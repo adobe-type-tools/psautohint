@@ -9,10 +9,10 @@
 CONFIG = release
 
 # Library
-ROOT_DIR = ../../../..
-SRC_DIR = $(ROOT_DIR)/source
+ROOT_DIR = .
 OBJECT_DIR = .
-LIB_TARGET = $(LIB_DIR)/autohintlib.a
+SRC_DIR = $(ROOT_DIR)/source
+LIB_TARGET = $(OBJECT_DIR)/autohintlib.a
 
 CFLAGS = $(STD_OPTS) -I$(ROOT_DIR)/source/public/ac \
 					-I$(ROOT_DIR)/source/public/extras \
@@ -95,9 +95,17 @@ LIB_OBJS = \
 	machinedep.o \
 	rawPStobez.o
 
-# Standard definitions
-include  $(ROOT_DIR)/../public/lib/config/linux/gcc/gcc.mak
+STD_OPTS = -m32 \
+$(SYS_INCLUDES)
 
+default: $(LIB_TARGET)
+
+$(LIB_TARGET): $(LIB_OBJS)
+	$(AR) -rvs $@ $?
+
+clean:
+	rm -f $(LIB_OBJS)
+	rm -f $(LIB_TARGET)
 	
 # Lib Object rules
 absfont.o:
@@ -207,6 +215,3 @@ machinedep.o:
 
 rawPStobez.o:
 	$(CC) $(CFLAGS) -c 	$(SRC_DIR)/bf/rawPStobez.c -o $@
-
-	
-	
