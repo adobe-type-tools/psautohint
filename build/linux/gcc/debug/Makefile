@@ -27,7 +27,7 @@ PRG_TARGET = $(EXE_DIR)/autohintexe
 TARGETS = $(PRG_TARGET)
 
 # Standard definitions
-include ../../../../../public/config/linux/gcc/gcc.mak
+include $(ROOT_DIR)/public/config/linux/gcc/gcc.mak
 
 # program rule is in gcc.mak
 
