@@ -9,18 +9,18 @@
 CONFIG = release
 
 # Library
-ROOT_DIR = .
-OBJECT_DIR = .
-SRC_DIR = $(ROOT_DIR)/source
-LIB_TARGET = $(OBJECT_DIR)/autohintlib.a
+OBJ_DIR = .
+SRC_DIR = .
+LIB_TARGET = $(OBJ_DIR)/autohintlib.a
 
-CFLAGS = $(STD_OPTS) -I$(ROOT_DIR)/source/public/ac \
-					-I$(ROOT_DIR)/source/public/extras \
-					-I$(ROOT_DIR)/source/ac \
-					-I$(ROOT_DIR)/source/bf \
-					 -DAC_C_LIB=1 \
-					 -DACLIB_EXPORTS \
-					 -DIS_LIB
+CFLAGS = $(STD_OPTS) \
+	-I$(SRC_DIR)/include/ac \
+	-I$(SRC_DIR)/include/extras \
+	-I$(SRC_DIR)/ac \
+	-I$(SRC_DIR)/bf \
+	 -DAC_C_LIB=1 \
+	 -DACLIB_EXPORTS \
+	 -DIS_LIB
 					 
 LIB_SRCS = \
 	$(SRC_DIR)/ac/ac.c \
@@ -58,42 +58,43 @@ LIB_SRCS = \
 	$(SRC_DIR)/bf/illtobez.c \
 	$(SRC_DIR)/bf/machinedep.c \
 	$(SRC_DIR)/bf/rawPStobez.c
+
 LIB_OBJS = \
-	ac.o \
-	ac_C_lib.o \
-	acfixed.o \
-	auto.o \
-	bbox.o \
-	bfstub.o \
-	charprop.o \
-	check.o \
-	control.o \
-	cswrite.o \
-	enum.o \
-	eval.o \
-	fix.o \
-	flat.o \
-	fontinfo.o \
-	gen.o \
-	head.o \
-	merge.o \
-	misc.o \
-	path.o \
-	pick.o \
-	read.o \
-	report.o \
-	shuffle.o \
-	stub.o \
-	write.o \
-	charlistpriv.o \
-	charpath.o \
-	charpathpriv.o \
-	cryptprocs.o \
-	fileops.o \
-	filookup.o \
-	illtobez.o \
-	machinedep.o \
-	rawPStobez.o
+	$(OBJ_DIR)/ac.o \
+	$(OBJ_DIR)/ac_C_lib.o \
+	$(OBJ_DIR)/acfixed.o \
+	$(OBJ_DIR)/auto.o \
+	$(OBJ_DIR)/bbox.o \
+	$(OBJ_DIR)/bfstub.o \
+	$(OBJ_DIR)/charprop.o \
+	$(OBJ_DIR)/check.o \
+	$(OBJ_DIR)/control.o \
+	$(OBJ_DIR)/cswrite.o \
+	$(OBJ_DIR)/enum.o \
+	$(OBJ_DIR)/eval.o \
+	$(OBJ_DIR)/fix.o \
+	$(OBJ_DIR)/flat.o \
+	$(OBJ_DIR)/fontinfo.o \
+	$(OBJ_DIR)/gen.o \
+	$(OBJ_DIR)/head.o \
+	$(OBJ_DIR)/merge.o \
+	$(OBJ_DIR)/misc.o \
+	$(OBJ_DIR)/path.o \
+	$(OBJ_DIR)/pick.o \
+	$(OBJ_DIR)/read.o \
+	$(OBJ_DIR)/report.o \
+	$(OBJ_DIR)/shuffle.o \
+	$(OBJ_DIR)/stub.o \
+	$(OBJ_DIR)/write.o \
+	$(OBJ_DIR)/charlistpriv.o \
+	$(OBJ_DIR)/charpath.o \
+	$(OBJ_DIR)/charpathpriv.o \
+	$(OBJ_DIR)/cryptprocs.o \
+	$(OBJ_DIR)/fileops.o \
+	$(OBJ_DIR)/filookup.o \
+	$(OBJ_DIR)/illtobez.o \
+	$(OBJ_DIR)/machinedep.o \
+	$(OBJ_DIR)/rawPStobez.o
 
 STD_OPTS = -m32 \
 $(SYS_INCLUDES)
@@ -107,6 +108,9 @@ clean:
 	rm -f $(LIB_OBJS)
 	rm -f $(LIB_TARGET)
 	
+main.o:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c -o $@
+
 # Lib Object rules
 absfont.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/absfont.c -o $@
