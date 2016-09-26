@@ -6,12 +6,22 @@
 #########################################################################
 
 # Configuration
-CONFIG = release
-
-# Library
 OBJ_DIR = .
 SRC_DIR = .
+STD_OPTS = -m32
+
+# Program
+PRG_SRCS = $(SRC_DIR)/main.c
+PRG_OBJS = $(OBJ_DIR)/main.o
+PRG_TARGET = autohintexe
+
+# Library
 LIB_TARGET = $(OBJ_DIR)/autohintlib.a
+
+default: $(PRG_TARGET)
+
+$(PRG_TARGET): $(PRG_OBJS) $(PRG_SRCS) $(LIB_TARGET)
+	$(CC) $(CFLAGS) -o $@ $(PRG_OBJS) $(LIB_TARGET) -lm
 
 CFLAGS = $(STD_OPTS) \
 	-I$(SRC_DIR)/include/ac \
@@ -96,18 +106,16 @@ LIB_OBJS = \
 	$(OBJ_DIR)/machinedep.o \
 	$(OBJ_DIR)/rawPStobez.o
 
-STD_OPTS = -m32 \
-$(SYS_INCLUDES)
-
-default: $(LIB_TARGET)
-
 $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) -rvs $@ $?
 
 clean:
+	rm -f $(PRG_OBJS)
 	rm -f $(LIB_OBJS)
+	rm -f $(PRG_TARGET)
 	rm -f $(LIB_TARGET)
-	
+
+# Program Object rules
 main.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c -o $@
 
