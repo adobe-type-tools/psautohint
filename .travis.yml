@@ -1,0 +1,24 @@
+sudo: false
+
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+os:
+  - linux
+  - osx
+
+addons:
+  apt:
+    packages:
+      - gcc-multilib
+
+matrix:
+  allow_failures:
+    - os: osx
+#     compiler: gcc
+
+script:
+  - make
