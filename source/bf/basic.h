@@ -29,11 +29,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <stdio.h>
 #include <string.h>
 #include <setjmp.h>
-#if OSX
-#include <sys/malloc.h>
-#else
-#include <malloc.h>
-#endif
 #include <sys/types.h>
 typedef unsigned char boolean;
 #endif
