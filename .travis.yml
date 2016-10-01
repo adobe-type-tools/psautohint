@@ -15,10 +15,5 @@ addons:
     packages:
       - gcc-multilib
 
-matrix:
-  allow_failures:
-    - os: osx
-#     compiler: gcc
-
 script:
   - make

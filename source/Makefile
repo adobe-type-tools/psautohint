@@ -10,6 +10,12 @@ OBJ_DIR = .
 SRC_DIR = .
 STD_OPTS = -m32
 
+OS := $(shell uname)
+ifeq ($(OS), Darwin)
+	STD_OPTS += -DOSX=1
+endif
+
+
 # Program
 PRG_SRCS = $(SRC_DIR)/main.c
 PRG_OBJS = $(OBJ_DIR)/main.o
