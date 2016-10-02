@@ -15,7 +15,7 @@ End Edit History
 #ifndef MACHINEDEP_H
 #define MACHINEDEP_H
 
-#if WIN32
+#ifdef _WIN32
 #include <dir.h>
 #include <math.h>
 #else
@@ -166,7 +166,7 @@ public procedure OpenLogFiles();
 typedef int (* includeFile) (struct direct *);
 typedef int (* sortFn)(const void *, const void *);
 
-#ifdef WIN32
+#ifdef _WIN32
 int BFscandir(char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort);
 #else
 int BFscandir(const char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort);

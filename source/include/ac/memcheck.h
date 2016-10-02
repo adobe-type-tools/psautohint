@@ -10,7 +10,7 @@
 #endif
 
 
-#if WIN32
+#ifdef _WIN32
 #define SINGEXPORT __declspec(dllexport)
 #define SINGSTDCALL __stdcall
 #define SINGCALLBACK __cdecl

@@ -313,7 +313,7 @@ boolean release;
 #if SUN
   result = ConvertCharFiles(
     RAWPSDIR, release, scale, convert_PScharfile);
-#elif WIN32
+#elif defined(_WIN32)
   result = ConvertCharFiles(
     RAWPSDIR, release, scale, convert_PScharfile);
 #else

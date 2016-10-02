@@ -1043,7 +1043,7 @@ void convert_illfiles(boolean rel)
     convertedchars = 0;
 #if SUN
 	ConvertCharFiles(ILLDIR, release, scale, convert_illcharfile);
-#elif WIN32
+#elif defined(_WIN32)
 	ConvertCharFiles(ILLDIR, release, scale, convert_illcharfile);
 #else
 	ConvertInputDirFiles(ILLDIR, convert_illcharfile);

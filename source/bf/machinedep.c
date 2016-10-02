@@ -16,7 +16,7 @@ End Edit History
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <file.h>
 #include <time.h>
 #else
@@ -27,7 +27,7 @@ End Edit History
 #include <signal.h>
 extern char *ctime();
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 /* as of Visual Studi 2005, the POSIX names are deprecated; need to use
 Windows specific names instead. 
@@ -61,7 +61,7 @@ static char uniqueIDFile[MAXPATHLEN];
 static short warncnt = 0;
 #if defined (__MWERKS__)
 static char Delimiter[] = "/";
-#elif defined (WIN32)
+#elif defined (_WIN32)
 static char Delimiter[] = "\\";
 #else
 static char Delimiter[] = "/";
@@ -295,7 +295,7 @@ boolean CFileExists(const char *filename, short errormsg)
 
 boolean DirExists(char *dirname, boolean absolute, boolean create, boolean errormsg)
 {
-#ifndef WIN32
+#ifndef _WIN32
 #pragma unused(absolute)
 #endif
     long int access_denied = access(dirname, F_OK);
@@ -324,7 +324,7 @@ boolean DirExists(char *dirname, boolean absolute, boolean create, boolean error
             if (errormsg)
                 LogMsg("  It will be created for you.\n", WARNING, OK, FALSE);
             {
-#ifdef WIN32
+#ifdef _WIN32
                 int result = mkdir(dirname);
 #else
                 int result = mkdir(dirname, 00775);
@@ -490,7 +490,7 @@ char *baseFontPath;
  void CreateResourceFile(filename)
 char *filename;
 {
-#ifndef WIN32
+#ifndef _WIN32
 #pragma unused(filename)
 #endif
 }
@@ -498,7 +498,7 @@ char *filename;
 /* Returns full pathname of current working directory. */
 void GetFullPathname(char *dirname, short vRefNum, long dirID)
 {
-#ifndef WIN32
+#ifndef _WIN32
 #pragma unused(vRefNum)
 #pragma unused(dirID)
 #endif
@@ -550,7 +550,7 @@ void SetMacFileType(filename, filetype)
 char *filename;
 char *filetype;
 {
-#ifndef WIN32
+#ifndef _WIN32
 #pragma unused(filename)
 #pragma unused(filetype)
 #endif
@@ -642,7 +642,7 @@ extern get_datetime(char *datetimestr)
 
  char *MakeTempName(char *dirprefix, char *fileprefix)
 {
-#ifndef WIN32
+#ifndef _WIN32
 #pragma unused(dirprefix)
 #pragma unused(fileprefix)
 #endif
@@ -651,7 +651,7 @@ extern get_datetime(char *datetimestr)
 
  int AutoCrit (char *filenameparam, char *goo)
 {
-#ifndef WIN32
+#ifndef _WIN32
 #pragma unused(filenameparam)
 #pragma unused(goo)
 #endif
@@ -677,7 +677,7 @@ float roundf(float x)
 #endif
 
 
-#ifdef WIN32
+#ifdef _WIN32
 	
 int BFscandir(char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort)
 {

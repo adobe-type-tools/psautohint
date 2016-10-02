@@ -45,7 +45,7 @@ struct	direct {
 /*
  * Definitions for library routines operating on directories.
  */
-#ifdef WIN32
+#ifdef _WIN32
 typedef struct _dirdesc {
 	int	dd_fd;			/* file descriptor */
 	long	dd_loc;             /* buf offset of entry from last readddir() */
@@ -64,7 +64,7 @@ extern	long telldir();
 extern	void seekdir();
 #define rewinddir(dirp)	seekdir((dirp), (long)0)
 extern	int closedir();
-#endif /*WIN32*/
+#endif /*_WIN32*/
 #endif
 
 #endif /*!_sys_dir_h*/

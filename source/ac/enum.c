@@ -29,7 +29,7 @@ boolean extracolor;
   short count;
   struct direct **namelist;
  
-#ifdef WIN32
+#ifdef _WIN32
   count = BFscandir(inPrefix, &namelist, includefile, bf_alphasort);
 #else
 int BFscandir(const char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort);

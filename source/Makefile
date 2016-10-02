@@ -30,7 +30,6 @@ CFLAGS = $(STD_OPTS) \
 
 ifeq ($(OS),Windows_NT)
 EXE = .exe
-STD_OPTS += -DWIN32
 CFLAGS += -I$(SRC_DIR)/include/winextras
 else
 PRG_LIBS += -lm

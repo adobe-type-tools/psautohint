@@ -9,7 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 #include "fipublic.h"
 
-#if !WIN32
+#ifndef _WIN32
 extern int unlink(const char *);
 #endif
 
@@ -67,7 +67,7 @@ public AC_RETRYPTR reportRetryCB = NULL;
 
 private void * defaultAC_memmanage(void *ctxptr, void *old, unsigned long size)
 	{
-#ifndef WIN32
+#ifndef _WIN32
 #pragma unused(ctxptr)	
 #endif
 		if (size > 0)

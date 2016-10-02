@@ -17,7 +17,7 @@ extern "C" {
 
 #ifdef AC_C_LIB_EXPORTS
 
-#if WIN32
+#ifdef _WIN32
 #define ACLIB_API __declspec(dllexport)
 #else
 	

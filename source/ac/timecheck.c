@@ -29,7 +29,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /*#include <sys/dir.h>*/
 #else
 #include <sys/types.h>
-#if WIN32
+#ifdef _WIN32
 #include <file.h>
 #include <dir.h>
 #else

@@ -32,7 +32,7 @@ boolean charstringoutput = FALSE;
 static void read_char_widths(void);
 #endif
 
-#if !WIN32
+#ifndef _WIN32
 extern int unlink(const char *);
 #endif
 
