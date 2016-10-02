@@ -6,13 +6,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 #include "machinedep.h"
 
-#ifdef WIN32
-#include <sys\types.h>
-#include <sys\stat.h>
-#else
 #include <sys/types.h>
 #include <sys/stat.h>
-#endif
 
 const char *C_ProgramVersion = "1.65240";
 const char *reportExt = ".rpt";
