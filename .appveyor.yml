@@ -1,0 +1,14 @@
+platform:
+  - x86
+
+install:
+  - appveyor DownloadFile "http://raw.githubusercontent.com/swig/cccl/master/cccl"
+  - call "%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" %PLATFORM%
+
+build_script:
+  - set PATH=C:\cygwin\bin;%APPVEYOR_BUILD_FOLDER%;%PATH%
+  - set CC=cccl
+  - make
+
+# disable automatic tests
+test: off
