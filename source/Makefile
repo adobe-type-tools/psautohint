@@ -13,15 +13,11 @@ STD_OPTS = -m32
 # Program
 PRG_SRCS = $(SRC_DIR)/main.c
 PRG_OBJS = $(OBJ_DIR)/main.o
-PRG_TARGET = autohintexe
+PRG_TARGET = autohintexe$(EXE)
+PRG_LIBS = $(LIB_TARGET)
 
 # Library
 LIB_TARGET = $(OBJ_DIR)/autohintlib.a
-
-default: $(PRG_TARGET)
-
-$(PRG_TARGET): $(PRG_OBJS) $(PRG_SRCS) $(LIB_TARGET)
-	$(CC) $(CFLAGS) -o $@ $(PRG_OBJS) $(LIB_TARGET) -lm
 
 CFLAGS = $(STD_OPTS) \
 	-I$(SRC_DIR)/include/ac \
@@ -31,6 +27,14 @@ CFLAGS = $(STD_OPTS) \
 	 -DAC_C_LIB=1 \
 	 -DACLIB_EXPORTS \
 	 -DIS_LIB
+
+ifeq ($(OS),Windows_NT)
+EXE = .exe
+STD_OPTS += -DWIN32
+CFLAGS += -I$(SRC_DIR)/include/winextras
+else
+PRG_LIBS += -lm
+endif
 					 
 LIB_SRCS = \
 	$(SRC_DIR)/ac/ac.c \
@@ -106,8 +110,7 @@ LIB_OBJS = \
 	$(OBJ_DIR)/machinedep.o \
 	$(OBJ_DIR)/rawPStobez.o
 
-$(LIB_TARGET): $(LIB_OBJS)
-	$(AR) -rvs $@ $?
+default: $(PRG_TARGET)
 
 clean:
 	rm -f $(PRG_OBJS)
@@ -115,11 +118,17 @@ clean:
 	rm -f $(PRG_TARGET)
 	rm -f $(LIB_TARGET)
 
-# Program Object rules
+# Program
+$(PRG_TARGET): $(PRG_OBJS) $(PRG_SRCS) $(LIB_TARGET)
+	$(CC) $(CFLAGS) -o $@ $(PRG_OBJS) $(PRG_LIBS)
+
 main.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c -o $@
 
-# Lib Object rules
+# Library
+$(LIB_TARGET): $(LIB_OBJS)
+	$(AR) -rvs $@ $?
+
 absfont.o:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/absfont.c -o $@
 
