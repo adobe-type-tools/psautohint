@@ -24,9 +24,9 @@ CFLAGS = $(STD_OPTS) \
 	-I$(SRC_DIR)/include/extras \
 	-I$(SRC_DIR)/ac \
 	-I$(SRC_DIR)/bf \
-	 -DAC_C_LIB=1 \
-	 -DACLIB_EXPORTS \
-	 -DIS_LIB
+	-DAC_C_LIB=1 \
+	-DACLIB_EXPORTS \
+	-DIS_LIB
 
 ifeq ($(OS),Windows_NT)
 EXE = .exe
