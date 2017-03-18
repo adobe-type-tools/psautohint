@@ -23,7 +23,7 @@ def debugMsg(*args):
 kStackLimit = 46
 kStemLimit = 96
 
-class ACFontError:
+class ACFontError(KeyError):
 	pass
 
 class SEACError(KeyError):
