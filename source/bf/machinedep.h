@@ -164,7 +164,7 @@ extern int AutoCrit (
 public procedure FlushLogFiles();
 public procedure OpenLogFiles();
 typedef int (* includeFile) (const struct direct *);
-typedef int (* sortFn)(const struct dirent **, const struct dirent **);
+typedef int (* sortFn)(const struct direct **, const struct direct **);
 
 #ifdef _WIN32
 int BFscandir(char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort);
@@ -176,7 +176,7 @@ extern char *GetPathName (
 );
 
 
-extern int bf_alphasort(const struct dirent **f1, const struct dirent **f2);
+extern int bf_alphasort(const struct direct **f1, const struct direct **f2);
 
 #if defined(_MSC_VER) && ( _MSC_VER < 1800)
 public float roundf(float x);

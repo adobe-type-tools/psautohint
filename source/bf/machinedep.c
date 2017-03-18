@@ -659,7 +659,7 @@ extern get_datetime(char *datetimestr)
 
 
 
-int bf_alphasort(const struct dirent **f1, const struct dirent **f2)
+int bf_alphasort(const struct direct **f1, const struct direct **f2)
 {
 	return strcmp((*f1)->d_name, (*f2)->d_name);
 }
