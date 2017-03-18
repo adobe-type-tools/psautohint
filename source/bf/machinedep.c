@@ -18,11 +18,10 @@ End Edit History
 #include <sys/stat.h>
 #ifdef _WIN32
 #include <file.h>
-#include <time.h>
 #else
 #include <sys/file.h>
-#include <sys/time.h>
 #endif
+#include <time.h>
 
 #include <signal.h>
 extern char *ctime();
