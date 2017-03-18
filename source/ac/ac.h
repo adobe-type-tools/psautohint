@@ -236,7 +236,7 @@ extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at t
 
 /* macros */
 
-#define ac_abs(a) (((abstmp = (a)) < 0) ? -abstmp : abstmp)
+#define ac_abs(a) abs(a)
 
 #define FixedPosInf MAXinteger
 #define FixedNegInf MINinteger

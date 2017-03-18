@@ -27,6 +27,7 @@ CFLAGS = $(STD_OPTS) \
 	-DAC_C_LIB=1 \
 	-DACLIB_EXPORTS \
 	-DIS_LIB \
+	-Wno-shift-negative-value \
 	-Werror
 
 ifeq ($(OS),Windows_NT)

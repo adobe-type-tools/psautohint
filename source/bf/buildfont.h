@@ -87,8 +87,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* the following are for scanning "PostScript format" input file lines       */
 /*****************************************************************************/
 
-#define COMMENT(s)               s[strspn(s, " \n\r\t\v\f")] == '%'
-#define BLANK(s)                 sscanf(s, "%*s") == EOF
+#define COMMENT(s)               (s[strspn(s, " \n\r\t\v\f")] == '%')
+#define BLANK(s)                 (sscanf(s, "%*s") == EOF)
 #define STREQ(a,b)               (((a)[0] == (b)[0]) && (strcmp((a),(b)) == 0))
 #define STRNEQ(a,b)              (((a)[0] != (b)[0]) || (strcmp((a),(b)) != 0))
 
