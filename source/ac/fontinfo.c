@@ -10,9 +10,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #define UNDEFINED (MAXinteger)
 
-public integer NumHColors, NumVColors;
+integer NumHColors, NumVColors;
 
-private procedure ParseStems(kw, stems, pnum)
+static void ParseStems(kw, stems, pnum)
   char *kw; Fixed *stems; integer *pnum; 
 {
   int istems[MAXSTEMS], i;
@@ -21,7 +21,7 @@ private procedure ParseStems(kw, stems, pnum)
     stems[i] = FixInt (istems[i]);
 }
 
-private procedure GetKeyValue(keyword, optional, value)
+static void GetKeyValue(keyword, optional, value)
   char *keyword; boolean optional; long int *value;
 {
   char *fontinfostr;
@@ -36,7 +36,7 @@ private procedure GetKeyValue(keyword, optional, value)
   return;
 }
 
-private procedure GetKeyFixedValue(char* keyword, boolean optional, Fixed *value)
+static void GetKeyFixedValue(char* keyword, boolean optional, Fixed *value)
 {
   char *fontinfostr;
   float tempValue;
@@ -52,7 +52,7 @@ private procedure GetKeyFixedValue(char* keyword, boolean optional, Fixed *value
   return;
 }
 
-public boolean ReadFontInfo() {
+boolean ReadFontInfo() {
   char *fontinfostr;
   long 
     AscenderHeight,

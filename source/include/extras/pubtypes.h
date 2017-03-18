@@ -80,19 +80,6 @@ typedef Card32                longcardinal;
                                     /***********************************/
                                     /* Declarative Sugar               */
                                     /***********************************/
-#define forward         extern
-
-#if WINATM && !defined(MAKEPUB)
-#define private
-#else
-#define private         static
-#endif
-
-#define public
-/*#define global          extern*/
-
-#define procedure       void
-
 #ifndef true
 #define true            1
 #define false           0

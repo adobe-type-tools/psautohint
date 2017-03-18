@@ -10,24 +10,24 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 extern char *FL_glyphname;
 #endif
 
-public char *VColorList[] = {
+char *VColorList[] = {
   "m", "M", "T", "ellipsis", NULL, NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-public char *HColorList[] = {
+char *HColorList[] = {
   "element", "equivalence", "notelement", "divide", NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL };
 
-private char * UpperSpecialChars[] = {
+static char * UpperSpecialChars[] = {
   "questiondown", "exclamdown", "semicolon", NULL };
 
-private char * LowerSpecialChars[] = {
+static char * LowerSpecialChars[] = {
   "question", "exclam", "colon", NULL };
 
-private char * NoBlueList[] = {
+static char * NoBlueList[] = {
    "at", "bullet", "copyright", "currency", "registered", NULL };
 
-private char * SolEol0List[] = {
+static char * SolEol0List[] = {
   "asciitilde", "asterisk", "bullet", "period", "periodcentered",
   "colon", "dieresis",
   "divide", "ellipsis", "exclam", "exclamdown", "guillemotleft",
@@ -35,12 +35,12 @@ private char * SolEol0List[] = {
   "quotedbl", "quotedblbase", "quotesinglbase", "quoteleft",
   "quoteright", "quotedblleft", "quotedblright", "tilde", NULL };
 
-private char * SolEol1List[] = {
+static char * SolEol1List[] = {
   "i", "j", "questiondown", "semicolon", NULL };
 
-private char * SolEolNeg1List[] = { "question", NULL };
+static char * SolEolNeg1List[] = { "question", NULL };
 
-public boolean StrEqual(s1, s2) register char *s1, *s2; {
+boolean StrEqual(s1, s2) register char *s1, *s2; {
   register unsigned char c1, c2;
   while (TRUE) {
     c1 = *s1++; c2 = *s2++;
@@ -97,7 +97,7 @@ char *charlist, *ColorList[];
   return (ListEntries - COUNTERDEFAULTENTRIES);
 }
 
-public integer SpecialCharType() {
+integer SpecialCharType() {
   /* 1 = upper; -1 = lower; 0 = neither */
 #if PYTHONLIB
   if(featurefiledata)
@@ -111,7 +111,7 @@ public integer SpecialCharType() {
   return 0;
   }
 
-public boolean HColorChar() {
+boolean HColorChar() {
 #if PYTHONLIB
   if(featurefiledata)
   {
@@ -121,7 +121,7 @@ public boolean HColorChar() {
 	  return FindNameInList(bezGlyphName, HColorList);
   }
 
-public boolean VColorChar() {
+boolean VColorChar() {
 #if PYTHONLIB
   if(featurefiledata)
   {
@@ -131,7 +131,7 @@ public boolean VColorChar() {
   return FindNameInList(bezGlyphName, VColorList);
   }
 
-public boolean NoBlueChar() {
+boolean NoBlueChar() {
 #if PYTHONLIB
   if(featurefiledata)
   {
@@ -141,7 +141,7 @@ public boolean NoBlueChar() {
   return FindNameInList(bezGlyphName, NoBlueList);
   }
 
-public integer SolEolCharCode() {
+integer SolEolCharCode() {
 #if PYTHONLIB
   if(featurefiledata)
   {
@@ -158,7 +158,7 @@ public integer SolEolCharCode() {
 
 /* This change was made to prevent bogus sol-eol's.  And to prevent
    adding sol-eol if there are a lot of subpaths. */
-public boolean SpecialSolEol() {
+boolean SpecialSolEol() {
   integer code = SolEolCharCode();
   integer count;
   if (code == 2) return FALSE;
@@ -168,7 +168,7 @@ public boolean SpecialSolEol() {
   return TRUE;
   }
 
-private PPathElt SubpathEnd(e) PPathElt e; {
+static PPathElt SubpathEnd(e) PPathElt e; {
   while (TRUE) {
     e = e->next;
     if (e == NULL) return pathEnd;
@@ -176,7 +176,7 @@ private PPathElt SubpathEnd(e) PPathElt e; {
     }
   }
 
-private PPathElt SubpathStart(e) PPathElt e; {
+static PPathElt SubpathStart(e) PPathElt e; {
   while (e != pathStart) {
     if (e->type == MOVETO) break;
     e = e->prev;
@@ -184,7 +184,7 @@ private PPathElt SubpathStart(e) PPathElt e; {
   return e;
   }
 
-private PPathElt SolEol(e) PPathElt e; {
+static PPathElt SolEol(e) PPathElt e; {
   e = SubpathStart(e);
   e->sol = TRUE;
   e = SubpathEnd(e);
@@ -192,7 +192,7 @@ private PPathElt SolEol(e) PPathElt e; {
   return e;
   }
 
-private procedure SolEolAll() {
+static void SolEolAll() {
   PPathElt e;
   e = pathStart->next;
   while (e != NULL) {
@@ -201,7 +201,7 @@ private procedure SolEolAll() {
     }
   }
 
-private procedure SolEolUpperOrLower(upper) boolean upper; {
+static void SolEolUpperOrLower(upper) boolean upper; {
   PPathElt e, s1, s2;
   Fixed x1, y1, s1y, s2y;
   boolean s1Upper;
@@ -222,7 +222,7 @@ private procedure SolEolUpperOrLower(upper) boolean upper; {
 
 /* This change was made to prevent bogus sol-eol's.  And to prevent
    adding sol-eol if there are a lot of subpaths. */
-public procedure AddSolEol() {
+void AddSolEol() {
   if (pathStart == NULL) return;
   if (!SpecialSolEol()) return;
   switch (SolEolCharCode()) {
@@ -233,7 +233,7 @@ public procedure AddSolEol() {
     }
   }
 
-public boolean MoveToNewClrs() {
+boolean MoveToNewClrs() {
 #if PYTHONLIB
   if(featurefiledata)
   {

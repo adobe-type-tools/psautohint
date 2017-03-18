@@ -10,7 +10,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define GetSubpathNext(e) ((e)->type == CLOSEPATH)? GetDest(e) : (e)->next
 #define GetSubpathPrev(e) ((e)->type == MOVETO)? GetClosedBy(e) : (e)->prev
 
-private procedure NumberSubpath(e) register PPathElt e; {
+static void NumberSubpath(e) register PPathElt e; {
   /* number the elements of the subpath starting at e */
   PPathElt first;
   integer cnt;
@@ -23,7 +23,7 @@ private procedure NumberSubpath(e) register PPathElt e; {
     }
   }
 
-private integer TstClrLsts(l1, l2, flg)
+static integer TstClrLsts(l1, l2, flg)
   PSegLnkLst l1, l2; boolean flg; {
   integer result, i;
   result = -1;
@@ -36,19 +36,19 @@ private integer TstClrLsts(l1, l2, flg)
   return result;
   }
 
-private integer ClrLstLen(lst) PSegLnkLst lst; {
+static integer ClrLstLen(lst) PSegLnkLst lst; {
   integer cnt = 0;
   while (lst != NULL) {
     cnt++; lst = lst->next; }
   return cnt; }
 
-private boolean SameClrLsts(l1, l2, flg)
+static boolean SameClrLsts(l1, l2, flg)
   PSegLnkLst l1, l2; boolean flg; {
   if (ClrLstLen(l1) != ClrLstLen(l2)) return FALSE;
   return (TstClrLsts(l1, l2, flg) == -1) ? TRUE : FALSE;
   }
 
-private procedure FindConflicts(e) PPathElt e; {
+static void FindConflicts(e) PPathElt e; {
   /* find conflicts in subpath for e */
   PSegLnkLst hLst, vLst, phLst, pvLst;
   boolean checked;
@@ -95,7 +95,7 @@ private procedure FindConflicts(e) PPathElt e; {
     }
   }
 
-private integer CountConflicts(e) PPathElt e; {
+static integer CountConflicts(e) PPathElt e; {
   /* e is a proposed closepath. return number of color conflicts */
   integer conflicts, nc, c, cnt;
   PPathElt first, conflict;
@@ -112,7 +112,7 @@ private integer CountConflicts(e) PPathElt e; {
   return conflicts;
   }
 
-private boolean TestColorSection(first, after)
+static boolean TestColorSection(first, after)
   /* returns FALSE if there is a conflict, TRUE otherwise */
   PPathElt first, after; {
   PPathElt e;
@@ -132,7 +132,7 @@ private boolean TestColorSection(first, after)
     e = GetSubpathNext(e); }
   return TRUE; }
 
-private boolean StartsOkWithPrimaryClrs(cp)
+static boolean StartsOkWithPrimaryClrs(cp)
   PPathElt cp; {
   /* return TRUE if proposed cp yields subpath whose
      first coloring section is consistent with the primary coloring */
@@ -152,7 +152,7 @@ private boolean StartsOkWithPrimaryClrs(cp)
   /* e is start of new coloring in subpath */
   return TestColorSection(first, e); }
 
-private boolean OkCandidate(cp,conflict,isShort)
+static boolean OkCandidate(cp,conflict,isShort)
   PPathElt cp, conflict; boolean isShort; {
   PPathElt cpConflict, nxt, nxtConflict;
   if (cp == conflict) return FALSE;
@@ -167,7 +167,7 @@ private boolean OkCandidate(cp,conflict,isShort)
   return TRUE;
   }
 
-private boolean OkJunction(p,e) PPathElt p,e; {
+static boolean OkJunction(p,e) PPathElt p,e; {
   Fixed x, y, x0, y0, x1, y1, sm;
   if (p->isFlex && e->isFlex) return FALSE;
   if (e->type == CURVETO) { x0 = e->x1; y0 = e->y1; }
@@ -178,7 +178,7 @@ private boolean OkJunction(p,e) PPathElt p,e; {
   return CheckSmoothness(x0, y0, x, y, x1, y1, &sm);
   }
 
-private PPathElt FindMinConflict(e) PPathElt e; {
+static PPathElt FindMinConflict(e) PPathElt e; {
   PPathElt conflict, cp, cpnxt, bestCP, first, prevConflict;
   integer best, cnt;
   boolean isShort;
@@ -233,7 +233,7 @@ private PPathElt FindMinConflict(e) PPathElt e; {
 #define SubpathConflictsWithPrimary(e) \
     (!TestColorSection(e, GetClosedBy(e)))
 
-private PPathElt NewCP(cp) PPathElt cp; {
+static PPathElt NewCP(cp) PPathElt cp; {
   PPathElt first;
   first = cp;
   while (TRUE) {
@@ -243,7 +243,7 @@ private PPathElt NewCP(cp) PPathElt cp; {
     }
   }
 
-private boolean ReorderSubpaths() {
+static boolean ReorderSubpaths() {
   /* if first subpath conflicts with primary,
      and there is a later subpath that does not,
      do tailsubpaths until later one becomes first */
@@ -283,7 +283,7 @@ private boolean ReorderSubpaths() {
   return TRUE;
   }
 
-public boolean RotateSubpaths(flg) boolean flg; {
+boolean RotateSubpaths(flg) boolean flg; {
   PPathElt e, cp, nxt;
   boolean chng = FALSE, chngSub;
   DEBUG = flg;

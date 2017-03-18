@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 
 #define MAXF (1L << 15)
-private procedure AdjustVal(pv,l1,l2,dist,d,hFlg)
+static void AdjustVal(pv,l1,l2,dist,d,hFlg)
 Fixed *pv, l1, l2, dist, d; boolean hFlg; {
 	real v, q, r1, r2, rd;
 	Fixed abstmp;
@@ -59,7 +59,7 @@ done:
 	*pv = acpflttofix(&v);
 }
 
-private Fixed CalcOverlapDist(d,overlaplen,minlen)
+static Fixed CalcOverlapDist(d,overlaplen,minlen)
 Fixed d, overlaplen, minlen; {
 	real r = (real)d, ro = (real)overlaplen, rm = (real)minlen;
 	r = r * ((real)(1.0 + 0.4 * (1.0 - ro / rm)));
@@ -76,7 +76,7 @@ FTrunc(((d) * (d)) / 40) : ((long)  (((double)(d)) * (d) / (40*256))))
     has a 7 bit Fixed fraction, and should be dividing by 128. I suspect that there was a yet earlier version which used a 8 bit fraction, and this is a bug.
  */
 
-private procedure EvalHPair(botSeg,topSeg,pspc,pv)
+static void EvalHPair(botSeg,topSeg,pspc,pv)
 PClrSeg botSeg, topSeg; Fixed *pspc, *pv; {
 	Fixed brght, blft, bloc, tloc, trght, tlft, ldst, rdst;
 	Fixed mndist, dist, dx, dy, minlen, overlaplen, abstmp;
@@ -127,7 +127,7 @@ PClrSeg botSeg, topSeg; Fixed *pspc, *pv; {
 	AdjustVal(pv, brght-blft, trght-tlft, dist, dy, TRUE);
 }
 
-private procedure HStemMiss(botSeg,topSeg)
+static void HStemMiss(botSeg,topSeg)
 PClrSeg botSeg, topSeg; {
 	Fixed brght, blft, bloc, tloc, trght, tlft, abstmp;
 	Fixed mndist, dist, dy, minlen, overlaplen;
@@ -177,7 +177,7 @@ PClrSeg botSeg, topSeg; {
 					   (botSeg->sType == sCURVE) || (topSeg->sType == sCURVE));
 }
 
-private procedure EvalVPair(leftSeg,rightSeg,pspc,pv)
+static void EvalVPair(leftSeg,rightSeg,pspc,pv)
 PClrSeg leftSeg, rightSeg; Fixed *pspc, *pv; {
 	Fixed ltop, lbot, lloc, rloc, rtop, rbot, tdst, bdst;
 	Fixed mndist, dx, dy, dist, overlaplen, minlen, abstmp;
@@ -223,7 +223,7 @@ PClrSeg leftSeg, rightSeg; Fixed *pspc, *pv; {
 	AdjustVal(pv, ltop-lbot, rtop-rbot, dist, dx, FALSE);
 }
 
-private procedure VStemMiss(leftSeg,rightSeg)
+static void VStemMiss(leftSeg,rightSeg)
 PClrSeg leftSeg, rightSeg; {
 	Fixed ltop, lbot, lloc, rloc, rtop, rbot;
 	Fixed mndist, dx, dist, overlaplen, minlen, abstmp;
@@ -268,7 +268,7 @@ PClrSeg leftSeg, rightSeg; {
 					   (leftSeg->sType == sCURVE) || (rightSeg->sType == sCURVE));
 }
 
-private procedure InsertVValue(lft,rght,val,spc,lSeg,rSeg)
+static void InsertVValue(lft,rght,val,spc,lSeg,rSeg)
 Fixed lft, rght, val, spc; PClrSeg lSeg, rSeg; {
 	register PClrVal item, vlist, vprev;
 	item = (PClrVal)Alloc(sizeof(ClrVal));
@@ -296,7 +296,7 @@ Fixed lft, rght, val, spc; PClrSeg lSeg, rSeg; {
 
 #define LePruneValue(val) ((val) < FixOne && ((val)<<10) <= pruneValue)
 
-private procedure AddVValue(lft,rght,val,spc,lSeg,rSeg)
+static void AddVValue(lft,rght,val,spc,lSeg,rSeg)
 Fixed lft, rght, val, spc; PClrSeg lSeg, rSeg; {
 	if (val == 0) return;
 	if (LePruneValue(val) && spc <= 0) return;
@@ -310,7 +310,7 @@ Fixed lft, rght, val, spc; PClrSeg lSeg, rSeg; {
 	InsertVValue(lft,rght,val,spc,lSeg,rSeg);
 }
 
-private procedure InsertHValue(bot,top,val,spc,bSeg,tSeg,ghst)
+static void InsertHValue(bot,top,val,spc,bSeg,tSeg,ghst)
 Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; boolean ghst; {
 	PClrVal item, vlist, vprev, vl;
 	Fixed b;
@@ -347,7 +347,7 @@ Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; boolean ghst; {
 		ReportAddHVal(item);
 }
 
-private procedure AddHValue(bot,top,val,spc,bSeg,tSeg)
+static void AddHValue(bot,top,val,spc,bSeg,tSeg)
 Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; {
 	boolean ghst;
 	if (val == 0) return;
@@ -362,13 +362,13 @@ Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; {
 	InsertHValue(bot,top,val,spc,bSeg,tSeg,ghst);
 }
 
-private real mfabs(real in)
+static real mfabs(real in)
 {
 	if (in>0) return in;
 	return -in;
 }
 
-private Fixed CombVals(v1,v2) Fixed v1,v2; {
+static Fixed CombVals(v1,v2) Fixed v1,v2; {
 	register integer i;
 	real r1, r2;
 	register real x, a, xx;
@@ -387,7 +387,7 @@ private Fixed CombVals(v1,v2) Fixed v1,v2; {
 	return acpflttofix(&r1);
 }
 
-private procedure CombineValues() { /* works for both H and V */
+static void CombineValues() { /* works for both H and V */
 	PClrVal vlist, v1;
 	Fixed loc1, loc2;
 	Fixed val;
@@ -412,7 +412,7 @@ private procedure CombineValues() { /* works for both H and V */
     }
 }
 
-public procedure EvalV() {
+void EvalV() {
 	PClrSeg lList, rList;
 	Fixed lft, rght;
 	Fixed val, spc;
@@ -432,7 +432,7 @@ public procedure EvalV() {
 	CombineValues();
 }
 
-public procedure EvalH() {
+void EvalH() {
 	PClrSeg bList, tList, lst, ghostSeg;
 	Fixed lstLoc, tempLoc, cntr;
 	Fixed val, spc;

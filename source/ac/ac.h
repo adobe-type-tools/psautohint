@@ -4,7 +4,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 /* See the discussion in the function definition for:
  control.c:Blues() 
- private procedure Blues() 
+ static void Blues() 
  */
 #include "ac_C_lib.h"
 #include "buildfont.h"
@@ -12,13 +12,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 /* widely used definitions */
 
-
-#define procedure void
-#define private static
-#define public 
-#ifndef NULL
-#define NULL 0L
-#endif
 
 #if THISISACMAIN
 #define ALLOWCSOUTPUT 1
@@ -62,7 +55,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 typedef struct {
   short int limit;
   Fixed feps;
-  procedure (*report)();
+  void (*report)();
   Cd ll, ur;
   Fixed llx, lly;
   } FltnRec, *PFltnRec;
@@ -205,7 +198,7 @@ extern char inPrefix[MAXPATHLEN], *inSuffix;
 extern PClrSeg segLists[4]; /* left, right, top, bot */
 extern PClrPoint pointList, *ptLstArray;
 extern integer ptLstIndex, numPtLsts, maxPtLsts;
-extern procedure AddStemExtremes(Fixed bot, Fixed top);
+extern void AddStemExtremes(Fixed bot, Fixed top);
 
 #define leftList (segLists[0])
 #define rightList (segLists[1])
@@ -284,7 +277,7 @@ extern long int FRnd(long int x);
 
 /* The fix to float and float to fixed procs are different for ac because it
    uses 24 bit of integer and 8 bits of fraction. */
-extern procedure acfixtopflt(Fixed x, float *pf);
+extern void acfixtopflt(Fixed x, float *pf);
 extern Fixed acpflttofix(float *pv);
 
 extern unsigned char * Alloc(integer sz); /* Sub-allocator */
@@ -309,20 +302,20 @@ extern void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 extern int AddCounterColorChars();
 extern boolean FindNameInList();
-extern procedure ACGetVersion();
-extern procedure PruneElementColorSegs();
+extern void ACGetVersion();
+extern void PruneElementColorSegs();
 extern int TestColorLst(/*lst, colorList, flg, Hflg, doLst*/);
 extern PClrVal CopyClrs(/*lst*/);
-extern procedure AutoExtraColors(/*movetoNewClrs, soleol, solWhere*/);
+extern void AutoExtraColors(/*movetoNewClrs, soleol, solWhere*/);
 extern PPathElt FindSubpathBBox(/*e*/);
-extern procedure ClrVBnds();
-extern procedure ReClrVBnds();
-extern procedure ClrHBnds();
-extern procedure ReClrHBnds();
-extern procedure AddBBoxHV(/*Hflg*/);
-extern procedure ClrBBox();
-extern procedure SetMaxStemDist(/* int dist */);
-extern procedure CheckPathBBox();
+extern void ClrVBnds();
+extern void ReClrVBnds();
+extern void ClrHBnds();
+extern void ReClrHBnds();
+extern void AddBBoxHV(/*Hflg*/);
+extern void ClrBBox();
+extern void SetMaxStemDist(/* int dist */);
+extern void CheckPathBBox();
 extern integer SpecialCharType();
 extern boolean VColorChar();
 extern boolean HColorChar();
@@ -330,36 +323,36 @@ extern boolean NoBlueChar();
 extern integer SolEolCharCode(/*s*/);
 extern boolean SpecialSolEol();
 extern boolean MoveToNewClrs();
-extern procedure CheckSmooth();
-extern procedure CheckBBoxEdge(/*e, vrt, lc, pf, pl*/);
+extern void CheckSmooth();
+extern void CheckBBoxEdge(/*e, vrt, lc, pf, pl*/);
 extern boolean CheckBBoxes(/*e1, e2*/);
 extern boolean CheckSmoothness(/*x0, y0, x1, y1, x2, y2, pd*/);
-extern procedure CheckForDups();
+extern void CheckForDups();
 extern boolean showClrInfo;
-extern procedure AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0, PPathElt p1);
-extern procedure AddHPair(PClrVal v, char ch);
-extern procedure AddVPair(PClrVal v, char ch);
-extern procedure XtraClrs(/*e*/);
+extern void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0, PPathElt p1);
+extern void AddHPair(PClrVal v, char ch);
+extern void AddVPair(PClrVal v, char ch);
+extern void XtraClrs(/*e*/);
 extern boolean CreateTimesFile();
 extern boolean DoFile(char *fname, boolean extracolor);
-extern procedure DoList(/*filenames*/);
-extern procedure EvalV();
-extern procedure EvalH();
-extern procedure GenVPts();
-extern procedure CheckVal(/*val, vert*/);
-extern procedure CheckTfmVal(/*b, t, vert*/);
-extern procedure CheckVals(/*vlst, vert*/);
+extern void DoList(/*filenames*/);
+extern void EvalV();
+extern void EvalH();
+extern void GenVPts();
+extern void CheckVal(/*val, vert*/);
+extern void CheckTfmVal(/*b, t, vert*/);
+extern void CheckVals(/*vlst, vert*/);
 extern boolean DoFixes();
 extern boolean FindLineSeg();
-extern procedure FltnCurve(/*c0, c1, c2, c3, pfr*/);
+extern void FltnCurve(/*c0, c1, c2, c3, pfr*/);
 extern boolean ReadFontInfo();
 extern boolean InBlueBand(/*loc,n,p*/);
-extern procedure GenHPts();
-extern procedure PreGenPts();
+extern void GenHPts();
+extern void PreGenPts();
 extern PPathElt GetDest(/*cldest*/);
 extern PPathElt GetClosedBy(/*clsdby*/);
-extern procedure GetEndPoint(/*e, x1p, y1p*/);
-extern procedure GetEndPoints(/*p,px0,py0,px1,py1*/);
+extern void GetEndPoint(/*e, x1p, y1p*/);
+extern void GetEndPoints(/*p,px0,py0,px1,py1*/);
 extern Fixed VertQuo(/*xk,yk,xl,yl*/);
 extern Fixed HorzQuo(/*xk,yk,xl,yl*/);
 extern boolean IsTiny(/*e*/);
@@ -374,109 +367,109 @@ extern boolean DoArgsIgnoreTime();
 extern boolean DoArgs(int cnt, char* names[], boolean extraColor, boolean* renameLog, boolean release);
 extern boolean DoAll(boolean extraColor, boolean release, boolean *renameLog, boolean quiet);
 
-extern procedure DoPrune();
-extern procedure PruneVVals();
-extern procedure PruneHVals();
-extern procedure MergeVals(/*vert*/);
-extern procedure MergeFromMainColors(char ch);
-extern procedure RoundPathCoords();
-extern procedure MoveSubpathToEnd(/*e*/);
-extern procedure AddSolEol();
+extern void DoPrune();
+extern void PruneVVals();
+extern void PruneHVals();
+extern void MergeVals(/*vert*/);
+extern void MergeFromMainColors(char ch);
+extern void RoundPathCoords();
+extern void MoveSubpathToEnd(/*e*/);
+extern void AddSolEol();
 extern int IncludeFile();
-extern procedure InitAuto();
-extern procedure InitData(integer reason);
-extern procedure InitFix();
-extern procedure InitGen();
+extern void InitAuto();
+extern void InitData(integer reason);
+extern void InitFix();
+extern void InitGen();
 extern boolean RotateSubpaths(/*flg*/);
-extern procedure InitPick();
-extern procedure AutoAddFlex();
+extern void InitPick();
+extern void AutoAddFlex();
 extern integer PointListCheck(/*new,lst*/);
 extern boolean SameColors(/*cn1, cn2*/);
 extern boolean PreCheckForColoring();
 extern integer CountSubPaths();
-extern procedure PickVVals(/*valList*/);
-extern procedure PickHVals(/*valList*/);
-extern procedure FindBestHVals();
-extern procedure FindBestVVals();
-extern procedure LogYMinMax();
-extern procedure PrintMessage(/*s*/);
-extern procedure ReportError(/*s*/);
-extern procedure ReportSmoothError(/*x, y*/);
-extern procedure ReportBadClosePathForAutoColoring(/*e*/);
-extern procedure ReportAddFlex();
-extern procedure ReportClipSharpAngle(/*x, y*/);
-extern procedure ReportSharpAngle(/*x, y*/);
-extern procedure ReportLinearCurve(/*e, x0, y0, x1, y1*/);
-extern procedure ReportNonHError(/*x0, y0, x1, y1*/);
-extern procedure ReportNonVError(/*x0, y0, x1, y1*/);
-extern procedure ExpectedMoveTo(/*e*/);
-extern procedure ReportMissingClosePath();
-extern procedure ReportTryFlexNearMiss(/*x0, y0, x2, y2*/);
-extern procedure ReportTryFlexError(/*CPflg, x, y*/);
-extern procedure AskForSplit(/*e*/);
-extern procedure ReportSplit(/*e*/);
-extern procedure ReportConflictCheck(/*e, conflict, cp*/);
-extern procedure ReportConflictCnt(/*e, cnt*/);
-extern procedure ReportMoveSubpath(/*e*/);
-extern procedure ReportRemFlare(/*e*/);
-extern procedure ReportRemConflict(/*e*/);
-extern procedure ReportRotateSubpath(/*e*/);
-extern procedure ReportRemShortColors(/*ex, ey*/);
+extern void PickVVals(/*valList*/);
+extern void PickHVals(/*valList*/);
+extern void FindBestHVals();
+extern void FindBestVVals();
+extern void LogYMinMax();
+extern void PrintMessage(/*s*/);
+extern void ReportError(/*s*/);
+extern void ReportSmoothError(/*x, y*/);
+extern void ReportBadClosePathForAutoColoring(/*e*/);
+extern void ReportAddFlex();
+extern void ReportClipSharpAngle(/*x, y*/);
+extern void ReportSharpAngle(/*x, y*/);
+extern void ReportLinearCurve(/*e, x0, y0, x1, y1*/);
+extern void ReportNonHError(/*x0, y0, x1, y1*/);
+extern void ReportNonVError(/*x0, y0, x1, y1*/);
+extern void ExpectedMoveTo(/*e*/);
+extern void ReportMissingClosePath();
+extern void ReportTryFlexNearMiss(/*x0, y0, x2, y2*/);
+extern void ReportTryFlexError(/*CPflg, x, y*/);
+extern void AskForSplit(/*e*/);
+extern void ReportSplit(/*e*/);
+extern void ReportConflictCheck(/*e, conflict, cp*/);
+extern void ReportConflictCnt(/*e, cnt*/);
+extern void ReportMoveSubpath(/*e*/);
+extern void ReportRemFlare(/*e*/);
+extern void ReportRemConflict(/*e*/);
+extern void ReportRotateSubpath(/*e*/);
+extern void ReportRemShortColors(/*ex, ey*/);
 extern boolean   ResolveConflictBySplit(/*e,Hflg,lnk1,lnk2*/);
-extern procedure ReportPossibleLoop(/*e*/);
-extern procedure ShowHVal(/*val*/);
-extern procedure ShowHVals(/*lst*/);
-extern procedure ReportAddHVal(/*val*/);
-extern procedure ShowVVal(/*val*/);
-extern procedure ShowVVals(/*lst*/);
-extern procedure ReportAddVVal(/*val*/);
-extern procedure ReportFndBstVal(/*seg,val,hFlg*/);
-extern procedure ReportCarry(/*l0, l1, loc, clrs, vert*/);
-extern procedure ReportBestCP(/*e, cp*/);
-extern procedure LogColorInfo(/*pl*/);
-extern procedure ReportAddVSeg(/*from, to, loc, i*/);
-extern procedure ReportAddHSeg(/*from, to, loc, i*/);
+extern void ReportPossibleLoop(/*e*/);
+extern void ShowHVal(/*val*/);
+extern void ShowHVals(/*lst*/);
+extern void ReportAddHVal(/*val*/);
+extern void ShowVVal(/*val*/);
+extern void ShowVVals(/*lst*/);
+extern void ReportAddVVal(/*val*/);
+extern void ReportFndBstVal(/*seg,val,hFlg*/);
+extern void ReportCarry(/*l0, l1, loc, clrs, vert*/);
+extern void ReportBestCP(/*e, cp*/);
+extern void LogColorInfo(/*pl*/);
+extern void ReportAddVSeg(/*from, to, loc, i*/);
+extern void ReportAddHSeg(/*from, to, loc, i*/);
 #if 0
-extern procedure ReportBandError(/*str, loc, blu*/);
+extern void ReportBandError(/*str, loc, blu*/);
 #else
-extern procedure ReportBandNearMiss(/*str, loc, blu*/);
+extern void ReportBandNearMiss(/*str, loc, blu*/);
 #endif
-extern procedure ReportStemNearMiss(/*vert, w, minW, b, t*/);
-extern procedure ReportColorConflict(/*x0, y0, x1, y1, ch*/);
-extern procedure ReportDuplicates(/*x, y*/);
-extern procedure ReportBBoxBogus(/*llx, lly, urx, ury*/);
-extern procedure ReportMergeHVal(/*b0,t0,b1,t1,v0,s0,v1,s1*/);
-extern procedure ReportMergeVVal(/*l0,r0,l1,r1,v0,s0,v1,s1*/);
-extern procedure ReportPruneHVal(/*val*/);
-extern procedure ReportPruneVVal(/*val*/);
+extern void ReportStemNearMiss(/*vert, w, minW, b, t*/);
+extern void ReportColorConflict(/*x0, y0, x1, y1, ch*/);
+extern void ReportDuplicates(/*x, y*/);
+extern void ReportBBoxBogus(/*llx, lly, urx, ury*/);
+extern void ReportMergeHVal(/*b0,t0,b1,t1,v0,s0,v1,s1*/);
+extern void ReportMergeVVal(/*l0,r0,l1,r1,v0,s0,v1,s1*/);
+extern void ReportPruneHVal(/*val*/);
+extern void ReportPruneVVal(/*val*/);
 extern Fixed ScaleAbs();
 extern Fixed UnScaleAbs();
-extern procedure InitShuffleSubpaths();
-extern procedure MarkLinks(/*vL,hFlg*/);
-extern procedure DoShuffleSubpaths();
-extern procedure CopyMainH();
-extern procedure CopyMainV();
-extern procedure RMovePoint();
-extern procedure AddVSegment();
-extern procedure AddHSegment();
-extern procedure Delete();
+extern void InitShuffleSubpaths();
+extern void MarkLinks(/*vL,hFlg*/);
+extern void DoShuffleSubpaths();
+extern void CopyMainH();
+extern void CopyMainV();
+extern void RMovePoint();
+extern void AddVSegment();
+extern void AddHSegment();
+extern void Delete();
 extern boolean StrEqual();
 extern boolean ReadCharFile();
 extern double FixToDbl(/*f*/);
 extern boolean CompareValues();
-extern procedure SaveFile();
-extern procedure CheckForMultiMoveTo();
+extern void SaveFile();
+extern void CheckForMultiMoveTo();
 extern double fabs();
 #define STARTUP (0)
 #define RESTART (1)
 
-public procedure ListClrInfo(/**/);
-public procedure Test();
+void ListClrInfo(/**/);
+void Test();
 
-extern procedure InitAll(/*reason*/);
+extern void InitAll(/*reason*/);
 
-public procedure AddVStem();
-public procedure AddHStem();
+void AddVStem();
+void AddHStem();
 
-public procedure AddCharExtremes();
-public procedure AddStemExtremes ();
+void AddCharExtremes();
+void AddStemExtremes ();

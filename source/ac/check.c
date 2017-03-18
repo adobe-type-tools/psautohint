@@ -7,16 +7,16 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "bftoac.h"
 #include "machinedep.h"
 
-private boolean xflat, yflat, xdone, ydone, bbquit;
-private integer xstate, ystate, xstart, ystart;
+static boolean xflat, yflat, xdone, ydone, bbquit;
+static integer xstate, ystate, xstart, ystart;
 static Fixed x0, cy0, x1, cy1, xloc, yloc;
-private Fixed x, y, xnxt, ynxt;
-private Fixed yflatstartx, yflatstarty, yflatendx, yflatendy;
-private Fixed xflatstarty, xflatstartx, xflatendx, xflatendy;
-private boolean vert, started, reCheckSmooth;
-private Fixed loc, frst, lst, fltnvalue;
-private PPathElt e;
-private boolean forMultiMaster = FALSE, inflPtFound = FALSE;
+static Fixed x, y, xnxt, ynxt;
+static Fixed yflatstartx, yflatstarty, yflatendx, yflatendy;
+static Fixed xflatstarty, xflatstartx, xflatendx, xflatendy;
+static boolean vert, started, reCheckSmooth;
+static Fixed loc, frst, lst, fltnvalue;
+static PPathElt e;
+static boolean forMultiMaster = FALSE, inflPtFound = FALSE;
 
 #define STARTING (0L)
 #define goingUP (1L)
@@ -27,14 +27,14 @@ private boolean forMultiMaster = FALSE, inflPtFound = FALSE;
 #define SDELTA (FixInt(8))
 #define SDELTA3 (FixInt(10))
 
-private procedure chkBad() {
+static void chkBad() {
     reCheckSmooth = ResolveConflictBySplit(e,FALSE,NULL,NULL);;
 }
 
 #define GrTan(n,d) (ac_abs(n)*100L > ac_abs(d)*sCurveTan)
 #define LsTan(n,d) (ac_abs(n)*100L < ac_abs(d)*sCurveTan)
 
-private procedure chkYDIR() {
+static void chkYDIR() {
     if (y > yloc) { /* going up */
         if (ystate == goingUP) return;
         if (ystate == STARTING) ystart = ystate = goingUP;
@@ -57,7 +57,7 @@ private procedure chkYDIR() {
     }
 }
 
-private procedure chkYFLAT() {
+static void chkYFLAT() {
     Fixed abstmp;
     if (!yflat) {
         if (LsTan(y-yloc, x-xloc)) {
@@ -68,7 +68,7 @@ private procedure chkYFLAT() {
         yflatendx = xloc; yflatendy = yloc; ydone = TRUE; }
 }
 
-private procedure chkXFLAT() {
+static void chkXFLAT() {
     Fixed abstmp;
     if (!xflat) {
         if (LsTan(x-xloc, y-yloc)) {
@@ -79,7 +79,7 @@ private procedure chkXFLAT() {
         xflatendx = xloc; xflatendy = yloc; xdone = TRUE; }
 }
 
-private procedure chkXDIR() {
+static void chkXDIR() {
     if (x > xloc) { /* going up */
         if (xstate == goingUP) return;
         if (xstate == STARTING) xstart = xstate = goingUP;
@@ -102,7 +102,7 @@ private procedure chkXDIR() {
     }
 }
 
-private procedure chkDT(c) Cd c; {
+static void chkDT(c) Cd c; {
     Fixed abstmp;
     Fixed loc;
 
@@ -180,7 +180,7 @@ private procedure chkDT(c) Cd c; {
 }
 
 #define FQ(x) ((long int)((x) >> 6))
-private integer CPDirection(x1,cy1,x2,y2,x3,y3) Fixed x1,cy1,x2,y2,x3,y3; {
+static integer CPDirection(x1,cy1,x2,y2,x3,y3) Fixed x1,cy1,x2,y2,x3,y3; {
     long int q, q1, q2, q3;
     q1 = FQ(x2)*FQ(y3-cy1);
     q2 = FQ(x1)*FQ(y2-y3);
@@ -191,7 +191,7 @@ private integer CPDirection(x1,cy1,x2,y2,x3,y3) Fixed x1,cy1,x2,y2,x3,y3; {
     return 0L;
 }
 
-private PPathElt PointLine(e, whichcp) PPathElt e; integer whichcp; {
+static PPathElt PointLine(e, whichcp) PPathElt e; integer whichcp; {
     PPathElt newline;
     if (whichcp == cpCurve1) whichcp = cpStart;
     else if (whichcp == cpCurve2) whichcp = cpEnd;
@@ -227,7 +227,7 @@ private PPathElt PointLine(e, whichcp) PPathElt e; integer whichcp; {
     return newline;
 }
 
-private procedure MovePoint(x, y, e, whichcp)
+static void MovePoint(x, y, e, whichcp)
 Fixed x, y; PPathElt e; int whichcp; {
     if (whichcp == cpStart) { e = e->prev; whichcp = cpEnd; }
     if (whichcp == cpEnd) {
@@ -245,7 +245,7 @@ Fixed x, y; PPathElt e; int whichcp; {
     }
 }
 
-public procedure RMovePoint(dx, dy, whichcp, e)
+void RMovePoint(dx, dy, whichcp, e)
 Fixed dx, dy; PPathElt e; integer whichcp; {
     if (whichcp == cpStart) { e = e->prev; whichcp = cpEnd; }
     if (whichcp == cpEnd) {
@@ -264,12 +264,12 @@ Fixed dx, dy; PPathElt e; integer whichcp; {
     
 }
 
-private boolean ZeroLength(e) PPathElt e; {
+static boolean ZeroLength(e) PPathElt e; {
     Fixed x0, cy0, x1, cy1;
     GetEndPoints(e,&x0,&cy0,&x1,&cy1);
     return (x0 == x1 && cy0 == cy1); }
 
-private boolean ConsiderClipSharpPoint(rx0, ry0, rx1, ry1, rx2, ry2, e)
+static boolean ConsiderClipSharpPoint(rx0, ry0, rx1, ry1, rx2, ry2, e)
 Fixed rx0, ry0, rx1, ry1, rx2, ry2; PPathElt e; {
     Fixed x0=rx0, cy0=ry0, x1=rx1, cy1=ry1, x2=rx2, y2=ry2;
     Fixed dx0, dy0, dx1, dy1, nlx, nly;
@@ -328,7 +328,7 @@ Fixed rx0, ry0, rx1, ry1, rx2, ry2; PPathElt e; {
     return TRUE;
 }
 
-public procedure Delete(e) PPathElt e; {
+void Delete(e) PPathElt e; {
     PPathElt nxt, prv;
     nxt = e->next; prv = e->prev;
     if (nxt != NULL) nxt->prev = prv;
@@ -339,7 +339,7 @@ public procedure Delete(e) PPathElt e; {
 
 /* This procedure is called from BuildFont when adding hints
  to base designs of a multi-master font. */
-public boolean GetInflectionPoint(x, y, x1, cy1, x2, y2, x3, y3, inflPt)
+boolean GetInflectionPoint(x, y, x1, cy1, x2, y2, x3, y3, inflPt)
 Fixed x, y, x1, cy1, x2, y2, x3, y3;
 Fixed *inflPt;
 {
@@ -362,7 +362,7 @@ Fixed *inflPt;
     return inflPtFound;
 }
 
-private procedure CheckSCurve(ee) PPathElt ee; {
+static void CheckSCurve(ee) PPathElt ee; {
     FltnRec fr;
     Cd c0, c1, c2, c3;
     if (ee->type != CURVETO)
@@ -386,7 +386,7 @@ private procedure CheckSCurve(ee) PPathElt ee; {
     FltnCurve(c0, c1, c2, c3, &fr);
 }
 
-private procedure CheckZeroLength() {
+static void CheckZeroLength() {
     PPathElt e, NxtE;
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3;
     e = pathStart;
@@ -403,7 +403,7 @@ private procedure CheckZeroLength() {
         Nxt1: e = NxtE; }
 }
 
-public procedure CheckSmooth() {
+void CheckSmooth() {
     PPathElt e, nxt, NxtE;
     boolean recheck;
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3, smdiff, xx, yy;
@@ -447,7 +447,7 @@ restart:
 
 #define BBdist (FixInt(20)) /* DEBUG 8 BIT. DOuble value from 10 to 20 for change in coordinate system. */
 
-private procedure chkBBDT(c) Cd c; {
+static void chkBBDT(c) Cd c; {
     Fixed x = c.x, y = c.y, abstmp;
     if (bbquit) return;
     if (vert) {
@@ -464,7 +464,7 @@ private procedure chkBBDT(c) Cd c; {
     }
 }
 
-public procedure CheckForMultiMoveTo() {
+void CheckForMultiMoveTo() {
     PPathElt e = pathStart;
     boolean moveto;
     moveto = FALSE;
@@ -476,7 +476,7 @@ public procedure CheckForMultiMoveTo() {
     }
 }
 
-public procedure CheckBBoxEdge(e, vrt, lc, pf, pl)
+void CheckBBoxEdge(e, vrt, lc, pf, pl)
 PPathElt e; boolean vrt; Fixed lc, *pf, *pl; {
     FltnRec fr;
     Cd c0, c1, c2, c3;
@@ -499,7 +499,7 @@ PPathElt e; boolean vrt; Fixed lc, *pf, *pl; {
     *pf = frst; *pl = lst;
 }
 
-private procedure MakeColinear(tx, ty, x0, cy0, x1, cy1, xptr, yptr)
+static void MakeColinear(tx, ty, x0, cy0, x1, cy1, xptr, yptr)
 Fixed tx, ty, x0, cy0, x1, cy1, *xptr, *yptr; {
     Fixed dx, dy;
     real rdx, rdy, dxdy, dxsq, dysq, dsq, xi, yi, rx, ry, rx0, ry0;
@@ -519,7 +519,7 @@ Fixed tx, ty, x0, cy0, x1, cy1, *xptr, *yptr; {
 
 #define DEG(x) ((x)*57.29577951308232088)
 extern double atan2();
-private Fixed ATan(a, b) Fixed a, b; {
+static Fixed ATan(a, b) Fixed a, b; {
     real aa, bb, cc;
     acfixtopflt(a, &aa); acfixtopflt(b, &bb);
     cc = (real)DEG(atan2((double)aa, (double)bb));
@@ -527,7 +527,7 @@ private Fixed ATan(a, b) Fixed a, b; {
     return acpflttofix(&cc);
 }
 
-public boolean CheckSmoothness(x0, cy0, x1, cy1, x2, y2, pd)
+boolean CheckSmoothness(x0, cy0, x1, cy1, x2, y2, pd)
 Fixed x0, cy0, x1, cy1, x2, y2, *pd; {
     Fixed dx, dy, smdiff, smx, smy, at0, at1, abstmp;
     dx = x0 - x1; dy = cy0 - cy1;
@@ -548,7 +548,7 @@ Fixed x0, cy0, x1, cy1, x2, y2, *pd; {
     return ac_abs(smx - x1) < FixInt(4) && ac_abs(smy - cy1) < FixInt(4);
 }
 
-public procedure CheckForDups() {
+void CheckForDups() {
     register PPathElt ob, nxt;
     register Fixed x, y;
     ob = pathStart;
@@ -570,7 +570,7 @@ foundMatch:
     ReportDuplicates(x, y);
 }
 
-public procedure MoveSubpathToEnd(e) PPathElt e; {
+void MoveSubpathToEnd(e) PPathElt e; {
     PPathElt subEnd, subStart, subNext, subPrev;
     subEnd = (e->type == CLOSEPATH)? e : GetClosedBy(e);
     subStart = GetDest(subEnd);

@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 #include "machinedep.h"
 
-public PPathElt GetDest(cldest) register PPathElt cldest; {
+PPathElt GetDest(cldest) register PPathElt cldest; {
   if (cldest == NULL) return NULL;
   while (TRUE) {
     cldest = cldest->prev;
@@ -16,7 +16,7 @@ public PPathElt GetDest(cldest) register PPathElt cldest; {
     }
   }
 
-public PPathElt GetClosedBy(clsdby) register PPathElt clsdby; {
+PPathElt GetClosedBy(clsdby) register PPathElt clsdby; {
   if (clsdby == NULL) return NULL;
   if (clsdby->type == CLOSEPATH) return clsdby;
   while (TRUE) {
@@ -27,7 +27,7 @@ public PPathElt GetClosedBy(clsdby) register PPathElt clsdby; {
     }
   }
 
-public procedure GetEndPoint(e, x1p, y1p)
+void GetEndPoint(e, x1p, y1p)
   register PPathElt e; Fixed *x1p, *y1p; {
   if (e == NULL) { *x1p = 0; *y1p = 0; return; }
   retry:
@@ -52,13 +52,13 @@ public procedure GetEndPoint(e, x1p, y1p)
     }
   }
 
-public procedure GetEndPoints(p,px0,py0,px1,py1)
+void GetEndPoints(p,px0,py0,px1,py1)
   PPathElt p; Fixed *px0, *py0, *px1, *py1; {
   GetEndPoint(p,px1,py1);
   GetEndPoint(p->prev,px0,py0); }
 
 #define Interpolate(q,v0,q0,v1,q1) (v0+(q-q0)*((v1-v0)/(q1-q0)))
-private Fixed HVness(pq) real *pq; {
+static Fixed HVness(pq) real *pq; {
   register real q;
   real result;
   /* approximately == 2 q neg exp */
@@ -73,7 +73,7 @@ private Fixed HVness(pq) real *pq; {
   else result = 0.0;
   return acpflttofix(&result); }
 
-public Fixed VertQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
+Fixed VertQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
     /* FixOne means exactly vertical. 0 means not vertical */
     /* intermediate values mean almost vertical */
     register Fixed xabs, yabs;
@@ -94,7 +94,7 @@ public Fixed VertQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
     return HVness(&q);
 }
 
-public Fixed HorzQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
+Fixed HorzQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
     register Fixed xabs, yabs;
     real rx, ry, q;
     yabs = yk-yl;
@@ -113,12 +113,12 @@ public Fixed HorzQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
     return HVness(&q);
 }
 
-public boolean IsTiny(e) PPathElt e; {
+boolean IsTiny(e) PPathElt e; {
   Fixed x0, y0, x1, y1, abstmp;
   GetEndPoints(e,&x0,&y0,&x1,&y1);
   return ((ac_abs(x0-x1) < FixTwo) && (ac_abs(y0-y1) < FixTwo))? TRUE : FALSE; }
 
-public boolean IsShort(e) PPathElt e; {
+boolean IsShort(e) PPathElt e; {
     Fixed x0, y0, x1, y1, dx, dy, mn, mx, abstmp;
     GetEndPoints(e,&x0,&y0,&x1,&y1);
     dx = ac_abs(x0-x1);
@@ -134,7 +134,7 @@ public boolean IsShort(e) PPathElt e; {
     return ((mx + (mn*42L)/125L) < FixInt(6))? TRUE : FALSE; /* DEBUG 8 BIT. Increased threshold from 3 to 6, for change in coordinare system. */
 }
 
-public PPathElt NxtForBend(p,px2,py2,px3,py3)
+PPathElt NxtForBend(p,px2,py2,px3,py3)
   PPathElt p; Fixed *px2, *py2, *px3, *py3; {
   PPathElt nxt, nxtMT = NULL;
   Fixed x, y, x2, y2;
@@ -164,7 +164,7 @@ public PPathElt NxtForBend(p,px2,py2,px3,py3)
   return nxt;
   }
 
-public PPathElt PrvForBend(p,px2,py2) PPathElt p; Fixed *px2, *py2; {
+PPathElt PrvForBend(p,px2,py2) PPathElt p; Fixed *px2, *py2; {
   PPathElt prv, prvCP = NULL;
   Fixed x2, y2;
   prv = p;
@@ -192,7 +192,7 @@ public PPathElt PrvForBend(p,px2,py2) PPathElt p; Fixed *px2, *py2; {
    return prv;
   }
 
-private boolean CheckHeight(upperFlag,p) 
+static boolean CheckHeight(upperFlag,p) 
   boolean upperFlag; PPathElt p; {
   PPathElt ee;
   Fixed y, yy;
@@ -206,8 +206,8 @@ private boolean CheckHeight(upperFlag,p)
     ee = ee->next; }
   return TRUE; }
 
-public boolean IsLower(p) PPathElt p; {
+boolean IsLower(p) PPathElt p; {
   return CheckHeight(FALSE,p); }
 
-public boolean IsUpper(p) PPathElt p; {
+boolean IsUpper(p) PPathElt p; {
   return CheckHeight(TRUE,p); }

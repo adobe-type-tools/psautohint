@@ -7,29 +7,29 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 
 /* Procedures defined in bf/fiblues.c - BuildFont */
-public boolean checkbandspacing()
+boolean checkbandspacing()
 {
 	return true;
 }
 
-public boolean checkbandwidths(overshootptsize, undershoot)
+boolean checkbandwidths(overshootptsize, undershoot)
 float overshootptsize;
 boolean undershoot;
 {
 	return true;
 }
 
-public int build_bands()
+int build_bands()
 {
 	return true;
 }
 
-public void SetMasterDir(dirindx)
+void SetMasterDir(dirindx)
 indx dirindx;
 {
 }
 
-public void WriteBlendedArray(barray, totalvals, subarraysz, str, dirCount)
+void WriteBlendedArray(barray, totalvals, subarraysz, str, dirCount)
 int *barray;
 char *str;
 int totalvals, subarraysz;

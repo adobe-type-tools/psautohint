@@ -21,19 +21,19 @@ extern const char *bezstring;
 
 char bezGlyphName[64];
 
-private Fixed currentx, currenty; /* used to calculate absolute coordinates */
-private Fixed tempx, tempy; /* used to calculate relative coordinates */
+static Fixed currentx, currenty; /* used to calculate absolute coordinates */
+static Fixed tempx, tempy; /* used to calculate relative coordinates */
 #define STKMAX (20)
-private Fixed stk[STKMAX];
-private integer stkindex;
-private boolean flex, startchar;
-private boolean forMultiMaster, includeHints;
+static Fixed stk[STKMAX];
+static integer stkindex;
+static boolean flex, startchar;
+static boolean forMultiMaster, includeHints;
    /* Reading file for comparison of multiple master data and hint information.
       Reads into PCharPathElt structure instead of PPathElt. */
 
-private real origEmSquare = 0.0;
+static real origEmSquare = 0.0;
 
-public Fixed ScaleAbs(unscaled) Fixed unscaled; {
+Fixed ScaleAbs(unscaled) Fixed unscaled; {
 Fixed temp1;
   if (!scalinghints)
     return unscaled;
@@ -54,7 +54,7 @@ Fixed temp1;
   return temp1;
 }
 
-public Fixed UnScaleAbs(scaled) Fixed scaled; {
+Fixed UnScaleAbs(scaled) Fixed scaled; {
 Fixed temp1;
   if (!scalinghints)
     return scaled;
@@ -76,7 +76,7 @@ Fixed temp1;
   return (temp1);
 }
 
-private Fixed Pop() {
+static Fixed Pop() {
   if (stkindex <= 0)
   {
 	FlushLogFiles();
@@ -87,7 +87,7 @@ private Fixed Pop() {
   return stk[stkindex];
   }
 
-private procedure Push(r) Fixed r; {
+static void Push(r) Fixed r; {
   if (stkindex >= STKMAX)
   {
 	FlushLogFiles();
@@ -98,16 +98,16 @@ private procedure Push(r) Fixed r; {
   stkindex++;
   }
 
-private procedure Pop2() {
+static void Pop2() {
   (void) Pop(); (void) Pop();
   }
 
-private procedure PopPCd(pcd) Cd *pcd; {
+static void PopPCd(pcd) Cd *pcd; {
   pcd->y = Pop(); pcd->x = Pop(); }
 
 #define DoDelta(dx,dy) currentx += (dx); currenty += (dy)
 
-private PPathElt AppendElement(etype) integer etype; {
+static PPathElt AppendElement(etype) integer etype; {
   PPathElt e;
   e = (PPathElt)Alloc(sizeof(PathElt));
   e->type = (short)etype;
@@ -118,7 +118,7 @@ private PPathElt AppendElement(etype) integer etype; {
   }
 
  
-private procedure psDIV() {
+static void psDIV() {
   Fixed x, y;
   y = Pop(); x = Pop();
   if (y == FixInt(100)) x /= 100L; /* this will usually be the case */
@@ -126,7 +126,7 @@ private procedure psDIV() {
   Push(x);
   }
 
-private procedure RDcurveto(c1, c2, c3) Cd c1, c2, c3; {
+static void RDcurveto(c1, c2, c3) Cd c1, c2, c3; {
   if (!forMultiMaster)
   {
     PPathElt new;
@@ -150,7 +150,7 @@ private procedure RDcurveto(c1, c2, c3) Cd c1, c2, c3; {
   }
   }
 
-private procedure RDmtlt(etype) integer etype; {
+static void RDmtlt(etype) integer etype; {
   if (!forMultiMaster)
   {
     PPathElt new;
@@ -170,26 +170,26 @@ private procedure RDmtlt(etype) integer etype; {
 #define RDlineto() RDmtlt(LINETO)
 #define RDmoveto() RDmtlt(MOVETO)
 
-private procedure psRDT() {
+static void psRDT() {
   Cd c;
   PopPCd(&c);
   tempx = c.x; tempy = c.y;
   DoDelta(c.x, c.y);
   RDlineto(); }
 
-private procedure psHDT() {
+static void psHDT() {
   Fixed dx;
   tempy = 0;
   dx = tempx = Pop(); currentx += dx;
   RDlineto(); }
 
-private procedure psVDT() {
+static void psVDT() {
   Fixed dy;
   tempx = 0;
   dy = tempy = Pop(); currenty += dy;
   RDlineto(); }
 
-private procedure psRMT() {
+static void psRMT() {
   Cd c;
   PopPCd(&c);
   if (flex) return;
@@ -197,52 +197,52 @@ private procedure psRMT() {
   DoDelta(c.x, c.y);
   RDmoveto(); }
 
-private procedure psHMT() {
+static void psHMT() {
   Fixed dx;
   tempy = 0;
   dx = tempx = Pop(); currentx += dx;
   RDmoveto(); }
 
-private procedure psVMT() {
+static void psVMT() {
   Fixed dy;
   tempx = 0;
   dy = tempy = Pop(); currenty += dy;
   RDmoveto(); }
 
-private procedure Rct(c1, c2, c3) Cd c1, c2, c3; {
+static void Rct(c1, c2, c3) Cd c1, c2, c3; {
   tempx = currentx; tempy = currenty;
   DoDelta(c1.x,c1.y); c1.x = currentx; c1.y = currenty;
   DoDelta(c2.x,c2.y); c2.x = currentx; c2.y = currenty;
   DoDelta(c3.x,c3.y); c3.x = currentx; c3.y = currenty;
   RDcurveto(c1, c2, c3); }
 
-private procedure psRCT() {
+static void psRCT() {
   Cd c1, c2, c3;
   PopPCd(&c3); PopPCd(&c2); PopPCd(&c1);
   Rct(c1, c2, c3); }
 
-private procedure psVHCT() {
+static void psVHCT() {
   Cd c1, c2, c3;
   c3.y = 0; c3.x = Pop();
   PopPCd(&c2);
   c1.y = Pop(); c1.x = 0;
   Rct(c1, c2, c3); }
 
-private procedure psHVCT() {
+static void psHVCT() {
   Cd c1, c2, c3;
   c3.y = Pop(); c3.x = 0;
   PopPCd(&c2);
   c1.y = 0; c1.x = Pop();
   Rct(c1, c2, c3); }
 
-private procedure psCP() {
+static void psCP() {
   if (!forMultiMaster)
     AppendElement(CLOSEPATH);
   else
     AppendCharPathElement(CP);
   }
 
-private procedure psMT() {
+static void psMT() {
   Cd c;
   c.y = Pop(); c.x = Pop();
   tempx = c.x - currentx; tempy = c.y - currenty;
@@ -250,7 +250,7 @@ private procedure psMT() {
   RDmoveto();
   }
 
-private procedure psDT() {
+static void psDT() {
   Cd c;
   c.y = Pop(); c.x = Pop();
   tempx = c.x - currentx; tempy = c.y - currenty;
@@ -258,13 +258,13 @@ private procedure psDT() {
   RDlineto();
   }
 
-private procedure psCT() {
+static void psCT() {
   Cd c1, c2, c3;
   tempx = currentx; tempy = currenty;
   PopPCd(&c3); PopPCd(&c2); PopPCd(&c1);
   RDcurveto(c1, c2, c3); }
 
-private procedure psFLX() {
+static void psFLX() {
   Cd c0, c1, c2, c3, c4, c5;
   integer i;
   for (i = 0; i < 5; i++) (void) Pop();
@@ -275,7 +275,7 @@ private procedure psFLX() {
   flex = FALSE;
   }
 
-private procedure ReadHintInfo(nm, str) char nm;  const char *str; {
+static void ReadHintInfo(nm, str) char nm;  const char *str; {
   Cd c0;
   short hinttype =
     nm == 'y' ? RY : nm == 'b' ? RB : nm == 'm' ? RM + ESCVAL : RV + ESCVAL;
@@ -295,7 +295,7 @@ private procedure ReadHintInfo(nm, str) char nm;  const char *str; {
     SetHintsElt(hinttype, &c0, elt1, elt2, (boolean)!startchar);
   }
   
-private integer StrLen(s) register char *s; {
+static integer StrLen(s) register char *s; {
   register integer cnt = 0;
   while (*s++ != 0) cnt++;
   return cnt;
@@ -316,7 +316,7 @@ int isPrefix(const char *s, const char* pref)
 	return 1;
 }
 
-private procedure DoName(nm, buff, len) const char * nm, *buff; int len; {
+static void DoName(nm, buff, len) const char * nm, *buff; int len; {
   switch (len) {
     case 2:
       switch (nm[0]) {
@@ -462,7 +462,7 @@ private procedure DoName(nm, buff, len) const char * nm, *buff; int len; {
   }
   }
 
-private procedure ParseString(s) const char * s; {
+static void ParseString(s) const char * s; {
   const char * s0;
     char c;
     char *c0;
@@ -590,17 +590,17 @@ private procedure ParseString(s) const char * s; {
 
 #define TESTING (FALSE)
 #if TESTING
-private unsigned char ibuff[MAXBYTES + 2];
-private integer inputlen;
+static unsigned char ibuff[MAXBYTES + 2];
+static integer inputlen;
 #endif /*TESTING*/
 
-public procedure SetReadFileName(file_name)
+void SetReadFileName(file_name)
 char *file_name;
 {
   fileName = file_name;
 }
 
-public boolean ReadCharFile(normal, forBlendData, readHints, prependprefix)
+boolean ReadCharFile(normal, forBlendData, readHints, prependprefix)
 boolean normal, forBlendData, readHints, prependprefix; 
 {
   char infile[MAXPATHLEN];
@@ -677,7 +677,7 @@ boolean normal, forBlendData, readHints, prependprefix;
   return TRUE;
 }
 
-public procedure Test() {
+void Test() {
 #if TESTING
   unsigned char buff[MAXBYTES + 2], *s;
   char infile[MAXPATHLEN];

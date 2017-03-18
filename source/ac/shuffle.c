@@ -6,10 +6,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 #define MAXCNT (100)
 
-private unsigned char *links;
-private integer rowcnt;
+static unsigned char *links;
+static integer rowcnt;
 
-public procedure InitShuffleSubpaths() {
+void InitShuffleSubpaths() {
 	register integer cnt = -1;
 	register PPathElt e = pathStart;
 	while (e != NULL) { /* every element is marked with its subpath count */
@@ -31,7 +31,7 @@ public procedure InitShuffleSubpaths() {
     (unsigned char *)Alloc(cnt * cnt);
 }
 
-private procedure PrintLinks() {
+static void PrintLinks() {
 	integer i, j;
 	PrintMessage("Links ");
 	for (i = 0; i < rowcnt; i++) {
@@ -53,7 +53,7 @@ private procedure PrintLinks() {
     }
 }
 
-private procedure PrintSumLinks(sumlinks) char *sumlinks; {
+static void PrintSumLinks(sumlinks) char *sumlinks; {
 	integer i;
 	PrintMessage("Sumlinks ");
 	for (i = 0; i < rowcnt; i++) {
@@ -71,7 +71,7 @@ private procedure PrintSumLinks(sumlinks) char *sumlinks; {
 	PrintMessage("\n");
 }
 
-private procedure PrintOutLinks(unsigned char *outlinks) {
+static void PrintOutLinks(unsigned char *outlinks) {
 	integer i;
 	PrintMessage("Outlinks ");
 	for (i = 0; i < rowcnt; i++) {
@@ -89,7 +89,7 @@ private procedure PrintOutLinks(unsigned char *outlinks) {
 	PrintMessage("\n");
 }
 
-public procedure MarkLinks(vL,hFlg) PClrVal vL; boolean hFlg; {
+void MarkLinks(vL,hFlg) PClrVal vL; boolean hFlg; {
 	register integer i, j;
 	register PClrSeg seg;
 	register PPathElt e;
@@ -118,7 +118,7 @@ public procedure MarkLinks(vL,hFlg) PClrVal vL; boolean hFlg; {
     }
 }
 
-private procedure Outpath(links, outlinks, output, bst)
+static void Outpath(links, outlinks, output, bst)
 unsigned char *links, *outlinks, *output; integer bst; {
 	register unsigned char *lnks, *outlnks;
 	register integer i = bst;
@@ -146,7 +146,7 @@ unsigned char *links, *outlinks, *output; integer bst; {
  is jumping from one subpath to another.  Kanji characters
  had the most problems with this which caused huge files
  to be created. */
-public procedure DoShuffleSubpaths() {
+void DoShuffleSubpaths() {
 	unsigned char sumlinks[MAXCNT], output[MAXCNT], outlinks[MAXCNT];
 	register unsigned char *lnks;
 	register integer i, j, bst, bstsum, bstlnks;

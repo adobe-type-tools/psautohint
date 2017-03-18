@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ac.h"
 
-private boolean CloseElements(e1,e2,loc1,loc2,vert)
+static boolean CloseElements(e1,e2,loc1,loc2,vert)
 /* TRUE iff you can go from e1 to e2 without going out of band loc1..loc2 */
 /* if vert is TRUE, then band is vert (test x values) */
 /* else band is horizontal (test y values) */
@@ -46,7 +46,7 @@ register boolean vert; {
 		if (e == e1) return FALSE; }
 }
 
-public boolean CloseSegs(s1,s2,vert) PClrSeg s1, s2; boolean vert; {
+boolean CloseSegs(s1,s2,vert) PClrSeg s1, s2; boolean vert; {
 	/* TRUE if the elements for these segs are "close" in the path */
 	PPathElt e1, e2;
 	Fixed loc1, loc2;
@@ -58,7 +58,7 @@ public boolean CloseSegs(s1,s2,vert) PClrSeg s1, s2; boolean vert; {
 			CloseElements(e2,e1,loc2,loc1,vert))? TRUE : FALSE;
 }
 
-public procedure DoPrune() {
+void DoPrune() {
 	/* Step through valList to the first item which is not pruned; set
 	that to be the head of the list. Then remove from the list
 	any subsequent element for which 'pruned' is true.
@@ -77,7 +77,7 @@ public procedure DoPrune() {
     }
 }
 
-private PClrVal PruneOne(sLst, hFlg, sL, i)
+static PClrVal PruneOne(sLst, hFlg, sL, i)
 PClrVal sLst, sL; boolean hFlg; integer i; {
 /* Simply set the 'pruned' field to True for sLst. */
 	if (hFlg) ReportPruneHVal(sLst,sL,i);
@@ -108,7 +108,7 @@ PClrVal sLst, sL; boolean hFlg; integer i; {
 
 /* The changes made here and in PruneHVals are to fix a bug in
  MinisterLight/E where the top left point was not getting colored. */
-public procedure PruneVVals() {
+void PruneVVals() {
 	PClrVal sLst, sL, sPrv;
 	PClrSeg seg1, seg2, sg1, sg2;
 	Fixed lft, rht, l, r, prndist;
@@ -161,7 +161,7 @@ public procedure PruneVVals() {
 }
 
 #define Fix16 (FixOne << 4)
-public procedure PruneHVals() {
+void PruneHVals() {
 	PClrVal sLst, sL, sPrv;
 	PClrSeg seg1, seg2, sg1, sg2;
 	Fixed bot, top, t, b;
@@ -282,7 +282,7 @@ public procedure PruneHVals() {
 	DoPrune();
 }
 
-private procedure FindBestVals(vL) register PClrVal vL; {
+static void FindBestVals(vL) register PClrVal vL; {
 	register Fixed bV, bS;
 	register Fixed t, b;
 	register PClrVal vL2, vPrv, bstV;
@@ -306,7 +306,7 @@ private procedure FindBestVals(vL) register PClrVal vL; {
 /* The following changes were made to fix a problem in Ryumin-Light and
  possibly other fonts as well.  The old version causes bogus coloring
  and extra newcolors. */
-private procedure ReplaceVals(oldB,oldT,newB,newT,newBst,vert)
+static void ReplaceVals(oldB,oldT,newB,newT,newBst,vert)
 register Fixed oldB, oldT, newB, newT; boolean vert;
 register PClrVal newBst; {
 	register PClrVal vL;
@@ -324,7 +324,7 @@ register PClrVal newBst; {
     }
 }
 
-public procedure MergeVals(vert) boolean vert; {
+void MergeVals(vert) boolean vert; {
 	register PClrVal vLst, vL;
 	PClrVal bstV, bV;
 	PClrSeg seg1, seg2, sg1, sg2;

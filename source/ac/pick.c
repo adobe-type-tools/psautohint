@@ -7,9 +7,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 #include "machinedep.h"
 
-private PClrVal Vrejects, Hrejects;
+static PClrVal Vrejects, Hrejects;
 
-public procedure InitPick(reason) integer reason; {
+void InitPick(reason) integer reason; {
 	switch (reason) {
 		case STARTUP:
 		case RESTART:
@@ -19,7 +19,7 @@ public procedure InitPick(reason) integer reason; {
 
 #define LtPruneB(val) ((val) < FixOne && ((val)<<10) < pruneB)
 
-private boolean ConsiderPicking(bestSpc, bestVal, colorList, prevBestVal)
+static boolean ConsiderPicking(bestSpc, bestVal, colorList, prevBestVal)
 Fixed bestSpc, bestVal, prevBestVal; PClrVal colorList; {
 	if (bestSpc > 0L) return TRUE;
 	if (colorList == NULL) return bestVal >= pruneD;
@@ -29,7 +29,7 @@ Fixed bestSpc, bestVal, prevBestVal; PClrVal colorList; {
 	(prevBestVal <= bestVal * pruneC) : (prevBestVal / pruneC <= bestVal);
 }
 
-public procedure PickVVals(valList) PClrVal valList; {
+void PickVVals(valList) PClrVal valList; {
 	PClrVal colorList, rejectList, vlist, prev, best, bestPrev, nxt;
 	Fixed bestVal, prevBestVal; Fixed lft, rght, vlft, vrght;
 	colorList = rejectList = NULL; prevBestVal = 0;
@@ -72,7 +72,7 @@ public procedure PickVVals(valList) PClrVal valList; {
 	Vrejects = rejectList;
 }
 
-private boolean InSerifBand(y0,y1,n,p) register Fixed y0, y1, *p; integer n; {
+static boolean InSerifBand(y0,y1,n,p) register Fixed y0, y1, *p; integer n; {
 	register integer i;
 	if (n <= 0) return FALSE;
 	y0 = itfmy(y0); y1 = itfmy(y1);
@@ -81,7 +81,7 @@ private boolean InSerifBand(y0,y1,n,p) register Fixed y0, y1, *p; integer n; {
 		if (p[i] <= y0 && p[i+1] >= y1) return TRUE;
 	return FALSE; }
 
-private boolean ConsiderValForSeg(val, seg, loc, nb, b, ns, s, primary)
+static boolean ConsiderValForSeg(val, seg, loc, nb, b, ns, s, primary)
 PClrVal val; PClrSeg seg;
 Fixed loc, *b, *s; integer nb, ns; boolean primary; {
 	if (primary && val->vSpc > 0.0) return TRUE;
@@ -91,7 +91,7 @@ Fixed loc, *b, *s; integer nb, ns; boolean primary; {
 	if (LtPruneB(val->vVal)) return FALSE;
 	return TRUE; }
 
-private PClrVal FndBstVal(
+static PClrVal FndBstVal(
 						  seg, seg1Flg, cList, rList, nb, b, ns, s, locFlg, hFlg)
 PClrSeg seg; PClrVal cList, rList;
 boolean seg1Flg; integer nb, ns; Fixed *b, *s;
@@ -131,7 +131,7 @@ boolean locFlg, hFlg; {
 }
 
 #define FixSixteenth (0x10L)
-private PClrVal FindBestValForSeg(
+static PClrVal FindBestValForSeg(
 								  seg, seg1Flg, cList, rList, nb, b, ns, s, hFlg)
 PClrSeg seg; PClrVal cList, rList;
 boolean seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
@@ -154,7 +154,7 @@ boolean seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
 	return best;
 }
 
-private boolean MembValList(val, vList) register PClrVal val, vList; {
+static boolean MembValList(val, vList) register PClrVal val, vList; {
 	while (vList != NULL) {
 		if (val == vList) return TRUE;
 		vList = vList->vNxt;
@@ -162,7 +162,7 @@ private boolean MembValList(val, vList) register PClrVal val, vList; {
 	return FALSE;
 }
 
-private PClrVal PrevVal(val, vList) register PClrVal val, vList; {
+static PClrVal PrevVal(val, vList) register PClrVal val, vList; {
 	PClrVal prev;
 	if (val == vList) return NULL;
 	prev = vList; 
@@ -179,7 +179,7 @@ private PClrVal PrevVal(val, vList) register PClrVal val, vList; {
 		prev = vList; }
 }
 
-private procedure FindRealVal(vlist, top, bot, pseg1, pseg2)
+static void FindRealVal(vlist, top, bot, pseg1, pseg2)
 PClrVal vlist; PClrSeg *pseg1, *pseg2; Fixed top, bot; {
 	while (vlist != NULL) {
 		if (vlist->vLoc2 == top && vlist->vLoc1 == bot && !vlist->vGhst) {
@@ -191,7 +191,7 @@ PClrVal vlist; PClrSeg *pseg1, *pseg2; Fixed top, bot; {
     }
 }
 
-public procedure PickHVals(valList) PClrVal valList; {
+void PickHVals(valList) PClrVal valList; {
 	PClrVal vlist, colorList, rejectList, bestPrev, prev, best, nxt;
 	Fixed bestVal, prevBestVal;
 	Fixed bot, top, vtop, vbot;
@@ -274,7 +274,7 @@ noMore:
 	Hrejects = rejectList;
 }
 
-private procedure FindBestValForSegs(sList,seg1Flg,cList,rList,nb,b,ns,s,hFlg)
+static void FindBestValForSegs(sList,seg1Flg,cList,rList,nb,b,ns,s,hFlg)
 PClrSeg sList; PClrVal cList, rList;
 boolean seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
 	PClrVal best;
@@ -284,7 +284,7 @@ boolean seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
 		sList = sList->sNxt; }
 }
 
-private procedure SetPruned() {
+static void SetPruned() {
 	register PClrVal vL = valList;
 	while (vL != NULL) {
 		vL->pruned = TRUE;
@@ -292,7 +292,7 @@ private procedure SetPruned() {
     }
 }
 
-public procedure FindBestHVals() {
+void FindBestHVals() {
 	SetPruned();
 	FindBestValForSegs(topList, FALSE, valList, NULL,
 					   lenTopBands, topBands, 0L, (Fixed *)NULL, TRUE);
@@ -301,7 +301,7 @@ public procedure FindBestHVals() {
 	DoPrune();
 }
 
-public procedure FindBestVVals() {
+void FindBestVVals() {
 	SetPruned();
 	FindBestValForSegs(leftList, TRUE, valList, NULL,
 					   0L, (Fixed *)NULL, numSerifs, serifs, FALSE);

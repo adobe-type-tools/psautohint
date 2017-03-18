@@ -8,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "bftoac.h"
 #include "machinedep.h"
 
-public int IncludeFile(struct direct * direntry)
+int IncludeFile(struct direct * direntry)
 {
 
   if (strcmp(direntry->d_name, ".notdef") == 0) 
@@ -20,7 +20,7 @@ public int IncludeFile(struct direct * direntry)
   return (FALSE);
 }
 
-public boolean DoAllIgnoreTime(extracolor, includefile)
+boolean DoAllIgnoreTime(extracolor, includefile)
 boolean extracolor;
 	int (*includefile) (const struct direct *);
 {
@@ -46,7 +46,7 @@ boolean extracolor;
   return result;
   }
 
-public boolean DoArgsIgnoreTime(cnt, nms, extracolor)
+boolean DoArgsIgnoreTime(cnt, nms, extracolor)
 int cnt; char *nms[]; boolean extracolor; {
   int i;
   boolean result = TRUE;

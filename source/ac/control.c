@@ -12,12 +12,12 @@ extern boolean charstringoutput;
 
 extern void CSWrite(void);
 
-private procedure DoHStems();
-private procedure DoVStems();
+static void DoHStems();
+static void DoVStems();
 
-private boolean CounterFailed;
+static boolean CounterFailed;
 
-public procedure InitAll(integer reason) {
+void InitAll(integer reason) {
 	InitData(reason); /* must be first */
 	InitAuto(reason);
 	InitFix(reason);
@@ -25,7 +25,7 @@ public procedure InitAll(integer reason) {
 	InitPick(reason);
 }
 
-private integer PtLstLen(PClrPoint lst) {
+static integer PtLstLen(PClrPoint lst) {
 	integer cnt = 0;
 	while (lst != NULL) {
 		cnt++;
@@ -34,7 +34,7 @@ private integer PtLstLen(PClrPoint lst) {
 	return cnt;
 }
 
-public integer PointListCheck(PClrPoint new, PClrPoint lst) {
+integer PointListCheck(PClrPoint new, PClrPoint lst) {
 	/* -1 means not a member, 1 means already a member, 0 means conflicts */
 	Fixed l1, l2, n1, n2, tmp, halfMargin;
 	char ch = new->c;
@@ -109,7 +109,7 @@ public integer PointListCheck(PClrPoint new, PClrPoint lst) {
 	}
 }
 
-private boolean SameColorLists(PClrPoint lst1, PClrPoint lst2) {
+static boolean SameColorLists(PClrPoint lst1, PClrPoint lst2) {
 	if (PtLstLen(lst1) != PtLstLen(lst2)) {
 		return FALSE;
 	}
@@ -122,14 +122,14 @@ private boolean SameColorLists(PClrPoint lst1, PClrPoint lst2) {
 	return TRUE;
 }
 
-public boolean SameColors(integer cn1, integer cn2) {
+boolean SameColors(integer cn1, integer cn2) {
 	if (cn1 == cn2) {
 		return TRUE;
 	}
 	return SameColorLists(ptLstArray[cn1], ptLstArray[cn2]);
 }
 
-public procedure MergeFromMainColors(char ch) {
+void MergeFromMainColors(char ch) {
 	register PClrPoint lst;
 	for (lst = ptLstArray[0]; lst != NULL; lst = lst->next) {
 		if (lst->c != ch) {
@@ -146,7 +146,7 @@ public procedure MergeFromMainColors(char ch) {
 	}
 }
 
-public procedure AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0, PPathElt p1) {
+void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0, PPathElt p1) {
 	register PClrPoint pt;
 	integer chk;
 	pt = (PClrPoint)Alloc(sizeof(ClrPoint));
@@ -172,7 +172,7 @@ public procedure AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, 
 	}
 }
 
-private procedure CopyClrFromLst(char clr, register PClrPoint lst) {
+static void CopyClrFromLst(char clr, register PClrPoint lst) {
 	boolean bvflg = (clr == 'b' || clr == 'v');
 	while (lst != NULL) {
 		if (lst->c == clr) {
@@ -187,15 +187,15 @@ private procedure CopyClrFromLst(char clr, register PClrPoint lst) {
 	}
 }
 
-public procedure CopyMainV() {
+void CopyMainV() {
 	CopyClrFromLst('m', ptLstArray[0]);
 }
 
-public procedure CopyMainH() {
+void CopyMainH() {
 	CopyClrFromLst('v', ptLstArray[0]);
 }
 
-public procedure AddHPair(PClrVal v, char ch) {
+void AddHPair(PClrVal v, char ch) {
 	Fixed bot, top, tmp;
 	PPathElt p0, p1, p;
 	bot = itfmy(v->vLoc1);
@@ -227,7 +227,7 @@ public procedure AddHPair(PClrVal v, char ch) {
 	AddColorPoint(0L, bot, 0L, top, ch, p0, p1);
 }
 
-public procedure AddVPair(PClrVal v, char ch) {
+void AddVPair(PClrVal v, char ch) {
 	Fixed lft, rght, tmp;
 	PPathElt p0, p1, p;
 	lft = itfmx(v->vLoc1);
@@ -245,7 +245,7 @@ public procedure AddVPair(PClrVal v, char ch) {
 	AddColorPoint(lft, 0L, rght, 0L, ch, p0, p1);
 }
 
-private boolean UseCounter(PClrVal sLst, boolean mclr) {
+static boolean UseCounter(PClrVal sLst, boolean mclr) {
 	integer cnt = 0;
 	Fixed minLoc, midLoc, maxLoc, abstmp, prevBstVal, bestVal;
 	Fixed minDelta, midDelta, maxDelta, loc, delta, th;
@@ -316,7 +316,7 @@ private boolean UseCounter(PClrVal sLst, boolean mclr) {
 	return FALSE;
 }
 
-private procedure GetNewPtLst() {
+static void GetNewPtLst() {
 	if (numPtLsts >= maxPtLsts) { /* increase size */
 		PClrPoint *newArray;
 		integer i;
@@ -333,7 +333,7 @@ private procedure GetNewPtLst() {
 	ptLstArray[ptLstIndex] = NULL;
 }
 
-public procedure XtraClrs(PPathElt e) {
+void XtraClrs(PPathElt e) {
 	/* this can be simplified for standalone coloring */
 	ptLstArray[ptLstIndex] = pointList;
 	if (e->newcolors == 0) {
@@ -344,7 +344,7 @@ public procedure XtraClrs(PPathElt e) {
 	pointList = ptLstArray[ptLstIndex];
 }
 
-private procedure Blues() {
+static void Blues() {
 	Fixed pv, pd, pc, pb, pa;
 	PClrVal sLst;
 
@@ -542,7 +542,7 @@ private procedure Blues() {
 	}
 }
 
-private procedure DoHStems(PClrVal sLst1) {
+static void DoHStems(PClrVal sLst1) {
 	Fixed bot, top;
 	Fixed charTop = MINinteger, charBot = MAXinteger;
 	boolean curved;
@@ -581,7 +581,7 @@ private procedure DoHStems(PClrVal sLst1) {
 	}
 }
 
-private procedure Yellows() {
+static void Yellows() {
 	Fixed pv, pd, pc, pb, pa;
 	PClrVal sLst;
 	if (showClrInfo) {
@@ -652,7 +652,7 @@ private procedure Yellows() {
 	}
 }
 
-private procedure DoVStems(PClrVal sLst) {
+static void DoVStems(PClrVal sLst) {
 	Fixed lft, rght;
 	boolean curved;
 	if (!doAligns && !doStems) {
@@ -673,7 +673,7 @@ private procedure DoVStems(PClrVal sLst) {
 	}
 }
 
-private procedure RemoveRedundantFirstColors() {
+static void RemoveRedundantFirstColors() {
 	register PPathElt e;
 	if (numPtLsts < 2 || !SameColors(0L, 1L)) {
 		return;
@@ -688,7 +688,7 @@ private procedure RemoveRedundantFirstColors() {
 	}
 }
 
-private procedure PreCheckForSolEol() {
+static void PreCheckForSolEol() {
 	integer code;
 	Fixed yStart, yEnd, x1, y1;
 	if (!SpecialSolEol() || useV || useH || pathStart == NULL) {
@@ -707,7 +707,7 @@ private procedure PreCheckForSolEol() {
 	}
 }
 
-private procedure AddColorsSetup() {
+static void AddColorsSetup() {
 	int i;
 	Fixed abstmp;
 	vBigDist = 0;
@@ -743,7 +743,7 @@ private procedure AddColorsSetup() {
 
 /* If extracolor is TRUE then it is ok to have multi-level
  coloring. */
-private procedure AddColorsInnerLoop(boolean extracolor) {
+static void AddColorsInnerLoop(boolean extracolor) {
 	integer solEolCode = 2, retryColoring = 0;
 	boolean isSolEol = FALSE;
 	while (TRUE) {
@@ -816,7 +816,7 @@ private procedure AddColorsInnerLoop(boolean extracolor) {
 	}
 }
 
-private procedure AddColorsCleanup() {
+static void AddColorsCleanup() {
 	RemoveRedundantFirstColors();
 	reportErrors = TRUE;
 	if (writecoloredbez) {
@@ -841,7 +841,7 @@ private procedure AddColorsCleanup() {
 	InitAll(RESTART);
 }
 
-private procedure AddColors(boolean extracolor) {
+static void AddColors(boolean extracolor) {
 	if (pathStart == NULL || pathStart == pathEnd) {
 		PrintMessage("No character path, so no hints.");
 #if ALLOWCSOUTPUT && THISISACMAIN
@@ -873,7 +873,7 @@ private procedure AddColors(boolean extracolor) {
 	Test();
 }
 
-public boolean DoFile(char *fname, boolean extracolor) {
+boolean DoFile(char *fname, boolean extracolor) {
 	integer lentop = lenTopBands, lenbot = lenBotBands;
 	fileName = fname;
 	if (!ReadCharFile(TRUE, FALSE, FALSE, TRUE)) {

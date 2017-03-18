@@ -27,16 +27,16 @@ extern Fixed GetPathLSB(void);
 
 FILE *cstmpfile;
 extern FILE *outputfile;
-private Fixed currentx, currenty;
-private boolean firstFlex, wrtColorInfo;
-private char S0[128];
-private PClrPoint bst;
-private char bch;
-private Fixed bx, by;
-private boolean bstB;
-private Fixed lsb;
-private boolean needtoSubLSB;
-private short trilockcount = 0;
+static Fixed currentx, currenty;
+static boolean firstFlex, wrtColorInfo;
+static char S0[128];
+static PClrPoint bst;
+static char bch;
+static Fixed bx, by;
+static boolean bstB;
+static Fixed lsb;
+static boolean needtoSubLSB;
+static short trilockcount = 0;
 #if DEBUG
 #else
 FILE *outIOFILE;
@@ -45,7 +45,7 @@ long val;
 #endif
 
 #if DEBUG
-private ws(char *str) {
+static ws(char *str) {
 	fputc(' ', cstmpfile);
 	fputs(str, cstmpfile);
 }
@@ -60,7 +60,7 @@ void test(void) {
 	fprintf(stderr, "hi");
 }
 
-private void ws(char *str) {
+static void ws(char *str) {
 	if (str[0] != ' ') {
 		fputc(' ', cstmpfile);
 	}
@@ -81,7 +81,7 @@ private void ws(char *str) {
 static char hintmaskstr[HINTMAXSTR];
 static char prevhintmaskstr[HINTMAXSTR];
 
-private void safestrcat(char *s1, char *s2) {
+static void safestrcat(char *s1, char *s2) {
 	if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
 		sprintf(S0, "ERROR: Hint information overflowing buffer: %s\n", fileName);
 		LogMsg(S0, LOGERROR, FATALERROR, TRUE);
@@ -91,7 +91,7 @@ private void safestrcat(char *s1, char *s2) {
 	}
 }
 
-private void sws(char *str) {
+static void sws(char *str) {
 	safestrcat(hintmaskstr, " ");
 	safestrcat(hintmaskstr, str);
 	if ((str[0] <= '0' || str[0] >= '9') && str[0] != '-') {
@@ -104,12 +104,12 @@ private void sws(char *str) {
 	sws(S0);                 \
 }
 
-private void wrtfx(Fixed f) {
+static void wrtfx(Fixed f) {
 	Fixed i = FRnd(f);
 	WRTNUM(FTrunc(i));
 }
 
-private procedure wrtx(Fixed x, boolean subLSB) {
+static void wrtx(Fixed x, boolean subLSB) {
 	Fixed i = FRnd(x);
 	if (subLSB) {
 		WRTNUM(FTrunc(i - currentx - lsb));
@@ -120,7 +120,7 @@ private procedure wrtx(Fixed x, boolean subLSB) {
 	currentx = i;
 }
 
-private procedure wrty(Fixed y) {
+static void wrty(Fixed y) {
 	Fixed i = FRnd(y);
 	WRTNUM(FTrunc(i - currenty));
 	currenty = i;
@@ -130,7 +130,7 @@ private procedure wrty(Fixed y) {
 	wrtx(c.x, 0); \
 	wrty(c.y)
 
-private procedure NewBest(PClrPoint lst) {
+static void NewBest(PClrPoint lst) {
 	Fixed x0, x1, y0, y1;
 	bst = lst;
 	bch = lst->c;
@@ -148,7 +148,7 @@ private procedure NewBest(PClrPoint lst) {
 	}
 }
 
-private procedure WriteOne(Fixed s) { /* write s to output file */
+static void WriteOne(Fixed s) { /* write s to output file */
 	Fixed r = UnScaleAbs(s);
 	if (scalinghints) {
 		r = FRnd(r);
@@ -168,7 +168,7 @@ private procedure WriteOne(Fixed s) { /* write s to output file */
 	}
 }
 
-private procedure WritePointItem(PClrPoint lst) {
+static void WritePointItem(PClrPoint lst) {
 	switch (lst->c) {
 		case 'b':
 			WriteOne(lst->y0);
@@ -208,7 +208,7 @@ private procedure WritePointItem(PClrPoint lst) {
 	}
 }
 
-private procedure WrtPntLst(PClrPoint lst) {
+static void WrtPntLst(PClrPoint lst) {
 	PClrPoint ptLst;
 	char ch;
 	Fixed x0, x1, y0, y1;
@@ -262,7 +262,7 @@ private procedure WrtPntLst(PClrPoint lst) {
 	}
 }
 
-private procedure wrtnewclrs(PPathElt e) {
+static void wrtnewclrs(PPathElt e) {
 	if (!wrtColorInfo) {
 		return;
 	}
@@ -275,7 +275,7 @@ private procedure wrtnewclrs(PPathElt e) {
 	}
 }
 
-private boolean IsFlex(PPathElt e) {
+static boolean IsFlex(PPathElt e) {
 	PPathElt e0, e1;
 	if (firstFlex) {
 		e0 = e;
@@ -288,7 +288,7 @@ private boolean IsFlex(PPathElt e) {
 	return (e0 != NULL && e0->isFlex && e1 != NULL && e1->isFlex);
 }
 
-private procedure mt(Cd c, PPathElt e) {
+static void mt(Cd c, PPathElt e) {
 	if (e->newcolors != 0) {
 		wrtnewclrs(e);
 	}
@@ -325,10 +325,10 @@ private procedure mt(Cd c, PPathElt e) {
 	}
 }
 
-private Fixed currentFlexx, currentFlexy;
-private boolean firstFlexMT;
+static Fixed currentFlexx, currentFlexy;
+static boolean firstFlexMT;
 
-private procedure wrtFlexx(Fixed x, boolean subLSB) {
+static void wrtFlexx(Fixed x, boolean subLSB) {
 	Fixed i = FRnd(x);
 	if (subLSB) {
 		WRTNUM(FTrunc(i - currentFlexx - lsb));
@@ -340,13 +340,13 @@ private procedure wrtFlexx(Fixed x, boolean subLSB) {
 	currentFlexx = i;
 }
 
-private procedure wrtFlexy(Fixed y) {
+static void wrtFlexy(Fixed y) {
 	Fixed i = FRnd(y);
 	WRTNUM(FTrunc(i - currentFlexy));
 	currentFlexy = i;
 }
 
-private procedure wrtFlexmt(Cd c) {
+static void wrtFlexmt(Cd c) {
 	if (firstFlexMT) {
 		if (FRnd(c.y) == currentFlexy) {
 			wrtFlexx(c.x, 1);
@@ -380,7 +380,7 @@ private procedure wrtFlexmt(Cd c) {
 	}
 }
 
-private procedure dt(Cd c, PPathElt e) {
+static void dt(Cd c, PPathElt e) {
 	if (e->newcolors != 0) {
 		wrtnewclrs(e);
 	}
@@ -423,10 +423,10 @@ private procedure dt(Cd c, PPathElt e) {
 	}
 }
 
-private Fixed flX, flY;
-private Cd fc1, fc2, fc3;
+static Fixed flX, flY;
+static Cd fc1, fc2, fc3;
 
-private procedure wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
+static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	integer dmin, delta;
 	boolean yflag;
 	Cd c13;
@@ -505,7 +505,7 @@ private procedure wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	firstFlex = TRUE;
 }
 
-private procedure ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
+static void ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	if (e->newcolors != 0) {
 		wrtnewclrs(e);
 	}
@@ -548,7 +548,7 @@ private procedure ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	}
 }
 
-private procedure cp(PPathElt e) {
+static void cp(PPathElt e) {
 	if (e->newcolors != 0) {
 		wrtnewclrs(e);
 	}

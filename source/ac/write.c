@@ -26,9 +26,9 @@ extern int bezoutputalloc;
 extern int bezoutputactual;
 
 #define ws(str) WriteString(str)
-public int writeAbsolute = 1;
+int writeAbsolute = 1;
 
-public long int FRnd(long int x){
+long int FRnd(long int x){
     /* This is meant to work on Fixed 24.8 values, not the elt path (x,y) which are 25.7 */
     long int r;
     r = x;

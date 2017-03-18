@@ -5,7 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 
 /* Procedures defined in stems/stemreport.c - StemHist */
-public procedure AddVStem(top, bottom, curved)
+void AddVStem(top, bottom, curved)
 Fixed top;
 Fixed bottom;
 boolean curved;
@@ -19,7 +19,7 @@ boolean curved;
   	}
 }
 
-public procedure AddHStem(right, left, curved)
+void AddHStem(right, left, curved)
 Fixed right;
 Fixed left;
 boolean curved;
@@ -33,7 +33,7 @@ boolean curved;
   	}
 }
 
-public procedure AddCharExtremes(bot, top)
+void AddCharExtremes(bot, top)
 Fixed bot, top;
 {
   if (addCharExtremesCB != NULL)
@@ -42,7 +42,7 @@ Fixed bot, top;
   	}
 }
 
-public procedure AddStemExtremes(bot, top)
+void AddStemExtremes(bot, top)
 Fixed bot, top;
 {
   if (addStemExtremesCB != NULL)

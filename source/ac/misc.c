@@ -8,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 
 
-public integer CountSubPaths() {
+integer CountSubPaths() {
   register PPathElt e = pathStart;
   integer cnt = 0;
   while (e != NULL) {
@@ -17,7 +17,7 @@ public integer CountSubPaths() {
     }
   return cnt;
   }
-public procedure RoundPathCoords() {
+void RoundPathCoords() {
   register PPathElt e;
   e = pathStart;
   while (e != NULL) {
@@ -37,7 +37,7 @@ public procedure RoundPathCoords() {
     }
   }
 
-private integer CheckForClr() {
+static integer CheckForClr() {
   PPathElt mt, cp;
   mt = pathStart;
   while (mt != NULL) {
@@ -51,7 +51,7 @@ private integer CheckForClr() {
   return 0L;
   }
 
-public boolean PreCheckForColoring() {
+boolean PreCheckForColoring() {
   PPathElt e, nxt;
   integer cnt = 0;
   integer chk;
@@ -85,7 +85,7 @@ public boolean PreCheckForColoring() {
   return TRUE;
   }
 
-private PPathElt GetSubpathNext(e) register PPathElt e; {
+static PPathElt GetSubpathNext(e) register PPathElt e; {
   while (TRUE) {
      e = e->next;
     if (e == NULL) break;
@@ -95,7 +95,7 @@ private PPathElt GetSubpathNext(e) register PPathElt e; {
   return e;
   }
 
-private PPathElt GetSubpathPrev(e) register PPathElt e; {
+static PPathElt GetSubpathPrev(e) register PPathElt e; {
   while (TRUE) {
     e = e->prev;
     if (e == NULL) break;
@@ -105,7 +105,7 @@ private PPathElt GetSubpathPrev(e) register PPathElt e; {
   return e; 
   }
 
-private boolean AddAutoFlexProp(e, yflag) PPathElt e; boolean yflag; {
+static boolean AddAutoFlexProp(e, yflag) PPathElt e; boolean yflag; {
   PPathElt e0 = e, e1 = e->next;
   if (e0->type != CURVETO || e1->type != CURVETO)
   {
@@ -126,7 +126,7 @@ private boolean AddAutoFlexProp(e, yflag) PPathElt e; boolean yflag; {
 
 #define LENGTHRATIOCUTOFF 0.11   /* 0.33^2 : two curves must be in approximate length ratio of 1:3 or better */
 
-private procedure TryYFlex(e, n, x0, y0, x1, y1)
+static void TryYFlex(e, n, x0, y0, x1, y1)
   PPathElt e, n; Fixed x0, y0, x1, y1; {
   Fixed x2, y2, x3, y3, x4, y4, abstmp;
   PPathElt p, q;
@@ -173,7 +173,7 @@ private procedure TryYFlex(e, n, x0, y0, x1, y1)
     ReportAddFlex();
   }
 
-private procedure TryXFlex(e, n, x0, y0, x1, y1)
+static void TryXFlex(e, n, x0, y0, x1, y1)
   PPathElt e, n; Fixed x0, y0, x1, y1; {
   Fixed x2, y2, x3, y3, x4, y4, abstmp;
   PPathElt p, q;
@@ -220,7 +220,7 @@ private procedure TryXFlex(e, n, x0, y0, x1, y1)
     ReportAddFlex();
   }
 
-public procedure AutoAddFlex() {
+void AutoAddFlex() {
   PPathElt e, n;
   Fixed x0, y0, x1, y1, abstmp;
   e = pathStart;

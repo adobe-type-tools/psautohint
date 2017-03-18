@@ -19,53 +19,53 @@ extern int unlink(const char *);
 extern boolean charstringoutput;
 #endif
 
-public PPathElt pathStart, pathEnd;
-public boolean YgoesUp;
-public boolean useV, useH, autoVFix, autoHFix, autoLinearCurveFix, editChar;
-public boolean AutoExtraDEBUG, debugColorPath, DEBUG, logging;
-public boolean showVs, showHs, listClrInfo;
-public boolean reportErrors, hasFlex, flexOK, flexStrict, showClrInfo, bandError;
-public Fixed hBigDist, vBigDist, initBigDist, minDist, minMidPt, ghostWidth,
+PPathElt pathStart, pathEnd;
+boolean YgoesUp;
+boolean useV, useH, autoVFix, autoHFix, autoLinearCurveFix, editChar;
+boolean AutoExtraDEBUG, debugColorPath, DEBUG, logging;
+boolean showVs, showHs, listClrInfo;
+boolean reportErrors, hasFlex, flexOK, flexStrict, showClrInfo, bandError;
+Fixed hBigDist, vBigDist, initBigDist, minDist, minMidPt, ghostWidth,
   ghostLength, bendLength, bandMargin, maxFlare,
   maxBendMerge, maxMerge, minColorElementLength, flexCand,
   pruneMargin;
-public Fixed pruneA, pruneB, pruneC, pruneD, pruneValue, bonus;
-public real theta, hBigDistR, vBigDistR, maxVal, minVal;
-public integer lenTopBands, lenBotBands, numSerifs, DMIN, DELTA, CPpercent;
-public integer bendTan, sCurveTan;
-public PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
-public char * fileName;
-public char outPrefix[MAXPATHLEN];
-public char inPrefix[MAXPATHLEN];
-public PClrSeg segLists[4];
-public Fixed VStems[MAXSTEMS], HStems[MAXSTEMS];
-public integer NumVStems, NumHStems;
-public Fixed topBands[MAXBLUES], botBands[MAXBLUES], serifs[MAXSERIFS];
-public PClrPoint pointList, *ptLstArray;
-public integer ptLstIndex, numPtLsts, maxPtLsts;
-public boolean makehintslog = TRUE;
-public boolean writecoloredbez = TRUE;
-public Fixed bluefuzz;
-public boolean doAligns, doStems;
-public boolean idInFile;
-public boolean roundToInt;
-private int maxStemDist = MAXSTEMDIST;
+Fixed pruneA, pruneB, pruneC, pruneD, pruneValue, bonus;
+real theta, hBigDistR, vBigDistR, maxVal, minVal;
+integer lenTopBands, lenBotBands, numSerifs, DMIN, DELTA, CPpercent;
+integer bendTan, sCurveTan;
+PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
+char * fileName;
+char outPrefix[MAXPATHLEN];
+char inPrefix[MAXPATHLEN];
+PClrSeg segLists[4];
+Fixed VStems[MAXSTEMS], HStems[MAXSTEMS];
+integer NumVStems, NumHStems;
+Fixed topBands[MAXBLUES], botBands[MAXBLUES], serifs[MAXSERIFS];
+PClrPoint pointList, *ptLstArray;
+integer ptLstIndex, numPtLsts, maxPtLsts;
+boolean makehintslog = TRUE;
+boolean writecoloredbez = TRUE;
+Fixed bluefuzz;
+boolean doAligns, doStems;
+boolean idInFile;
+boolean roundToInt;
+static int maxStemDist = MAXSTEMDIST;
 
 
-public AC_REPORTFUNCPTR libReportCB = NULL;
-public AC_REPORTFUNCPTR libErrorReportCB = NULL;
+AC_REPORTFUNCPTR libReportCB = NULL;
+AC_REPORTFUNCPTR libErrorReportCB = NULL;
 unsigned int  allstems; /* if false, then stems defined by curves are excluded from the reporting */
-public AC_REPORTSTEMPTR addHStemCB = NULL;
-public AC_REPORTSTEMPTR addVStemCB = NULL;
-public AC_REPORTZONEPTR addCharExtremesCB = NULL;
-public AC_REPORTZONEPTR addStemExtremesCB = NULL;
-public AC_RETRYPTR reportRetryCB = NULL;
+AC_REPORTSTEMPTR addHStemCB = NULL;
+AC_REPORTSTEMPTR addVStemCB = NULL;
+AC_REPORTZONEPTR addCharExtremesCB = NULL;
+AC_REPORTZONEPTR addStemExtremesCB = NULL;
+AC_RETRYPTR reportRetryCB = NULL;
 #define CHARSETVAR "CHARSETDIR"
 #define BAKFILE "hints.log.BAK"
 
 
 
-private void * defaultAC_memmanage(void *ctxptr, void *old, unsigned long size)
+static void * defaultAC_memmanage(void *ctxptr, void *old, unsigned long size)
 	{
 #ifndef _WIN32
 #pragma unused(ctxptr)	
@@ -99,10 +99,10 @@ private void * defaultAC_memmanage(void *ctxptr, void *old, unsigned long size)
  ACFREEMEM(ptr) 
 	*/
 
-public AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr = defaultAC_memmanage;
-public void *AC_memmanageCtxPtr = NULL;
+AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr = defaultAC_memmanage;
+void *AC_memmanageCtxPtr = NULL;
 
-public void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func)
+void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func)
 	{
 	AC_memmanageFuncPtr = func;
 	AC_memmanageCtxPtr = ctxptr;
@@ -110,10 +110,10 @@ public void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func)
 
 
 #define VMSIZE (1000000L)
-private unsigned char *vmfree, *vmlast, vm[VMSIZE];
+static unsigned char *vmfree, *vmlast, vm[VMSIZE];
 
 /* sub allocator */
-public unsigned char * Alloc(integer sz)
+unsigned char * Alloc(integer sz)
 	{
 	unsigned char * s;
 	sz = (sz + 3) & ~3; /* make size a multiple of 4 */
@@ -130,7 +130,7 @@ public unsigned char * Alloc(integer sz)
   }
 
 
-public procedure InitData(integer reason)
+void InitData(integer reason)
  {
   register char *s;
   real tmp, origEmSquare;
@@ -213,20 +213,20 @@ public procedure InitData(integer reason)
   }
 
 
-private procedure setOutputPrefix (prefix)
+static void setOutputPrefix (prefix)
 char *prefix;
 {
   get_filename(outPrefix, prefix, "");
 }
 
-public procedure SetMaxStemDist(int dist)
+void SetMaxStemDist(int dist)
 {
   maxStemDist = dist;
 }
 
 
 /* Returns whether coloring was successful. */  
-public boolean AutoColor(
+boolean AutoColor(
 			 boolean release,
 			 boolean fixStems,
 			 boolean debug,

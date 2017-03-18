@@ -8,12 +8,12 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 
 #define maxFixes (100)
-private Fixed HFixYs[maxFixes], HFixDYs[maxFixes];
-private Fixed VFixXs[maxFixes], VFixDXs[maxFixes];
-private integer HFixCount, VFixCount;
-private Fixed bPrev, tPrev;
+static Fixed HFixYs[maxFixes], HFixDYs[maxFixes];
+static Fixed VFixXs[maxFixes], VFixDXs[maxFixes];
+static integer HFixCount, VFixCount;
+static Fixed bPrev, tPrev;
 
-public procedure InitFix(reason) integer reason; {
+void InitFix(reason) integer reason; {
   switch (reason) {
     case STARTUP: case RESTART:
       HFixCount = VFixCount = 0;
@@ -21,19 +21,19 @@ public procedure InitFix(reason) integer reason; {
     }
   }
 
-private procedure RecordHFix(y,dy) Fixed y, dy; {
+static void RecordHFix(y,dy) Fixed y, dy; {
   HFixYs[HFixCount] = y;
   HFixDYs[HFixCount] = dy;
   HFixCount++;
   }
 
-private procedure RecordVFix(x,dx) Fixed x, dx; {
+static void RecordVFix(x,dx) Fixed x, dx; {
   VFixXs[VFixCount] = x;
   VFixDXs[VFixCount] = dx;
   VFixCount++;
   }
 
-private procedure RecordForFix(vert, w, minW, b, t)
+static void RecordForFix(vert, w, minW, b, t)
   boolean vert; Fixed w, minW, b, t; {
   Fixed mn, mx, delta;
   if (b < t) { mn = b; mx = t; }
@@ -68,7 +68,7 @@ private procedure RecordForFix(vert, w, minW, b, t)
     }
   }
 
-private boolean CheckForInsideBands(loc, blues, numblues)
+static boolean CheckForInsideBands(loc, blues, numblues)
   Fixed loc, *blues; integer numblues; {
   integer i;
   for (i = 0; i < numblues; i += 2) {
@@ -78,7 +78,7 @@ private boolean CheckForInsideBands(loc, blues, numblues)
   }
 
 #define bFuzz (FixInt(6))
-private procedure CheckForNearBands(loc, blues, numblues) 
+static void CheckForNearBands(loc, blues, numblues) 
   Fixed loc, *blues; integer numblues; { 
   integer i; 
   boolean bottom = TRUE;
@@ -98,7 +98,7 @@ private procedure CheckForNearBands(loc, blues, numblues)
     }
   }
 
-public boolean FindLineSeg(loc, sL) Fixed loc; PClrSeg sL; {
+boolean FindLineSeg(loc, sL) Fixed loc; PClrSeg sL; {
   while (sL != NULL) {
     if (sL->sLoc ==loc && sL->sType == sLINE) return TRUE;
     sL = sL->sNxt; }
@@ -108,7 +108,7 @@ public boolean FindLineSeg(loc, sL) Fixed loc; PClrSeg sL; {
 /* Traverses hSegList to check for near misses to
    the horizontal alignment zones. The list contains
    segments that may or may not have hints added. */ 
-public procedure CheckTfmVal (hSegList, bandList, length)
+void CheckTfmVal (hSegList, bandList, length)
 PClrSeg hSegList; Fixed *bandList; long int length;  {
   Fixed tfmval;
   PClrSeg sList = hSegList;
@@ -122,7 +122,7 @@ PClrSeg hSegList; Fixed *bandList; long int length;  {
     }
 }
 #else
-public procedure CheckTfmVal (b, t, vert) Fixed b, t; boolean vert; {
+void CheckTfmVal (b, t, vert) Fixed b, t; boolean vert; {
   if (t < b) { Fixed tmp; tmp = t; t = b; b = tmp; }
   if (!vert && (lenTopBands >= 2 || lenBotBands >= 2) && !bandError &&
       !CheckForInsideBands(t, topBands, lenTopBands) &&
@@ -133,7 +133,7 @@ public procedure CheckTfmVal (b, t, vert) Fixed b, t; boolean vert; {
 }
 #endif
 
-public procedure CheckVal(val, vert) PClrVal val; boolean vert; {
+void CheckVal(val, vert) PClrVal val; boolean vert; {
   Fixed *stems;
   integer numstems, i;
   Fixed wd, diff, minDiff, minW, b, t, w;
@@ -170,14 +170,14 @@ public procedure CheckVal(val, vert) PClrVal val; boolean vert; {
     RecordForFix(vert, w, minW, b, t);
   }
 
-public procedure CheckVals(vlst, vert) PClrVal vlst; boolean vert; {
+void CheckVals(vlst, vert) PClrVal vlst; boolean vert; {
   while (vlst != NULL) {
     CheckVal(vlst, vert);
     vlst = vlst->vNxt;
     }
   }
 
-private procedure FixH(e, fixy, fixdy) PPathElt e; Fixed fixy, fixdy; {
+static void FixH(e, fixy, fixdy) PPathElt e; Fixed fixy, fixdy; {
   PPathElt prev, nxt;
   RMovePoint(0L, fixdy, cpStart, e);
   RMovePoint(0L, fixdy, cpEnd, e);
@@ -190,7 +190,7 @@ private procedure FixH(e, fixy, fixdy) PPathElt e; Fixed fixy, fixdy; {
     RMovePoint(0L, fixdy, cpCurve1, nxt);
   }
 
-private procedure FixHs(fixy, fixdy)
+static void FixHs(fixy, fixdy)
   Fixed fixy, fixdy; { /* y dy in user space */
   PPathElt e;
   Fixed xlst, ylst, xinit, yinit;
@@ -222,7 +222,7 @@ private procedure FixHs(fixy, fixdy)
     }
   }
 
-private procedure FixV(e, fixx, fixdx) PPathElt e; Fixed fixx, fixdx; {
+static void FixV(e, fixx, fixdx) PPathElt e; Fixed fixx, fixdx; {
   PPathElt prev, nxt;
   RMovePoint(fixdx, 0L, cpStart, e);
   RMovePoint(fixdx, 0L, cpEnd, e);
@@ -235,7 +235,7 @@ private procedure FixV(e, fixx, fixdx) PPathElt e; Fixed fixx, fixdx; {
     RMovePoint(fixdx, 0L, cpCurve1, nxt);
   }
 
-private procedure FixVs(fixx, fixdx)
+static void FixVs(fixx, fixdx)
   Fixed fixx, fixdx; { /* x dx in user space */
   PPathElt e;
   Fixed xlst, ylst, xinit, yinit;
@@ -266,7 +266,7 @@ private procedure FixVs(fixx, fixdx)
     }
   }
 
-public boolean DoFixes() {
+boolean DoFixes() {
   boolean didfixes = FALSE;
   integer i;
   if (HFixCount > 0 && autoHFix) {

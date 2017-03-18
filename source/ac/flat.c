@@ -5,7 +5,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ac.h"
 
-private procedure FMiniFltn(f0, f1, f2, f3, pfr, inside)
+static void FMiniFltn(f0, f1, f2, f3, pfr, inside)
   Cd f0, f1, f2, f3; register PFltnRec pfr; boolean inside; {
   /* Like FFltnCurve, but assumes abs(deltas) <= 127 pixels */
   /* 8 bits of fraction gives enough precision for splitting curves */
@@ -220,7 +220,7 @@ while (TRUE) {
   FixedMidPoint(b0, a2, b1); \
   a3 = b0
 
-private procedure FFltnCurve(c0, c1, c2, c3, pfr, inrect)
+static void FFltnCurve(c0, c1, c2, c3, pfr, inrect)
                                                /* inrect = !testRect */
   Cd c0, c1, c2, c3;  register PFltnRec pfr;
   register boolean inrect;
@@ -294,7 +294,7 @@ ReportC3:
 (*pfr->report)(c3);
 }
 
-public procedure FltnCurve(c0, c1, c2, c3, pfr)
+void FltnCurve(c0, c1, c2, c3, pfr)
   Cd c0, c1, c2, c3;  PFltnRec pfr; {
   pfr->limit = 6; /* limit on how many times a bez curve can be split in half by recursive calls to FFltnCurve() */
 //pfr->feps = FixHalf;

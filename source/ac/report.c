@@ -18,25 +18,25 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #endif
 
 #if !IS_LIB
-private FILE *yminfile, *ymaxfile, *logfile, *vertfile, *horzfile;
+static FILE *yminfile, *ymaxfile, *logfile, *vertfile, *horzfile;
 #else
 extern AC_REPORTFUNCPTR libReportCB;
 #endif
-private char S0[512];
+static char S0[512];
 
-public double FixToDbl(f) Fixed f; {
+double FixToDbl(f) Fixed f; {
   real r;
   acfixtopflt(f, &r);
   return r;
   }
 
 #define VERSION "4.1"
-public procedure ACGetVersion(char *name, char *str)
+void ACGetVersion(char *name, char *str)
 {
   sprintf(str, "%s ac library version %s.\n", name, VERSION);
 }
 
-public procedure OpenLogFiles() {
+void OpenLogFiles() {
 #if !IS_LIB
   char dir[MAXPATHLEN];
   char uid[L_cuserid];
@@ -61,7 +61,7 @@ public procedure OpenLogFiles() {
 #endif
   }
 
-public procedure FlushLogFiles()
+void FlushLogFiles()
 {
 #if !IS_LIB
   fflush(logfile);
@@ -73,7 +73,7 @@ public procedure FlushLogFiles()
 #endif
 }
 
-public procedure CloseLogFiles() {
+void CloseLogFiles() {
 #if !IS_LIB
   fclose(logfile);
   if (!logging) return;
@@ -90,7 +90,7 @@ public procedure CloseLogFiles() {
 #endif
   }
 
-public procedure LogYMinMax() {
+void LogYMinMax() {
 #if !IS_LIB
   PPathElt e = pathStart;
   Fixed temp, y, ymax = FixInt(-10000), ymin = FixInt(10000);
@@ -115,7 +115,7 @@ public procedure LogYMinMax() {
 #if IS_LIB
 #define EndLine()
 #else
-private procedure EndLine() {
+static void EndLine() {
   if (!makehintslog)
     return;
   (void)fprintf(logfile, "\n");
@@ -125,7 +125,7 @@ private procedure EndLine() {
 #define PrinMsg(s) PrintMessage(s)
 
 
-public procedure PrintMessage(s) char * s; {
+void PrintMessage(s) char * s; {
 #if !IS_LIB
   if (!makehintslog)
     return;
@@ -141,7 +141,7 @@ public procedure PrintMessage(s) char * s; {
   }
 
 
-public procedure ReportError(s) char * s; {
+void ReportError(s) char * s; {
 #if !IS_LIB
   if (reportErrors) PrintMessage(s);
 #else
@@ -149,20 +149,20 @@ public procedure ReportError(s) char * s; {
 #endif
   }
 
-public procedure ReportSmoothError(x, y) Fixed x, y; {
+void ReportSmoothError(x, y) Fixed x, y; {
   (void)sprintf(S0, "Junction at %g %g may need smoothing.",
     FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
   ReportError(S0);
   }
 
 
-public procedure ReportAddFlex() {
+void ReportAddFlex() {
   if (hasFlex) return;
   hasFlex = TRUE;
   PrintMessage("FYI: added flex operators to this character.");
   }
 
-public procedure ReportClipSharpAngle(x, y) Fixed x, y; {
+void ReportClipSharpAngle(x, y) Fixed x, y; {
   (void)sprintf(S0, "FYI: Too sharp angle at %g %g has been clipped.",
     FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
   PrintMessage(S0);
@@ -170,14 +170,14 @@ public procedure ReportClipSharpAngle(x, y) Fixed x, y; {
 
 
 
-public procedure ReportSharpAngle(x, y) Fixed x, y; {
+void ReportSharpAngle(x, y) Fixed x, y; {
   (void)sprintf(S0, "FYI: angle at %g %g is very sharp. Please check.",
     FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
   PrintMessage(S0);
   }
 
 
-public procedure ReportLinearCurve(e, x0, y0, x1, y1)
+void ReportLinearCurve(e, x0, y0, x1, y1)
   PPathElt e; Fixed x0, y0, x1, y1; {
   if (autoLinearCurveFix) {
     e->type = LINETO; e->x = e->x3; e->y = e->y3;
@@ -194,7 +194,7 @@ public procedure ReportLinearCurve(e, x0, y0, x1, y1)
 
 
 
-private procedure ReportNonHVError(x0, y0, x1, y1, s)
+static void ReportNonHVError(x0, y0, x1, y1, s)
   Fixed x0, y0, x1, y1; char * s; {
   Fixed dx, dy;
   x0 = itfmx(x0); y0 = itfmy(y0);
@@ -209,13 +209,13 @@ private procedure ReportNonHVError(x0, y0, x1, y1, s)
   }
 
 
-public procedure ReportNonHError(x0, y0, x1, y1) Fixed x0, y0, x1, y1; {
+void ReportNonHError(x0, y0, x1, y1) Fixed x0, y0, x1, y1; {
   ReportNonHVError(x0, y0, x1, y1, "horizontal"); }
 
-public procedure ReportNonVError(x0, y0, x1, y1) Fixed x0, y0, x1, y1; {
+void ReportNonVError(x0, y0, x1, y1) Fixed x0, y0, x1, y1; {
   ReportNonHVError(x0, y0, x1, y1, "vertical"); }
 
-public procedure ExpectedMoveTo(e) PPathElt e; {
+void ExpectedMoveTo(e) PPathElt e; {
   char * s;
   switch (e->type) {
     case LINETO: s = (char *)"lineto"; break;
@@ -231,20 +231,20 @@ public procedure ExpectedMoveTo(e) PPathElt e; {
   }
 
 
-public procedure ReportMissingClosePath() {
+void ReportMissingClosePath() {
   FlushLogFiles();
   (void)sprintf(globmsg, "Missing closepath in %s character.\n  The file is probably truncated.", fileName);
   LogMsg (globmsg, LOGERROR, NONFATALERROR, TRUE); 
 }
 
-public procedure ReportTryFlexNearMiss(x0, y0, x2, y2) Fixed x0, y0, x2, y2; {
+void ReportTryFlexNearMiss(x0, y0, x2, y2) Fixed x0, y0, x2, y2; {
   (void)sprintf(S0, "Curves from %g %g to %g %g near miss for adding flex.",
     FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)),
     FixToDbl(itfmx(x2)), FixToDbl(itfmy(y2)));
   ReportError(S0);
   }
 
-public procedure ReportTryFlexError(CPflg, x, y)
+void ReportTryFlexError(CPflg, x, y)
   boolean CPflg; Fixed x, y; {
   (void)sprintf(S0,
     CPflg ? "Please move closepath from %g %g so can add flex." :
@@ -253,7 +253,7 @@ public procedure ReportTryFlexError(CPflg, x, y)
   ReportError(S0);
   }
 
-public procedure ReportSplit(e) PPathElt e; {
+void ReportSplit(e) PPathElt e; {
   Fixed x0, y0, x1, y1;
   GetEndPoints(e, &x0, &y0, &x1, &y1);
   (void)sprintf(S0, "FYI: the element that goes from %g %g to %g %g has been split.",
@@ -262,7 +262,7 @@ public procedure ReportSplit(e) PPathElt e; {
   PrintMessage(S0);
   }
 
-public procedure AskForSplit(e) PPathElt e; {
+void AskForSplit(e) PPathElt e; {
   Fixed x0, y0, x1, y1;
   if (e->type == MOVETO) e = GetClosedBy(e);
   GetEndPoints(e, &x0, &y0, &x1, &y1);
@@ -273,7 +273,7 @@ public procedure AskForSplit(e) PPathElt e; {
   }
 
 
-public procedure ReportPossibleLoop(e) PPathElt e; {
+void ReportPossibleLoop(e) PPathElt e; {
   Fixed x0, y0, x1, y1;
   if (e->type == MOVETO) e = GetClosedBy(e);
   GetEndPoints(e, &x0, &y0, &x1, &y1);
@@ -284,7 +284,7 @@ public procedure ReportPossibleLoop(e) PPathElt e; {
   }
 
 
-public procedure ReportConflictCheck(e, conflict, cp)
+void ReportConflictCheck(e, conflict, cp)
   PPathElt e, conflict, cp; {
   Fixed ex, ey, cx, cy, cpx, cpy;
   GetEndPoint(e, &ex, &ey);
@@ -297,7 +297,7 @@ public procedure ReportConflictCheck(e, conflict, cp)
   ReportError(S0);
   }
 
-public procedure ReportConflictCnt(e, cnt) PPathElt e; integer cnt; {
+void ReportConflictCnt(e, cnt) PPathElt e; integer cnt; {
   Fixed ex, ey;
   GetEndPoint(e, &ex, &ey);
   (void) sprintf(S0, "%g %g conflict count = %ld",
@@ -306,7 +306,7 @@ public procedure ReportConflictCnt(e, cnt) PPathElt e; integer cnt; {
   }
 
 
-public procedure ReportRemFlare(e,e2,hFlg,i)
+void ReportRemFlare(e,e2,hFlg,i)
   PPathElt e, e2; boolean hFlg; integer i; {
   Fixed ex1, ey1, ex2, ey2;
   if (!showClrInfo) return;
@@ -320,7 +320,7 @@ public procedure ReportRemFlare(e,e2,hFlg,i)
   PrintMessage(S0); 
   }
 
-public procedure ReportRemConflict(e) PPathElt e; {
+void ReportRemConflict(e) PPathElt e; {
   Fixed ex, ey; 
   if (!showClrInfo) return; 
   GetEndPoint(e, &ex, &ey); 
@@ -330,7 +330,7 @@ public procedure ReportRemConflict(e) PPathElt e; {
   }
 
 
-public procedure ReportRotateSubpath(e) PPathElt e; {
+void ReportRotateSubpath(e) PPathElt e; {
   Fixed ex, ey;
   if (!showClrInfo) return;
   GetEndPoint(e, &ex, &ey);
@@ -340,7 +340,7 @@ public procedure ReportRotateSubpath(e) PPathElt e; {
   }
 
 
-public procedure ReportRemShortColors(ex, ey) Fixed ex, ey; {
+void ReportRemShortColors(ex, ey) Fixed ex, ey; {
   if (!showClrInfo) return;
   sprintf(S0, "Removed hints from short element at %g %g.",
     FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
@@ -348,7 +348,7 @@ public procedure ReportRemShortColors(ex, ey) Fixed ex, ey; {
   }
 
 
-private procedure PrntVal(v) Fixed v; {
+static void PrntVal(v) Fixed v; {
   if (v >= FixInt(100000L))
     sprintf(S0, "%ld", FTrunc(v));
   else
@@ -357,7 +357,7 @@ private procedure PrntVal(v) Fixed v; {
   }
 
 
-private procedure ShwHV(val) PClrVal val; {
+static void ShwHV(val) PClrVal val; {
   Fixed bot, top;
   bot = itfmy(val->vLoc1);
   top = itfmy(val->vLoc2);
@@ -370,7 +370,7 @@ private procedure ShwHV(val) PClrVal val; {
       PrinMsg(" G");
   }
 
-public procedure ShowHVal(val) PClrVal val; {
+void ShowHVal(val) PClrVal val; {
   Fixed l, r;
   PClrSeg seg;
   ShwHV(val);
@@ -387,17 +387,17 @@ public procedure ShowHVal(val) PClrVal val; {
   PrinMsg(S0);
   }
 
-public procedure ShowHVals(lst) PClrVal lst; {
+void ShowHVals(lst) PClrVal lst; {
   while (lst != NULL) {
     ShowHVal(lst); EndLine(); lst = lst->vNxt; }
   }
 
-public procedure ReportAddHVal(val) PClrVal val; {
+void ReportAddHVal(val) PClrVal val; {
   ShowHVal(val);
   EndLine();
   }
 
-private procedure ShwVV(val) PClrVal val; {
+static void ShwVV(val) PClrVal val; {
   Fixed lft, rht;
   lft = itfmx(val->vLoc1);
   rht = itfmx(val->vLoc2);
@@ -409,7 +409,7 @@ private procedure ShwVV(val) PClrVal val; {
   }
 
 
-public procedure ShowVVal(val) PClrVal val; {
+void ShowVVal(val) PClrVal val; {
   Fixed b, t;
   PClrSeg seg;
   ShwVV(val);
@@ -427,18 +427,18 @@ public procedure ShowVVal(val) PClrVal val; {
   }
 
 
-public procedure ShowVVals(lst) PClrVal lst; {
+void ShowVVals(lst) PClrVal lst; {
   while (lst != NULL) {
     ShowVVal(lst); EndLine(); lst = lst->vNxt; }
   }
 
-public procedure ReportAddVVal(val) PClrVal val; {
+void ReportAddVVal(val) PClrVal val; {
   ShowVVal(val);
   EndLine();
   }
 
 
-public procedure ReportFndBstVal(seg,val,hFlg)
+void ReportFndBstVal(seg,val,hFlg)
   PClrSeg seg; PClrVal val; boolean hFlg; {
   if (hFlg) {
     sprintf(S0, "FndBstVal: sLoc %g sLft %g sRght %g ",
@@ -462,7 +462,7 @@ public procedure ReportFndBstVal(seg,val,hFlg)
   }
 
 
-public procedure ReportCarry(l0, l1, loc, clrs, vert)
+void ReportCarry(l0, l1, loc, clrs, vert)
   Fixed l0, l1, loc; PClrVal clrs; boolean vert; {
   if (!showClrInfo) return;
   if (vert) {
@@ -474,7 +474,7 @@ public procedure ReportCarry(l0, l1, loc, clrs, vert)
   PrintMessage(S0);
   }
 
-public procedure ReportBestCP(e, cp) PPathElt e, cp; {
+void ReportBestCP(e, cp) PPathElt e, cp; {
   Fixed ex, ey, px, py;
   GetEndPoint(e, &ex, &ey);
   if (cp != NULL) {
@@ -490,7 +490,7 @@ public procedure ReportBestCP(e, cp) PPathElt e, cp; {
 
 
 
-public procedure LogColorInfo(pl) PClrPoint pl; {
+void LogColorInfo(pl) PClrPoint pl; {
   char c = pl->c;
   Fixed lft, rht, top, bot, wdth;
   if (c == 'y' || c == 'm') { /* vertical lines */
@@ -508,13 +508,13 @@ public procedure LogColorInfo(pl) PClrPoint pl; {
   }
 
 
-private procedure LstHVal(val) PClrVal val; {
+static void LstHVal(val) PClrVal val; {
   PrinMsg("\t");
   ShowHVal(val);
   PrinMsg(" ");
   }
 
-private procedure LstVVal(val) PClrVal val; {
+static void LstVVal(val) PClrVal val; {
   PrinMsg("\t");
   ShowVVal(val);
   PrinMsg(" ");
@@ -522,7 +522,7 @@ private procedure LstVVal(val) PClrVal val; {
 
 
 
-public procedure ListClrInfo() { /* debugging routine */
+void ListClrInfo() { /* debugging routine */
   PPathElt e;
   PSegLnkLst hLst, vLst;
   PClrSeg seg;
@@ -549,7 +549,7 @@ public procedure ListClrInfo() { /* debugging routine */
     }
   }
 
-public procedure ReportAddVSeg(from, to, loc, i)
+void ReportAddVSeg(from, to, loc, i)
   Fixed from, to, loc; integer i; {
   if (!showClrInfo || !showVs) return;
   (void)sprintf(S0, "add vseg %g %g to %g %g %ld",
@@ -558,7 +558,7 @@ public procedure ReportAddVSeg(from, to, loc, i)
   PrintMessage(S0);
   }
 
-public procedure ReportAddHSeg(from, to, loc, i)
+void ReportAddHSeg(from, to, loc, i)
   Fixed from, to, loc; integer i; {
   if (!showClrInfo || !showHs) return;
   (void)sprintf(S0, "add hseg %g %g to %g %g %ld",
@@ -568,7 +568,7 @@ public procedure ReportAddHSeg(from, to, loc, i)
   }
 
 
-public procedure ReportRemVSeg(from, to, loc)
+void ReportRemVSeg(from, to, loc)
   Fixed from, to, loc; {
   if (!showClrInfo || !showVs) return;
   (void)sprintf(S0, "rem vseg %g %g to %g %g",
@@ -578,7 +578,7 @@ public procedure ReportRemVSeg(from, to, loc)
   }
 
 
-public procedure ReportRemHSeg(from, to, loc)
+void ReportRemHSeg(from, to, loc)
   Fixed from, to, loc; {
   if (!showClrInfo || !showHs) return;
   (void)sprintf(S0, "rem hseg %g %g to %g %g",
@@ -588,18 +588,18 @@ public procedure ReportRemHSeg(from, to, loc)
   }
 
 
-public procedure ReportBandError(str, loc, blu) char * str; Fixed loc, blu; {
+void ReportBandError(str, loc, blu) char * str; Fixed loc, blu; {
   (void)sprintf(S0, "Near miss %s horizontal zone at %g instead of %g.",
     str, FixToDbl(loc), FixToDbl(blu));
   ReportError(S0);
   }
-public procedure ReportBandNearMiss(str, loc, blu) char * str; Fixed loc, blu; {
+void ReportBandNearMiss(str, loc, blu) char * str; Fixed loc, blu; {
   (void)sprintf(S0, "Near miss %s horizontal zone at %g instead of %g.",
     str, FixToDbl(loc), FixToDbl(blu));
   ReportError(S0);
   }
 
-public procedure ReportStemNearMiss(vert, w, minW, b, t, curve)
+void ReportStemNearMiss(vert, w, minW, b, t, curve)
   boolean vert, curve; Fixed w, minW, b, t; {
   (void)sprintf(S0, "%s %s stem near miss: %g instead of %g at %g to %g.",
     vert? "Vertical" : "Horizontal", curve? "curve" : "linear",
@@ -607,7 +607,7 @@ public procedure ReportStemNearMiss(vert, w, minW, b, t, curve)
   ReportError(S0);
   }
 
-public procedure ReportColorConflict(x0, y0, x1, y1, ch)
+void ReportColorConflict(x0, y0, x1, y1, ch)
   Fixed x0, y0, x1, y1; char ch; {
   unsigned char s[2];
   s[0] = ch; s[1] = 0;
@@ -616,20 +616,20 @@ public procedure ReportColorConflict(x0, y0, x1, y1, ch)
   ReportError(S0);
   }
 
-public procedure ReportDuplicates(x, y) Fixed x, y; {
+void ReportDuplicates(x, y) Fixed x, y; {
   (void)sprintf(S0, "Check for duplicate subpath at %g %g.",
     FixToDbl(x), FixToDbl(y));
   ReportError(S0);
   }
 
-public procedure ReportBBoxBogus(llx, lly, urx, ury)
+void ReportBBoxBogus(llx, lly, urx, ury)
   Fixed llx, lly, urx, ury; {
   (void)sprintf(S0, "Character bounding box looks bogus: %g %g %g %g.",
     FixToDbl(llx), FixToDbl(lly), FixToDbl(urx), FixToDbl(ury));
   ReportError(S0);
   }
 
-public procedure ReportMergeHVal(b0,t0,b1,t1,v0,s0,v1,s1)
+void ReportMergeHVal(b0,t0,b1,t1,v0,s0,v1,s1)
   Fixed b0,t0,b1,t1,v0,s0,v1,s1; {
   if (!showClrInfo) return;
   sprintf(S0, "Replace H hints pair at %g %g by %g %g\n\told value ",
@@ -644,7 +644,7 @@ public procedure ReportMergeHVal(b0,t0,b1,t1,v0,s0,v1,s1)
   PrintMessage(S0);
   }
 
-public procedure ReportMergeVVal(l0,r0,l1,r1,v0,s0,v1,s1)
+void ReportMergeVVal(l0,r0,l1,r1,v0,s0,v1,s1)
   Fixed l0,r0,l1,r1,v0,s0,v1,s1; {
   if (!showClrInfo) return;
   sprintf(S0, "Replace V hints pair at %g %g by %g %g\n\told value ",
@@ -659,7 +659,7 @@ public procedure ReportMergeVVal(l0,r0,l1,r1,v0,s0,v1,s1)
   PrintMessage(S0);
   }
 
-public procedure ReportPruneHVal(val,v,i)
+void ReportPruneHVal(val,v,i)
   PClrVal val,v; integer i; {
   if (!showClrInfo) return;
   sprintf(S0, "PruneHVal: %ld\n\t", i);
@@ -670,7 +670,7 @@ public procedure ReportPruneHVal(val,v,i)
   EndLine();
   }
 
-public procedure ReportPruneVVal(val,v,i)
+void ReportPruneVVal(val,v,i)
   PClrVal val,v; integer i; {
   if (!showClrInfo) return;
   sprintf(S0, "PruneVVal: %ld\n\t", i);
@@ -681,7 +681,7 @@ public procedure ReportPruneVVal(val,v,i)
   EndLine();
   }
 
-public procedure ReportMoveSubpath(e,s) PPathElt e; char *s; {
+void ReportMoveSubpath(e,s) PPathElt e; char *s; {
   Fixed x, y;
   GetEndPoint(e, &x, &y);
   sprintf(S0, "FYI: Moving subpath %g %g to %s.",

@@ -8,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #define fixedScale ((real)(FixOne))
 
-public procedure acfixtopflt(x, pf)
+void acfixtopflt(x, pf)
   Fixed x; float *pf;
 
 #ifdef sun3
@@ -17,7 +17,7 @@ public procedure acfixtopflt(x, pf)
  {*pf = (float) x / fixedScale;}
 #endif
 
-public Fixed acpflttofix(pf)
+Fixed acpflttofix(pf)
   float *pf;
   {
   float f = *pf;

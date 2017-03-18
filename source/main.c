@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
 {
     /* See the discussion in the function definition for:
      autohintlib:control.c:Blues()
-     private procedure Blues()
+     static void Blues()
      */
 
 	int allowEdit, roundCoords, allowHintSub, fixStems, debug, badParam;

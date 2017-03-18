@@ -8,17 +8,17 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "bftoac.h"
 #include "machinedep.h"
 
-private Fixed xmin, ymin, xmax, ymax, vMn, vMx, hMn, hMx;
-private PPathElt pxmn, pxmx, pymn, pymx, pe, pvMn, pvMx, phMn, phMx;
+static Fixed xmin, ymin, xmax, ymax, vMn, vMx, hMn, hMx;
+static PPathElt pxmn, pxmx, pymn, pymx, pe, pvMn, pvMx, phMn, phMx;
 
-private procedure FPBBoxPt(c) Cd c; {
+static void FPBBoxPt(c) Cd c; {
   if (c.x < xmin) { xmin = c.x; pxmn = pe; }
   if (c.x > xmax) { xmax = c.x; pxmx = pe; }
   if (c.y < ymin) { ymin = c.y; pymn = pe; }
   if (c.y > ymax) { ymax = c.y; pymx = pe; }
   }
 
-private procedure FindPathBBox() {
+static void FindPathBBox() {
   FltnRec fr;
   register PPathElt e;
   Cd c0, c1, c2, c3;
@@ -63,7 +63,7 @@ private procedure FindPathBBox() {
   ymax = FHalfRnd(ymax);
   }
 
-public PPathElt FindSubpathBBox(e) PPathElt e; {
+PPathElt FindSubpathBBox(e) PPathElt e; {
   FltnRec fr;
   Cd c0, c1, c2, c3;
   if (e == NULL) {
@@ -124,7 +124,7 @@ public PPathElt FindSubpathBBox(e) PPathElt e; {
   return e;
   }
 
-public procedure FindCurveBBox(
+void FindCurveBBox(
   x0,y0,px1,py1,px2,py2,x1,y1,pllx,plly,purx,pury)
   Fixed x0,y0,px1,py1,px2,py2,x1,y1,*pllx,*plly,*purx,*pury; {
   FltnRec fr;
@@ -144,7 +144,7 @@ public procedure FindCurveBBox(
   *pury = FHalfRnd(ymax);
   }
 
-public procedure ClrVBnds() {
+void ClrVBnds() {
   Fixed tmp;
   PPathElt p;
   if (pathStart == NULL || VColorChar()) return;
@@ -158,11 +158,11 @@ public procedure ClrVBnds() {
   AddColorPoint(vMn, 0L, vMx, 0L, 'y', pvMn, pvMx);
   }
 
-public procedure ReClrVBnds() {
+void ReClrVBnds() {
   AddColorPoint(vMn, 0L, vMx, 0L, 'y', pvMn, pvMx);
   }
 
-public procedure ClrHBnds() {
+void ClrHBnds() {
   Fixed tmp;
   PPathElt p;
   if (pathStart == NULL || HColorChar()) return;
@@ -176,11 +176,11 @@ public procedure ClrHBnds() {
   AddColorPoint(0L, hMn, 0L, hMx, 'b', phMn, phMx);
   }
 
-public procedure ReClrHBnds() {
+void ReClrHBnds() {
   AddColorPoint(0L, hMn, 0L, hMx, 'b', phMn, phMx);
   }
 
-private boolean CheckValOverlaps(lft, rht, lst, xflg)
+static boolean CheckValOverlaps(lft, rht, lst, xflg)
   Fixed lft, rht; PClrVal lst; boolean xflg; {
   Fixed lft2, rht2, tmp;
   if (xflg) { lft = itfmx(lft); rht = itfmx(rht); }
@@ -197,7 +197,7 @@ private boolean CheckValOverlaps(lft, rht, lst, xflg)
   return FALSE;
   }
 
-public procedure AddBBoxHV(Hflg, subs) boolean Hflg, subs; {
+void AddBBoxHV(Hflg, subs) boolean Hflg, subs; {
   PPathElt e;
   PClrVal val;
   PClrSeg seg1, seg2;
@@ -258,7 +258,7 @@ public procedure AddBBoxHV(Hflg, subs) boolean Hflg, subs; {
     }
   }
 
-public procedure ClrBBox() {
+void ClrBBox() {
   Fixed llx, lly, urx, ury, tmp;
   PPathElt p, p0, p1;
   if (!useV) {
@@ -281,7 +281,7 @@ public procedure ClrBBox() {
     }
   }
 
-public procedure CheckPathBBox() {
+void CheckPathBBox() {
   Fixed llx, lly, urx, ury, tmp;
   FindPathBBox();
   llx = itfmx(xmin); urx = itfmx(xmax);
@@ -293,7 +293,7 @@ public procedure CheckPathBBox() {
     ReportBBoxBogus(llx, lly, urx, ury);
   }
 
-public Fixed GetPathLSB(void) {
+Fixed GetPathLSB(void) {
   Fixed llx, urx, tmp;
   FindPathBBox();
   llx = itfmx(xmin); urx = itfmx(xmax);
@@ -301,7 +301,7 @@ public Fixed GetPathLSB(void) {
   return (llx);
   }
 
-public boolean CheckBBoxes(e1, e2) PPathElt e1, e2; {
+boolean CheckBBoxes(e1, e2) PPathElt e1, e2; {
   /* return TRUE if e1 and e2 in same subpath or i
      the bbox for one is inside the bbox of the other */
   Fixed xmn, xmx, ymn, ymx;

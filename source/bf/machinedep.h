@@ -153,8 +153,8 @@ extern void AppendFile (
     char *, char *
 );
 
-public procedure FlushLogFiles();
-public procedure OpenLogFiles();
+void FlushLogFiles();
+void OpenLogFiles();
 typedef int (* includeFile) (const struct direct *);
 typedef int (* sortFn)(const struct direct **, const struct direct **);
 
@@ -171,7 +171,7 @@ extern char *GetPathName (
 extern int bf_alphasort(const struct direct **f1, const struct direct **f2);
 
 #if defined(_MSC_VER) && ( _MSC_VER < 1800)
-public float roundf(float x);
+float roundf(float x);
 #endif
 
 

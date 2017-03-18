@@ -6,10 +6,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 #include "machinedep.h"
 
-private boolean clrBBox, clrHBounds, clrVBounds, haveHBnds, haveVBnds,
+static boolean clrBBox, clrHBounds, clrVBounds, haveHBnds, haveVBnds,
   mergeMain;
 
-public procedure InitAuto(reason) integer reason; {
+void InitAuto(reason) integer reason; {
   switch (reason) {
     case STARTUP:
     case RESTART:
@@ -17,15 +17,15 @@ public procedure InitAuto(reason) integer reason; {
     }
   }
 
-private PPathElt GetSubPathNxt(e) PPathElt e; {
+static PPathElt GetSubPathNxt(e) PPathElt e; {
   if (e->type == CLOSEPATH) return GetDest(e);
   return e->next; }
 
-private PPathElt GetSubPathPrv(e) PPathElt e; {
+static PPathElt GetSubPathPrv(e) PPathElt e; {
   if (e->type == MOVETO) e = GetClosedBy(e);
   return e->prev; }
 
-private PClrVal FindClosestVal(sLst, loc) PClrVal sLst; Fixed loc; {
+static PClrVal FindClosestVal(sLst, loc) PClrVal sLst; Fixed loc; {
   Fixed dist = FixInt(10000), bot, top, d;
   PClrVal best = NULL;
   while (sLst != NULL) {
@@ -40,7 +40,7 @@ private PClrVal FindClosestVal(sLst, loc) PClrVal sLst; Fixed loc; {
   return best;
   }
 
-private procedure CpyHClr(e) PPathElt e; {
+static void CpyHClr(e) PPathElt e; {
   Fixed x1, y1;
   PClrVal best;
   GetEndPoint(e, &x1, &y1);
@@ -49,7 +49,7 @@ private procedure CpyHClr(e) PPathElt e; {
     AddHPair(best, 'b');
   }
 
-private procedure CpyVClr(e) PPathElt e; {
+static void CpyVClr(e) PPathElt e; {
   Fixed x1, y1;
   PClrVal best;
   GetEndPoint(e, &x1, &y1);
@@ -58,7 +58,7 @@ private procedure CpyVClr(e) PPathElt e; {
     AddVPair(best, 'y');
   }
 
-private procedure PruneColorSegs(e, hFlg) PPathElt e; boolean hFlg; {
+static void PruneColorSegs(e, hFlg) PPathElt e; boolean hFlg; {
   PSegLnkLst lst, nxt, prv;
   PSegLnk lnk;
   PClrSeg seg;
@@ -85,7 +85,7 @@ private procedure PruneColorSegs(e, hFlg) PPathElt e; boolean hFlg; {
     }
   }
 
-public procedure PruneElementColorSegs() {
+void PruneElementColorSegs() {
   register PPathElt e;
   e = pathStart;
   while (e != NULL) {
@@ -96,7 +96,7 @@ public procedure PruneElementColorSegs() {
 
 #define ElmntClrSegLst(e, hFlg) (hFlg) ? (e)->Hs : (e)->Vs
 
-private procedure RemLnk(e,hFlg,rm)
+static void RemLnk(e,hFlg,rm)
   PPathElt e; boolean hFlg; PSegLnkLst rm; {
   PSegLnkLst lst, prv, nxt;
   lst = hFlg ? e->Hs : e->Vs;
@@ -115,7 +115,7 @@ private procedure RemLnk(e,hFlg,rm)
   LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
   }
 
-private boolean AlreadyOnList(v, lst)  register PClrVal v, lst; {
+static boolean AlreadyOnList(v, lst)  register PClrVal v, lst; {
   while (lst != NULL) {
     if (v == lst) return TRUE;
     lst = lst->vNxt;
@@ -123,25 +123,25 @@ private boolean AlreadyOnList(v, lst)  register PClrVal v, lst; {
   return FALSE;
   }
 
-private procedure AutoVSeg(sLst) PClrVal sLst; {
+static void AutoVSeg(sLst) PClrVal sLst; {
   AddVPair(sLst, 'y');
   }
 
-private procedure AutoHSeg(sLst) PClrVal sLst; {
+static void AutoHSeg(sLst) PClrVal sLst; {
   AddHPair(sLst, 'b');
   }
 
-private procedure AddHColoring(h) PClrVal h; {
+static void AddHColoring(h) PClrVal h; {
   if (useH || AlreadyOnList(h,Hcoloring)) return;
   h->vNxt = Hcoloring; Hcoloring = h;
   AutoHSeg(h); }
 
-private procedure AddVColoring(v) PClrVal v; {
+static void AddVColoring(v) PClrVal v; {
   if (useV || AlreadyOnList(v,Vcoloring)) return;
   v->vNxt = Vcoloring; Vcoloring = v;
   AutoVSeg(v); }
 
-private integer TestColor(s, colorList, flg, doLst)
+static integer TestColor(s, colorList, flg, doLst)
   PClrSeg s; PClrVal colorList; boolean flg, doLst; {
   /* -1 means already in colorList; 0 means conflicts; 1 means ok to add */
   PClrVal v, clst;
@@ -197,7 +197,7 @@ private integer TestColor(s, colorList, flg, doLst)
 #define TestHColorLst(h) TestColorLst(h, Hcoloring, YgoesUp, TRUE)
 #define TestVColorLst(v) TestColorLst(v, Vcoloring, TRUE, TRUE)
 
-public int TestColorLst(lst, colorList, flg, doLst)
+int TestColorLst(lst, colorList, flg, doLst)
   PSegLnkLst lst; PClrVal colorList; boolean flg, doLst; {
   /* -1 means already in colorList; 0 means conflicts; 1 means ok to add */
   int result, i, cnt;
@@ -225,7 +225,7 @@ public int TestColorLst(lst, colorList, flg, doLst)
   FixedMidPoint(b1, a3, b2); \
   FixedMidPoint(a3, a2, b1);
 
-public boolean ResolveConflictBySplit(e,Hflg,lnk1,lnk2)
+boolean ResolveConflictBySplit(e,Hflg,lnk1,lnk2)
   register PPathElt e; boolean Hflg; PSegLnkLst lnk1, lnk2; {
   /* insert new pathelt immediately following e */
   /* e gets first half of split; new gets second */
@@ -258,7 +258,7 @@ public boolean ResolveConflictBySplit(e,Hflg,lnk1,lnk2)
   return TRUE;
   }
 
-private procedure RemDupLnks(e,Hflg) PPathElt e; boolean Hflg; {
+static void RemDupLnks(e,Hflg) PPathElt e; boolean Hflg; {
   PSegLnkLst l1, l2, l2nxt;
   l1 = Hflg ? e->Hs : e->Vs;
   while (l1 != NULL) {
@@ -280,7 +280,7 @@ private procedure RemDupLnks(e,Hflg) PPathElt e; boolean Hflg; {
 
 /* The changes made here were to fix a problem in MinisterLight/E.
    The top left point was not getting colored. */
-private boolean TryResolveConflict(e,Hflg)
+static boolean TryResolveConflict(e,Hflg)
   PPathElt e; boolean Hflg; {
   integer typ;
   PSegLnkLst lst, lnk1, lnk2;
@@ -349,7 +349,7 @@ private boolean TryResolveConflict(e,Hflg)
   else return FALSE;
   }
 
-private boolean CheckColorSegs(PPathElt e, boolean flg, boolean Hflg) 
+static boolean CheckColorSegs(PPathElt e, boolean flg, boolean Hflg) 
 {
   PSegLnkLst lst;
   PSegLnkLst lst2;
@@ -373,7 +373,7 @@ private boolean CheckColorSegs(PPathElt e, boolean flg, boolean Hflg)
   return FALSE;
   }
 
-private procedure CheckElmntClrSegs() {
+static void CheckElmntClrSegs() {
   PPathElt e;
   e = pathStart;
   while (e != NULL) {
@@ -381,7 +381,7 @@ private procedure CheckElmntClrSegs() {
       (void)CheckColorSegs(e,TRUE,FALSE);
     e = e->next; }
   }
-private boolean ClrLstsClash(lst1,lst2,flg)
+static boolean ClrLstsClash(lst1,lst2,flg)
   PSegLnkLst lst1, lst2; boolean flg; {
   PClrSeg seg;
   PClrVal val;
@@ -402,7 +402,7 @@ private boolean ClrLstsClash(lst1,lst2,flg)
   return FALSE;
   }
 
-private PSegLnkLst BestFromLsts(lst1,lst2) PSegLnkLst lst1, lst2; {
+static PSegLnkLst BestFromLsts(lst1,lst2) PSegLnkLst lst1, lst2; {
   PSegLnkLst lst, bst;
   PClrSeg seg;
   PClrVal val;
@@ -421,7 +421,7 @@ private PSegLnkLst BestFromLsts(lst1,lst2) PSegLnkLst lst1, lst2; {
   return bst;
   }
 
-private boolean ClrsClash(e, p, hLst, vLst, phLst, pvLst)
+static boolean ClrsClash(e, p, hLst, vLst, phLst, pvLst)
   PPathElt e, p; PSegLnkLst *hLst, *vLst, *phLst, *pvLst; {
   boolean clash = FALSE;
   PSegLnkLst bst, new;
@@ -448,7 +448,7 @@ private boolean ClrsClash(e, p, hLst, vLst, phLst, pvLst)
   return clash;
   }
 
-private procedure GetColorLsts(e, phLst, pvLst, ph, pv) 
+static void GetColorLsts(e, phLst, pvLst, ph, pv) 
   PPathElt e; PSegLnkLst *phLst, *pvLst; integer *ph, *pv; {
   PSegLnkLst hLst, vLst;
   integer h, v;
@@ -470,7 +470,7 @@ private procedure GetColorLsts(e, phLst, pvLst, ph, pv)
   *ph = h; *pv = v;
   }
 
-private procedure ReClrBounds(e) PPathElt e; {
+static void ReClrBounds(e) PPathElt e; {
   if (!useH) {
     if (clrHBounds && Hcoloring==NULL && !haveHBnds)
       ReClrHBnds();
@@ -489,7 +489,7 @@ private procedure ReClrBounds(e) PPathElt e; {
     }
   }
 
-private procedure AddColorLst(lst,vert) PSegLnkLst lst; boolean vert; {
+static void AddColorLst(lst,vert) PSegLnkLst lst; boolean vert; {
   PClrVal val;
   PClrSeg seg;
   while (lst != NULL) {
@@ -501,7 +501,7 @@ private procedure AddColorLst(lst,vert) PSegLnkLst lst; boolean vert; {
     }
   }
 
-private procedure StartNewColoring(e, hLst, vLst)
+static void StartNewColoring(e, hLst, vLst)
   PPathElt e; PSegLnkLst hLst, vLst; {
   ReClrBounds(e);
   if (e->newcolors != 0)
@@ -519,18 +519,18 @@ private procedure StartNewColoring(e, hLst, vLst)
   if (!useV) AddColorLst(vLst,TRUE);
   }
 
-private boolean IsIn(h,v) integer h, v; {
+static boolean IsIn(h,v) integer h, v; {
   return (h == -1 && v == -1);
   }
 
-private boolean IsOk(h,v) integer h, v; {
+static boolean IsOk(h,v) integer h, v; {
   return (h != 0 && v != 0);
   }
 
 #define AddIfNeedV(v,vLst) if (!useV && v == 1) AddColorLst(vLst,TRUE)
 #define AddIfNeedH(h,hLst) if (!useH && h == 1) AddColorLst(hLst,FALSE)
 
-private procedure SetHColors(lst) PClrVal lst; {
+static void SetHColors(lst) PClrVal lst; {
   if (useH) return;
   Hcoloring = lst;
   while (lst != NULL) {
@@ -539,7 +539,7 @@ private procedure SetHColors(lst) PClrVal lst; {
     }
   }
 
-private procedure SetVColors(lst) PClrVal lst; {
+static void SetVColors(lst) PClrVal lst; {
   if (useV) return;
   Vcoloring = lst;
   while (lst != NULL) {
@@ -548,7 +548,7 @@ private procedure SetVColors(lst) PClrVal lst; {
     }
   }
 
-public PClrVal CopyClrs(lst) PClrVal lst; {
+PClrVal CopyClrs(lst) PClrVal lst; {
   PClrVal v, vlst;
   int cnt;
   vlst = NULL; cnt = 0;
@@ -563,14 +563,14 @@ public PClrVal CopyClrs(lst) PClrVal lst; {
     lst = lst->vNxt; }
   return vlst; }
 
-private PPathElt ColorBBox(e) PPathElt e; {
+static PPathElt ColorBBox(e) PPathElt e; {
   e = FindSubpathBBox(e);
   ClrBBox();
   clrBBox = TRUE;
   return e;
   }
 
-private boolean IsFlare(loc,e,n,Hflg) Fixed loc; PPathElt e, n; boolean Hflg; {
+static boolean IsFlare(loc,e,n,Hflg) Fixed loc; PPathElt e, n; boolean Hflg; {
   Fixed x, y, abstmp;
   while (e != n) {
     GetEndPoint(e,&x,&y);
@@ -581,17 +581,17 @@ private boolean IsFlare(loc,e,n,Hflg) Fixed loc; PPathElt e, n; boolean Hflg; {
   return TRUE;
   }
 
-private boolean IsTopSegOfVal(loc, top, bot) Fixed loc, top, bot; {
+static boolean IsTopSegOfVal(loc, top, bot) Fixed loc, top, bot; {
   Fixed d1, d2, abstmp;
   d1 = top-loc; d2 = bot-loc;
   return (ac_abs(d1) <= ac_abs(d2))? TRUE : FALSE;
   }
 
-private procedure RemFlareLnk(e, hFlg, rm, e2, i)
+static void RemFlareLnk(e, hFlg, rm, e2, i)
   PPathElt e, e2; boolean hFlg; PSegLnkLst rm; integer i; {
   RemLnk(e,hFlg,rm); if (showClrInfo) ReportRemFlare(e,e2,hFlg,i); }
 
-public boolean CompareValues(val1,val2,factor,ghstshift)
+boolean CompareValues(val1,val2,factor,ghstshift)
   register PClrVal val1, val2; integer factor, ghstshift; {
   register Fixed v1 = val1->vVal, v2 = val2->vVal, mx;
   mx = v1 > v2 ? v1 : v2; mx <<= 1;
@@ -610,7 +610,7 @@ public boolean CompareValues(val1,val2,factor,ghstshift)
              (v1 > v2 * factor) : (v1 / factor > v2);
   }
 
-private procedure RemFlares(Hflg) boolean Hflg; {
+static void RemFlares(Hflg) boolean Hflg; {
   PSegLnkLst lst1, lst2, nxt1, nxt2;
   PPathElt e, n;
   PClrSeg seg1, seg2;
@@ -661,7 +661,7 @@ private procedure RemFlares(Hflg) boolean Hflg; {
     e = e->next; }
   }
 
-private procedure CarryIfNeed(loc,vert,clrs)
+static void CarryIfNeed(loc,vert,clrs)
   PClrVal clrs; Fixed loc; boolean vert; {
   PClrSeg seg;
   PClrVal seglnk;
@@ -700,7 +700,7 @@ private procedure CarryIfNeed(loc,vert,clrs)
   }
 
 #define PRODIST (FixInt(100)) /* DEBUG 8 BIT. Needed to double test from 50 to 100 for change in coordinate system */
-private procedure ProClrs(e,hFlg,loc)
+static void ProClrs(e,hFlg,loc)
   PPathElt e; Fixed loc; boolean hFlg; {
   PSegLnkLst lst, plst;
   PPathElt prv;
@@ -721,7 +721,7 @@ private procedure ProClrs(e,hFlg,loc)
     }
   }
 
-private procedure PromoteColors() {
+static void PromoteColors() {
   PPathElt e;
   Fixed cx, cy;
   e = pathStart;
@@ -733,7 +733,7 @@ private procedure PromoteColors() {
     }
   }
 
-private procedure RemPromotedClrs() {
+static void RemPromotedClrs() {
   PPathElt e;
   e = pathStart;
   while (e != NULL) {
@@ -743,7 +743,7 @@ private procedure RemPromotedClrs() {
     }
   }
 
-private procedure RemShortColors() {
+static void RemShortColors() {
   /* Must not change colors at a short element. */
   PPathElt e;
   Fixed cx, cy, ex, ey, abstmp;
@@ -760,7 +760,7 @@ private procedure RemShortColors() {
     }
   }
 
-public procedure AutoExtraColors(movetoNewClrs, soleol, solWhere)
+void AutoExtraColors(movetoNewClrs, soleol, solWhere)
 boolean movetoNewClrs, soleol; integer solWhere; {
     integer h, v, ph, pv;
     PPathElt e, cp, p;

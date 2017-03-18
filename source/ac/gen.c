@@ -4,14 +4,14 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 #include "bftoac.h"
 
-extern procedure ReportRemVSeg(Fixed from, Fixed to, Fixed loc);
-extern procedure ReportRemHSeg(Fixed from, Fixed to, Fixed loc);
+extern void ReportRemVSeg(Fixed from, Fixed to, Fixed loc);
+extern void ReportRemHSeg(Fixed from, Fixed to, Fixed loc);
 
 
-private PSegLnkLst Hlnks, Vlnks;
-private integer cpFrom, cpTo;
+static PSegLnkLst Hlnks, Vlnks;
+static integer cpFrom, cpTo;
 
-public procedure InitGen(reason) integer reason; {
+void InitGen(reason) integer reason; {
 	integer i;
 	switch (reason) {
 		case STARTUP: case RESTART:
@@ -20,7 +20,7 @@ public procedure InitGen(reason) integer reason; {
     }
 }
 
-private procedure LinkSegment(e, Hflg, seg)
+static void LinkSegment(e, Hflg, seg)
 PPathElt e; boolean Hflg; PClrSeg seg; {
 	PSegLnk newlnk;
 	PSegLnkLst newlst, globlst;
@@ -38,7 +38,7 @@ PPathElt e; boolean Hflg; PClrSeg seg; {
 		globlst->next = Vlnks; Vlnks = globlst; }
 }
 
-private procedure CopySegmentLink(e1, e2, Hflg)
+static void CopySegmentLink(e1, e2, Hflg)
 PPathElt e1, e2; boolean Hflg; {
 	/* copy reference to first link from e1 to e2 */
 	PSegLnkLst newlst;
@@ -49,7 +49,7 @@ PPathElt e1, e2; boolean Hflg; {
 		newlst->lnk = e1->Vs->lnk; newlst->next = e2->Vs; e2->Vs = newlst; }
 }
 
-private procedure AddSegment(from,to,loc,lftLstNm,rghtLstNm,e1,e2,Hflg,typ)
+static void AddSegment(from,to,loc,lftLstNm,rghtLstNm,e1,e2,Hflg,typ)
 Fixed from, to, loc; integer lftLstNm, rghtLstNm;
 PPathElt e1, e2; boolean Hflg; integer typ; {
 	PClrSeg seg, segList, prevSeg;
@@ -84,18 +84,18 @@ PPathElt e1, e2; boolean Hflg; integer typ; {
 		prevSeg = segList; segList = segList->sNxt; }
 }
 
-public procedure AddVSegment(from,to,loc,p1,p2,typ,i) 
+void AddVSegment(from,to,loc,p1,p2,typ,i) 
 Fixed from, to, loc; PPathElt p1, p2; integer typ, i; {
  	if (DEBUG) ReportAddVSeg(from, to, loc, i);
 	if (YgoesUp) AddSegment(from,to,loc,0,1,p1,p2,FALSE,typ);
 	else AddSegment(from,to,loc,1,0,p1,p2,FALSE,typ); }
 
-public procedure AddHSegment(from,to,loc,p1,p2,typ,i)
+void AddHSegment(from,to,loc,p1,p2,typ,i)
 Fixed from, to, loc; PPathElt p1, p2; integer typ, i; {
 	if (DEBUG) ReportAddHSeg(from, to, loc, i);
 	AddSegment(from,to,loc,2,3,p1,p2,TRUE,typ); }
 
-private Fixed CPFrom(cp2,cp3) Fixed cp2,cp3; {
+static Fixed CPFrom(cp2,cp3) Fixed cp2,cp3; {
     Fixed val = 2*(((cp3-cp2)*cpFrom)/200L);  /*DEBUG 8 BIT: hack to get same rounding as old version */
     val += cp2;
 
@@ -103,14 +103,14 @@ private Fixed CPFrom(cp2,cp3) Fixed cp2,cp3; {
 	return val; /* DEBUG 8 BIT to match results with 7 bit fractions */
 }
 
-private Fixed CPTo(cp0,cp1) Fixed cp0,cp1; {
+static Fixed CPTo(cp0,cp1) Fixed cp0,cp1; {
     Fixed val = 2*(((cp1-cp0)*cpTo)/200L); /*DEBUG 8 BIT: hack to get same rounding as old version */
     val += cp0;
     DEBUG_ROUND(val)
 	return val; /* DEBUG 8 BIT to match results with 7 bit fractions */
 }
 
-private boolean TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
+static boolean TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
 	/* return true if bend angle is sharp enough (135 degrees or less) */
 	real dx1, dy1, dx2, dy2, dotprod, lensqprod;
 	acfixtopflt(x1-x0, &dx1);
@@ -125,7 +125,7 @@ private boolean TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
 #define TestTan(d1,d2) (abs(d1) > (abs(d2)*bendTan)/1000L)
 #define FRound(x) FTrunc(FRnd(x))
 
-private boolean IsCCW(x0,y0,x1,y1,x2,y2)
+static boolean IsCCW(x0,y0,x1,y1,x2,y2)
 Fixed x0, y0, x1, y1, x2, y2; {
     /* returns true if (x0,y0) -> (x1,y1) -> (x2,y2) is counter clockwise
 	 in character space */
@@ -138,7 +138,7 @@ Fixed x0, y0, x1, y1, x2, y2; {
 	return ccw;
 }
 
-private procedure DoHBendsNxt(x0,y0,x1,y1,p)
+static void DoHBendsNxt(x0,y0,x1,y1,p)
 Fixed x0, y0, x1, y1; PPathElt p; {
 	Fixed x2, y2, delta, strt, end, x3, y3;
 	boolean ysame, ccw, above, doboth;
@@ -168,7 +168,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 		 }
 }
 
-private procedure DoHBendsPrv(x0,y0,x1,y1,p)
+static void DoHBendsPrv(x0,y0,x1,y1,p)
 Fixed x0, y0, x1, y1; PPathElt p; {
 	Fixed x2, y2, delta, strt, end;
 	boolean ysame, ccw, above, doboth;
@@ -197,7 +197,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 		 }
 }
 
-private procedure DoVBendsNxt(x0,y0,x1,y1,p)
+static void DoVBendsNxt(x0,y0,x1,y1,p)
 Fixed x0, y0, x1, y1; PPathElt p; {
 	Fixed x2, y2, delta, strt, end, x3, y3;
 	boolean xsame, ccw, right, doboth;
@@ -227,7 +227,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 		 }
 }
 
-private procedure DoVBendsPrv(x0,y0,x1,y1,p)
+static void DoVBendsPrv(x0,y0,x1,y1,p)
 Fixed x0, y0, x1, y1; PPathElt p; {
 	Fixed x2, y2, delta, strt, end;
 	boolean xsame, ccw, right, doboth;
@@ -256,7 +256,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 		 }
 }
 
-private procedure MergeLnkSegs(seg1, seg2, lst)
+static void MergeLnkSegs(seg1, seg2, lst)
 PSegLnkLst lst; PClrSeg seg1, seg2; {
 	/* replace lnk refs to seg1 by seg2 */
 	PSegLnk lnk;
@@ -266,15 +266,15 @@ PSegLnkLst lst; PClrSeg seg1, seg2; {
 		lst = lst->next; }
 }
 
-private procedure MergeHSegs(seg1, seg2) PClrSeg seg1, seg2; {
+static void MergeHSegs(seg1, seg2) PClrSeg seg1, seg2; {
 	MergeLnkSegs(seg1, seg2, Hlnks);
 }
 
-private procedure MergeVSegs(seg1, seg2) PClrSeg seg1, seg2; {
+static void MergeVSegs(seg1, seg2) PClrSeg seg1, seg2; {
 	MergeLnkSegs(seg1, seg2, Vlnks);
 }
 
-private procedure ReportRemSeg(l, lst) integer l; PClrSeg lst; {
+static void ReportRemSeg(l, lst) integer l; PClrSeg lst; {
 	Fixed from, to, loc;
 	/* this assumes !YgoesUp */
 	switch (l) {
@@ -289,7 +289,7 @@ private procedure ReportRemSeg(l, lst) integer l; PClrSeg lst; {
 }
 
 /* Filters out bogus bend segments. */
-private procedure RemExtraBends(l0, l1) integer l0, l1;
+static void RemExtraBends(l0, l1) integer l0, l1;
 {
 	register PClrSeg lst0, lst, n, p;
 	PClrSeg nxt, prv;
@@ -329,8 +329,8 @@ private procedure RemExtraBends(l0, l1) integer l0, l1;
     }
 }
 
-private procedure CompactList(i,nm)
-integer i; procedure (*nm)(); {
+static void CompactList(i,nm)
+integer i; void (*nm)(); {
 	PClrSeg lst, prv, nxtprv, nxt;
 	Fixed lstmin, lstmax, nxtmin, nxtmax;
 	boolean flg;
@@ -366,7 +366,7 @@ integer i; procedure (*nm)(); {
     }
 }
 
-private Fixed PickVSpot(x0,y0,x1,y1,px1,py1,px2,py2,prvx,prvy,nxtx,nxty)
+static Fixed PickVSpot(x0,y0,x1,y1,px1,py1,px2,py2,prvx,prvy,nxtx,nxty)
 Fixed x0,y0,x1,y1,px1,py1,px2,py2,prvx,prvy,nxtx,nxty; {
 	register Fixed a1, a2;
 	if (x0 == px1 && x1 != px2) return x0;
@@ -387,7 +387,7 @@ Fixed x0,y0,x1,y1,px1,py1,px2,py2,prvx,prvy,nxtx,nxty; {
 	return FixHalfMul(x0 + x1);
 }
 
-private Fixed AdjDist(d,q) Fixed d,q; {
+static Fixed AdjDist(d,q) Fixed d,q; {
 	Fixed val;
 	if (q == FixOne)
     {
@@ -402,30 +402,30 @@ private Fixed AdjDist(d,q) Fixed d,q; {
 /* serifs of ITCGaramond Ultra have points that are not quite horizontal 
  e.g., in H: (53,51)(74,52)(116,54) 
  the following was added to let these through */
-private boolean TstFlat(dmn,dmx) Fixed dmn, dmx; {
+static boolean TstFlat(dmn,dmx) Fixed dmn, dmx; {
 	if (dmn < 0) dmn = -dmn; if (dmx < 0) dmx = -dmx;
 	return (dmx >= PSDist(50) && dmn <= PSDist(4));
 }
 
-private boolean NxtHorz(x,y,p) Fixed x,y; PPathElt p; {
+static boolean NxtHorz(x,y,p) Fixed x,y; PPathElt p; {
 	Fixed x2, y2, x3, y3;
 	p = NxtForBend(p,&x2,&y2,&x3,&y3);
 	return TstFlat(y2-y,x2-x);
 }
 
-private boolean PrvHorz(x,y,p) Fixed x,y; PPathElt p; {
+static boolean PrvHorz(x,y,p) Fixed x,y; PPathElt p; {
 	Fixed x2, y2;
 	p = PrvForBend(p,&x2,&y2);
 	return TstFlat(y2-y,x2-x);
 }
 
-private boolean NxtVert(x,y,p) Fixed x,y; PPathElt p; {
+static boolean NxtVert(x,y,p) Fixed x,y; PPathElt p; {
 	Fixed x2, y2, x3, y3;
 	p = NxtForBend(p,&x2,&y2,&x3,&y3);
 	return TstFlat(x2-x,y2-y);
 }
 
-private boolean PrvVert(x,y,p) Fixed x,y; PPathElt p; {
+static boolean PrvVert(x,y,p) Fixed x,y; PPathElt p; {
 	Fixed x2, y2;
 	p = PrvForBend(p,&x2,&y2);
 	return TstFlat(x2-x,y2-y);
@@ -434,14 +434,14 @@ private boolean PrvVert(x,y,p) Fixed x,y; PPathElt p; {
 /* PrvSameDir and NxtSameDir were added to check the direction of a
  path and not add a band if the point is not at an extreme and is
  going in the same direction as the previous path. */  
-private boolean TstSameDir(x0,y0,x1,y1,x2,y2)
+static boolean TstSameDir(x0,y0,x1,y1,x2,y2)
 Fixed x0, y0, x1, y1, x2, y2; {
 	if (ProdLt0(y0-y1,y1-y2) || ProdLt0(x0-x1,x1-x2))
 		return FALSE;
 	return !TestBend(x0,y0,x1,y1,x2,y2);
 }
 
-private boolean PrvSameDir(x0,y0,x1,y1,p)
+static boolean PrvSameDir(x0,y0,x1,y1,p)
 Fixed x0,y0,x1,y1; PPathElt p; {
 	Fixed x2, y2;
 	p = PrvForBend(p,&x2,&y2);
@@ -450,7 +450,7 @@ Fixed x0,y0,x1,y1; PPathElt p; {
 	return TstSameDir(x0,y0,x1,y1,x2,y2);
 }
 
-private boolean NxtSameDir(x0,y0,x1,y1,p)
+static boolean NxtSameDir(x0,y0,x1,y1,p)
 Fixed x0,y0,x1,y1; PPathElt p; {
 	Fixed x2, y2, x3, y3;
 	p = NxtForBend(p,&x2,&y2,&x3,&y3);
@@ -459,7 +459,7 @@ Fixed x0,y0,x1,y1; PPathElt p; {
 	return TstSameDir(x0,y0,x1,y1,x2,y2);
 }
 
-public procedure GenVPts(specialCharType) integer specialCharType; {
+void GenVPts(specialCharType) integer specialCharType; {
 	/* specialCharType 1 = upper; -1 = lower; 0 = neither */
 	PPathElt p, fl;
 	boolean isVert, flex1, flex2;
@@ -597,7 +597,7 @@ public procedure GenVPts(specialCharType) integer specialCharType; {
 	rightList = segLists[1];
 }
 
-public boolean InBlueBand(loc,n,p) Fixed loc; register Fixed *p; integer n; {
+boolean InBlueBand(loc,n,p) Fixed loc; register Fixed *p; integer n; {
 	register int i;
 	register Fixed y;
 	if (n <= 0) return FALSE;
@@ -610,7 +610,7 @@ public boolean InBlueBand(loc,n,p) Fixed loc; register Fixed *p; integer n; {
 			(p[i+1]+bluefuzz) >= y) return TRUE;
 	return FALSE; }
 
-private Fixed PickHSpot(x0,y0,x1,y1,xdist,px1,py1,px2,py2,prvx,prvy,nxtx,nxty)
+static Fixed PickHSpot(x0,y0,x1,y1,xdist,px1,py1,px2,py2,prvx,prvy,nxtx,nxty)
 Fixed x0,y0,x1,y1,xdist,px1,py1,px2,py2,prvx,prvy,nxtx,nxty; {
 	boolean topSeg = (xdist < 0L)? TRUE : FALSE;
 	Fixed upper, lower;
@@ -644,7 +644,7 @@ Fixed x0,y0,x1,y1,xdist,px1,py1,px2,py2,prvx,prvy,nxtx,nxty; {
 	return FixHalfMul(y0 + y1);
 }
 
-public procedure GenHPts() {
+void GenHPts() {
 	PPathElt p, fl;
 	boolean isHoriz, flex1, flex2;
 	Fixed flx0, fly0, llx, lly, urx, ury, xavg, xend, xdist, q, q2;
@@ -780,7 +780,7 @@ public procedure GenHPts() {
 	CheckTfmVal(botList, botBands, lenBotBands);
 }
 
-public procedure PreGenPts() {
+void PreGenPts() {
 	Hlnks = Vlnks = NULL;
 	segLists[0] = NULL; segLists[1] = NULL;
 	segLists[2] = NULL; segLists[3] = NULL;
