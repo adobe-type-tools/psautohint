@@ -11,6 +11,11 @@ os:
   - linux
   - osx
 
+matrix:
+  allow_failures:
+    - os: linux
+      compiler: clang
+
 addons:
   apt:
     packages:
