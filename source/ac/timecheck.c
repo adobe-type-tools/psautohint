@@ -131,15 +131,9 @@ private boolean compareCvtTimes(char *inputDir, boolean release, tConvertfunc co
  */
 private void freeFileTimes(void)
 {
-#if DOMEMCHECK
-	memck_free(oldFileTimes);
-	memck_free(newFileTimes);
-	memck_free(nameBuf);
-#else
 	ACFREEMEM(oldFileTimes);
 	ACFREEMEM(newFileTimes);
 	ACFREEMEM(nameBuf);
-#endif
 	oldFileTimes = newFileTimes = NULL;
 	oldFileCnt = newFileCnt = bufSize = 0;
 	nextFree = (char*)MAXCHARNAME;
@@ -272,11 +266,7 @@ private void readInputDir(const char *dirName,
 		  }
 
 		newFileCnt = p - newFileTimes;	/* Actual number of valid files */
-#if DOMEMCHECK
-		memck_free(nameList);
-#else
 		ACFREEMEM(nameList);
-#endif
 	}
 #endif
 }
@@ -286,13 +276,9 @@ private void readInputDir(const char *dirName,
 private char* allocate(int n, int size)
 {
 #if IS_LIB
-#if DOMEMCHECK
-	char *p = (char *)memck_calloc(n, size);
-#else
 	char *p = (char *)ACNEWMEM(n * size);
 	if (NULL != p)
 		memset((void *)p, 0x0, n * size);
-#endif
 #else
 	char* p = (char *)calloc(n,size);
 #endif	
@@ -318,17 +304,10 @@ private short storeName(const char *name)
 		/* Not enough space so (re)allocate it */
 		
 		bufSize += BUF_INCR;
-#if DOMEMCHECK
-		if (nameBuf)
-			nameBuf = memck_realloc(nameBuf, bufSize);
-		else
-			nameBuf = memck_malloc(bufSize);
-#else
 		if (nameBuf)
 			nameBuf = ACREALLOCMEM(nameBuf, bufSize);
 		else
 			nameBuf = ACNEWMEM(bufSize);
-#endif
 		if (!nameBuf) {
 			sprintf(globmsg, "Can't allocate space for file names.\n");
 			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
@@ -692,11 +671,7 @@ error: /* Just tidy up and return. Yes I've used a goto! I think this is
 		* one of the few legitimate uses.
 		*/
 	fclose(fp);
-#if DOMEMCHECK
-	memck_free(oldFileTimes);
-#else
 	UnallocateMem(oldFileTimes);
-#endif
 	oldFileCnt = 0;
 	return FALSE;
 #endif

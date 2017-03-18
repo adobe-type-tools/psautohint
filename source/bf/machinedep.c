@@ -468,19 +468,11 @@ char *baseFontPath;
   for (oldsp = startpath; startpath < oldsp + length; startpath++)
     if (*startpath == *Delimiter)
       *startpath = *Delimiter;
-#if DOMEMCHECK
-	startpath = memck_malloc((strlen(newpath) + length + 1) * sizeof(char));
-#else
   startpath = AllocateMem(((unsigned int)strlen(newpath)) + length + 1, sizeof(char),
     "return string for CheckBFPath");
-#endif
   strcpy (startpath, newpath);
   strcat(startpath, oldsp);
-#if DOMEMCHECK
-		memck_free(baseFontPath);
-#else
 		UnallocateMem(baseFontPath);
-#endif
   return startpath;
 }
 
@@ -662,11 +654,7 @@ int BFscandir(char* dirName, struct direct ***nameList, includeFile IncludeFile,
 	struct direct dp;
 	char * searchstring;
 
-#if DOMEMCHECK
-	searchstring=(char*) memck_malloc((6+strlen(dirName)) * sizeof(char));
-#else
 	searchstring=(char*) AllocateMem(6+((unsigned int)strlen(dirName)), sizeof(char), "scandir dirname");
-#endif
 	strcpy(searchstring, ".\\");
 	strcat(searchstring, dirName);
 	if(searchstring[strlen(searchstring)-1]=='\\')
@@ -688,18 +676,10 @@ int BFscandir(char* dirName, struct direct ***nameList, includeFile IncludeFile,
 	if(count>0)
 	{
 		int i;
-#if DOMEMCHECK
-		*nameList = (struct direct **) memck_malloc(count * sizeof(struct direct *));
-#else
 		*nameList = (struct direct **) AllocateMem(count, sizeof(struct direct *), "scandir namelist");
-#endif
 		for (i = 0 ; i<count; i++)
 		{
-#if DOMEMCHECK
-			(*nameList)[i]=(struct direct *) memck_malloc(sizeof(struct direct));
-#else
 			(*nameList)[i]=(struct direct *) AllocateMem(1, sizeof(struct direct), "scandir direct");
-#endif
 		}
 	}
 	count=0;

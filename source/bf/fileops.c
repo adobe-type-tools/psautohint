@@ -32,8 +32,6 @@ extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;
 extern void *AC_memmanageCtxPtr;
 #endif
 
-#include "memcheck.h"
-
 
 typedef struct
    {
@@ -110,11 +108,7 @@ char **buffer, *filename;
     fprintf(stderr,"Calling realloc: %ld vs %ld\n", filelen, MaxBytes); fflush(stderr);
 #endif
     MaxBytes = filelen + 5;
-#if DOMEMCHECK
-	*buffer = (char *)memck_realloc(*buffer, (MaxBytes * sizeof(char)));
-#else
     *buffer = (char *)ReallocateMem(*buffer, (unsigned)(MaxBytes * sizeof(char)), "file buffer");
-#endif
   }
   return filelen;
 }
@@ -261,11 +255,7 @@ void
 SetSubsetName(char *name)
    {
    strcpy(subsetname, name);
-#if DOMEMCHECK
-   subsetdata =(SubsetData *)memck_malloc(INCREMENT * sizeof(SubsetData));
-#else
    subsetdata =(SubsetData *)AllocateMem(INCREMENT, sizeof(SubsetData), "SetSubsetName");
-#endif
    usesSubset = TRUE;
    }
 
@@ -302,12 +292,8 @@ LoadSubsetData(void)
       if (++allocated >= allocation)
          {
          allocation += INCREMENT;
-#if DOMEMCHECK
-		 subsetdata = (SubsetData *)memck_realloc(subsetdata, (allocation*sizeof(SubsetData)));
-#else
          subsetdata = (SubsetData *)ReallocateMem((char *)subsetdata,
                allocation*sizeof(SubsetData), "LoadSubsetData");
-#endif
          }
       }
 
@@ -397,11 +383,7 @@ setcharsetname(boolean release, char *csname, char *baseFontPath)
          sprintf(subsetPath, "%s%s%s", charsetDir, delimit, subsetname);
       }
    
-#if DOMEMCHECK
-	memck_free(filename);
-#else
    UnallocateMem(filename);
-#endif
    PathNameLenOK(charsetname);
    strcpy(csname, charsetname);
    strcpy(charsetPath, charsetname);
@@ -431,12 +413,8 @@ extern char *GetFItoAFMCharSetName()
   
   if (strlen(charsetDir) == 0)
     return NULL; 
-#if DOMEMCHECK
-  filename = memck_malloc((strlen(charsetDir) + strlen(AFMCHARSETTABLE) + 2) * sizeof(char));
-#else
   filename = AllocateMem((unsigned int)(strlen(charsetDir) + strlen(AFMCHARSETTABLE) + 2),
     sizeof(char), "AFM charset filename");
-#endif
   get_filename(filename, charsetDir, AFMCHARSETTABLE);
   return filename;
 }

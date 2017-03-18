@@ -31,11 +31,7 @@ private procedure GetKeyValue(keyword, optional, value)
   if ((fontinfostr != NULL) && (fontinfostr[0] != 0))
   {
     *value = atol(fontinfostr);
-#if DOMEMCHECK
-	memck_free(fontinfostr);
-#else
    ACFREEMEM(fontinfostr);
-#endif
   }
   return;
 }
@@ -51,11 +47,7 @@ private procedure GetKeyFixedValue(char* keyword, boolean optional, Fixed *value
   {
 	sscanf(fontinfostr, "%g", &tempValue);
  	*value = (Fixed)tempValue*(1<< FixShift);
-	#if DOMEMCHECK
-	memck_free(fontinfostr);
-#else
    ACFREEMEM(fontinfostr);
-#endif
   }
   return;
 }
@@ -135,19 +127,11 @@ public boolean ReadFontInfo() {
   fontinfostr = GetFntInfo("FlexOK", !ORDINARYCOLORING);
   flexOK = (fontinfostr != NULL) && (fontinfostr[0]!='\0') && strcmp(fontinfostr, "false");
 
-#if DOMEMCHECK
-	memck_free(fontinfostr);
-#else
    ACFREEMEM(fontinfostr);
-#endif
   fontinfostr = GetFntInfo("FlexStrict", TRUE);
 if (fontinfostr != NULL) 
   flexStrict = strcmp(fontinfostr, "false");
-#if DOMEMCHECK
-	memck_free(fontinfostr);
-#else
    ACFREEMEM(fontinfostr);
-#endif
 
  	/* get bluefuzz. It is already set to its default value in ac.c::InitData().
 	GetKeyFixedValue does nto change the value if it is not present in fontinfo.  */
@@ -157,20 +141,12 @@ if (fontinfostr != NULL)
   if ((fontinfostr = GetFntInfo("VCounterChars", ACOPTIONAL)) != NULL)
   {
     NumVColors = AddCounterColorChars(fontinfostr, VColorList);
-#if DOMEMCHECK
-	memck_free(fontinfostr);
-#else
    ACFREEMEM(fontinfostr);
-#endif
   };
   if ((fontinfostr = GetFntInfo("HCounterChars", ACOPTIONAL)) != NULL)
   {
     NumHColors = AddCounterColorChars(fontinfostr, HColorList);
-#if DOMEMCHECK
-	memck_free(fontinfostr);
-#else
    ACFREEMEM(fontinfostr);
-#endif
   };
   GetKeyValue("AscenderHeight", ACOPTIONAL, &AscenderHeight);
   GetKeyValue("AscenderOvershoot", ACOPTIONAL, &AscenderOvershoot);

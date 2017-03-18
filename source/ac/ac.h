@@ -9,10 +9,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac_C_lib.h"
 #include "buildfont.h"
 
-#if DOMEMCHECK
-#include "memcheck.h"
-#endif
-
 
 /* widely used definitions */
 

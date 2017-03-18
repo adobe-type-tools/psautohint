@@ -59,18 +59,10 @@ static void FreeFontInfoArray(void)
 	{
 		if (featurefiledata[i].value[0])
 		{
-#if DOMEMCHECK
-			memck_free(featurefiledata[i].value);
-#else
 			ACFREEMEM(featurefiledata[i].value);
-#endif
 		}
 	}
-#if DOMEMCHECK
-	memck_free(featurefiledata);
-#else
 	ACFREEMEM(featurefiledata);
-#endif
 	
 }
 static int ParseFontInfo(const char *fontinfo)
@@ -79,11 +71,7 @@ static int ParseFontInfo(const char *fontinfo)
 	int i;
 
 	featurefilesize=34;
-#if DOMEMCHECK
-	featurefiledata= ( FFEntry *) memck_malloc(featurefilesize*sizeof(FFEntry));
-#else
 	featurefiledata= ( FFEntry *) ACNEWMEM(featurefilesize*sizeof(FFEntry));
-#endif	
 	featurefiledata[0].key="OrigEmSqUnits";
 	featurefiledata[1].key="FontName";
 	featurefiledata[2].key="FlexOK";
@@ -160,11 +148,7 @@ static int ParseFontInfo(const char *fontinfo)
 			size_t matchLen = MAX(kwLen, strlen(featurefiledata[i].key));
 			if(!strncmp(featurefiledata[i].key, kwstart, matchLen))
 			{
-#if DOMEMCHECK
-				featurefiledata[i].value=(char *)memck_malloc(current-tkstart+1);
-#else
 				featurefiledata[i].value=(char *)ACNEWMEM( current-tkstart+1 );
-#endif
 				if (!featurefiledata[i].value)
 					return AC_MemoryError;
 				strncpy(featurefiledata[i].value, tkstart, current-tkstart);
@@ -175,21 +159,13 @@ static int ParseFontInfo(const char *fontinfo)
 		if (i==featurefilesize)
 		{
 			char *temp;
-#if DOMEMCHECK
-			temp=(char*)memck_malloc(tkstart-kwstart+1);
-#else
 			temp=(char*)ACNEWMEM(tkstart-kwstart+1);
-#endif
 			if(!temp)
 				return AC_MemoryError;
 			strncpy(temp, kwstart, tkstart-kwstart);
 			temp[tkstart-kwstart]='\0';
 			/*fprintf(stderr, "Ignoring fileinfo %s...\n", temp);*/
-#if DOMEMCHECK
-			memck_free(temp);
-#else
 			ACFREEMEM(temp);
-#endif
 		}
 		skipblanks();
 	}
@@ -278,20 +254,12 @@ ACLIB_API int  AutoColorString(const char *srcbezdata, const char *fontinfo, cha
 		{
 			strncpy(dstbezdata, bezoutput, bezoutputactual+1);
 			*length=bezoutputactual+1;
-#if DOMEMCHECK
-			memck_free(bezoutput);
-#else
 			ACFREEMEM(bezoutput);
-#endif
 			bezoutputalloc=0;
 			return AC_Success;
 		}else{
 			*length=bezoutputactual+1;
-#if DOMEMCHECK
-			memck_free(bezoutput);
-#else
 			ACFREEMEM(bezoutput);
-#endif
 			bezoutputalloc=0;
 			return AC_DestBuffOfloError;
 		}
@@ -301,11 +269,7 @@ ACLIB_API int  AutoColorString(const char *srcbezdata, const char *fontinfo, cha
 	
 	bezoutputalloc=*length;
 	bezoutputactual=0;
-#if DOMEMCHECK
-	bezoutput=(char*)memck_malloc(bezoutputalloc);
-#else
 	bezoutput=(char*)ACNEWMEM(bezoutputalloc);
-#endif
 	if(!bezoutput)
 	{
 		FreeFontInfoArray();

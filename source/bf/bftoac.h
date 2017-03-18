@@ -8,8 +8,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef BFTOAC_H
 #define BFTOAC_H
 
-#include "memcheck.h"
-
 extern boolean AutoColor(boolean, boolean, boolean, boolean, boolean, short, char *[], boolean, boolean, boolean, boolean);
 
 extern boolean CreateACTimes (void);

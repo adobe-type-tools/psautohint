@@ -465,11 +465,7 @@ static int maxnumwidths = 0;
 static void init_widthsarray(void)
 {
 	if (widthsarray != NULL) {
-#if DOMEMCHECK
-		memck_free(widthsarray);
-#else
 		ACFREEMEM(widthsarray);
-#endif
 		widthsarray = NULL;
 	}
 	widthsarray = (WidthElt *)calloc(WIDTHINCR + 1, sizeof(WidthElt));

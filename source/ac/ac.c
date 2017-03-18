@@ -74,19 +74,11 @@ private void * defaultAC_memmanage(void *ctxptr, void *old, unsigned long size)
 		{
 		if (NULL == old)
 			{
-#if DOMEMCHECK
-			return memck_malloc((size_t)size);
-#else
 			return malloc((size_t)size);
-#endif
 			}
 		else
 			{
-#if DOMEMCHECK
-			return memck_realloc(old, (size_t)size);
-#else
 			return realloc(old, (size_t)size);
-#endif
 			}
 		}
 	else
@@ -95,11 +87,7 @@ private void * defaultAC_memmanage(void *ctxptr, void *old, unsigned long size)
 			return NULL;
 		else
 			{
-#if DOMEMCHECK
-			memck_free(old);
-#else
 			free(old);
-#endif
 			return NULL;
 			}
 		}
@@ -198,11 +186,7 @@ public procedure InitData(integer reason)
         SetFntInfoFileName (SCALEDHINTSINFO);
         s = GetFntInfo("OrigEmSqUnits", MANDATORY);
         sscanf(s, "%g", &origEmSquare);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		ACFREEMEM(s);
-#endif
         bluefuzz = (Fixed) (origEmSquare / 2000.0); /* .5 pixel */
       }
       else 

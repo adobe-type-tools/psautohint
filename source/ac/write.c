@@ -45,11 +45,7 @@ static long WriteString(char *str) {
 	if (bezoutput) {
 		if ((bezoutputactual + (int)strlen(str)) >= bezoutputalloc) {
 			int desiredsize = MAX(bezoutputalloc * 2, (bezoutputalloc + (int)strlen(str)));
-#if DOMEMCHECK
-			bezoutput = (char *)memck_realloc(bezoutput, desiredsize);
-#else
 			bezoutput = (char *)ACREALLOCMEM(bezoutput, desiredsize);
-#endif
 			if (bezoutput) {
 				bezoutputalloc = desiredsize;
 			}

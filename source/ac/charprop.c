@@ -91,11 +91,7 @@ char *charlist, *ColorList[];
       break;
     }
     length = (short)strlen(token);
-#if DOMEMCHECK
-	ColorList[ListEntries] = memck_malloc(length+1);
-#else
     ColorList[ListEntries] = AllocateMem(1, length+1, "counter hints list");
-#endif
     strcpy(ColorList[ListEntries++], token);
   }
   return (ListEntries - COUNTERDEFAULTENTRIES);

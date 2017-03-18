@@ -131,12 +131,8 @@ static void WriteToBuffer()
     if ((byteCount + len) > buffSize)
     {
         buffSize += GROWBUFF;
-#if DOMEMCHECK
-        startbuff = (char *)memck_realloc(*outbuff, (buffSize * sizeof(char)));
-#else
         startbuff = (char *)ReallocateMem(*outbuff,
                                           (unsigned)(buffSize * sizeof(char)), "file buffer");
-#endif
         SetMaxBytes(buffSize);
         *outbuff = startbuff;
         startbuff += byteCount;
@@ -325,23 +321,14 @@ indx startix, stopix;
                 while (hintElt != NULL)
                 {
                     next = hintElt->next;
-#if DOMEMCHECK
-                    memck_free(hintElt);
-#else
                     UnallocateMem(hintElt);
-#endif
                     hintElt = next;
                 }
             }
         }
 #endif
-#if DOMEMCHECK
-        memck_free(pathlist[j].mainhints);
-        memck_free(pathlist[j].path);
-#else
         UnallocateMem(pathlist[j].mainhints);
         UnallocateMem(pathlist[j].path);
-#endif
     }
 }
 
@@ -686,14 +673,10 @@ static boolean CompareCharPaths(char *filename, boolean fortransitionals)
     totalPathElt = minPathLen = MAXINT;
     if (pathlist == NULL)
 	{
-#if DOMEMCHECK
-        pathlist = (PPathList)memck_malloc(MAXDESIGNS * sizeof(PathList));
-#else
         pathlist = (PPathList) AllocateMem(
                                            (unsigned int) MAXDESIGNS /*dirCount*/,
                                            sizeof(PathList),
                                            "character path list");
-#endif
 	}
     
     for (dirix = 0; dirix < dirCount; dirix++)
@@ -1149,11 +1132,7 @@ static void InsertHint(PHintElt currHintElt, indx pathEltIx,
     {
         if (ix == hintsdirIx)
             continue;
-#if DOMEMCHECK
-        newEntry = (PHintElt) memck_malloc (sizeof(HintElt));
-#else
         newEntry = (PHintElt) AllocateMem (1, sizeof(HintElt), "hint element");
-#endif
         newEntry->type = hinttype;
         hintElt =
         (pathEltIx == MAINHINTS ? &pathlist[ix].mainhints : &pathlist[ix].path[pathEltIx].hints);
@@ -1670,11 +1649,7 @@ indx eltix;
     indx ix, j, opix, startix;
     short opcount, subrIx, length;
     
-#if DOMEMCHECK
-    refPtArray = (Cd *) memck_malloc (dirCount * sizeof(Cd));
-#else
     refPtArray = (Cd *) AllocateMem (dirCount, sizeof(Cd), "reference point array");
-#endif
     for (ix = 0; ix < dirCount; ix++)
     {
         refPtArray[ix].x = (vert ? pathlist[ix].path[eltix].x : pathlist[ix].path[eltix].x3);
@@ -1773,11 +1748,7 @@ indx eltix;
     } /* end of j for loop */
     WriteStr("0 subr\n");
     flexexists = TRUE;
-#if DOMEMCHECK
-    memck_free (refPtArray);
-#else
     UnallocateMem (refPtArray);
-#endif
     
 #endif /* AC_C_LIB */
 }
@@ -1793,11 +1764,7 @@ indx pathEltIx;
     
     /* hintArray contains the pointers to the beginning of the linked list of hints for
      each design at pathEltIx. */
-#if DOMEMCHECK
-    hintArray = (PHintElt *) memck_malloc(dirCount * sizeof(HintElt *));
-#else
     hintArray = (PHintElt *) AllocateMem(dirCount, sizeof(HintElt *), "hint element array");
-#endif
     /* Initialize hint array. */
     for (ix = 0; ix < dirCount; ix++)
         hintArray[ix] =
@@ -1904,11 +1871,7 @@ indx pathEltIx;
     } /* end of while */
     if (pathEltIx != MAINHINTS)
         WriteStr("endsubr enc\nnewcolors\n");
-#if DOMEMCHECK
-    memck_free(hintArray);
-#else
     UnallocateMem (hintArray);
-#endif
 }
 
 

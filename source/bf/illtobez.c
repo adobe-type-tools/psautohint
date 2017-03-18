@@ -130,15 +130,9 @@ static dump_path(
 
 static  void illcleanup()
 {
-#if DOMEMCHECK
-    memck_free(widthtab);
-    memck_free(path);
-    memck_free(final_path);
-#else
     UnallocateMem(widthtab);
     UnallocateMem(path);
     UnallocateMem(final_path);
-#endif
 }
 
 static boolean initialize_widths()
@@ -150,12 +144,8 @@ static boolean initialize_widths()
     long cnt, maxChars = MAXCHARS;
     char line[MAXLINE + 1];	/* input buffer */
     
-#if DOMEMCHECK
-	widthtab = (struct char_width *) memck_malloc(maxChars * sizeof(char_width));
-#else
     widthtab = (struct char_width *) AllocateMem(maxChars, sizeof(char_width),
                                                  "width table");
-#endif
     for (ix = 0; ix < maxChars; ix++)
         widthtab[ix].width = UNINITWIDTH;
     widthcnt = dict_entries = 0;
@@ -171,12 +161,8 @@ static boolean initialize_widths()
             if (widthcnt >= maxChars)
             {
                 maxChars += 100;
-#if DOMEMCHECK
-                widthtab = (struct char_width *) memck_realloc(widthtab, (maxChars * sizeof(struct char_width)));
-#else
                 widthtab = (struct char_width *) ReallocateMem(
                                                                (char *)widthtab, (unsigned)(maxChars * sizeof(struct char_width)), "width table");
-#endif
                 for (ix = maxChars - 100; ix < maxChars; ix++)
                     widthtab[ix].width = UNINITWIDTH;
             }
@@ -1004,18 +990,10 @@ extern void set_scale(float *newscale)
     if (cnt != 1)
     {
         sprintf(globmsg, "ScalePercent line of fontinfo file invalid.\n");
-#if DOMEMCHECK
-		memck_free(fontinfostr);
-#else
 		UnallocateMem(fontinfostr);
-#endif
         LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
     }
-#if DOMEMCHECK
-    memck_free(fontinfostr);
-#else
     UnallocateMem(fontinfostr);
-#endif
     *newscale = temp / (float) 100;
 }
 
@@ -1032,14 +1010,9 @@ void convert_illfiles(boolean rel)
     set_scale(&scale);
     get_filename(tmpnm, bezdir, TEMPFILE);
     
-#if DOMEMCHECK
-    path = (struct path_element *) memck_malloc(MAXPOINTS * sizeof(path_element));
-    final_path = (struct path_element *) memck_malloc(MAXPOINTS * sizeof(path_element));
-#else
     path = (struct path_element *) AllocateMem(MAXPOINTS, sizeof(path_element),
                                                "path structure");
     final_path = (struct path_element *) AllocateMem(MAXPOINTS, sizeof(path_element), "final path structure");
-#endif
     convertedchars = 0;
 #if SUN
 	ConvertCharFiles(ILLDIR, release, scale, convert_illcharfile);

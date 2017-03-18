@@ -121,11 +121,7 @@ static boolean valueOK = TRUE;
 
 void fiptrfree(FIPTR ptr)
 {
-#if DOMEMCHECK
-	memck_free(ptr->value_string);
-#else
 	UnallocateMem(ptr->value_string);
-#endif
 }
 
 /*  Look up the keyword parameter in the table to get the index */
@@ -149,11 +145,7 @@ FILE *file;
 {
   char *line;
   char linekey[LINELEN + 1];
-#if DOMEMCHECK
-  line = memck_malloc((unsigned) LINELEN * sizeof(char));
-#else
   line = AllocateMem((unsigned) LINELEN, sizeof(char), "font info buffer");
-#endif
   while (fgets(line, LINELEN, file) != NULL)
   {
     if (sscanf(line, " %s", linekey) < 1)
@@ -161,11 +153,7 @@ FILE *file;
     if (STREQ(key, linekey))
       return (line);
   }
-#if DOMEMCHECK
-  memck_free(line);
-#else
   UnallocateMem(line);
-#endif
   return (NULL);
 }
 
@@ -179,11 +167,7 @@ static void make_error_return(short exit_status, char *error_msg1, char *error_m
   short msg3_len = (short)strlen(error_msg3);
   short msg4_len = (short)strlen(error_msg4);
 
-#if DOMEMCHECK
-  memck_free(fiptr->value_string);
-#else
   UnallocateMem(fiptr->value_string);
-#endif
   fiptr->value_string = AllocateMem((unsigned) (msg1_len + msg2_len + msg3_len
       + msg4_len + 1), sizeof(char), "fontinfo return value");
   sprintf(fiptr->value_string, "%s%s%s%s",
@@ -196,12 +180,8 @@ static void make_error_return(short exit_status, char *error_msg1, char *error_m
  * exit status. The caller should free the arg.*/
 static  void make_normal_return(char *arg, boolean arg_is_string)
 {
-#if DOMEMCHECK
-	fiptr->value_string = memck_malloc((unsigned) (strlen(arg) + 1) * sizeof(char));
-#else
   fiptr->value_string = AllocateMem((unsigned) (strlen(arg) + 1), sizeof(char),
     "fontinfo return");
-#endif
   strcpy(fiptr->value_string, arg);
   fiptr->exit_status = NORMAL_RETURN;
   fiptr->value_is_string = arg_is_string;
@@ -218,31 +198,19 @@ char *arg;
 
   if (fiptr->value_string == NULL)
   {
-#if DOMEMCHECK
-	fiptr->value_string = memck_malloc((unsigned) (strlen(arg) + 1) * sizeof(char));
-#else
     fiptr->value_string = AllocateMem((unsigned) (strlen(arg) + 1),
       sizeof(char), "fontinfo return");
-#endif
     strcpy(fiptr->value_string, arg);
   }
   else
   {
     temp = fiptr->value_string;
-#if DOMEMCHECK
-	fiptr->value_string = memck_malloc((strlen(temp) + strlen(arg) + 1) * sizeof(char));
-#else
     fiptr->value_string = AllocateMem((unsigned)
       (strlen(temp) + strlen(arg) + 1), sizeof(char),
       "fontinfo return");
-#endif
     strcat(fiptr->value_string, temp);
     strcat(fiptr->value_string, arg);
-#if DOMEMCHECK
-	memck_free(temp);
-#else
     UnallocateMem(temp);
-#endif
   }
   fiptr->exit_status = NORMAL_RETURN;
   fiptr->value_is_string = FALSE;
@@ -449,11 +417,7 @@ static char *get_middle_lines(char *beginkey, char *endkey, boolean matrix)
     }
   }
   fclose(fifile);
-#if DOMEMCHECK
-  memck_free(line);
-#else
   UnallocateMem(line);
-#endif
   return (NULL);
 }
 
@@ -475,18 +439,10 @@ char *dirpath;
     fclose(fifile);
     return (NULL);
   }
-#if DOMEMCHECK
-    lineargs = memck_malloc((unsigned) LINELEN * sizeof(char));
-#else
   lineargs = AllocateMem((unsigned) LINELEN, sizeof(char), "fontinfo buffer");
-#endif
   strcpy(lineargs, line + strindex(line, key) + strlen(key));
   fclose(fifile);
-#if DOMEMCHECK
-  memck_free(line);
-#else
   UnallocateMem(line);
-#endif
   return (lineargs);
 }
 
@@ -674,11 +630,7 @@ extern FIPTR filookup(char *keyword, boolean optional)
     
   if (fiptr->value_string != NULL)
   {
-#if DOMEMCHECK
-	memck_free(fiptr->value_string);
-#else
 	UnallocateMem(fiptr->value_string);
-#endif
   }
 
   switch (kwindex)
@@ -837,11 +789,7 @@ extern FIPTR filookup(char *keyword, boolean optional)
     break;
   }
 
-#if DOMEMCHECK
-  memck_free(fs);
-#else
   UnallocateMem(fs);
-#endif
   return (fiptr);
 }
 
@@ -877,11 +825,7 @@ extern char *GetFntInfo(char *keyword, boolean optional)
 		{
 			if(featurefiledata[i].key && !strcmp(featurefiledata[i].key, keyword))
 			{
-#if DOMEMCHECK
-				returnstring = memck_malloc((strlen(featurefiledata[i].value)+1) * sizeof(char));
-#else
 				returnstring = (char *)AllocateMem((unsigned)strlen(featurefiledata[i].value)+1, sizeof(char), "GetFntInfo return str");
-#endif
 				strcpy(returnstring, featurefiledata[i].value);
 				return returnstring;
 			}
@@ -900,42 +844,22 @@ extern char *GetFntInfo(char *keyword, boolean optional)
   switch (fptr->exit_status)
   {
   case NORMAL_RETURN:
-#if DOMEMCHECK
-	returnstring = memck_malloc((strlen(fptr->value_string) + 1) * sizeof(char));
-#else
     returnstring = AllocateMem((unsigned)strlen(fptr->value_string) + 1, sizeof(char),
       "return string for fontinfo");
-#endif
     strcpy(returnstring, fptr->value_string);
-#if DOMEMCHECK
-	memck_free(fptr->value_string);
-#else
 	UnallocateMem(fptr->value_string);
-#endif
     break;
   case OPTIONAL_NOT_FOUND:
     returnstring = NULL;
-#if DOMEMCHECK
-	memck_free(fptr->value_string);
-#else
 	UnallocateMem(fptr->value_string);
-#endif
     break;
   case ERROR_RETURN:
     sprintf(globmsg, "%s\n", fptr->value_string);
-#if DOMEMCHECK
-	memck_free(fptr->value_string);
-#else
 	UnallocateMem(fptr->value_string);
-#endif
     LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
     break;
   default:
-#if DOMEMCHECK
-	memck_free(fptr->value_string);
-#else
 	UnallocateMem(fptr->value_string);
-#endif
     LogMsg("Unknown exit status from fontinfo lookup.\n",
       LOGERROR, NONFATALERROR, TRUE);
 	break;
@@ -963,38 +887,22 @@ extern int GetFIInt(char *keyword, boolean optional)
   {
   case NORMAL_RETURN:
     sscanf(fptr->value_string, "%d", &temp);
-#if DOMEMCHECK
-	memck_free(fptr->value_string);
-#else
 	UnallocateMem(fptr->value_string);
-#endif
     return (temp);
     break;
   case OPTIONAL_NOT_FOUND:
     if (optional)
     {
-#if DOMEMCHECK
-	memck_free(fptr->value_string);
-#else
 	UnallocateMem(fptr->value_string);
-#endif
       return (MAXINT);
     }
     /* fall through intentionally */
   case ERROR_RETURN:
     sprintf(globmsg, "%s\n", fptr->value_string);
-#if DOMEMCHECK
-	memck_free(fptr->value_string);
-#else
 	UnallocateMem(fptr->value_string);
-#endif
     LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
   default:
-#if DOMEMCHECK
-	memck_free(fptr->value_string);
-#else
 	UnallocateMem(fptr->value_string);
-#endif
     LogMsg("Unknown exit status from fontinfo lookup.\n",
       LOGERROR, NONFATALERROR, TRUE);
   }
@@ -1005,11 +913,7 @@ extern int GetFIInt(char *keyword, boolean optional)
    This is to reclaim the storage allocated in GetFntInfo.  */
 extern void FreeFontInfo(char *ptr)
 {
-#if DOMEMCHECK
-	memck_free(ptr);
-#else
    UnallocateMem(ptr);
-#endif
 }
 
 /* Appends Aux{H,V}Stems which is optional to StemSnap{H,V} respectively. */
@@ -1023,27 +927,15 @@ static char *GetHVStems(char *kw, boolean optional)
   if (fistr2 == NULL) return fistr1;
   if (fistr1 == NULL) return fistr2;
   /* Merge two arrays. */
-#if DOMEMCHECK
-newfistr = memck_malloc((strlen(fistr1) + strlen(fistr2) + 1) * sizeof(char));
-#else
   newfistr = AllocateMem(
     (unsigned) (strlen(fistr1) + strlen(fistr2) + 1), sizeof(char), "Aux stem value");
-#endif
   end = (char *)strrchr(fistr1, ']');
   end[0] = '\0';
   start = (char *)strchr(fistr2, '[');
   start[0] = ' ';
   sprintf(newfistr, "%s%s", fistr1, fistr2);
-#if DOMEMCHECK
-	memck_free(fistr1);
-#else
    UnallocateMem(fistr1);
-#endif
-#if DOMEMCHECK
-	memck_free(fistr2);
-#else
    UnallocateMem(fistr2);
-#endif
   return newfistr;
 }
 
@@ -1097,11 +989,7 @@ extern void ParseIntStems(char *kw, boolean optional, long maxstems, int *stems,
       switch (c) 
       {
         case 0: *pnum = 0; 
-#if DOMEMCHECK
-				memck_free(initline);
-#else
 				UnallocateMem(initline);
-#endif 
 			return;
         case '[': goto numlst;
         default: break;
@@ -1148,21 +1036,13 @@ extern void ParseIntStems(char *kw, boolean optional, long maxstems, int *stems,
       }
     if (ix > 0 && (cnt != targetCnt))
     {
-#if DOMEMCHECK
-		memck_free(initline);
-#else
 		UnallocateMem(initline);
-#endif
       sprintf(globmsg, "The keyword: %s does not have the same number of values\n  in each master design.\n", kw);
       LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
     }
     targetCnt = cnt;
     *pnum += cnt;
-#if DOMEMCHECK
-		memck_free(initline);
-#else
 		UnallocateMem(initline);
-#endif
   } /* end of for loop */
   if (blendstr == NULL || total == 0)
     return;
@@ -1242,121 +1122,49 @@ CheckRequiredKWs (void)
       {
       sprintf(globmsg, "FontName in %s exceeds max length of %d.\n",
       fifilename, (int) (MAXFONTNAME-1));
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
       LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
       }
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("Encoding",
          scalinghints || (GetCharsetParser() == bf_CHARSET_CID));
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("AdobeCopyright", scalinghints);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("FullName", scalinghints);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("FamilyName", scalinghints);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("Weight", scalinghints);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("isFixedPitch", scalinghints);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("UnderlinePosition", scalinghints);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("UnderlineThickness", scalinghints);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("Trademark", ACOPTIONAL);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("Composites", ACOPTIONAL);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("ScalePercent", ACOPTIONAL);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
 
 #ifdef SUN
    if (scalinghints)
       {
       SetFntInfoFileName (SCALEDHINTSINFO);
       s = GetFntInfo ("OrigEmSqUnits", MANDATORY);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
       }
    s = GetFntInfo("FlexOK", ACOPTIONAL);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("RndStemUp", ACOPTIONAL);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("HCounterChars", ACOPTIONAL);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    s = GetFntInfo("VCounterChars", ACOPTIONAL);
-#if DOMEMCHECK
-		memck_free(s);
-#else
 		UnallocateMem(s);
-#endif
    ParseIntStems("DominantV", MANDATORY, (long) MAXDOMINANTSTEMS, stems,
          &stemcnt, NULL);
    ParseIntStems ("DominantH", ACOPTIONAL, (long) MAXDOMINANTSTEMS, stems,
@@ -1448,12 +1256,8 @@ get_base_font_path ()
 
  if (line == NULL)
    return (NULL);
-#if DOMEMCHECK
-	bfp = memck_malloc((strlen (line) + 3) *sizeof(char));
-#else
  bfp = AllocateMem ((unsigned) (strlen (line) + 3), 
    sizeof(char), "font info buffer");
-#endif
  i = sscanf (line, "%s", bfp);
  if (i != 1)
    return (NULL);
@@ -1467,11 +1271,7 @@ get_base_font_path ()
  line = CheckBFPath(line);
  get_filename(name, line, "");  /* Adds appropriate delimiter. */
  strcpy(line, name);
-#if DOMEMCHECK
- memck_free(bfp);
-#else
  UnallocateMem (bfp);
-#endif
  return (line);
 } 
 

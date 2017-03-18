@@ -42,11 +42,7 @@ boolean extracolor;
       result = FALSE; 
       continue; 
     }
-#if DOMEMCHECK
-	memck_free(namelist);
-#else
 	ACFREEMEM(namelist);
-#endif
   return result;
   }
 

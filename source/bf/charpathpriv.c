@@ -25,24 +25,16 @@ static void CheckPath()
   
   if (currPathList->path == NULL)
 	{
-#if DOMEMCHECK
-  currPathList->path = (CharPathElt *) memck_malloc ((unsigned int) maxPathEntries * sizeof(CharPathElt));
-#else
     currPathList->path = (CharPathElt *) AllocateMem ((unsigned int) maxPathEntries, sizeof(CharPathElt), "path element array");
-#endif
 	}
 	if (path_entries >= maxPathEntries)
   {
     int i;
 
     maxPathEntries += MAXPATHELT;
-#if DOMEMCHECK
-currPathList->path =(PCharPathElt ) memck_realloc(currPathList->path, (maxPathEntries * sizeof(CharPathElt)));
-#else
     currPathList->path =
       (PCharPathElt ) ReallocateMem((char *) currPathList->path,
       maxPathEntries * sizeof(CharPathElt), "path element array");
-#endif
     /* Initialize certain fields in CharPathElt, since realloc'ed memory */
     /* may be non-zero. */
     for (i = path_entries; i < maxPathEntries; i++)
@@ -91,11 +83,7 @@ extern void SetHintsElt(short hinttype, CdPtr coord, long elt1, long elt2, boole
     CheckPath();
     hintEntry = &currPathList->path[path_entries].hints;
   }
-#if DOMEMCHECK
-lastHintEntry = (PHintElt) memck_malloc (sizeof(HintElt));
-#else
   lastHintEntry = (PHintElt) AllocateMem (1, sizeof(HintElt), "hint element");
-#endif
   lastHintEntry->type = hinttype;
   lastHintEntry->leftorbot = coord->x;
   lastHintEntry->rightortop = coord->y; /* absolute coordinates */

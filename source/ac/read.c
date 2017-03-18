@@ -46,11 +46,7 @@ Fixed temp1;
     else
     {
       sscanf(fistr, "%g", &origEmSquare);
-#if DOMEMCHECK
-	memck_free(fistr);
-#else
    ACFREEMEM(fistr);
-#endif
     }
     ResetFntInfoFileName ();
   }
@@ -71,11 +67,7 @@ Fixed temp1;
     else
     {
       sscanf(fistr, "%g", &origEmSquare);
-#if DOMEMCHECK
-	memck_free(fistr);
-#else
    ACFREEMEM(fistr);
-#endif
     }
     ResetFntInfoFileName ();
   }
@@ -645,11 +637,7 @@ boolean normal, forBlendData, readHints, prependprefix;
   fd = ACOpenFile(infile, "rb", OPENWARN);
   if (fd == NULL) return FALSE;
   filelen = ACGetFileSize(infile);
-#if DOMEMCHECK
-    inputbuff = (char *) memck_malloc(filelen+5);
-#else
   inputbuff = (char *) ACNEWMEM(filelen+5);
-#endif
   cc = ACReadFile((char *)inputbuff, fd, (char *)infile, filelen);
   inputbuff[cc] = '\0';
 #ifdef IS_LIB
@@ -675,11 +663,7 @@ boolean normal, forBlendData, readHints, prependprefix;
 #endif
 #ifndef IS_LIB
   fclose(fd);
-#if DOMEMCHECK
-  memck_free(inputbuff);
-#else
   ACFREEMEM(inputbuff);
-#endif
 #endif
 
 #if TESTING
