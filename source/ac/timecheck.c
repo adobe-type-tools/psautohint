@@ -23,11 +23,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 #include "buildfont.h"
 
-#ifdef __MWERKS__
-/*#include "types.h"*/
-/*#include <sys/file.h>*/
-/*#include <sys/dir.h>*/
-#else
 #include <sys/types.h>
 #ifdef _WIN32
 #include <file.h>
@@ -35,7 +30,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #else
 #include <sys/file.h>
 #include <sys/dir.h>
-#endif
 #endif
 
 #if !IS_LIB
@@ -219,11 +213,7 @@ private void readInputDir(const char *dirName,
 		struct stat s;
 
 		/* explicitly look for .notdef bez file */
-#ifdef __MWERKS__
-		sprintf(charFile, ":%s:.notdef", dirName);
-#else
 		sprintf(charFile, "%s\\.notdef", dirName);
-#endif
 		if (FileExists(charFile, FALSE) &&
 			!stat(charFile, &s))
 		  {
@@ -237,11 +227,7 @@ private void readInputDir(const char *dirName,
 		p = newFileTimes;
 		
 		for (i = 0; i < fileCnt; i++) {
-#ifdef __MWERKS__
-			sprintf(charFile, ":%s:%s", dirName, nameList[i]->d_name);
-#else
 			sprintf(charFile, "%s\\%s", dirName, nameList[i]->d_name);
-#endif		
 			if (FileExists(charFile, FALSE) &&
 				!stat(charFile, &s)) {
 				p->nameIndx = storeName(nameList[i]->d_name);
@@ -251,11 +237,7 @@ private void readInputDir(const char *dirName,
 		}
 		
 		/* explicitly handle for .notdef bez file */
-#ifdef __MWERKS__
-			sprintf(charFile, ":%s:.notdef", dirName);
-#else
 			sprintf(charFile, "%s\\.notdef", dirName);
-#endif
 
 		if (FileExists(charFile, FALSE) &&
 			!stat(charFile, &s))
@@ -1063,11 +1045,7 @@ private void updateTime(
 	if (p) {
 		char charFile[MAXPATHLEN];
 		struct stat s;
-#ifdef __MWERKS__
-		sprintf(charFile, ":%s:%s", dirName, INDX_PTR(p->nameIndx));
-#else
 		sprintf(charFile, "%s\\%s", dirName, INDX_PTR(p->nameIndx));
-#endif
 		if (!stat(charFile, &s))
 			p->modTime = s.st_mtime;
 	}
@@ -1178,22 +1156,14 @@ private fileTime* checkFile(
 		char inFile[MAXPATHLEN];
 		char* name = INDX_PTR(newp->nameIndx);
 		struct stat s;
-#ifdef __MWERKS__
-		sprintf(inFile, ":%s:%s", inputDir, name);	
-#else
 		sprintf(inFile, "%s\\%s", inputDir, name);
-#endif
 		if (!stat(inFile, &s)) {
 			char bezFile[MAXPATHLEN];
 			time_t newTime = s.st_mtime;
 			
 			*oldp = findName(name, oldFileCnt, oldFileTimes);
 
-#ifdef __MWERKS__
-			sprintf(bezFile, ":%s:%s", BEZDIR, name);
-#else
 			sprintf(bezFile, "%s\\%s", BEZDIR, name);
-#endif		
 			if ((*oldp == NULL) || 
 				((newTime != (*oldp)->modTime) && (strcmp(name,".notdef")!=0)) ||
 				!FileExists(bezFile, FALSE))

@@ -33,9 +33,6 @@ typedef Card32                *PCard32;
 typedef Int32                 integer;
 #define MAXinteger            MAX_INT32
 #define MINinteger            MIN_INT32
-#ifdef __MWERKS__
-typedef CardX                 boolean;
-#endif
 typedef Card16                cardinal;
 typedef Card32                longcardinal;
 
@@ -175,13 +172,10 @@ typedef character       *charptr;
 typedef void            (*PVoidProc)();
                                     /* Pointer to procedure returning  */
                                     /* no result                       */
-#ifndef __MWERKS__
 typedef Card32          GenericID;  /* Generic ID for contexts,        */
                                     /* spaces, name cache, etc.        */
                                     /* Opaque type used in public      */
                                     /* interfaces                      */
-
-#endif
 
 #if 0
 #define BitsInGenericIndex      10

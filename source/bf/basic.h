@@ -9,29 +9,12 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <ctype.h>
 #include "pubtypes.h"
 
-#if __MWERKS__ 
-
-#ifndef __dead2
-#define	__dead2
-#define	__pure2
-#define	__unused
-#endif
-#include <stdlib.h>
-
-#include <stdio.h>
-#include <setjmp.h>
-
-
-/*#include <unistd.h>*/
-
-#else
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <setjmp.h>
 #include <sys/types.h>
 typedef unsigned char boolean;
-#endif
 
 #ifndef FALSE
 #define FALSE 0

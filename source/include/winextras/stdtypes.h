@@ -11,8 +11,6 @@
 #ifndef	__sys_stdtypes_h
 #define	__sys_stdtypes_h
 
-#ifndef __MWERKS__
-
 typedef	int		sigset_t;	/* signal mask - may change */
 
 typedef	unsigned int	speed_t;	/* tty speeds */
@@ -30,7 +28,5 @@ typedef	int		size_t;		/* ??? */
 typedef int		ptrdiff_t;	/* result of subtracting two pointers */
 
 typedef	unsigned short	wchar_t;	/* big enough for biggest char set */
-
-#endif
 
 #endif	/* !__sys_stdtypes_h */

@@ -70,11 +70,7 @@
 
 #if	!defined(KERNEL)
 
-#ifdef __MWERKS__
-#include "types.h"
-#else
 #include <sys/types.h>
-#endif
 
 /*extern void	_exit(int status );*/
 extern int	access(/* char *path, int amode */);

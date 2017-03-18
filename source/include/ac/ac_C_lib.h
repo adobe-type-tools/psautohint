@@ -21,9 +21,7 @@ extern "C" {
 #define ACLIB_API __declspec(dllexport)
 #else
 	
-#if __MWERKS__
-#define ACLIB_API __declspec(export)
-#elif __GNUC__ && __MACH__
+#if __GNUC__ && __MACH__
 #define ACLIB_API __attribute__((visibility("default")))
 #endif
 	

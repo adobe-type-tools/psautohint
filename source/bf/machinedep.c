@@ -58,9 +58,7 @@ Windows specific names instead.
 static char ibmfilename[] = "ibmprinterfont.unprot";
 static char uniqueIDFile[MAXPATHLEN];
 static short warncnt = 0;
-#if defined (__MWERKS__)
-static char Delimiter[] = "/";
-#elif defined (_WIN32)
+#if defined (_WIN32)
 static char Delimiter[] = "\\";
 #else
 static char Delimiter[] = "/";

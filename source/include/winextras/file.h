@@ -6,11 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef	__sys_file_h
 #define	__sys_file_h
 
-#ifdef __MWERKS__
-#include "types.h"
-#else
 #include <sys/types.h>
-#endif
 
 #ifdef	KERNEL
 /*

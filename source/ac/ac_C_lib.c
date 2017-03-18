@@ -172,9 +172,7 @@ static int ParseFontInfo(const char *fontinfo)
 
 	return AC_Success;
 }
-#if __MWERKS__
-#pragma export on
-#endif
+
 ACLIB_API void  AC_SetMemManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func)
 {
 	setAC_memoryManager(ctxptr, func);
@@ -314,9 +312,3 @@ ACLIB_API const char *AC_getVersion(void)
 {
 	return libversion;
 }
-
-
-#if __MWERKS__
-#pragma export off
-#endif
-
