@@ -22,19 +22,13 @@ public int IncludeFile(struct direct * direntry)
 
 public boolean DoAllIgnoreTime(extracolor, includefile)
 boolean extracolor;
-	int (*includefile) (struct direct *); 
+	int (*includefile) (const struct direct *);
 {
   indx ix;
   boolean result = TRUE;
   short count;
   struct direct **namelist;
  
-#ifdef _WIN32
-  count = BFscandir(inPrefix, &namelist, includefile, bf_alphasort);
-#else
-int BFscandir(const char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort);
-#endif
-
   count = BFscandir(inPrefix, &namelist, includefile, bf_alphasort);
   if (count == -1)
   {

@@ -659,12 +659,9 @@ extern get_datetime(char *datetimestr)
 
 
 
-int bf_alphasort(const void *f1, const void *f2)
+int bf_alphasort(const struct dirent **f1, const struct dirent **f2)
 {
-	struct direct **mf1, **mf2;
-	mf1=(struct direct **)f1;
-	mf2=(struct direct **)f2;
-	return strcmp((*mf1)->d_name, (*mf2)->d_name);
+	return strcmp((*f1)->d_name, (*f2)->d_name);
 }
 
 #if defined(_MSC_VER) && ( _MSC_VER < 1800)
