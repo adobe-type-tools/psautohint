@@ -153,14 +153,6 @@ extern void AppendFile (
     char *, char *
 );
 
-extern char *MakeTempName (
-   char *, char *
-);
-
-extern int AutoCrit (
-   char *, char *
-);
-
 public procedure FlushLogFiles();
 public procedure OpenLogFiles();
 typedef int (* includeFile) (const struct direct *);

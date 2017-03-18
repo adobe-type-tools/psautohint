@@ -637,28 +637,6 @@ extern get_datetime(char *datetimestr)
 */
 /* copies from one path ref num to another - can be different forks of same file */
 
-
-
- char *MakeTempName(char *dirprefix, char *fileprefix)
-{
-#ifndef _WIN32
-#pragma unused(dirprefix)
-#pragma unused(fileprefix)
-#endif
-	return NULL;
-}
-
- int AutoCrit (char *filenameparam, char *goo)
-{
-#ifndef _WIN32
-#pragma unused(filenameparam)
-#pragma unused(goo)
-#endif
-	return 0;
-}
-
-
-
 int bf_alphasort(const struct direct **f1, const struct direct **f2)
 {
 	return strcmp((*f1)->d_name, (*f2)->d_name);
