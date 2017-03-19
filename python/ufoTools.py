@@ -295,9 +295,7 @@ Example from "B" in SourceCodePro-Regular
 
 """
 
-import sys
 import re
-import time
 import os
 import plistlib
 import hashlib
