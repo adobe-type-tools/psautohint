@@ -1,6 +1,8 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+#include <math.h>
+
 #include "ac.h"
 #include "bftoac.h"
 
@@ -112,14 +114,15 @@ static Fixed CPTo(cp0,cp1) Fixed cp0,cp1; {
 
 static boolean TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
 	/* return true if bend angle is sharp enough (135 degrees or less) */
-	real dx1, dy1, dx2, dy2, dotprod, lensqprod;
+	real dx1, dy1, dx2, dy2;
+	double dotprod, lensqprod;
 	acfixtopflt(x1-x0, &dx1);
 	acfixtopflt(y1-y0, &dy1);
 	acfixtopflt(x2-x1, &dx2);
 	acfixtopflt(y2-y1, &dy2);
 	dotprod = dx1*dx2 + dy1*dy2;
 	lensqprod = (dx1*dx1 + dy1*dy1) * (dx2*dx2 + dy2*dy2);
-	return (dotprod*dotprod / lensqprod) <= .5;
+	return roundf((dotprod*dotprod / lensqprod) * 1000) / 1000 <= .5f;
 }
 
 #define TestTan(d1,d2) (abs(d1) > (abs(d2)*bendTan)/1000)
