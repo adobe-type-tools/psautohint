@@ -536,22 +536,8 @@ def ACreport(*args):
 	if arg[-1] != os.linesep:
 		print
 
-def CheckEnvironmentTx():
-	txPath = 'tx'
-	txError = 0
-	command = "%s -u 2>&1" % (txPath)
-	report = FDKUtils.runShellCmd(command)
-	if "options" not in report:
-			txError = 1
-	
-	if  txError:
-		logMsg("Please re-install the FDK. The path to the program 'tx' is not in the environment variable PATH.")
-		raise FDKEnvironmentError
-
-	return
-
 def CheckEnvironment():
-	command = "autohintexe -u 2>&1"
+	command = "autohintexe -u"
 	report = FDKUtils.runShellCmd(command)
 	if "version" not in report:
 		logMsg("Please re-install the FDK. The path to the program 'autohintexe' is not in the environment variable PATH.")
@@ -992,10 +978,9 @@ def openOpenTypeFile(path, outFilePath):
 			raise ACFontError("Font file must be PS, CFF or OTF file: %s." % path)
 	
 		else:  # It is a PS file. Convert to CFF.	
-			CheckEnvironmentTx()
 			fontType =  2
 			print "Converting Type1 font to temp CFF font file..."
-			command="tx  -cff +b -std \"%s\" \"%s\" 2>&1" % (path, tempPathCFF)
+			command="tx  -cff +b -std \"%s\" \"%s\"" % (path, tempPathCFF)
 			report = FDKUtils.runShellCmd(command)
 			if "fatal" in report:
 				logMsg("Attempted to convert font %s  from PS to a temporary CFF data file." % path)

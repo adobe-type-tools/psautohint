@@ -8,13 +8,15 @@ __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.c
 
 import subprocess
 import traceback
+import shlex
 
 def runShellCmd(cmd):
 	try:
-		p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
-		log = p.read()
+		args = shlex.split(cmd)
+		p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		log = p.stdout.read()
 		return log
 	except :
-		msg = "Error executing command '%s'. %s" % (cmd, traceback.print_exc())
-		print(msg)
+		traceback.print_exc()
+		print("Error executing command '%s'." % cmd)
 		return ""

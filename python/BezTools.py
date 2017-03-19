@@ -1210,7 +1210,7 @@ class CFFFontData:
 				tf.write(data)
 				tf.close()
 				finalPath = outFilePath
-				command="tx  -t1 -std \"%s\" \"%s\" 2>&1" % (tempPath, outFilePath)
+				command="tx  -t1 -std \"%s\" \"%s\"" % (tempPath, outFilePath)
 				report = FDKUtils.runShellCmd(command)
 				self.logMsg(report)
 				if "fatal" in report:

@@ -457,26 +457,12 @@ def mergeFDDicts(prevDictList, privateDict):
 	return 
 	
 
-def CheckTx():
-	txPath = 'tx'
-	txError = 0
-	command = "%s -u 2>&1" % (txPath)
-	report = FDKUtils.runShellCmd(command)
-	if "options" not in report:
-		txError = 1
-
-	if  txError:
-		raise FontInfoParseError("Please re-install the FDK. The path to the program 'tx' is not in the environment variable PATH.")
-
-	return
-
 def getBlueFuzz(fPath):
-	CheckTx()
 	blueFuzz = 1.0
-	command = "tx -dump -0 \"%s\" 2>&1" % (fPath)
+	command = "tx -dump -0 \"%s\"" % (fPath)
 	data = FDKUtils.runShellCmd(command)
 	if not data:
-		raise FontInfoParseError("Error: Failed getting  log from tx from %, when trying to get FontName." % (fPath))
+		raise FontInfoParseError("Error: Failed getting log from tx from %s, when trying to get BlueFuzz." % (fPath))
 		
 	m = re.search(r"BlueFuzz\s+(\d+(?:\.\d+)*)", data) 
 	if m:
