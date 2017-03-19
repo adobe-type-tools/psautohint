@@ -14,3 +14,4 @@ all: $(TESTS)
 	@echo "	Testing $<"
 	@rm -rf $@
 	@python2 $(PYT_DIR)/autohint.py -all -q -o $@ $< 2>&1 >/dev/null
+	@diff -Naur $< $@
