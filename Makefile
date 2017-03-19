@@ -7,6 +7,7 @@
 
 ROOT_DIR = .
 SRC_DIR = $(ROOT_DIR)/source
+TST_DIR = $(ROOT_DIR)/tests
 
 default:
 	make -C $(SRC_DIR)
@@ -14,3 +15,5 @@ default:
 clean:
 	make -C $(SRC_DIR) clean
 
+check:
+	make -C $(TST_DIR)

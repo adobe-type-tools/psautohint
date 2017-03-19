@@ -13,4 +13,5 @@ addons:
       - gcc-multilib
 
 script:
-  - make
+  - make -j
+  - make -j check
