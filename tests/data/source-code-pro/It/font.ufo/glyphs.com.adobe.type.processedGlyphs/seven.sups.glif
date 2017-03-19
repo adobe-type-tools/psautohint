@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="1" name="seven.sups">
+	<advance width="600" />
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="curve" x="253" y="395" />
+      <point type="line" x="318" y="395" />
+      <point x="347" y="521" />
+      <point x="390" y="631" />
+      <point type="curve" x="513" y="750" />
+      <point type="line" x="518" y="785" />
+      <point type="line" x="257" y="785" />
+      <point type="line" x="247" y="733" />
+      <point type="line" x="440" y="733" />
+      <point x="341" y="630" />
+      <point x="286" y="524" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>w600c253395l318395347521390631c513750l518785l257785l247733l440733341630286524</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 733 52</string>
+              <string>vstem 247 271</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

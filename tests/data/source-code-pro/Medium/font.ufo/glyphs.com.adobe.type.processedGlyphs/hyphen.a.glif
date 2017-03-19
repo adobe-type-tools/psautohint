@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="1" name="hyphen.a">
+	<advance width="600" />
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="line" x="131" y="212" />
+      <point type="line" x="469" y="212" />
+      <point type="line" x="469" y="293" />
+      <point type="line" x="131" y="293" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>w600l131212l469212l469293l131293</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 212 81</string>
+              <string>vstem 131 338</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

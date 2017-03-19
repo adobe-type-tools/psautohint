@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="1" name="commabelowcmb.alt">
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="curve" x="-73" y="638" />
+      <point x="-73" y="619" />
+      <point x="-70" y="602" />
+      <point type="curve" x="-63" y="583" />
+      <point x="-34" y="565" />
+      <point x="-17" y="561" />
+      <point type="curve" x="6" y="561" />
+      <point x="50" y="561" />
+      <point x="84" y="588" />
+      <point type="curve" x="84" y="625" />
+      <point x="84" y="658" />
+      <point x="63" y="683" />
+      <point type="curve" x="28" y="701" />
+      <point x="46" y="718" />
+      <point x="69" y="728" />
+      <point type="curve" x="100" y="741" />
+      <point type="line" x="83" y="785" />
+      <point x="-4" y="756" />
+      <point x="-73" y="705" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>w1000c-73638-73619-70602c-63583-34565-17561c65615056184588c846258465863683c287014671869728c100741l83785-4756-73705</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 561 224</string>
+              <string>vstem -73 157</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="one.onum" format="1">
+	<advance width="600"/>
+	<outline>
+		<contour>
+			<point x="21" y="0" type="line"/>
+			<point x="479" y="0" type="line"/>
+			<point x="501" y="110" type="line"/>
+			<point x="353" y="110" type="line"/>
+			<point x="446" y="578" type="line"/>
+			<point x="345" y="578" type="line"/>
+			<point x="296" y="549"/>
+			<point x="241" y="533"/>
+			<point x="158" y="522" type="curve"/>
+			<point x="140" y="436" type="line"/>
+			<point x="281" y="436" type="line"/>
+			<point x="216" y="110" type="line"/>
+			<point x="44" y="110" type="line"/>
+		</contour>
+	</outline>
+</glyph>

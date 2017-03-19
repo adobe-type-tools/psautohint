@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="1" name="macroncmb.cap">
+	<advance width="600" />
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="line" x="162" y="731" />
+      <point type="line" x="438" y="731" />
+      <point type="line" x="438" y="798" />
+      <point type="line" x="162" y="798" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>w600l162731l438731l438798l162798</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 731 67</string>
+              <string>vstem 162 276</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

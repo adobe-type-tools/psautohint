@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="lightdiagcrossbxd" format="1">
+	<unicode hex="2573"/>
+	<advance width="600"/>
+	<outline>
+		<contour>
+			<point x="548" y="-300" type="line"/>
+			<point x="600" y="-300" type="line"/>
+			<point x="600" y="-196" type="line"/>
+			<point x="352" y="300" type="line"/>
+			<point x="600" y="796" type="line"/>
+			<point x="600" y="900" type="line"/>
+			<point x="548" y="900" type="line"/>
+			<point x="300" y="404" type="line"/>
+			<point x="52" y="900" type="line"/>
+			<point x="0" y="900" type="line"/>
+			<point x="0" y="796" type="line"/>
+			<point x="248" y="300" type="line"/>
+			<point x="0" y="-196" type="line"/>
+			<point x="0" y="-300" type="line"/>
+			<point x="52" y="-300" type="line"/>
+			<point x="300" y="196" type="line"/>
+		</contour>
+	</outline>
+</glyph>

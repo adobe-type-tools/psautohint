@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="1" name="lefttackbelowcmb">
+	<unicode hex="0318" />
+  <advance width="600" />
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="line" x="215" y="-253" />
+      <point type="line" x="278" y="-253" />
+      <point type="line" x="316" y="-56" />
+      <point type="line" x="255" y="-56" />
+      <point type="line" x="241" y="-125" />
+      <point type="line" x="134" y="-125" />
+      <point type="line" x="123" y="-184" />
+      <point type="line" x="229" y="-184" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>w600l215-253l278-253l316-56l255-56l241-125l134-125l123-184l229-184</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem -184 59</string>
+              <string>vstem 123 193</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

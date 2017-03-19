@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="one.cap" format="1">
+	<advance width="600"/>
+	<outline>
+		<contour>
+			<point x="21" y="0" type="line"/>
+			<point x="479" y="0" type="line"/>
+			<point x="501" y="110" type="line"/>
+			<point x="353" y="110" type="line"/>
+			<point x="461" y="652" type="line"/>
+			<point x="359" y="652" type="line"/>
+			<point x="311" y="623"/>
+			<point x="255" y="607"/>
+			<point x="172" y="596" type="curve"/>
+			<point x="155" y="510" type="line"/>
+			<point x="295" y="510" type="line"/>
+			<point x="216" y="110" type="line"/>
+			<point x="44" y="110" type="line"/>
+		</contour>
+	</outline>
+</glyph>

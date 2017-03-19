@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<glyph format="1" name="breveinvertedcmb.cap">
+	<advance width="600" />
+  <outline>
+    <contour>
+      <point name="hintSet0000" type="line" x="217" y="694" />
+      <point x="226" y="735" />
+      <point x="255" y="759" />
+      <point type="curve" x="300" y="759" />
+      <point x="345" y="759" />
+      <point x="374" y="735" />
+      <point type="curve" x="383" y="694" />
+      <point type="line" x="463" y="708" />
+      <point x="454" y="797" />
+      <point x="399" y="845" />
+      <point type="curve" x="300" y="845" />
+      <point x="201" y="845" />
+      <point x="146" y="797" />
+      <point type="curve" x="137" y="708" />
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.adobe.type.autohint.v2</key>
+      <dict>
+        <key>id</key>
+        <string>w600l217694226735255759c300759345759374735c383694l463708454797399845c300845201845146797c137708</string>
+        <key>hintSetList</key>
+        <array>
+          <dict>
+            <key>pointTag</key>
+            <string>hintSet0000</string>
+            <key>stems</key>
+            <array>
+              <string>hstem 708 -20</string>
+              <string>hstem 759 86</string>
+              <string>vstem 137 326</string>
+            </array>
+          </dict>
+        </array>
+      </dict>
+    </dict>
+  </lib>
+</glyph>
