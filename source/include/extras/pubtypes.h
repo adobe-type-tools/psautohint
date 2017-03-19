@@ -23,25 +23,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <stdint.h>
 
 typedef int32_t               Fixed;
-
-
 typedef int32_t               Int32;
-#define MAX_INT32             ((Int32)0x7FFFFFFF)
-#define MIN_INT32             ((Int32)0x80000000)
-
 typedef uint32_t              Card32;
-#define MAX_CARD32            ((Card32)0xFFFFFFFF)
-
 typedef int16_t               Int16;
-#define MAX_INT16             ((Int16)0x7FFF)
-#define MIN_INT16             ((Int16)0x8000)
-
 typedef uint16_t              Card16;
-#define MAX_CARD16            ((Card16)0xFFFF)
-
 typedef uint8_t               Card8;
-#define MAX_CARD8             ((Card8)0xFF)
-
 
 typedef Int16                 *PInt16;
 typedef Int32                 *PInt32;
@@ -49,21 +35,9 @@ typedef Card8                 *PCard8;
 typedef Card16                *PCard16;
 typedef Card32                *PCard32;
 
-#define MAXInt32              MAX_INT32
-#define MINInt32              MIN_INT32
-
 typedef Int32                 integer;
-#define MAXinteger            MAX_INT32
-#define MINinteger            MIN_INT32
-typedef Card16                cardinal;
-typedef Card32                longcardinal;
-
-#define MAXCard32             MAX_CARD32
-#define MAXlongcardinal       MAX_CARD32
-#define MAXunsignedinteger    MAX_CARD32
-#define MAXCard16             MAX_CARD16
-#define MAXcardinal           MAX_CARD16
-#define MAXCard8              MAX_CARD8
+#define MAXinteger            INT32_MAX
+#define MINinteger            INT32_MIN
 
 /***********************************************************************/
 /* Other definitions                                                   */
