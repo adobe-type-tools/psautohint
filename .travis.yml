@@ -7,11 +7,6 @@ os:
   - linux
   - osx
 
-addons:
-  apt:
-    packages:
-      - gcc-multilib
-
 install:
   - pip install -r requirements.txt
 
