@@ -23,49 +23,17 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <stdint.h>
 
 typedef int32_t               Fixed;
-typedef int32_t               Int32;
-typedef uint32_t              Card32;
-typedef int16_t               Int16;
-typedef uint16_t              Card16;
-typedef uint8_t               Card8;
-
-typedef Int16                 *PInt16;
-typedef Int32                 *PInt32;
-typedef Card8                 *PCard8;
-typedef Card16                *PCard16;
-typedef Card32                *PCard32;
-
-typedef Int32                 integer;
+typedef int32_t               integer;
 #define MAXinteger            INT32_MAX
 #define MINinteger            INT32_MIN
 
 /***********************************************************************/
 /* Other definitions                                                   */
 /***********************************************************************/
-#ifndef VAXC
-#define readonly
-#define exitNormal 1
-#define exitError 2
-#else
-#define exitNormal 0
-#define exitError 1
-#endif
-
-#define _inline
-#define _priv           extern
-
-                                    /***********************************/
-                                    /* Control Constructs              */
-                                    /***********************************/
-#define until(x)        while (!(x))
-#define endswitch       default:;
 
                                     /***********************************/
                                     /* Inline Functions                */
                                     /***********************************/
-#ifndef ABS
-#define ABS(x) ((x)<0?-(x):(x))
-#endif
 #ifndef MIN
 #define MIN(a,b)        ((a)<(b)?(a):(b))
 #endif
@@ -81,109 +49,10 @@ typedef Int32                 integer;
 #define false           0
 #endif 
 
-typedef integer         (*PIntProc)();
-
-                                    /***********************************/
-                                    /* Canonical type for sizes of     */
-                                    /* things -- will change to size_t */
-                                    /* when we are completely          */
-                                    /* converted to ANSI conventions.  */
-                                    /***********************************/
-typedef int32_t         ps_size_t;
-
-                                    /***********************************/
-                                    /* Bit fields                      */
-                                    /***********************************/
-#ifndef BitField
-#define BitField        unsigned
-#endif
-
                                     /***********************************/
                                     /* Reals and Fixed point           */
                                     /***********************************/
 typedef float           real;
-typedef real            *Preal;
 typedef double          longreal;
-
-typedef Fixed           *PFixed;
-
-                                    /***********************************/
-                                    /* Coordinates                     */
-                                    /***********************************/
-typedef real ACComponent;
-
-typedef struct _t_RCd {
-  ACComponent x, y;
-} RCd, *PRCd;
-
-typedef struct _t_FCd {
-  Fixed x, y;
-} FCd, *PFCd;
-
-                                    /***********************************/
-                                    /* Characters and strings          */
-                                    /***********************************/
-typedef unsigned char   character;
-typedef character       *string;
-typedef character       *charptr;
-
-#ifdef NUL
-#undef NUL
-#endif
-#define NUL             '\0'
-
-                                    /***********************************/
-                                    /* Generic Pointers                */
-                                    /***********************************/
-#ifndef NULL
-#define NULL            0
-#endif
-
-#ifdef NIL
-#undef NIL
-#endif
-#define NIL             NULL
-
-typedef void            (*PVoidProc)();
-                                    /* Pointer to procedure returning  */
-                                    /* no result                       */
-typedef Card32          GenericID;  /* Generic ID for contexts,        */
-                                    /* spaces, name cache, etc.        */
-                                    /* Opaque type used in public      */
-                                    /* interfaces                      */
-
-#if 0
-#define BitsInGenericIndex      10
-#define BitsInGenericGeneration (32 - BitsInGenericIndex)
-
-#define MAXGenericIDIndex       ((Card32)((1<<BitsInGenericIndex) - 1))
-#define MAXGenericIDGeneration  ((Card32)((1<<BitsInGenericGeneration) - 1))
-
-typedef union {                     /* Representation of GenericID     */
-  struct {
-    BitField index:BitsInGenericIndex;
-                                    /* Reusable component              */
-    BitField generation:BitsInGenericGeneration;
-                                    /* Non-reusable component          */
-  } id;
-  GenericID stamp;                  /* Unique combined id (index,      */
-                                    /* generation)                     */
-} GenericIDRec;
-#endif
-
-/***********************************************************************/
-/* Following is the standard opaque handle for a stream. This is all   */
-/* that most clients should need. The concrete data structure is       */
-/* defined in stream.h.                                                */
-/***********************************************************************/
-typedef struct _t_StmRec        *Stm;
-
-typedef struct _t_StringList {
-  integer numStrings;
-  integer refCnt;
-  string  str[1];
-                                    /* Space for additional strings    */
-                                    /* is malloc'ed starting here      */
-} StringList, *PStringList;
 
 #endif/*_PUBTYPES_H*/
