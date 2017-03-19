@@ -510,7 +510,6 @@ def logMsg(*args):
 				gLogFile.flush()
 			return
 			
-		msg = re.sub(r"[\r\n]", " ", msg)
 		if msg[-1] == ",":
 			msg = msg[:-1]
 			if msg == kProgressChar:
