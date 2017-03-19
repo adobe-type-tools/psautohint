@@ -444,7 +444,6 @@ import time
 from fontTools.ttLib import TTFont, getTableModule
 import plistlib
 import warnings
-from BezTools import *
 import FDKUtils
 import ufoTools
 import traceback
@@ -1018,6 +1017,7 @@ def openOpenTypeFile(path, outFilePath):
 			logMsg("Attempted to read font %s  as CFF." % path)
 			raise ACFontError("Error parsing font file <%s>." % path)
 
+	from BezTools import CFFFontData
 	fontData = CFFFontData(ttFont, path, outFilePath, fontType, logMsg)
 	return fontData
 
