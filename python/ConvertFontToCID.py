@@ -513,7 +513,21 @@ def mergeFDDicts(prevDictList, privateDict):
 	return 
 	
 
+def CheckTx():
+	txPath = 'tx'
+	txError = 0
+	command = "%s -u 2>&1" % (txPath)
+	report = FDKUtils.runShellCmd(command)
+	if "options" not in report:
+		txError = 1
+
+	if  txError:
+		raise FontParseError("Please re-install the FDK. The path to the program 'tx' is not in the environment variable PATH.")
+
+	return
+
 def getGlyphList(fPath, removeNotdef = 0):
+	CheckTx()
 	command = "tx -dump -4 \"%s\" 2>&1" % (fPath)
 	data = FDKUtils.runShellCmd(command)
 	if not data:
@@ -530,6 +544,7 @@ def getGlyphList(fPath, removeNotdef = 0):
 	return nameList
 
 def getFontBBox(fPath):
+	CheckTx()
 	fontBBox = [-200, -200,1000,100]
 	command = "tx -mtx -2  \"%s\" 2>&1" % (fPath)
 	data = FDKUtils.runShellCmd(command)
@@ -545,6 +560,7 @@ def getFontBBox(fPath):
 	return fontBBox
 	
 def getFontName(fPath):
+	CheckTx()
 	command = "tx -dump -0 \"%s\" 2>&1" % (fPath)
 	data = FDKUtils.runShellCmd(command)
 	if not data:
@@ -557,6 +573,7 @@ def getFontName(fPath):
 	return m.group(1)
 
 def getBlueFuzz(fPath):
+	CheckTx()
 	blueFuzz = 1.0
 	command = "tx -dump -0 \"%s\" 2>&1" % (fPath)
 	data = FDKUtils.runShellCmd(command)
@@ -694,6 +711,7 @@ def fixFontDict(tempPath, fdDict):
 	return
 	
 def makeTempFonts(fontDictList, glyphSetList, fdGlyphDict, inputPath):
+	CheckTx()
 	fontList = []
 	setIndex = 0
 	for glyphList in glyphSetList:
@@ -717,6 +735,7 @@ def makeTempFonts(fontDictList, glyphSetList, fdGlyphDict, inputPath):
 	return fontList
 
 def makeCIDFontInfo(fontPath, cidfontinfoPath):
+	CheckTx()
 	cfiDict = {}
 	for key in kRequiredCIDFontInfoFields + kOptionalFields:
 		cfiDict[key] = None
@@ -865,6 +884,7 @@ def convertFontToCID(inputPath, outputPath):
 			os.remove(fontPath)
 
 def mergeFontToCFF(srcPath, outputPath, doSubr):
+	CheckTx()
 	# We assume that srcPath is a type 1 font,and outputPath is an OTF font.
 	
 	# First, convert src font to cff, and subroutinize it if so requested.
