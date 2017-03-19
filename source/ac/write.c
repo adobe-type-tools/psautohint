@@ -65,7 +65,7 @@ static int32_t WriteString(char *str) {
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal p;laces. */
 #define WRTNUM(i)                           \
 	{                                       \
-		sprintf(S0, "%ld ", (int32_t)(i)); \
+		sprintf(S0, "%d ", (int32_t)(i)); \
 		ws(S0);                             \
 	}
 
@@ -193,7 +193,7 @@ void safestrcat(char *s1, char *s2) {
 #define sws(str) safestrcat(hintmaskstr, (char *)str)
 
 #define SWRTNUM(i) {                    \
-sprintf(S0, "%ld ", (int32_t)(i)); \
+sprintf(S0, "%d ", (int32_t)(i)); \
 sws(S0);                            \
 }
 

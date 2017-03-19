@@ -166,7 +166,7 @@ static boolean initialize_widths()
                 for (ix = maxChars - 100; ix < maxChars; ix++)
                     widthtab[ix].width = UNINITWIDTH;
             }
-            cnt = sscanf(&line[ix + 1], " %s %ld WDef", widthtab[widthcnt].name, &temp);
+            cnt = sscanf(&line[ix + 1], " %s %d WDef", widthtab[widthcnt].name, &temp);
             if (cnt != 2)
             {
                 fclose(wfile);
@@ -239,7 +239,7 @@ static void process_width(FILE *infile, const char *name, boolean seen_width)
                 }
                 if ((widthtab[ix].width != UNINITWIDTH) || (seen_width))
                 {
-                    sprintf(globmsg, "Width updated for %s character (old: %d, new: %ld).\n", name, (int) widthtab[ix].width, width);
+                    sprintf(globmsg, "Width updated for %s character (old: %d, new: %d).\n", name, (int) widthtab[ix].width, width);
                     LogMsg(globmsg, INFO, OK, FALSE);
                 }
                 widthtab[ix].width = (int16_t) width;
@@ -775,17 +775,17 @@ static void relative(FILE *outfile)
     {
         if (p->tag == CTINDEX)
         {
-            fprintf(OUTPUTBUFF, "%ld %ld ", p->coord.x, p->coord.y);
+            fprintf(OUTPUTBUFF, "%d %d ", p->coord.x, p->coord.y);
             p++;
-            fprintf(OUTPUTBUFF, "%ld %ld ", p->coord.x, p->coord.y);
+            fprintf(OUTPUTBUFF, "%d %d ", p->coord.x, p->coord.y);
             p++;
-            fprintf(OUTPUTBUFF, "%ld %ld %c\n", p->coord.x, p->coord.y, op[p->tag]);
+            fprintf(OUTPUTBUFF, "%d %d %c\n", p->coord.x, p->coord.y, op[p->tag]);
             p++;
             i -= 3;
         }
         else
         {
-            fprintf(OUTPUTBUFF, "%ld %ld %c\n", p->coord.x, p->coord.y, op[p->tag]);
+            fprintf(OUTPUTBUFF, "%d %d %c\n", p->coord.x, p->coord.y, op[p->tag]);
             p++;
             i--;
         }
@@ -800,7 +800,7 @@ static void relative(FILE *outfile)
             case MTINDEX:
                 if (firstpath)
                 {
-                    sprintf(buff, "%ld %ld rmt\n", p->coord.x, p->coord.y);
+                    sprintf(buff, "%d %d rmt\n", p->coord.x, p->coord.y);
                     (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
                     firstpath = FALSE;
                 }
@@ -809,17 +809,17 @@ static void relative(FILE *outfile)
                     dy = p->coord.y - cp.y;
                     if ((dx = p->coord.x - cp.x) == 0)
                     {
-                        sprintf(buff, "%ld vmt\n", dy);
+                        sprintf(buff, "%d vmt\n", dy);
                         (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
                     }
                     else if (dy == 0)
                     {
-                        sprintf(buff, "%ld hmt\n", dx);
+                        sprintf(buff, "%d hmt\n", dx);
                         (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
                     }
                     else
                     {
-                        sprintf(buff, "%ld %ld rmt\n", dx, dy);
+                        sprintf(buff, "%d %d rmt\n", dx, dy);
                         (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
                     }
                 }
@@ -831,17 +831,17 @@ static void relative(FILE *outfile)
                 dy = p->coord.y - cp.y;
                 if ((dx = p->coord.x - cp.x) == 0)
                 {
-                    sprintf(buff, "%ld vdt\n", dy);
+                    sprintf(buff, "%d vdt\n", dy);
                     (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
                 }
                 else if (dy == 0)
                 {
-                    sprintf(buff, "%ld hdt\n", dx);
+                    sprintf(buff, "%d hdt\n", dx);
                     (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
                 }
                 else
                 {
-                    sprintf(buff, "%ld %ld rdt\n", dx, dy);
+                    sprintf(buff, "%d %d rdt\n", dx, dy);
                     (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
                 }
                 cp = p->coord;
@@ -854,25 +854,25 @@ static void relative(FILE *outfile)
                 
                 if (((dx = (p->coord.x - cp.x)) == 0) && (p2->coord.y == p1->coord.y))	/* vhct */
                 {
-                    sprintf(buff, "%ld %ld %ld %ld vhct\n",
+                    sprintf(buff, "%d %d %d %d vhct\n",
                             p->coord.y - cp.y, p1->coord.x - p->coord.x,
                             p1->coord.y - p->coord.y, p2->coord.x - p1->coord.x);
                     (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
                 }
                 else if (((dy = (p->coord.y - cp.y)) == 0) && (p2->coord.x == p1->coord.x))	/* hvct */
                 {
-                    sprintf(buff, "%ld %ld %ld %ld hvct\n",
+                    sprintf(buff, "%d %d %d %d hvct\n",
                             dx, p1->coord.x - p->coord.x,
                             p1->coord.y - p->coord.y, p2->coord.y - p1->coord.y);
                     (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
                 }
                 else			/* rct */
                 {
-                    sprintf(buff, "%ld %ld ", dx, dy);
+                    sprintf(buff, "%d %d ", dx, dy);
                     (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
-                    sprintf(buff, "%ld %ld ", p1->coord.x - p->coord.x, p1->coord.y - p->coord.y);
+                    sprintf(buff, "%d %d ", p1->coord.x - p->coord.x, p1->coord.y - p->coord.y);
                     (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
-                    sprintf(buff, "%ld %ld rct\n", p2->coord.x - p1->coord.x, p2->coord.y - p1->coord.y);
+                    sprintf(buff, "%d %d rct\n", p2->coord.x - p1->coord.x, p2->coord.y - p1->coord.y);
                     (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
                 }
                 cp = p2->coord;

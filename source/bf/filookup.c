@@ -1094,7 +1094,7 @@ char *direction;
   for (ix = 0; ix < stemcnt; ix++)
     if (dominantVal == stems[ix])
       return;
-  sprintf(globmsg, "The Dominant%s value: %ld must be included in\n  the StemSnap%s array in the %s file.\n", direction, dominantVal, direction, FIFILENAME);
+  sprintf(globmsg, "The Dominant%s value: %d must be included in\n  the StemSnap%s array in the %s file.\n", direction, dominantVal, direction, FIFILENAME);
   LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
 }
 

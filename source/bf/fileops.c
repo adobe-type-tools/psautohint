@@ -105,7 +105,7 @@ char **buffer, *filename;
   filelen = ACGetFileSize (filename);
   if (filelen > MaxBytes) { /* renner Tue Sep 11 14:59:37 1990 */
 #if 0
-    fprintf(stderr,"Calling realloc: %ld vs %ld\n", filelen, MaxBytes); fflush(stderr);
+    fprintf(stderr,"Calling realloc: %d vs %d\n", filelen, MaxBytes); fflush(stderr);
 #endif
     MaxBytes = filelen + 5;
     *buffer = (char *)ReallocateMem(*buffer, (unsigned)(MaxBytes * sizeof(char)), "file buffer");
@@ -564,7 +564,7 @@ ReadNames(char *cname, char *filename, int32_t *masters, int32_t *hintDir,
 
       case bf_CHARSET_STANDARD:
       default:
-         total_assigns = sscanf(line, " %s %s %ld %ld",
+         total_assigns = sscanf(line, " %s %s %d %d",
                cname, filename, masters, hintDir);
          if (total_assigns >= 1)
             {

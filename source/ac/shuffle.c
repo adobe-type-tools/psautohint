@@ -17,7 +17,7 @@ void InitShuffleSubpaths() {
 		if (DEBUG)
 			{
 			if (e->type == MOVETO) { /* DEBUG */
-				sprintf(globmsg, "subpath %ld starts at %g %g\n", cnt,
+				sprintf(globmsg, "subpath %d starts at %g %g\n", cnt,
 						FixToDbl(itfmx(e->x)), FixToDbl(itfmy(e->y)));
 				PrintMessage(globmsg);
 			}
@@ -35,13 +35,13 @@ static void PrintLinks() {
 	integer i, j;
 	PrintMessage("Links ");
 	for (i = 0; i < rowcnt; i++) {
-		sprintf(globmsg, "%ld  ", i);
+		sprintf(globmsg, "%d  ", i);
 		PrintMessage(globmsg);
 		if (i < 10) PrintMessage(" ");
     }
 	PrintMessage("\n");
 	for (i = 0; i < rowcnt; i++) {
-		sprintf(globmsg, " %ld   ", i);
+		sprintf(globmsg, " %d   ", i);
 		PrintMessage(globmsg);
 		if (i < 10) PrintMessage(" ");
 		for (j = 0; j < rowcnt; j++)
@@ -57,7 +57,7 @@ static void PrintSumLinks(sumlinks) char *sumlinks; {
 	integer i;
 	PrintMessage("Sumlinks ");
 	for (i = 0; i < rowcnt; i++) {
-		sprintf(globmsg, "%ld  ", i);
+		sprintf(globmsg, "%d  ", i);
 		PrintMessage(globmsg);
 		if (i < 10) PrintMessage(" ");
     }
@@ -75,7 +75,7 @@ static void PrintOutLinks(unsigned char *outlinks) {
 	integer i;
 	PrintMessage("Outlinks ");
 	for (i = 0; i < rowcnt; i++) {
-		sprintf(globmsg, "%ld  ", i);
+		sprintf(globmsg, "%d  ", i);
 		PrintMessage(globmsg);
 		if (i < 10) PrintMessage(" ");
     }
@@ -110,7 +110,7 @@ void MarkLinks(vL,hFlg) PClrVal vL; boolean hFlg; {
 		if (DEBUG)
 			{
 			if (hFlg) ShowHVal(vL); else ShowVVal(vL);
-			sprintf(globmsg, " : %ld <-> %ld\n", i, j);
+			sprintf(globmsg, " : %d <-> %d\n", i, j);
 			PrintMessage(globmsg);
 			}
 		links[rowcnt * i + j] = 1;
@@ -130,7 +130,7 @@ unsigned char *links, *outlinks, *output; integer bst; {
 	MoveSubpathToEnd(e);
 	if (DEBUG)
 		{
-		sprintf(globmsg, "move subpath %ld to end\n", bst); /* DEBUG */
+		sprintf(globmsg, "move subpath %d to end\n", bst); /* DEBUG */
 		PrintMessage(globmsg);
 		}  output[bst] = 1;
 	lnks = &links[bst * rowcnt];

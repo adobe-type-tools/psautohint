@@ -171,11 +171,11 @@ static mt()
   dx = SCALEDRTOL((p1.x - currPt.x), scale);
   dy = SCALEDRTOL((p1.y - currPt.y), scale);
   if (dx == 0)
-    sprintf(outstr, "%ld %c%c%c\n", dy, 'v', 'm', 't');
+    sprintf(outstr, "%d %c%c%c\n", dy, 'v', 'm', 't');
   else if (dy == 0)
-    sprintf(outstr, "%ld %c%c%c\n", dx, 'h', 'm', 't');
+    sprintf(outstr, "%d %c%c%c\n", dx, 'h', 'm', 't');
   else
-    sprintf(outstr, "%ld %ld %c%c%c\n", dx, dy, 'r', 'm', 't');
+    sprintf(outstr, "%d %d %c%c%c\n", dx, dy, 'r', 'm', 't');
   SetCd(p1, &currPt);
 }
 
@@ -187,11 +187,11 @@ static dt()
   dx = SCALEDRTOL((p1.x - currPt.x), scale);
   dy = SCALEDRTOL((p1.y - currPt.y), scale);
   if (dx == 0)
-    sprintf(outstr, "%ld %c%c%c\n", dy, 'v', 'd', 't');
+    sprintf(outstr, "%d %c%c%c\n", dy, 'v', 'd', 't');
   else if (dy == 0)
-    sprintf(outstr, "%ld %c%c%c\n", dx, 'h', 'd', 't');
+    sprintf(outstr, "%d %c%c%c\n", dx, 'h', 'd', 't');
   else
-    sprintf(outstr, "%ld %ld %c%c%c\n", dx, dy, 'r', 'd', 't');
+    sprintf(outstr, "%d %d %c%c%c\n", dx, dy, 'r', 'd', 't');
   SetCd(p1, &currPt);
 }
 
@@ -205,17 +205,17 @@ static ct()
   p1.y = oprnd_stk[count--];
   p1.x = oprnd_stk[count];
   if ((currPt.x == p1.x) && (p3.y == p2.y))	/* vhct */
-    sprintf(outstr, "%ld %ld %ld %ld %c%c%c%c\n",
+    sprintf(outstr, "%d %d %d %d %c%c%c%c\n",
       SCALEDRTOL((p1.y - currPt.y), scale), SCALEDRTOL((p2.x - p1.x), scale),
       SCALEDRTOL((p2.y - p1.y), scale), SCALEDRTOL((p3.x - p2.x), scale),
       'v', 'h', 'c', 't');
   else if ((currPt.y == p1.y) && (p3.x == p2.x))	/* hvct */
-    sprintf(outstr, "%ld %ld %ld %ld %c%c%c%c\n",
+    sprintf(outstr, "%d %d %d %d %c%c%c%c\n",
       SCALEDRTOL((p1.x - currPt.x), scale), SCALEDRTOL((p2.x - p1.x), scale),
       SCALEDRTOL((p2.y - p1.y), scale), SCALEDRTOL((p3.y - p2.y), scale),
       'h', 'v', 'c', 't');
   else				/* rct */
-    sprintf(outstr, "%ld %ld %ld %ld %ld %ld %c%c%c\n",
+    sprintf(outstr, "%d %d %d %d %d %d %c%c%c\n",
       SCALEDRTOL((p1.x - currPt.x), scale), SCALEDRTOL((p1.y - currPt.y), scale),
       SCALEDRTOL((p2.x - p1.x), scale), SCALEDRTOL((p2.y - p1.y), scale),
       SCALEDRTOL((p3.x - p2.x), scale), SCALEDRTOL((p3.y - p2.y), scale),
@@ -243,7 +243,7 @@ extern void convert_PScharfile(const char *charname, const char *filename)
   currPt.y = 0;
   while (ReadrawPSFile(infile, token, inname) != NULL)
   {
-    if (sscanf(token, " %ld", &number) == 1)
+    if (sscanf(token, " %d", &number) == 1)
     {
       putonstk(number, charname);
       continue;

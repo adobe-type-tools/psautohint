@@ -51,7 +51,7 @@ static ws(char *str) {
 }
 
 #define WRTNUM(i) {          \
-	sprintf(S0, "%ld", (i)); \
+	sprintf(S0, "%d", (i)); \
 	ws(S0);                  \
 }
 
@@ -71,7 +71,7 @@ static void ws(char *str) {
 }
 
 #define WRTNUM(i) {          \
-	sprintf(S0, "%ld", (i)); \
+	sprintf(S0, "%d", (i)); \
 	ws(S0);                  \
 }
 #endif
@@ -100,7 +100,7 @@ static void sws(char *str) {
 }
 
 #define SWRTNUM(i) {         \
-	sprintf(S0, "%ld", (i)); \
+	sprintf(S0, "%d", (i)); \
 	sws(S0);                 \
 }
 

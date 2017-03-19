@@ -300,7 +300,7 @@ void ReportConflictCheck(e, conflict, cp)
 void ReportConflictCnt(e, cnt) PPathElt e; integer cnt; {
   Fixed ex, ey;
   GetEndPoint(e, &ex, &ey);
-  (void) sprintf(S0, "%g %g conflict count = %ld",
+  (void) sprintf(S0, "%g %g conflict count = %d",
     FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)), cnt);
   ReportError(S0);
   }
@@ -312,7 +312,7 @@ void ReportRemFlare(e,e2,hFlg,i)
   if (!showClrInfo) return;
   GetEndPoint(e, &ex1, &ey1);
   GetEndPoint(e2, &ex2, &ey2);
-  (void) sprintf(S0, "Removed %s flare at %g %g by %g %g : %ld.",
+  (void) sprintf(S0, "Removed %s flare at %g %g by %g %g : %d.",
     hFlg ? "horizontal" : "vertical",
     FixToDbl(itfmx(ex1)), FixToDbl(itfmy(ey1)),
     FixToDbl(itfmx(ex2)), FixToDbl(itfmy(ey2)),
@@ -350,7 +350,7 @@ void ReportRemShortColors(ex, ey) Fixed ex, ey; {
 
 static void PrntVal(v) Fixed v; {
   if (v >= FixInt(100000L))
-    sprintf(S0, "%ld", FTrunc(v));
+    sprintf(S0, "%d", FTrunc(v));
   else
     sprintf(S0, "%g", FixToDbl(v));
   PrinMsg(S0);
@@ -552,7 +552,7 @@ void ListClrInfo() { /* debugging routine */
 void ReportAddVSeg(from, to, loc, i)
   Fixed from, to, loc; integer i; {
   if (!showClrInfo || !showVs) return;
-  (void)sprintf(S0, "add vseg %g %g to %g %g %ld",
+  (void)sprintf(S0, "add vseg %g %g to %g %g %d",
     FixToDbl(itfmx(loc)), FixToDbl(itfmy(from)),
     FixToDbl(itfmx(loc)), FixToDbl(itfmy(to)), i);
   PrintMessage(S0);
@@ -561,7 +561,7 @@ void ReportAddVSeg(from, to, loc, i)
 void ReportAddHSeg(from, to, loc, i)
   Fixed from, to, loc; integer i; {
   if (!showClrInfo || !showHs) return;
-  (void)sprintf(S0, "add hseg %g %g to %g %g %ld",
+  (void)sprintf(S0, "add hseg %g %g to %g %g %d",
     FixToDbl(itfmx(from)), FixToDbl(itfmy(loc)),
     FixToDbl(itfmx(to)), FixToDbl(itfmy(loc)), i);
   PrintMessage(S0);
@@ -662,7 +662,7 @@ void ReportMergeVVal(l0,r0,l1,r1,v0,s0,v1,s1)
 void ReportPruneHVal(val,v,i)
   PClrVal val,v; integer i; {
   if (!showClrInfo) return;
-  sprintf(S0, "PruneHVal: %ld\n\t", i);
+  sprintf(S0, "PruneHVal: %d\n\t", i);
   PrinMsg(S0);
   ShowHVal(val);
   PrinMsg("\n\t");
@@ -673,7 +673,7 @@ void ReportPruneHVal(val,v,i)
 void ReportPruneVVal(val,v,i)
   PClrVal val,v; integer i; {
   if (!showClrInfo) return;
-  sprintf(S0, "PruneVVal: %ld\n\t", i);
+  sprintf(S0, "PruneVVal: %d\n\t", i);
   PrinMsg(S0);
   ShowVVal(val);
   PrinMsg("\n\t");

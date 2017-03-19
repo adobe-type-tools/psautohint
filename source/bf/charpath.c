@@ -450,7 +450,7 @@ indx dirIx, pathIx;
             {
                 if (!bereallyQuiet) {
                     GetMasterDirName(dirname, dirIx);
-                    sprintf(globmsg, "Could not modify point closepath in directory '%s', character: %s near (%ld, %ld).\n", dirname, currentChar, FTrunc8(end->x), FTrunc8(end->y));
+                    sprintf(globmsg, "Could not modify point closepath in directory '%s', character: %s near (%d, %d).\n", dirname, currentChar, FTrunc8(end->x), FTrunc8(end->y));
                     LogMsg(globmsg, WARNING, OK, TRUE);
                 }
                 return;
@@ -797,12 +797,12 @@ static void WriteSbandWidth()
     }
     if (sbsame && wsame)
     {
-        sprintf(outstr, "%ld %d ", pathlist[0].sb, pathlist[0].width);
+        sprintf(outstr, "%d %d ", pathlist[0].sb, pathlist[0].width);
         WriteToBuffer();
     }
     else if (sbsame)
     {
-        sprintf(outstr, "%ld ", pathlist[0].sb);
+        sprintf(outstr, "%d ", pathlist[0].sb);
         WriteToBuffer();
         for (j = 0; j < dirCount; j++)
         {
@@ -817,7 +817,7 @@ static void WriteSbandWidth()
     {
         for (j = 0; j < dirCount; j++)
         {
-            sprintf(outstr, "%ld ",
+            sprintf(outstr, "%d ",
                     (j == 0) ? pathlist[j].sb : pathlist[j].sb - pathlist[0].sb);
             WriteToBuffer();
         }
@@ -831,7 +831,7 @@ static void WriteSbandWidth()
         GetLengthandSubrIx(opcount, &length, &subrix);
         if ((writeSubrOnce = (length == opcount)))
         {
-            sprintf(outstr, "%ld %d ", pathlist[0].sb, pathlist[0].width);
+            sprintf(outstr, "%d %d ", pathlist[0].sb, pathlist[0].width);
             WriteToBuffer();
             length = startix = 1;
         }
@@ -839,7 +839,7 @@ static void WriteSbandWidth()
         {
             for(j = startix; j < dirCount; j++)
             {
-                sprintf(outstr, "%ld ", (ix == 0) ?
+                sprintf(outstr, "%d ", (ix == 0) ?
                         (j == 0) ? pathlist[j].sb : pathlist[j].sb - pathlist[0].sb :
                         (j == 0) ? (int32_t)pathlist[j].width : (int32_t)(pathlist[j].width - pathlist[0].width));
                 WriteToBuffer();
@@ -1170,7 +1170,7 @@ static void InsertHint(PHintElt currHintElt, indx pathEltIx,
                     pathElt = pathlist[ix].path[pathIx];
                     if (pathElt.type != RCT)
                     {
-                        sprintf(globmsg, "Malformed path list: %s, dir: %d, element: %ld != RCT.\n",
+                        sprintf(globmsg, "Malformed path list: %s, dir: %d, element: %d != RCT.\n",
                                 currentChar, ix, pathIx);
                         LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
                     }
@@ -1271,7 +1271,7 @@ indx ix;
             if (!DoubleCheckFlexVals(i, ix, hintsdirIx)) {
                 end = &pathlist[i].path[ix];
                 GetMasterDirName(pathdir, i);
-                sprintf(globmsg, "Flex will not be included in character: %s in '%s' at element %d near (%ld, %ld) because the character does not have flex in each design.\n", currentChar, pathdir, (int) ix, FTrunc8(end->x), FTrunc8(end->y));
+                sprintf(globmsg, "Flex will not be included in character: %s in '%s' at element %d near (%d, %d) because the character does not have flex in each design.\n", currentChar, pathdir, (int) ix, FTrunc8(end->x), FTrunc8(end->y));
                 LogMsg(globmsg, WARNING, OK, TRUE);
                 return FALSE;
             }
@@ -1461,7 +1461,7 @@ static void ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
         newhinttype = (hinttype == (RM + ESCVAL) ? RY : RB);
         if (*errormsg)
         {
-            sprintf(globmsg, "Near miss for using operator: %s in character: %s in '%s'. (min=%ld..%ld[delta=%ld], mid=%ld..%ld[delta=%ld], max=%ld..%ld[delta=%ld])\n",
+            sprintf(globmsg, "Near miss for using operator: %s in character: %s in '%s'. (min=%d..%d[delta=%d], mid=%d..%d[delta=%d], max=%d..%d[delta=%d])\n",
                     (hinttype == (RM + ESCVAL)) ? "vstem3" : "hstem3",
                     currentChar, dirname,
                     FTrunc8((*hintElt)->leftorbot), FTrunc8((*hintElt)->rightortop), FTrunc8((*hintElt)->rightortop - (*hintElt)->leftorbot),
@@ -2003,7 +2003,7 @@ static boolean CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t 
             break;
         default:
             GetMasterDirName(dirname, dir1);
-            sprintf(globmsg, "Invalid index value: %d defined for curveto command4 in character: %s. Op=%d, dir=%s near (%ld %ld).\n", (int)opIx, currentChar, (int)op, dirname, FTrunc8(path1->x), FTrunc8(path1->y));
+            sprintf(globmsg, "Invalid index value: %d defined for curveto command4 in character: %s. Op=%d, dir=%s near (%d %d).\n", (int)opIx, currentChar, (int)op, dirname, FTrunc8(path1->x), FTrunc8(path1->y));
             LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
             break;
     }

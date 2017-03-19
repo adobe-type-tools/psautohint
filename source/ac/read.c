@@ -283,7 +283,7 @@ static void ReadHintInfo(nm, str) char nm;  const char *str; {
   PopPCd(&c0);
   c0.y += c0.x;  /* make absolute */
   /* Look for comment of path elements used to determine this band. */
-  if (sscanf(str, " %% %ld %ld", &elt1, &elt2) != 2)
+  if (sscanf(str, " %% %d %d", &elt1, &elt2) != 2)
   {
 	FlushLogFiles();
     sprintf(globmsg, "Extra hint information required for blended fonts is not in\n  character file: %s.  Please re-hint using the latest software.\n  Hints will not be included in this font.\n", fileName);
