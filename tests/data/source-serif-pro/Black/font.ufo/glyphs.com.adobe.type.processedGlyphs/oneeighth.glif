@@ -93,7 +93,7 @@
               <string>hstem -12 33</string>
               <string>hstem 243 32</string>
               <string>hstem 365 32</string>
-              <string>hstem 641 -20</string>
+              <string>hstem 634 -20</string>
               <string>vstem 115 123</string>
             </array>
           </dict>
@@ -117,7 +117,7 @@
               <string>hstem -12 33</string>
               <string>hstem 243 32</string>
               <string>hstem 365 32</string>
-              <string>hstem 641 -20</string>
+              <string>hstem 634 -20</string>
               <string>vstem 115 123</string>
               <string>vstem 519 96</string>
               <string>vstem 716 107</string>
@@ -131,7 +131,7 @@
               <string>hstem -12 33</string>
               <string>hstem 243 32</string>
               <string>hstem 365 32</string>
-              <string>hstem 641 -20</string>
+              <string>hstem 634 -20</string>
               <string>vstem 115 123</string>
               <string>vstem 524 99</string>
               <string>vstem 718 93</string>
@@ -145,7 +145,7 @@
               <string>hstem -12 33</string>
               <string>hstem 243 32</string>
               <string>hstem 365 32</string>
-              <string>hstem 641 -20</string>
+              <string>hstem 634 -20</string>
               <string>vstem 115 123</string>
               <string>vstem 519 96</string>
               <string>vstem 716 107</string>
@@ -159,7 +159,7 @@
               <string>hstem -12 33</string>
               <string>hstem 243 32</string>
               <string>hstem 365 32</string>
-              <string>hstem 641 -20</string>
+              <string>hstem 634 -20</string>
               <string>vstem 115 123</string>
               <string>vstem 524 99</string>
               <string>vstem 718 93</string>
@@ -173,7 +173,7 @@
               <string>hstem -12 33</string>
               <string>hstem 243 32</string>
               <string>hstem 365 32</string>
-              <string>hstem 641 -20</string>
+              <string>hstem 634 -20</string>
               <string>vstem 115 123</string>
               <string>vstem 519 96</string>
               <string>vstem 716 107</string>

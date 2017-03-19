@@ -38,7 +38,7 @@
             <string>hintSet0000</string>
             <key>stems</key>
             <array>
-              <string>hstem 8 -21</string>
+              <string>hstem -204 400</string>
               <string>vstem 244 228</string>
             </array>
           </dict>

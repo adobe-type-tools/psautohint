@@ -77,7 +77,7 @@
               <string>hstem -225 51</string>
               <string>hstem -12 64</string>
               <string>hstem 424 62</string>
-              <string>hstem 711 -20</string>
+              <string>hstem 589 122</string>
               <string>vstem 256 60</string>
             </array>
           </dict>
@@ -89,7 +89,7 @@
               <string>hstem -225 51</string>
               <string>hstem -12 64</string>
               <string>hstem 424 62</string>
-              <string>hstem 711 -20</string>
+              <string>hstem 589 122</string>
               <string>vstem 216 78</string>
             </array>
           </dict>
@@ -101,7 +101,7 @@
               <string>hstem -225 51</string>
               <string>hstem -12 64</string>
               <string>hstem 424 62</string>
-              <string>hstem 711 -20</string>
+              <string>hstem 589 122</string>
               <string>vstem 256 60</string>
             </array>
           </dict>

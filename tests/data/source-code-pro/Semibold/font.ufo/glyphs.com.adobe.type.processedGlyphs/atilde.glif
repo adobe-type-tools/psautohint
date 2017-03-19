@@ -83,7 +83,6 @@
               <string>hstem 242 72</string>
               <string>hstem 410 93</string>
               <string>hstem 575 81</string>
-              <string>hstem 719 -20</string>
               <string>vstem 71 111</string>
               <string>vstem 410 115</string>
             </array>
@@ -97,7 +96,6 @@
               <string>hstem 242 72</string>
               <string>hstem 410 93</string>
               <string>hstem 575 81</string>
-              <string>hstem 719 -20</string>
               <string>vstem 71 111</string>
               <string>vstem 426.5 98.5</string>
             </array>
@@ -111,7 +109,6 @@
               <string>hstem 242 72</string>
               <string>hstem 410 93</string>
               <string>hstem 575 81</string>
-              <string>hstem 719 -20</string>
               <string>vstem 71 111</string>
               <string>vstem 426.5 98.5</string>
             </array>
@@ -125,7 +122,6 @@
               <string>hstem 242 72</string>
               <string>hstem 410 93</string>
               <string>hstem 575 81</string>
-              <string>hstem 719 -20</string>
               <string>vstem 71 111</string>
               <string>vstem 410 115</string>
             </array>
@@ -139,7 +135,6 @@
               <string>hstem 242 72</string>
               <string>hstem 410 93</string>
               <string>hstem 575 81</string>
-              <string>hstem 719 -20</string>
               <string>vstem 71 111</string>
               <string>vstem 410 115</string>
             </array>
@@ -153,7 +148,6 @@
               <string>hstem 242 72</string>
               <string>hstem 410 93</string>
               <string>hstem 575 81</string>
-              <string>hstem 719 -20</string>
               <string>vstem 71 111</string>
               <string>vstem 428 74</string>
             </array>
@@ -180,7 +174,6 @@
               <string>hstem 242 72</string>
               <string>hstem 410 93</string>
               <string>hstem 575 81</string>
-              <string>hstem 719 -20</string>
               <string>vstem 71 111</string>
               <string>vstem 410 115</string>
             </array>

@@ -8,10 +8,10 @@
       <point x="508" y="640" />
       <point type="curve" x="524" y="705" />
       <point type="line" x="446" y="705" />
-      <point name="hintSet0003" x="433" y="664" />
+      <point x="433" y="664" />
       <point x="406" y="634" />
       <point type="curve" x="364" y="634" />
-      <point name="hintSet0004" x="322" y="634" />
+      <point x="322" y="634" />
       <point x="307" y="664" />
       <point type="curve" x="311" y="705" />
       <point type="line" x="234" y="705" />
@@ -32,25 +32,7 @@
             <string>hintSet0000</string>
             <key>stems</key>
             <array>
-              <string>hstem 575 130</string>
-              <string>vstem 232 292</string>
-            </array>
-          </dict>
-          <dict>
-            <key>pointTag</key>
-            <string>hintSet0003</string>
-            <key>stems</key>
-            <array>
               <string>hstem 575 59</string>
-              <string>vstem 232 292</string>
-            </array>
-          </dict>
-          <dict>
-            <key>pointTag</key>
-            <string>hintSet0004</string>
-            <key>stems</key>
-            <array>
-              <string>hstem 575 130</string>
               <string>vstem 232 292</string>
             </array>
           </dict>

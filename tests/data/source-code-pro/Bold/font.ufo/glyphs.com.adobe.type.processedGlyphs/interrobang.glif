@@ -71,7 +71,7 @@
             <key>stems</key>
             <array>
               <string>hstem 9 -21</string>
-              <string>hstem 509 -20</string>
+              <string>hstem 255 254</string>
               <string>hstem 572 110</string>
               <string>vstem 186 183</string>
             </array>
@@ -82,7 +82,7 @@
             <key>stems</key>
             <array>
               <string>hstem -12 192</string>
-              <string>hstem 509 -20</string>
+              <string>hstem 255 254</string>
               <string>hstem 572 110</string>
               <string>vstem 186 183</string>
             </array>
@@ -93,7 +93,7 @@
             <key>stems</key>
             <array>
               <string>hstem 9 -21</string>
-              <string>hstem 509 -20</string>
+              <string>hstem 255 254</string>
               <string>hstem 572 110</string>
               <string>vstem 186 183</string>
             </array>

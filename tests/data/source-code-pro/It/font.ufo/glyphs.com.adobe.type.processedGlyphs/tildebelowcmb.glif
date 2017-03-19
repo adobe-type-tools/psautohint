@@ -18,7 +18,7 @@
       <point name="hintSet0005" x="89" y="-79" />
       <point x="51" y="-136" />
       <point type="curve" x="35" y="-215" />
-      <point name="hintSet0006" type="line" x="90" y="-218" />
+      <point type="line" x="90" y="-218" />
       <point x="100" y="-170" />
       <point x="119" y="-138" />
       <point type="curve" x="149" y="-138" />
@@ -50,16 +50,6 @@
             <key>stems</key>
             <array>
               <string>hstem -194 -21</string>
-              <string>hstem -138 59</string>
-              <string>vstem 35 363</string>
-            </array>
-          </dict>
-          <dict>
-            <key>pointTag</key>
-            <string>hintSet0006</string>
-            <key>stems</key>
-            <array>
-              <string>hstem -197 -21</string>
               <string>hstem -138 59</string>
               <string>vstem 35 363</string>
             </array>

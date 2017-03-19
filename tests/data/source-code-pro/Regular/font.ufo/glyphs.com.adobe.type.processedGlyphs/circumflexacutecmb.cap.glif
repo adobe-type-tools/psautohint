@@ -32,7 +32,6 @@
             <string>hintSet0000</string>
             <key>stems</key>
             <array>
-              <string>hstem 725 -20</string>
               <string>hstem 768 47</string>
               <string>vstem 171 352</string>
             </array>

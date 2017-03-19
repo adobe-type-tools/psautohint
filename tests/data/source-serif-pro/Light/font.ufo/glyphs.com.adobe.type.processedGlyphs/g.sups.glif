@@ -126,7 +126,7 @@
             <key>stems</key>
             <array>
               <string>hstem 275 25</string>
-              <string>hstem 434 33</string>
+              <string>hstem 422 45</string>
               <string>hstem 538 21</string>
               <string>hstem 732 21</string>
               <string>vstem 51 37</string>

@@ -56,7 +56,7 @@
             <key>stems</key>
             <array>
               <string>hstem 9 -21</string>
-              <string>hstem 493 -20</string>
+              <string>hstem 366 127</string>
               <string>vstem 191 117</string>
             </array>
           </dict>
@@ -66,7 +66,7 @@
             <key>stems</key>
             <array>
               <string>hstem -12 127</string>
-              <string>hstem 493 -20</string>
+              <string>hstem 366 127</string>
               <string>vstem 191 117</string>
             </array>
           </dict>
@@ -76,7 +76,7 @@
             <key>stems</key>
             <array>
               <string>hstem 9 -21</string>
-              <string>hstem 493 -20</string>
+              <string>hstem 366 127</string>
               <string>vstem 191 117</string>
             </array>
           </dict>

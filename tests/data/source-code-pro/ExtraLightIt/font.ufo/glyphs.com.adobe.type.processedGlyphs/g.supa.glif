@@ -184,7 +184,7 @@
               <string>hstem 258 24</string>
               <string>hstem 410 27</string>
               <string>hstem 511 24</string>
-              <string>hstem 711 24</string>
+              <string>hstem 711 16</string>
               <string>vstem 161 29</string>
               <string>vstem 236 29</string>
               <string>vstem 446 29</string>

@@ -53,7 +53,7 @@
             <key>stems</key>
             <array>
               <string>hstem -182 -21</string>
-              <string>hstem 22 -21</string>
+              <string>hstem 1 163</string>
               <string>hstem 337 178</string>
               <string>vstem 238 169</string>
             </array>

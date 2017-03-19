@@ -73,7 +73,6 @@
               <string>hstem -206 91</string>
               <string>hstem 9 94</string>
               <string>hstem 408 95</string>
-              <string>hstem 719 -20</string>
               <string>vstem 53 117</string>
               <string>vstem 402 116</string>
             </array>
@@ -86,7 +85,6 @@
               <string>hstem -206 91</string>
               <string>hstem 9 94</string>
               <string>hstem 491 -20</string>
-              <string>hstem 719 -20</string>
               <string>vstem 53 117</string>
               <string>vstem 402 116</string>
             </array>
@@ -99,7 +97,6 @@
               <string>hstem -206 91</string>
               <string>hstem 9 94</string>
               <string>hstem 408 95</string>
-              <string>hstem 719 -20</string>
               <string>vstem 53 117</string>
               <string>vstem 402 116</string>
             </array>
@@ -112,7 +109,6 @@
               <string>hstem -206 91</string>
               <string>hstem 9 94</string>
               <string>hstem 408 95</string>
-              <string>hstem 719 -20</string>
               <string>vstem 53 117</string>
               <string>vstem 408 110</string>
             </array>
@@ -125,7 +121,6 @@
               <string>hstem -206 91</string>
               <string>hstem 9 94</string>
               <string>hstem 408 95</string>
-              <string>hstem 719 -20</string>
               <string>vstem 53 117</string>
               <string>vstem 402 116</string>
             </array>

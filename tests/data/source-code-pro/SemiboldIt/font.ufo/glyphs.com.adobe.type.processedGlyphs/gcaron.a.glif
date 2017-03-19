@@ -107,7 +107,6 @@
             <key>stems</key>
             <array>
               <string>hstem -217 69</string>
-              <string>hstem 22 -21</string>
               <string>hstem 155 69</string>
               <string>hstem 409 82</string>
               <string>hstem 577 72</string>
@@ -122,7 +121,6 @@
             <key>stems</key>
             <array>
               <string>hstem -217 69</string>
-              <string>hstem 22 -21</string>
               <string>hstem 155 69</string>
               <string>hstem 409 82</string>
               <string>hstem 577 72</string>
@@ -137,7 +135,6 @@
             <key>stems</key>
             <array>
               <string>hstem -217 69</string>
-              <string>hstem 22 -21</string>
               <string>hstem 155 69</string>
               <string>hstem 428 75</string>
               <string>hstem 577 72</string>
@@ -152,7 +149,6 @@
             <key>stems</key>
             <array>
               <string>hstem -217 69</string>
-              <string>hstem 22 -21</string>
               <string>hstem 155 69</string>
               <string>hstem 409 82</string>
               <string>hstem 577 72</string>
@@ -167,7 +163,6 @@
             <key>stems</key>
             <array>
               <string>hstem -217 69</string>
-              <string>hstem 22 -21</string>
               <string>hstem 155 69</string>
               <string>hstem 409 82</string>
               <string>hstem 577 72</string>
@@ -182,7 +177,6 @@
             <key>stems</key>
             <array>
               <string>hstem -217 69</string>
-              <string>hstem 22 -21</string>
               <string>hstem 155 69</string>
               <string>hstem 409 82</string>
               <string>hstem 577 72</string>
@@ -197,7 +191,6 @@
             <key>stems</key>
             <array>
               <string>hstem -217 69</string>
-              <string>hstem 22 -21</string>
               <string>hstem 155 69</string>
               <string>hstem 428 75</string>
               <string>hstem 577 72</string>
@@ -212,7 +205,6 @@
             <key>stems</key>
             <array>
               <string>hstem -217 69</string>
-              <string>hstem 22 -21</string>
               <string>hstem 155 69</string>
               <string>hstem 409 82</string>
               <string>hstem 577 72</string>
@@ -227,7 +219,6 @@
             <key>stems</key>
             <array>
               <string>hstem -217 69</string>
-              <string>hstem 22 -21</string>
               <string>hstem 155 69</string>
               <string>hstem 409 82</string>
               <string>hstem 577 72</string>

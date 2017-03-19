@@ -33,7 +33,6 @@
             <key>stems</key>
             <array>
               <string>hstem 572 31</string>
-              <string>hstem 718 -20</string>
               <string>vstem 153 40</string>
               <string>vstem 407 40</string>
             </array>

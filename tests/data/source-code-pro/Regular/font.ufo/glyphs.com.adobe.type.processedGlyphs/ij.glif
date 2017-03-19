@@ -37,8 +37,8 @@
       <point x="345" y="-150" />
       <point x="329" y="-146" />
       <point type="curve" x="316" y="-142" />
-      <point name="hintSet0016" type="line" x="300" y="-204" />
-      <point name="hintSet0017" x="317" y="-211" />
+      <point type="line" x="300" y="-204" />
+      <point x="317" y="-211" />
       <point x="341" y="-217" />
     </contour>
     <contour>
@@ -80,32 +80,6 @@
           <dict>
             <key>pointTag</key>
             <string>hintSet0004</string>
-            <key>stems</key>
-            <array>
-              <string>hstem -217 67</string>
-              <string>hstem 21 -21</string>
-              <string>hstem 486 -20</string>
-              <string>hstem 586 116</string>
-              <string>vstem 93 121</string>
-              <string>vstem 422 82</string>
-            </array>
-          </dict>
-          <dict>
-            <key>pointTag</key>
-            <string>hintSet0016</string>
-            <key>stems</key>
-            <array>
-              <string>hstem -183 -21</string>
-              <string>hstem 21 -21</string>
-              <string>hstem 486 -20</string>
-              <string>hstem 586 116</string>
-              <string>vstem 112 82</string>
-              <string>vstem 422 82</string>
-            </array>
-          </dict>
-          <dict>
-            <key>pointTag</key>
-            <string>hintSet0017</string>
             <key>stems</key>
             <array>
               <string>hstem -217 67</string>

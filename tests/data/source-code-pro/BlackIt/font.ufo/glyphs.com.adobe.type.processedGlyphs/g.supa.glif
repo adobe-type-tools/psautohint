@@ -99,7 +99,7 @@
             <array>
               <string>hstem 231 68</string>
               <string>hstem 353 83</string>
-              <string>hstem 499 -20</string>
+              <string>hstem 472 70</string>
               <string>hstem 621 77</string>
               <string>vstem 168 92</string>
               <string>vstem 381 110</string>
@@ -112,7 +112,7 @@
             <array>
               <string>hstem 231 68</string>
               <string>hstem 353 83</string>
-              <string>hstem 499 -20</string>
+              <string>hstem 472 70</string>
               <string>hstem 621 77</string>
               <string>vstem 193 100</string>
               <string>vstem 383 99</string>
@@ -125,7 +125,7 @@
             <array>
               <string>hstem 231 68</string>
               <string>hstem 353 83</string>
-              <string>hstem 499 -20</string>
+              <string>hstem 472 70</string>
               <string>hstem 638 68</string>
               <string>vstem 193 100</string>
               <string>vstem 383 99</string>
@@ -138,7 +138,7 @@
             <array>
               <string>hstem 231 68</string>
               <string>hstem 353 83</string>
-              <string>hstem 499 -20</string>
+              <string>hstem 472 70</string>
               <string>hstem 621 77</string>
               <string>vstem 168 92</string>
               <string>vstem 383 99</string>
@@ -151,7 +151,7 @@
             <array>
               <string>hstem 231 68</string>
               <string>hstem 353 83</string>
-              <string>hstem 499 -20</string>
+              <string>hstem 472 70</string>
               <string>hstem 621 77</string>
               <string>vstem 126 94</string>
               <string>vstem 383 99</string>
@@ -164,7 +164,7 @@
             <array>
               <string>hstem 231 68</string>
               <string>hstem 353 83</string>
-              <string>hstem 499 -20</string>
+              <string>hstem 472 70</string>
               <string>hstem 621 77</string>
               <string>vstem 168 92</string>
               <string>vstem 381 110</string>
@@ -190,7 +190,7 @@
             <array>
               <string>hstem 231 68</string>
               <string>hstem 353 83</string>
-              <string>hstem 499 -20</string>
+              <string>hstem 472 70</string>
               <string>hstem 621 77</string>
               <string>vstem 126 94</string>
               <string>vstem 381 110</string>

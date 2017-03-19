@@ -74,19 +74,19 @@
       <point x="172" y="-44" />
       <point x="182" y="-29" />
       <point type="curve" x="207" y="-13" />
-      <point name="hintSet0029" x="225" y="-18" />
+      <point x="225" y="-18" />
       <point x="247" y="-20" />
       <point type="curve" x="283" y="-20" />
       <point type="line" x="345" y="-20" />
       <point x="402" y="-20" />
       <point x="432" y="-26" />
       <point type="curve" x="432" y="-58" />
-      <point name="hintSet0032" x="432" y="-92" />
+      <point x="432" y="-92" />
       <point x="377" y="-118" />
     </contour>
     <contour>
-      <point name="hintSet0033" type="curve" x="370" y="573" />
-      <point x="447" y="573" />
+      <point type="curve" x="370" y="573" />
+      <point name="hintSet0034" x="447" y="573" />
       <point x="491" y="622" />
       <point type="curve" x="494" y="725" />
       <point type="line" x="402" y="730" />
@@ -121,7 +121,7 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 388 108</string>
               <string>hstem 637 102</string>
@@ -135,7 +135,7 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 388 108</string>
               <string>hstem 637 102</string>
@@ -149,7 +149,7 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 388 108</string>
               <string>hstem 637 102</string>
@@ -163,7 +163,7 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 409 99</string>
               <string>hstem 637 102</string>
@@ -177,7 +177,7 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 388 108</string>
               <string>hstem 637 102</string>
@@ -191,7 +191,7 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 388 108</string>
               <string>hstem 637 102</string>
@@ -205,7 +205,7 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 388 108</string>
               <string>hstem 637 102</string>
@@ -219,7 +219,7 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 409 99</string>
               <string>hstem 637 102</string>
@@ -233,49 +233,21 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 388 108</string>
-              <string>hstem 637 102</string>
+              <string>hstem 573 102</string>
               <string>vstem 52 120</string>
               <string>vstem 432 140</string>
             </array>
           </dict>
           <dict>
             <key>pointTag</key>
-            <string>hintSet0029</string>
+            <string>hintSet0034</string>
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
               <string>hstem -20 113</string>
-              <string>hstem 157 89</string>
-              <string>hstem 388 108</string>
-              <string>hstem 637 102</string>
-              <string>vstem 73 138</string>
-              <string>vstem 432 140</string>
-            </array>
-          </dict>
-          <dict>
-            <key>pointTag</key>
-            <string>hintSet0032</string>
-            <key>stems</key>
-            <array>
-              <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
-              <string>hstem 157 89</string>
-              <string>hstem 388 108</string>
-              <string>hstem 637 102</string>
-              <string>vstem 52 120</string>
-              <string>vstem 432 140</string>
-            </array>
-          </dict>
-          <dict>
-            <key>pointTag</key>
-            <string>hintSet0033</string>
-            <key>stems</key>
-            <array>
-              <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
               <string>hstem 157 89</string>
               <string>hstem 388 108</string>
               <string>hstem 573 102</string>
@@ -289,7 +261,7 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 388 108</string>
               <string>hstem 637 102</string>
@@ -303,12 +275,12 @@
             <key>stems</key>
             <array>
               <string>hstem -211 93</string>
-              <string>hstem -13 106</string>
+              <string>hstem -20 113</string>
               <string>hstem 157 89</string>
               <string>hstem 388 108</string>
               <string>hstem 573 102</string>
-              <string>vstem 73 138</string>
-              <string>vstem 402 92</string>
+              <string>vstem 52 120</string>
+              <string>vstem 432 140</string>
             </array>
           </dict>
         </array>

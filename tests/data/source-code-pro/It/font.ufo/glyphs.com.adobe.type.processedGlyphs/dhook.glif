@@ -9,7 +9,7 @@
       <point x="346" y="23" />
       <point type="curve" x="397" y="74" />
       <point type="line" x="401" y="74" />
-      <point name="hintSet0003" type="line" x="393" y="1" />
+      <point type="line" x="393" y="1" />
       <point type="line" x="456" y="1" />
       <point type="line" x="571" y="569" />
       <point x="582" y="625" />
@@ -66,17 +66,6 @@
             <key>stems</key>
             <array>
               <string>hstem -12 64</string>
-              <string>hstem 434 64</string>
-              <string>hstem 657 67</string>
-              <string>vstem 52 79</string>
-            </array>
-          </dict>
-          <dict>
-            <key>pointTag</key>
-            <string>hintSet0003</string>
-            <key>stems</key>
-            <array>
-              <string>hstem 22 -21</string>
               <string>hstem 434 64</string>
               <string>hstem 657 67</string>
               <string>vstem 52 79</string>
