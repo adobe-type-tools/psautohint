@@ -933,7 +933,7 @@ class UFOFontData:
 
 			if "FDDict" in fontInfoData:
 
-				blueFuzz = ConvertFontToCID.getBlueFuzz(inputPath)
+				blueFuzz = fdDict.BlueFuzz
 				fdGlyphDict, fontDictList, finalFDict = ConvertFontToCID.parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY, psName, blueFuzz)
 				if finalFDict == None:
 					# If a font dict was not explicitly specified for the output font, use the first user-specified font dict.
