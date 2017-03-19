@@ -12,6 +12,9 @@ addons:
     packages:
       - gcc-multilib
 
+install:
+  - pip install -r requirements.txt
+
 script:
   - make -j
   - make -j check
