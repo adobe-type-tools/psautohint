@@ -104,7 +104,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /*****************************************************************************/
 typedef struct Bbox
    {
-   long int llx, lly, urx, ury;
+   int32_t llx, lly, urx, ury;
    } Bbox, *BboxPtr;
 
 /*****************************************************************************/
@@ -112,7 +112,7 @@ typedef struct Bbox
 /*****************************************************************************/
 typedef struct
    {
-   long int x, y;
+   int32_t x, y;
    } Cd, *CdPtr;
 
 
@@ -142,7 +142,7 @@ extern boolean scalinghints;
 /* fails an error message is printed and the program exits.                  */
 /*****************************************************************************/
 extern FILE *
-ACOpenFile(char *, char *, short);
+ACOpenFile(char *, char *, int16_t);
 
 /*****************************************************************************/
 /* Deletes the specified file from the bez directory.                        */
@@ -154,7 +154,7 @@ DeleteBezFile(char *, char *);
 /* Reads successive character and file names from character set file.        */
 /*****************************************************************************/
 extern char *
-ReadNames(char *, char *, long *, long *, FILE *);
+ReadNames(char *, char *, int32_t *, int32_t *, FILE *);
 
 /*****************************************************************************/
 /* Reads a token from the data buffer.                                       */
@@ -172,8 +172,8 @@ BAKFile(char *);
 /* Reads the file composites.ps, if it exists, and attempts to create        */
 /* composite chars. for those listed.                                        */
 /*****************************************************************************/
-extern long
-make_composites(boolean, boolean, long *, char *, boolean, char **);
+extern int32_t
+make_composites(boolean, boolean, int32_t *, char *, boolean, char **);
 
 /*****************************************************************************/
 /* Returns the max number of composites for the font.                        */
@@ -185,13 +185,13 @@ readcomposite(boolean, indx);
 /* Computes the character bounding box.                                      */
 /*****************************************************************************/
 extern int
-computesbandbbx(char *, char *, long, BboxPtr, boolean, long, long);
+computesbandbbx(char *, char *, int32_t, BboxPtr, boolean, int32_t, int32_t);
 
-extern long
+extern int32_t
 GetMaxBytes(void);
 
 extern void
-SetMaxBytes(long);
+SetMaxBytes(int32_t);
 
 extern CharsetParser
 GetCharsetParser();
@@ -224,7 +224,7 @@ set_uniqueIDFile(char *);
 /* Transforms a point using the global variable, matrix.                     */
 /*****************************************************************************/
 extern int
-TransformPoint(long *, long*, boolean);
+TransformPoint(int32_t *, int32_t*, boolean);
 
 /*****************************************************************************/
 /* Returns the name of the character set file.                               */
@@ -248,7 +248,7 @@ get_encodingfilename(char *, boolean, int);
 /* Make an Adobe PS font or a release font.                                  */
 /*****************************************************************************/
 extern int
-makePSfont(char *, boolean, boolean, boolean, long, long, long);
+makePSfont(char *, boolean, boolean, boolean, int32_t, int32_t, int32_t);
 
 /*****************************************************************************/
 /* Make a Macintosh printer font.                                            */
@@ -268,17 +268,17 @@ GetFontMatrix(char *, char *);
 /*****************************************************************************/
 /* Returns the total number of input directories.                            */
 /*****************************************************************************/
-extern short
+extern int16_t
 GetTotalInputDirs(void);
 
 extern void
-SetTotalInputDirs(short);
+SetTotalInputDirs(int16_t);
 
 /*****************************************************************************/
 /* Parse the private dict portion of an ASCII format font.                   */
 /*****************************************************************************/
 extern void
-ParseFont(FILE *, FILE *, long, long *, long *, long *, long *, boolean);
+ParseFont(FILE *, FILE *, int32_t, int32_t *, int32_t *, int32_t *, int32_t *, boolean);
 
 /*****************************************************************************/
 /* Program to derive printer font file name for the mac from the PostScript  */
@@ -302,13 +302,13 @@ convert_illcharfile(const char *, const char *);
 extern void
 convert_illfiles(boolean);
 
-extern long
-process_chars(boolean, boolean, boolean, long *, long *, boolean, boolean);
+extern int32_t
+process_chars(boolean, boolean, boolean, int32_t *, int32_t *, boolean, boolean);
 
 extern void
 set_scale(float *);
 
-extern short
+extern int16_t
 strindex(char *, char *);
 
 extern boolean ConvertCharFiles(char *inputDir,	
@@ -337,7 +337,7 @@ WriteEntry(FILE *, char *, char *, boolean, boolean);
 /* Returns whether given character is in StandardEncoding.                   */
 /*****************************************************************************/
 extern boolean
-InStandardEncoding(char *, long *);
+InStandardEncoding(char *, int32_t *);
 
 /*****************************************************************************/
 /* Writes copyright notice and trademark information.                        */
@@ -355,7 +355,7 @@ FreeCompTab(void);
 /* Deallocates memory and deletes temporary files.                           */
 /*****************************************************************************/
 extern int
-cleanup(short);
+cleanup(int16_t);
 
 extern char *
 GetBaseFontPath(boolean);
@@ -378,7 +378,7 @@ ReallocateMem(char *, unsigned int, const char *);
 extern void
 UnallocateMem(void *ptr);
 
-extern unsigned long
+extern uint32_t
 CheckFileBufferLen(char **, char *);
 
 extern void
@@ -393,13 +393,13 @@ WriteStart(FILE *, const char *);
 extern void
 getidfilename(char *);
 
-extern long
-ACReadFile(char *, FILE *, char *, long);
+extern int32_t
+ACReadFile(char *, FILE *, char *, int32_t);
 
-extern long
+extern int32_t
 getmaxcomps(void);
 
-extern long
+extern int32_t
 getrealcomps(void);
 
 extern void

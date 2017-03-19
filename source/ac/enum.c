@@ -26,7 +26,7 @@ boolean extracolor;
 {
   indx ix;
   boolean result = TRUE;
-  short count;
+  int16_t count;
   struct direct **namelist;
  
   count = BFscandir(inPrefix, &namelist, includefile, bf_alphasort);

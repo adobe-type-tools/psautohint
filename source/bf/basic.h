@@ -29,8 +29,8 @@ typedef unsigned char boolean;
 #endif
 #define ABS(a) ((a) >= 0 ? (a) : -(a))
 /* Round the same way as PS. i.e. -6.5 ==> -6.0 */
-#define LROUND(a) ((a > 0) ? (long)(a + 0.5) : ((a + (long)(-a)) == -0.5) ? (long) a : (long)(a - 0.5))
-#define	 SCALEDRTOL(a, s) (a<0 ? (long) ((a*s) - 0.5) : (long) ((a*s) + 0.5))
+#define LROUND(a) ((a > 0) ? (int32_t)(a + 0.5) : ((a + (int32_t)(-a)) == -0.5) ? (int32_t) a : (int32_t)(a - 0.5))
+#define	 SCALEDRTOL(a, s) (a<0 ? (int32_t) ((a*s) - 0.5) : (int32_t) ((a*s) + 0.5))
 
 
 typedef int indx;		/* for indexes that could be either short or
@@ -61,10 +61,10 @@ typedef int indx;		/* for indexes that could be either short or
 extern char globmsg[MAXMSGLEN + 1];	/* used to format the string passed to LogMsg */
 
 extern void LogMsg(
-    char *, short, short, boolean
+    char *, int16_t, int16_t, boolean
 );
 
-extern short WarnCount(
+extern int16_t WarnCount(
     void
 );
 

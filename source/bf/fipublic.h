@@ -27,7 +27,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 typedef struct fontinfo
 {
-  short exit_status;		/* NORMAL_RETURN = 0 - normal return => */
+  int16_t exit_status;		/* NORMAL_RETURN = 0 - normal return => */
   /* keyword found and argument ok, */
   /* value_string has value */
   /* OPTIONAL_NOT_FOUND = 1 */
@@ -36,7 +36,7 @@ typedef struct fontinfo
   /* ERROR_RETURN = 2 - error return =>    keyword not found or argument
      bad, */
   /* value_string has error msg describing problem */
-  short value_is_string;	/* 0 means false */
+  int16_t value_is_string;	/* 0 means false */
   char *value_string;
 } FINODE, *FIPTR;
 
@@ -90,7 +90,7 @@ void
 );
 
 extern void ParseIntStems(
-char *, boolean, long, int *, long*, char *
+char *, boolean, int32_t, int *, int32_t*, char *
 );
 
 #endif /*FIPUBLIC_H*/

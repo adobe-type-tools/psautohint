@@ -20,7 +20,7 @@ PClrPoint prv_bst;
 char bch;
 Fixed bx, by;
 boolean bstB;
-short subpathcount;
+int16_t subpathcount;
 extern char *bezoutput;
 extern int bezoutputalloc;
 extern int bezoutputactual;
@@ -28,9 +28,9 @@ extern int bezoutputactual;
 #define ws(str) WriteString(str)
 int writeAbsolute = 1;
 
-long int FRnd(long int x){
+int32_t FRnd(int32_t x){
     /* This is meant to work on Fixed 24.8 values, not the elt path (x,y) which are 25.7 */
-    long int r;
+    int32_t r;
     r = x;
     if (roundToInt)
     {
@@ -41,7 +41,7 @@ long int FRnd(long int x){
 }
 
 /* returns the number of characters written and possibly encrypted*/
-static long WriteString(char *str) {
+static int32_t WriteString(char *str) {
 	if (bezoutput) {
 		if ((bezoutputactual + (int)strlen(str)) >= bezoutputalloc) {
 			int desiredsize = MAX(bezoutputalloc * 2, (bezoutputalloc + (int)strlen(str)));
@@ -55,17 +55,17 @@ static long WriteString(char *str) {
 		}
 		strcat(bezoutput, str);
 		bezoutputactual += (int)strlen(str);
-		return (long)strlen(str);
+		return (int32_t)strlen(str);
 	}
 	else {
-		return DoContEncrypt((char *)str, outputfile, FALSE, (unsigned long)INLEN);
+		return DoContEncrypt((char *)str, outputfile, FALSE, (uint32_t)INLEN);
 	}
 }
 
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal p;laces. */
 #define WRTNUM(i)                           \
 	{                                       \
-		sprintf(S0, "%ld ", (long int)(i)); \
+		sprintf(S0, "%ld ", (int32_t)(i)); \
 		ws(S0);                             \
 	}
 
@@ -193,7 +193,7 @@ void safestrcat(char *s1, char *s2) {
 #define sws(str) safestrcat(hintmaskstr, (char *)str)
 
 #define SWRTNUM(i) {                    \
-sprintf(S0, "%ld ", (long int)(i)); \
+sprintf(S0, "%ld ", (int32_t)(i)); \
 sws(S0);                            \
 }
 
@@ -593,7 +593,7 @@ static void cp(PPathElt e) {
 }
 
 static void NumberPath() {
-	register short int cnt;
+	register int16_t cnt;
 	register PPathElt e;
 	e = pathStart;
 	cnt = 1;

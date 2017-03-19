@@ -34,10 +34,10 @@ static void FMiniFltn(f0, f1, f2, f3, pfr, inside)
 #define d3x (p[8])
 #define d3y (p[9])
 #define MiniBlkSz (10)
-#define mdpt(a,b) (((long)(a)+(long)(b))>>1)
-long int cds[MiniBlkSz*MiniFltnMaxDepth], dpth, eps;
-long int bbLLX, bbLLY, bbURX, bbURY;
-register long int *p;
+#define mdpt(a,b) (((int32_t)(a)+(int32_t)(b))>>1)
+int32_t cds[MiniBlkSz*MiniFltnMaxDepth], dpth, eps;
+int32_t bbLLX, bbLLY, bbURX, bbURY;
+register int32_t *p;
 p = cds; dpth = 1;
 *(p++) = inside; /* initial value of inrect2. Set to True by caller, and is never set false.  */
 *(p++) = FALSE; /* inbbox2 starts out FALSE */
@@ -55,23 +55,23 @@ Once the the current set of points meets the test that one of the control points
  then the algoithm iteratively steps back to the previous set. If thsi does not meet the test, the algorith
  iterates forward again
  */
-/*DEBUG 8 BIT. AFter chaning the fractinoal part to 8 bits form 7 bits, had to change all the short values to long in order to not overflow math operations. The only reason these were all shorts was speed and memory issues in 1986. */
+/*DEBUG 8 BIT. AFter chaning the fractinoal part to 8 bits form 7 bits, had to change all the int16_t values to int32_t in order to not overflow math operations. The only reason these were all shorts was speed and memory issues in 1986. */
  { register Fixed llx, lly;
   llx = pfr->llx; lly = pfr->lly;
-  *(p++) = (long)MFix(f0.x-llx); *(p++) = (long)MFix(f0.y-lly);
-  *(p++) = (long)MFix(f1.x-llx); *(p++) = (long)MFix(f1.y-lly);
-  *(p++) = (long)MFix(f2.x-llx); *(p++) = (long)MFix(f2.y-lly);
-  *(p++) = (long)MFix(f3.x-llx); *(p++) = (long)MFix(f3.y-lly);
+  *(p++) = (int32_t)MFix(f0.x-llx); *(p++) = (int32_t)MFix(f0.y-lly);
+  *(p++) = (int32_t)MFix(f1.x-llx); *(p++) = (int32_t)MFix(f1.y-lly);
+  *(p++) = (int32_t)MFix(f2.x-llx); *(p++) = (int32_t)MFix(f2.y-lly);
+  *(p++) = (int32_t)MFix(f3.x-llx); *(p++) = (int32_t)MFix(f3.y-lly);
   }
 if (!inrect) {
   register Fixed c, f128;
-  c = (long)pfr->ll.x; bbLLX = (c <= 0)? 0 : (long)MFix(c);
-  c = (long)pfr->ll.y; bbLLY = (c <= 0)? 0 : (long)MFix(c);
+  c = (int32_t)pfr->ll.x; bbLLX = (c <= 0)? 0 : (int32_t)MFix(c);
+  c = (int32_t)pfr->ll.y; bbLLY = (c <= 0)? 0 : (int32_t)MFix(c);
   f128 = FixInt(128);
-  c = (long)pfr->ur.x; bbURX = (c >= f128)? 0x7fff : (long)MFix(c);
-  c = (long)pfr->ur.y; bbURY = (c >= f128)? 0x7fff : (long)MFix(c);
+  c = (int32_t)pfr->ur.x; bbURX = (c >= f128)? 0x7fff : (int32_t)MFix(c);
+  c = (int32_t)pfr->ur.y; bbURY = (c >= f128)? 0x7fff : (int32_t)MFix(c);
   }
-eps = (long)MFix(pfr->feps);
+eps = (int32_t)MFix(pfr->feps);
 //      if (eps < 8)
 //          eps = 8;  /* Brotz patch */
       if (eps < 16) /* DEBUG 8 BIT FIX */
@@ -81,7 +81,7 @@ while (TRUE) {
   if (dpth == MiniFltnMaxDepth)
       goto ReportC3;
   if (!inrect) {
-    register long int llx, lly, urx, ury, c;
+    register int32_t llx, lly, urx, ury, c;
     llx = urx = c0x;
     if ((c=c1x) < llx) llx = c;
     else if (c > urx) urx = c;
@@ -104,7 +104,7 @@ while (TRUE) {
         llx >= bbLLX && lly >= bbLLY) inrect = TRUE;
     }
   if (!inbbox) {
-    register long int mrgn = eps, r0, r3, ll, ur, c;
+    register int32_t mrgn = eps, r0, r3, ll, ur, c;
     r0 = c0x; r3 = c3x;
     if (r0 < r3) {ll = r0 - mrgn; ur = r3 + mrgn;}
     else {ll = r3 - mrgn;  ur = r0 + mrgn;}
@@ -126,38 +126,38 @@ while (TRUE) {
       }
     }
   if (inbbox) {
-    register long int eqa, eqb, x, y;
+    register int32_t eqa, eqb, x, y;
     register Fixed EPS, d;
     x = c0x; y = c0y;
     eqa = c3y - y;
     eqb = x - c3x;
     if (eqa == 0 && eqb == 0) goto ReportC3;
-    EPS = ((abs(eqa) > abs(eqb))? (long)eqa : (long)eqb)*(long)eps;
+    EPS = ((abs(eqa) > abs(eqb))? (int32_t)eqa : (int32_t)eqb)*(int32_t)eps;
     if (EPS < 0) EPS = -EPS;
-    d = (long)eqa*(long)(c1x-x); d += (long)eqb*(long)(c1y-y);
+    d = (int32_t)eqa*(int32_t)(c1x-x); d += (int32_t)eqb*(int32_t)(c1y-y);
     if (abs(d) < EPS)
       {
-      d = (long)eqa*(long)(c2x-x); d += (long)eqb*(long)(c2y-y);
+      d = (int32_t)eqa*(int32_t)(c2x-x); d += (int32_t)eqb*(int32_t)(c2y-y);
       if (abs(d) < EPS)
           goto ReportC3;
       }
   }
     { /* Bezier divide */
-    register long int c0, c1, c2, d1, d2, d3;
+    register int32_t c0, c1, c2, d1, d2, d3;
     d0x = c0 = c0x; c1 = c1x; c2 = c2x;
-    d1x = d1 = (long)mdpt(c0,c1);
-    d3 = (long)mdpt(c1,c2);
-    d2x = d2 = (long)mdpt(d1,d3);
-    c2x = c2 = (long)mdpt(c2,c3x);
-    c1x = c1 = (long)mdpt(d3,c2);
-    c0x = d3x = (long)mdpt(d2,c1);
+    d1x = d1 = (int32_t)mdpt(c0,c1);
+    d3 = (int32_t)mdpt(c1,c2);
+    d2x = d2 = (int32_t)mdpt(d1,d3);
+    c2x = c2 = (int32_t)mdpt(c2,c3x);
+    c1x = c1 = (int32_t)mdpt(d3,c2);
+    c0x = d3x = (int32_t)mdpt(d2,c1);
     d0y = c0 = c0y; c1 = c1y; c2 = c2y;
-    d1y = d1 = (long)mdpt(c0,c1);
-    d3 = (long)mdpt(c1,c2);
-    d2y = d2 = (long)mdpt(d1,d3);
-    c2y = c2 = (long)mdpt(c2,c3y);
-    c1y = c1 = (long)mdpt(d3,c2);
-    c0y = d3y = (long)mdpt(d2,c1);
+    d1y = d1 = (int32_t)mdpt(c0,c1);
+    d3 = (int32_t)mdpt(c1,c2);
+    d2y = d2 = (int32_t)mdpt(d1,d3);
+    c2y = c2 = (int32_t)mdpt(c2,c3y);
+    c1y = c1 = (int32_t)mdpt(d3,c2);
+    c0y = d3y = (int32_t)mdpt(d2,c1);
     bbox2 = inbbox;
     inrect2 = inrect;
     p += MiniBlkSz;

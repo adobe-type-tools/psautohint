@@ -36,12 +36,12 @@ static Fixed bx, by;
 static boolean bstB;
 static Fixed lsb;
 static boolean needtoSubLSB;
-static short trilockcount = 0;
+static int16_t trilockcount = 0;
 #if DEBUG
 #else
 FILE *outIOFILE;
 /*crypt_Token tok;*/
-long val;
+int32_t val;
 #endif
 
 #if DEBUG
@@ -578,7 +578,7 @@ void CSWrite(void) {
 	fprintf(cstmpfile, "## -| {");
 
 	wrtfx(lsb);
-	WRTNUM((long int)width);
+	WRTNUM((int32_t)width);
 	ws("hsbw");
 
 	prevhintmaskstr[0] = '\0';

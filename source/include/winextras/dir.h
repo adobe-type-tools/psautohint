@@ -22,7 +22,7 @@
 
 struct	direct {
 	off_t   d_off;			/* offset of next disk directory entry */
-	unsigned long	d_fileno;		/* file number of entry */
+	uint32_t	d_fileno;		/* file number of entry */
 	unsigned short	d_reclen;		/* length of this record */
 	unsigned short	d_namlen;		/* length of string in d_name */
 	char	d_name[MAXNAMLEN + 1];	/* name (up to MAXNAMLEN + 1) */
@@ -48,10 +48,10 @@ struct	direct {
 #ifdef _WIN32
 typedef struct _dirdesc {
 	int	dd_fd;			/* file descriptor */
-	long	dd_loc;             /* buf offset of entry from last readddir() */
-	long	dd_size;		/* amount of valid data in buffer */
-	long	dd_bsize;		/* amount of entries read at a time */
-	long	dd_off;             	/* Current offset in dir (for telldir) */
+	int32_t	dd_loc;             /* buf offset of entry from last readddir() */
+	int32_t	dd_size;		/* amount of valid data in buffer */
+	int32_t	dd_bsize;		/* amount of entries read at a time */
+	int32_t	dd_off;             	/* Current offset in dir (for telldir) */
 	char	*dd_buf;		/* directory data buffer */
 } DIR;
 
@@ -60,9 +60,9 @@ typedef struct _dirdesc {
 #endif
 extern	DIR *opendir();
 extern	struct direct *readdir();
-extern	long telldir();
+extern	int32_t telldir();
 extern	void seekdir();
-#define rewinddir(dirp)	seekdir((dirp), (long)0)
+#define rewinddir(dirp)	seekdir((dirp), (int32_t)0)
 extern	int closedir();
 #endif /*_WIN32*/
 #endif

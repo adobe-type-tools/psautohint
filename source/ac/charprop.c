@@ -67,9 +67,9 @@ char *charlist, *ColorList[];
 {
   const char* setList = "(), \t\n\r";
   char *token;
-  short length;
+  int16_t length;
   boolean firstTime = TRUE;
-  short ListEntries = COUNTERDEFAULTENTRIES;
+  int16_t ListEntries = COUNTERDEFAULTENTRIES;
 
   while (TRUE)
   {
@@ -90,7 +90,7 @@ char *charlist, *ColorList[];
       LogMsg(globmsg, WARNING, OK, TRUE);
       break;
     }
-    length = (short)strlen(token);
+    length = (int16_t)strlen(token);
     ColorList[ListEntries] = AllocateMem(1, length+1, "counter hints list");
     strcpy(ColorList[ListEntries++], token);
   }

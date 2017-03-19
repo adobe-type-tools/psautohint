@@ -12,10 +12,10 @@ typedef struct cl_elem
   char *filename;
   boolean composite:1, derived:1, transitional:1,
       inCharTable:1, inBezDir:1;
-  short masters; /* number of masters for this char */
-  short hintDir; /* which of the master dirs will be used for hints */
+  int16_t masters; /* number of masters for this char */
+  int16_t hintDir; /* which of the master dirs will be used for hints */
 }CL_ELEM;
 
 
-extern long clsize;
+extern int32_t clsize;
 extern struct cl_elem *charlist;

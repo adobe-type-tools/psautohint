@@ -22,7 +22,7 @@ void InitShuffleSubpaths() {
 				PrintMessage(globmsg);
 			}
 			}
-		e->count = (short)cnt;
+		e->count = (int16_t)cnt;
 		e = e->next;
     }
 	cnt++;

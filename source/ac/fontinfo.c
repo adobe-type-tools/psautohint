@@ -22,7 +22,7 @@ static void ParseStems(kw, stems, pnum)
 }
 
 static void GetKeyValue(keyword, optional, value)
-  char *keyword; boolean optional; long int *value;
+  char *keyword; boolean optional; int32_t *value;
 {
   char *fontinfostr;
   
@@ -54,7 +54,7 @@ static void GetKeyFixedValue(char* keyword, boolean optional, Fixed *value)
 
 boolean ReadFontInfo() {
   char *fontinfostr;
-  long 
+  int32_t 
     AscenderHeight,
     AscenderOvershoot,
     BaselineYCoord,

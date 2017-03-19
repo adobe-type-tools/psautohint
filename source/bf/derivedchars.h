@@ -13,7 +13,7 @@ boolean, indx
 );
 
 extern char **make_derivedchars(
-boolean, short *, indx
+boolean, int16_t *, indx
 );
 
 extern void readderived (

@@ -44,7 +44,7 @@ extern boolean ReadCharFile();
 static boolean firstMT;
 #endif
 static char *startbuff, **outbuff;
-static short dirCount, byteCount, buffSize;
+static int16_t dirCount, byteCount, buffSize;
 static PPathList pathlist = NULL;
 static Cd *refPtArray = NULL;
 static indx hintsdirIx;
@@ -54,39 +54,39 @@ static char outstr[100];
 static void AddLine(indx, indx);
 static boolean CheckFlexOK(indx);
 static boolean ChangetoCurve(indx, indx);
-static void CheckFlexValues(short *, indx, indx, boolean *, boolean *);
+static void CheckFlexValues(int16_t *, indx, indx, boolean *, boolean *);
 static void CheckForZeroLengthCP(void);
 static void CheckHandVStem3(void);
 static void CombinePaths(void);
 static boolean CompareCharPaths(char *, boolean);
-static void Ct(Cd, Cd, Cd, indx, short);
-static boolean CurveBBox(indx, short, long, Fixed *);
+static void Ct(Cd, Cd, Cd, indx, int16_t);
+static boolean CurveBBox(indx, int16_t, int32_t, Fixed *);
 static void FindHandVStem3(PHintElt *, indx, boolean *);
 static void FreePathElements(indx, indx);
-static void GetCoordFromType(short, CdPtr, indx, indx);
-static long GetCPIx(indx, long);
-static void GetEndPoint(indx, long, Fixed *, Fixed *);
-static void GetEndPoints(indx, long, CdPtr, CdPtr);
+static void GetCoordFromType(int16_t, CdPtr, indx, indx);
+static int32_t GetCPIx(indx, int32_t);
+static void GetEndPoint(indx, int32_t, Fixed *, Fixed *);
+static void GetEndPoints(indx, int32_t, CdPtr, CdPtr);
 static void GetFlexCoord(indx, indx, indx, CdPtr);
-static void GetPathType(short, char *);
-static short GetPointType(short, Fixed, long *);
-static void GetRelPos(long, short, Fixed, CdPtr, CdPtr, Fixed *);
+static void GetPathType(int16_t, char *);
+static int16_t GetPointType(int16_t, Fixed, int32_t *);
+static void GetRelPos(int32_t, int16_t, Fixed, CdPtr, CdPtr, Fixed *);
 static void GetRelativePosition(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *);
-static void Hvct(Cd, Cd, Cd, indx, short);
-static void InconsistentPathType(char *, indx, short, short, indx);
+static void Hvct(Cd, Cd, Cd, indx, int16_t);
+static void InconsistentPathType(char *, indx, int16_t, int16_t, indx);
 static void InconsistentPointCount(char *, indx, int, int);
-static void InsertHint(PHintElt, indx, short, short);
-static void MtorDt(Cd, indx, short);
+static void InsertHint(PHintElt, indx, int16_t, int16_t);
+static void MtorDt(Cd, indx, int16_t);
 static void OptimizeCT(indx);
-static void OptimizeMtorDt(indx, short *, boolean *, boolean *);
+static void OptimizeMtorDt(indx, int16_t *, boolean *, boolean *);
 static void ReadHints(PHintElt, indx);
 static int ReadandAssignHints(void);
-static void ReadHorVStem3Values(indx, short, short, boolean *);
+static void ReadHorVStem3Values(indx, int16_t, int16_t, boolean *);
 static void SetSbandWidth(char *, boolean, Transitions *, int);
-static void Vhct(Cd, Cd, Cd, indx, short);
+static void Vhct(Cd, Cd, Cd, indx, int16_t);
 static void WriteFlex(indx);
 static void WriteHints(indx);
-static void WritePathElt(indx, indx, short, indx, short);
+static void WritePathElt(indx, indx, int16_t, indx, int16_t);
 static void WriteSbandWidth(void);
 static void WriteX(Fixed);
 static void WriteY(Fixed);
@@ -103,9 +103,9 @@ void GetMasterDirName(char *dirname, indx ix)
 
 /* macros */
 #define FixShift (8)
-#define IntToFix(i) ((long int)(i) << FixShift)
-#define FRnd(x) ((long int)(((x)+(1<<7)) & ~0xFFL))
-#define FTrunc8(x) ((long int)((x)>>8))
+#define IntToFix(i) ((int32_t)(i) << FixShift)
+#define FRnd(x) ((int32_t)(((x)+(1<<7)) & ~0xFFL))
+#define FTrunc8(x) ((int32_t)((x)>>8))
 #define FIXED2FLOAT(x) ((float)((x) / 256.0))
 #define FixedToDouble(x) ((double)((x) / 256.0))
 #define Frac(x) ((x) & 0xFFL)
@@ -174,9 +174,9 @@ Fixed val;
 }
 
 /* Locates the first CP following the given path element. */
-static long GetCPIx(dirIx, pathIx)
+static int32_t GetCPIx(dirIx, pathIx)
 indx dirIx;
-long pathIx;
+int32_t pathIx;
 {
     indx ix;
     
@@ -214,7 +214,7 @@ static int GetNextMTIx(indx dirIx, indx pathIx)
 
 static void GetEndPoint(dirIx, pathIx, ptX, ptY)
 indx dirIx;
-long pathIx;
+int32_t pathIx;
 Fixed *ptX, *ptY;
 {
     PCharPathElt pathElt = &pathlist[dirIx].path[pathIx];
@@ -246,12 +246,12 @@ retry:
 
 static void GetEndPoints(dirIx, pathIx, start, end)
 indx dirIx;
-long pathIx;
+int32_t pathIx;
 Cd *start, *end;
 {
     if (pathlist[dirIx].path[pathIx].type == RMT)
     {
-        long cpIx;
+        int32_t cpIx;
         
         GetEndPoint(dirIx, pathIx, &start->x, &start->y);
         /* Get index for closepath associated with this moveto. */
@@ -265,7 +265,7 @@ Cd *start, *end;
     }
 }
 
-static void GetCoordFromType(short pathtype, CdPtr coord,
+static void GetCoordFromType(int16_t pathtype, CdPtr coord,
                              indx dirix, indx eltno)
 {
     switch(pathtype)
@@ -285,7 +285,7 @@ static void GetCoordFromType(short pathtype, CdPtr coord,
     };
 }
 
-static void GetPathType(short pathtype, char *str)
+static void GetPathType(int16_t pathtype, char *str)
 {
     switch(pathtype)
     {
@@ -343,8 +343,8 @@ static void InconsistentPointCount(char *filename, indx ix,
     LogMsg(globmsg, WARNING, OK, TRUE);
 }
 
-static void InconsistentPathType(char *filename, indx ix, short type1,
-                                 short type2, indx eltno)
+static void InconsistentPathType(char *filename, indx ix, int16_t type1,
+                                 int16_t type2, indx eltno)
 {
     char pathdir1[MAXPATHLEN], pathdir2[MAXPATHLEN];
     char typestr1[10], typestr2[10];
@@ -666,9 +666,9 @@ static Path_Name_ Path_Names[1];
 static boolean CompareCharPaths(char *filename, boolean fortransitionals)
 {
     indx dirix, ix, i;
-    long totalPathElt, minPathLen;
+    int32_t totalPathElt, minPathLen;
     boolean ok = TRUE;
-    short type1, type2;
+    int16_t type1, type2;
     
     totalPathElt = minPathLen = MAXINT;
     if (pathlist == NULL)
@@ -759,7 +759,7 @@ static boolean CompareCharPaths(char *filename, boolean fortransitionals)
 static void SetSbandWidth(char *charname, boolean fortransit, Transitions* trptr, int trgroupnum)
 {
 #if !AC_C_LIB
-    short width;
+    int16_t width;
     Bbox bbox;
 #endif
     indx dirix;
@@ -786,7 +786,7 @@ static void SetSbandWidth(char *charname, boolean fortransit, Transitions* trptr
 
 static void WriteSbandWidth()
 {
-    short subrix, length, opcount = GetOperandCount(SBX);
+    int16_t subrix, length, opcount = GetOperandCount(SBX);
     indx ix, j, startix = 0;
     boolean writeSubrOnce, sbsame = TRUE, wsame = TRUE;
     
@@ -841,7 +841,7 @@ static void WriteSbandWidth()
             {
                 sprintf(outstr, "%ld ", (ix == 0) ?
                         (j == 0) ? pathlist[j].sb : pathlist[j].sb - pathlist[0].sb :
-                        (j == 0) ? (long int)pathlist[j].width : (long int)(pathlist[j].width - pathlist[0].width));
+                        (j == 0) ? (int32_t)pathlist[j].width : (int32_t)(pathlist[j].width - pathlist[0].width));
                 WriteToBuffer();
             }
             if (!writeSubrOnce || (ix == (opcount - 1)))
@@ -851,7 +851,7 @@ static void WriteSbandWidth()
     WriteStr("sbx\n");
 }
 
-static boolean CurveBBox(indx dirIx, short hinttype, long pathIx, Fixed *value)
+static boolean CurveBBox(indx dirIx, int16_t hinttype, int32_t pathIx, Fixed *value)
 {
     Cd startPt, endPt;
     Fixed llx, lly, urx, ury, minval, maxval;
@@ -950,13 +950,13 @@ static boolean nearlyequal_ (Fixed a, Fixed b, Fixed tolerance)
  the specified path element. Since path element numbers in
  character files start from one and the path array starts
  from zero we need to subtract one from the path index. */
-static short GetPointType(short hinttype, Fixed value, long *pathEltIx)
+static int16_t GetPointType(int16_t hinttype, Fixed value, int32_t *pathEltIx)
 {
     Cd startPt, endPt;
     Fixed startval, endval, loc;
-    short pathtype;
+    int16_t pathtype;
     boolean tryAgain = TRUE;
-    long pathIx = *pathEltIx - 1;
+    int32_t pathIx = *pathEltIx - 1;
     
 #if __CENTERLINE__
     if (TRACE) {
@@ -1054,7 +1054,7 @@ retry:
     return FLATTEN;
 }
 
-static void GetRelPos(long pathIx, short hinttype, Fixed hintVal,
+static void GetRelPos(int32_t pathIx, int16_t hinttype, Fixed hintVal,
                       CdPtr startPt, CdPtr endPt, Fixed *val)
 {
     Cd origStart, origEnd;
@@ -1094,14 +1094,14 @@ Fixed currEnd, currStart, end, start, hintVal, *fixedRelValue;
  be stored.  pathIx is the index of the path segment used to
  calculate this particular hint. */
 static void InsertHint(PHintElt currHintElt, indx pathEltIx,
-                       short type1, short type2)
+                       int16_t type1, int16_t type2)
 {
     indx ix, j;
     Cd startPt, endPt;
     PHintElt *hintElt, newEntry;
     CharPathElt pathElt;
-    long pathIx;
-    short pathtype, hinttype = currHintElt->type;
+    int32_t pathIx;
+    int16_t pathtype, hinttype = currHintElt->type;
     Fixed *value, ghostVal, tempVal;
     
 #if __CENTERLINE__
@@ -1208,7 +1208,7 @@ PHintElt hintElt;
 indx pathEltIx;
 {
     PHintElt currElt = hintElt;
-    short pointtype1, pointtype2;
+    int16_t pointtype1, pointtype2;
     
     while (currElt != NULL)
     {
@@ -1286,7 +1286,7 @@ indx ix;
 static void OptimizeCT(ix)
 indx ix;
 {
-    short newtype;
+    int16_t newtype;
     boolean vhct = TRUE, hvct = TRUE;
     indx i;
     
@@ -1311,7 +1311,7 @@ indx ix;
             pathlist[i].path[ix].type = newtype;
 }
 
-static void MtorDt(Cd coord, indx startix, short length)
+static void MtorDt(Cd coord, indx startix, int16_t length)
 {
     if (length == 2) {WriteCd(coord);}
     else
@@ -1319,7 +1319,7 @@ static void MtorDt(Cd coord, indx startix, short length)
         else WriteY(coord.y);
 }
 
-static void Hvct(Cd coord1, Cd coord2, Cd coord3, indx startix, short length)
+static void Hvct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
 {
     indx ix;
     indx lastix = startix + length;
@@ -1346,7 +1346,7 @@ static void Hvct(Cd coord1, Cd coord2, Cd coord3, indx startix, short length)
     }
 }
 
-static void Vhct(Cd coord1, Cd coord2, Cd coord3, indx startix, short length)
+static void Vhct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
 {
     indx ix;
     indx lastix = startix + length;
@@ -1374,7 +1374,7 @@ static void Vhct(Cd coord1, Cd coord2, Cd coord3, indx startix, short length)
 }
 
 /* length can only be 1, 2, 3 or 6 */
-static void Ct(Cd coord1, Cd coord2, Cd coord3, indx startix, short length)
+static void Ct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
 {
     indx ix;
     indx lastix = startix + length;
@@ -1407,12 +1407,12 @@ static void Ct(Cd coord1, Cd coord2, Cd coord3, indx startix, short length)
     }
 }
 
-static void ReadHorVStem3Values(indx pathIx, short eltno, short hinttype,
+static void ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
                                 boolean *errormsg)
 {
     indx ix;
     PHintElt *hintElt;
-    short count, newhinttype;
+    int16_t count, newhinttype;
     boolean ok = TRUE;
     Fixed min, dmin, mid, dmid, max, dmax;
     char dirname[MAXPATHLEN];
@@ -1496,7 +1496,7 @@ PHintElt *hintElt;
 indx pathIx;
 boolean *errormsg;
 {
-    short count = 1;
+    int16_t count = 1;
     
     while (*hintElt != NULL)
     {
@@ -1525,7 +1525,7 @@ static void CheckHandVStem3()
         FindHandVStem3(&pathlist[hintsdirIx].path[ix].hints, ix, &errormsg);
 }
 
-static void CheckFlexValues(short *operator, indx eltix, indx flexix,
+static void CheckFlexValues(int16_t *operator, indx eltix, indx flexix,
                             boolean *xequal, boolean *yequal)
 {
     indx ix;
@@ -1645,9 +1645,9 @@ indx eltix;
     Cd coord, coord0; /* array of reference points */
     boolean xsame, ysame, writeSubrOnce;
     char operator[MAXOPLEN]; /* rmt, hmt, vmt */
-    short optype;
+    int16_t optype;
     indx ix, j, opix, startix;
-    short opcount, subrIx, length;
+    int16_t opcount, subrIx, length;
     
     refPtArray = (Cd *) AllocateMem (dirCount, sizeof(Cd), "reference point array");
     for (ix = 0; ix < dirCount; ix++)
@@ -1757,8 +1757,8 @@ static void WriteHints(pathEltIx)
 indx pathEltIx;
 {
     indx ix, opix, startix;
-    short rmcount, rvcount, hinttype;
-    short opcount, subrIx, length;
+    int16_t rmcount, rvcount, hinttype;
+    int16_t opcount, subrIx, length;
     PHintElt *hintArray;
     boolean lbsame, rtsame, writeSubrOnce;
     
@@ -1875,8 +1875,8 @@ indx pathEltIx;
 }
 
 
-static void WritePathElt(indx dirIx, indx eltIx, short pathType,
-                         indx startix, short length)
+static void WritePathElt(indx dirIx, indx eltIx, int16_t pathType,
+                         indx startix, int16_t length)
 {
     Cd c1, c2, c3;
     PCharPathElt path, path0;
@@ -1937,7 +1937,7 @@ static void WritePathElt(indx dirIx, indx eltIx, short pathType,
 
 static void OptimizeMtorDt(eltix, op, xequal, yequal)
 indx eltix;
-short *op;
+int16_t *op;
 boolean *xequal, *yequal;
 {
     indx ix;
@@ -1962,7 +1962,7 @@ boolean *xequal, *yequal;
     }
 }
 
-static boolean CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, short op)
+static boolean CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
 {
     PCharPathElt path1 = &pathlist[dir1].path[eltIx], path2 = &pathlist[dir2].path[eltIx];
     char dirname[MAXPATHLEN];
@@ -2014,7 +2014,7 @@ static boolean CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, short op
 /* Checks if path element values are the same for the RCT, HVCT and VHCT
  operators in each master directory between operands startIx to
  startIx + length.  Returns TRUE if they are the same and FALSE otherwise. */
-static boolean SamePathValues(indx eltIx, short op, indx startIx, short length)
+static boolean SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
 {
     indx ix, dirIx;
     /*  PCharPathElt path0 = &pathlist[0].path[eltIx]; */
@@ -2037,7 +2037,7 @@ static void CombinePaths()
 {
 #if ! AC_C_LIB
     indx ix, eltix, opix, startIx, dirIx;
-    short length, subrIx, opcount, op;
+    int16_t length, subrIx, opcount, op;
     char operator[MAXOPLEN];
     boolean xequal, yequal;
     
@@ -2146,9 +2146,9 @@ static void CombinePaths()
 }
 
 /* Returns number of operands for the given operator. */
-extern short GetOperandCount(short op)
+extern int16_t GetOperandCount(int16_t op)
 {
-    short count;
+    int16_t count;
     
     if (op < ESCVAL)
         switch(op)
@@ -2193,7 +2193,7 @@ extern short GetOperandCount(short op)
 /* Returns the subr number to use for a given operator in subrIx and
  checks that the argument length of each subr call does not
  exceed the font interpreter stack limit. */
-extern void GetLengthandSubrIx(short opcount, short *length, short *subrIx)
+extern void GetLengthandSubrIx(int16_t opcount, int16_t *length, int16_t *subrIx)
 {
     
     if (((opcount * dirCount) > FONTSTKLIMIT) && opcount != 1)

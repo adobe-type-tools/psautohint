@@ -11,6 +11,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef AC_C_LIB_H_
 #define AC_C_LIB_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,7 +46,7 @@ enum
 
 ACLIB_API const char * AC_getVersion(void);
 
-typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, unsigned long size);
+typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, uint32_t size);
 
 /*
  * Function: AC_SetMemManager
@@ -79,7 +81,7 @@ It should be copied immediately - it may may last past the return of the calback
 */
 
 extern unsigned int allstems; /* if false, then stems defined by curves are xcluded from the reporting */
-typedef void (*AC_REPORTSTEMPTR)(long int top, long int bottom, char* glyphName);
+typedef void (*AC_REPORTSTEMPTR)(int32_t top, int32_t bottom, char* glyphName);
 
 extern AC_REPORTSTEMPTR addHStemCB;
 extern AC_REPORTSTEMPTR addVStemCB;
@@ -92,7 +94,7 @@ If this is called , then the AC lib will write all the aligment zones it encount
 Note that the callabcks should not dispose of the glyphName memory; that belongs to the AC lib.
 It should be copied immediately - it may may last past the return of the calback.
 */
-typedef void (*AC_REPORTZONEPTR)(long int top, long int bottom, char* glyphName);
+typedef void (*AC_REPORTZONEPTR)(int32_t top, int32_t bottom, char* glyphName);
 extern AC_REPORTZONEPTR addCharExtremesCB;
 extern AC_REPORTZONEPTR addStemExtremesCB;
 ACLIB_API void  AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB);

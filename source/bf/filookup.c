@@ -35,7 +35,7 @@ static char endVectors[] = "EndVectors";
 static char fifilename [MAXPATHLEN];
 
 
-static short lookup(
+static int16_t lookup(
     char *
 );
 
@@ -44,7 +44,7 @@ static char *search_for_key(
 );
 
 static void make_error_return(
-    short, char *, char *, char *, char *
+    int16_t, char *, char *, char *, char *
 );
 
 static  void make_normal_return(
@@ -125,7 +125,7 @@ void fiptrfree(FIPTR ptr)
 }
 
 /*  Look up the keyword parameter in the table to get the index */
-static short lookup(key)
+static int16_t lookup(key)
 char *key;
 {
   indx kwindex;
@@ -160,12 +160,12 @@ FILE *file;
 /*  make_error_return concatenates the error_msgs
     strings together into the string return value and
     assigns the exit status in the return value structure, as well */
-static void make_error_return(short exit_status, char *error_msg1, char *error_msg2, char *error_msg3, char *error_msg4)
+static void make_error_return(int16_t exit_status, char *error_msg1, char *error_msg2, char *error_msg3, char *error_msg4)
 {
-  short msg1_len = (short)strlen(error_msg1);
-  short msg2_len = (short)strlen(error_msg2);
-  short msg3_len = (short)strlen(error_msg3);
-  short msg4_len = (short)strlen(error_msg4);
+  int16_t msg1_len = (int16_t)strlen(error_msg1);
+  int16_t msg2_len = (int16_t)strlen(error_msg2);
+  int16_t msg3_len = (int16_t)strlen(error_msg3);
+  int16_t msg4_len = (int16_t)strlen(error_msg4);
 
   UnallocateMem(fiptr->value_string);
   fiptr->value_string = AllocateMem((unsigned) (msg1_len + msg2_len + msg3_len
@@ -227,7 +227,7 @@ char *key, *lineargs;
   i = sscanf(lineargs, " %f", &f);
   if (i == 1)
   {
-    j = (short) f;
+    j = (int16_t) f;
     if ((float) j == f)
     {
       sprintf(lineargs, "%d", j);
@@ -258,7 +258,7 @@ char *key, *lineargs;
 static  void check_for_num(key, lineargs)
 char *key, *lineargs;
 {
-  short i;
+  int16_t i;
   float f;
 
   i = sscanf(lineargs, " %g", &f);
@@ -583,7 +583,7 @@ static void init_kw_tab()
 */
 extern FIPTR filookup(char *keyword, boolean optional)
 {
-  short kwindex;
+  int16_t kwindex;
   char *fs;
   char *bfp = NULL;
 
@@ -948,13 +948,13 @@ static char *GetHVStems(char *kw, boolean optional)
    current font directory and not for all input directories
    (e.g., for a multi-master font).
  */  
-extern void ParseIntStems(char *kw, boolean optional, long maxstems, int *stems, long *pnum, char *blendstr)
+extern void ParseIntStems(char *kw, boolean optional, int32_t maxstems, int *stems, int32_t *pnum, char *blendstr)
 {
   char c;
   char *line;  
   int val, cnt, i, ix, j, temp, targetCnt = -1, total = 0;
   boolean singleint = FALSE;
-  short dirCount = (blendstr == NULL ? 1 : GetTotalInputDirs());
+  int16_t dirCount = (blendstr == NULL ? 1 : GetTotalInputDirs());
   char *initline;
 
   *pnum = 0;
@@ -1064,20 +1064,20 @@ static void CheckStemSnap(direction)
 char *direction;
 {
   int stems[MAXSTEMSNAP];
-  long stemcnt, dominantVal = MAXINT, domValCnt = 0;
+  int32_t stemcnt, dominantVal = MAXINT, domValCnt = 0;
   char key[15];
   indx ix;
   
   key[0] = '\0';
   sprintf(key, "Dominant%s", direction);
-  ParseIntStems (key, ACOPTIONAL, (long) MAXDOMINANTSTEMS, stems, &stemcnt, NULL);
+  ParseIntStems (key, ACOPTIONAL, (int32_t) MAXDOMINANTSTEMS, stems, &stemcnt, NULL);
   if (stemcnt > 0)
   {
     dominantVal = stems[0];
     domValCnt = stemcnt;
   }
   sprintf(key, "StemSnap%s", direction);
-  ParseIntStems (key, ACOPTIONAL, (long) MAXSTEMSNAP, stems, &stemcnt, NULL);
+  ParseIntStems (key, ACOPTIONAL, (int32_t) MAXSTEMSNAP, stems, &stemcnt, NULL);
   if (stemcnt <= 0)
     return;
   if (dominantVal == MAXINT)
@@ -1113,7 +1113,7 @@ CheckRequiredKWs (void)
    {
    char *s;
 /*   int stems[MAXDOMINANTSTEMS];
-   long stemcnt, bands; */
+   int32_t stemcnt, bands; */
 #ifdef SUN
    float overshootptsize = (float)DEFAULTOVRSHTPTSIZE;
 #endif
@@ -1165,9 +1165,9 @@ CheckRequiredKWs (void)
 		UnallocateMem(s);
    s = GetFntInfo("VCounterChars", ACOPTIONAL);
 		UnallocateMem(s);
-   ParseIntStems("DominantV", MANDATORY, (long) MAXDOMINANTSTEMS, stems,
+   ParseIntStems("DominantV", MANDATORY, (int32_t) MAXDOMINANTSTEMS, stems,
          &stemcnt, NULL);
-   ParseIntStems ("DominantH", ACOPTIONAL, (long) MAXDOMINANTSTEMS, stems,
+   ParseIntStems ("DominantH", ACOPTIONAL, (int32_t) MAXDOMINANTSTEMS, stems,
          &stemcnt, NULL);
    CheckStemSnap ("H");
    CheckStemSnap ("V");

@@ -11,9 +11,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #define MAXPATHELT 100 /* initial maximum number of path elements */
 
-static long maxPathEntries = 0;
+static int32_t maxPathEntries = 0;
 static PPathList currPathList = NULL;
-long path_entries;
+int32_t path_entries;
 boolean addHints = TRUE;
 
 static void CheckPath(
@@ -69,7 +69,7 @@ PPathList plist;
   currPathList = plist;
 }
 
-extern void SetHintsElt(short hinttype, CdPtr coord, long elt1, long elt2, boolean mainhints)
+extern void SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2, boolean mainhints)
 {
   PHintElt *hintEntry;
   PHintElt lastHintEntry = NULL;

@@ -18,52 +18,52 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define MAXLENIV 4
 
 /* Globals used outside this source file */
-short lenIV = 4;
+int16_t lenIV = 4;
 
 /* Globals used by encryption routines. */
-static long C1, C2, key, lineLength, lineCount;
-static unsigned long innerrndnum, outerrndnum;
+static int32_t C1, C2, key, lineLength, lineCount;
+static uint32_t innerrndnum, outerrndnum;
 static char hexmap[] = "0123456789abcdef";
 static int outerlenIV = 4;
 
 /* Globals used by decryption routines. */
-static long dec1, dec2, inchars;
-static unsigned long randno;
-static short decrypttype;
+static int32_t dec1, dec2, inchars;
+static uint32_t randno;
+static int16_t decrypttype;
 
 /* Globals used by both encryption and decryption routines. */
-static long format;
+static int32_t format;
 
 /* Prototypes */
 
 static char *InputEnc(
-    char *, boolean, unsigned long *
+    char *, boolean, uint32_t *
 );
 
 static void InitEncrypt(
     FILE *, boolean
 );
 
-static unsigned long DoDecrypt(
-FILE *, char *, boolean, long, boolean, unsigned long, short, long, boolean
+static uint32_t DoDecrypt(
+FILE *, char *, boolean, int32_t, boolean, uint32_t, int16_t, int32_t, boolean
 );
 
 static void SetCryptGlobs(
-    int, long, boolean, long *, long *, long *
+    int, int32_t, boolean, int32_t *, int32_t *, int32_t *
 );
 
-#define InitRnum(r,s) {r = (unsigned long) s;}
+#define InitRnum(r,s) {r = (uint32_t) s;}
 #define Rnum8(r)\
-  ((unsigned long) (r = (((r*C1)+C2) & 0x3fffffff)>>8) & 0xFF)
+  ((uint32_t) (r = (((r*C1)+C2) & 0x3fffffff)>>8) & 0xFF)
 #define Encrypt(r, clear, cipher)\
-  r = ((unsigned long) ((cipher = ((clear)^(r>>8)) & 0xFF) + r)*C1 + C2)
+  r = ((uint32_t) ((cipher = ((clear)^(r>>8)) & 0xFF) + r)*C1 + C2)
 
 #define DoublyEncrypt(r0, r1, clear, cipher) \
-  r0 = ((unsigned long) ((cipher = ((clear)^(r0 >>8)) & 0xFF) + r0)*C1 + C2);\
-  r1 = ((unsigned long) ((cipher = ((cipher)^(r1 >>8)) & 0xFF) + r1)*C1 + C2);
+  r0 = ((uint32_t) ((cipher = ((clear)^(r0 >>8)) & 0xFF) + r0)*C1 + C2);\
+  r1 = ((uint32_t) ((cipher = ((cipher)^(r1 >>8)) & 0xFF) + r1)*C1 + C2);
 
 #define Decrypt(r, clear, cipher)\
-  clear = (unsigned char) ((cipher)^(r>>8)) & 0xFF; r = (unsigned long) ((cipher) + r)*dec1 + dec2
+  clear = (unsigned char) ((cipher)^(r>>8)) & 0xFF; r = (uint32_t) ((cipher) + r)*dec1 + dec2
 
 #define OutputEnc(ch, stm)\
   if (format == BIN) (void) putc(ch, stm);\
@@ -72,11 +72,11 @@ static void SetCryptGlobs(
     if (--lineCount <= 0) {(void) putc('\n', stm); lineCount = lineLength/2;}}
 
 #define get_char(ch, stream, filein)\
-  if (filein) ch = (long) getc((FILE *) stream);\
-  else ch = (long) *stm++;\
+  if (filein) ch = (int32_t) getc((FILE *) stream);\
+  else ch = (int32_t) *stm++;\
   inchars++;
 
-static void SetCryptGlobs(int crypttype, long formattype, boolean chardata, long *c1, long *c2, long *k)
+static void SetCryptGlobs(int crypttype, int32_t formattype, boolean chardata, int32_t *c1, int32_t *c2, int32_t *k)
 {
   format = formattype;
   switch (crypttype)
@@ -103,9 +103,9 @@ static void SetCryptGlobs(int crypttype, long formattype, boolean chardata, long
   LogMsg("Invalid crypt params.\n", LOGERROR, NONFATALERROR, TRUE);
 }
 
-static char *InputEnc(char * stm, boolean fileinput, unsigned long *cipher)
+static char *InputEnc(char * stm, boolean fileinput, uint32_t *cipher)
 {
-  register long c1, c2;
+  register int32_t c1, c2;
 
   get_char(c1, stm, fileinput);
   if (format == BIN)
@@ -149,16 +149,16 @@ static char *InputEnc(char * stm, boolean fileinput, unsigned long *cipher)
 static char *InputPlain(stm, fileinput, clear)
 char *stm;
 boolean fileinput;
-unsigned long *clear;
+uint32_t *clear;
 {
-  register long c1;
+  register int32_t c1;
 
   get_char(c1, stm, fileinput);
   *clear = c1;
   return (stm);
 }
 
-void SetLenIV (short len)
+void SetLenIV (int16_t len)
 {
   lenIV = len;
 }
@@ -175,13 +175,13 @@ static void InitEncrypt(FILE *outstream, boolean dblenc)
 {
   register indx j;
   boolean ok = FALSE;
-  unsigned long randomseed, clear, cipher, origouterrndnum;
+  uint32_t randomseed, clear, cipher, origouterrndnum;
   time_t tm;
-  short keylen = (dblenc?lenIV:outerlenIV);
+  int16_t keylen = (dblenc?lenIV:outerlenIV);
   char initVec[MAXLENIV];
 
   get_time(&tm);
-  InitRnum(randomseed, (unsigned long) tm);
+  InitRnum(randomseed, (uint32_t) tm);
   origouterrndnum = outerrndnum;
   while (!ok)
   {
@@ -216,17 +216,17 @@ static void InitEncrypt(FILE *outstream, boolean dblenc)
 }				/* InitEncrypt */
 
 /* innerrndnum and outerrndnum are globals */
-extern long ContEncrypt(char *indata, FILE  *outstream, boolean fileinput, long incount, boolean dblenc)
+extern int32_t ContEncrypt(char *indata, FILE  *outstream, boolean fileinput, int32_t incount, boolean dblenc)
 {
-  unsigned long clear;
-  long encchars = 0;
+  uint32_t clear;
+  int32_t encchars = 0;
 
   while (TRUE)
   {
     if (fileinput)
     {
-      clear = (unsigned long) getc((FILE *) indata);
-      if (clear == (unsigned long)EOF)
+      clear = (uint32_t) getc((FILE *) indata);
+      if (clear == (uint32_t)EOF)
 	break;
     }
     else
@@ -239,7 +239,7 @@ extern long ContEncrypt(char *indata, FILE  *outstream, boolean fileinput, long 
 #ifdef ENCRYPTOUTPUT
     if (dblenc)
     { 
-	unsigned long cipher;
+	uint32_t cipher;
 		/* {}'s needed for enclosing macro call. */
       DoublyEncrypt(innerrndnum, outerrndnum, clear, cipher);
     }
@@ -255,7 +255,7 @@ extern long ContEncrypt(char *indata, FILE  *outstream, boolean fileinput, long 
   return (encchars);
 }				/* ContEncrypt */
 
-short DoInitEncrypt (FILE *outstream, short enctype, long formattype, long linelen, boolean chardata)
+int16_t DoInitEncrypt (FILE *outstream, int16_t enctype, int32_t formattype, int32_t linelen, boolean chardata)
 {
   lineLength = linelen;
   SetCryptGlobs(enctype, formattype, chardata, &C1, &C2, &key);
@@ -264,15 +264,15 @@ short DoInitEncrypt (FILE *outstream, short enctype, long formattype, long linel
 }				/* DoInitEncrypt */
 
 /* returns the number of characters encrypted and written */
-extern long DoContEncrypt(char * indata, FILE *outstream, boolean fileinput, long incount)
+extern int32_t DoContEncrypt(char * indata, FILE *outstream, boolean fileinput, int32_t incount)
 {
-  unsigned long enccount;
+  uint32_t enccount;
   FILE *instream = (FILE *) indata;
 
   if (fileinput)
     clearerr(instream);
   else if (incount == INLEN)
-    incount = (long)strlen(indata);
+    incount = (int32_t)strlen(indata);
   clearerr(outstream);
   enccount = ContEncrypt(indata, outstream, fileinput, incount, FALSE);
   if ((fileinput && fileerror(instream)) || fileerror(outstream))
@@ -285,11 +285,11 @@ extern long DoContEncrypt(char * indata, FILE *outstream, boolean fileinput, lon
  * an error occurred while reading or writing. The incount argument is used
  * only if we are encrypting characters from memory.
  */
-long DoEncrypt
-  (char *indata, FILE *outstream, boolean fileinput, long incount, short enctype, long formattype, long linelen,
+int32_t DoEncrypt
+  (char *indata, FILE *outstream, boolean fileinput, int32_t incount, int16_t enctype, int32_t formattype, int32_t linelen,
     boolean chardata, boolean dblenc)
 {
-	unsigned long enccount;
+	uint32_t enccount;
 	FILE *instream = (FILE *) indata;
   lineLength = linelen;
   SetCryptGlobs(enctype, formattype, chardata, &C1, &C2, &key);
@@ -314,10 +314,10 @@ long DoEncrypt
  * the format and decoding types and the globals dec1 and dec2.
  */
 
-extern long ContDecrypt(char *indata, char *outdata, boolean fileinput, boolean fileoutput, long incount,
-    unsigned long outcount)
+extern int32_t ContDecrypt(char *indata, char *outdata, boolean fileinput, boolean fileoutput, int32_t incount,
+    uint32_t outcount)
 {
-  unsigned long cipher, clearchars = 0;
+  uint32_t cipher, clearchars = 0;
   unsigned char clear;
   FILE *instream = (FILE *) indata;
   FILE *outstream = (FILE *) outdata;
@@ -330,7 +330,7 @@ extern long ContDecrypt(char *indata, char *outdata, boolean fileinput, boolean 
   while (fileinput || (inchars < incount))
   {
     indata = InputEnc(indata, fileinput, &cipher);
-    if (cipher == (unsigned long)EOF)
+    if (cipher == (uint32_t)EOF)
       break;
     Decrypt(randno, clear, cipher);
     if (fileoutput)
@@ -350,23 +350,23 @@ extern long ContDecrypt(char *indata, char *outdata, boolean fileinput, boolean 
   return (clearchars);
 }
 
-static unsigned long DoDecrypt
+static uint32_t DoDecrypt
   (FILE *instream, char *outdata, boolean fileinput,		/* whether input is from file or memory */
-	long incount, boolean fileoutput,		/* whether output is to file or memory */
-	unsigned long outcount, short dectype,			/* the type of decryption */
-	long formattype, boolean chardata)
+	int32_t incount, boolean fileoutput,		/* whether output is to file or memory */
+	uint32_t outcount, int16_t dectype,			/* the type of decryption */
+	int32_t formattype, boolean chardata)
 
 {
-  unsigned long cipher, seed, clearchars = 0;
+  uint32_t cipher, seed, clearchars = 0;
   unsigned char clear;
   FILE *outstream = (FILE *) outdata;
   char *currPtr = (char *) instream;
   int j;
-  short keylen = (chardata?lenIV:outerlenIV);
+  int16_t keylen = (chardata?lenIV:outerlenIV);
  
   inchars = 0;
   decrypttype = dectype;
-  SetCryptGlobs(dectype, formattype, chardata, &dec1, &dec2, (long *) &seed);
+  SetCryptGlobs(dectype, formattype, chardata, &dec1, &dec2, (int32_t *) &seed);
   if (fileinput)
     clearerr(instream);
   if (fileoutput)
@@ -376,7 +376,7 @@ static unsigned long DoDecrypt
   {
     currPtr = InputEnc(currPtr, fileinput, &cipher);
     /* Check for empty file. */
-    if (cipher == (unsigned long)EOF)
+    if (cipher == (uint32_t)EOF)
       return (0);
     Decrypt(randno, clear, cipher);
     
@@ -384,7 +384,7 @@ static unsigned long DoDecrypt
   while (fileinput || (inchars < incount))
   {
     currPtr = InputEnc(currPtr, fileinput, &cipher);
-    if (cipher == (unsigned long)EOF)
+    if (cipher == (uint32_t)EOF)
       break;
     
     Decrypt(randno, clear, cipher);
@@ -408,14 +408,14 @@ static unsigned long DoDecrypt
   return (clearchars);
 }				/* DoDecrypt */
 
-static unsigned long DoRead
+static uint32_t DoRead
   (FILE *instream, char *outdata, boolean fileinput,		/* whether input is from file or memory */
-	long incount, boolean fileoutput,		/* whether output is to file or memory */
-	unsigned long outcount)
+	int32_t incount, boolean fileoutput,		/* whether output is to file or memory */
+	uint32_t outcount)
 
 {
-  unsigned long clear;
-  unsigned long clearchars = 0;
+  uint32_t clear;
+  uint32_t clearchars = 0;
   FILE *outstream = (FILE *) outdata;
   char *currPtr = (char *) instream;
  
@@ -428,7 +428,7 @@ static unsigned long DoRead
   while (fileinput || (inchars < incount))
   {
    	currPtr = InputPlain(currPtr, fileinput, &clear);
-    if (clear == (unsigned long)EOF)
+    if (clear == (uint32_t)EOF)
       break;
     
    if (fileoutput)
@@ -452,11 +452,11 @@ static unsigned long DoRead
 }				/* DoRead */
 
 
- unsigned long ReadDecFile(FILE *instream, char *filename, char *outbuffer, 
-			boolean fileinput /* whether input is from file or memory */, long incount, unsigned long outcount, 
-			short dectype /* the type of decryption */)
+ uint32_t ReadDecFile(FILE *instream, char *filename, char *outbuffer, 
+			boolean fileinput /* whether input is from file or memory */, int32_t incount, uint32_t outcount, 
+			int16_t dectype /* the type of decryption */)
 {
-  unsigned long cc;
+  uint32_t cc;
 	boolean decrypt=1;
 	char c;
 	

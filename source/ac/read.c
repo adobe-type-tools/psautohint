@@ -110,7 +110,7 @@ static void PopPCd(pcd) Cd *pcd; {
 static PPathElt AppendElement(etype) integer etype; {
   PPathElt e;
   e = (PPathElt)Alloc(sizeof(PathElt));
-  e->type = (short)etype;
+  e->type = (int16_t)etype;
   if (pathEnd != NULL) { pathEnd->next = e; e->prev = pathEnd; }
   else pathStart = e;
   pathEnd = e;
@@ -277,9 +277,9 @@ static void psFLX() {
 
 static void ReadHintInfo(nm, str) char nm;  const char *str; {
   Cd c0;
-  short hinttype =
+  int16_t hinttype =
     nm == 'y' ? RY : nm == 'b' ? RB : nm == 'm' ? RM + ESCVAL : RV + ESCVAL;
-  long elt1, elt2;
+  int32_t elt1, elt2;
   PopPCd(&c0);
   c0.y += c0.x;  /* make absolute */
   /* Look for comment of path elements used to determine this band. */
@@ -607,7 +607,7 @@ boolean normal, forBlendData, readHints, prependprefix;
   FILE *fd;
   char *inputbuff;
   integer cc;
-  unsigned long filelen;
+  uint32_t filelen;
   currentx = currenty = tempx = tempy = stkindex = 0;
   flex = idInFile = startchar = FALSE;
   forMultiMaster = forBlendData;
@@ -689,7 +689,7 @@ void Test() {
   if (fd == NULL) return;
   cc = ReadDecFile(
      fd, (char *)infile, (char *)buff,
-     TRUE, MAXBYTES, (unsigned long)MAXBYTES, OTHER);
+     TRUE, MAXBYTES, (uint32_t)MAXBYTES, OTHER);
   fclose(fd);
   if (cc >= MAXBYTES) { cc--; buff[cc] = 0; goto mismatch; }
   buff[cc] = 0;

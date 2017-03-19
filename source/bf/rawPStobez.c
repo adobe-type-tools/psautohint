@@ -30,11 +30,11 @@ End Edit History
 #define SSIZE 20		/* operand stack size */
 
 #if !IS_LIB
-static long oprnd_stk[SSIZE];
-static short count;
-static short convertedchars;
+static int32_t oprnd_stk[SSIZE];
+static int16_t count;
+static int16_t convertedchars;
 static boolean printmsg;
-static long dx, dy;
+static int32_t dx, dy;
 static char tempname[MAXFILENAME];
 static Cd p1, p2, p3, currPt;
 static float scale; /* scale factor for each character. */
@@ -45,7 +45,7 @@ static void errmsg(
     char *, char *, FILE *, FILE *
 );
 
-static short nextline(
+static int16_t nextline(
     FILE *
 );
 
@@ -58,7 +58,7 @@ static void SetCd(
 );
 
 static void putonstk(
-    long, char *
+    int32_t, char *
 );
 
 static void mt(
@@ -86,10 +86,10 @@ FILE *infile, *outfile;
   LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
 }
 
-static short nextline(infile)
+static int16_t nextline(infile)
 FILE *infile;
 {
-  register short c;
+  register int16_t c;
 
   while (TRUE)
   {
@@ -103,7 +103,7 @@ static char *ReadrawPSFile(stream, tokenPtr, filename)
 FILE *stream;
 char *tokenPtr, *filename;
 {
-  register short c;
+  register int16_t c;
 
   /* Skip all white space */
   while (TRUE)
@@ -149,7 +149,7 @@ CdPtr b;
 }
 
 static putonstk(number, charname)
-long number;
+int32_t number;
 char * charname;
 {
   if (count >= SSIZE)
@@ -227,7 +227,7 @@ extern void convert_PScharfile(const char *charname, const char *filename)
 {
   FILE *infile, *outfile;
   char token[50];
-  long number;
+  int32_t number;
   char inname[MAXPATHLEN], outname[MAXPATHLEN];
 
   get_filename(inname, RAWPSDIR, filename);

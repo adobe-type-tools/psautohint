@@ -8,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef BFTOAC_H
 #define BFTOAC_H
 
-extern boolean AutoColor(boolean, boolean, boolean, boolean, boolean, short, char *[], boolean, boolean, boolean, boolean);
+extern boolean AutoColor(boolean, boolean, boolean, boolean, boolean, int16_t, char *[], boolean, boolean, boolean, boolean);
 
 extern boolean CreateACTimes (void);
 typedef void (*tConvertfunc)(const char *, const char *);

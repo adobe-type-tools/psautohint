@@ -70,7 +70,7 @@ static void printHelp(void)
 	fprintf(OUTPUTBUFF, "   -v print versions.\n");
 }
 
-static int main_cleanup(short code)
+static int main_cleanup(int16_t code)
 {
 	closefiles();
 	if (code != AC_Success)
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 	int firstFileNameIndex = -1; /* arg index for first bez file name, or  suffix of environment variable holding the bez string. */
 	
 	register char *current_arg;
-	short total_files = 0;
+	int16_t total_files = 0;
 	int result, argi;
 
 	badParam = fixStems = debug = doAligns = doStems = allstems = FALSE;

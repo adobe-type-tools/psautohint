@@ -179,9 +179,9 @@ static void chkDT(c) Cd c; {
     xloc = xnxt; yloc = ynxt;
 }
 
-#define FQ(x) ((long int)((x) >> 6))
+#define FQ(x) ((int32_t)((x) >> 6))
 static integer CPDirection(x1,cy1,x2,y2,x3,y3) Fixed x1,cy1,x2,y2,x3,y3; {
-    long int q, q1, q2, q3;
+    int32_t q, q1, q2, q3;
     q1 = FQ(x2)*FQ(y3-cy1);
     q2 = FQ(x1)*FQ(y2-y3);
     q3 = FQ(x3)*FQ(cy1-y2);

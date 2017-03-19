@@ -12,7 +12,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
   names to the binary encoded equivalents. */
 typedef struct op_element
 {
-  short encoding;
+  int16_t encoding;
   char operator[MAXOPLEN];
 } op_element;
 
@@ -138,7 +138,7 @@ extern void init_ops()
 
 }
 
-void GetOperator(short encoding, char *operator)
+void GetOperator(int16_t encoding, char *operator)
 {
   indx ix;
 
@@ -154,7 +154,7 @@ void GetOperator(short encoding, char *operator)
 
 /* Checks if the operator passed in is a recognized PS operator.
    If it is the associated opcode is returned.	 */
-extern short op_known(operator)
+extern int16_t op_known(operator)
 char *operator;
 
 {

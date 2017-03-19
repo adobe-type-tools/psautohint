@@ -338,7 +338,7 @@ void XtraClrs(PPathElt e) {
 	ptLstArray[ptLstIndex] = pointList;
 	if (e->newcolors == 0) {
 		GetNewPtLst();
-		e->newcolors = (short)ptLstIndex;
+		e->newcolors = (int16_t)ptLstIndex;
 	}
 	ptLstIndex = e->newcolors;
 	pointList = ptLstArray[ptLstIndex];

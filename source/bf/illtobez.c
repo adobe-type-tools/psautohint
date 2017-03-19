@@ -50,13 +50,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 typedef struct path_element
 {
     Cd coord;
-    short tag;
+    int16_t tag;
 } path_element;
 
 typedef struct char_width
 {
     char name[MAXCHARNAME];
-    short width;
+    int16_t width;
 } char_width;
 
 /* Globals */
@@ -68,12 +68,12 @@ static boolean printmsg;	/* whether to print Converting msg */
 static boolean release;		/* indicates release version */
 static indx np;			/* number of points in path */
 static indx widthcnt;		/* number of character widths */
-static long dict_entries;
+static int32_t dict_entries;
 static float scale;		/* scale factor */
 static char_width *widthtab = NULL;
 static path_element *path = NULL, *final_path = NULL;
 static char tmpnm[sizeof(TEMPFILE) + sizeof(bezdir) + 3];
-static short convertedchars;
+static int16_t convertedchars;
 
 extern void ConvertInputDirFiles(const char *dirname, tConvertfunc convertproc);
 
@@ -109,7 +109,7 @@ static void do_path(
                     boolean, FILE *, const char *
                     );
 
-static long findarea(
+static int32_t findarea(
                      CdPtr, CdPtr, CdPtr
                      );
 
@@ -139,9 +139,9 @@ static boolean initialize_widths()
 {
     FILE *wfile;
     boolean widths_exist = FALSE;
-    long temp;
+    int32_t temp;
     indx ix;
-    long cnt, maxChars = MAXCHARS;
+    int32_t cnt, maxChars = MAXCHARS;
     char line[MAXLINE + 1];	/* input buffer */
     
     widthtab = (struct char_width *) AllocateMem(maxChars, sizeof(char_width),
@@ -175,7 +175,7 @@ static boolean initialize_widths()
                 LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
             }
             CharNameLenOK(widthtab[widthcnt].name);
-            widthtab[widthcnt].width = (short) temp;
+            widthtab[widthcnt].width = (int16_t) temp;
             widthcnt++;
         }
         fclose(wfile);
@@ -186,7 +186,7 @@ static boolean initialize_widths()
 static void process_width(FILE *infile, const char *name, boolean seen_width)
 {
     indx n, ix;
-    long width, cnt;
+    int32_t width, cnt;
     float real_width, junk;
     char line[MAXLINE + 1];	/* input buffer */
     
@@ -242,7 +242,7 @@ static void process_width(FILE *infile, const char *name, boolean seen_width)
                     sprintf(globmsg, "Width updated for %s character (old: %d, new: %ld).\n", name, (int) widthtab[ix].width, width);
                     LogMsg(globmsg, INFO, OK, FALSE);
                 }
-                widthtab[ix].width = (short) width;
+                widthtab[ix].width = (int16_t) width;
             }
             char_exists = TRUE;
             break;
@@ -251,7 +251,7 @@ static void process_width(FILE *infile, const char *name, boolean seen_width)
     if (!char_exists)
     {
         strcpy(widthtab[widthcnt].name, name);
-        widthtab[widthcnt].width = (short) width;
+        widthtab[widthcnt].width = (int16_t) width;
         widthcnt++;
     }
 }
@@ -334,7 +334,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
     float color = 0.0;
     float temp1, temp2, temp3, temp4, temp5, temp6;
     indx n;
-    long cnt;
+    int32_t cnt;
     boolean white, seen_width = FALSE, seen_trailer = FALSE;
     char op, line[MAXLINE + 1];	/* input buffer */
     
@@ -535,7 +535,7 @@ static void do_path(boolean white, FILE *outfile, const char *name)
 {
     indx n, elem;
     path_element *p, *fp;
-    long tag;
+    int32_t tag;
     boolean cw, reverse;
     boolean open = ((path[0].coord.x != path[np - 1].coord.x) ||
                     (path[0].coord.y != path[np - 1].coord.y));
@@ -705,9 +705,9 @@ static void do_path(boolean white, FILE *outfile, const char *name)
     relative(outfile);
 }				/* end do_path */
 
-static long findarea(CdPtr p1, CdPtr p2, CdPtr sp)
+static int32_t findarea(CdPtr p1, CdPtr p2, CdPtr sp)
 {
-    long v1x, v1y, v2x, v2y;
+    int32_t v1x, v1y, v2x, v2y;
     
     v1x = p1->x - sp->x;
     v1y = p1->y - sp->y;
@@ -720,7 +720,7 @@ static long findarea(CdPtr p1, CdPtr p2, CdPtr sp)
 static boolean directionIsCW()
 {
     path_element *p = path;
-    long area, n;
+    int32_t area, n;
     Cd c1, c2, old_point, sp;
     
     area = 0;
@@ -760,7 +760,7 @@ static boolean directionIsCW()
 static void relative(FILE *outfile)
 {
     path_element *p, *p1, *p2;
-    long i, dx, dy;
+    int32_t i, dx, dy;
 #if ILLDEBUG
     static char op[3] = {'M', 'L', 'C'};
 #endif
@@ -888,7 +888,7 @@ static void relative(FILE *outfile)
 static dump_path(boolean reverse)
 {
     static char op[3] = {'M', 'L', 'C'};
-    long n;
+    int32_t n;
     path_element *p;
     
     n = np;
@@ -958,7 +958,7 @@ void convert_illcharfile(const char *charname, const char *filename)
     infile = ACOpenFile(inname, "r", OPENWARN);
     if (infile == NULL) return;
     outfile = ACOpenFile(tmpnm, "w", OPENERROR);
-    DoInitEncrypt(outfile, OTHER, HEX, (long) BEZLINESIZE, FALSE);
+    DoInitEncrypt(outfile, OTHER, HEX, (int32_t) BEZLINESIZE, FALSE);
     WriteStart(outfile, charname);
     convert(infile, outfile, charname, filename);
     (void) DoContEncrypt("ed\n", outfile, FALSE, INLEN);
@@ -979,7 +979,7 @@ void convert_illcharfile(const char *charname, const char *filename)
 extern void set_scale(float *newscale)
 {
     float temp;
-    long cnt;
+    int32_t cnt;
     char *fontinfostr;
     
     *newscale = 1;

@@ -20,36 +20,26 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* Numeric definitions                                                 */
 /***********************************************************************/
 
-/***********************************************************************/
-/* The present file assumes:                                           */
-/*                                                                     */
-/*             char:   8 bits                                          */
-/*             short: 16 bits                                          */
-/*             long:  32 bits                                          */
-/*                                                                     */
-/* This assumption is currently true for Sun, PC, and Mac environments.*/
-/* When this assumption is no longer true, #ifdef the code accordingly */
-/* and change this comment.                                            */
-/***********************************************************************/
+#include <stdint.h>
 
-typedef long                  Fixed;
+typedef int32_t               Fixed;
 
 
-typedef long                  Int32;
+typedef int32_t               Int32;
 #define MAX_INT32             ((Int32)0x7FFFFFFF)
 #define MIN_INT32             ((Int32)0x80000000)
 
-typedef unsigned long         Card32;
+typedef uint32_t              Card32;
 #define MAX_CARD32            ((Card32)0xFFFFFFFF)
 
-typedef short                 Int16;
+typedef int16_t               Int16;
 #define MAX_INT16             ((Int16)0x7FFF)
 #define MIN_INT16             ((Int16)0x8000)
 
-typedef unsigned short        Card16;
+typedef uint16_t              Card16;
 #define MAX_CARD16            ((Card16)0xFFFF)
 
-typedef unsigned char         Card8;
+typedef uint8_t               Card8;
 #define MAX_CARD8             ((Card8)0xFF)
 
 
@@ -125,7 +115,7 @@ typedef integer         (*PIntProc)();
                                     /* when we are completely          */
                                     /* converted to ANSI conventions.  */
                                     /***********************************/
-typedef long int        ps_size_t;
+typedef int32_t         ps_size_t;
 
                                     /***********************************/
                                     /* Bit fields                      */
@@ -140,14 +130,6 @@ typedef long int        ps_size_t;
 typedef float           real;
 typedef real            *Preal;
 typedef double          longreal;
-
-/*
-#if !MACROM || __GNUC__
-typedef long int        Fixed;     */ /* 16 bits of integer, 16 bits of  */
-                                    /* fraction                        */
-/*
-#endif
-*/
 
 typedef Fixed           *PFixed;
 

@@ -109,7 +109,7 @@ boolean FindLineSeg(loc, sL) Fixed loc; PClrSeg sL; {
    the horizontal alignment zones. The list contains
    segments that may or may not have hints added. */ 
 void CheckTfmVal (hSegList, bandList, length)
-PClrSeg hSegList; Fixed *bandList; long int length;  {
+PClrSeg hSegList; Fixed *bandList; int32_t length;  {
   Fixed tfmval;
   PClrSeg sList = hSegList;
 

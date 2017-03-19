@@ -91,14 +91,14 @@ extern int	execv(/* char *path, char *argv[] */);
 extern int	execve(/* char *path, char *argv[], char *envp[] */);
 extern int	execvp(/* char *file, char *argv[] */);
 #endif
-extern long	fpathconf(/* int fd, int name */);
+extern int32_t	fpathconf(/* int fd, int name */);
 extern char	*getcwd(/* char *buf, int size */);
 extern int	getgroups(/* int gidsetsize, gid_t grouplist[] */);
 extern char	*getlogin(/* void */);
 extern int	isatty(/* int fildes */);
 extern int	link(/* char *path1, char *path2 */);
 extern off_t	lseek(/* int fildes, off_t offset, int whence */);
-extern long	pathconf(/* char *path, int name */);
+extern int32_t	pathconf(/* char *path, int name */);
 extern int	pause(/* void */);
 extern int	pipe(/* int fildes[2] */);
 extern int	read(/* int fildes, char *buf, unsigned int nbyte */);
@@ -107,7 +107,7 @@ extern int	setgid(/* gid_t gid */);
 extern int	setpgid(/* pid_t pid, pid_t pgid */);
 extern int	setuid(/* uid_t uid */);
 extern unsigned	sleep(/* unsigned int seconds */);
-extern long	sysconf(/* int name */);
+extern int32_t	sysconf(/* int name */);
 extern int	tcsetpgrp(/* int fildes, pid_t pgrp_id */);
 extern char	*ttyname(/* int fildes */);
 /*extern int	unlink(const char *path );*/

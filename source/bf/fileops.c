@@ -17,8 +17,8 @@ static char charsetPath[MAXPATHLEN];
 static char subsetPath[MAXPATHLEN];
 static char subsetname[MAXPATHLEN];
 static char working_dir[MAXPATHLEN];/* name of directory where bf was invoked*/
-static short total_inputdirs = 1;   /* number of input directories           */
-static long MaxBytes;
+static int16_t total_inputdirs = 1;   /* number of input directories           */
+static int32_t MaxBytes;
 char globmsg[MAXMSGLEN + 1];        /* used to format messages               */
 static CharsetParser charsetParser;
 static char charsetLayout[MAXPATHLEN];
@@ -27,7 +27,7 @@ static int initialWorkingDirLength;
 
 
 #if IS_LIB
-typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, unsigned long size);
+typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, uint32_t size);
 extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;
 extern void *AC_memmanageCtxPtr;
 #endif
@@ -41,7 +41,7 @@ typedef struct
 
 extern boolean multiplemaster; /* from buildfont.c */
 
-extern short strindex(s, t)         /* return index of t in s, -1 if none    */
+extern int16_t strindex(s, t)         /* return index of t in s, -1 if none    */
 char *s, *t;
 {
   indx i, n;
@@ -97,10 +97,10 @@ void UnallocateMem(void *ptr)
 #endif
 }
 
-extern unsigned long CheckFileBufferLen(buffer, filename)
+extern uint32_t CheckFileBufferLen(buffer, filename)
 char **buffer, *filename;
 {
-  long filelen;
+  int32_t filelen;
 
   filelen = ACGetFileSize (filename);
   if (filelen > MaxBytes) { /* renner Tue Sep 11 14:59:37 1990 */
@@ -116,7 +116,7 @@ char **buffer, *filename;
 /* ACOpenFile tries to open a file with the access attribute
    specified.  If fopen fails an error message is printed
    and the program exits if severity = FATAL. */
-extern FILE *ACOpenFile(char * filename, char *access, short severity)
+extern FILE *ACOpenFile(char * filename, char *access, int16_t severity)
 {
   FILE *stream;
   char dirname[MAXPATHLEN];
@@ -178,20 +178,20 @@ char *pathname;
 extern boolean BAKFile(filename)
 char *filename;
 {
-  short length = (short)strlen(filename);
+  int16_t length = (int16_t)strlen(filename);
   if (length <= 4) return FALSE;
   if (!strcmp(&filename[length-4], BAKSUFFIX))
     return TRUE;
   return FALSE;
 }
 
-extern long GetMaxBytes()
+extern int32_t GetMaxBytes()
 {
   return MaxBytes;
 }
 
 extern void SetMaxBytes (value)
-long value;
+int32_t value;
 {
   MaxBytes = value;
 }
@@ -323,7 +323,7 @@ void
 setcharsetname(boolean release, char *csname, char *baseFontPath)
    {
    char *filename;
-   long i;
+   int32_t i;
    char delimit[2];
 
    charsetname[0] = csname[0] = '\0';
@@ -350,7 +350,7 @@ setcharsetname(boolean release, char *csname, char *baseFontPath)
    if (!CFileExists(charsetname, FALSE))
       {
       get_filedelimit(delimit);
-      if (((i = (long)strlen(charsetDir)) == 0) || (charsetDir[i - 1] == delimit[0]))
+      if (((i = (int32_t)strlen(charsetDir)) == 0) || (charsetDir[i - 1] == delimit[0]))
          delimit[0] = '\0';
 
       if (charsetParser == bf_CHARSET_CID)
@@ -368,7 +368,7 @@ setcharsetname(boolean release, char *csname, char *baseFontPath)
    if (!CFileExists(subsetPath, FALSE))
       {
       get_filedelimit(delimit);
-      if (((i = (long)strlen(charsetDir)) == 0) || (charsetDir[i - 1] == delimit[0]))
+      if (((i = (int32_t)strlen(charsetDir)) == 0) || (charsetDir[i - 1] == delimit[0]))
          delimit[0] = '\0';
 
       if (charsetParser == bf_CHARSET_CID)
@@ -419,34 +419,34 @@ extern char *GetFItoAFMCharSetName()
   return filename;
 }
 
-extern short GetTotalInputDirs()
+extern int16_t GetTotalInputDirs()
 {
   return total_inputdirs;
 }
 
-extern void SetTotalInputDirs(short total)
+extern void SetTotalInputDirs(int16_t total)
 {
   total_inputdirs = total;
 }
 
 /* insures that the meaningful data in the buffer is terminated
  * by an end of line marker and the null terminator for a string. */
-extern long ACReadFile(textptr, fd, filename, filelength)
+extern int32_t ACReadFile(textptr, fd, filename, filelength)
 char *textptr;
 FILE *fd;
 char *filename;
-long filelength;
+int32_t filelength;
 {
-  long cc;
+  int32_t cc;
 
   cc = ReadDecFile(
-    fd, filename, textptr, TRUE, MAXINT, (unsigned long) (filelength),
+    fd, filename, textptr, TRUE, MAXINT, (uint32_t) (filelength),
     OTHER);
   fclose(fd);
   if (textptr[cc - 1] != NL || textptr[cc - 1] != '\r')
     textptr[cc++] = NL;
   textptr[cc] = '\0';
-  return ((long) cc); 
+  return ((int32_t) cc); 
 }           /* ACReadFile */
 
 boolean
@@ -513,7 +513,7 @@ IsInFullCharset(char *bezName)
 /* character set file.   It returns next free location for characters.       */
 /*****************************************************************************/
 extern char *
-ReadNames(char *cname, char *filename, long *masters, long *hintDir,
+ReadNames(char *cname, char *filename, int32_t *masters, int32_t *hintDir,
       FILE *stream)
    {
 #ifdef IS_GGL

@@ -11,10 +11,10 @@ extern char beginsubr[10], endsubr[8], preflx[7], newcolors[10];
 #endif
 
 extern void GetOperator(
-  short, char *
+  int16_t, char *
 );
 
-extern short op_known(
+extern int16_t op_known(
     char *
 );
 

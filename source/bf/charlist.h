@@ -3,7 +3,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /***********************************************************************/
 
 extern void AddCharListEntry(
-char *, char *, long, long, boolean, boolean, boolean, boolean
+char *, char *, int32_t, int32_t, boolean, boolean, boolean, boolean
 );
 
 extern boolean CheckCharListEntry(

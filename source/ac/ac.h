@@ -1,7 +1,6 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
-
 /* See the discussion in the function definition for:
  control.c:Blues() 
  static void Blues() 
@@ -53,7 +52,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* structures */
 
 typedef struct {
-  short int limit;
+  int16_t limit;
   Fixed feps;
   void (*report)();
   Cd ll, ur;
@@ -77,7 +76,7 @@ typedef struct _clrseg {
   struct _pthelt *sElt;
     /* points to the path element that generated this ClrSeg */
     /* set by AddSegment in gen.c */
-  short int sType;
+  int16_t sType;
     /* tells what type of segment this is: sLINE sBEND sCURVE or sGHOST */
   } ClrSeg, *PClrSeg;
 
@@ -103,8 +102,8 @@ typedef struct _clrval {
   Fixed vVal, vSpc, initVal;
   Fixed vLoc1, vLoc2;
     /* vBot=vLoc1, vTop=vLoc2, vLft=vLoc1, vRght=vLoc2 */ 
-  short int vGhst:8;
-  short int pruned:8;
+  int16_t vGhst:8;
+  int16_t pruned:8;
   PClrSeg vSeg1, vSeg2;
   struct _clrval *vBst;
   PClrRep vRep;
@@ -141,11 +140,11 @@ typedef struct _clrval {
 
 typedef struct _pthelt {
   struct _pthelt *prev, *next, *conflict;
-  short int type;
+  int16_t type;
   PSegLnkLst Hs, Vs;
   boolean Hcopy:1, Vcopy:1, isFlex:1, yFlex:1, newCP:1, sol:1, eol:1;
   int unused:9;
-  short int count, newcolors;
+  int16_t count, newcolors;
   Fixed x, y, x1, y1, x2, y2, x3, y3;
   } PathElt, *PPathElt;
 
@@ -230,12 +229,12 @@ extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at t
 #define FixedPosInf MAXinteger
 #define FixedNegInf MINinteger
 #define FixShift (8)
-#define FixInt(i) (((long int)(i)) << FixShift)
-#define FixReal(i) ((long int)((i) *256.0))
-extern long int FRnd(long int x);
-#define FHalfRnd(x) ((long int)(((x)+(1<<7)) & ~0xFFL))
-#define FracPart(x) ((long int)(x) & 0xFFL)
-#define FTrunc(x) (((long int)(x))>>FixShift)
+#define FixInt(i) (((int32_t)(i)) << FixShift)
+#define FixReal(i) ((int32_t)((i) *256.0))
+extern int32_t FRnd(int32_t x);
+#define FHalfRnd(x) ((int32_t)(((x)+(1<<7)) & ~0xFFL))
+#define FracPart(x) ((int32_t)(x) & 0xFFL)
+#define FTrunc(x) (((int32_t)(x))>>FixShift)
 #define FIXED2FLOAT(x) (x/256.0)
 #if SUN
 #ifndef MAX
@@ -290,7 +289,7 @@ extern void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 
 
-#define ACNEWMEM(size) AC_memmanageFuncPtr(AC_memmanageCtxPtr, NULL, (unsigned long)(size))
+#define ACNEWMEM(size) AC_memmanageFuncPtr(AC_memmanageCtxPtr, NULL, (uint32_t)(size))
 #define ACREALLOCMEM(oldptr, newsize) AC_memmanageFuncPtr(AC_memmanageCtxPtr, (oldptr), (newsize))
 #define ACFREEMEM(ptr) AC_memmanageFuncPtr(AC_memmanageCtxPtr, (ptr), 0)
 

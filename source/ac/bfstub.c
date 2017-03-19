@@ -33,7 +33,7 @@ void WriteBlendedArray(barray, totalvals, subarraysz, str, dirCount)
 int *barray;
 char *str;
 int totalvals, subarraysz;
-short dirCount;
+int16_t dirCount;
 {
 }
 

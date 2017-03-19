@@ -68,10 +68,10 @@ Fixed d, overlaplen, minlen; {
 }
 
 #define GapDist(d) (((d) < FixInt(127)) ? \
-FTrunc(((d) * (d)) / 40) : ((long)  (((double)(d)) * (d) / (40*256))))
+FTrunc(((d) * (d)) / 40) : ((int32_t)  (((double)(d)) * (d) / (40*256))))
 /* if d is >= 127.0 Fixed, then d*d will overflow the signed int 16 bit value. */
 /* DEBUG 8 BIT. No idea why d*d was divided by 20, but we need to divide it by 2 more to get a dist that is only 2* the old autohint value. 
- With the 8.8 fixed coordinate system, we still overflow a long int with d*(d/40), so rather than casting this to a long int and then doing >>8, we need to divide by 256, then cast to long int. 
+ With the 8.8 fixed coordinate system, we still overflow a int32_t with d*(d/40), so rather than casting this to a int32_t and then doing >>8, we need to divide by 256, then cast to int32_t. 
  I also fail to understand why the original used FTrunc, which right shifts by 256. For the current coordinate space, which has a fractional part of 8 bits, you do need to divide by 256 after doing a simple int multiply, but the previous coordinate space
     has a 7 bit Fixed fraction, and should be dividing by 128. I suspect that there was a yet earlier version which used a 8 bit fraction, and this is a bug.
  */

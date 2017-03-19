@@ -41,7 +41,7 @@ extern boolean createlockfile (
 );
 
 
-extern void set_errorproc( int (*)(short) );
+extern void set_errorproc( int (*)(int16_t) );
 
 
 extern void closefiles(
@@ -86,7 +86,7 @@ extern void get_mac_fontname(
    the current working directory. On UNIX it always
    returns the current working directory. */
 extern void GetFullPathname(
-char *, short, long
+char *, int16_t, int32_t
 );
 
 extern char *CheckBFPath(
@@ -97,7 +97,7 @@ extern void GetInputDirName(
     char *, char *
 );
 
-extern unsigned long ACGetFileSize(
+extern uint32_t ACGetFileSize(
     char *
 );
 
@@ -108,12 +108,12 @@ extern boolean DirExists(
 
 /* Checks for the existence of the specified file. */
 extern boolean FileExists(
-    const char *, short
+    const char *, int16_t
 );
 
 /* Checks for the existence of the specified file. */
 extern boolean CFileExists(
-    const char *, short
+    const char *, int16_t
 );
 
 extern void MoveDerivedFile(

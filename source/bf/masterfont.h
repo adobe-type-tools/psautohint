@@ -38,7 +38,7 @@ extern int GetMasterDirIx(
   char *
 );
 
-extern short GetMasterFontList(
+extern int16_t GetMasterFontList(
   char *
 );
 

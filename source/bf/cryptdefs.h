@@ -22,28 +22,28 @@ End Edit History.
 
 #define INLEN -1L
 
-extern long DoContEncrypt(
-    char *, FILE *, boolean, long
+extern int32_t DoContEncrypt(
+    char *, FILE *, boolean, int32_t
 );
 
-extern long ContEncrypt(char *indata, FILE  *outstream, boolean fileinput, long incount, boolean dblenc);
+extern int32_t ContEncrypt(char *indata, FILE  *outstream, boolean fileinput, int32_t incount, boolean dblenc);
 
-extern short DoInitEncrypt(
-    FILE *, short, long, long, boolean
+extern int16_t DoInitEncrypt(
+    FILE *, int16_t, int32_t, int32_t, boolean
 );
 
-extern long DoEncrypt(
-    char *, FILE *, boolean, long, short, long, long, boolean, boolean
+extern int32_t DoEncrypt(
+    char *, FILE *, boolean, int32_t, int16_t, int32_t, int32_t, boolean, boolean
 );
 
-extern long ContDecrypt(
-    char *, char *, boolean, boolean, long, unsigned long
+extern int32_t ContDecrypt(
+    char *, char *, boolean, boolean, int32_t, uint32_t
 );
 
-extern unsigned long ReadDecFile(
-    FILE *, char *, char *, boolean, long, unsigned long, short
+extern uint32_t ReadDecFile(
+    FILE *, char *, char *, boolean, int32_t, uint32_t, int16_t
 );
 
 extern void SetLenIV (
-    short
+    int16_t
 );

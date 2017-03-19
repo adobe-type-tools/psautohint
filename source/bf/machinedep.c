@@ -57,24 +57,24 @@ Windows specific names instead.
 
 static char ibmfilename[] = "ibmprinterfont.unprot";
 static char uniqueIDFile[MAXPATHLEN];
-static short warncnt = 0;
+static int16_t warncnt = 0;
 #if defined (_WIN32)
 static char Delimiter[] = "\\";
 #else
 static char Delimiter[] = "/";
 #endif
 
-static int (*errorproc)(short); /* proc to be called from LogMsg if error occurs */
+static int (*errorproc)(int16_t); /* proc to be called from LogMsg if error occurs */
 
 /* used for cacheing of log messages */
 static char lastLogStr[MAXMSGLEN + 1] = "";
-static short lastLogLevel = -1;
+static int16_t lastLogLevel = -1;
 static boolean lastLogPrefix;
 static int logCount = 0;
 
-static void LogMsg1(char *str, short level, short code, boolean prefix);
+static void LogMsg1(char *str, int16_t level, int16_t code, boolean prefix);
 
-short WarnCount()
+int16_t WarnCount()
 {
     return warncnt;
 }
@@ -93,7 +93,7 @@ void ResetWarnCount()
 #endif
 
 void set_errorproc(userproc)
-int (*userproc)(short);
+int (*userproc)(int16_t);
 {
   errorproc = userproc;
 }
@@ -115,8 +115,8 @@ int (*userproc)(short);
 
  void LogMsg( 
 		char *str,			/* message string */
-		short level,		/* error, warning, info */
-		short code,		/* exit value - if !OK, this proc will not return */
+		int16_t level,		/* error, warning, info */
+		int16_t code,		/* exit value - if !OK, this proc will not return */
 		boolean prefix	/* prefix message with LOGERROR: or WARNING:, as appropriate */)
 {
   /* changed handling of this to be more friendly (?) jvz */
@@ -138,7 +138,7 @@ int (*userproc)(short);
   }
 }
 
-static void LogMsg1(char *str, short level, short code, boolean prefix)
+static void LogMsg1(char *str, int16_t level, int16_t code, boolean prefix)
 {
   switch (level)
   {
@@ -243,7 +243,7 @@ void get_current_dir(char *currdir)
 
 /* Returns true if the given file exists, is not a directory
    and user has read permission, otherwise it returns FALSE. */
-boolean FileExists(const char *filename, short errormsg)
+boolean FileExists(const char *filename, int16_t errormsg)
 {
   struct stat stbuff;
   int filedesc;
@@ -285,7 +285,7 @@ boolean FileExists(const char *filename, short errormsg)
   return TRUE;
 }
 
-boolean CFileExists(const char *filename, short errormsg)
+boolean CFileExists(const char *filename, int16_t errormsg)
 {
 	return FileExists(filename, errormsg);
 }
@@ -295,7 +295,7 @@ boolean DirExists(char *dirname, boolean absolute, boolean create, boolean error
 #ifndef _WIN32
 #pragma unused(absolute)
 #endif
-    long int access_denied = access(dirname, F_OK);
+    int32_t access_denied = access(dirname, F_OK);
     
     if (access_denied)
     {
@@ -352,16 +352,16 @@ char *suffix;
   sprintf(name, "%s%s%s", currdir, Delimiter, suffix);
 }
 
-unsigned long ACGetFileSize(filename)
+uint32_t ACGetFileSize(filename)
 char *filename;
 {
   struct stat filestat;
 
   if ((stat(filename, &filestat)) < 0) return (0);
 #ifdef CW80
-	return((unsigned long) filestat.st_mtime);
+	return((uint32_t) filestat.st_mtime);
 #else
-  return((unsigned long) filestat.st_size);
+  return((uint32_t) filestat.st_size);
 #endif
 }
 
@@ -430,7 +430,7 @@ char *baseFontPath;
   char *uponelevel = "../";
   char *startpath, *oldsp;
   char newpath[MAXPATHLEN];
-  short length;
+  int16_t length;
 
   newpath[0] = '\0';
   if (strchr(baseFontPath, *Delimiter) == NULL)
@@ -442,7 +442,7 @@ char *baseFontPath;
   }
 
   /* Find number of colons at the start of the path */
-  switch (length=(short)strspn(baseFontPath, Delimiter))
+  switch (length=(int16_t)strspn(baseFontPath, Delimiter))
   {
     case (0):
       break;
@@ -459,7 +459,7 @@ char *baseFontPath;
       break;
   }
 
-  length = (short)strlen(startpath);
+  length = (int16_t)strlen(startpath);
   /* replace all colons by slashes in remainder of input string -
     Note: this does not handle > 1 colon embedded in the middle of
     a Mac path name correctly */
@@ -485,7 +485,7 @@ char *filename;
 }
 
 /* Returns full pathname of current working directory. */
-void GetFullPathname(char *dirname, short vRefNum, long dirID)
+void GetFullPathname(char *dirname, int16_t vRefNum, int32_t dirID)
 {
 #ifndef _WIN32
 #pragma unused(vRefNum)
@@ -609,14 +609,14 @@ char *macfontname;
 }
 
 extern get_time(value)
-long *value;
+int32_t *value;
 {
   GetDateTime(value);
 }
 
 extern get_datetime(char *datetimestr)
 {
-  long secs;
+  int32_t secs;
   char datestr[25], timestr[25];
 
   get_time(&secs);

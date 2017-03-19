@@ -65,7 +65,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* Modification time struct from each file */
 typedef struct {
 	time_t modTime;
-	short nameIndx;
+	int16_t nameIndx;
 } fileTime;
 
 int newFileCnt = 0; /* Number of files and their ... */
@@ -92,10 +92,10 @@ char* nextFree = (char*)MAXCHARNAME; /* Pointer to next free char in buffer */
 time_t time();
 
 static char* allocate();
-static unsigned short calcChksum();
+static uint16_t calcChksum();
 static void newTimesFile(const char*, boolean);
 static void readInputDir(const char*, boolean);
-static short storeName();
+static int16_t storeName();
 static void formatTime();
 static void writeTimesFile(boolean convert, float scale);
 static void printArray();
@@ -278,9 +278,9 @@ static char* allocate(int n, int size)
  * realloc) without screwing up all the references that have
  * already been made to it.
  */
-static short storeName(const char *name)
+static int16_t storeName(const char *name)
 {
-	short tmp = nextFree - nameBuf;
+	int16_t tmp = nextFree - nameBuf;
 
 	if (strlen(name) + 1 + nextFree - nameBuf > bufSize) {
 		/* Not enough space so (re)allocate it */
@@ -317,7 +317,7 @@ static void writeTimesFile(boolean convert, /* Flags if writing .Converttimes */
 	
 	int i;
 	char s[25];
-	unsigned short chksum;
+	uint16_t chksum;
 	char* timesFileName = (convert) ? CVT_NAME : AC_NAME;
 	int lines = 4 + 1 + ((convert) ? 1 : 7) + 1 + newFileCnt;
 	FILE* fp = ACOpenFile(timesFileName, "w+", OPENWARN); /* Valid for Mac? */
@@ -390,7 +390,7 @@ static void formatTime(time_t t, char* s)
 static void printArray(
 			FILE* fp, /* Timestamp file pointer */
 			char* name, /* Array name */
-			long len, /* Array length */
+			int32_t len, /* Array length */
 			Fixed* a /* Array */)
 {
 	int i;
@@ -409,7 +409,7 @@ static void printArray(
 static void printCounterList(
 			FILE* fp, /* Timestamp file pointer */
 			char* name, /* List name */
-			long len, /* List length */
+			int32_t len, /* List length */
 			char** list /* The list */)
 {
 	int i;
@@ -427,10 +427,10 @@ static void printCounterList(
  * number of lines from the beginning of the file and accumulating
  * checksum as a 16-bit rotated shifted exor.
  */
-static unsigned short calcChksum(FILE *fp, int lines)
+static uint16_t calcChksum(FILE *fp, int lines)
 {
 	char buf[MAX_TEXT_LINE];
-	register unsigned short chksum = 0;
+	register uint16_t chksum = 0;
 	
 	rewind(fp);
 	while (lines-- && fgets(buf, MAX_TEXT_LINE, fp)) {
@@ -514,8 +514,8 @@ static boolean readCharSet()
 	char csFileName[MAXPATHLEN];
 	char fName[MAXFILENAME+4];
 	int i;
-	long masters, hintDir;
-	short nextName = nextFree - nameBuf; /* Remember first name position */
+	int32_t masters, hintDir;
+	int16_t nextName = nextFree - nameBuf; /* Remember first name position */
 	
 	getcharsetname(csFileName);
 	fp = ACOpenFile(csFileName, "r", OPENWARN);
@@ -573,7 +573,7 @@ static boolean readTimesFile(
 #else
 	char tmp[MAXFILENAME];
 	int lines;
-	unsigned short chksum;
+	uint16_t chksum;
 	int linesRead = 0;
 	char HCounterLine[MAX_TEXT_LINE];
 	char VCounterLine[MAX_TEXT_LINE];
@@ -680,9 +680,9 @@ static boolean readOldTimesFile(
 #pragma unused(scale)
 #else
 	
-	long version;
+	int32_t version;
 	char buf[MAX_TEXT_LINE];
-	long offset;
+	int32_t offset;
 	int counterListLen;
 	int HCounterCnt;
 	int VCounterCnt;
@@ -764,7 +764,7 @@ static int get32(FILE *fp)
  */
 static boolean compareData(
 		FILE* fp, /* Timestamp file pointer */
-		long len, /* Array length */
+		int32_t len, /* Array length */
 		Fixed a[] /* Array */)
 {
 	int i;
@@ -780,7 +780,7 @@ static boolean compareData(
  */
 static boolean readFileTimesData(
 			FILE* fp, /* Timestamp file pointer */
-			long offset /* File times offset */)
+			int32_t offset /* File times offset */)
 {
 #if IS_LIB
 #pragma unused(fp)
@@ -788,7 +788,7 @@ static boolean readFileTimesData(
 #else	
 	int i;
 	int len;
-	short nextName = nextFree - nameBuf; /* Remember first name position */
+	int16_t nextName = nextFree - nameBuf; /* Remember first name position */
 
 	fseek(fp, offset, L_SET); /* Seek to file times */
 	for (oldFileCnt = 0; (len = get16(fp)) && !feof(fp); oldFileCnt++) {
@@ -837,7 +837,7 @@ static boolean readFileTimesData(
 static boolean compareCounterListData(
 				int nameCnt, /* Number of names in the counter list  */
 				char** cp, /* Counter list */
-				long len, /* List length */
+				int32_t len, /* List length */
 				char* list[] /* The list */)
 {
 	char* names[COUNTER_EXTRA_ENTRIES];
@@ -858,7 +858,7 @@ static boolean compareCounterListData(
 static boolean compareArrays(
 				FILE* fp, /* Timestamp file pointer */
 				char* name, /* Array name */
-				long len, /* Array length */
+				int32_t len, /* Array length */
 				Fixed a[] /* Array */)
 {
 	char fmt[MAX_TEXT_LINE];
@@ -915,7 +915,7 @@ static boolean readFileTimes(
 static boolean compareCounterLists(
 			char* listName, /* List name */
 			char line[], /* Input line */
-			long len, /* List length */
+			int32_t len, /* List length */
 			char* list[] /* The list */)
 {
 	char label[64];
@@ -944,7 +944,7 @@ static boolean compareCounterLists(
 static boolean compareLists(
 				int nameCnt, /* Items in names */
 				char* names[], /* Name list */
-				long len, /* List length */
+				int32_t len, /* List length */
 				char* list[] /* The list */)
 {
 	int i;
@@ -1214,7 +1214,7 @@ static void readCharList()
     char fName[MAXFILENAME+4];
 	int i;
 	boolean start = TRUE;
-	short nextName = nextFree - nameBuf; /* Remember first name position */
+	int16_t nextName = nextFree - nameBuf; /* Remember first name position */
 	
 	for (newFileCnt = 0; ReadCharFileNames(fName, &start); newFileCnt++)
 		(void)storeName(fName);

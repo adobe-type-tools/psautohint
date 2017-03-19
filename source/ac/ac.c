@@ -65,7 +65,7 @@ AC_RETRYPTR reportRetryCB = NULL;
 
 
 
-static void * defaultAC_memmanage(void *ctxptr, void *old, unsigned long size)
+static void * defaultAC_memmanage(void *ctxptr, void *old, uint32_t size)
 	{
 #ifndef _WIN32
 #pragma unused(ctxptr)	
@@ -232,7 +232,7 @@ boolean AutoColor(
 			 boolean debug,
 			 boolean extracolor,
 			 boolean changeChar,
-			 short total_files,
+			 int16_t total_files,
 			 char *fileNamePtr[],
 			 boolean quiet,
              boolean doAll,

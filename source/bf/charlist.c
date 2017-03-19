@@ -41,8 +41,8 @@ readcharset(boolean release)
    char filename[MAXFILENAME];
    char charsetfilename[MAXPATHLEN];
    boolean foundone = FALSE;
-   long masters;
-   long hintDir;
+   int32_t masters;
+   int32_t hintDir;
 
    getcharsetname(charsetfilename);
    charsetexists = (strlen(charsetfilename) > 0);
@@ -278,8 +278,8 @@ checkcharlist(boolean release, boolean quiet, char *indir, indx dirix)
 
 extern void
 AddCharListEntry(char *cname, char *fname,
-      long masters,                 /* number of masters, 1-16               */
-      long hintDir,                 /* index of hint directory for this      */
+      int32_t masters,                 /* number of masters, 1-16               */
+      int32_t hintDir,                 /* index of hint directory for this      */
                                     /* character in dir list                 */
       boolean derived, boolean composite, boolean inBez, boolean transitional)
    {

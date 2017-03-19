@@ -12,7 +12,7 @@ typedef float Ary4[4];
 
 typedef struct _Transitions {
   char *charname;
-  short numtransitiongroups; 
+  int16_t numtransitiongroups; 
   struct _TransitGroup *transitgrouparray; /* ARRAY */
 } Transitions;
 
@@ -23,8 +23,8 @@ typedef struct _TransitGroup
   int *assembled_sb;     /* array */
   Bbox bbx;             /* not of the assembled file, but the super-bbox of all elts */
   int subrindex;        /* subroutine-index the _Merged_ assembledfilename's charpaths */
-  short numentries;
-  short hintindex;  /* which elt entry is -the- source for hints for this group */
+  int16_t numentries;
+  int16_t hintindex;  /* which elt entry is -the- source for hints for this group */
   struct _TransitElt *transiteltarray; /* ARRAY */
   Ary4 minval, maxval;    /* sorted min/max of group's fromval/toval entries */
 } TransitionGroup;
@@ -34,8 +34,8 @@ typedef struct _tt_pathlist *PTPathList;
 typedef struct _TransitElt
 {
   char *from_filename, *to_filename;
-  short from_width, to_width;
-  short from_sb, to_sb;
+  int16_t from_width, to_width;
+  int16_t from_sb, to_sb;
   Bbox from_bbx, to_bbx;
   PTPathList from_pathlist, to_pathlist; /* opaque */
   unsigned from_ishintdir:1, /* else "to" is hintdir for this pair */
@@ -58,7 +58,7 @@ extern void CopyTransitionalToTable();
 extern void AssembleTransitionals();
 
 extern char **TransitionalCharsHintList(
-boolean, short *, indx
+boolean, int16_t *, indx
 );
 
 extern void Free_TransitionalList();

@@ -9,7 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "bftoac.h"
 #include "charlistpriv.h"
 
-long clsize = 0;
+int32_t clsize = 0;
 struct cl_elem *charlist = NULL;
 
 extern boolean ReadCharFileNames (fname, start)

@@ -14,15 +14,15 @@
 typedef	int		sigset_t;	/* signal mask - may change */
 
 typedef	unsigned int	speed_t;	/* tty speeds */
-typedef	unsigned long	tcflag_t;	/* tty line disc modes */
+typedef	uint32_t	tcflag_t;	/* tty line disc modes */
 typedef	unsigned char	cc_t;		/* tty control char */
 typedef	int		pid_t;		/* process id */
 
 typedef	unsigned short	mode_t;		/* file mode bits */
 typedef	short		nlink_t;	/* links to a file */
 
-typedef	long		clock_t;	/* units=ticks (typically 60/sec) */
-typedef	long		time_t;		/* value = secs since epoch */
+typedef	int32_t		clock_t;	/* units=ticks (typically 60/sec) */
+typedef	int32_t		time_t;		/* value = secs since epoch */
 
 typedef	int		size_t;		/* ??? */
 typedef int		ptrdiff_t;	/* result of subtracting two pointers */

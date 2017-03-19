@@ -59,7 +59,7 @@ PPathElt e1, e2; boolean Hflg; integer typ; {
 	if (from > to) { seg->sMax = from; seg->sMin = to; }
 	else { seg->sMax = to; seg->sMin = from; }
 	seg->sBonus = bonus;
-	seg->sType = (short)typ;
+	seg->sType = (int16_t)typ;
 	if (e1 != NULL) {
 		if (e1->type == CLOSEPATH) e1 = GetDest(e1);
 		LinkSegment(e1, Hflg, seg);
