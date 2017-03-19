@@ -42,13 +42,13 @@ static integer CheckForClr() {
   mt = pathStart;
   while (mt != NULL) {
     if (mt->type != MOVETO) {
-      ExpectedMoveTo(mt); return -1L; }
+      ExpectedMoveTo(mt); return -1; }
     cp = GetClosedBy(mt);
     if (cp == NULL) {
-      ReportMissingClosePath(); return -1L; }
+      ReportMissingClosePath(); return -1; }
     mt = cp->next;
     }
-  return 0L;
+  return 0;
   }
 
 boolean PreCheckForColoring() {
@@ -76,8 +76,8 @@ boolean PreCheckForColoring() {
     }
   while (TRUE) {
     chk = CheckForClr();
-    if (chk == -1L) return FALSE;
-    if (chk == 0L) break;
+    if (chk == -1) return FALSE;
+    if (chk == 0) break;
     if (++cnt > 10) {
       LogMsg("Looping in PreCheckForHints!\n", WARNING, OK, TRUE);
       break; }

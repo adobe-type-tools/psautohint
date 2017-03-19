@@ -79,15 +79,15 @@ Fixed VertQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
     register Fixed xabs, yabs;
     real rx, ry, q;
     xabs = xk-xl;
-    if (xabs < 0L)
+    if (xabs < 0)
         xabs = -xabs;
     if (xabs==0)
         return FixOne;
     yabs = yk-yl;
-    if (yabs < 0L)
+    if (yabs < 0)
         yabs = -yabs;
     if (yabs==0)
-        return 0L;
+        return 0;
     acfixtopflt(xabs, &rx);
     acfixtopflt(yabs, &ry);
     q = (real)(rx*rx)/(theta*ry); /* DEBUG 8 BIT. Used to by 2*(rx*rx)/(theta*ry). Don't need thsi with the 8 bits of Fixed fraction. */
@@ -100,13 +100,13 @@ Fixed HorzQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
     yabs = yk-yl;
     if (yabs < 0)
         yabs = -yabs;
-    if (yabs==0L)
+    if (yabs==0)
         return FixOne;
     xabs = xk-xl;
     if (xabs < 0)
         xabs = -xabs;
-    if (xabs==0L)
-        return 0L;
+    if (xabs==0)
+        return 0;
     acfixtopflt(xabs, &rx);
     acfixtopflt(yabs, &ry);
     q = (real)(ry*ry)/(theta*rx); /* DEBUG 8 BIT. Used to by 2*(ry*ry)/(theta*ry). Don't need thsi with the 8 bits of Fixed fraction. */
@@ -131,7 +131,7 @@ boolean IsShort(e) PPathElt e; {
         mn = dx;
         mx = dy;
     }
-    return ((mx + (mn*42L)/125L) < FixInt(6))? TRUE : FALSE; /* DEBUG 8 BIT. Increased threshold from 3 to 6, for change in coordinare system. */
+    return ((mx + (mn*42)/125) < FixInt(6))? TRUE : FALSE; /* DEBUG 8 BIT. Increased threshold from 3 to 6, for change in coordinare system. */
 }
 
 PPathElt NxtForBend(p,px2,py2,px3,py3)

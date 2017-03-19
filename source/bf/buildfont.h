@@ -47,7 +47,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
                                     /* max characters in a font (including   */
                                     /* composites)                           */
                                     /*****************************************/
-#define MAXENCLINE               65000L
+#define MAXENCLINE               65000
                                     /*****************************************/
                                     /* linelength used when encrypting       */
                                     /*****************************************/
@@ -61,14 +61,14 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
                                     /* and that for root is 29 chars         */
                                     /*****************************************/
 #ifndef MAXINT
-#define MAXINT                   32767L
+#define MAXINT                   32767
 #endif
 #define MAXLINE                  1000
                                     /*****************************************/
                                     /* maximum length of a line              */
                                     /*****************************************/
 #ifndef MININT
-#define MININT                   -32768L
+#define MININT                   -32768
 #endif
 #define MULTIFONTBBOXFILENAME    ".bfmultifontbbox"
 #define SCALEDHINTSINFO          "scaledhintsinfo"
@@ -80,7 +80,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
                                     /*****************************************/
 #define UNSCALEDASCIIFONT        "font.unscaled"
 #define WIDTHSFILENAME           "widths.ps"
-#define diskfontmax              65000L
+#define diskfontmax              65000
 
 
 /*****************************************************************************/

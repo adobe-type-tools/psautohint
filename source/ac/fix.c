@@ -179,15 +179,15 @@ void CheckVals(vlst, vert) PClrVal vlst; boolean vert; {
 
 static void FixH(e, fixy, fixdy) PPathElt e; Fixed fixy, fixdy; {
   PPathElt prev, nxt;
-  RMovePoint(0L, fixdy, cpStart, e);
-  RMovePoint(0L, fixdy, cpEnd, e);
+  RMovePoint(0, fixdy, cpStart, e);
+  RMovePoint(0, fixdy, cpEnd, e);
   prev = e->prev;
   if (prev != NULL && prev->type == CURVETO && prev->y2 == fixy)
-    RMovePoint(0L, fixdy, cpCurve2, prev);
+    RMovePoint(0, fixdy, cpCurve2, prev);
   if (e->type == CLOSEPATH) e = GetDest(e);
   nxt = e->next;
   if (nxt != NULL && nxt->type == CURVETO && nxt->y1 == fixy)
-    RMovePoint(0L, fixdy, cpCurve1, nxt);
+    RMovePoint(0, fixdy, cpCurve1, nxt);
   }
 
 static void FixHs(fixy, fixdy)
@@ -224,15 +224,15 @@ static void FixHs(fixy, fixdy)
 
 static void FixV(e, fixx, fixdx) PPathElt e; Fixed fixx, fixdx; {
   PPathElt prev, nxt;
-  RMovePoint(fixdx, 0L, cpStart, e);
-  RMovePoint(fixdx, 0L, cpEnd, e);
+  RMovePoint(fixdx, 0, cpStart, e);
+  RMovePoint(fixdx, 0, cpEnd, e);
   prev = e->prev;
   if (prev != NULL && prev->type == CURVETO && prev->x2 == fixx)
-    RMovePoint(fixdx, 0L, cpCurve2, prev);
+    RMovePoint(fixdx, 0, cpCurve2, prev);
   if (e->type == CLOSEPATH) e = GetDest(e);
   nxt = e->next;
   if (nxt != NULL && nxt->type == CURVETO && nxt->x1 == fixx)
-    RMovePoint(fixdx, 0L, cpCurve1, nxt);
+    RMovePoint(fixdx, 0, cpCurve1, nxt);
   }
 
 static void FixVs(fixx, fixdx)

@@ -29,7 +29,7 @@ static integer TstClrLsts(l1, l2, flg)
   result = -1;
   if (l1 != NULL) while (l2 != NULL) {
     i = TestColorLst(l1, l2->lnk->seg->sLnk, flg, FALSE);
-    if (i == 0) return 0L;
+    if (i == 0) return 0;
     if (i == 1) result = 1;
     l2 = l2->next;
     }
@@ -78,7 +78,7 @@ static void FindConflicts(e) PPathElt e; {
         v = TstClrLsts(vLst, pvLst, TRUE);
       else if (vLst == NULL && pvLst == NULL) v = -1;
       else v = 1;
-      if (checked && h == -1L && v == -1L &&
+      if (checked && h == -1 && v == -1 &&
           ClrLstLen(hLst)==ClrLstLen(phLst) &&
 	  ClrLstLen(vLst)==ClrLstLen(pvLst)) { /* same coloring */
 	p = p->conflict;

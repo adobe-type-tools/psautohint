@@ -360,7 +360,7 @@ static void writeTimesFile(boolean convert, /* Flags if writing .Converttimes */
 	/* Must do this when changing from read to write on a file opened
 	 * for update, see fopen(3S).
 	 */
-	fseek(fp, 0L, L_XTND);
+	fseek(fp, 0, L_XTND);
 
 	fprintf(fp, "%%%% Checksum %04x\n", chksum);
 	

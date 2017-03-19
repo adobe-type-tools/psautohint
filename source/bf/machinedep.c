@@ -51,7 +51,7 @@ Windows specific names instead.
 
 #define CURRENTID "CurrentID"
 #define MAXID "MaxID"
-#define MAXUNIQUEID 16777215L	/* 2^24 - 1 */
+#define MAXUNIQUEID 16777215	/* 2^24 - 1 */
 #define BUFFERSZ 512		/* buffer size used by unique id file */
 #define MAXIDFILELEN 100	/* maximum length of line in unique id file */
 

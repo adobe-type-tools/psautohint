@@ -349,7 +349,7 @@ void ReportRemShortColors(ex, ey) Fixed ex, ey; {
 
 
 static void PrntVal(v) Fixed v; {
-  if (v >= FixInt(100000L))
+  if (v >= FixInt(100000))
     sprintf(S0, "%d", FTrunc(v));
   else
     sprintf(S0, "%g", FixToDbl(v));

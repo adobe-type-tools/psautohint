@@ -157,12 +157,12 @@ static void WriteOne(Fixed s) { /* write s to output file */
 		SWRTNUM(FTrunc(r));
 	}
 	else {
-		if (FracPart(r * 10L) == 0) {
-			SWRTNUM(FTrunc(FRnd(r * 10L)));
+		if (FracPart(r * 10) == 0) {
+			SWRTNUM(FTrunc(FRnd(r * 10)));
 			sws("10 div");
 		}
 		else {
-			SWRTNUM(FTrunc(FRnd(r * 100L)));
+			SWRTNUM(FTrunc(FRnd(r * 100)));
 			sws("100 div");
 		}
 	}
@@ -593,7 +593,7 @@ void CSWrite(void) {
 	needtoSubLSB = TRUE;
 	firstFlexMT = TRUE;
 
-	currentx = currenty = 0L;
+	currentx = currenty = 0;
 	while (e != NULL) {
 		switch (e->type) {
 			case CURVETO:

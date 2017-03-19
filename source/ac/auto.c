@@ -147,9 +147,9 @@ static integer TestColor(s, colorList, flg, doLst)
   PClrVal v, clst;
   Fixed top, bot, cTop, cBot, vT, vB, loc, abstmp;
   boolean loc1;
-  if (s == NULL) return -1L;
+  if (s == NULL) return -1;
   v = s->sLnk; loc = s->sLoc;
-  if (v == NULL) return -1L;
+  if (v == NULL) return -1;
   vT = top = v->vLoc2;
   vB = bot = v->vLoc1;
   if (v->vGhst) { /* collapse width for conflict test */
@@ -162,7 +162,7 @@ static integer TestColor(s, colorList, flg, doLst)
     while (clst != NULL) {
       if (++cnt > 100) {
         LogMsg("Loop in hintlist for TestHint\n\007", WARNING, OK, TRUE);
-	return 0L; }
+	return 0; }
       clst = clst->vNxt; }
     }
   if (v->vGhst) {
@@ -182,17 +182,17 @@ static integer TestColor(s, colorList, flg, doLst)
   while (colorList != NULL) { /* check for conflict */
     cTop = colorList->vLoc2; cBot = colorList->vLoc1;
     if (vB == cBot && vT == cTop) {
-      return -1L; }
+      return -1; }
     if (colorList->vGhst) { /* collapse width for conflict test */
       if (colorList->vSeg1->sType == sGHOST) cBot = cTop;
       else cTop = cBot;
       }
     if ((flg && (cBot <= top) && (cTop >= bot)) ||
        (!flg && (cBot >= top) && (cTop <= bot))) {
-         return 0L; }
+         return 0; }
     colorList = colorList->vNxt;
     if (!doLst) break; }
-  return 1L;}
+  return 1;}
 
 #define TestHColorLst(h) TestColorLst(h, Hcoloring, YgoesUp, TRUE)
 #define TestVColorLst(v) TestColorLst(v, Vcoloring, TRUE, TRUE)
@@ -205,11 +205,11 @@ int TestColorLst(lst, colorList, flg, doLst)
   while (lst != NULL) {
     i = TestColor(lst->lnk->seg, colorList, flg, doLst);
     if (i == 0) { result = 0; break; }
-    if (i == 1) result = 1L;
+    if (i == 1) result = 1;
     lst = lst->next;
     if (++cnt > 100) {
       LogMsg("Looping in TestHintLst\007\n", WARNING, OK, TRUE);
-      return 0L; }
+      return 0; }
     }
   return result; }
 
@@ -310,7 +310,7 @@ static boolean TryResolveConflict(e,Hflg)
     RemLnk(e,Hflg,lnk1);
     if (showClrInfo) ReportRemConflict(e);
     return TRUE; }
-  if (val2->vVal < FixInt(50) && val1->vVal > val2->vVal * 20L &&
+  if (val2->vVal < FixInt(50) && val1->vVal > val2->vVal * 20 &&
       OkToRemLnk(loc2,Hflg,val2->vSpc)) {
     RemLnk(e,Hflg,lnk2);  
     if (showClrInfo) ReportRemConflict(e);
@@ -603,7 +603,7 @@ boolean CompareValues(val1,val2,factor,ghstshift)
   if ((val1->vSpc > 0 && val2->vSpc > 0) ||
       (val1->vSpc == 0 && val2->vSpc == 0))
     return v1 > v2;
-  if (val1->vSpc > 0L)
+  if (val1->vSpc > 0)
     return (v1 < FixedPosInf / factor) ?
              (v1 * factor > v2) : (v1 > v2 / factor);
   return (v2 < FixedPosInf/factor) ?
@@ -642,7 +642,7 @@ static void RemFlares(Hflg) boolean Hflg; {
               if (diff != 0 &&
                   IsTopSegOfVal(seg1->sLoc, val1->vLoc2, val1->vLoc1)==
 		  IsTopSegOfVal(seg2->sLoc, val2->vLoc2, val2->vLoc1)) {
-                if (CompareValues(val1,val2,spcBonus,0L)) {
+                if (CompareValues(val1,val2,spcBonus,0)) {
                   /* This change was made to fix flares in Bodoni2. */
                   if (val2->vSpc == 0 && val2->vVal < FixInt(1000))
                      RemFlareLnk(n,Nm1,lst2,e,1); }

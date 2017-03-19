@@ -18,9 +18,9 @@ static Fixed loc, frst, lst, fltnvalue;
 static PPathElt e;
 static boolean forMultiMaster = FALSE, inflPtFound = FALSE;
 
-#define STARTING (0L)
-#define goingUP (1L)
-#define goingDOWN (2L)
+#define STARTING (0)
+#define goingUP (1)
+#define goingDOWN (2)
 
 /* DEBUG 8 BIT. The SDELTA value must tbe increased by 2 due to change in coordinate system from 7 to 8 bit FIXED fraction. */
 
@@ -31,8 +31,8 @@ static void chkBad() {
     reCheckSmooth = ResolveConflictBySplit(e,FALSE,NULL,NULL);;
 }
 
-#define GrTan(n,d) (ac_abs(n)*100L > ac_abs(d)*sCurveTan)
-#define LsTan(n,d) (ac_abs(n)*100L < ac_abs(d)*sCurveTan)
+#define GrTan(n,d) (ac_abs(n)*100 > ac_abs(d)*sCurveTan)
+#define LsTan(n,d) (ac_abs(n)*100 < ac_abs(d)*sCurveTan)
 
 static void chkYDIR() {
     if (y > yloc) { /* going up */
@@ -131,7 +131,7 @@ static void chkDT(c) Cd c; {
             if (!forMultiMaster)
                 {
                     AddHSegment(yflatstartx,yflatendx,loc,
-                                e,(PPathElt)NULL,sCURVE,13L);
+                                e,(PPathElt)NULL,sCURVE,13);
                 }
                 else
                 {
@@ -165,7 +165,7 @@ static void chkDT(c) Cd c; {
                 
                 {
                     AddVSegment(xflatstarty,xflatendy,loc,
-                               e,(PPathElt)NULL,sCURVE,13L);
+                               e,(PPathElt)NULL,sCURVE,13);
                 }
                 else
                 {
@@ -186,9 +186,9 @@ static integer CPDirection(x1,cy1,x2,y2,x3,y3) Fixed x1,cy1,x2,y2,x3,y3; {
     q2 = FQ(x1)*FQ(y2-y3);
     q3 = FQ(x3)*FQ(cy1-y2);
     q = q1 + q2 + q3;
-    if (q > 0) return 1L;
-    if (q < 0) return -1L;
-    return 0L;
+    if (q > 0) return 1;
+    if (q < 0) return -1;
+    return 0;
 }
 
 static PPathElt PointLine(e, whichcp) PPathElt e; integer whichcp; {
@@ -531,7 +531,7 @@ boolean CheckSmoothness(x0, cy0, x1, cy1, x2, y2, pd)
 Fixed x0, cy0, x1, cy1, x2, y2, *pd; {
     Fixed dx, dy, smdiff, smx, smy, at0, at1, abstmp;
     dx = x0 - x1; dy = cy0 - cy1;
-    *pd = 0L;
+    *pd = 0;
     if (dx == 0 && dy == 0) return TRUE;
     at0 = ATan(dx, dy);
     dx = x1 - x2; dy = cy1 - y2;

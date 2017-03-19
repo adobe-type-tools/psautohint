@@ -121,7 +121,7 @@ static PPathElt AppendElement(etype) integer etype; {
 static void psDIV() {
   Fixed x, y;
   y = Pop(); x = Pop();
-  if (y == FixInt(100)) x /= 100L; /* this will usually be the case */
+  if (y == FixInt(100)) x /= 100; /* this will usually be the case */
   else x = (x * FixOne) / y;
   Push(x);
   }

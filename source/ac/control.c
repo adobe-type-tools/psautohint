@@ -93,7 +93,7 @@ integer PointListCheck(PClrPoint new, PClrPoint lst) {
 				l2 = tmp;
 			}
 			if (l1 == n1 && l2 == n2) {
-				return 1L;
+				return 1;
 			}
 			/* Add this extra margin to the band to fix a problem in
 			 TimesEuropa/Italic/v,w,y where a main hstem hint was
@@ -102,7 +102,7 @@ integer PointListCheck(PClrPoint new, PClrPoint lst) {
 			l1 -= halfMargin;
 			l2 += halfMargin;
 			if (l1 <= n2 && n1 <= l2) {
-				return 0L;
+				return 0;
 			}
 		}
 		lst = lst->next;
@@ -137,10 +137,10 @@ void MergeFromMainColors(char ch) {
 		}
 		if (PointListCheck(lst, pointList) == -1) {
 			if (ch == 'b') {
-				AddColorPoint(0L, lst->y0, 0L, lst->y1, ch, lst->p0, lst->p1);
+				AddColorPoint(0, lst->y0, 0, lst->y1, ch, lst->p0, lst->p1);
 			}
 			else {
-				AddColorPoint(lst->x0, 0L, lst->x1, 0L, ch, lst->p0, lst->p1);
+				AddColorPoint(lst->x0, 0, lst->x1, 0, ch, lst->p0, lst->p1);
 			}
 		}
 	}
@@ -177,10 +177,10 @@ static void CopyClrFromLst(char clr, register PClrPoint lst) {
 	while (lst != NULL) {
 		if (lst->c == clr) {
 			if (bvflg) {
-				AddColorPoint(0L, lst->y0, 0L, lst->y1, clr, lst->p0, lst->p1);
+				AddColorPoint(0, lst->y0, 0, lst->y1, clr, lst->p0, lst->p1);
 			}
 			else {
-				AddColorPoint(lst->x0, 0L, lst->x1, 0L, clr, lst->p0, lst->p1);
+				AddColorPoint(lst->x0, 0, lst->x1, 0, clr, lst->p0, lst->p1);
 			}
 		}
 		lst = lst->next;
@@ -224,7 +224,7 @@ void AddHPair(PClrVal v, char ch) {
 			bot = top + FixInt(21); /* width == -21 iff top seg is ghost */
 		}
 	}
-	AddColorPoint(0L, bot, 0L, top, ch, p0, p1);
+	AddColorPoint(0, bot, 0, top, ch, p0, p1);
 }
 
 void AddVPair(PClrVal v, char ch) {
@@ -242,7 +242,7 @@ void AddVPair(PClrVal v, char ch) {
 		p0 = p1;
 		p1 = p;
 	}
-	AddColorPoint(lft, 0L, rght, 0L, ch, p0, p1);
+	AddColorPoint(lft, 0, rght, 0, ch, p0, p1);
 }
 
 static boolean UseCounter(PClrVal sLst, boolean mclr) {
@@ -250,7 +250,7 @@ static boolean UseCounter(PClrVal sLst, boolean mclr) {
 	Fixed minLoc, midLoc, maxLoc, abstmp, prevBstVal, bestVal;
 	Fixed minDelta, midDelta, maxDelta, loc, delta, th;
 	PClrVal lst, newLst;
-	minLoc = midLoc = maxLoc = FixInt(20000L);
+	minLoc = midLoc = maxLoc = FixInt(20000);
 	minDelta = midDelta = maxDelta = 0;
 	lst = sLst;
 	while (lst != NULL) {
@@ -270,7 +270,7 @@ static boolean UseCounter(PClrVal sLst, boolean mclr) {
 		sLst = sLst->vNxt;
 	}
 	bestVal = sLst->vVal;
-	if (prevBstVal > FixInt(1000L) || bestVal < prevBstVal * 10L) {
+	if (prevBstVal > FixInt(1000) || bestVal < prevBstVal * 10) {
 		return FALSE;
 	}
 	newLst = sLst;
@@ -298,7 +298,7 @@ static boolean UseCounter(PClrVal sLst, boolean mclr) {
 		}
 		sLst = sLst->vNxt;
 	}
-	th = FixInt(5) / 100L;
+	th = FixInt(5) / 100;
 	if (ac_abs(minDelta - maxDelta) < th &&
 		ac_abs((maxLoc - midLoc) - (midLoc - minLoc)) < th) {
 		if (mclr) {
@@ -675,7 +675,7 @@ static void DoVStems(PClrVal sLst) {
 
 static void RemoveRedundantFirstColors() {
 	register PPathElt e;
-	if (numPtLsts < 2 || !SameColors(0L, 1L)) {
+	if (numPtLsts < 2 || !SameColors(0, 1)) {
 		return;
 	}
 	e = pathStart;
@@ -720,7 +720,7 @@ static void AddColorsSetup() {
 	if (vBigDist < initBigDist) {
 		vBigDist = initBigDist;
 	}
-	vBigDist = (vBigDist * 23L) / 20L;
+	vBigDist = (vBigDist * 23) / 20;
 	acfixtopflt(vBigDist, &vBigDistR);
 	hBigDist = 0;
 	for (i = 0; i < NumHStems; i++) {
@@ -732,7 +732,7 @@ static void AddColorsSetup() {
 	if (hBigDist < initBigDist) {
 		hBigDist = initBigDist;
 	}
-	hBigDist = (hBigDist * 23L) / 20L;
+	hBigDist = (hBigDist * 23) / 20;
 	acfixtopflt(hBigDist, &hBigDistR);
 	if ((!scalinghints) && (roundToInt)) {
 		RoundPathCoords();
