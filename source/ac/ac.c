@@ -109,7 +109,7 @@ void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func)
 	}
 
 
-#define VMSIZE (1000000L)
+#define VMSIZE (1000000)
 static unsigned char *vmfree, *vmlast, vm[VMSIZE];
 
 /* sub allocator */

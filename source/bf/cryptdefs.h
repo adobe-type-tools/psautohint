@@ -11,16 +11,14 @@ End Edit History.
 
 #include "basic.h"
 
-#define MAXINT32 0x7fffffffL
-
-#define BIN 0L
-#define HEX 1L
+#define BIN 0
+#define HEX 1
 
 #define OTHER 0
 #define EEXEC 1
 #define FONTPASSWORD 2
 
-#define INLEN -1L
+#define INLEN -1
 
 extern int32_t DoContEncrypt(
     char *, FILE *, boolean, int32_t

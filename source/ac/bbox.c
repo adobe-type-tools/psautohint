@@ -155,11 +155,11 @@ void ClrVBnds() {
     tmp = vMn; vMn = vMx; vMx = tmp;
     p = pvMn; pvMn = pvMx; pvMx = p;
     }
-  AddColorPoint(vMn, 0L, vMx, 0L, 'y', pvMn, pvMx);
+  AddColorPoint(vMn, 0, vMx, 0, 'y', pvMn, pvMx);
   }
 
 void ReClrVBnds() {
-  AddColorPoint(vMn, 0L, vMx, 0L, 'y', pvMn, pvMx);
+  AddColorPoint(vMn, 0, vMx, 0, 'y', pvMn, pvMx);
   }
 
 void ClrHBnds() {
@@ -173,11 +173,11 @@ void ClrHBnds() {
     tmp = hMn; hMn = hMx; hMx = tmp;
     p = phMn; phMn = phMx; phMx = p;
     }
-  AddColorPoint(0L, hMn, 0L, hMx, 'b', phMn, phMx);
+  AddColorPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
   }
 
 void ReClrHBnds() {
-  AddColorPoint(0L, hMn, 0L, hMx, 'b', phMn, phMx);
+  AddColorPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
   }
 
 static boolean CheckValOverlaps(lft, rht, lst, xflg)
@@ -268,7 +268,7 @@ void ClrBBox() {
       tmp = llx; llx = urx; urx = tmp;
       p = p0; p0 = p1; p1 = p0;
       }
-    AddColorPoint(llx, 0L, urx, 0L, 'y', p0, p1);
+    AddColorPoint(llx, 0, urx, 0, 'y', p0, p1);
     }
   if (!useH) {
     lly = itfmy(ymax); ury = itfmy(ymin);
@@ -277,7 +277,7 @@ void ClrBBox() {
       tmp = lly; lly = ury; ury = tmp;
       p = p0; p0 = p1; p1 = p0;
       }
-    AddColorPoint(0L, lly, 0L, ury, 'b', p0, p1);
+    AddColorPoint(0, lly, 0, ury, 'b', p0, p1);
     }
   }
 

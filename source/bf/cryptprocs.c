@@ -6,14 +6,14 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "cryptdefs.h"
 #include "machinedep.h"
 
-#define C1e 1069928045L
-#define C2e  226908351L
-#define C1o  902381661L
-#define C2o  341529579L
-#define keye	121201L
-#define keyo	 11586L
-#define keyf  85294471L
-#define keyc   6492394L
+#define C1e 1069928045
+#define C2e  226908351
+#define C1o  902381661
+#define C2o  341529579
+#define keye	121201
+#define keyo	 11586
+#define keyf  85294471
+#define keyc   6492394
 
 #define MAXLENIV 4
 

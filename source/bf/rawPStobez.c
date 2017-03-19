@@ -236,7 +236,7 @@ extern void convert_PScharfile(const char *charname, const char *filename)
   if (infile == NULL)
     return;
   outfile = ACOpenFile(tempname, "w", OPENERROR);
-  DoInitEncrypt(outfile, OTHER, HEX, MAXINT32, FALSE);
+  DoInitEncrypt(outfile, OTHER, HEX, INT32_MAX, FALSE);
   WriteStart(outfile, charname);
   count = 0;
   currPt.x = 0;

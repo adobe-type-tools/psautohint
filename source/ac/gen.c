@@ -96,7 +96,7 @@ Fixed from, to, loc; PPathElt p1, p2; integer typ, i; {
 	AddSegment(from,to,loc,2,3,p1,p2,TRUE,typ); }
 
 static Fixed CPFrom(cp2,cp3) Fixed cp2,cp3; {
-    Fixed val = 2*(((cp3-cp2)*cpFrom)/200L);  /*DEBUG 8 BIT: hack to get same rounding as old version */
+    Fixed val = 2*(((cp3-cp2)*cpFrom)/200);  /*DEBUG 8 BIT: hack to get same rounding as old version */
     val += cp2;
 
      DEBUG_ROUND(val)
@@ -104,7 +104,7 @@ static Fixed CPFrom(cp2,cp3) Fixed cp2,cp3; {
 }
 
 static Fixed CPTo(cp0,cp1) Fixed cp0,cp1; {
-    Fixed val = 2*(((cp1-cp0)*cpTo)/200L); /*DEBUG 8 BIT: hack to get same rounding as old version */
+    Fixed val = 2*(((cp1-cp0)*cpTo)/200); /*DEBUG 8 BIT: hack to get same rounding as old version */
     val += cp0;
     DEBUG_ROUND(val)
 	return val; /* DEBUG 8 BIT to match results with 7 bit fractions */
@@ -122,7 +122,7 @@ static boolean TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
 	return (dotprod*dotprod / lensqprod) <= .5;
 }
 
-#define TestTan(d1,d2) (abs(d1) > (abs(d2)*bendTan)/1000L)
+#define TestTan(d1,d2) (abs(d1) > (abs(d2)*bendTan)/1000)
 #define FRound(x) FTrunc(FRnd(x))
 
 static boolean IsCCW(x0,y0,x1,y1,x2,y2)
@@ -162,9 +162,9 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 			 }
 			 else doboth = TRUE;
 			 strt = x1 - delta; end = x1 + delta;
-			 AddHSegment(strt, end, y1, p, (PPathElt)NULL, sBEND, 0L);
+			 AddHSegment(strt, end, y1, p, (PPathElt)NULL, sBEND, 0);
 			 if (doboth)
-				 AddHSegment(end, strt, y1, p, (PPathElt)NULL, sBEND, 1L);
+				 AddHSegment(end, strt, y1, p, (PPathElt)NULL, sBEND, 1);
 		 }
 }
 
@@ -191,9 +191,9 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 				 if (above != ccw) delta = -delta;
 			 }
 			 strt = x0 - delta; end = x0 + delta;
-			 AddHSegment(strt, end, y0, p->prev, (PPathElt)NULL, sBEND, 2L);
+			 AddHSegment(strt, end, y0, p->prev, (PPathElt)NULL, sBEND, 2);
 			 if (doboth)
-				 AddHSegment(end, strt, y0, p->prev, (PPathElt)NULL, sBEND, 3L);
+				 AddHSegment(end, strt, y0, p->prev, (PPathElt)NULL, sBEND, 3);
 		 }
 }
 
@@ -221,9 +221,9 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 			 }
 			 else doboth = TRUE;
 			 strt = y1 - delta; end = y1 + delta;
-			 AddVSegment(strt, end, x1, p, (PPathElt)NULL, sBEND, 0L);
+			 AddVSegment(strt, end, x1, p, (PPathElt)NULL, sBEND, 0);
 			 if (doboth)
-				 AddVSegment(end, strt, x1, p, (PPathElt)NULL, sBEND, 1L);
+				 AddVSegment(end, strt, x1, p, (PPathElt)NULL, sBEND, 1);
 		 }
 }
 
@@ -250,9 +250,9 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 				 if (!YgoesUp) delta = -delta;
 			 }
 			 strt = y0 - delta; end = y0 + delta;
-			 AddVSegment(strt, end, x0, p->prev, (PPathElt)NULL, sBEND, 2L);
+			 AddVSegment(strt, end, x0, p->prev, (PPathElt)NULL, sBEND, 2);
 			 if (doboth)
-				 AddVSegment(end, strt, x0, p->prev, (PPathElt)NULL, sBEND, 3L);
+				 AddVSegment(end, strt, x0, p->prev, (PPathElt)NULL, sBEND, 3);
 		 }
 }
 
@@ -467,7 +467,7 @@ void GenVPts(specialCharType) integer specialCharType; {
 	Fixed prvx, prvy, nxtx, nxty, xx, yy, yd2;
 	p = pathStart;
 	flex1 = flex2 = FALSE;
-	cpTo = CPpercent; cpFrom = 100L - cpTo;  
+	cpTo = CPpercent; cpFrom = 100 - cpTo;  
 	flx0 = fly0 = 0; fl = NULL;
 	while (p != NULL) {
 		Fixed x0, y0, x1, y1;
@@ -478,7 +478,7 @@ void GenVPts(specialCharType) integer specialCharType; {
 			if (p->isFlex) {
 				if (flex1) {
 					if (IsVertical(flx0,fly0,x1,y1))
-						AddVSegment(fly0,y1,x1,fl->prev,p,sLINE,4L);
+						AddVSegment(fly0,y1,x1,fl->prev,p,sLINE,4);
 					flex1 = FALSE; flex2 = TRUE; }
 				else {
 					flex1 = TRUE; flex2 = FALSE;
@@ -486,30 +486,30 @@ void GenVPts(specialCharType) integer specialCharType; {
 			else flex1 = flex2 = FALSE;
 			px1 = p->x1; py1 = p->y1; px2 = p->x2; py2 = p->y2;
 			if (!flex2) {
-				if ((q=VertQuo(px1,py1,x0,y0)) == 0L) /* first two not vertical */
+				if ((q=VertQuo(px1,py1,x0,y0)) == 0) /* first two not vertical */
 					DoVBendsPrv(x0,y0,px1,py1,p);
 				else {
 					isVert = TRUE;
 					if (px1 == x0 ||
 						(px2 != x1 &&
 						 (PrvVert(px1,py1,p) || !PrvSameDir(x1,y1,x0,y0,p)))) {
-							if ((q2=VertQuo(px2,py2,x0,y0)) > 0L &&
+							if ((q2=VertQuo(px2,py2,x0,y0)) > 0 &&
 								ProdGe0(py1-y0,py2-y0) &&
 								abs(py2-y0) > abs(py1-y0)) {
 								ydist = AdjDist(CPTo(py1,py2)-y0, q2); 
 								yend = AdjDist(CPTo(y0,py1)-y0, q);
 								if (abs(yend) > abs(ydist)) ydist = yend;
-								AddVSegment(y0,y0+ydist,x0,p->prev,p,sCURVE,5L);
+								AddVSegment(y0,y0+ydist,x0,p->prev,p,sCURVE,5);
 							}
 							else {
 								ydist = AdjDist(CPTo(y0,py1)-y0,q);
-								AddVSegment(y0,CPTo(y0,py1),x0,p->prev,p,sCURVE,6L);
+								AddVSegment(y0,CPTo(y0,py1),x0,p->prev,p,sCURVE,6);
 							}
 						}
 				}
 			}
 			if (!flex1) {
-				if ((q=VertQuo(px2,py2,x1,y1)) == 0L) /* last 2 not vertical */
+				if ((q=VertQuo(px2,py2,x1,y1)) == 0) /* last 2 not vertical */
 					DoVBendsNxt(px2,py2,x1,y1,p);
 				else if (px2==x1 ||
 						 (px1 != x0 &&
@@ -517,8 +517,8 @@ void GenVPts(specialCharType) integer specialCharType; {
 							 ydist = AdjDist(y1-CPFrom(py2,y1),q);
 							 isVert = TRUE;
 							 q2 = VertQuo(x0,y0,x1,y1);
-							 yd2 = (q2 > 0L) ? AdjDist(y1-y0, q2) : 0L;
-							 if (isVert && q2 > 0L && abs(yd2) > abs(ydist)) {
+							 yd2 = (q2 > 0) ? AdjDist(y1-y0, q2) : 0;
+							 if (isVert && q2 > 0 && abs(yd2) > abs(ydist)) {
 								 if (x0==px1 && px1==px2 && px2==x1)
 									 ReportLinearCurve(p, x0, y0, x1, y1);
 								 ydist = FixHalfMul(yd2);
@@ -527,18 +527,18 @@ void GenVPts(specialCharType) integer specialCharType; {
 								 (void)NxtForBend(p,&nxtx,&nxty,&xx,&yy);
 								 AddVSegment(yavg-ydist,yavg+ydist,
 											 PickVSpot(x0,y0,x1,y1,px1,py1,px2,py2,prvx,prvy,nxtx,nxty),
-											 p,(PPathElt)NULL,sCURVE,7L);
+											 p,(PPathElt)NULL,sCURVE,7);
 							 }
 							 else {
 								 q2=VertQuo(px1,py1,x1,y1);
-								 if (q2 > 0L && ProdGe0(py1-y1,py2-y1) &&
+								 if (q2 > 0 && ProdGe0(py1-y1,py2-y1) &&
 									 abs(py2-y1) < abs(py1-y1)) {
 									 yend = AdjDist(y1-CPFrom(py1,py2),q2);
 									 if (abs(yend) > abs(ydist)) ydist = yend;
-									 AddVSegment(y1-ydist,y1,x1,p,(PPathElt)NULL,sCURVE,8L);
+									 AddVSegment(y1-ydist,y1,x1,p,(PPathElt)NULL,sCURVE,8);
 								 }
 								 else
-									 AddVSegment(y1-ydist,y1,x1,p,(PPathElt)NULL,sCURVE,9L);
+									 AddVSegment(y1-ydist,y1,x1,p,(PPathElt)NULL,sCURVE,9);
 							 }
 						 }
 			}
@@ -553,26 +553,26 @@ void GenVPts(specialCharType) integer specialCharType; {
 						loc = (minx-llx > urx-maxx)? llx : urx;
 						CheckBBoxEdge(p,TRUE,loc,&frst,&lst);
 						yavg = FixHalfMul(frst+lst);
-						ydist = (frst==lst)? (y1-y0)/10L : FixHalfMul(lst-frst);
+						ydist = (frst==lst)? (y1-y0)/10 : FixHalfMul(lst-frst);
 						if (abs(ydist) < bendLength)
-							ydist = (ydist > 0L) ?
+							ydist = (ydist > 0) ?
 							FixHalfMul(bendLength) : FixHalfMul(-bendLength);
 						AddVSegment(yavg-ydist, yavg+ydist, loc,
-									p, (PPathElt)NULL, sCURVE, 10L);
+									p, (PPathElt)NULL, sCURVE, 10);
 					}
 				}
 			}
 		}
 		else if (p->type == MOVETO) {
 			bonus = 0;
-			if (specialCharType == -1L) {
+			if (specialCharType == -1) {
 				if (IsLower(p)) bonus = FixInt(200); }
-			else if (specialCharType == 1L) {
+			else if (specialCharType == 1) {
 				if (IsUpper(p)) bonus = FixInt(200); }}
 		else if (!IsTiny(p)) {
-			if ((q=VertQuo(x0,y0,x1,y1)) > 0L) {
+			if ((q=VertQuo(x0,y0,x1,y1)) > 0) {
 				if (x0 == x1)
-					AddVSegment(y0,y1,x0,p->prev,p,sLINE,11L);
+					AddVSegment(y0,y1,x0,p->prev,p,sLINE,11);
 				else {
 					if (q < FixQuarter) q = FixQuarter;
 					ydist = FixHalfMul(AdjDist(y1-y0,q));
@@ -581,7 +581,7 @@ void GenVPts(specialCharType) integer specialCharType; {
 					(void)NxtForBend(p,&nxtx,&nxty,&xx,&yy);
 					AddVSegment(yavg-ydist,yavg+ydist,
 								PickVSpot(x0,y0,x1,y1,x0,y0,x1,y1,prvx,prvy,nxtx,nxty),
-								p,(PPathElt)NULL,sLINE,12L);
+								p,(PPathElt)NULL,sLINE,12);
 					if (abs(x0-x1) <= FixTwo)
 						ReportNonVError(x0, y0, x1, y1);
 				}
@@ -612,7 +612,7 @@ boolean InBlueBand(loc,n,p) Fixed loc; register Fixed *p; integer n; {
 
 static Fixed PickHSpot(x0,y0,x1,y1,xdist,px1,py1,px2,py2,prvx,prvy,nxtx,nxty)
 Fixed x0,y0,x1,y1,xdist,px1,py1,px2,py2,prvx,prvy,nxtx,nxty; {
-	boolean topSeg = (xdist < 0L)? TRUE : FALSE;
+	boolean topSeg = (xdist < 0)? TRUE : FALSE;
 	Fixed upper, lower;
 	boolean inBlue0, inBlue1;
 	if (topSeg) {
@@ -653,7 +653,7 @@ void GenHPts() {
 	bonus = 0; flx0 = fly0 = 0; fl = NULL;
 	flex1 = flex2 = FALSE;
 	cpTo = CPpercent;
-	cpFrom = 100L - cpTo;
+	cpFrom = 100 - cpTo;
 	while (p != NULL) {
 		Fixed x0, y0, x1, y1;
 		GetEndPoints(p,&x0,&y0,&x1,&y1);
@@ -664,7 +664,7 @@ void GenHPts() {
 				if (flex1) {
 					flex1 = FALSE; flex2 = TRUE;
 					if (IsHorizontal(flx0,fly0,x1,y1))
-						AddHSegment(flx0,x1,y1,fl->prev,p,sLINE,4L);
+						AddHSegment(flx0,x1,y1,fl->prev,p,sLINE,4);
 				}
 				else {
 					flex1 = TRUE; flex2 = FALSE;
@@ -672,30 +672,30 @@ void GenHPts() {
 			else flex1 = flex2 = FALSE;
 			px1 = p->x1; py1 = p->y1; px2 = p->x2; py2 = p->y2;
 			if (!flex2) {
-				if ((q=HorzQuo(px1,py1,x0,y0)) == 0L)
+				if ((q=HorzQuo(px1,py1,x0,y0)) == 0)
 					DoHBendsPrv(x0,y0,px1,py1,p);
 				else {
 					isHoriz = TRUE;
 					if (py1 == y0 ||
 						(py2 != y1 &&
 						 (PrvHorz(px1,py1,p) || !PrvSameDir(x1,y1,x0,y0,p)))) {
-							if ((q2=HorzQuo(px2,py2,x0,y0)) > 0L &&
+							if ((q2=HorzQuo(px2,py2,x0,y0)) > 0 &&
 								ProdGe0(px1-x0,px2-x0) &&
 								abs(px2-x0) > abs(px1-x0)) {
 								xdist = AdjDist(CPTo(px1,px2)-x0,q2);
 								xend = AdjDist(CPTo(x0,px1)-x0,q);
 								if (abs(xend) > abs(xdist)) xdist = xend;
-								AddHSegment(x0,x0+xdist,y0,p->prev,p,sCURVE,5L);
+								AddHSegment(x0,x0+xdist,y0,p->prev,p,sCURVE,5);
 							}
 							else {
 								xdist = AdjDist(CPTo(x0,px1)-x0,q);
-								AddHSegment(x0,x0+xdist,y0,p->prev,p,sCURVE,6L);
+								AddHSegment(x0,x0+xdist,y0,p->prev,p,sCURVE,6);
 							}
 						}
 				}
 			}
 			if (!flex1) {
-				if ((q=HorzQuo(px2,py2,x1,y1)) == 0L) 
+				if ((q=HorzQuo(px2,py2,x1,y1)) == 0) 
 					DoHBendsNxt(px2,py2,x1,y1,p);
 				else if (py2 == y1 ||
 						 (py1 != y0 &&
@@ -703,7 +703,7 @@ void GenHPts() {
 							 xdist = AdjDist(x1-CPFrom(px2,x1),q);
 							 q2=HorzQuo(x0,y0,x1,y1);
 							 isHoriz = TRUE;
-							 xd2 = (q2 > 0L)? AdjDist(x1-x0,q2) : 0L;
+							 xd2 = (q2 > 0)? AdjDist(x1-x0,q2) : 0;
 							 if (isHoriz && q2 > 0 && abs(xd2) > abs(xdist)) {
 								 Fixed hspot;
 								 if (y0==py1 && py1==py2 && py2==y1)
@@ -715,18 +715,18 @@ void GenHPts() {
 								 hspot = PickHSpot(
 												   x0,y0,x1,y1,xdist,px1,py1,px2,py2,prvx,prvy,nxtx,nxty);
 								 AddHSegment(
-											 xavg-xdist,xavg+xdist,hspot,p,(PPathElt)NULL,sCURVE,7L);
+											 xavg-xdist,xavg+xdist,hspot,p,(PPathElt)NULL,sCURVE,7);
 							 }
 							 else {
 								 q2=HorzQuo(px1,py1,x1,y1);
-								 if (q2 > 0L && ProdGe0(px1-x1,px2-x1) &&
+								 if (q2 > 0 && ProdGe0(px1-x1,px2-x1) &&
 									 abs(px2-x1) < abs(px1-x1)) {
 									 xend = AdjDist(x1-CPFrom(px1,px2),q2);
 									 if (abs(xend) > abs(xdist)) xdist = xend;
-									 AddHSegment(x1-xdist,x1,y1,p,(PPathElt)NULL,sCURVE,8L);
+									 AddHSegment(x1-xdist,x1,y1,p,(PPathElt)NULL,sCURVE,8);
 								 }
 								 else
-									 AddHSegment(x1-xdist,x1,y1,p,(PPathElt)NULL,sCURVE,9L);
+									 AddHSegment(x1-xdist,x1,y1,p,(PPathElt)NULL,sCURVE,9);
 							 }
 						 }
 			}
@@ -741,20 +741,20 @@ void GenHPts() {
 						loc = (miny-lly > ury-maxy)? lly : ury;
 						CheckBBoxEdge(p,FALSE,loc,&frst,&lst);
 						xavg = FixHalfMul(frst+lst);
-						xdist = (frst==lst)? (x1-x0)/10L : FixHalfMul(lst-frst);
+						xdist = (frst==lst)? (x1-x0)/10 : FixHalfMul(lst-frst);
 						if (abs(xdist) < bendLength)
 							xdist = (xdist > 0.0) ?
 							FixHalfMul(bendLength) : FixHalfMul(-bendLength);
 						AddHSegment(
-									xavg-xdist,xavg+xdist,loc,p,(PPathElt)NULL,sCURVE,10L);
+									xavg-xdist,xavg+xdist,loc,p,(PPathElt)NULL,sCURVE,10);
 					}
 				}
 			}
 		}
 		else if (p->type != MOVETO && !IsTiny(p)) {
-			if ((q=HorzQuo(x0,y0,x1,y1)) > 0L) {
+			if ((q=HorzQuo(x0,y0,x1,y1)) > 0) {
 				if (y0 == y1)
-					AddHSegment(x0,x1,y0,p->prev,p,sLINE,11L);
+					AddHSegment(x0,x1,y0,p->prev,p,sLINE,11);
 				else {
 					if (q < FixQuarter) q = FixQuarter;
 					xdist = FixHalfMul(AdjDist(x1-x0,q));
@@ -762,7 +762,7 @@ void GenHPts() {
 					(void)PrvForBend(p,&prvx,&prvy);
 					(void)NxtForBend(p,&nxtx,&nxty,&xx,&yy);
 					yy = PickHSpot(x0,y0,x1,y1,xdist,x0,y0,x1,y1,prvx,prvy,nxtx,nxty);
-					AddHSegment(xavg-xdist,xavg+xdist,yy,p->prev,p,sLINE,12L);
+					AddHSegment(xavg-xdist,xavg+xdist,yy,p->prev,p,sLINE,12);
 					if (abs(y0-y1) <= FixTwo)
 						ReportNonHError(x0, y0, x1, y1);
 				}

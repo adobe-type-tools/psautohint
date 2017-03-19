@@ -21,7 +21,7 @@ void InitPick(reason) integer reason; {
 
 static boolean ConsiderPicking(bestSpc, bestVal, colorList, prevBestVal)
 Fixed bestSpc, bestVal, prevBestVal; PClrVal colorList; {
-	if (bestSpc > 0L) return TRUE;
+	if (bestSpc > 0) return TRUE;
 	if (colorList == NULL) return bestVal >= pruneD;
 	if (bestVal > pruneA) return TRUE;
 	if (LtPruneB(bestVal)) return FALSE;
@@ -36,7 +36,7 @@ void PickVVals(valList) PClrVal valList; {
 	while (TRUE) {
 		vlist = valList; prev = bestPrev = best = NULL;
 		while (vlist != NULL) {
-			if ((best == NULL || CompareValues(vlist,best,spcBonus,0L)) &&
+			if ((best == NULL || CompareValues(vlist,best,spcBonus,0)) &&
 				ConsiderPicking(vlist->vSpc, vlist->vVal, colorList, prevBestVal)) {
 				best = vlist; bestPrev = prev; bestVal = vlist->vVal; }
 			prev = vlist; vlist = vlist->vNxt; }
@@ -113,7 +113,7 @@ boolean locFlg, hFlg; {
 				(best == NULL ||
 				 (vList->vVal == best->vVal && vList->vSpc == best->vSpc &&
 				  vList->initVal > best->initVal) ||
-				 CompareValues(vList,best,spcBonus,3L)) &&
+				 CompareValues(vList,best,spcBonus,3)) &&
 				/* last arg is "ghostshift" that penalizes ghost values */
 				/* ghost values are set to 20 */
 				/* so ghostshift of 3 means prefer nonghost if its
@@ -130,7 +130,7 @@ boolean locFlg, hFlg; {
 	return best;
 }
 
-#define FixSixteenth (0x10L)
+#define FixSixteenth (0x10)
 static PClrVal FindBestValForSeg(
 								  seg, seg1Flg, cList, rList, nb, b, ns, s, hFlg)
 PClrSeg seg; PClrVal cList, rList;
@@ -202,7 +202,7 @@ void PickHVals(valList) PClrVal valList; {
 		vlist = valList;
 		prev = bestPrev = best = NULL;
 		while (vlist != NULL) {
-			if ((best==NULL || CompareValues(vlist,best,spcBonus,0L)) &&
+			if ((best==NULL || CompareValues(vlist,best,spcBonus,0)) &&
 				ConsiderPicking(vlist->vSpc, vlist->vVal, colorList, prevBestVal)) {
 				best = vlist; bestPrev = prev; bestVal = vlist->vVal; }
 			prev = vlist; vlist = vlist->vNxt; }
@@ -213,14 +213,14 @@ void PickHVals(valList) PClrVal valList; {
 			}
 			if (seg1->sType == sGHOST) {
 				/*newBst = FindBestValForSeg(seg2, FALSE, valList,
-				 (PClrVal)NULL, 0L, (Fixed *)NIL, 0L, (Fixed *)NIL, TRUE);*/
+				 (PClrVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, TRUE);*/
 				newBst = seg2->sLnk;
 				if (newBst != NULL && newBst != best
 					&& MembValList(newBst,valList)) {
 					best = newBst; bestPrev = PrevVal(best, valList); }}
 			else if (seg2->sType == sGHOST) {
 				/*newBst = FindBestValForSeg(seg1, TRUE, valList,
-				 (PClrVal)NULL, 0L, (Fixed *)NIL, 0L, (Fixed *)NIL, TRUE); */
+				 (PClrVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, TRUE); */
 				newBst = seg2->sLnk;
 				if (newBst != NULL && newBst != best
 					&& MembValList(newBst,valList)) {
@@ -295,18 +295,18 @@ static void SetPruned() {
 void FindBestHVals() {
 	SetPruned();
 	FindBestValForSegs(topList, FALSE, valList, NULL,
-					   lenTopBands, topBands, 0L, (Fixed *)NULL, TRUE);
+					   lenTopBands, topBands, 0, (Fixed *)NULL, TRUE);
 	FindBestValForSegs(botList, TRUE, valList, NULL,
-					   lenBotBands, botBands, 0L, (Fixed *)NULL, TRUE);
+					   lenBotBands, botBands, 0, (Fixed *)NULL, TRUE);
 	DoPrune();
 }
 
 void FindBestVVals() {
 	SetPruned();
 	FindBestValForSegs(leftList, TRUE, valList, NULL,
-					   0L, (Fixed *)NULL, numSerifs, serifs, FALSE);
+					   0, (Fixed *)NULL, numSerifs, serifs, FALSE);
 	FindBestValForSegs(rightList, FALSE, valList, NULL,
-					   0L, (Fixed *)NULL, numSerifs, serifs, FALSE);
+					   0, (Fixed *)NULL, numSerifs, serifs, FALSE);
 	DoPrune();
 }
 

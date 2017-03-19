@@ -86,22 +86,22 @@ PClrVal sLst, sL; boolean hFlg; integer i; {
 	return sLst->vNxt; }
 
 #define PRNDIST (PSDist(10))
-#define PRNFCTR (3L)
+#define PRNFCTR (3)
 
 #define PruneLt(val, v) \
-(((v) < (FixedPosInf/10L) && (val) < (FixedPosInf/PRNFCTR)) ? \
-((val) * PRNFCTR < (v) * 10L) : ((val)/10L < (v)/PRNFCTR))
+(((v) < (FixedPosInf/10) && (val) < (FixedPosInf/PRNFCTR)) ? \
+((val) * PRNFCTR < (v) * 10) : ((val)/10 < (v)/PRNFCTR))
 #define PruneLe(val, v) \
 (((val) < (FixedPosInf/PRNFCTR)) ? \
 ((v) <= (val) * PRNFCTR) : ((v)/PRNFCTR <= (val)))
 #define PruneGt(val, v) \
 (((val) < (FixedPosInf/PRNFCTR)) ? \
 ((v) > (val) * PRNFCTR) : ((v)/PRNFCTR > (val)))
-#define MUCHFCTR (50L)
+#define MUCHFCTR (50)
 #define PruneMuchGt(val, v) \
 (((val) < (FixedPosInf/MUCHFCTR)) ? \
 ((v) > (val) * MUCHFCTR) : ((v)/MUCHFCTR > (val)))
-#define VERYMUCHFCTR (100L)
+#define VERYMUCHFCTR (100)
 #define PruneVeryMuchGt(val, v) \
 (((val) < (FixedPosInf/VERYMUCHFCTR)) ? \
 ((v) > (val) * VERYMUCHFCTR) : ((v)/VERYMUCHFCTR > (val)))
@@ -130,10 +130,10 @@ void PruneVVals() {
 			l = sL->vLoc1; r = sL->vLoc2;
 			if ((l==lft && r==rht) || PruneLe(val, v)) goto NxtSL;
 			if (rht+prndist >= r && lft-prndist <= l &&
-				(val < FixInt(100L) && PruneMuchGt(val, v)?
+				(val < FixInt(100) && PruneMuchGt(val, v)?
 				 (CloseSegs(seg1,sg1,TRUE) || CloseSegs(seg2,sg2,TRUE)) :
 				 (CloseSegs(seg1,sg1,TRUE) && CloseSegs(seg2,sg2,TRUE)))) {
-					sLst = PruneOne(sLst,FALSE,sL,1L);
+					sLst = PruneOne(sLst,FALSE,sL,1);
 					flg = FALSE; break; }
 			if (seg1 != NULL && seg2 != NULL) {
 				if (ac_abs(l-lft) < FixOne) {
@@ -141,17 +141,17 @@ void PruneVVals() {
 						CloseSegs(seg1,sg1,TRUE))
 						otherLft = TRUE;
 					if (seg2->sType == sBEND && CloseSegs(seg1,sg1,TRUE)) {
-						sLst = PruneOne(sLst,FALSE,sL,2L);
+						sLst = PruneOne(sLst,FALSE,sL,2);
 						flg = FALSE; break; }}
 				if (ac_abs(r-rht) < FixOne) {
 					if (!otherRht && PruneLt(val,v) && ac_abs(l-r) < ac_abs(lft-rht) &&
 						CloseSegs(seg2,sg2,TRUE))
 						otherRht = TRUE;
 					if (seg1->sType == sBEND && CloseSegs(seg2,sg2,TRUE)) {
-						sLst = PruneOne(sLst,FALSE,sL,3L);
+						sLst = PruneOne(sLst,FALSE,sL,3);
 						flg = FALSE; break; }}
 				if (otherLft && otherRht) {
-					sLst = PruneOne(sLst,FALSE,sL,4L);
+					sLst = PruneOne(sLst,FALSE,sL,4);
 					flg = FALSE; break; }
 			}
 			NxtSL: sL = sL->vNxt; }
@@ -202,7 +202,7 @@ void PruneHVals() {
 				  (!YgoesUp && top-prndist <= t && bot+prndist >= b)
 				  ) &&				/* The sL hint is within the sLst hint */
 				 
-				 (   val < FixInt(100L) &&
+				 (   val < FixInt(100) &&
 				  PruneMuchGt(val, v)?
 				  (CloseSegs(seg1,sg1,FALSE) || CloseSegs(seg2,sg2,FALSE)) :
 				  (CloseSegs(seg1,sg1,FALSE) && CloseSegs(seg2,sg2,FALSE))
@@ -219,7 +219,7 @@ void PruneHVals() {
 				  ) /* either val is small ( < Fixed 16) or, for both bot and top, the value is the same as SL, and not in a blue zone. */
 				 
 				 ) {
-				sLst = PruneOne(sLst,TRUE,sL,5L);
+				sLst = PruneOne(sLst,TRUE,sL,5);
 				flg = FALSE;
 				break; 
 			}
@@ -236,7 +236,7 @@ void PruneHVals() {
 					CloseSegs(seg1,sg1,FALSE) /* and the tops are close */
 					)
 					{
-					sLst = PruneOne(sLst,TRUE,sL,6L);
+					sLst = PruneOne(sLst,TRUE,sL,6);
 					flg = FALSE;
 					break; 
 					}
@@ -254,7 +254,7 @@ void PruneHVals() {
 					seg2->sType == sBEND && 
 					CloseSegs(seg1,sg1,FALSE)) /* and the tops are close */
 					{
-					sLst = PruneOne(sLst,TRUE,sL,7L);
+					sLst = PruneOne(sLst,TRUE,sL,7);
 					flg = FALSE;
 					break;
 					}
@@ -268,7 +268,7 @@ void PruneHVals() {
 			if (otherBot && otherTop) {
 				/* if v less than  val by a factor of 3, and the sl stem width is less than the sLst stem width,
 				 and the tops and bottoms are close */
-				sLst = PruneOne(sLst,TRUE,sL,8L);
+				sLst = PruneOne(sLst,TRUE,sL,8);
 				flg = FALSE;
 				break; }
 		NxtSL:
@@ -342,7 +342,7 @@ void MergeVals(vert) boolean vert; {
 		vLst = valList; vL = NULL;
 		while (vLst != NULL) {
 			if (vLst->merge) {}
-			else if (vL == NULL || CompareValues(vLst->vBst,vL->vBst,SFACTOR,0L))
+			else if (vL == NULL || CompareValues(vLst->vBst,vL->vBst,SFACTOR,0))
 				vL = vLst;
 			vLst = vLst->vNxt;
 		}

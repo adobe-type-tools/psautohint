@@ -35,7 +35,7 @@ int32_t FRnd(int32_t x){
     if (roundToInt)
     {
         r = r+ (1<<7);
-        r = r & ~0xFFL;
+        r = r & ~0xFF;
     }
     return r;
 }
@@ -624,7 +624,7 @@ void SaveFile() {
 	}
 #endif
 #ifdef ENCRYPTOUTPUT
-	DoInitEncrypt(outputfile, OTHER, HEX, 64L, FALSE);
+	DoInitEncrypt(outputfile, OTHER, HEX, 64, FALSE);
 #endif
 	sprintf(S0, "%% %s\n", fileName);
 	ws(S0);
@@ -640,7 +640,7 @@ void SaveFile() {
 
 	ws("sc\n");
 	firstFlex = TRUE;
-	currentx = currenty = 0L;
+	currentx = currenty = 0;
 	while (e != NULL) {
 		switch (e->type) {
 			case CURVETO:

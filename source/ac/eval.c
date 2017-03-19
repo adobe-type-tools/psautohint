@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ac.h"
 
-#define MAXF (1L << 15)
+#define MAXF (1 << 15)
 static void AdjustVal(pv,l1,l2,dist,d,hFlg)
 Fixed *pv, l1, l2, dist, d; boolean hFlg; {
 	real v, q, r1, r2, rd;

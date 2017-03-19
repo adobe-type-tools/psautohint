@@ -104,13 +104,13 @@ void GetMasterDirName(char *dirname, indx ix)
 /* macros */
 #define FixShift (8)
 #define IntToFix(i) ((int32_t)(i) << FixShift)
-#define FRnd(x) ((int32_t)(((x)+(1<<7)) & ~0xFFL))
+#define FRnd(x) ((int32_t)(((x)+(1<<7)) & ~0xFF))
 #define FTrunc8(x) ((int32_t)((x)>>8))
 #define FIXED2FLOAT(x) ((float)((x) / 256.0))
 #define FixedToDouble(x) ((double)((x) / 256.0))
-#define Frac(x) ((x) & 0xFFL)
-#define FixOne (0x100L)
-#define FixHalf (0x80L)
+#define Frac(x) ((x) & 0xFF)
+#define FixOne (0x100)
+#define FixHalf (0x80)
 #define FixHalfMul(f) ((f) >> 1)
 #define FixTwoMul(f) ((f) << 1)
 #define TFMX(x) ((x))
@@ -168,7 +168,7 @@ Fixed val;
         WRTNUM(FTrunc8(val))
         else
         {
-            WRTNUM(FTrunc8(FRnd(val*100L)))
+            WRTNUM(FTrunc8(FRnd(val*100)))
             WriteStr("100 div ");
         }
 }

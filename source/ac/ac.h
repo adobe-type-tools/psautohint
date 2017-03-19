@@ -28,26 +28,26 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define COUNTERLISTSIZE 64
 
 /* values for ClrSeg.sType */
-#define sLINE (0L)
-#define sBEND (1L)
-#define sCURVE (2L)
-#define sGHOST (3L)
+#define sLINE (0)
+#define sBEND (1)
+#define sCURVE (2)
+#define sGHOST (3)
 
 /* values for PathElt.type */
-#define MOVETO (0L)
-#define LINETO (1L)
-#define CURVETO (2L)
-#define CLOSEPATH (3L)
+#define MOVETO (0)
+#define LINETO (1)
+#define CURVETO (2)
+#define CLOSEPATH (3)
 
 /* values for pathelt control points */
-#define cpStart (0L)
-#define cpCurve1 (1L)
-#define cpCurve2 (2L)
-#define cpEnd (3L)
+#define cpStart (0)
+#define cpCurve1 (1)
+#define cpCurve2 (2)
+#define cpEnd (3)
 
 /* widths of ghost bands */
-#define botGhst (-21L)
-#define topGhst (-20L)
+#define botGhst (-21)
+#define topGhst (-20)
 
 /* structures */
 
@@ -232,8 +232,8 @@ extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at t
 #define FixInt(i) (((int32_t)(i)) << FixShift)
 #define FixReal(i) ((int32_t)((i) *256.0))
 extern int32_t FRnd(int32_t x);
-#define FHalfRnd(x) ((int32_t)(((x)+(1<<7)) & ~0xFFL))
-#define FracPart(x) ((int32_t)(x) & 0xFFL)
+#define FHalfRnd(x) ((int32_t)(((x)+(1<<7)) & ~0xFF))
+#define FracPart(x) ((int32_t)(x) & 0xFF)
 #define FTrunc(x) (((int32_t)(x))>>FixShift)
 #define FIXED2FLOAT(x) (x/256.0)
 #if SUN
@@ -245,10 +245,10 @@ extern int32_t FRnd(int32_t x);
 #endif
 #endif
 
-#define FixOne (0x100L)
-#define FixTwo (0x200L)
-#define FixHalf (0x80L)
-#define FixQuarter (0x40L)
+#define FixOne (0x100)
+#define FixTwo (0x200)
+#define FixHalf (0x80)
+#define FixQuarter (0x40)
 #define FixHalfMul(f) (2*((f) >> 2)) /* DEBUG 8 BIT. Revert this to ((f) >>1) once I am confident that there are not bugs from the update to 8 bits for the Fixed fraction. */
 #define FixTwoMul(f) ((f) << 1)
 #define tfmx(x) ((x))
@@ -262,10 +262,10 @@ extern int32_t FRnd(int32_t x);
 #define PSDist(d) ((FixInt(d)))
 #define IsVertical(x1,y1,x2,y2) (VertQuo(x1,y1,x2,y2) > 0)
 #define IsHorizontal(x1,y1,x2,y2) (HorzQuo(x1,y1,x2,y2) > 0)
-#define SFACTOR (20L)
+#define SFACTOR (20)
    /* SFACTOR must be < 25 for Gothic-Medium-22 c08 */
-#define spcBonus (1000L)
-#define ProdLt0(f0, f1) (((f0) < 0L && (f1) > 0L) || ((f0) > 0L && (f1) < 0L))
+#define spcBonus (1000)
+#define ProdLt0(f0, f1) (((f0) < 0 && (f1) > 0) || ((f0) > 0 && (f1) < 0))
 #define ProdGe0(f0, f1) (!ProdLt0(f0, f1))
 
 #define DEBUG_ROUND(val) { val = ( val >=0 ) ? (2*(val/2)) : (2*((val - 1)/2));}
