@@ -9,13 +9,11 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 import sys
 import re
-import time
 import os
 import FDKUtils
 import ConvertFontToCID
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
-from fontTools.pens.basePen import BasePen
-from types import FloatType, StringType, LongType
+from types import FloatType, LongType
 debug = 0
 def debugMsg(*args):
 	if debug:
