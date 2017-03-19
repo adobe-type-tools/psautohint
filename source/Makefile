@@ -8,7 +8,6 @@
 # Configuration
 OBJ_DIR = .
 SRC_DIR = .
-STD_OPTS = -m32
 
 # Program
 PRG_SRCS = $(SRC_DIR)/main.c
@@ -19,7 +18,7 @@ PRG_LIBS = $(LIB_TARGET)
 # Library
 LIB_TARGET = $(OBJ_DIR)/autohintlib.a
 
-CFLAGS = $(STD_OPTS) \
+CFLAGS = \
 	-I$(SRC_DIR)/include/ac \
 	-I$(SRC_DIR)/include/extras \
 	-I$(SRC_DIR)/ac \
