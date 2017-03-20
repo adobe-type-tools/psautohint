@@ -7,14 +7,16 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define BASIC_H
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <ctype.h>
-#include "pubtypes.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <setjmp.h>
 #include <sys/types.h>
+
+typedef int32_t               Fixed;
 
 /* macro definitions */
 #define NUMMIN(a, b) ((a) <= (b) ? (a) : (b))
