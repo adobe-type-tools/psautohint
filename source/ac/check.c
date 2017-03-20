@@ -273,7 +273,7 @@ static bool ConsiderClipSharpPoint(rx0, ry0, rx1, ry1, rx2, ry2, e)
 Fixed rx0, ry0, rx1, ry1, rx2, ry2; PPathElt e; {
     Fixed x0=rx0, cy0=ry0, x1=rx1, cy1=ry1, x2=rx2, y2=ry2;
     Fixed dx0, dy0, dx1, dy1, nlx, nly;
-    real rdx0, rdx1, rdy0, rdy1;
+    float rdx0, rdx1, rdy0, rdy1;
     PPathElt newline;
     x0 = itfmx(x0);   x1 = itfmx(x1);   x2 = itfmx(x2);
     cy0 = itfmy(cy0);   cy1 = itfmy(cy1);   y2 = itfmy(y2);
@@ -312,7 +312,7 @@ Fixed rx0, ry0, rx1, ry1, rx2, ry2; PPathElt e; {
         MovePoint(nlx, (cy0 > cy1)? nly+FixHalf : nly-FixHalf, newline, cpStart);
     }
     else {
-        real dydx0, dydx1;
+        float dydx0, dydx1;
         integer wh1, wh2;
         dx0 = x0 - nlx; dy0 = cy0 - nly;
         acfixtopflt(dx0, &rdx0); acfixtopflt(dy0, &rdy0);
@@ -502,7 +502,7 @@ PPathElt e; bool vrt; Fixed lc, *pf, *pl; {
 static void MakeColinear(tx, ty, x0, cy0, x1, cy1, xptr, yptr)
 Fixed tx, ty, x0, cy0, x1, cy1, *xptr, *yptr; {
     Fixed dx, dy;
-    real rdx, rdy, dxdy, dxsq, dysq, dsq, xi, yi, rx, ry, rx0, ry0;
+    float rdx, rdy, dxdy, dxsq, dysq, dsq, xi, yi, rx, ry, rx0, ry0;
     dx = x1-x0; dy = cy1-cy0;
     if (dx==0 && dy==0) { *xptr = tx; *yptr = ty; return; }
     if (dx==0) { *xptr = x0; *yptr = ty; return; }
@@ -520,9 +520,9 @@ Fixed tx, ty, x0, cy0, x1, cy1, *xptr, *yptr; {
 #define DEG(x) ((x)*57.29577951308232088)
 extern double atan2();
 static Fixed ATan(a, b) Fixed a, b; {
-    real aa, bb, cc;
+    float aa, bb, cc;
     acfixtopflt(a, &aa); acfixtopflt(b, &bb);
-    cc = (real)DEG(atan2((double)aa, (double)bb));
+    cc = (float)DEG(atan2((double)aa, (double)bb));
     while (cc < 0) cc += 360.0;
     return acpflttofix(&cc);
 }

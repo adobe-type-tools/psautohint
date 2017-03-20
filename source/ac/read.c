@@ -31,7 +31,7 @@ static bool forMultiMaster, includeHints;
    /* Reading file for comparison of multiple master data and hint information.
       Reads into PCharPathElt structure instead of PPathElt. */
 
-static real origEmSquare = 0.0;
+static float origEmSquare = 0.0;
 
 Fixed ScaleAbs(unscaled) Fixed unscaled; {
 Fixed temp1;
@@ -50,7 +50,7 @@ Fixed temp1;
     }
     ResetFntInfoFileName ();
   }
-  temp1 = (Fixed)(1000.0 / origEmSquare * ((real) unscaled));
+  temp1 = (Fixed)(1000.0 / origEmSquare * ((float) unscaled));
   return temp1;
 }
 
@@ -71,7 +71,7 @@ Fixed temp1;
     }
     ResetFntInfoFileName ();
   }
-  temp1 = (Fixed)(origEmSquare / 1000.0 * ((real) scaled));
+  temp1 = (Fixed)(origEmSquare / 1000.0 * ((float) scaled));
   temp1 = FRnd (temp1);
   return (temp1);
 }

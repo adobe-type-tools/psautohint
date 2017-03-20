@@ -30,7 +30,7 @@ Fixed hBigDist, vBigDist, initBigDist, minDist, minMidPt, ghostWidth,
   maxBendMerge, maxMerge, minColorElementLength, flexCand,
   pruneMargin;
 Fixed pruneA, pruneB, pruneC, pruneD, pruneValue, bonus;
-real theta, hBigDistR, vBigDistR, maxVal, minVal;
+float theta, hBigDistR, vBigDistR, maxVal, minVal;
 integer lenTopBands, lenBotBands, numSerifs, DMIN, DELTA, CPpercent;
 integer bendTan, sCurveTan;
 PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
@@ -133,7 +133,7 @@ unsigned char * Alloc(integer sz)
 void InitData(integer reason)
  {
   register char *s;
-  real tmp, origEmSquare;
+  float tmp, origEmSquare;
 
   switch (reason) {
     case STARTUP:
@@ -167,7 +167,7 @@ void InitData(integer reason)
       flexCand = PSDist(4);
       sCurveTan = 25;
       maxVal = 8000000.0;
-      minVal = 1.0 / (real)(FixOne);
+      minVal = 1.0 / (float)(FixOne);
       autoHFix = autoVFix = false;
       editChar = true;
       roundToInt = true;

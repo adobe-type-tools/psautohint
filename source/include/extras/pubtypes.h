@@ -41,10 +41,4 @@ typedef int32_t               integer;
 #define MAX(a,b)        ((a)>(b)?(a):(b))
 #endif
 
-                                    /***********************************/
-                                    /* Reals and Fixed point           */
-                                    /***********************************/
-typedef float           real;
-typedef double          longreal;
-
 #endif/*_PUBTYPES_H*/

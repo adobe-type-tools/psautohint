@@ -208,7 +208,7 @@ void PickHVals(valList) PClrVal valList; {
 			prev = vlist; vlist = vlist->vNxt; }
 		if (best != NULL) {
 			seg1 = best->vSeg1; seg2 = best->vSeg2;
-			if (best->vGhst) { /* find real segments at same loc as best */
+			if (best->vGhst) { /* find float segments at same loc as best */
 				FindRealVal(valList, best->vLoc2, best->vLoc1, &seg1, &seg2);
 			}
 			if (seg1->sType == sGHOST) {

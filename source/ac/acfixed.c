@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "ac.h"
 
-#define fixedScale ((real)(FixOne))
+#define fixedScale ((float)(FixOne))
 
 void acfixtopflt(x, pf)
   Fixed x; float *pf;
