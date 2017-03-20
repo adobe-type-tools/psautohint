@@ -8,8 +8,8 @@ build_script:
   - set CC=cccl
   - bash -c "python2 get-pip.py"
   - bash -c "python2 -m pip install -r requirements.txt"
-  - make -j
-  - make -j4 check
+  - make
+  - make check
 
 # disable automatic tests
 test: off
