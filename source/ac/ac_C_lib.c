@@ -145,7 +145,7 @@ static int ParseFontInfo(const char *fontinfo)
 		kwLen = (int)(kwend - kwstart);
 		for (i=0; i<featurefilesize; i++)
 		{
-			size_t matchLen = MAX(kwLen, strlen(featurefiledata[i].key));
+			size_t matchLen = NUMMAX(kwLen, strlen(featurefiledata[i].key));
 			if(!strncmp(featurefiledata[i].key, kwstart, matchLen))
 			{
 				featurefiledata[i].value=(char *)ACNEWMEM( current-tkstart+1 );

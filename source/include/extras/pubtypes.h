@@ -24,18 +24,4 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 typedef int32_t               Fixed;
 
-/***********************************************************************/
-/* Other definitions                                                   */
-/***********************************************************************/
-
-                                    /***********************************/
-                                    /* Inline Functions                */
-                                    /***********************************/
-#ifndef MIN
-#define MIN(a,b)        ((a)<(b)?(a):(b))
-#endif
-#ifndef MAX
-#define MAX(a,b)        ((a)>(b)?(a):(b))
-#endif
-
 #endif/*_PUBTYPES_H*/
