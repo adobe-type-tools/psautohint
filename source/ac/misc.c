@@ -134,11 +134,11 @@ static void TryYFlex(e, n, x0, y0, x1, y1)
   double d0sq, d1sq, quot, dx, dy;
 
   GetEndPoint(n, &x2, &y2);
-  dy = ac_abs(y0-y2);
+  dy = abs(y0-y2);
   if (dy > flexCand) return; /* too big diff in bases. If dy is within flexCand, flex will fail , but we will report it as a candidate. */
-  dx = ac_abs(x0-x2);
+  dx = abs(x0-x2);
   if (dx < MAXFLEX) return; /* Let's not add flex to features less than MAXFLEX wide. */
-  if (dx < (3*ac_abs(y0-y2))) return; /* We want the width to be at least three times the height. */
+  if (dx < (3*abs(y0-y2))) return; /* We want the width to be at least three times the height. */
   if (ProdLt0(y1-y0,y1-y2)) return; /* y0 and y2 not on same side of y1 */
 
   /* check the ratios of the "lengths" of 'e' and 'n'  */
@@ -181,12 +181,12 @@ static void TryXFlex(e, n, x0, y0, x1, y1)
   double d0sq, d1sq, quot, dx, dy;
 
   GetEndPoint(n, &x2, &y2);
-      dx = ac_abs(y0-y2);
+      dx = abs(y0-y2);
   if (dx > flexCand) return; /* too big diff in bases */
 
-  dy = ac_abs(x0-x2);
+  dy = abs(x0-x2);
   if (dy < MAXFLEX) return; /* Let's not add flex to features less than MAXFLEX wide. */
-  if (dy < (3*ac_abs(x0-x2))) return; /* We want the width to be at least three times the height. */
+  if (dy < (3*abs(x0-x2))) return; /* We want the width to be at least three times the height. */
 
   if (ProdLt0(x1-x0,x1-x2)) return; /* x0 and x2 not on same side of x1 */
 
@@ -229,8 +229,8 @@ void AutoAddFlex() {
     n = GetSubpathNext(e);
     if (n->type != CURVETO) goto Nxt;
     GetEndPoints(e, &x0, &y0, &x1, &y1);
-    if (ac_abs(y0-y1) <= MAXFLEX) TryYFlex(e, n, x0, y0, x1, y1);
-    if (ac_abs(x0-x1) <= MAXFLEX) TryXFlex(e, n, x0, y0, x1, y1);
+    if (abs(y0-y1) <= MAXFLEX) TryYFlex(e, n, x0, y0, x1, y1);
+    if (abs(x0-x1) <= MAXFLEX) TryXFlex(e, n, x0, y0, x1, y1);
 Nxt: e = e->next;
     }
   }

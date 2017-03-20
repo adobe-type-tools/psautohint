@@ -136,15 +136,15 @@ void PruneVVals() {
 					sLst = PruneOne(sLst,false,sL,1);
 					flg = false; break; }
 			if (seg1 != NULL && seg2 != NULL) {
-				if (ac_abs(l-lft) < FixOne) {
-					if (!otherLft && PruneLt(val,v) && ac_abs(l-r) < ac_abs(lft-rht) &&
+				if (abs(l-lft) < FixOne) {
+					if (!otherLft && PruneLt(val,v) && abs(l-r) < abs(lft-rht) &&
 						CloseSegs(seg1,sg1,true))
 						otherLft = true;
 					if (seg2->sType == sBEND && CloseSegs(seg1,sg1,true)) {
 						sLst = PruneOne(sLst,false,sL,2);
 						flg = false; break; }}
-				if (ac_abs(r-rht) < FixOne) {
-					if (!otherRht && PruneLt(val,v) && ac_abs(l-r) < ac_abs(lft-rht) &&
+				if (abs(r-rht) < FixOne) {
+					if (!otherRht && PruneLt(val,v) && abs(l-r) < abs(lft-rht) &&
 						CloseSegs(seg2,sg2,true))
 						otherRht = true;
 					if (seg1->sType == sBEND && CloseSegs(seg2,sg2,true)) {
@@ -227,7 +227,7 @@ void PruneHVals() {
 			if (seg1 == NULL || seg2 == NULL)
 				goto NxtSL; /* If the sLst is aghost hint, skip  */
 			
-			if (ac_abs(b-bot) < FixOne) {
+			if (abs(b-bot) < FixOne) {
 				/* If the bottoms of the stems are within 1 unit */
 				
 				if (PruneGt(val, v) && /* If v is more than 3* val) */
@@ -241,13 +241,13 @@ void PruneHVals() {
 					break; 
 					}
 				
-				if (!otherBot && PruneLt(val,v) && ac_abs(t-b) < ac_abs(top-bot)) {
+				if (!otherBot && PruneLt(val,v) && abs(t-b) < abs(top-bot)) {
 					if (CloseSegs(seg1,sg1,false))
 						otherBot = true;
 				}
 			}
 			
-			if (ac_abs(t-top) < FixOne) {
+			if (abs(t-top) < FixOne) {
 				/* If the tops of the stems are within 1 unit */
 				if (PruneGt(val, v) && /* If v is more than 3* val) */
 					!botInBlue &&
@@ -259,7 +259,7 @@ void PruneHVals() {
 					break;
 					}
 				
-				if (!otherTop && PruneLt(val,v) && ac_abs(t-b) < ac_abs(top-bot)) {
+				if (!otherTop && PruneLt(val,v) && abs(t-b) < abs(top-bot)) {
 					if (CloseSegs(seg2,sg2,false))
 						otherTop = true;
 				}
@@ -376,7 +376,7 @@ void MergeVals(vert) bool vert; {
                            !InBlueBand(b,lenBotBands,botBands) &&
                            !InBlueBand(t,lenTopBands,topBands) &&
                            !InBlueBand(top,lenTopBands,topBands)))) ||
-                (ac_abs(top-t) <= maxMerge && ac_abs(bot-b) <= maxMerge &&
+                (abs(top-t) <= maxMerge && abs(bot-b) <= maxMerge &&
                  (vert || (t == top || !InBlueBand(top,lenTopBands,topBands))) &&
                  (vert || (b == bot || !InBlueBand(bot,lenBotBands,botBands))))) {
                     if (s==spc && val==v && !vert) {
@@ -393,12 +393,12 @@ void MergeVals(vert) bool vert; {
             else if (s==spc && sg1 != NULL && sg2 != NULL) {
                 seg1 = vLst->vSeg1; seg2 = vLst->vSeg2;
                 if (seg1 != NULL && seg2 != NULL) {
-                    if (ac_abs(bot-b) <= FixOne && ac_abs(top-t) <= maxBendMerge) {
+                    if (abs(bot-b) <= FixOne && abs(top-t) <= maxBendMerge) {
                         if (seg2->sType == sBEND &&
                             (vert || !InBlueBand(top,lenTopBands,topBands)))
                             goto replace;
                     }
-                    else if (ac_abs(top-t) <= FixOne && ac_abs(bot-b) <= maxBendMerge) {
+                    else if (abs(top-t) <= FixOne && abs(bot-b) <= maxBendMerge) {
                         if (v > val && seg1->sType == sBEND &&
                             (vert || !InBlueBand(bot,lenBotBands,botBands)))
                             goto replace;

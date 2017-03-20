@@ -31,8 +31,8 @@ static void chkBad() {
     reCheckSmooth = ResolveConflictBySplit(e,false,NULL,NULL);;
 }
 
-#define GrTan(n,d) (ac_abs(n)*100 > ac_abs(d)*sCurveTan)
-#define LsTan(n,d) (ac_abs(n)*100 < ac_abs(d)*sCurveTan)
+#define GrTan(n,d) (abs(n)*100 > abs(d)*sCurveTan)
+#define LsTan(n,d) (abs(n)*100 < abs(d)*sCurveTan)
 
 static void chkYDIR() {
     if (y > yloc) { /* going up */
@@ -111,14 +111,14 @@ static void chkDT(c) Cd c; {
     if (!ydone) {
         chkYDIR(); chkYFLAT();
         if (ydone && yflat &&
-            ac_abs(yflatstarty-cy0) > SDELTA &&
-            ac_abs(cy1-yflatendy) > SDELTA) {
+            abs(yflatstarty-cy0) > SDELTA &&
+            abs(cy1-yflatendy) > SDELTA) {
             if ((ystart==goingUP && yflatstarty-yflatendy > SDELTA) ||
                 (ystart==goingDOWN && yflatendy-yflatstarty > SDELTA)) {
                 if (editChar && !forMultiMaster)
                     chkBad();
                 return; }
-            if (ac_abs(yflatstartx-yflatendx) > SDELTA3)
+            if (abs(yflatstartx-yflatendx) > SDELTA3)
             {
                 DEBUG_ROUND(yflatstartx);
                 DEBUG_ROUND(yflatendx);
@@ -144,14 +144,14 @@ static void chkDT(c) Cd c; {
     if (!xdone) {
         chkXDIR(); chkXFLAT();
         if (xdone && xflat &&
-            ac_abs(xflatstartx-x0) > SDELTA &&
-            ac_abs(x1-xflatendx) > SDELTA) {
+            abs(xflatstartx-x0) > SDELTA &&
+            abs(x1-xflatendx) > SDELTA) {
             if ((xstart==goingUP && xflatstartx-xflatendx > SDELTA) ||
                 (xstart==goingDOWN && xflatendx-xflatstartx > SDELTA)) {
                 if (editChar && !forMultiMaster)
                     chkBad();
                 return; }
-            if (ac_abs(xflatstarty-xflatendy) > SDELTA3)
+            if (abs(xflatstarty-xflatendy) > SDELTA3)
             {
                 DEBUG_ROUND(xflatstarty);
                 DEBUG_ROUND(xflatendy);
@@ -452,15 +452,15 @@ static void chkBBDT(c) Cd c; {
     if (bbquit) return;
     if (vert) {
         lst = y;
-        if (!started && ac_abs(x-loc) <= BBdist) {
+        if (!started && abs(x-loc) <= BBdist) {
             started = true; frst = y; }
-        else if (started && ac_abs(x-loc) > BBdist) bbquit = true;
+        else if (started && abs(x-loc) > BBdist) bbquit = true;
     }
     else {
         lst = x;
-        if (!started && ac_abs(y-loc) <= BBdist) {
+        if (!started && abs(y-loc) <= BBdist) {
             started = true; frst = x; }
-        else if (started && ac_abs(y-loc) > BBdist) bbquit = true;
+        else if (started && abs(y-loc) > BBdist) bbquit = true;
     }
 }
 
@@ -545,7 +545,7 @@ Fixed x0, cy0, x1, cy1, x2, y2, *pd; {
     smx = FHalfRnd(smx);
     smy = FHalfRnd(smy);
     /* DEBUG 8 BIT. Double hard coded distance values, for change from 7 to 8 bits for fractions. */
-    return ac_abs(smx - x1) < FixInt(4) && ac_abs(smy - cy1) < FixInt(4);
+    return abs(smx - x1) < FixInt(4) && abs(smy - cy1) < FixInt(4);
 }
 
 void CheckForDups() {

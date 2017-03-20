@@ -169,7 +169,7 @@ static int32_t TestColor(s, colorList, flg, doLst)
     /* if best value for segment uses a ghost, and
        segment loc is already in the colorList, then return -1 */
     clst = colorList;
-    if (ac_abs(loc-vT) < ac_abs(loc-vB)) { loc1 = false; loc = vT; }
+    if (abs(loc-vT) < abs(loc-vB)) { loc1 = false; loc = vT; }
     else { loc1 = true; loc = vB; }
     while (clst != NULL) {
       if ((loc1 ? clst->vLoc1 : clst->vLoc2) == loc)
@@ -300,8 +300,8 @@ static bool TryResolveConflict(e,Hflg)
   lst = lst->next;
   seg2 = lst->lnk->seg; lc2 = seg2->sLoc; lnk2 = lst;
   if (lc1==loc1 || lc2==loc2) {}
-  else if (ac_abs(lc1-loc1) > ac_abs(lc1-loc2) ||
-           ac_abs(lc2-loc2) > ac_abs(lc2-loc1)) {
+  else if (abs(lc1-loc1) > abs(lc1-loc2) ||
+           abs(lc2-loc2) > abs(lc2-loc1)) {
     seg = seg1; seg1 = seg2; seg2 = seg;
     lst = lnk1; lnk1 = lnk2; lnk2 = lst;
     }
@@ -574,7 +574,7 @@ static bool IsFlare(loc,e,n,Hflg) Fixed loc; PPathElt e, n; bool Hflg; {
   Fixed x, y, abstmp;
   while (e != n) {
     GetEndPoint(e,&x,&y);
-    if ((Hflg && ac_abs(y-loc) > maxFlare) || (!Hflg && ac_abs(x-loc) > maxFlare))
+    if ((Hflg && abs(y-loc) > maxFlare) || (!Hflg && abs(x-loc) > maxFlare))
       return false;
     e = GetSubPathNxt(e);
     }
@@ -584,7 +584,7 @@ static bool IsFlare(loc,e,n,Hflg) Fixed loc; PPathElt e, n; bool Hflg; {
 static bool IsTopSegOfVal(loc, top, bot) Fixed loc, top, bot; {
   Fixed d1, d2, abstmp;
   d1 = top-loc; d2 = bot-loc;
-  return (ac_abs(d1) <= ac_abs(d2))? true : false;
+  return (abs(d1) <= abs(d2))? true : false;
   }
 
 static void RemFlareLnk(e, hFlg, rm, e2, i)
@@ -636,7 +636,7 @@ static void RemFlares(Hflg) bool Hflg; {
 	    nxt2 = lst2->next;
             if (seg1 != NULL && seg2 != NULL) {
               diff = seg1->sLoc - seg2->sLoc;
-              if (ac_abs(diff) > maxFlare) {nxtE = true; goto Nxt2;}
+              if (abs(diff) > maxFlare) {nxtE = true; goto Nxt2;}
               if (!IsFlare(seg1->sLoc,e,n,Hflg)) {nxtE = true; goto Nxt2;}
               val1 = seg1->sLnk; val2 = seg2->sLnk;
               if (diff != 0 &&
@@ -715,7 +715,7 @@ static void ProClrs(e,hFlg,loc)
     if (plst != NULL) return;
     GetEndPoint(prv, &cx, &cy);
     dst = (hFlg ? cy : cx) - loc;
-    if (ac_abs(dst) > PRODIST) return;
+    if (abs(dst) > PRODIST) return;
     if (hFlg) { prv->Hs = lst; prv->Hcopy = true; }
     else { prv->Vs = lst; prv->Vcopy = true; }
     }
@@ -751,8 +751,8 @@ static void RemShortColors() {
   cx = 0; cy = 0;
   while (e != NULL) {
     GetEndPoint(e, &ex, &ey);
-    if (ac_abs(cx-ex) < minColorElementLength &&
-        ac_abs(cy-ey) < minColorElementLength) {
+    if (abs(cx-ex) < minColorElementLength &&
+        abs(cy-ey) < minColorElementLength) {
       if (showClrInfo) ReportRemShortColors(ex, ey);
       e->Hs = NULL; e->Vs = NULL;
       }

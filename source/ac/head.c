@@ -116,13 +116,13 @@ Fixed HorzQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
 bool IsTiny(e) PPathElt e; {
   Fixed x0, y0, x1, y1, abstmp;
   GetEndPoints(e,&x0,&y0,&x1,&y1);
-  return ((ac_abs(x0-x1) < FixTwo) && (ac_abs(y0-y1) < FixTwo))? true : false; }
+  return ((abs(x0-x1) < FixTwo) && (abs(y0-y1) < FixTwo))? true : false; }
 
 bool IsShort(e) PPathElt e; {
     Fixed x0, y0, x1, y1, dx, dy, mn, mx, abstmp;
     GetEndPoints(e,&x0,&y0,&x1,&y1);
-    dx = ac_abs(x0-x1);
-    dy = ac_abs(y0-y1);
+    dx = abs(x0-x1);
+    dy = abs(y0-y1);
     if (dx > dy)
     { mn = dy;
         mx = dx;

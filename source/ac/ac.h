@@ -224,8 +224,6 @@ extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at t
 
 /* macros */
 
-#define ac_abs(a) abs(a)
-
 #define FixedPosInf INT32_MAX
 #define FixedNegInf INT32_MIN
 #define FixShift (8)
