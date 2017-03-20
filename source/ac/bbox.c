@@ -266,7 +266,7 @@ void ClrBBox() {
     p0 = pxmn; p1 = pxmx;
     if (llx > urx) {
       tmp = llx; llx = urx; urx = tmp;
-      p = p0; p0 = p1; p1 = p0;
+      p = p0; p0 = p1; p1 = p;
       }
     AddColorPoint(llx, 0, urx, 0, 'y', p0, p1);
     }
@@ -275,7 +275,7 @@ void ClrBBox() {
     p0 = pymx; p1 = pymn;
     if (lly > ury) {
       tmp = lly; lly = ury; ury = tmp;
-      p = p0; p0 = p1; p1 = p0;
+      p = p0; p0 = p1; p1 = p;
       }
     AddColorPoint(0, lly, 0, ury, 'b', p0, p1);
     }
