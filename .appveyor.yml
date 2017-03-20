@@ -3,11 +3,14 @@ platform:
 
 install:
   - appveyor DownloadFile "http://raw.githubusercontent.com/swig/cccl/master/cccl"
+  - appveyor DownloadFile "https://bootstrap.pypa.io/get-pip.py"
   - call "%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" %PLATFORM%
 
 build_script:
   - set PATH=C:\cygwin\bin;%APPVEYOR_BUILD_FOLDER%;%PATH%
   - set CC=cccl
+  - bash -c "python2 get-pip.py"
+  - bash -c "python2 -m pip install -r requirements.txt"
   - make -j
   - make -j check
 
