@@ -8,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 void AddVStem(top, bottom, curved)
 Fixed top;
 Fixed bottom;
-boolean curved;
+bool curved;
 {
   if (curved && !allstems)
     return;
@@ -22,7 +22,7 @@ boolean curved;
 void AddHStem(right, left, curved)
 Fixed right;
 Fixed left;
-boolean curved;
+bool curved;
 {
   if (curved && !allstems)
     return;

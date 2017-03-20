@@ -16,15 +16,15 @@ extern int unlink(const char *);
 #define MAXSTEMDIST 150  /* initial maximum stem width allowed for hints */
 
 #if ALLOWCSOUTPUT && THISISACMAIN
-extern boolean charstringoutput;
+extern bool charstringoutput;
 #endif
 
 PPathElt pathStart, pathEnd;
-boolean YgoesUp;
-boolean useV, useH, autoVFix, autoHFix, autoLinearCurveFix, editChar;
-boolean AutoExtraDEBUG, debugColorPath, DEBUG, logging;
-boolean showVs, showHs, listClrInfo;
-boolean reportErrors, hasFlex, flexOK, flexStrict, showClrInfo, bandError;
+bool YgoesUp;
+bool useV, useH, autoVFix, autoHFix, autoLinearCurveFix, editChar;
+bool AutoExtraDEBUG, debugColorPath, DEBUG, logging;
+bool showVs, showHs, listClrInfo;
+bool reportErrors, hasFlex, flexOK, flexStrict, showClrInfo, bandError;
 Fixed hBigDist, vBigDist, initBigDist, minDist, minMidPt, ghostWidth,
   ghostLength, bendLength, bandMargin, maxFlare,
   maxBendMerge, maxMerge, minColorElementLength, flexCand,
@@ -43,12 +43,12 @@ integer NumVStems, NumHStems;
 Fixed topBands[MAXBLUES], botBands[MAXBLUES], serifs[MAXSERIFS];
 PClrPoint pointList, *ptLstArray;
 integer ptLstIndex, numPtLsts, maxPtLsts;
-boolean makehintslog = TRUE;
-boolean writecoloredbez = TRUE;
+bool makehintslog = true;
+bool writecoloredbez = true;
 Fixed bluefuzz;
-boolean doAligns, doStems;
-boolean idInFile;
-boolean roundToInt;
+bool doAligns, doStems;
+bool idInFile;
+bool roundToInt;
 static int maxStemDist = MAXSTEMDIST;
 
 
@@ -124,7 +124,7 @@ unsigned char * Alloc(integer sz)
 		FlushLogFiles();
 		sprintf (globmsg, "Exceeded VM size for hints in file: %s.\n",
 				 fileName);
-		LogMsg(globmsg, LOGERROR, FATALERROR, TRUE);
+		LogMsg(globmsg, LOGERROR, FATALERROR, true);
 		}
 	return s;
   }
@@ -137,10 +137,10 @@ void InitData(integer reason)
 
   switch (reason) {
     case STARTUP:
-      DEBUG = FALSE;
+      DEBUG = false;
 	  DMIN = 50;
       DELTA = 0;
-      YgoesUp = (dtfmy(FixOne) > 0) ? TRUE : FALSE;
+      YgoesUp = (dtfmy(FixOne) > 0) ? true : false;
       initBigDist = PSDist(maxStemDist);
       /* must be <= 168 for ITC Garamond Book Italic p, q, thorn */
       minDist = PSDist(7);
@@ -168,16 +168,16 @@ void InitData(integer reason)
       sCurveTan = 25;
       maxVal = 8000000.0;
       minVal = 1.0 / (real)(FixOne);
-      autoHFix = autoVFix = FALSE;
-      editChar = TRUE;
+      autoHFix = autoVFix = false;
+      editChar = true;
       roundToInt = true;
       /* Default is to change a curve with collinear points into a line. */
-      autoLinearCurveFix = TRUE;
-      flexOK = FALSE;
-      flexStrict = TRUE;
+      autoLinearCurveFix = true;
+      flexOK = false;
+      flexStrict = true;
       AutoExtraDEBUG = DEBUG;
       logging = DEBUG;
-      debugColorPath = FALSE;
+      debugColorPath = false;
       showClrInfo = DEBUG;
       showHs = showVs = DEBUG;
       listClrInfo = DEBUG;
@@ -208,7 +208,7 @@ void InitData(integer reason)
       numPtLsts = 1;
 
 /*     if (fileName != NULL && fileName[0] == 'g')
-       showClrInfo = showHs = showVs = listClrInfo = TRUE; */
+       showClrInfo = showHs = showVs = listClrInfo = true; */
     }
   }
 
@@ -226,20 +226,20 @@ void SetMaxStemDist(int dist)
 
 
 /* Returns whether coloring was successful. */  
-boolean AutoColor(
-			 boolean release,
-			 boolean fixStems,
-			 boolean debug,
-			 boolean extracolor,
-			 boolean changeChar,
+bool AutoColor(
+			 bool release,
+			 bool fixStems,
+			 bool debug,
+			 bool extracolor,
+			 bool changeChar,
 			 int16_t total_files,
 			 char *fileNamePtr[],
-			 boolean quiet,
-             boolean doAll,
-             boolean roundCoords,
-			 boolean doLog)
+			 bool quiet,
+             bool doAll,
+             bool roundCoords,
+			 bool doLog)
 {
-  boolean result, renameLog = FALSE;
+  bool result, renameLog = false;
   char *tempstring;
 
 	makehintslog=doLog;
@@ -248,17 +248,17 @@ boolean AutoColor(
 #if ALLOWCSOUTPUT && THISISACMAIN
   if (charstringoutput) {
 	setOutputPrefix("CharString");
-	DirExists("CharString", FALSE, TRUE, FALSE);
+	DirExists("CharString", false, true, false);
   }
 #endif
-  if (!ReadFontInfo()) return FALSE;
+  if (!ReadFontInfo()) return false;
   editChar = changeChar;
   roundToInt = roundCoords;
   if ((editChar) && fixStems)
     autoVFix = autoHFix = fixStems;
   autoLinearCurveFix = editChar;
   if (debug)
-    DEBUG = showClrInfo = showHs = showVs = listClrInfo = TRUE;
+    DEBUG = showClrInfo = showHs = showVs = listClrInfo = true;
   if ((tempstring = getenv(CHARSETVAR)) != NULL)
     set_charsetdir(tempstring);
   else set_charsetdir("\0");

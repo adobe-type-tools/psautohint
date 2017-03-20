@@ -51,12 +51,12 @@ extern void FreeFontInfo(
    file.  If the keyword doesn't exist and this is an optional
    key, returns a NULL.	 Otherwise, returns the value string. */
 extern char *GetFntInfo(
-    char *, boolean
+    char *, bool
 );
 
 /* returns MAXINT if optional and not found */
 extern int GetFIInt(
-char *, boolean
+char *, bool
 );
 
 extern void SetFntInfoFileName(
@@ -71,13 +71,13 @@ void
    fontinfo file for use in the Private dictionary. */
 
 extern char *get_private_blues(
-    boolean
+    bool
 );
 
 /* get_blended_blues formats the BlueValue-related data for
    multiple master fonts. */
 extern char *get_blended_blues(
-  boolean, boolean
+  bool, bool
 );
 
 /* This proc attempts to test for required fontinfo keywords
@@ -90,7 +90,7 @@ void
 );
 
 extern void ParseIntStems(
-char *, boolean, int32_t, int *, int32_t*, char *
+char *, bool, int32_t, int *, int32_t*, char *
 );
 
 #endif /*FIPUBLIC_H*/

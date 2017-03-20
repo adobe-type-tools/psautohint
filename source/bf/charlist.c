@@ -17,21 +17,21 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #define MAXCLIST 800
 
-static boolean charsetexists;
+static bool charsetexists;
 static int maxclist = 0;
 
-static void readcharset(boolean);
+static void readcharset(bool);
 indx FindCharListEntry(char *);
 static indx DumbFindCharListEntry(char *);
 static indx FileInCharList(char *);
 static void checkduplicates(void);
 static void checkfiledups(void);
-static void checkcharlist(boolean, boolean, char *, indx);
+static void checkcharlist(bool, bool, char *, indx);
 static void swap(struct cl_elem *, struct cl_elem *);
 
 
 static void
-readcharset(boolean release)
+readcharset(bool release)
 /*****************************************************************************/
 /* Put entry for each character into charlist.                               */
 /*****************************************************************************/
@@ -40,7 +40,7 @@ readcharset(boolean release)
    char cname[MAXCHARNAME];
    char filename[MAXFILENAME];
    char charsetfilename[MAXPATHLEN];
-   boolean foundone = FALSE;
+   bool foundone = false;
    int32_t masters;
    int32_t hintDir;
 
@@ -82,8 +82,8 @@ readcharset(boolean release)
    while ((ReadNames(cname, filename, &masters, &hintDir, filelist)) != NULL)
       {
       AddCharListEntry(cname, filename, masters, hintDir,
-            FALSE, FALSE, FALSE, FALSE);
-      foundone = TRUE;
+            false, false, false, false);
+      foundone = true;
       }
 
    fclose(filelist);
@@ -95,9 +95,9 @@ readcharset(boolean release)
             charsetfilename);
 
       if (release)
-         LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       else
-         LogMsg(globmsg, WARNING, OK, TRUE);
+         LogMsg(globmsg, WARNING, OK, true);
       }
    }
 
@@ -175,7 +175,7 @@ checkduplicates()
    {
    indx i = 0;
    indx j;
-   boolean duplicate = FALSE;
+   bool duplicate = false;
 
    while (i < clsize)
       {
@@ -187,8 +187,8 @@ checkduplicates()
          sprintf(globmsg,
                "Duplicate character name: %s in the character set.\n",
                charlist[i].charname);
-         LogMsg(globmsg, LOGERROR, OK, TRUE);
-         duplicate = TRUE;
+         LogMsg(globmsg, LOGERROR, OK, true);
+         duplicate = true;
          }
 
       i = j;
@@ -196,7 +196,7 @@ checkduplicates()
 
   if (duplicate)
       LogMsg("BuildFont cannot continue with duplication(s) "
-            "in character set.\n", LOGERROR, NONFATALERROR, TRUE);
+            "in character set.\n", LOGERROR, NONFATALERROR, true);
    }
 
 
@@ -206,7 +206,7 @@ checkfiledups()
    {
    indx i = 0;
    indx j;
-   boolean duplicate = FALSE;
+   bool duplicate = false;
 
    while (i < clsize)
       {
@@ -217,8 +217,8 @@ checkfiledups()
 
          sprintf(globmsg, "Duplicate file name: %s in the character set.\n",
                charlist[i].filename);
-         LogMsg(globmsg, LOGERROR, OK, TRUE);
-         duplicate = TRUE;
+         LogMsg(globmsg, LOGERROR, OK, true);
+         duplicate = true;
          }
 
       i = j;
@@ -226,13 +226,13 @@ checkfiledups()
 
    if (duplicate)
       LogMsg("BuildFont cannot continue with duplicate file name(s) in\n"
-            "  character set.\n", LOGERROR, NONFATALERROR, TRUE);
+            "  character set.\n", LOGERROR, NONFATALERROR, true);
    }
 
 
 
 static void
-checkcharlist(boolean release, boolean quiet, char *indir, indx dirix)
+checkcharlist(bool release, bool quiet, char *indir, indx dirix)
 /*****************************************************************************/
 /* If any non-derived, non-composite file is not found, a warning or error   */
 /* is given.                                                                 */
@@ -240,7 +240,7 @@ checkcharlist(boolean release, boolean quiet, char *indir, indx dirix)
    {
    indx i = 0;
    char inname[MAXPATHLEN];
-   boolean filemissing = FALSE;
+   bool filemissing = false;
 
    while (i < clsize)
       {
@@ -252,17 +252,17 @@ checkcharlist(boolean release, boolean quiet, char *indir, indx dirix)
             {
             get_filename(inname, indir, charlist[i].filename);
 
-            if (!FileExists(inname, FALSE))
+            if (!FileExists(inname, false))
                {
                if (!quiet) 
                   {
                   sprintf(globmsg, "The %s file does not exist or"
                         " is not accessible,\n"
                         "  but is in the character set.\n", inname);
-                  LogMsg(globmsg, (release?LOGERROR:WARNING), OK, TRUE);
+                  LogMsg(globmsg, (release?LOGERROR:WARNING), OK, true);
                   }
 
-               filemissing = TRUE;
+               filemissing = true;
                }
             }
          }
@@ -271,7 +271,7 @@ checkcharlist(boolean release, boolean quiet, char *indir, indx dirix)
 
    if (release && filemissing)
       LogMsg("BuildFont cannot continue with missing input file(s).\n", LOGERROR,
-            NONFATALERROR, TRUE);
+            NONFATALERROR, true);
    }
 
 
@@ -281,7 +281,7 @@ AddCharListEntry(char *cname, char *fname,
       int32_t masters,                 /* number of masters, 1-16               */
       int32_t hintDir,                 /* index of hint directory for this      */
                                     /* character in dir list                 */
-      boolean derived, boolean composite, boolean inBez, boolean transitional)
+      bool derived, bool composite, bool inBez, bool transitional)
    {
    indx fnlen;
    indx i;
@@ -293,7 +293,7 @@ AddCharListEntry(char *cname, char *fname,
       maxclist = MAXCLIST;
 
       for (i = 0; i < maxclist; i++)
-         charlist[i].inCharTable = charlist[i].inBezDir = FALSE;
+         charlist[i].inCharTable = charlist[i].inBezDir = false;
 
       clsize = 0;
       }
@@ -305,7 +305,7 @@ AddCharListEntry(char *cname, char *fname,
             (unsigned)(maxclist * sizeof(struct cl_elem)), "character list");
 
       for (i = clsize; i < maxclist; i++)
-         charlist[i].inCharTable = charlist[i].inBezDir = FALSE;
+         charlist[i].inCharTable = charlist[i].inBezDir = false;
       }
 
    if (DumbFindCharListEntry(cname) >= 0)
@@ -327,7 +327,7 @@ AddCharListEntry(char *cname, char *fname,
 
    charlist[clsize].derived = derived;
    charlist[clsize].composite = composite;
-   charlist[clsize].inCharTable = FALSE;
+   charlist[clsize].inCharTable = false;
    charlist[clsize].inBezDir = inBez;
    charlist[clsize].masters = masters;
    charlist[clsize].hintDir = hintDir;
@@ -337,11 +337,11 @@ AddCharListEntry(char *cname, char *fname,
 
 
 
-extern boolean
-CheckCharListEntry(char *cname, char *fname, boolean derived,
-      boolean composite, boolean transitional, boolean release, indx dirIx)
+extern bool
+CheckCharListEntry(char *cname, char *fname, bool derived,
+      bool composite, bool transitional, bool release, indx dirIx)
    {
-   boolean error = FALSE;
+   bool error = false;
    indx cli = FindCharListEntry(cname);
 
    if (cli < 0)
@@ -350,16 +350,16 @@ CheckCharListEntry(char *cname, char *fname, boolean derived,
          {
          sprintf(globmsg, "Derived character: %s is not found"
                " in the character set.\n", cname);
-         LogMsg(globmsg, LOGERROR, OK, TRUE);
-         error = TRUE;
+         LogMsg(globmsg, LOGERROR, OK, true);
+         error = true;
          }
 
       else if (release && transitional)
          {
          sprintf(globmsg, "Transitional character: %s is not found"
                " in the character set.\n", cname);
-         LogMsg(globmsg, LOGERROR, OK, TRUE);
-         error = TRUE;
+         LogMsg(globmsg, LOGERROR, OK, true);
+         error = true;
          }
 
       else if (charsetexists)
@@ -374,7 +374,7 @@ CheckCharListEntry(char *cname, char *fname, boolean derived,
             sprintf(globmsg, "Composite character: %s is not found"
                   " in the character set.\n", cname);
 
-         LogMsg(globmsg, WARNING, OK, TRUE);
+         LogMsg(globmsg, WARNING, OK, true);
          }
 
       return error;
@@ -384,24 +384,24 @@ CheckCharListEntry(char *cname, char *fname, boolean derived,
       {
       sprintf(globmsg, "%s is a duplicate transitional character name.\n",
             charlist[cli].charname);
-      LogMsg(globmsg, LOGERROR, OK, TRUE);
-      error = TRUE;
+      LogMsg(globmsg, LOGERROR, OK, true);
+      error = true;
       }
 
    if (charlist[cli].derived && derived && (dirIx == 0))
       {
       sprintf(globmsg, "%s is a duplicate derived character name.\n",
             charlist[cli].charname);
-      LogMsg(globmsg, LOGERROR, OK, TRUE);
-      error = TRUE;
+      LogMsg(globmsg, LOGERROR, OK, true);
+      error = true;
       }
 
    if (charlist[cli].composite && composite && (dirIx == 0))
       {
       sprintf(globmsg, "%s is a duplicate composite character name.\n",
             charlist[cli].charname);
-      LogMsg(globmsg, LOGERROR, OK, TRUE);
-      error = TRUE;
+      LogMsg(globmsg, LOGERROR, OK, true);
+      error = true;
       }
 
    charlist[cli].derived = charlist[cli].derived || derived;
@@ -412,8 +412,8 @@ CheckCharListEntry(char *cname, char *fname, boolean derived,
       {
       sprintf(globmsg, "Character name %s was defined more than once as"
             " a derived or composite character .\n", charlist[cli].charname);
-      LogMsg(globmsg, LOGERROR, OK, TRUE);
-      error = TRUE;
+      LogMsg(globmsg, LOGERROR, OK, true);
+      error = true;
       }
 
    if ((strlen(fname) > 0) && STRNEQ(charlist[cli].filename, fname))
@@ -422,8 +422,8 @@ CheckCharListEntry(char *cname, char *fname, boolean derived,
             "  filename %s in %s file.\n", charlist[cli].charname,
             charlist[cli].filename, fname,
             charlist[cli].derived ? DERIVEDCHARFILENAME : COMPFILE);
-      LogMsg(globmsg, LOGERROR, OK, TRUE);
-      error = TRUE;
+      LogMsg(globmsg, LOGERROR, OK, true);
+      error = true;
       }
 
    return error;
@@ -444,7 +444,7 @@ swap(struct cl_elem *c1, struct cl_elem *c2)
 
 
 extern void
-sortcharlist(boolean byfilename)
+sortcharlist(bool byfilename)
 /*****************************************************************************/
 /* sort the charlist by character name                                       */
 /*****************************************************************************/
@@ -473,7 +473,7 @@ sortcharlist(boolean byfilename)
 /* Put entry for each character into charlist.                               */
 /*****************************************************************************/
 /*extern void
-makecharlist(boolean release, boolean quiet, char *indir, indx dirix)
+makecharlist(bool release, bool quiet, char *indir, indx dirix)
    {
    indx i;
 
@@ -486,7 +486,7 @@ makecharlist(boolean release, boolean quiet, char *indir, indx dirix)
          maxclist = MAXCLIST;
 
          for (i = 0; i < maxclist; i++)
-            charlist[i].inCharTable = charlist[i].inBezDir = FALSE;
+            charlist[i].inCharTable = charlist[i].inBezDir = false;
 
          clsize = 0;
          }
@@ -494,18 +494,18 @@ makecharlist(boolean release, boolean quiet, char *indir, indx dirix)
       readcharset(release);
       }
 
-   sortcharlist(FALSE);
+   sortcharlist(false);
    if (dirix == 0) checkduplicates();
    readderived(release, dirix);
    readcomposite(release, dirix);
    checkcharlist(release, quiet, indir, dirix);
-   sortcharlist(TRUE);
+   sortcharlist(true);
    checkfiledups();
    }
 
 
 */
-extern boolean
+extern bool
 NameInCharList(char *fname)
    {
    return (FileInCharList(fname) >= 0);
@@ -524,16 +524,16 @@ CopyCharListToTable()
             !charlist[i].transitional &&
             charlist[i].inCharTable)
          create_entry(charlist[i].charname, charlist[i].filename, UNINITWIDTH,
-               FALSE, 0, charlist[i].masters, charlist[i].hintDir);
+               false, 0, charlist[i].masters, charlist[i].hintDir);
    }
 
 */
 
 extern void
-CheckAllListInTable(boolean release)
+CheckAllListInTable(bool release)
    {
    indx i;
-   boolean onemissing = FALSE;
+   bool onemissing = false;
 
    for (i = 0; i < clsize; i++)
       {
@@ -545,19 +545,19 @@ CheckAllListInTable(boolean release)
       sprintf(globmsg, "Character: %s is in character set,"
             " but was not found in the\n  %s directory.\n",
             charlist[i].charname, bezdir);
-      LogMsg(globmsg, (release?LOGERROR:WARNING), OK, TRUE);
-      onemissing = TRUE;
+      LogMsg(globmsg, (release?LOGERROR:WARNING), OK, true);
+      onemissing = true;
       }
 
    if (release && onemissing)
       LogMsg("BuildFont cannot continue with missing character(s).\n", 
-            LOGERROR, NONFATALERROR, TRUE);
+            LOGERROR, NONFATALERROR, true);
    }
 
-extern boolean IsInFullCharset(char *bezName);
+extern bool IsInFullCharset(char *bezName);
 
-extern boolean
-CompareCharListToBez(char *fname, boolean release, indx dirix, boolean quiet)
+extern bool
+CompareCharListToBez(char *fname, bool release, indx dirix, bool quiet)
    {
    indx i = FileInCharList(fname);
    char filename[MAXPATHLEN];
@@ -573,7 +573,7 @@ CompareCharListToBez(char *fname, boolean release, indx dirix, boolean quiet)
                   "  be included in the font because it is not"
                   " in the character set.\n", fname, bezdir);
 
-            LogMsg(globmsg, WARNING, OK, TRUE);
+            LogMsg(globmsg, WARNING, OK, true);
             }
          }
       else
@@ -582,7 +582,7 @@ CompareCharListToBez(char *fname, boolean release, indx dirix, boolean quiet)
          /* Check if this is a directory since we already know it exists in  */
          /* the bez directory.                                               */
          /********************************************************************/
-         if (FileExists(filename, TRUE))
+         if (FileExists(filename, true))
             {
             if (dirix == 0)
                {
@@ -597,45 +597,45 @@ CompareCharListToBez(char *fname, boolean release, indx dirix, boolean quiet)
                      sprintf(globmsg,
                            "Extra character file: %s in %s directory will\n"
                            "  be included in the font.\n", fname, bezdir);
-                     LogMsg(globmsg, WARNING, OK, TRUE);
+                     LogMsg(globmsg, WARNING, OK, true);
 		     }
                      }
                   }
 
                AddCharListEntry(fname, fname, GetTotalInputDirs(),
-                     GetHintsDir(), FALSE, FALSE, TRUE, FALSE);
-               sortcharlist(TRUE);
+                     GetHintsDir(), false, false, true, false);
+               sortcharlist(true);
                }
             }
          }
 
-      return FALSE;
+      return false;
       }
 
-   if (charlist[i].composite) return FALSE;
+   if (charlist[i].composite) return false;
 
    if (charlist[i].derived)
       {
       sprintf(globmsg, "File name: %s in %s directory\n"
             "  is the same as a derived file name.\n", fname, bezdir);
-      LogMsg(globmsg, LOGERROR, OK, TRUE);
-      return TRUE;
+      LogMsg(globmsg, LOGERROR, OK, true);
+      return true;
       }
 
    /**************************************************************************/
    /* don't worry about transitional                                         */
    /**************************************************************************/
-   if (!FileExists(filename, FALSE))
-      return FALSE;                 /* Error msg will be issued in           */
+   if (!FileExists(filename, false))
+      return false;                 /* Error msg will be issued in           */
                                     /* CheckAllListInTable or checkcharlist. */
-   charlist[i].inBezDir = TRUE;
-   return FALSE;
+   charlist[i].inBezDir = true;
+   return false;
    }
 
 
 
 extern void
-ResetCharListBools(boolean firstTime, indx dirix)
+ResetCharListBools(bool firstTime, indx dirix)
 /*****************************************************************************/
 /* This proc is called to compare the inBezDir and inCharTable booleans.     */
 /* Its purpose is to ensure that only characters in every input directory    */
@@ -654,12 +654,12 @@ ResetCharListBools(boolean firstTime, indx dirix)
       if (charlist[i].inBezDir)
          {
          if (!charlist[i].inCharTable && firstTime)
-            charlist[i].inCharTable = TRUE;
+            charlist[i].inCharTable = true;
          }
       else
-         charlist[i].inCharTable = FALSE;
+         charlist[i].inCharTable = false;
 
-      charlist[i].inBezDir = FALSE;  
+      charlist[i].inBezDir = false;  
       }
    }
 

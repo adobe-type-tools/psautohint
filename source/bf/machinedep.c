@@ -69,10 +69,10 @@ static int (*errorproc)(int16_t); /* proc to be called from LogMsg if error occu
 /* used for cacheing of log messages */
 static char lastLogStr[MAXMSGLEN + 1] = "";
 static int16_t lastLogLevel = -1;
-static boolean lastLogPrefix;
+static bool lastLogPrefix;
 static int logCount = 0;
 
-static void LogMsg1(char *str, int16_t level, int16_t code, boolean prefix);
+static void LogMsg1(char *str, int16_t level, int16_t code, bool prefix);
 
 int16_t WarnCount()
 {
@@ -108,7 +108,7 @@ int (*userproc)(int16_t);
     char newStr[MAXMSGLEN];
     sprintf(newStr, "The last message (%.20s...) repeated %d more times.\n",
 	    lastLogStr, logCount);
-    LogMsg1(newStr, lastLogLevel, OK, TRUE);
+    LogMsg1(newStr, lastLogLevel, OK, true);
   }
   logCount = 0;
 }
@@ -117,11 +117,11 @@ int (*userproc)(int16_t);
 		char *str,			/* message string */
 		int16_t level,		/* error, warning, info */
 		int16_t code,		/* exit value - if !OK, this proc will not return */
-		boolean prefix	/* prefix message with LOGERROR: or WARNING:, as appropriate */)
+		bool prefix	/* prefix message with LOGERROR: or WARNING:, as appropriate */)
 {
   /* changed handling of this to be more friendly (?) jvz */
   if (strlen(str) > MAXMSGLEN) {
-    LogMsg1("The following message was truncated.\n", WARNING, OK, TRUE);
+    LogMsg1("The following message was truncated.\n", WARNING, OK, true);
     ++warncnt;
   }
   if (level == WARNING)
@@ -138,7 +138,7 @@ int (*userproc)(int16_t);
   }
 }
 
-static void LogMsg1(char *str, int16_t level, int16_t code, boolean prefix)
+static void LogMsg1(char *str, int16_t level, int16_t code, bool prefix)
 {
   switch (level)
   {
@@ -229,7 +229,7 @@ char *current_dir;
 {
   if ((chdir(current_dir)) != 0) {
     sprintf(globmsg,"Unable to cd to directory: '%s'.\n", current_dir);
-    LogMsg(globmsg, WARNING, OK, TRUE);
+    LogMsg(globmsg, WARNING, OK, true);
   }
 }
 
@@ -242,32 +242,32 @@ void get_current_dir(char *currdir)
 
 
 /* Returns true if the given file exists, is not a directory
-   and user has read permission, otherwise it returns FALSE. */
-boolean FileExists(const char *filename, int16_t errormsg)
+   and user has read permission, otherwise it returns false. */
+bool FileExists(const char *filename, int16_t errormsg)
 {
   struct stat stbuff;
   int filedesc;
 
   if ((strlen(filename) == 0) && !errormsg)
-    return FALSE;
+    return false;
   /* Check if this file exists and if it is a directory. */
   if (stat(filename, &stbuff) == -1)
   {
     if (errormsg)
     {
       sprintf(globmsg, "The %s file does not exist, but is required.\n", filename);
-      LogMsg(globmsg, LOGERROR, OK, TRUE);
+      LogMsg(globmsg, LOGERROR, OK, true);
     }
-    return FALSE;
+    return false;
   }
   if ((stbuff.st_mode & S_IFMT) == S_IFDIR)
   {
     if (errormsg)
     {
       sprintf(globmsg, "%s is a directory not a file.\n", filename);
-      LogMsg(globmsg, LOGERROR, OK, TRUE);
+      LogMsg(globmsg, LOGERROR, OK, true);
     }
-    return FALSE;
+    return false;
   }
   else
 
@@ -277,20 +277,20 @@ boolean FileExists(const char *filename, int16_t errormsg)
     if (errormsg)
     {
       sprintf(globmsg, "The %s file is not accessible.\n", filename);
-      LogMsg(globmsg, LOGERROR, OK, TRUE);
+      LogMsg(globmsg, LOGERROR, OK, true);
     }
-    return FALSE;
+    return false;
   }
 
-  return TRUE;
+  return true;
 }
 
-boolean CFileExists(const char *filename, int16_t errormsg)
+bool CFileExists(const char *filename, int16_t errormsg)
 {
 	return FileExists(filename, errormsg);
 }
 
-boolean DirExists(char *dirname, boolean absolute, boolean create, boolean errormsg)
+bool DirExists(char *dirname, bool absolute, bool create, bool errormsg)
 {
 #ifndef _WIN32
 #pragma unused(absolute)
@@ -302,24 +302,24 @@ boolean DirExists(char *dirname, boolean absolute, boolean create, boolean error
         if (errno == EACCES)
         {
             sprintf(globmsg, "The %s directory cannot be accessed.\n", dirname);
-            LogMsg(globmsg, LOGERROR, OK, TRUE);
-            return FALSE;
+            LogMsg(globmsg, LOGERROR, OK, true);
+            return false;
         }
         else
         {
             if (errormsg)
             {
                 sprintf(globmsg, "The %s directory does not exist.", dirname);
-                LogMsg(globmsg, create?WARNING:LOGERROR, OK, TRUE);
+                LogMsg(globmsg, create?WARNING:LOGERROR, OK, true);
             }
             if (!create)
             {
                 if (errormsg)
-                    LogMsg("\n", LOGERROR, OK, FALSE);
-                return FALSE;
+                    LogMsg("\n", LOGERROR, OK, false);
+                return false;
             }
             if (errormsg)
-                LogMsg("  It will be created for you.\n", WARNING, OK, FALSE);
+                LogMsg("  It will be created for you.\n", WARNING, OK, false);
             {
 #ifdef _WIN32
                 int result = mkdir(dirname);
@@ -330,13 +330,13 @@ boolean DirExists(char *dirname, boolean absolute, boolean create, boolean error
                 if (result)
                 {
                     sprintf(globmsg, "Can't create the %s directory.\n", dirname);
-                    LogMsg(globmsg, LOGERROR, OK, TRUE);
-                    return FALSE;
+                    LogMsg(globmsg, LOGERROR, OK, true);
+                    return false;
                 }
             } /* end local block for mkdir */
         }
     }
-    return TRUE;
+    return true;
 }
 
 
@@ -368,18 +368,18 @@ char *filename;
 void RenameFile(oldName, newName)
 char *oldName, *newName;
 {
-  if(FileExists(newName, FALSE))
+  if(FileExists(newName, false))
   {
 	if(remove(newName))
 	{
 		sprintf(globmsg, "Could not remove file: %s for renaming (%d).\n", newName, errno);
-		LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);	
+		LogMsg(globmsg, LOGERROR, NONFATALERROR, true);	
 	}
   }
   if(rename(oldName, newName))
   {
     sprintf(globmsg, "Could not rename file: %s to: %s (%d).\n", oldName, newName, errno );
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
 }
 
@@ -437,7 +437,7 @@ char *baseFontPath;
   {
     if (*baseFontPath == *Delimiter)
       LogMsg("BaseFontPath keyword in fontinfo file must indicate\
-  a relative path name.\n", LOGERROR, NONFATALERROR, TRUE);
+  a relative path name.\n", LOGERROR, NONFATALERROR, true);
     return baseFontPath;
   }
 
@@ -448,7 +448,7 @@ char *baseFontPath;
       break;
     case (1):
       LogMsg("BaseFontPath keyword in fontinfo file must indicate\
-  a relative path name.\n", LOGERROR, NONFATALERROR, TRUE);
+  a relative path name.\n", LOGERROR, NONFATALERROR, true);
       break;
     default:
       /* first two colons => up one, any subsequent single colon => up one */
@@ -497,42 +497,42 @@ void GetFullPathname(char *dirname, int16_t vRefNum, int32_t dirID)
 }
 
 /* Creates a file called .BFLOCK or .ACLOCK in the current directory.
-   If checkexists is TRUE this proc will check if .BFLOCK or .ACLOCK exists
+   If checkexists is true this proc will check if .BFLOCK or .ACLOCK exists
    before creating it.  If it does exist an error message will
    be displayed and buildfont will exit.
    The .BFLOCK file is used to indicate that buildfont is currently
    being run in the directory. The .ACLOCK file is used to indicate 
    that AC is currently being run in the directory. */
-boolean createlockfile(fileToOpen, baseFontPath)
+bool createlockfile(fileToOpen, baseFontPath)
 char *fileToOpen;
 char *baseFontPath;  /* for error msg only; cd has been done */
 {
   FILE *bf;
 
-  if (CFileExists(BFFILE, FALSE))
+  if (CFileExists(BFFILE, false))
   {
     sprintf(globmsg, "BuildFont is already running in the %s directory.\n", 
       (strlen(baseFontPath))? baseFontPath : "current");
-    LogMsg(globmsg, LOGERROR, OK, TRUE);
-    return FALSE;
+    LogMsg(globmsg, LOGERROR, OK, true);
+    return false;
   }
-  if (CFileExists(ACFILE, FALSE))
+  if (CFileExists(ACFILE, false))
   {
     sprintf(globmsg, "AC is already running in the %s directory.\n", 
       (strlen(baseFontPath))? baseFontPath : "current");
-    LogMsg(globmsg, LOGERROR, OK, TRUE);
-    return FALSE;
+    LogMsg(globmsg, LOGERROR, OK, true);
+    return false;
   }
   bf = ACOpenFile(fileToOpen, "w", OPENOK);
   if (bf == NULL)
   {
     sprintf(globmsg, 
       "Cannot open the %s%s file.\n", baseFontPath, fileToOpen);
-    LogMsg(globmsg, LOGERROR, OK, TRUE);
-    return FALSE;
+    LogMsg(globmsg, LOGERROR, OK, true);
+    return false;
   }
   fclose(bf);
-  return TRUE;
+  return true;
 }
 
 void SetMacFileType(filename, filetype)
@@ -588,7 +588,7 @@ char *ibmfontname;
     if (strlen(fontinfostr) != 5)
     {
       sprintf(globmsg, "PCFileNamePrefix in the %s file must be exactly 5 characters.\n", FIFILENAME);
-      LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+      LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     strcpy(ibmfontname, fontinfostr);
     strcat(ibmfontname, "___.PFB");
@@ -621,7 +621,7 @@ extern get_datetime(char *datetimestr)
 
   get_time(&secs);
   IUDateString(secs, abbrevDate, datestr);
-  IUTimeString(secs, TRUE, timestr);
+  IUTimeString(secs, true, timestr);
   sprintf(datetimestr, "%p %p", datestr, timestr);
 }
 */

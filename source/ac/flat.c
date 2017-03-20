@@ -6,7 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 
 static void FMiniFltn(f0, f1, f2, f3, pfr, inside)
-  Cd f0, f1, f2, f3; register PFltnRec pfr; boolean inside; {
+  Cd f0, f1, f2, f3; register PFltnRec pfr; bool inside; {
   /* Like FFltnCurve, but assumes abs(deltas) <= 127 pixels */
   /* 8 bits of fraction gives enough precision for splitting curves */
 #define MFix(f) (f)
@@ -40,7 +40,7 @@ int32_t bbLLX, bbLLY, bbURX, bbURY;
 register int32_t *p;
 p = cds; dpth = 1;
 *(p++) = inside; /* initial value of inrect2. Set to True by caller, and is never set false.  */
-*(p++) = FALSE; /* inbbox2 starts out FALSE */
+*(p++) = false; /* inbbox2 starts out false */
 /* shift coordinates so that lower left of BBox is at (0,0)*/
 /* This  fills the first  MiniBlkSz series of ints with the start point, control point, end end point
  (x,y) values for the curve, minus the lower left (x,y) for the curve.
@@ -76,7 +76,7 @@ eps = (int32_t)MFix(pfr->feps);
 //          eps = 8;  /* Brotz patch */
       if (eps < 16) /* DEBUG 8 BIT FIX */
           eps = 16;  /* Brotz patch */
-while (TRUE) {
+while (true) {
     /* Iterate until curve has been flattened into MiniFltnMaxDepth segments */
   if (dpth == MiniFltnMaxDepth)
       goto ReportC3;
@@ -101,7 +101,7 @@ while (TRUE) {
     if (ury < bbLLY || lly > bbURY)
         goto ReportC3;
     if (urx <= bbURX && ury <= bbURY &&
-        llx >= bbLLX && lly >= bbLLY) inrect = TRUE;
+        llx >= bbLLX && lly >= bbLLY) inrect = true;
     }
   if (!inbbox) {
     register int32_t mrgn = eps, r0, r3, ll, ur, c;
@@ -121,7 +121,7 @@ while (TRUE) {
             ur = MFixInt(128) - 1;
         c = c1y;
         if (c > ll && c < ur)
-          {c = c2y;  if (c > ll && c < ur) inbbox = TRUE;}
+          {c = c2y;  if (c > ll && c < ur) inbbox = true;}
         }
       }
     }
@@ -223,7 +223,7 @@ while (TRUE) {
 static void FFltnCurve(c0, c1, c2, c3, pfr, inrect)
                                                /* inrect = !testRect */
   Cd c0, c1, c2, c3;  register PFltnRec pfr;
-  register boolean inrect;
+  register bool inrect;
   /* Like FltnCurve, but works in the Fixed domain. */
   /* abs values of coords must be < 2^14 so will not overflow when
      find midpoint by add and shift */
@@ -258,7 +258,7 @@ if (!inrect) {
       goto ReportC3;
   if (urx <= pfr->ur.x && ury <= pfr->ur.y &&
       llx >= pfr->ll.x && lly >= pfr->ll.y)
-      inrect = TRUE;
+      inrect = true;
   }
 { /* if the height or width of the initial bbox is > 256, split it, and this function on the two parts. */
  register Fixed th;
@@ -299,5 +299,5 @@ void FltnCurve(c0, c1, c2, c3, pfr)
   pfr->limit = 6; /* limit on how many times a bez curve can be split in half by recursive calls to FFltnCurve() */
 //pfr->feps = FixHalf;
   pfr->feps = FixOne; /* DEBUG 8 BIT FIX */
-  FFltnCurve(c0, c1, c2, c3, pfr, TRUE);
+  FFltnCurve(c0, c1, c2, c3, pfr, true);
   }

@@ -135,7 +135,7 @@ typedef enum
 #define OPENOK                   0
 
 extern char bezdir[MAXPATHLEN];
-extern boolean scalinghints;
+extern bool scalinghints;
 
 /*****************************************************************************/
 /* Tries to open the given file with the access attribute specified.  If it  */
@@ -165,7 +165,7 @@ ReadToken(char *, char *, char *, char *);
 /*****************************************************************************/
 /* Returns whether file has .BAK suffix.                                     */
 /*****************************************************************************/
-extern boolean
+extern bool
 BAKFile(char *);
 
 /*****************************************************************************/
@@ -173,19 +173,19 @@ BAKFile(char *);
 /* composite chars. for those listed.                                        */
 /*****************************************************************************/
 extern int32_t
-make_composites(boolean, boolean, int32_t *, char *, boolean, char **);
+make_composites(bool, bool, int32_t *, char *, bool, char **);
 
 /*****************************************************************************/
 /* Returns the max number of composites for the font.                        */
 /*****************************************************************************/
 extern int
-readcomposite(boolean, indx);
+readcomposite(bool, indx);
 
 /*****************************************************************************/
 /* Computes the character bounding box.                                      */
 /*****************************************************************************/
 extern int
-computesbandbbx(char *, char *, int32_t, BboxPtr, boolean, int32_t, int32_t);
+computesbandbbx(char *, char *, int32_t, BboxPtr, bool, int32_t, int32_t);
 
 extern int32_t
 GetMaxBytes(void);
@@ -224,7 +224,7 @@ set_uniqueIDFile(char *);
 /* Transforms a point using the global variable, matrix.                     */
 /*****************************************************************************/
 extern int
-TransformPoint(int32_t *, int32_t*, boolean);
+TransformPoint(int32_t *, int32_t*, bool);
 
 /*****************************************************************************/
 /* Returns the name of the character set file.                               */
@@ -236,19 +236,19 @@ getcharsetname(char *);
 /* Returns the name of the character set file.                               */
 /*****************************************************************************/
 extern void
-setcharsetname(boolean , char *, char *);
+setcharsetname(bool , char *, char *);
 
 /*****************************************************************************/
 /* Returns the name of the encoding file.                                    */
 /*****************************************************************************/
 extern void
-get_encodingfilename(char *, boolean, int);
+get_encodingfilename(char *, bool, int);
 
 /*****************************************************************************/
 /* Make an Adobe PS font or a release font.                                  */
 /*****************************************************************************/
 extern int
-makePSfont(char *, boolean, boolean, boolean, int32_t, int32_t, int32_t);
+makePSfont(char *, bool, bool, bool, int32_t, int32_t, int32_t);
 
 /*****************************************************************************/
 /* Make a Macintosh printer font.                                            */
@@ -278,7 +278,7 @@ SetTotalInputDirs(int16_t);
 /* Parse the private dict portion of an ASCII format font.                   */
 /*****************************************************************************/
 extern void
-ParseFont(FILE *, FILE *, int32_t, int32_t *, int32_t *, int32_t *, int32_t *, boolean);
+ParseFont(FILE *, FILE *, int32_t, int32_t *, int32_t *, int32_t *, int32_t *, bool);
 
 /*****************************************************************************/
 /* Program to derive printer font file name for the mac from the PostScript  */
@@ -294,16 +294,16 @@ convert_PScharfile(const char *, const char *);
 /* Converts raw PS files to relativized bez format.                          */
 /*****************************************************************************/
 extern int
-convert_rawPSfiles(boolean);
+convert_rawPSfiles(bool);
 
 extern void
 convert_illcharfile(const char *, const char *);
 
 extern void
-convert_illfiles(boolean);
+convert_illfiles(bool);
 
 extern int32_t
-process_chars(boolean, boolean, boolean, int32_t *, int32_t *, boolean, boolean);
+process_chars(bool, bool, bool, int32_t *, int32_t *, bool, bool);
 
 extern void
 set_scale(float *);
@@ -311,8 +311,8 @@ set_scale(float *);
 extern int16_t
 strindex(char *, char *);
 
-extern boolean ConvertCharFiles(char *inputDir,	
-				boolean release,				
+extern bool ConvertCharFiles(char *inputDir,	
+				bool release,				
 				float scale,				
 				void (*convertFunc)(const char *, const char *)	
 				);
@@ -321,7 +321,7 @@ extern boolean ConvertCharFiles(char *inputDir,
 /* Creates an Adobe Font Metrics (AFM) file.                                 */
 /*****************************************************************************/
 extern int
-make_afm(boolean);
+make_afm(bool);
 
 extern int
 ReadWriteFile(FILE *, char *);
@@ -331,12 +331,12 @@ ReadWriteFile(FILE *, char *);
 /* given output file.                                                        */
 /*****************************************************************************/
 extern int
-WriteEntry(FILE *, char *, char *, boolean, boolean);
+WriteEntry(FILE *, char *, char *, bool, bool);
 
 /*****************************************************************************/
 /* Returns whether given character is in StandardEncoding.                   */
 /*****************************************************************************/
-extern boolean
+extern bool
 InStandardEncoding(char *, int32_t *);
 
 /*****************************************************************************/
@@ -358,7 +358,7 @@ extern int
 cleanup(int16_t);
 
 extern char *
-GetBaseFontPath(boolean);
+GetBaseFontPath(bool);
 
 extern void
 FileNameLenOK(char *);
@@ -382,7 +382,7 @@ extern uint32_t
 CheckFileBufferLen(char **, char *);
 
 extern void
-WriteBlendEntry(FILE *, char *, char *, boolean);
+WriteBlendEntry(FILE *, char *, char *, bool);
 
 extern int
 WriteStart(FILE *, const char *);
@@ -423,7 +423,7 @@ GetSubsetName(void);
 extern char *
 GetSubsetPath(void);
 
-extern boolean
+extern bool
 UsesSubset(void);
 
 #endif /*BUILDFONT_H*/

@@ -15,7 +15,7 @@ extern int build_bands(
 
 /* looks up specified keyword in fontinfo file. */
 extern FIPTR filookup(
-    char *, boolean
+    char *, bool
 );
 
 /* Frees the value string associated with fiptr. */
@@ -24,11 +24,11 @@ extern void fiptrfree(
 );
 
 /* These procs check that band widths and band spacing are within limits. */
-extern boolean checkbandwidths(
-  float, boolean
+extern bool checkbandwidths(
+  float, bool
 );
 
-extern boolean checkbandspacing(
+extern bool checkbandspacing(
     void
 );
 

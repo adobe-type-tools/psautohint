@@ -13,13 +13,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 FILE *outputfile;
 Fixed currentx, currenty;
-boolean firstFlex, wrtColorInfo;
+bool firstFlex, wrtColorInfo;
 char S0[128];
 PClrPoint bst;
 PClrPoint prv_bst;
 char bch;
 Fixed bx, by;
-boolean bstB;
+bool bstB;
 int16_t subpathcount;
 extern char *bezoutput;
 extern int bezoutputalloc;
@@ -58,7 +58,7 @@ static int32_t WriteString(char *str) {
 		return (int32_t)strlen(str);
 	}
 	else {
-		return DoContEncrypt((char *)str, outputfile, FALSE, (uint32_t)INLEN);
+		return DoContEncrypt((char *)str, outputfile, false, (uint32_t)INLEN);
 	}
 }
 
@@ -183,7 +183,7 @@ static char prevhintmaskstr[HINTMAXSTR];
 void safestrcat(char *s1, char *s2) {
 	if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
 		sprintf(S0, "ERROR: Hint information overflowing buffer: %s\n", fileName);
-		LogMsg(S0, LOGERROR, FATALERROR, TRUE);
+		LogMsg(S0, LOGERROR, FATALERROR, true);
 	}
 	else {
 		strcat(s1, s2);
@@ -207,13 +207,13 @@ static void NewBest(PClrPoint lst) {
 	bst = lst;
 	bch = lst->c;
 	if (bch == 'y' || bch == 'm') {
-		bstB = TRUE;
+		bstB = true;
 		x0 = lst->x0;
 		x1 = lst->x1;
 		bx = MIN(x0, x1);
 	}
 	else {
-		bstB = FALSE;
+		bstB = false;
 		y0 = lst->y0;
 		y1 = lst->y1;
 		by = MIN(y0, y1);
@@ -260,7 +260,7 @@ static void WritePointItem(PClrPoint lst) {
 		default: {
 			sprintf(S0, "Illegal point list data for file: %s.\n",
 					fileName);
-			LogMsg(S0, LOGERROR, NONFATALERROR, TRUE);
+			LogMsg(S0, LOGERROR, NONFATALERROR, true);
 		}
 	}
 	sws(" % ");
@@ -276,10 +276,10 @@ static void WrtPntLst(PClrPoint lst) {
 	ptLst = lst;
 
 	while (lst != NULL) {/* mark all as not yet done */
-		lst->done = FALSE;
+		lst->done = false;
 		lst = lst->next;
 	}
-	while (TRUE) {/* write in sort order */
+	while (true) {/* write in sort order */
 		lst = ptLst;
 		bst = NULL;
 		while (lst != NULL) {/* find first not yet done as init best */
@@ -318,7 +318,7 @@ static void WrtPntLst(PClrPoint lst) {
 			}
 			lst = lst->next;
 		}
-		bst->done = TRUE; /* mark as having been done */
+		bst->done = true; /* mark as having been done */
 		WritePointItem(bst);
 	}
 }
@@ -337,7 +337,7 @@ static void wrtnewclrs(PPathElt e) {
 	}
 }
 
-boolean IsFlex(PPathElt e) {
+bool IsFlex(PPathElt e) {
 	PPathElt e0, e1;
 	if (firstFlex) {
 		e0 = e;
@@ -428,7 +428,7 @@ ws("rmt\npreflx2a\n")
 
 static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	integer dmin, delta;
-	boolean yflag;
+	bool yflag;
 	Cd c13;
 	real shrink, r1, r2;
 	if (firstFlex) {
@@ -437,7 +437,7 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 		fc1 = c1;
 		fc2 = c2;
 		fc3 = c3;
-		firstFlex = FALSE;
+		firstFlex = false;
 		return;
 	}
 	yflag = e->yFlex;
@@ -529,7 +529,7 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
         WRTNUM(FTrunc(FRnd(currenty)));
         ws("flx\n");
 	}
-	firstFlex = TRUE;
+	firstFlex = true;
 }
 
 static void ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
@@ -624,7 +624,7 @@ void SaveFile() {
 	}
 #endif
 #ifdef ENCRYPTOUTPUT
-	DoInitEncrypt(outputfile, OTHER, HEX, 64, FALSE);
+	DoInitEncrypt(outputfile, OTHER, HEX, 64, false);
 #endif
 	sprintf(S0, "%% %s\n", fileName);
 	ws(S0);
@@ -639,7 +639,7 @@ void SaveFile() {
 	}
 
 	ws("sc\n");
-	firstFlex = TRUE;
+	firstFlex = true;
 	currentx = currenty = 0;
 	while (e != NULL) {
 		switch (e->type) {
@@ -667,7 +667,7 @@ void SaveFile() {
 				break;
 			default: {
 				sprintf(S0, "Illegal path list for file: %s.\n", fileName);
-				LogMsg(S0, LOGERROR, NONFATALERROR, TRUE);
+				LogMsg(S0, LOGERROR, NONFATALERROR, true);
 			}
 		}
 #if WRTABS_COMMENT

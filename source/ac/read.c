@@ -26,8 +26,8 @@ static Fixed tempx, tempy; /* used to calculate relative coordinates */
 #define STKMAX (20)
 static Fixed stk[STKMAX];
 static integer stkindex;
-static boolean flex, startchar;
-static boolean forMultiMaster, includeHints;
+static bool flex, startchar;
+static bool forMultiMaster, includeHints;
    /* Reading file for comparison of multiple master data and hint information.
       Reads into PCharPathElt structure instead of PPathElt. */
 
@@ -81,7 +81,7 @@ static Fixed Pop() {
   {
 	FlushLogFiles();
     sprintf (globmsg, "Stack underflow while reading %s file.\n", fileName);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
   stkindex--;
   return stk[stkindex];
@@ -92,7 +92,7 @@ static void Push(r) Fixed r; {
   {
 	FlushLogFiles();
     sprintf (globmsg, "Stack underflow while reading %s file.\n", fileName);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
   stk[stkindex] = r;
   stkindex++;
@@ -146,7 +146,7 @@ static void RDcurveto(c1, c2, c3) Cd c1, c2, c3; {
     new->rx1 = c1.x - tempx; new->ry1 = c1.y - tempy;
     new->rx2 = c2.x - c1.x; new->ry2 = c2.y - c1.y;
     new->rx3 = c3.x - c2.x; new->ry3 = c3.y - c2.y;
-    if (flex) new->isFlex = TRUE;
+    if (flex) new->isFlex = true;
   }
   }
 
@@ -272,7 +272,7 @@ static void psFLX() {
   PopPCd(&c2); PopPCd(&c1); PopPCd(&c0);
   Rct(c0, c1, c2);
   Rct(c3, c4, c5);
-  flex = FALSE;
+  flex = false;
   }
 
 static void ReadHintInfo(nm, str) char nm;  const char *str; {
@@ -287,12 +287,12 @@ static void ReadHintInfo(nm, str) char nm;  const char *str; {
   {
 	FlushLogFiles();
     sprintf(globmsg, "Extra hint information required for blended fonts is not in\n  character file: %s.  Please re-hint using the latest software.\n  Hints will not be included in this font.\n", fileName);
-    LogMsg(globmsg, WARNING, NONFATALERROR, TRUE);
+    LogMsg(globmsg, WARNING, NONFATALERROR, true);
     SetNoHints();
-    includeHints = FALSE;
+    includeHints = false;
   }
   else
-    SetHintsElt(hinttype, &c0, elt1, elt2, (boolean)!startchar);
+    SetHintsElt(hinttype, &c0, elt1, elt2, (bool)!startchar);
   }
   
 static integer StrLen(s) register char *s; {
@@ -337,7 +337,7 @@ static void DoName(nm, buff, len) const char * nm, *buff; int len; {
 	  break;
 	case 's': /* sc */
           if (nm[1] != 'c') goto badFile;
-          startchar = TRUE;
+          startchar = true;
 	  break;
 	case 'e': /* ed */
           if (nm[1] != 'd') goto badFile;
@@ -351,7 +351,7 @@ static void DoName(nm, buff, len) const char * nm, *buff; int len; {
         case 'i': /* id */
           if (nm[1] != 'd') goto badFile;
           Pop();
-          idInFile = TRUE;
+          idInFile = true;
           break;
         default: goto badFile;
         }
@@ -427,7 +427,7 @@ static void DoName(nm, buff, len) const char * nm, *buff; int len; {
           if (nm[0] != 'p' || nm[1] != 'r' || nm[2] != 'e' ||
               nm[3] != 'f' || nm[4] != 'l' || nm[5] != 'x')
               goto badFile;
-          flex = TRUE;
+          flex = true;
           break;
 	case 'r': /* endsubr */
           if (!isPrefix(nm, "endsubr")) goto badFile;
@@ -458,7 +458,7 @@ static void DoName(nm, buff, len) const char * nm, *buff; int len; {
 
 	FlushLogFiles();
     sprintf(globmsg, "Bad file format. Unknown operator: %s in %s character.\n", op, fileName);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
   }
 
@@ -466,20 +466,20 @@ static void ParseString(s) const char * s; {
   const char * s0;
     char c;
     char *c0;
-   boolean neg;
-    boolean isReal;
+   bool neg;
+    bool isReal;
     float rval;
   integer val;
   Fixed r;
   pathStart = pathEnd = NULL;
   bezGlyphName[0] = 0;
   
-  while (TRUE) {
+  while (true) {
     c = *s++;
     nxtChar:
     switch (c) {
       case '-': /* negative number */
-        neg = TRUE; val = 0; goto rdnum;
+        neg = true; val = 0; goto rdnum;
       case '%': /* comment */
 		if (bezGlyphName[0] == 0)
 			{
@@ -499,7 +499,7 @@ static void ParseString(s) const char * s; {
 				sprintf (globmsg, 
 					"Bad input file.  Glyph name  %s is greater than 32 chars.\n",
 					bezGlyphName);
-				  LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+				  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 						}
 				
 			}
@@ -516,15 +516,15 @@ static void ParseString(s) const char * s; {
           sprintf (globmsg, 
             "Bad input file.  Numbers left on stack at end of %s file.\n",
             fileName);
-          LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+          LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
         return;
       default:
         if (c >= '0' && c <= '9') {
-          neg = FALSE; val = c - '0'; goto rdnum; }
+          neg = false; val = c - '0'; goto rdnum; }
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
           s0 = s - 1;
-          while (TRUE) {
+          while (true) {
             c = *s++;
 			if ( (c == ' ') || (c == '\t') || (c == '\n') || (c =='\r') ||  (c == '\0'))
 				break;
@@ -538,12 +538,12 @@ static void ParseString(s) const char * s; {
           }
 		FlushLogFiles();
         sprintf (globmsg, "Unexpected character in %s file.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       }
       rdnum:
       isReal = false;
       c0 = (char*)(s-1);
-      while (TRUE) {
+      while (true) {
           c = *s++;
           if (c == '.')
               isReal = true;
@@ -569,7 +569,7 @@ static void ParseString(s) const char * s; {
                   FlushLogFiles();
                   sprintf (globmsg, "Stack overflow while reading %s file.\n",
                            fileName);
-                  LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                   return;
               }
               stk[stkindex] = r;
@@ -581,14 +581,14 @@ static void ParseString(s) const char * s; {
               sprintf (globmsg,
                        "Illegal number terminator while reading %s file.\n",
                        fileName);
-              LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+              LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
               return;
           }
       } /*end while true */
     }
   }
 
-#define TESTING (FALSE)
+#define TESTING (false)
 #if TESTING
 static unsigned char ibuff[MAXBYTES + 2];
 static integer inputlen;
@@ -600,8 +600,8 @@ char *file_name;
   fileName = file_name;
 }
 
-boolean ReadCharFile(normal, forBlendData, readHints, prependprefix)
-boolean normal, forBlendData, readHints, prependprefix; 
+bool ReadCharFile(normal, forBlendData, readHints, prependprefix)
+bool normal, forBlendData, readHints, prependprefix; 
 {
   char infile[MAXPATHLEN];
   FILE *fd;
@@ -609,7 +609,7 @@ boolean normal, forBlendData, readHints, prependprefix;
   integer cc;
   uint32_t filelen;
   currentx = currenty = tempx = tempy = stkindex = 0;
-  flex = idInFile = startchar = FALSE;
+  flex = idInFile = startchar = false;
   forMultiMaster = forBlendData;
   includeHints = readHints;
   if (prependprefix
@@ -635,7 +635,7 @@ boolean normal, forBlendData, readHints, prependprefix;
   {
 #endif
   fd = ACOpenFile(infile, "rb", OPENWARN);
-  if (fd == NULL) return FALSE;
+  if (fd == NULL) return false;
   filelen = ACGetFileSize(infile);
   inputbuff = (char *) ACNEWMEM(filelen+5);
   cc = ACReadFile((char *)inputbuff, fd, (char *)infile, filelen);
@@ -669,12 +669,12 @@ boolean normal, forBlendData, readHints, prependprefix;
 #if TESTING
   if (normal) {
     fd = ACOpenFile("file.old", "wb", OPENWARN);
-    if (fd == NULL) return FALSE;
+    if (fd == NULL) return false;
     fprintf(fd, "%s", ibuff);
     fclose(fd);
     }
 #endif
-  return TRUE;
+  return true;
 }
 
 void Test() {
@@ -689,16 +689,16 @@ void Test() {
   if (fd == NULL) return;
   cc = ReadDecFile(
      fd, (char *)infile, (char *)buff,
-     TRUE, MAXBYTES, (uint32_t)MAXBYTES, OTHER);
+     true, MAXBYTES, (uint32_t)MAXBYTES, OTHER);
   fclose(fd);
   if (cc >= MAXBYTES) { cc--; buff[cc] = 0; goto mismatch; }
   buff[cc] = 0;
   if (cc != inputlen) {
-    LogMsg("Test: file length different.\n", WARNING, OK, TRUE);
+    LogMsg("Test: file length different.\n", WARNING, OK, true);
     goto mismatch; }
   for (i = 0; i < cc; i++)
     if (buff[i] != ibuff[i]) {
-      LogMsg("Test: file contents different.\n", WARNING, OK, TRUE);
+      LogMsg("Test: file contents different.\n", WARNING, OK, true);
       goto mismatch; }
 /*  return; */
   mismatch:

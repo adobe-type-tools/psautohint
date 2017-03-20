@@ -60,12 +60,12 @@ typedef struct char_width
 } char_width;
 
 /* Globals */
-static boolean firstpath;	/* 1st path in this character */
-static boolean width_found;	/* width comment in ill. file */
-static boolean err;		/* whether error occurred during
+static bool firstpath;	/* 1st path in this character */
+static bool width_found;	/* width comment in ill. file */
+static bool err;		/* whether error occurred during
                          conversion */
-static boolean printmsg;	/* whether to print Converting msg */
-static boolean release;		/* indicates release version */
+static bool printmsg;	/* whether to print Converting msg */
+static bool release;		/* indicates release version */
 static indx np;			/* number of points in path */
 static indx widthcnt;		/* number of character widths */
 static int32_t dict_entries;
@@ -81,19 +81,19 @@ static void illcleanup(
                        void
                        );
 
-static boolean initialize_widths(
+static bool initialize_widths(
                                  void
                                  );
 
 static void process_width(
-                          FILE *, const char *, boolean
+                          FILE *, const char *, bool
                           );
 
 static void write_widths_file(
-                              boolean
+                              bool
                               );
 
-static boolean width_error(
+static bool width_error(
                            const char *
                            );
 
@@ -106,14 +106,14 @@ static  void convert(
                      );
 
 static void do_path(
-                    boolean, FILE *, const char *
+                    bool, FILE *, const char *
                     );
 
 static int32_t findarea(
                      CdPtr, CdPtr, CdPtr
                      );
 
-static boolean directionIsCW(
+static bool directionIsCW(
                              void
                              );
 
@@ -123,7 +123,7 @@ static void relative(
 
 #if ILLDEBUG
 static dump_path(
-                 boolean
+                 bool
                  );
 #endif
 
@@ -135,10 +135,10 @@ static  void illcleanup()
     UnallocateMem(final_path);
 }
 
-static boolean initialize_widths()
+static bool initialize_widths()
 {
     FILE *wfile;
-    boolean widths_exist = FALSE;
+    bool widths_exist = false;
     int32_t temp;
     indx ix;
     int32_t cnt, maxChars = MAXCHARS;
@@ -149,7 +149,7 @@ static boolean initialize_widths()
     for (ix = 0; ix < maxChars; ix++)
         widthtab[ix].width = UNINITWIDTH;
     widthcnt = dict_entries = 0;
-    if ((widths_exist = CFileExists(WIDTHSFILENAME, FALSE)))
+    if ((widths_exist = CFileExists(WIDTHSFILENAME, false)))
     {
         wfile = ACOpenFile(WIDTHSFILENAME, "r", OPENERROR);
         while (fgets(line, MAXLINE, wfile) != NULL)
@@ -172,7 +172,7 @@ static boolean initialize_widths()
                 fclose(wfile);
                 sprintf(globmsg, "%s file line: %s cannot be parsed.\n  It should have the format: /<char name> <width> WDef",
                         WIDTHSFILENAME, line);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             }
             CharNameLenOK(widthtab[widthcnt].name);
             widthtab[widthcnt].width = (int16_t) temp;
@@ -183,14 +183,14 @@ static boolean initialize_widths()
     return (widths_exist);
 }
 
-static void process_width(FILE *infile, const char *name, boolean seen_width)
+static void process_width(FILE *infile, const char *name, bool seen_width)
 {
     indx n, ix;
     int32_t width, cnt;
     float real_width, junk;
     char line[MAXLINE + 1];	/* input buffer */
     
-    boolean char_exists = FALSE, done = FALSE;
+    bool char_exists = false, done = false;
     
     /* read width information */
     fgets(line, MAXLINE, infile);
@@ -199,7 +199,7 @@ static void process_width(FILE *infile, const char *name, boolean seen_width)
     {
         fclose(infile);
         sprintf(globmsg, "Width specified for %s character cannot be parsed.\n", name);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     /* skip past next "end of path" operator */
     while ((!done) && (fgets(line, MAXLINE, infile) != NULL))
@@ -209,7 +209,7 @@ static void process_width(FILE *infile, const char *name, boolean seen_width)
         {
             case CLOSEANDNOPAINT:
             case NOPAINT:
-                done = TRUE;
+                done = true;
                 break;
             case CLOSEANDSTROKE:
             case STROKE:
@@ -218,13 +218,13 @@ static void process_width(FILE *infile, const char *name, boolean seen_width)
             case CLOSEANDFILL:
             case CLOSEANDFILLANDSTROKE:
                 sprintf(globmsg, "Width filled or stroked in %s character.\n", name);
-                LogMsg(globmsg, WARNING, OK, TRUE);
-                done = TRUE;
+                LogMsg(globmsg, WARNING, OK, true);
+                done = true;
                 break;
         }
     }
     width = SCALEDRTOL(real_width, scale);
-    width_found = TRUE;
+    width_found = true;
     /* Check if there is already an entry for this char. */
     for (ix = 0; ix < widthcnt; ix++)
     {
@@ -235,16 +235,16 @@ static void process_width(FILE *infile, const char *name, boolean seen_width)
                 if (seen_width)
                 {
                     sprintf(globmsg, "2 different widths specified in %s character.\n", name);
-                    LogMsg(globmsg, WARNING, OK, TRUE);
+                    LogMsg(globmsg, WARNING, OK, true);
                 }
                 if ((widthtab[ix].width != UNINITWIDTH) || (seen_width))
                 {
                     sprintf(globmsg, "Width updated for %s character (old: %d, new: %d).\n", name, (int) widthtab[ix].width, width);
-                    LogMsg(globmsg, INFO, OK, FALSE);
+                    LogMsg(globmsg, INFO, OK, false);
                 }
                 widthtab[ix].width = (int16_t) width;
             }
-            char_exists = TRUE;
+            char_exists = true;
             break;
         }
     }
@@ -256,7 +256,7 @@ static void process_width(FILE *infile, const char *name, boolean seen_width)
     }
 }
 
-static void write_widths_file(boolean widths_exist)
+static void write_widths_file(bool widths_exist)
 {
     FILE *wfile;
     indx i;
@@ -265,7 +265,7 @@ static void write_widths_file(boolean widths_exist)
     {
         sprintf(globmsg, "No %s file written, because no widths were found.\n",
                 WIDTHSFILENAME);
-        LogMsg(globmsg, INFO, OK, FALSE);
+        LogMsg(globmsg, INFO, OK, false);
         return;
     }
     /* if widths.ps file already exists rename it to widths.ps.BAK */
@@ -290,7 +290,7 @@ static void write_widths_file(boolean widths_exist)
 
 /* This procedure is called if a width comment is not found
  while converting a font illustrator file */
-static boolean width_error(const char *name)
+static bool width_error(const char *name)
 {
     indx ix;
     
@@ -300,33 +300,33 @@ static boolean width_error(const char *name)
         if (!strcmp(name, widthtab[ix].name))
         {
             sprintf(globmsg, "No width in %s character description, using\nwidth of %d from %s file.\n", widthtab[ix].name, (int) widthtab[ix].width, WIDTHSFILENAME);
-            LogMsg(globmsg, INFO, OK, FALSE);
-            return (FALSE);
+            LogMsg(globmsg, INFO, OK, false);
+            return (false);
         }
     }
     if (release)
     {
         sprintf(globmsg, "No width was specified for the %s character.\n", name);
-        LogMsg(globmsg, LOGERROR, OK, TRUE);
-        return (TRUE);
+        LogMsg(globmsg, LOGERROR, OK, true);
+        return (true);
     }
     else
     {
         sprintf(globmsg,
                 "No width was specified for the %s character.\n  The default width of %d will be used.\n",
                 name, DEFAULTWIDTH);
-        LogMsg(globmsg, WARNING, OK, TRUE);
+        LogMsg(globmsg, WARNING, OK, true);
         strcpy(widthtab[widthcnt].name, name);
         widthtab[widthcnt].width = DEFAULTWIDTH;
         widthcnt++;
-        return(FALSE);
+        return(false);
     }
 }
 
 static  void toomanypoints(const char *name)
 {
     sprintf(globmsg, "%s character description has too many points (maximum is %d).\n", name, (int) MAXPOINTS);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 }
 
 static  void convert(FILE *infile, FILE *outfile, const char *charname, const char *filename)
@@ -335,7 +335,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
     float temp1, temp2, temp3, temp4, temp5, temp6;
     indx n;
     int32_t cnt;
-    boolean white, seen_width = FALSE, seen_trailer = FALSE;
+    bool white, seen_width = false, seen_trailer = false;
     char op, line[MAXLINE + 1];	/* input buffer */
     
     /* Skip prolog and script setup sections */
@@ -364,7 +364,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
         if (WIDTH(line))
         {
             process_width(infile, charname, seen_width);
-            seen_width = TRUE;
+            seen_width = true;
             continue;
         }
         if (TRAILER(line))
@@ -372,9 +372,9 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
             if (np != 0)
             {
                 sprintf(globmsg, "Incomplete path at end of script section of %s character.\n", filename);
-                LogMsg(globmsg, WARNING, OK, TRUE);
+                LogMsg(globmsg, WARNING, OK, true);
             }
-            seen_trailer = TRUE;
+            seen_trailer = true;
             break;
         }
         if (COMMENT(line))
@@ -383,7 +383,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
         if (n < 2)
         {
             sprintf(globmsg, "%s character description contains the invalid line:\n  %s.\n", filename, line);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
         switch (op = line[n - 2])	/* the illustrator operator */
         {
@@ -394,7 +394,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
             case FILLANDSTROKE:
             case CLOSEANDFILLANDSTROKE:
                 sprintf(globmsg, "%d point path with paint operator %c ignored in %s character.\n", np, op, filename);
-                LogMsg(globmsg, WARNING, OK, TRUE);
+                LogMsg(globmsg, WARNING, OK, true);
                 np = 0;
                 continue;
                 /* NOTREACHED */
@@ -406,7 +406,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
                         (path[0].coord.y != path[np - 1].coord.y))
                     {
                         sprintf(globmsg, "%d point path in %s character is not closed.  It will be ignored.\n", np, filename);
-                        LogMsg(globmsg, WARNING, OK, TRUE);
+                        LogMsg(globmsg, WARNING, OK, true);
                         np = 0;
                         continue;
                     }
@@ -421,7 +421,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
                 {
                     sprintf(globmsg, "%d point filled path ignored in %s character.\n",
                             np, filename);
-                    LogMsg(globmsg, WARNING, OK, TRUE);
+                    LogMsg(globmsg, WARNING, OK, true);
                     np = 0;
                     continue;
                 }
@@ -432,20 +432,20 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
                 if (cnt != 1)
                 {
                     sprintf(globmsg, "Color specified for %s character cannot be parsed.\n", filename);
-                    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                 }
                 break;
             case MOVETO:
                 if (np != 0)
                 {
                     sprintf(globmsg, "%d point path not ended before moveto in %s character.\n  %s", np, filename, line);
-                    LogMsg(globmsg, WARNING, OK, TRUE);
+                    LogMsg(globmsg, WARNING, OK, true);
                 }
                 cnt = sscanf(line, " %f %f", &temp1, &temp2);
                 if (cnt != 2)
                 {
                     sprintf(globmsg, "Moveto for %s character cannot be parsed.\n  %s", filename, line);
-                    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                 }
                 path[np].coord.x = SCALEDRTOL(temp1, scale);
                 path[np].coord.y = SCALEDRTOL(temp2, scale);
@@ -458,7 +458,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
                 if (cnt != 2)
                 {
                     sprintf(globmsg, "Lineto for %s character cannot be parsed.\n  %s", filename, line);
-                    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                 }
                 if (np >= MAXPOINTS)
                     toomanypoints(filename);
@@ -474,7 +474,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
                 if (cnt != 6)
                 {
                     sprintf(globmsg, "Curveto for %s character cannot be parsed.\n  %s", filename, line);
-                    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                 }
                 if (np > (MAXPOINTS - 3))
                     toomanypoints(filename);
@@ -493,7 +493,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
                 if (cnt != 4)
                 {
                     sprintf(globmsg, "Curveto for%s  character cannot be parsed.\n  %s", filename, line);
-                    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                 }
                 if (np > (MAXPOINTS - 3))
                     toomanypoints(filename);
@@ -511,7 +511,7 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
                 if (cnt != 4)
                 {
                     sprintf(globmsg, "Curveto for %s character cannot be parsed.\n  %s", filename, line);
-                    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                 }
                 if (np > (MAXPOINTS - 3))
                     toomanypoints(filename);
@@ -527,17 +527,17 @@ static  void convert(FILE *infile, FILE *outfile, const char *charname, const ch
     if (!seen_trailer)
     {
         sprintf(globmsg, "No \"%%TRAILER\" line in file for %s character\n - file probably truncated.\n", filename);
-        LogMsg(globmsg, WARNING, OK, TRUE);
+        LogMsg(globmsg, WARNING, OK, true);
     }
 }				/* end convert */
 
-static void do_path(boolean white, FILE *outfile, const char *name)
+static void do_path(bool white, FILE *outfile, const char *name)
 {
     indx n, elem;
     path_element *p, *fp;
     int32_t tag;
-    boolean cw, reverse;
-    boolean open = ((path[0].coord.x != path[np - 1].coord.x) ||
+    bool cw, reverse;
+    bool open = ((path[0].coord.x != path[np - 1].coord.x) ||
                     (path[0].coord.y != path[np - 1].coord.y));
     
     cw = directionIsCW();
@@ -717,7 +717,7 @@ static int32_t findarea(CdPtr p1, CdPtr p2, CdPtr sp)
     return ((v1x * v2y) - (v2x * v1y));
 }
 
-static boolean directionIsCW()
+static bool directionIsCW()
 {
     path_element *p = path;
     int32_t area, n;
@@ -801,8 +801,8 @@ static void relative(FILE *outfile)
                 if (firstpath)
                 {
                     sprintf(buff, "%d %d rmt\n", p->coord.x, p->coord.y);
-                    (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
-                    firstpath = FALSE;
+                    (void) DoContEncrypt(buff, outfile, false, INLEN);
+                    firstpath = false;
                 }
                 else
                 {
@@ -810,17 +810,17 @@ static void relative(FILE *outfile)
                     if ((dx = p->coord.x - cp.x) == 0)
                     {
                         sprintf(buff, "%d vmt\n", dy);
-                        (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                        (void) DoContEncrypt(buff, outfile, false, INLEN);
                     }
                     else if (dy == 0)
                     {
                         sprintf(buff, "%d hmt\n", dx);
-                        (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                        (void) DoContEncrypt(buff, outfile, false, INLEN);
                     }
                     else
                     {
                         sprintf(buff, "%d %d rmt\n", dx, dy);
-                        (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                        (void) DoContEncrypt(buff, outfile, false, INLEN);
                     }
                 }
                 cp = p->coord;
@@ -832,17 +832,17 @@ static void relative(FILE *outfile)
                 if ((dx = p->coord.x - cp.x) == 0)
                 {
                     sprintf(buff, "%d vdt\n", dy);
-                    (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                    (void) DoContEncrypt(buff, outfile, false, INLEN);
                 }
                 else if (dy == 0)
                 {
                     sprintf(buff, "%d hdt\n", dx);
-                    (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                    (void) DoContEncrypt(buff, outfile, false, INLEN);
                 }
                 else
                 {
                     sprintf(buff, "%d %d rdt\n", dx, dy);
-                    (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                    (void) DoContEncrypt(buff, outfile, false, INLEN);
                 }
                 cp = p->coord;
                 p++;
@@ -857,23 +857,23 @@ static void relative(FILE *outfile)
                     sprintf(buff, "%d %d %d %d vhct\n",
                             p->coord.y - cp.y, p1->coord.x - p->coord.x,
                             p1->coord.y - p->coord.y, p2->coord.x - p1->coord.x);
-                    (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                    (void) DoContEncrypt(buff, outfile, false, INLEN);
                 }
                 else if (((dy = (p->coord.y - cp.y)) == 0) && (p2->coord.x == p1->coord.x))	/* hvct */
                 {
                     sprintf(buff, "%d %d %d %d hvct\n",
                             dx, p1->coord.x - p->coord.x,
                             p1->coord.y - p->coord.y, p2->coord.y - p1->coord.y);
-                    (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                    (void) DoContEncrypt(buff, outfile, false, INLEN);
                 }
                 else			/* rct */
                 {
                     sprintf(buff, "%d %d ", dx, dy);
-                    (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                    (void) DoContEncrypt(buff, outfile, false, INLEN);
                     sprintf(buff, "%d %d ", p1->coord.x - p->coord.x, p1->coord.y - p->coord.y);
-                    (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                    (void) DoContEncrypt(buff, outfile, false, INLEN);
                     sprintf(buff, "%d %d rct\n", p2->coord.x - p1->coord.x, p2->coord.y - p1->coord.y);
-                    (void) DoContEncrypt(buff, outfile, FALSE, INLEN);
+                    (void) DoContEncrypt(buff, outfile, false, INLEN);
                 }
                 cp = p2->coord;
                 p += 3;
@@ -881,11 +881,11 @@ static void relative(FILE *outfile)
                 break;
         }
     }
-    (void) DoContEncrypt("cp\n", outfile, FALSE, INLEN);	/* closepath */
+    (void) DoContEncrypt("cp\n", outfile, false, INLEN);	/* closepath */
 }				/* end relative */
 
 #if ILLDEBUG
-static dump_path(boolean reverse)
+static dump_path(bool reverse)
 {
     static char op[3] = {'M', 'L', 'C'};
     int32_t n;
@@ -950,18 +950,18 @@ void convert_illcharfile(const char *charname, const char *filename)
     FILE *infile, *outfile;
     char inname[MAXPATHLEN], outname[MAXPATHLEN];
     
-    firstpath = TRUE;
-    width_found = FALSE;
+    firstpath = true;
+    width_found = false;
     get_filename(inname, ILLDIR, filename);
     get_filename(outname, bezdir, filename);
     
     infile = ACOpenFile(inname, "r", OPENWARN);
     if (infile == NULL) return;
     outfile = ACOpenFile(tmpnm, "w", OPENERROR);
-    DoInitEncrypt(outfile, OTHER, HEX, (int32_t) BEZLINESIZE, FALSE);
+    DoInitEncrypt(outfile, OTHER, HEX, (int32_t) BEZLINESIZE, false);
     WriteStart(outfile, charname);
     convert(infile, outfile, charname, filename);
-    (void) DoContEncrypt("ed\n", outfile, FALSE, INLEN);
+    (void) DoContEncrypt("ed\n", outfile, false, INLEN);
     if (!width_found)
         err = err || width_error(charname);
     fclose(infile);
@@ -970,8 +970,8 @@ void convert_illcharfile(const char *charname, const char *filename)
     if (printmsg)
     {
         LogMsg ("Converting Adobe Illustrator(R) files ...",
-                INFO,OK,FALSE);
-        printmsg = FALSE;
+                INFO,OK,false);
+        printmsg = false;
     }
     convertedchars++;
 }
@@ -991,20 +991,20 @@ extern void set_scale(float *newscale)
     {
         sprintf(globmsg, "ScalePercent line of fontinfo file invalid.\n");
 		UnallocateMem(fontinfostr);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     UnallocateMem(fontinfostr);
     *newscale = temp / (float) 100;
 }
 
 
-void convert_illfiles(boolean rel)
+void convert_illfiles(bool rel)
 {
-    boolean widths_exist;
-    boolean result = TRUE;
+    bool widths_exist;
+    bool result = true;
     
     release = rel;
-    printmsg = TRUE;
+    printmsg = true;
     illcleanup();	/* just in case last caller exited with error */
     widths_exist = initialize_widths();
     set_scale(&scale);
@@ -1024,11 +1024,11 @@ void convert_illfiles(boolean rel)
     if (convertedchars > 0)
     {
         sprintf (globmsg, " %d files converted.\n", (int) convertedchars);
-        LogMsg (globmsg, INFO,OK,FALSE);
+        LogMsg (globmsg, INFO,OK,false);
         if (scale != 1.0)
         {
             sprintf(globmsg, "Widths in the original %s file were not scaled.\n", WIDTHSFILENAME);
-            LogMsg(globmsg, WARNING, OK, TRUE);
+            LogMsg(globmsg, WARNING, OK, true);
         }
     }
     if (err || !result)

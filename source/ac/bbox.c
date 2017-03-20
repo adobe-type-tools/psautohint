@@ -52,7 +52,7 @@ static void FindPathBBox() {
       {
 		FlushLogFiles();
         sprintf (globmsg, "Undefined operator in %s character.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       }
       }
     e = e->next;
@@ -109,7 +109,7 @@ PPathElt FindSubpathBBox(e) PPathElt e; {
       {
 		FlushLogFiles();
         sprintf (globmsg, "Undefined operator in %s character.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       }
       }
     e = e->next;
@@ -180,8 +180,8 @@ void ReClrHBnds() {
   AddColorPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
   }
 
-static boolean CheckValOverlaps(lft, rht, lst, xflg)
-  Fixed lft, rht; PClrVal lst; boolean xflg; {
+static bool CheckValOverlaps(lft, rht, lst, xflg)
+  Fixed lft, rht; PClrVal lst; bool xflg; {
   Fixed lft2, rht2, tmp;
   if (xflg) { lft = itfmx(lft); rht = itfmx(rht); }
   else { lft = itfmy(lft); rht = itfmy(rht); }
@@ -191,13 +191,13 @@ static boolean CheckValOverlaps(lft, rht, lst, xflg)
     if (xflg) { lft2 = itfmx(lft2); rht2 = itfmx(rht2); }
     else { lft2 = itfmy(lft2); rht2 = itfmy(rht2); }
     if (lft2 > rht2) { tmp = lft2; lft2 = rht2; rht2 = tmp; }
-    if (lft2 <= rht && lft <= rht2) return TRUE;
+    if (lft2 <= rht && lft <= rht2) return true;
     lst = lst->vNxt;
     }
-  return FALSE;
+  return false;
   }
 
-void AddBBoxHV(Hflg, subs) boolean Hflg, subs; {
+void AddBBoxHV(Hflg, subs) bool Hflg, subs; {
   PPathElt e;
   PClrVal val;
   PClrSeg seg1, seg2;
@@ -206,7 +206,7 @@ void AddBBoxHV(Hflg, subs) boolean Hflg, subs; {
     if (subs) e = FindSubpathBBox(e);
     else { FindPathBBox(); e = NULL; }
     if (!Hflg) {
-      if (!CheckValOverlaps(xmin, xmax, Vcoloring, TRUE)) {
+      if (!CheckValOverlaps(xmin, xmax, Vcoloring, true)) {
         val = (PClrVal)Alloc(sizeof(ClrVal));
 	seg1 = (PClrSeg)Alloc(sizeof(ClrSeg));
 	seg1->sLoc = xmin; seg1->sElt = pxmn;
@@ -224,14 +224,14 @@ void AddBBoxHV(Hflg, subs) boolean Hflg, subs; {
 	val->vLoc2 = xmax;
 	val->vSeg1 = seg1;
 	val->vSeg2 = seg2;
-	val->vGhst = FALSE;
+	val->vGhst = false;
 	val->vNxt = Vcoloring;
 	val->vBst = val;
 	Vcoloring = val;
         }
       }
     else {
-      if (!CheckValOverlaps(ymin, ymax, Hcoloring, FALSE)) {
+      if (!CheckValOverlaps(ymin, ymax, Hcoloring, false)) {
         val = (PClrVal)Alloc(sizeof(ClrVal));
 	seg1 = (PClrSeg)Alloc(sizeof(ClrSeg));
 	seg1->sLoc = ymax; seg1->sElt = pymx;
@@ -249,7 +249,7 @@ void AddBBoxHV(Hflg, subs) boolean Hflg, subs; {
 	val->vLoc2 = ymin;
 	val->vSeg1 = seg1;
 	val->vSeg2 = seg2;
-	val->vGhst = FALSE;
+	val->vGhst = false;
 	val->vNxt = Hcoloring;
 	val->vBst = val;
 	Hcoloring = val;
@@ -301,12 +301,12 @@ Fixed GetPathLSB(void) {
   return (llx);
   }
 
-boolean CheckBBoxes(e1, e2) PPathElt e1, e2; {
-  /* return TRUE if e1 and e2 in same subpath or i
+bool CheckBBoxes(e1, e2) PPathElt e1, e2; {
+  /* return true if e1 and e2 in same subpath or i
      the bbox for one is inside the bbox of the other */
   Fixed xmn, xmx, ymn, ymx;
   e1 = GetDest(e1); e2 = GetDest(e2);
-  if (e1 == e2) return TRUE; /* same subpath */
+  if (e1 == e2) return true; /* same subpath */
   FindSubpathBBox(e1);
   xmn = xmin; xmx = xmax; ymn = ymin; ymx = ymax;
   FindSubpathBBox(e2);

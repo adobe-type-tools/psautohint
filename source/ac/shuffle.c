@@ -89,7 +89,7 @@ static void PrintOutLinks(unsigned char *outlinks) {
 	PrintMessage("\n");
 }
 
-void MarkLinks(vL,hFlg) PClrVal vL; boolean hFlg; {
+void MarkLinks(vL,hFlg) PClrVal vL; bool hFlg; {
 	register integer i, j;
 	register PClrSeg seg;
 	register PPathElt e;
@@ -163,7 +163,7 @@ void DoShuffleSubpaths() {
     }
 	if (DEBUG)
 		PrintSumLinks((char*)sumlinks);
-	while (TRUE) {
+	while (true) {
 		bst = -1; bstsum = 0;
 		for (i = 0; i < rowcnt; i++) {
 			if (output[i] == 0 && (bst == -1 || sumlinks[i] > bstsum)) {
@@ -171,7 +171,7 @@ void DoShuffleSubpaths() {
 		}
 		if (bst == -1) break;
 		Outpath(links, outlinks, output, bst);
-		while (TRUE) {
+		while (true) {
 			bst = -1; bstsum = 0; bstlnks = 0;
 			for (i = 0; i < rowcnt; i++) {
 				if (output[i] == 0 && outlinks[i] >= bstlnks) {

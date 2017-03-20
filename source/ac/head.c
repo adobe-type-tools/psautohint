@@ -9,7 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 PPathElt GetDest(cldest) register PPathElt cldest; {
   if (cldest == NULL) return NULL;
-  while (TRUE) {
+  while (true) {
     cldest = cldest->prev;
     if (cldest == NULL) return pathStart;
     if (cldest->type == MOVETO) return cldest;
@@ -19,7 +19,7 @@ PPathElt GetDest(cldest) register PPathElt cldest; {
 PPathElt GetClosedBy(clsdby) register PPathElt clsdby; {
   if (clsdby == NULL) return NULL;
   if (clsdby->type == CLOSEPATH) return clsdby;
-  while (TRUE) {
+  while (true) {
     clsdby = clsdby->next;
     if (clsdby == NULL) return NULL;
     if (clsdby->type == MOVETO) return NULL;
@@ -41,13 +41,13 @@ void GetEndPoint(e, x1p, y1p)
       if (e == NULL || e->type == CLOSEPATH)
       {
         sprintf(globmsg, "Bad character description file: %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       }
       goto retry;
     default:
     {
       sprintf(globmsg, "Illegal operator in character file: %s.\n", fileName);
-      LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+      LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     }
   }
@@ -113,12 +113,12 @@ Fixed HorzQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
     return HVness(&q);
 }
 
-boolean IsTiny(e) PPathElt e; {
+bool IsTiny(e) PPathElt e; {
   Fixed x0, y0, x1, y1, abstmp;
   GetEndPoints(e,&x0,&y0,&x1,&y1);
-  return ((ac_abs(x0-x1) < FixTwo) && (ac_abs(y0-y1) < FixTwo))? TRUE : FALSE; }
+  return ((ac_abs(x0-x1) < FixTwo) && (ac_abs(y0-y1) < FixTwo))? true : false; }
 
-boolean IsShort(e) PPathElt e; {
+bool IsShort(e) PPathElt e; {
     Fixed x0, y0, x1, y1, dx, dy, mn, mx, abstmp;
     GetEndPoints(e,&x0,&y0,&x1,&y1);
     dx = ac_abs(x0-x1);
@@ -131,7 +131,7 @@ boolean IsShort(e) PPathElt e; {
         mn = dx;
         mx = dy;
     }
-    return ((mx + (mn*42)/125) < FixInt(6))? TRUE : FALSE; /* DEBUG 8 BIT. Increased threshold from 3 to 6, for change in coordinare system. */
+    return ((mx + (mn*42)/125) < FixInt(6))? true : false; /* DEBUG 8 BIT. Increased threshold from 3 to 6, for change in coordinare system. */
 }
 
 PPathElt NxtForBend(p,px2,py2,px3,py3)
@@ -140,7 +140,7 @@ PPathElt NxtForBend(p,px2,py2,px3,py3)
   Fixed x, y, x2, y2;
   nxt = p;
   GetEndPoint(p, &x, &y);
-  while (TRUE) {
+  while (true) {
     if (nxt->type == CLOSEPATH) {
       nxt = GetDest(nxt);
       /* The following test was added to prevent an infinite loop. */
@@ -168,7 +168,7 @@ PPathElt PrvForBend(p,px2,py2) PPathElt p; Fixed *px2, *py2; {
   PPathElt prv, prvCP = NULL;
   Fixed x2, y2;
   prv = p;
-  while (TRUE) {
+  while (true) {
     prv = prv->prev;
     if (prv == NULL) goto Bogus;
     if (prv->type == MOVETO) {
@@ -192,8 +192,8 @@ PPathElt PrvForBend(p,px2,py2) PPathElt p; Fixed *px2, *py2; {
    return prv;
   }
 
-static boolean CheckHeight(upperFlag,p) 
-  boolean upperFlag; PPathElt p; {
+static bool CheckHeight(upperFlag,p) 
+  bool upperFlag; PPathElt p; {
   PPathElt ee;
   Fixed y, yy;
   ee = pathStart;
@@ -201,13 +201,13 @@ static boolean CheckHeight(upperFlag,p)
   while (ee != NULL) {
     if (ee->type == MOVETO && ee != p) {
       yy = itfmy(ee->y);
-      if ((upperFlag && yy > y) || (!upperFlag && yy < y)) return FALSE;
+      if ((upperFlag && yy > y) || (!upperFlag && yy < y)) return false;
       }
     ee = ee->next; }
-  return TRUE; }
+  return true; }
 
-boolean IsLower(p) PPathElt p; {
-  return CheckHeight(FALSE,p); }
+bool IsLower(p) PPathElt p; {
+  return CheckHeight(false,p); }
 
-boolean IsUpper(p) PPathElt p; {
-  return CheckHeight(TRUE,p); }
+bool IsUpper(p) PPathElt p; {
+  return CheckHeight(true,p); }

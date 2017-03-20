@@ -34,7 +34,7 @@ static void RecordVFix(x,dx) Fixed x, dx; {
   }
 
 static void RecordForFix(vert, w, minW, b, t)
-  boolean vert; Fixed w, minW, b, t; {
+  bool vert; Fixed w, minW, b, t; {
   Fixed mn, mx, delta;
   if (b < t) { mn = b; mx = t; }
   else { mn = t; mx = b; }
@@ -68,20 +68,20 @@ static void RecordForFix(vert, w, minW, b, t)
     }
   }
 
-static boolean CheckForInsideBands(loc, blues, numblues)
+static bool CheckForInsideBands(loc, blues, numblues)
   Fixed loc, *blues; integer numblues; {
   integer i;
   for (i = 0; i < numblues; i += 2) {
-    if (loc >= blues[i] && loc <= blues[i+1]) return TRUE;
+    if (loc >= blues[i] && loc <= blues[i+1]) return true;
     }
-  return FALSE;
+  return false;
   }
 
 #define bFuzz (FixInt(6))
 static void CheckForNearBands(loc, blues, numblues) 
   Fixed loc, *blues; integer numblues; { 
   integer i; 
-  boolean bottom = TRUE;
+  bool bottom = true;
   for (i = 0; i < numblues; i++) { 
     if ((bottom && loc >= blues[i]-bFuzz && loc < blues[i]) ||
        (!bottom && loc <= blues[i]+bFuzz && loc > blues[i])) {
@@ -91,18 +91,18 @@ static void CheckForNearBands(loc, blues, numblues)
      ReportBandNearMiss(bottom? "below" : "above", loc, blues[i]);
 #endif
 #if 0
-      bandError = TRUE;
+      bandError = true;
 #endif
       }
     bottom = !bottom;
     }
   }
 
-boolean FindLineSeg(loc, sL) Fixed loc; PClrSeg sL; {
+bool FindLineSeg(loc, sL) Fixed loc; PClrSeg sL; {
   while (sL != NULL) {
-    if (sL->sLoc ==loc && sL->sType == sLINE) return TRUE;
+    if (sL->sLoc ==loc && sL->sType == sLINE) return true;
     sL = sL->sNxt; }
-  return FALSE; }
+  return false; }
 
 #if 1
 /* Traverses hSegList to check for near misses to
@@ -122,7 +122,7 @@ PClrSeg hSegList; Fixed *bandList; int32_t length;  {
     }
 }
 #else
-void CheckTfmVal (b, t, vert) Fixed b, t; boolean vert; {
+void CheckTfmVal (b, t, vert) Fixed b, t; bool vert; {
   if (t < b) { Fixed tmp; tmp = t; t = b; b = tmp; }
   if (!vert && (lenTopBands >= 2 || lenBotBands >= 2) && !bandError &&
       !CheckForInsideBands(t, topBands, lenTopBands) &&
@@ -133,11 +133,11 @@ void CheckTfmVal (b, t, vert) Fixed b, t; boolean vert; {
 }
 #endif
 
-void CheckVal(val, vert) PClrVal val; boolean vert; {
+void CheckVal(val, vert) PClrVal val; bool vert; {
   Fixed *stems;
   integer numstems, i;
   Fixed wd, diff, minDiff, minW, b, t, w;
-  boolean curve = FALSE;
+  bool curve = false;
   if (vert) {
     stems = VStems; numstems = NumVStems;
     b = itfmx(val->vLoc1); t = itfmx(val->vLoc2); }
@@ -161,7 +161,7 @@ void CheckVal(val, vert) PClrVal val; boolean vert; {
                 !FindLineSeg(val->vLoc2, rightList))) ||
       (!vert && (!FindLineSeg(val->vLoc1, botList) ||
                  !FindLineSeg(val->vLoc2, topList))))
-       curve = TRUE;
+       curve = true;
     if (!val->vGhst)
       ReportStemNearMiss(vert, w, minW, b, t, curve);
   }
@@ -170,7 +170,7 @@ void CheckVal(val, vert) PClrVal val; boolean vert; {
     RecordForFix(vert, w, minW, b, t);
   }
 
-void CheckVals(vlst, vert) PClrVal vlst; boolean vert; {
+void CheckVals(vlst, vert) PClrVal vlst; bool vert; {
   while (vlst != NULL) {
     CheckVal(vlst, vert);
     vlst = vlst->vNxt;
@@ -214,7 +214,7 @@ static void FixHs(fixy, fixdy)
 		{
 		  FlushLogFiles();
 		  sprintf(globmsg, "Illegal operator in path list in %s.\n", fileName);
-		  LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+		  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
 
       }
@@ -259,25 +259,25 @@ static void FixVs(fixx, fixdx)
 		{
 		  FlushLogFiles();
 		  sprintf(globmsg, "Illegal operator in point list in %s.\n", fileName);
-		  LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+		  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
       }
     e = e->next;
     }
   }
 
-boolean DoFixes() {
-  boolean didfixes = FALSE;
+bool DoFixes() {
+  bool didfixes = false;
   integer i;
   if (HFixCount > 0 && autoHFix) {
     PrintMessage("Fixing horizontal near misses.");
-    didfixes = TRUE;
+    didfixes = true;
     for (i = 0; i < HFixCount; i++)
       FixHs(HFixYs[i], HFixDYs[i]);
     }
   if (VFixCount > 0 && autoVFix) {
     PrintMessage("Fixing vertical near misses.");
-    didfixes = TRUE;
+    didfixes = true;
     for (i = 0; i < VFixCount; i++)
       FixVs(VFixXs[i], VFixDXs[i]);
     }

@@ -93,11 +93,11 @@ time_t time();
 
 static char* allocate();
 static uint16_t calcChksum();
-static void newTimesFile(const char*, boolean);
-static void readInputDir(const char*, boolean);
+static void newTimesFile(const char*, bool);
+static void readInputDir(const char*, bool);
 static int16_t storeName();
 static void formatTime();
-static void writeTimesFile(boolean convert, float scale);
+static void writeTimesFile(bool convert, float scale);
 static void printArray();
 static void printCounterList();
 static void sortFileTimes();
@@ -106,20 +106,20 @@ static void copyTimes();
 static void updateTime();
 static fileTime* checkFile();
 static void readCharList();
-static boolean readTimesFile(boolean convert, float scale);
-static boolean readCharSet();
-static boolean readOldTimesFile(FILE* fp, boolean convert, float scale);
+static bool readTimesFile(bool convert, float scale);
+static bool readCharSet();
+static bool readOldTimesFile(FILE* fp, bool convert, float scale);
 static int get16();
 static int get32();
-static boolean compareData();
-static boolean readFileTimesData();
-static boolean compareCounterListData();
-static boolean compareArrays();
-static boolean readFileTimes();
-static boolean compareCounterLists();
-static boolean compareLists();
-static boolean compareTimes(boolean, boolean, boolean*, boolean);
-static boolean compareCvtTimes(char *inputDir, boolean release, tConvertfunc convertFunc);
+static bool compareData();
+static bool readFileTimesData();
+static bool compareCounterListData();
+static bool compareArrays();
+static bool readFileTimes();
+static bool compareCounterLists();
+static bool compareLists();
+static bool compareTimes(bool, bool, bool*, bool);
+static bool compareCvtTimes(char *inputDir, bool release, tConvertfunc convertFunc);
 
 /* Free up space used for storing file times and filenames.
  */
@@ -138,19 +138,19 @@ static void freeFileTimes(void)
  * created using the current timestamps if a pschars or ill
  * directory exists. Called by the -t option to BuildFont.
  */
-boolean CreateTimesFile(void)
+bool CreateTimesFile(void)
 {
 #if !IS_LIB
-	if (DirExists(ILLDIR, FALSE, FALSE, FALSE))
-		newTimesFile(ILLDIR, TRUE);
-	else if (DirExists(RAWPSDIR, FALSE, FALSE, FALSE))
-		newTimesFile(RAWPSDIR, TRUE);
+	if (DirExists(ILLDIR, false, false, false))
+		newTimesFile(ILLDIR, true);
+	else if (DirExists(RAWPSDIR, false, false, false))
+		newTimesFile(RAWPSDIR, true);
 
-	newTimesFile(BEZDIR, FALSE);
+	newTimesFile(BEZDIR, false);
 
 	freeFileTimes();
 #endif	
-	return TRUE; /* This maintains compatibility with the old version */
+	return true; /* This maintains compatibility with the old version */
 }
 
 /* Warns about and renames any existing .ACtimes or .Converttimes files
@@ -158,7 +158,7 @@ boolean CreateTimesFile(void)
  * files' current timestamps.
  */  
 static void newTimesFile(const char *dirName, 
-						  boolean convert)/* Flags converting from ill/ or pschars/ directory */
+						  bool convert)/* Flags converting from ill/ or pschars/ directory */
 {
 #if IS_LIB
 #pragma unused(dirName)
@@ -167,15 +167,15 @@ static void newTimesFile(const char *dirName,
 	float scale;
 	char* timesFileName = (convert) ? CVT_NAME : AC_NAME;
 	
-	readInputDir(dirName, TRUE);
+	readInputDir(dirName, true);
 	
-	if (CFileExists(timesFileName, FALSE)) {
+	if (CFileExists(timesFileName, false)) {
 		/* Rename the old timestamp file */
 		char newName[50];
 		
 		sprintf(globmsg, "Renaming existing %s file to %s.old.\n",
 				timesFileName, timesFileName);
-		LogMsg(globmsg, WARNING, OK, TRUE);
+		LogMsg(globmsg, WARNING, OK, true);
 		sprintf(newName, "%s.old", timesFileName);
 		RenameFile(timesFileName, newName);
 	}
@@ -189,7 +189,7 @@ static void newTimesFile(const char *dirName,
  * character set.  Ignores .BAK files.
  */
 static void readInputDir(const char *dirName, 
-						  boolean creating)/* Flags creation (not updating) of timestamp file */ 
+						  bool creating)/* Flags creation (not updating) of timestamp file */ 
 {
 #if IS_LIB
 #pragma unused(dirName)
@@ -204,7 +204,7 @@ static void readInputDir(const char *dirName,
 	fileCnt = BFscandir(dirName, &nameList, IncludeFile, bf_alphasort);
 	if (fileCnt == -1) {
 		sprintf(globmsg, "Can't read the %s directory.\n", dirName);
-		LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+		LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 	}
 	else {
 		int i;
@@ -214,7 +214,7 @@ static void readInputDir(const char *dirName,
 
 		/* explicitly look for .notdef bez file */
 		sprintf(charFile, "%s\\.notdef", dirName);
-		if (FileExists(charFile, FALSE) &&
+		if (FileExists(charFile, false) &&
 			!stat(charFile, &s))
 		  {
 			newFileTimes =(fileTime*)allocate(fileCnt+1, sizeof(fileTime));
@@ -228,7 +228,7 @@ static void readInputDir(const char *dirName,
 		
 		for (i = 0; i < fileCnt; i++) {
 			sprintf(charFile, "%s\\%s", dirName, nameList[i]->d_name);
-			if (FileExists(charFile, FALSE) &&
+			if (FileExists(charFile, false) &&
 				!stat(charFile, &s)) {
 				p->nameIndx = storeName(nameList[i]->d_name);
 				p->modTime = (creating) ? s.st_mtime : 0;
@@ -239,7 +239,7 @@ static void readInputDir(const char *dirName,
 		/* explicitly handle for .notdef bez file */
 			sprintf(charFile, "%s\\.notdef", dirName);
 
-		if (FileExists(charFile, FALSE) &&
+		if (FileExists(charFile, false) &&
 			!stat(charFile, &s))
 		  {
 			p->nameIndx = storeName(".notdef");
@@ -266,7 +266,7 @@ static char* allocate(int n, int size)
 #endif	
 	if (!p) {
 		sprintf(globmsg, "Can't allocate space for file times.\n");
-		LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+		LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 	}
 	
 	return p;
@@ -292,7 +292,7 @@ static int16_t storeName(const char *name)
 			nameBuf = ACNEWMEM(bufSize);
 		if (!nameBuf) {
 			sprintf(globmsg, "Can't allocate space for file names.\n");
-			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
 
 		nextFree = tmp + nameBuf; /* Realloc can move the block */
@@ -307,7 +307,7 @@ static int16_t storeName(const char *name)
 
 /* Write out the timestamp file.
  */
-static void writeTimesFile(boolean convert, /* Flags if writing .Converttimes */
+static void writeTimesFile(bool convert, /* Flags if writing .Converttimes */
 							float scale)/* Coversion scale factor */
 {
 #if IS_LIB
@@ -366,7 +366,7 @@ static void writeTimesFile(boolean convert, /* Flags if writing .Converttimes */
 	
 	if (ferror(fp)) {
 		sprintf(globmsg, "Error writing the %s file.\n", timesFileName);
-		LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+		LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 	}
 	fclose(fp);
 #endif
@@ -447,18 +447,18 @@ static uint16_t calcChksum(FILE *fp, int lines)
 /* Hint the specified files and update their time entries in the
  * timestamp file. Called by AC only when hinting a list of characters.
  */
-boolean DoArgs(
+bool DoArgs(
 			int cnt, /* Number of characters to process */
 			char* names[], /* Names of characters to process */
-			boolean extraColor,
-			boolean* renameLog,
-			boolean release /* Flags release version */)
+			bool extraColor,
+			bool* renameLog,
+			bool release /* Flags release version */)
 {
 #ifdef IS_GGL
-	return FALSE;
+	return false;
 #else
 	int i;
-	boolean result = TRUE;
+	bool result = true;
 	
 #ifdef IS_LIB
 	if (!featurefiledata){
@@ -467,14 +467,14 @@ boolean DoArgs(
 	if (release) {
 		if (!readCharSet()) {
 			freeFileTimes();
-			return FALSE;
+			return false;
 		}
 	}
 	else
-		readInputDir(BEZDIR, FALSE);
+		readInputDir(BEZDIR, false);
 
 	
-	if (readTimesFile(FALSE, 0.0))
+	if (readTimesFile(false, 0.0))
 		copyTimes();
 
 #ifdef IS_LIB
@@ -483,18 +483,18 @@ boolean DoArgs(
 	
 	for (i = 0; i < cnt; i++) {
 		if (!DoFile(names[i], extraColor)) {
-			result = FALSE;
+			result = false;
 			continue;
 		}
 		else
-			*renameLog = TRUE;
+			*renameLog = true;
 #if !IS_LIB		
 		updateTime(findName(names[i], newFileCnt, newFileTimes), BEZDIR);
 #endif
     }
 
 #if !IS_LIB
-	writeTimesFile(FALSE, 0.0);
+	writeTimesFile(false, 0.0);
 
 	freeFileTimes();
 #endif
@@ -506,7 +506,7 @@ boolean DoArgs(
 /* Reads through the charset file and builds
  * a list of character names/filenames.
  */
-static boolean readCharSet()
+static bool readCharSet()
 {
 #if !IS_LIB
 	FILE *fp;
@@ -520,7 +520,7 @@ static boolean readCharSet()
 	getcharsetname(csFileName);
 	fp = ACOpenFile(csFileName, "r", OPENWARN);
 	if (fp == NULL)
-		return FALSE;
+		return false;
 
 	for (newFileCnt = 0; ReadNames(cName, fName, &masters, &hintDir, fp); newFileCnt++)
 		(void)storeName(fName);
@@ -535,7 +535,7 @@ static boolean readCharSet()
 
 	sortFileTimes(newFileCnt, newFileTimes);
 #endif	
-	return TRUE;
+	return true;
 }
 
 /* Compare function for qsort and bsearch */
@@ -562,14 +562,14 @@ static void sortFileTimes(
  * header values are different then the file times are discarded
  * and all the characters will be rehinted.
  */
-static boolean readTimesFile(
-				boolean convert, /* Flags if reading .Converttimes */
+static bool readTimesFile(
+				bool convert, /* Flags if reading .Converttimes */
 				float scale /* Conversion scale */)
 {
 #if IS_LIB
 #pragma unused(scale)
 #pragma unused(convert)
-	return TRUE;
+	return true;
 #else
 	char tmp[MAXFILENAME];
 	int lines;
@@ -581,7 +581,7 @@ static boolean readTimesFile(
 	FILE* fp = ACOpenFile(timesFileName, "r", OPENOK);
 	
 	if (fp == NULL)
-		return FALSE;
+		return false;
 
 	/* Read and check the file preamble */
 	if (fscanf(fp, "%%%% File %s\n", tmp) != 1) {
@@ -589,7 +589,7 @@ static boolean readTimesFile(
 		if (!readOldTimesFile(fp, convert, scale))
 			goto error;
 		fclose(fp);
-		return TRUE;
+		return true;
 	}
 	
 	if (strcmp(tmp, timesFileName) ||
@@ -647,7 +647,7 @@ static boolean readTimesFile(
 		goto error;
 
 	fclose(fp);
-	return TRUE;
+	return true;
 
 error: /* Just tidy up and return. Yes I've used a goto! I think this is
 		* one of the few legitimate uses.
@@ -655,7 +655,7 @@ error: /* Just tidy up and return. Yes I've used a goto! I think this is
 	fclose(fp);
 	UnallocateMem(oldFileTimes);
 	oldFileCnt = 0;
-	return FALSE;
+	return false;
 #endif
 }
 
@@ -669,9 +669,9 @@ error: /* Just tidy up and return. Yes I've used a goto! I think this is
  * platform previously and this ASCII timestamp version will be
  * the first ported version.
  */
-static boolean readOldTimesFile(
+static bool readOldTimesFile(
 			FILE* fp, /* Timestamp file pointer */
-			boolean convert, /* Flags if reading .Converttimes */
+			bool convert, /* Flags if reading .Converttimes */
 			float scale /* Conversion scale */)
 {
 #if IS_LIB
@@ -692,7 +692,7 @@ static boolean readOldTimesFile(
 
 	version = get32(fp);
 	if (version != VERSION10 && version != VERSION11)
-		return FALSE; /* Not a valid file */
+		return false; /* Not a valid file */
 
 	offset = get16(fp); /* File times offset */
 
@@ -705,7 +705,7 @@ static boolean readOldTimesFile(
 	if (get32(fp) != flexOK ||
 		get16(fp) != NumHStems || get16(fp) != NumVStems ||
 		get16(fp) != lenBotBands || get16(fp) != lenTopBands)
-		return FALSE;
+		return false;
 	if (version == VERSION11) {
 		VCounterCnt = get16(fp); /* V before H for some reason */
 		HCounterCnt = get16(fp);
@@ -714,15 +714,15 @@ static boolean readOldTimesFile(
 		!compareData(fp, NumVStems, VStems) ||
 		!compareData(fp, lenBotBands, botBands) ||
 		!compareData(fp, lenTopBands, topBands))
-		return FALSE;
+		return false;
 
 	counterListLen = offset - ftell(fp);
 	if (version == VERSION11 && counterListLen)
 		if (fread(buf, counterListLen, 1, fp) != 1)
-			return FALSE;
+			return false;
 	
 	if (!readFileTimesData(fp, offset))
-		return FALSE;
+		return false;
 
 	if (version == VERSION11) {
 		char* cp = buf;
@@ -734,7 +734,7 @@ static boolean readOldTimesFile(
 	}
 	else
 #endif
-		return TRUE;
+		return true;
 }
 
 /* Get 16-bit number from stream, assumes hi-byte lo-address ordering.
@@ -762,7 +762,7 @@ static int get32(FILE *fp)
 /* Reads an array of numbers in old format from the timestamp file
  * and compares them with an array derived from the fontinfo file (in memory).
  */
-static boolean compareData(
+static bool compareData(
 		FILE* fp, /* Timestamp file pointer */
 		int32_t len, /* Array length */
 		Fixed a[] /* Array */)
@@ -771,14 +771,14 @@ static boolean compareData(
 
 	for (i = 0; i < len; i++)
 		if (get32(fp) != a[i])
-			return FALSE;
+			return false;
 
-	return TRUE;
+	return true;
 }
 
 /* Read the old format file times data.
  */
-static boolean readFileTimesData(
+static bool readFileTimesData(
 			FILE* fp, /* Timestamp file pointer */
 			int32_t offset /* File times offset */)
 {
@@ -808,7 +808,7 @@ static boolean readFileTimesData(
 		}
 
 		if (len != 2 + 4 + nameLen)
-			return FALSE;	/* Format error */
+			return false;	/* Format error */
 
 		(void)storeName(name);
 	}
@@ -826,7 +826,7 @@ static boolean readFileTimesData(
 		fseek(fp, len - (2 + 4), L_INCR); /* Skip over name */
 	}
 #endif
-	return TRUE;
+	return true;
 }
 
 /* Scans the old format counter list input data (which was read earlier)
@@ -834,7 +834,7 @@ static boolean readFileTimesData(
  * derived from the fontinfo file (in memory). Names not in the
  * intersection of these lists are marked for rehinting.
  */
-static boolean compareCounterListData(
+static bool compareCounterListData(
 				int nameCnt, /* Number of names in the counter list  */
 				char** cp, /* Counter list */
 				int32_t len, /* List length */
@@ -855,7 +855,7 @@ static boolean compareCounterListData(
  * timestamp file and compares them with an array derived from
  * the fontinfo file (in memory).
  */
-static boolean compareArrays(
+static bool compareArrays(
 				FILE* fp, /* Timestamp file pointer */
 				char* name, /* Array name */
 				int32_t len, /* Array length */
@@ -866,13 +866,13 @@ static boolean compareArrays(
 	
 	sprintf(fmt, "%s [", name); /* Make format string with array name */
 	if (fscanf(fp, fmt)) /* Read the beginning of the line */
-		return FALSE;
+		return false;
 	
 	for (i = 0; i < len; i++) {
 		int val;
 		
 		if (fscanf(fp, "%d ", &val) != 1 || FixInt(val) != a[i])
-			return FALSE;
+			return false;
 	}
 
 	return !fscanf(fp, "]\n"); /* Read the rest of the line */
@@ -880,7 +880,7 @@ static boolean compareArrays(
 
 /* Reads the file times from the timestamp file.
  */
-static boolean readFileTimes(
+static bool readFileTimes(
 				FILE* fp, /* Timestamp file pointer */
 				int timeCnt /* Number of times to read */)
 {
@@ -895,7 +895,7 @@ static boolean readFileTimes(
 		if (fscanf(fp, "(%d/%d/%d %d:%d:%d) %s\n",
 				   &tm.tm_mon, &tm.tm_mday, &tm.tm_year,
 				   &tm.tm_hour, &tm.tm_min, &tm.tm_sec, name) != 7)
-			return FALSE;
+			return false;
 
 		tm.tm_mon--; /* Because it's stored 0-11!, see ctime(3) */
 		oldFileTimes[i].nameIndx = storeName(name);
@@ -904,7 +904,7 @@ static boolean readFileTimes(
 
 	oldFileCnt = timeCnt;
 
-	return TRUE;
+	return true;
 }
 
 /* Scans the counter list input line (which was read earlier) and marks
@@ -912,7 +912,7 @@ static boolean readFileTimes(
  * derived from the fontinfo file (in memory). Names not in the
  * intersection of these lists are marked for rehinting.
  */
-static boolean compareCounterLists(
+static bool compareCounterLists(
 			char* listName, /* List name */
 			char line[], /* Input line */
 			int32_t len, /* List length */
@@ -927,7 +927,7 @@ static boolean compareCounterLists(
 	sprintf(label, "%s (", listName); /* Make label string with list name */
 	labelLen = strlen(label);
 	if (strncmp(line, label, labelLen))
-		return FALSE;
+		return false;
 
 	/* Locate all the names */
 	startp = line + labelLen;
@@ -941,7 +941,7 @@ static boolean compareCounterLists(
 
 /* Actually does the work of comparing the counter lists together.
  */
-static boolean compareLists(
+static bool compareLists(
 				int nameCnt, /* Items in names */
 				char* names[], /* Name list */
 				int32_t len, /* List length */
@@ -950,7 +950,7 @@ static boolean compareLists(
 	int i;
 	
 	if (nameCnt == 0 && len == 0)
-		return TRUE; /* Nothing to do */
+		return true; /* Nothing to do */
 	
 	for (i = nameCnt; i < COUNTER_EXTRA_ENTRIES; i++)
 		names[i] = NULL; /* Clear unused entries */
@@ -977,7 +977,7 @@ static boolean compareLists(
 			else {
 				sprintf(globmsg, "Cannot find counter hints character \"%s\" in current %s file.\n",
 						list[i], AC_NAME);
-				LogMsg(globmsg, WARNING, OK, TRUE);
+				LogMsg(globmsg, WARNING, OK, true);
 			}
 		}
 	}
@@ -992,7 +992,7 @@ static boolean compareLists(
 			/* OK if character not found in this situation */
 		}
 
-	return TRUE;
+	return true;
 }
 		
 /* Copies old times list (read from timestamp file) to new
@@ -1055,29 +1055,29 @@ static void updateTime(
 /* Scan all the files and hints the bez files that have changed.
  * Called by AC and BuildFont for rehinting whole font.
  */
-boolean DoAll(
-			boolean extraColor,
-			boolean release, /* Flags release version */
-			boolean *renameLog,
-			boolean quiet)
+bool DoAll(
+			bool extraColor,
+			bool release, /* Flags release version */
+			bool *renameLog,
+			bool quiet)
 {
 #ifdef IS_GGL
-	return FALSE;
+	return false;
 #else
-	boolean result = TRUE;
+	bool result = true;
 	
 	if (release) {
 		if (!readCharSet()) {
 			freeFileTimes();
-			return FALSE;
+			return false;
 		}
 	}
 	else
-		readInputDir(BEZDIR, FALSE);
+		readInputDir(BEZDIR, false);
 	
-	readTimesFile(FALSE, 0.0);
+	readTimesFile(false, 0.0);
 	result = compareTimes(extraColor, release, renameLog, quiet);
-	writeTimesFile(FALSE, 0.0);
+	writeTimesFile(false, 0.0);
 
 	freeFileTimes();
 	
@@ -1088,14 +1088,14 @@ boolean DoAll(
 /* Converts characters that have changed since the last run
  * of BuildFont in the bez directory.
  */
-static boolean compareTimes(
-			boolean extraColor,
-			boolean release, /* Flags release version */
-			boolean *renameLog,
-			boolean quiet)
+static bool compareTimes(
+			bool extraColor,
+			bool release, /* Flags release version */
+			bool *renameLog,
+			bool quiet)
 {
-	boolean result = TRUE;
-	boolean printStatus = TRUE;
+	bool result = true;
+	bool printStatus = true;
 	int charCnt = 0;
 	fileTime* newp;
 
@@ -1107,30 +1107,30 @@ static boolean compareTimes(
 			break;
 		else if (release) {
 			sprintf(globmsg, "The %s character has out of date hints.\n  Add hints again before creating a release version.\n", INDX_PTR(newp->nameIndx));
-			LogMsg(globmsg, LOGERROR, OK, TRUE);
+			LogMsg(globmsg, LOGERROR, OK, true);
 			
 			if (oldp)
 				newp->modTime = oldp->modTime;
 			
-			result = FALSE;
+			result = false;
 		}
 		else if (DoFile(INDX_PTR(newp->nameIndx), extraColor)) {
 			if (printStatus) {
 				if (!quiet) {
 					sprintf(globmsg, "Adding hints %s... ",
 							(extraColor) ? "" : "(single layer) ");
-					LogMsg(globmsg, INFO, OK, FALSE);
+					LogMsg(globmsg, INFO, OK, false);
 				}
-				printStatus = FALSE;
+				printStatus = false;
 			}
-			*renameLog = TRUE;
+			*renameLog = true;
 			charCnt++;
 			updateTime(newp, BEZDIR);
 		}
 	}
 	
 	if (!quiet && !release && charCnt > 0) {
-		LogMsg(globmsg, INFO, OK, FALSE);
+		LogMsg(globmsg, INFO, OK, false);
 	}
 	
 	return result;
@@ -1166,7 +1166,7 @@ static fileTime* checkFile(
 			sprintf(bezFile, "%s\\%s", BEZDIR, name);
 			if ((*oldp == NULL) || 
 				((newTime != (*oldp)->modTime) && (strcmp(name,".notdef")!=0)) ||
-				!FileExists(bezFile, FALSE))
+				!FileExists(bezFile, false))
 				/* The name wasn't in the old timestamp file or the
 				 * file time has changed or the bez file doesn't
 				 * exist or has the wrong permissions.
@@ -1185,22 +1185,22 @@ static fileTime* checkFile(
  * the specified conversion function. Called by BuildFont -o when
  * ill/ or pschars/ characters exist and may need converting.
  */
-boolean ConvertCharFiles(char *inputDir,	/* Coversion input directory */
-				boolean release,				/* Flags release version */
+bool ConvertCharFiles(char *inputDir,	/* Coversion input directory */
+				bool release,				/* Flags release version */
 				float scale,				/* Conversion scale */
 				tConvertfunc convertFunc	/* Conversion function */
 				)
 {
-	boolean result = FALSE;
+	bool result = false;
 	
 	if (release)
 		readCharList();
 	else
-		readInputDir(inputDir, TRUE);
+		readInputDir(inputDir, true);
 	
-	readTimesFile(TRUE, scale);
+	readTimesFile(true, scale);
 	result = compareCvtTimes(inputDir, release, convertFunc);
-	writeTimesFile(TRUE, scale);
+	writeTimesFile(true, scale);
 
 	freeFileTimes();
 	
@@ -1213,7 +1213,7 @@ static void readCharList()
 {
     char fName[MAXFILENAME+4];
 	int i;
-	boolean start = TRUE;
+	bool start = true;
 	int16_t nextName = nextFree - nameBuf; /* Remember first name position */
 	
 	for (newFileCnt = 0; ReadCharFileNames(fName, &start); newFileCnt++)
@@ -1233,9 +1233,9 @@ static void readCharList()
 /* Converts characters that have changed since the last run
  * of BuildFont from the input to the bez directory.
  */
-static boolean compareCvtTimes(char *inputDir, boolean release, tConvertfunc convertFunc)
+static bool compareCvtTimes(char *inputDir, bool release, tConvertfunc convertFunc)
 {
-	boolean result = TRUE;
+	bool result = true;
 	fileTime* newp;
 	fileTime* oldp;
 	
@@ -1246,12 +1246,12 @@ static boolean compareCvtTimes(char *inputDir, boolean release, tConvertfunc con
 			break;
 		else if (release) {
 			sprintf(globmsg, "The %s character needs to be converted.\n  Convert before creating a release version.\n", INDX_PTR(newp->nameIndx));
-			LogMsg(globmsg, LOGERROR, OK, TRUE);
+			LogMsg(globmsg, LOGERROR, OK, true);
 			
 			if (oldp)
 				newp->modTime = oldp->modTime;
 			
-			result = FALSE;
+			result = false;
 		}
 		else {
 			(*convertFunc)(INDX_PTR(newp->nameIndx), INDX_PTR(newp->nameIndx));

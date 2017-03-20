@@ -14,7 +14,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static int32_t maxPathEntries = 0;
 static PPathList currPathList = NULL;
 int32_t path_entries;
-boolean addHints = TRUE;
+bool addHints = true;
 
 static void CheckPath(
   void
@@ -40,10 +40,10 @@ static void CheckPath()
     for (i = path_entries; i < maxPathEntries; i++)
     {
       currPathList->path[i].hints = NULL;
-      currPathList->path[i].isFlex = FALSE;
-      currPathList->path[i].sol = FALSE;
-      currPathList->path[i].eol = FALSE;
-      currPathList->path[i].remove = FALSE;
+      currPathList->path[i].isFlex = false;
+      currPathList->path[i].sol = false;
+      currPathList->path[i].eol = false;
+      currPathList->path[i].remove = false;
     }
   }
 }
@@ -69,7 +69,7 @@ PPathList plist;
   currPathList = plist;
 }
 
-extern void SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2, boolean mainhints)
+extern void SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2, bool mainhints)
 {
   PHintElt *hintEntry;
   PHintElt lastHintEntry = NULL;
@@ -102,7 +102,7 @@ extern void SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt
    fonts. */
 extern void SetNoHints()
 {
-  addHints = FALSE;
+  addHints = false;
 }
 
 /* According to Bill Paxton the offset locking commands should
@@ -114,8 +114,8 @@ extern void SetOffsetLocking(locktype)
 char *locktype;
 {
   if (STREQ(locktype, "sol"))
-    currPathList[path_entries-1].sol = TRUE;
+    currPathList[path_entries-1].sol = true;
   else
-    currPathList[path_entries-1].eol = TRUE;
+    currPathList[path_entries-1].eol = true;
 }
 */

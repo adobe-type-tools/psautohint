@@ -12,15 +12,15 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 int32_t clsize = 0;
 struct cl_elem *charlist = NULL;
 
-extern boolean ReadCharFileNames (fname, start)
+extern bool ReadCharFileNames (fname, start)
 char *fname;
-boolean *start;
+bool *start;
 {
   static indx i;
   if (*start)
   {
     i = 0;
-    *start = FALSE;
+    *start = false;
   }
   while (i < clsize)
   {
@@ -31,8 +31,8 @@ boolean *start;
     }
     strcpy (fname, charlist[i].filename);
     i++;
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 

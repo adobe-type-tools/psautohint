@@ -33,7 +33,7 @@ End Edit History
 static int32_t oprnd_stk[SSIZE];
 static int16_t count;
 static int16_t convertedchars;
-static boolean printmsg;
+static bool printmsg;
 static int32_t dx, dy;
 static char tempname[MAXFILENAME];
 static Cd p1, p2, p3, currPt;
@@ -83,7 +83,7 @@ FILE *infile, *outfile;
   fclose(infile);
   fclose(outfile);
   sprintf(globmsg, "%s in %s file does not have the correct number of operands.\n This file was not converted.\n", str, name);
-  LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 }
 
 static int16_t nextline(infile)
@@ -91,7 +91,7 @@ FILE *infile;
 {
   register int16_t c;
 
-  while (TRUE)
+  while (true)
   {
     c = getc(infile);
     if (c == NL || c == '\r' || c == EOF)
@@ -106,7 +106,7 @@ char *tokenPtr, *filename;
   register int16_t c;
 
   /* Skip all white space */
-  while (TRUE)
+  while (true)
   {
     c = getc(stream);
     if (c == '%')
@@ -120,7 +120,7 @@ char *tokenPtr, *filename;
       break;
     }
   }
-  while (TRUE)
+  while (true)
   {
     c = getc(stream);
     if (c == '%')
@@ -128,7 +128,7 @@ char *tokenPtr, *filename;
     if (c == EOF)
     {
       sprintf(globmsg, "Unexpected end of file found in %s directory \n  character description: %s.\n", RAWPSDIR, filename);
-      LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+      LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     if (isspace(c))
       break;
@@ -157,7 +157,7 @@ char * charname;
     sprintf (globmsg, 
       "Maximum stack size exceeded when converting %s file %s.\n", 
       RAWPSDIR, charname);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
   oprnd_stk[count] = number;
   count = count + 1;
@@ -236,7 +236,7 @@ extern void convert_PScharfile(const char *charname, const char *filename)
   if (infile == NULL)
     return;
   outfile = ACOpenFile(tempname, "w", OPENERROR);
-  DoInitEncrypt(outfile, OTHER, HEX, INT32_MAX, FALSE);
+  DoInitEncrypt(outfile, OTHER, HEX, INT32_MAX, false);
   WriteStart(outfile, charname);
   count = 0;
   currPt.x = 0;
@@ -256,7 +256,7 @@ extern void convert_PScharfile(const char *charname, const char *filename)
 	break;
       if (CLOSEPATH)
       {
-	(void) DoContEncrypt("cp\n", outfile, FALSE, INLEN);
+	(void) DoContEncrypt("cp\n", outfile, false, INLEN);
 	continue;
       }
       else if (MOVETO)
@@ -280,33 +280,33 @@ extern void convert_PScharfile(const char *charname, const char *filename)
 	fclose(outfile);
 	unlink(tempname);
 	sprintf(globmsg, "Unknown operator: %s in character description: %s.\n", token, inname);
-	LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+	LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       }
       count = 0;
-      (void) DoContEncrypt(outstr, outfile, FALSE, INLEN);
+      (void) DoContEncrypt(outstr, outfile, false, INLEN);
     }
   }
-  (void) DoContEncrypt("ed\n", outfile, FALSE, INLEN);
+  (void) DoContEncrypt("ed\n", outfile, false, INLEN);
   fclose(infile);
   fclose(outfile);
   RenameFile(tempname, outname);
   if (printmsg)
   {
     LogMsg("Converting PostScript(R) language files ...",
-      INFO, OK, FALSE);
-    printmsg = FALSE;
+      INFO, OK, false);
+    printmsg = false;
   }
   convertedchars++;
 }
 
 extern convert_rawPSfiles(release)
-boolean release;
+bool release;
 {
-  boolean result = TRUE;
+  bool result = true;
 
   /* initialize globals in this source file */
   count = convertedchars = 0;
-  printmsg = TRUE;
+  printmsg = true;
   set_scale(&scale);
 
   get_filename(tempname, bezdir, TEMPFILE);
@@ -322,11 +322,11 @@ boolean release;
   if (convertedchars > 0)
   {
     sprintf(globmsg, " %d files converted.\n", (int) convertedchars);
-    LogMsg(globmsg, INFO, OK, FALSE);
+    LogMsg(globmsg, INFO, OK, false);
     if (scale != 1.0)
     {
       sprintf(globmsg, "Widths in the original %s file were not scaled.\n", WIDTHSFILENAME);
-      LogMsg(globmsg, WARNING, OK, TRUE);
+      LogMsg(globmsg, WARNING, OK, true);
     }
   }
   if (!result) cleanup(NONFATALERROR);
@@ -338,6 +338,6 @@ boolean release;
 int WriteStart(FILE *outfile, const char *name)
 {
   sprintf(outstr, "%%%s\nsc\n", name);
-  (void) DoContEncrypt(outstr, outfile, FALSE, INLEN);
+  (void) DoContEncrypt(outstr, outfile, false, INLEN);
   return 0;
 }

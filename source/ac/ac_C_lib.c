@@ -276,21 +276,21 @@ ACLIB_API int  AutoColorString(const char *srcbezdata, const char *fontinfo, cha
 	*bezoutput=0;
 	
 	result = AutoColor(
-		       FALSE, /* whether any new coloring should cause error */
-		       FALSE,  /*fixStems*/
-			   (boolean)debug, /*debug*/
+		       false, /* whether any new coloring should cause error */
+		       false,  /*fixStems*/
+			   (bool)debug, /*debug*/
 			   allowHintSub, /* extracolor*/ 
 			   allowEdit, /*editChars*/ 
 			   1,
 		       names, 
-			   FALSE, /*quiet*/ 
-                FALSE, /* doAll*/
+			   false, /*quiet*/ 
+                false, /* doAll*/
                 roundCoords, /* doAll*/
-                FALSE);/* do log */
-	/* result == TRUE is good */
+                false);/* do log */
+	/* result == true is good */
 	/* The following call to cleanup() always returns control to just after the setjmp() function call above,,
 	but with value set to 1 if success, or -1 if not */
-	cleanup( (result == TRUE) ? OK: NONFATALERROR);
+	cleanup( (result == true) ? OK: NONFATALERROR);
 	
 	
 	return AC_UnknownError; /*Shouldn't get here*/

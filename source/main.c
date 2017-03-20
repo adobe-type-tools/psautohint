@@ -16,9 +16,9 @@ char *bezName = NULL;
 char *fileSuffix = NULL;
 FILE *reportFile = NULL;
 
-boolean verbose = TRUE; /* if TRUE don't number of characters processed. */
+bool verbose = true; /* if true don't number of characters processed. */
 
-boolean scalinghints = FALSE;
+bool scalinghints = false;
 
 /* EXECUTABLE defined means it is being compiled as a command-line tool;
 if not defined, it is being compiled as a Python module.
@@ -28,7 +28,7 @@ extern jmp_buf aclibmark;
 #endif
 
 #if ALLOWCSOUTPUT
-boolean charstringoutput = FALSE;
+bool charstringoutput = false;
 static void read_char_widths(void);
 #endif
 
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
      */
 
 	int allowEdit, roundCoords, allowHintSub, fixStems, debug, badParam;
-	boolean argumentIsBezData = false;
+	bool argumentIsBezData = false;
 	char *fontInfoFileName=NULL; /* font info file name, or suffix of environment variable holding the fontfino string. */
 	char *fontinfo = NULL; /* the string of fontinfo data */
 	int firstFileNameIndex = -1; /* arg index for first bez file name, or  suffix of environment variable holding the bez string. */
@@ -224,8 +224,8 @@ int main(int argc, char *argv[])
 	int16_t total_files = 0;
 	int result, argi;
 
-	badParam = fixStems = debug = doAligns = doStems = allstems = FALSE;
-	allowEdit = allowHintSub = roundCoords = TRUE;
+	badParam = fixStems = debug = doAligns = doStems = allstems = false;
+	allowEdit = allowHintSub = roundCoords = true;
 	fileSuffix = (char *)dfltExt;
 
 	/* read in options */
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
 
 		switch (current_arg[1]) {
 			case '\0':
-				badParam = TRUE;
+				badParam = true;
 				break;
 			case 'u':
 				printUsage();
@@ -269,9 +269,9 @@ int main(int argc, char *argv[])
 #endif
 				break;
 			case 'e':
-				allowEdit = FALSE;
+				allowEdit = false;
             case 'd':
-                roundCoords = FALSE;
+                roundCoords = false;
 				break;
 			case 'b':
 				argumentIsBezData = true;
@@ -307,23 +307,23 @@ int main(int argc, char *argv[])
 				}
 				break;
 			case 'n':
-				allowHintSub = FALSE;
+				allowHintSub = false;
 				break;
 			case 'q':
-				verbose = FALSE;
+				verbose = false;
 				break;
 			case 'D':
-				debug = TRUE;
+				debug = true;
 				break;
 			case 'F':
-				fixStems = TRUE;
+				fixStems = true;
 				break;
 			case 'a':
 				allstems = 1;
 				break;
 
 			case 'r':
-				allowEdit = allowHintSub = FALSE;
+				allowEdit = allowHintSub = false;
 				fileSuffix = (char *)reportExt;
 				switch (current_arg[2]) {
 					case 'a':
@@ -348,7 +348,7 @@ int main(int argc, char *argv[])
 						break;
 					default:
 						fprintf(OUTPUTBUFF, "Error. %s is an invalid parameter.\n", current_arg);
-						badParam = TRUE;
+						badParam = true;
 						break;
 				}
 				break;
@@ -359,23 +359,23 @@ int main(int argc, char *argv[])
 				break;
 #if ALLOWCSOUTPUT
 			case 'C':
-				charstringoutput = TRUE;
+				charstringoutput = true;
 				break;
 #endif
 			default:
 				fprintf(OUTPUTBUFF, "Error. %s is an invalid parameter.\n", current_arg);
-				badParam = TRUE;
+				badParam = true;
 				break;
 		}
 	}
 
 	if (firstFileNameIndex == -1) {
 		fprintf(OUTPUTBUFF, "Error. Illegal command line. Must provide bez file name.\n");
-		badParam = TRUE;
+		badParam = true;
 	}
 	if (fontInfoFileName == NULL) {
 		fprintf(OUTPUTBUFF, "Error. Illegal command line. Must provide font info file name.\n");
-		badParam = TRUE;
+		badParam = true;
 	}
 
 	if (badParam)
@@ -422,7 +422,7 @@ int main(int argc, char *argv[])
             free(output);
             output = malloc(outputsize);
             /* printf("NOTE: trying again. Input size %d output size %d.\n", strlen(bezdata), outputsize); */
-            AC_SetReportCB(reportCB, FALSE);
+            AC_SetReportCB(reportCB, false);
             result = AutoColorString(bezdata, fontinfo, output, (int *)&outputsize, allowEdit, allowHintSub, roundCoords, debug);
             AC_SetReportCB(reportCB, verbose);
         }
@@ -470,7 +470,7 @@ static void init_widthsarray(void)
 	}
 	widthsarray = (WidthElt *)calloc(WIDTHINCR + 1, sizeof(WidthElt));
 	if (widthsarray == NULL) {
-		LogMsg("Could not allocate widths.\n", LOGERROR, OK, FALSE);
+		LogMsg("Could not allocate widths.\n", LOGERROR, OK, false);
 	}
 	numwidths = 0;
 	maxnumwidths = WIDTHINCR;
@@ -481,7 +481,7 @@ static void set_char_width(char *cname, int width)
 	if (numwidths == maxnumwidths) {
 		widthsarray = (WidthElt *)realloc(widthsarray, (maxnumwidths + WIDTHINCR + 1) * sizeof(WidthElt));
 		if (widthsarray == NULL) {
-			LogMsg("Could not re-allocate widths.\n", LOGERROR, OK, FALSE);
+			LogMsg("Could not re-allocate widths.\n", LOGERROR, OK, false);
 		}
 		maxnumwidths += WIDTHINCR;
 	}
@@ -500,7 +500,7 @@ int get_char_width(char *cname)
 		}
 	}
 	sprintf(globmsg, "Could not find width for '%s'. Assuming 1000.\n", cname);
-	LogMsg(globmsg, INFO, OK, FALSE);
+	LogMsg(globmsg, INFO, OK, false);
 	return (1000);
 }
 
@@ -525,7 +525,7 @@ static void read_char_widths(void)
 							 "/<char name> <width> WDef\n",
 					"widths.ps", line);
 			fclose(fwidth);
-			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
 		set_char_width(cname, width);
 	}

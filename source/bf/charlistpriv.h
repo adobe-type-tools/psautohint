@@ -10,7 +10,7 @@ typedef struct cl_elem
 {
   char *charname;
   char *filename;
-  boolean composite:1, derived:1, transitional:1,
+  bool composite:1, derived:1, transitional:1,
       inCharTable:1, inBezDir:1;
   int16_t masters; /* number of masters for this char */
   int16_t hintDir; /* which of the master dirs will be used for hints */

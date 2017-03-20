@@ -8,17 +8,17 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef BFTOAC_H
 #define BFTOAC_H
 
-extern boolean AutoColor(boolean, boolean, boolean, boolean, boolean, int16_t, char *[], boolean, boolean, boolean, boolean);
+extern bool AutoColor(bool, bool, bool, bool, bool, int16_t, char *[], bool, bool, bool, bool);
 
-extern boolean CreateACTimes (void);
+extern bool CreateACTimes (void);
 typedef void (*tConvertfunc)(const char *, const char *);
-extern boolean ConvertCharFiles(char *, boolean, float, tConvertfunc);
+extern bool ConvertCharFiles(char *, bool, float, tConvertfunc);
 
 extern void FindCurveBBox(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *, Fixed *, Fixed *, Fixed *);
 
-extern boolean GetInflectionPoint(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *);
+extern bool GetInflectionPoint(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *);
 
-extern boolean ReadCharFileNames (char *, boolean *);
+extern bool ReadCharFileNames (char *, bool *);
 
 extern void setPrefix(char *);
 
