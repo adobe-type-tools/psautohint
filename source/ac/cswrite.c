@@ -430,7 +430,7 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	integer dmin, delta;
 	bool yflag;
 	Cd c13;
-	real shrink, r1, r2;
+	float shrink, r1, r2;
 	if (firstFlex) {
 		flX = currentx;
 		flY = currenty;
@@ -450,7 +450,7 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 		}
 		else {
 			acfixtopflt(fc3.y - c3.y, &shrink);
-			shrink = (real)delta / shrink;
+			shrink = (float)delta / shrink;
 			if (shrink < 0.0) {
 				shrink = -shrink;
 			}
@@ -468,7 +468,7 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 		}
 		else {
 			acfixtopflt(fc3.x - c3.x, &shrink);
-			shrink = (real)delta / shrink;
+			shrink = (float)delta / shrink;
 			if (shrink < 0.0) {
 				shrink = -shrink;
 			}

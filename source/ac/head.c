@@ -58,18 +58,18 @@ void GetEndPoints(p,px0,py0,px1,py1)
   GetEndPoint(p->prev,px0,py0); }
 
 #define Interpolate(q,v0,q0,v1,q1) (v0+(q-q0)*((v1-v0)/(q1-q0)))
-static Fixed HVness(pq) real *pq; {
-  register real q;
-  real result;
+static Fixed HVness(pq) float *pq; {
+  register float q;
+  float result;
   /* approximately == 2 q neg exp */
   /* as q -> 0, result goes to 1.0 */
   /* as q -> inf, result goes to 0.0 */
   q = *pq;
-  if (q < .25) result = (real)Interpolate(q,1.0,0.0,.841,.25);
-  else if (q < .5) result = (real)Interpolate(q,.841,.25,.707,.5);
-  else if (q < 1) result = (real)Interpolate(q,.707,.5,.5,1.0);
-  else if (q < 2) result = (real)Interpolate(q,.5,1.0,.25,2.0);
-  else if (q < 4) result = (real)Interpolate(q,.25,2.0,0.0,4.0);
+  if (q < .25) result = (float)Interpolate(q,1.0,0.0,.841,.25);
+  else if (q < .5) result = (float)Interpolate(q,.841,.25,.707,.5);
+  else if (q < 1) result = (float)Interpolate(q,.707,.5,.5,1.0);
+  else if (q < 2) result = (float)Interpolate(q,.5,1.0,.25,2.0);
+  else if (q < 4) result = (float)Interpolate(q,.25,2.0,0.0,4.0);
   else result = 0.0;
   return acpflttofix(&result); }
 
@@ -77,7 +77,7 @@ Fixed VertQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
     /* FixOne means exactly vertical. 0 means not vertical */
     /* intermediate values mean almost vertical */
     register Fixed xabs, yabs;
-    real rx, ry, q;
+    float rx, ry, q;
     xabs = xk-xl;
     if (xabs < 0)
         xabs = -xabs;
@@ -90,13 +90,13 @@ Fixed VertQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
         return 0;
     acfixtopflt(xabs, &rx);
     acfixtopflt(yabs, &ry);
-    q = (real)(rx*rx)/(theta*ry); /* DEBUG 8 BIT. Used to by 2*(rx*rx)/(theta*ry). Don't need thsi with the 8 bits of Fixed fraction. */
+    q = (float)(rx*rx)/(theta*ry); /* DEBUG 8 BIT. Used to by 2*(rx*rx)/(theta*ry). Don't need thsi with the 8 bits of Fixed fraction. */
     return HVness(&q);
 }
 
 Fixed HorzQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
     register Fixed xabs, yabs;
-    real rx, ry, q;
+    float rx, ry, q;
     yabs = yk-yl;
     if (yabs < 0)
         yabs = -yabs;
@@ -109,7 +109,7 @@ Fixed HorzQuo(xk,yk,xl,yl) Fixed xk,yk,xl,yl; {
         return 0;
     acfixtopflt(xabs, &rx);
     acfixtopflt(yabs, &ry);
-    q = (real)(ry*ry)/(theta*rx); /* DEBUG 8 BIT. Used to by 2*(ry*ry)/(theta*ry). Don't need thsi with the 8 bits of Fixed fraction. */
+    q = (float)(ry*ry)/(theta*rx); /* DEBUG 8 BIT. Used to by 2*(ry*ry)/(theta*ry). Don't need thsi with the 8 bits of Fixed fraction. */
     return HVness(&q);
 }
 

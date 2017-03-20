@@ -25,7 +25,7 @@ extern AC_REPORTFUNCPTR libReportCB;
 static char S0[512];
 
 double FixToDbl(f) Fixed f; {
-  real r;
+  float r;
   acfixtopflt(f, &r);
   return r;
   }

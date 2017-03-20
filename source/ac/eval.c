@@ -9,7 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define MAXF (1 << 15)
 static void AdjustVal(pv,l1,l2,dist,d,hFlg)
 Fixed *pv, l1, l2, dist, d; bool hFlg; {
-	real v, q, r1, r2, rd;
+	float v, q, r1, r2, rd;
 	Fixed abstmp;
     /* DEBUG 8 BIT. To get the saem result as the old auothint, had to change from FixedOne to FixedTwo. Since the returned weight is proportional to the square of l1 and l2,
      these need to be clamped to twice the old clamped value, else when the clamped values are used, the weight comes out as 1/4 of the original value. */
@@ -20,24 +20,24 @@ Fixed *pv, l1, l2, dist, d; bool hFlg; {
 	if (l2 < FixTwo)
 		l2 = FixTwo;
 	if (ac_abs(l1) < MAXF)
-		r1 = (real)(l1 * l1);
+		r1 = (float)(l1 * l1);
 	else {
-		r1 = (real)l1;
+		r1 = (float)l1;
 		r1 = r1*r1; 
 	}
 	if (ac_abs(l2) < MAXF)
-		r2 = (real)(l2 * l2);
+		r2 = (float)(l2 * l2);
 	else {
-		r2 = (real)l2;
+		r2 = (float)l2;
 		r2 = r2*r2; 
 	}
 	if (ac_abs(dist) < MAXF)
-		q = (real)(dist * dist);
+		q = (float)(dist * dist);
 	else {
-		q = (real)dist;
+		q = (float)dist;
 		q = q*q; 
 	}
-	v = (real)((1000.0 * r1 * r2) / (q * q));
+	v = (float)((1000.0 * r1 * r2) / (q * q));
 	if (d <= (hFlg? hBigDist : vBigDist))
 		goto done;
 	acfixtopflt(d, &rd);
@@ -61,8 +61,8 @@ done:
 
 static Fixed CalcOverlapDist(d,overlaplen,minlen)
 Fixed d, overlaplen, minlen; {
-	real r = (real)d, ro = (real)overlaplen, rm = (real)minlen;
-	r = r * ((real)(1.0 + 0.4 * (1.0 - ro / rm)));
+	float r = (float)d, ro = (float)overlaplen, rm = (float)minlen;
+	r = r * ((float)(1.0 + 0.4 * (1.0 - ro / rm)));
 	d = (Fixed)r;
 	return d;
 }
@@ -362,7 +362,7 @@ Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; {
 	InsertHValue(bot,top,val,spc,bSeg,tSeg,ghst);
 }
 
-static real mfabs(real in)
+static float mfabs(float in)
 {
 	if (in>0) return in;
 	return -in;
@@ -370,18 +370,18 @@ static real mfabs(real in)
 
 static Fixed CombVals(v1,v2) Fixed v1,v2; {
 	register integer i;
-	real r1, r2;
-	register real x, a, xx;
+	float r1, r2;
+	register float x, a, xx;
 	acfixtopflt(v1,&r1); 
 	acfixtopflt(v2,&r2);
 	/* home brew sqrt */
 	a = r1 * r2; x = a;
 	for (i = 0; i < 16; i++) {
-		xx = ((real)0.5) * (x + a / x);
+		xx = ((float)0.5) * (x + a / x);
 		if (i >= 8 && mfabs(xx-x) <= mfabs(xx) * 0.0000001) break;
 		x = xx;
     }
-	r1 += r2 + ((real)2.0) * xx;
+	r1 += r2 + ((float)2.0) * xx;
 	if (r1 > maxVal) r1 = maxVal;
 	else if (r1 > 0 && r1 < minVal) r1 = minVal;
 	return acpflttofix(&r1);

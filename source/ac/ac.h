@@ -188,7 +188,7 @@ extern Fixed hBigDist, vBigDist, initBigDist, minDist, minMidPt, ghostWidth,
   maxBendMerge, maxMerge, minColorElementLength, flexCand,
   pruneMargin;
 extern Fixed pruneA, pruneB, pruneC, pruneD, pruneValue, bonus;
-extern real theta, hBigDistR, vBigDistR, maxVal, minVal;
+extern float theta, hBigDistR, vBigDistR, maxVal, minVal;
 extern integer DMIN, DELTA, CPpercent, bendTan, sCurveTan;
 extern PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
 extern char * fileName;

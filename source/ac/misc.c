@@ -131,7 +131,7 @@ static void TryYFlex(e, n, x0, y0, x1, y1)
   Fixed x2, y2, x3, y3, x4, y4, abstmp;
   PPathElt p, q;
   bool top, dwn;
-  longreal d0sq, d1sq, quot, dx, dy;
+  double d0sq, d1sq, quot, dx, dy;
 
   GetEndPoint(n, &x2, &y2);
   dy = ac_abs(y0-y2);
@@ -178,7 +178,7 @@ static void TryXFlex(e, n, x0, y0, x1, y1)
   Fixed x2, y2, x3, y3, x4, y4, abstmp;
   PPathElt p, q;
   bool lft;
-  longreal d0sq, d1sq, quot, dx, dy;
+  double d0sq, d1sq, quot, dx, dy;
 
   GetEndPoint(n, &x2, &y2);
       dx = ac_abs(y0-y2);
