@@ -12,4 +12,4 @@ install:
 
 script:
   - make -j
-  - make -j check
+  - make -j4 check
