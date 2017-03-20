@@ -25,7 +25,7 @@ static Fixed currentx, currenty; /* used to calculate absolute coordinates */
 static Fixed tempx, tempy; /* used to calculate relative coordinates */
 #define STKMAX (20)
 static Fixed stk[STKMAX];
-static integer stkindex;
+static int32_t stkindex;
 static bool flex, startchar;
 static bool forMultiMaster, includeHints;
    /* Reading file for comparison of multiple master data and hint information.
@@ -107,7 +107,7 @@ static void PopPCd(pcd) Cd *pcd; {
 
 #define DoDelta(dx,dy) currentx += (dx); currenty += (dy)
 
-static PPathElt AppendElement(etype) integer etype; {
+static PPathElt AppendElement(etype) int32_t etype; {
   PPathElt e;
   e = (PPathElt)Alloc(sizeof(PathElt));
   e->type = (int16_t)etype;
@@ -150,7 +150,7 @@ static void RDcurveto(c1, c2, c3) Cd c1, c2, c3; {
   }
   }
 
-static void RDmtlt(etype) integer etype; {
+static void RDmtlt(etype) int32_t etype; {
   if (!forMultiMaster)
   {
     PPathElt new;
@@ -266,7 +266,7 @@ static void psCT() {
 
 static void psFLX() {
   Cd c0, c1, c2, c3, c4, c5;
-  integer i;
+  int32_t i;
   for (i = 0; i < 5; i++) (void) Pop();
   PopPCd(&c5); PopPCd(&c4); PopPCd(&c3);
   PopPCd(&c2); PopPCd(&c1); PopPCd(&c0);
@@ -295,8 +295,8 @@ static void ReadHintInfo(nm, str) char nm;  const char *str; {
     SetHintsElt(hinttype, &c0, elt1, elt2, (bool)!startchar);
   }
   
-static integer StrLen(s) register char *s; {
-  register integer cnt = 0;
+static int32_t StrLen(s) register char *s; {
+  register int32_t cnt = 0;
   while (*s++ != 0) cnt++;
   return cnt;
   }
@@ -469,7 +469,7 @@ static void ParseString(s) const char * s; {
    bool neg;
     bool isReal;
     float rval;
-  integer val;
+  int32_t val;
   Fixed r;
   pathStart = pathEnd = NULL;
   bezGlyphName[0] = 0;
@@ -591,7 +591,7 @@ static void ParseString(s) const char * s; {
 #define TESTING (false)
 #if TESTING
 static unsigned char ibuff[MAXBYTES + 2];
-static integer inputlen;
+static int32_t inputlen;
 #endif /*TESTING*/
 
 void SetReadFileName(file_name)
@@ -606,7 +606,7 @@ bool normal, forBlendData, readHints, prependprefix;
   char infile[MAXPATHLEN];
   FILE *fd;
   char *inputbuff;
-  integer cc;
+  int32_t cc;
   uint32_t filelen;
   currentx = currenty = tempx = tempy = stkindex = 0;
   flex = idInFile = startchar = false;
@@ -629,7 +629,7 @@ bool normal, forBlendData, readHints, prependprefix;
   if (bezstring)
   {
     inputbuff=(char*)bezstring;
-    cc=(integer)strlen(inputbuff);
+    cc=(int32_t)strlen(inputbuff);
   }
   else
   {
@@ -682,7 +682,7 @@ void Test() {
   unsigned char buff[MAXBYTES + 2], *s;
   char infile[MAXPATHLEN];
   FILE *fd;
-  integer cc, i;
+  int32_t cc, i;
 
   sprintf(infile, "%s%s", outPrefix, fileName);
   fd = ACOpenFile(infile, "rb", OPENWARN);

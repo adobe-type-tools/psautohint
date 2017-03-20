@@ -189,14 +189,14 @@ extern Fixed hBigDist, vBigDist, initBigDist, minDist, minMidPt, ghostWidth,
   pruneMargin;
 extern Fixed pruneA, pruneB, pruneC, pruneD, pruneValue, bonus;
 extern float theta, hBigDistR, vBigDistR, maxVal, minVal;
-extern integer DMIN, DELTA, CPpercent, bendTan, sCurveTan;
+extern int32_t DMIN, DELTA, CPpercent, bendTan, sCurveTan;
 extern PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
 extern char * fileName;
 extern char outPrefix[MAXPATHLEN], *outSuffix;
 extern char inPrefix[MAXPATHLEN], *inSuffix;
 extern PClrSeg segLists[4]; /* left, right, top, bot */
 extern PClrPoint pointList, *ptLstArray;
-extern integer ptLstIndex, numPtLsts, maxPtLsts;
+extern int32_t ptLstIndex, numPtLsts, maxPtLsts;
 extern void AddStemExtremes(Fixed bot, Fixed top);
 
 #define leftList (segLists[0])
@@ -208,12 +208,12 @@ extern void AddStemExtremes(Fixed bot, Fixed top);
 #define MAXBLUES (20)
 #define MAXSERIFS (5)
 extern Fixed topBands[MAXBLUES], botBands[MAXBLUES], serifs[MAXSERIFS];
-extern integer lenTopBands, lenBotBands, numSerifs;
+extern int32_t lenTopBands, lenBotBands, numSerifs;
 #define MAXSTEMS (20)
 extern Fixed VStems[MAXSTEMS], HStems[MAXSTEMS];
-extern integer NumVStems, NumHStems;
+extern int32_t NumVStems, NumHStems;
 extern char *HColorList[], *VColorList[];
-extern integer NumHColors, NumVColors;
+extern int32_t NumHColors, NumVColors;
 extern bool makehintslog;
 extern bool writecoloredbez;
 extern Fixed bluefuzz;
@@ -226,8 +226,8 @@ extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at t
 
 #define ac_abs(a) abs(a)
 
-#define FixedPosInf MAXinteger
-#define FixedNegInf MINinteger
+#define FixedPosInf INT32_MAX
+#define FixedNegInf INT32_MIN
 #define FixShift (8)
 #define FixInt(i) (((int32_t)(i)) << FixShift)
 #define FixReal(i) ((int32_t)((i) *256.0))
@@ -275,11 +275,11 @@ extern int32_t FRnd(int32_t x);
 /* procedures */
 
 /* The fix to float and float to fixed procs are different for ac because it
-   uses 24 bit of integer and 8 bits of fraction. */
+   uses 24 bit of int32_t and 8 bits of fraction. */
 extern void acfixtopflt(Fixed x, float *pf);
 extern Fixed acpflttofix(float *pv);
 
-extern unsigned char * Alloc(integer sz); /* Sub-allocator */
+extern unsigned char * Alloc(int32_t sz); /* Sub-allocator */
 
 
 
@@ -315,11 +315,11 @@ extern void AddBBoxHV(/*Hflg*/);
 extern void ClrBBox();
 extern void SetMaxStemDist(/* int dist */);
 extern void CheckPathBBox();
-extern integer SpecialCharType();
+extern int32_t SpecialCharType();
 extern bool VColorChar();
 extern bool HColorChar();
 extern bool NoBlueChar();
-extern integer SolEolCharCode(/*s*/);
+extern int32_t SolEolCharCode(/*s*/);
 extern bool SpecialSolEol();
 extern bool MoveToNewClrs();
 extern void CheckSmooth();
@@ -376,16 +376,16 @@ extern void MoveSubpathToEnd(/*e*/);
 extern void AddSolEol();
 extern int IncludeFile();
 extern void InitAuto();
-extern void InitData(integer reason);
+extern void InitData(int32_t reason);
 extern void InitFix();
 extern void InitGen();
 extern bool RotateSubpaths(/*flg*/);
 extern void InitPick();
 extern void AutoAddFlex();
-extern integer PointListCheck(/*new,lst*/);
+extern int32_t PointListCheck(/*new,lst*/);
 extern bool SameColors(/*cn1, cn2*/);
 extern bool PreCheckForColoring();
-extern integer CountSubPaths();
+extern int32_t CountSubPaths();
 extern void PickVVals(/*valList*/);
 extern void PickHVals(/*valList*/);
 extern void FindBestHVals();

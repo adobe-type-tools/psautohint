@@ -17,7 +17,7 @@ static void DoVStems();
 
 static bool CounterFailed;
 
-void InitAll(integer reason) {
+void InitAll(int32_t reason) {
 	InitData(reason); /* must be first */
 	InitAuto(reason);
 	InitFix(reason);
@@ -25,8 +25,8 @@ void InitAll(integer reason) {
 	InitPick(reason);
 }
 
-static integer PtLstLen(PClrPoint lst) {
-	integer cnt = 0;
+static int32_t PtLstLen(PClrPoint lst) {
+	int32_t cnt = 0;
 	while (lst != NULL) {
 		cnt++;
 		lst = lst->next;
@@ -34,7 +34,7 @@ static integer PtLstLen(PClrPoint lst) {
 	return cnt;
 }
 
-integer PointListCheck(PClrPoint new, PClrPoint lst) {
+int32_t PointListCheck(PClrPoint new, PClrPoint lst) {
 	/* -1 means not a member, 1 means already a member, 0 means conflicts */
 	Fixed l1, l2, n1, n2, tmp, halfMargin;
 	char ch = new->c;
@@ -122,7 +122,7 @@ static bool SameColorLists(PClrPoint lst1, PClrPoint lst2) {
 	return true;
 }
 
-bool SameColors(integer cn1, integer cn2) {
+bool SameColors(int32_t cn1, int32_t cn2) {
 	if (cn1 == cn2) {
 		return true;
 	}
@@ -148,7 +148,7 @@ void MergeFromMainColors(char ch) {
 
 void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0, PPathElt p1) {
 	register PClrPoint pt;
-	integer chk;
+	int32_t chk;
 	pt = (PClrPoint)Alloc(sizeof(ClrPoint));
 	pt->x0 = x0;
 	pt->y0 = y0;
@@ -246,7 +246,7 @@ void AddVPair(PClrVal v, char ch) {
 }
 
 static bool UseCounter(PClrVal sLst, bool mclr) {
-	integer cnt = 0;
+	int32_t cnt = 0;
 	Fixed minLoc, midLoc, maxLoc, abstmp, prevBstVal, bestVal;
 	Fixed minDelta, midDelta, maxDelta, loc, delta, th;
 	PClrVal lst, newLst;
@@ -319,7 +319,7 @@ static bool UseCounter(PClrVal sLst, bool mclr) {
 static void GetNewPtLst() {
 	if (numPtLsts >= maxPtLsts) { /* increase size */
 		PClrPoint *newArray;
-		integer i;
+		int32_t i;
 		maxPtLsts += 5;
 		newArray = (PClrPoint *)Alloc(maxPtLsts * sizeof(PClrPoint));
 		for (i = 0; i < maxPtLsts - 5; i++) {
@@ -544,7 +544,7 @@ static void Blues() {
 
 static void DoHStems(PClrVal sLst1) {
 	Fixed bot, top;
-	Fixed charTop = MINinteger, charBot = MAXinteger;
+	Fixed charTop = INT32_MIN, charBot = INT32_MAX;
 	bool curved;
 	if (!doAligns && !doStems) {
 		return;
@@ -572,11 +572,11 @@ static void DoHStems(PClrVal sLst1) {
 				 !FindLineSeg(sLst1->vLoc2, topList);
 		AddHStem(top, bot, curved);
 		sLst1 = sLst1->vNxt;
-		if (top != MINinteger || bot != MAXinteger) {
+		if (top != INT32_MIN || bot != INT32_MAX) {
 			AddStemExtremes(UnScaleAbs(bot), UnScaleAbs(top));
 		}
 	}
-	if (charTop != MINinteger || charBot != MAXinteger) {
+	if (charTop != INT32_MIN || charBot != INT32_MAX) {
 		AddCharExtremes(UnScaleAbs(charBot), UnScaleAbs(charTop));
 	}
 }
@@ -689,7 +689,7 @@ static void RemoveRedundantFirstColors() {
 }
 
 static void PreCheckForSolEol() {
-	integer code;
+	int32_t code;
 	Fixed yStart, yEnd, x1, y1;
 	if (!SpecialSolEol() || useV || useH || pathStart == NULL) {
 		return;
@@ -744,7 +744,7 @@ static void AddColorsSetup() {
 /* If extracolor is true then it is ok to have multi-level
  coloring. */
 static void AddColorsInnerLoop(bool extracolor) {
-	integer solEolCode = 2, retryColoring = 0;
+	int32_t solEolCode = 2, retryColoring = 0;
 	bool isSolEol = false;
 	while (true) {
 		PreGenPts();
@@ -874,7 +874,7 @@ static void AddColors(bool extracolor) {
 }
 
 bool DoFile(char *fname, bool extracolor) {
-	integer lentop = lenTopBands, lenbot = lenBotBands;
+	int32_t lentop = lenTopBands, lenbot = lenBotBands;
 	fileName = fname;
 	if (!ReadCharFile(true, false, false, true)) {
 		sprintf(globmsg, "Cannot open %s file.\n", fileName);

@@ -97,7 +97,7 @@ char *charlist, *ColorList[];
   return (ListEntries - COUNTERDEFAULTENTRIES);
 }
 
-integer SpecialCharType() {
+int32_t SpecialCharType() {
   /* 1 = upper; -1 = lower; 0 = neither */
 #if PYTHONLIB
   if(featurefiledata)
@@ -141,7 +141,7 @@ bool NoBlueChar() {
   return FindNameInList(bezGlyphName, NoBlueList);
   }
 
-integer SolEolCharCode() {
+int32_t SolEolCharCode() {
 #if PYTHONLIB
   if(featurefiledata)
   {
@@ -159,8 +159,8 @@ integer SolEolCharCode() {
 /* This change was made to prevent bogus sol-eol's.  And to prevent
    adding sol-eol if there are a lot of subpaths. */
 bool SpecialSolEol() {
-  integer code = SolEolCharCode();
-  integer count;
+  int32_t code = SolEolCharCode();
+  int32_t count;
   if (code == 2) return false;
   count = CountSubPaths();
   if (code != 0 && count != 2) return false;

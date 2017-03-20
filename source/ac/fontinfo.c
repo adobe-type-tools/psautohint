@@ -8,12 +8,12 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "fipublic.h"
 
 
-#define UNDEFINED (MAXinteger)
+#define UNDEFINED (INT32_MAX)
 
-integer NumHColors, NumVColors;
+int32_t NumHColors, NumVColors;
 
 static void ParseStems(kw, stems, pnum)
-  char *kw; Fixed *stems; integer *pnum; 
+  char *kw; Fixed *stems; int32_t *pnum; 
 {
   int istems[MAXSTEMS], i;
   ParseIntStems (kw, ACOPTIONAL, MAXSTEMS, istems, pnum, NULL);

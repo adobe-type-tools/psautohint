@@ -369,7 +369,7 @@ static float mfabs(float in)
 }
 
 static Fixed CombVals(v1,v2) Fixed v1,v2; {
-	register integer i;
+	register int32_t i;
 	float r1, r2;
 	register float x, a, xx;
 	acfixtopflt(v1,&r1); 

@@ -9,7 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static bool clrBBox, clrHBounds, clrVBounds, haveHBnds, haveVBnds,
   mergeMain;
 
-void InitAuto(reason) integer reason; {
+void InitAuto(reason) int32_t reason; {
   switch (reason) {
     case STARTUP:
     case RESTART:
@@ -141,7 +141,7 @@ static void AddVColoring(v) PClrVal v; {
   v->vNxt = Vcoloring; Vcoloring = v;
   AutoVSeg(v); }
 
-static integer TestColor(s, colorList, flg, doLst)
+static int32_t TestColor(s, colorList, flg, doLst)
   PClrSeg s; PClrVal colorList; bool flg, doLst; {
   /* -1 means already in colorList; 0 means conflicts; 1 means ok to add */
   PClrVal v, clst;
@@ -157,7 +157,7 @@ static integer TestColor(s, colorList, flg, doLst)
     else top = bot;
     }
   if (DEBUG) {
-    integer cnt = 0;
+    int32_t cnt = 0;
     clst = colorList;
     while (clst != NULL) {
       if (++cnt > 100) {
@@ -282,7 +282,7 @@ static void RemDupLnks(e,Hflg) PPathElt e; bool Hflg; {
    The top left point was not getting colored. */
 static bool TryResolveConflict(e,Hflg)
   PPathElt e; bool Hflg; {
-  integer typ;
+  int32_t typ;
   PSegLnkLst lst, lnk1, lnk2;
   PClrSeg seg, seg1, seg2;
   PClrVal val1, val2;
@@ -407,7 +407,7 @@ static PSegLnkLst BestFromLsts(lst1,lst2) PSegLnkLst lst1, lst2; {
   PClrSeg seg;
   PClrVal val;
   Fixed bstval;
-  integer i;
+  int32_t i;
   bst = NULL; bstval = 0;
   for (i = 0; i < 2; i++) {
     lst = i? lst1 : lst2;
@@ -449,9 +449,9 @@ static bool ClrsClash(e, p, hLst, vLst, phLst, pvLst)
   }
 
 static void GetColorLsts(e, phLst, pvLst, ph, pv) 
-  PPathElt e; PSegLnkLst *phLst, *pvLst; integer *ph, *pv; {
+  PPathElt e; PSegLnkLst *phLst, *pvLst; int32_t *ph, *pv; {
   PSegLnkLst hLst, vLst;
-  integer h, v;
+  int32_t h, v;
   if (useH) {
     hLst = NULL; h = -1; }
   else {
@@ -519,11 +519,11 @@ static void StartNewColoring(e, hLst, vLst)
   if (!useV) AddColorLst(vLst,true);
   }
 
-static bool IsIn(h,v) integer h, v; {
+static bool IsIn(h,v) int32_t h, v; {
   return (h == -1 && v == -1);
   }
 
-static bool IsOk(h,v) integer h, v; {
+static bool IsOk(h,v) int32_t h, v; {
   return (h != 0 && v != 0);
   }
 
@@ -588,11 +588,11 @@ static bool IsTopSegOfVal(loc, top, bot) Fixed loc, top, bot; {
   }
 
 static void RemFlareLnk(e, hFlg, rm, e2, i)
-  PPathElt e, e2; bool hFlg; PSegLnkLst rm; integer i; {
+  PPathElt e, e2; bool hFlg; PSegLnkLst rm; int32_t i; {
   RemLnk(e,hFlg,rm); if (showClrInfo) ReportRemFlare(e,e2,hFlg,i); }
 
 bool CompareValues(val1,val2,factor,ghstshift)
-  register PClrVal val1, val2; integer factor, ghstshift; {
+  register PClrVal val1, val2; int32_t factor, ghstshift; {
   register Fixed v1 = val1->vVal, v2 = val2->vVal, mx;
   mx = v1 > v2 ? v1 : v2; mx <<= 1;
   while (mx > 0) { mx <<= 1; v1 <<= 1; v2 <<= 1; }
@@ -761,10 +761,10 @@ static void RemShortColors() {
   }
 
 void AutoExtraColors(movetoNewClrs, soleol, solWhere)
-bool movetoNewClrs, soleol; integer solWhere; {
-    integer h, v, ph, pv;
+bool movetoNewClrs, soleol; int32_t solWhere; {
+    int32_t h, v, ph, pv;
     PPathElt e, cp, p;
-    integer etype;
+    int32_t etype;
     PSegLnkLst hLst, vLst, phLst, pvLst;
     PClrVal mtVclrs, mtHclrs, prvHclrs, prvVclrs;
     

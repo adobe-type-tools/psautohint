@@ -31,18 +31,18 @@ Fixed hBigDist, vBigDist, initBigDist, minDist, minMidPt, ghostWidth,
   pruneMargin;
 Fixed pruneA, pruneB, pruneC, pruneD, pruneValue, bonus;
 float theta, hBigDistR, vBigDistR, maxVal, minVal;
-integer lenTopBands, lenBotBands, numSerifs, DMIN, DELTA, CPpercent;
-integer bendTan, sCurveTan;
+int32_t lenTopBands, lenBotBands, numSerifs, DMIN, DELTA, CPpercent;
+int32_t bendTan, sCurveTan;
 PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
 char * fileName;
 char outPrefix[MAXPATHLEN];
 char inPrefix[MAXPATHLEN];
 PClrSeg segLists[4];
 Fixed VStems[MAXSTEMS], HStems[MAXSTEMS];
-integer NumVStems, NumHStems;
+int32_t NumVStems, NumHStems;
 Fixed topBands[MAXBLUES], botBands[MAXBLUES], serifs[MAXSERIFS];
 PClrPoint pointList, *ptLstArray;
-integer ptLstIndex, numPtLsts, maxPtLsts;
+int32_t ptLstIndex, numPtLsts, maxPtLsts;
 bool makehintslog = true;
 bool writecoloredbez = true;
 Fixed bluefuzz;
@@ -113,7 +113,7 @@ void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func)
 static unsigned char *vmfree, *vmlast, vm[VMSIZE];
 
 /* sub allocator */
-unsigned char * Alloc(integer sz)
+unsigned char * Alloc(int32_t sz)
 	{
 	unsigned char * s;
 	sz = (sz + 3) & ~3; /* make size a multiple of 4 */
@@ -130,7 +130,7 @@ unsigned char * Alloc(integer sz)
   }
 
 
-void InitData(integer reason)
+void InitData(int32_t reason)
  {
   register char *s;
   float tmp, origEmSquare;

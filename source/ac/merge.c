@@ -78,7 +78,7 @@ void DoPrune() {
 }
 
 static PClrVal PruneOne(sLst, hFlg, sL, i)
-PClrVal sLst, sL; bool hFlg; integer i; {
+PClrVal sLst, sL; bool hFlg; int32_t i; {
 /* Simply set the 'pruned' field to True for sLst. */
 	if (hFlg) ReportPruneHVal(sLst,sL,i);
 	else ReportPruneVVal(sLst,sL,i);
