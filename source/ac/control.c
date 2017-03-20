@@ -299,8 +299,8 @@ static bool UseCounter(PClrVal sLst, bool mclr) {
 		sLst = sLst->vNxt;
 	}
 	th = FixInt(5) / 100;
-	if (ac_abs(minDelta - maxDelta) < th &&
-		ac_abs((maxLoc - midLoc) - (midLoc - minLoc)) < th) {
+	if (abs(minDelta - maxDelta) < th &&
+		abs((maxLoc - midLoc) - (midLoc - minLoc)) < th) {
 		if (mclr) {
 			Vcoloring = newLst;
 		}
@@ -309,8 +309,8 @@ static bool UseCounter(PClrVal sLst, bool mclr) {
 		}
 		return true;
 	}
-	if (ac_abs(minDelta - maxDelta) < FixInt(3) &&
-		ac_abs((maxLoc - midLoc) - (midLoc - minLoc)) < FixInt(3)) {
+	if (abs(minDelta - maxDelta) < FixInt(3) &&
+		abs((maxLoc - midLoc) - (midLoc - minLoc)) < FixInt(3)) {
 		ReportError(mclr ? "Near miss for using V counter hinting." : "Near miss for using H counter hinting.");
 	}
 	return false;
@@ -728,7 +728,7 @@ static void AddColorsSetup() {
 			hBigDist = HStems[i];
 		}
 	}
-	hBigDist = ac_abs(dtfmy(hBigDist));
+	hBigDist = abs(dtfmy(hBigDist));
 	if (hBigDist < initBigDist) {
 		hBigDist = initBigDist;
 	}
