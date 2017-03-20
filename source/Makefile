@@ -20,7 +20,6 @@ LIB_TARGET = $(OBJ_DIR)/autohintlib.a
 
 CFLAGS = \
 	-I$(SRC_DIR)/include/ac \
-	-I$(SRC_DIR)/include/extras \
 	-I$(SRC_DIR)/ac \
 	-I$(SRC_DIR)/bf \
 	-DAC_C_LIB=1 \
