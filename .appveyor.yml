@@ -8,7 +8,8 @@ install:
 build_script:
   - set PATH=C:\cygwin\bin;%APPVEYOR_BUILD_FOLDER%;%PATH%
   - set CC=cccl
-  - make
+  - make -j
+  - make -j check
 
 # disable automatic tests
 test: off
