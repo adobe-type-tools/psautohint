@@ -42,14 +42,6 @@ typedef int32_t               integer;
 #endif
 
                                     /***********************************/
-                                    /* Declarative Sugar               */
-                                    /***********************************/
-#ifndef true
-#define true            1
-#define false           0
-#endif 
-
-                                    /***********************************/
                                     /* Reals and Fixed point           */
                                     /***********************************/
 typedef float           real;

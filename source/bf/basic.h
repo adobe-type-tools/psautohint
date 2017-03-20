@@ -6,6 +6,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef BASIC_H
 #define BASIC_H
 #include <stdlib.h>
+#include <stdbool.h>
 #include <ctype.h>
 #include "pubtypes.h"
 
@@ -14,12 +15,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <string.h>
 #include <setjmp.h>
 #include <sys/types.h>
-typedef unsigned char boolean;
+typedef bool boolean;
 
-#ifndef FALSE
-#define FALSE 0
-#define TRUE 1
-#endif
+#define FALSE false
+#define TRUE true
 
 /* macro definitions */
 #define NUMMIN(a, b) ((a) <= (b) ? (a) : (b))
