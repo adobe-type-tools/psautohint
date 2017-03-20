@@ -44,7 +44,7 @@ int32_t FRnd(int32_t x){
 static int32_t WriteString(char *str) {
 	if (bezoutput) {
 		if ((bezoutputactual + (int)strlen(str)) >= bezoutputalloc) {
-			int desiredsize = MAX(bezoutputalloc * 2, (bezoutputalloc + (int)strlen(str)));
+			int desiredsize = NUMMAX(bezoutputalloc * 2, (bezoutputalloc + (int)strlen(str)));
 			bezoutput = (char *)ACREALLOCMEM(bezoutput, desiredsize);
 			if (bezoutput) {
 				bezoutputalloc = desiredsize;
@@ -210,13 +210,13 @@ static void NewBest(PClrPoint lst) {
 		bstB = true;
 		x0 = lst->x0;
 		x1 = lst->x1;
-		bx = MIN(x0, x1);
+		bx = NUMMIN(x0, x1);
 	}
 	else {
 		bstB = false;
 		y0 = lst->y0;
 		y1 = lst->y1;
-		by = MIN(y0, y1);
+		by = NUMMIN(y0, y1);
 	}
 }
 
@@ -303,14 +303,14 @@ static void WrtPntLst(PClrPoint lst) {
 					if (bstB) {
 						x0 = lst->x0;
 						x1 = lst->x1;
-						if (MIN(x0, x1) < bx) {
+						if (NUMMIN(x0, x1) < bx) {
 							NewBest(lst);
 						}
 					}
 					else {
 						y0 = lst->y0;
 						y1 = lst->y1;
-						if (MIN(y0, y1) < by) {
+						if (NUMMIN(y0, y1) < by) {
 							NewBest(lst);
 						}
 					}

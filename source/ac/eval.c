@@ -99,14 +99,14 @@ PClrSeg botSeg, topSeg; Fixed *pspc, *pv; {
 		*pspc = FixInt(2);
 	/* left is always < right */
 	if ((tlft <= brght) && (trght >= blft)) { /* overlap */
-		overlaplen = MIN(trght,brght) - MAX(tlft,blft);
-		minlen = MIN(trght-tlft,brght-blft);
+		overlaplen = NUMMIN(trght,brght) - NUMMAX(tlft,blft);
+		minlen = NUMMIN(trght-tlft,brght-blft);
 		if (minlen == overlaplen) dist = dy;
 		else dist = CalcOverlapDist(dy, overlaplen, minlen);
     }
 	else { /* no overlap; take closer ends */
 		ldst = ac_abs(tlft-brght); rdst = ac_abs(trght-blft);
-		dx = MIN(ldst, rdst);
+		dx = NUMMIN(ldst, rdst);
 		dist = GapDist(dx);
         dist += (7*dy)/5; /* extra penalty for nonoverlap
 										* changed from 7/5 to 12/5 for Perpetua/Regular/
@@ -117,7 +117,7 @@ PClrSeg botSeg, topSeg; Fixed *pspc, *pv; {
 		if (dx > dy)
             dist *= dx / dy;
     }
-	mndist = FixTwoMul(minDist);     dist = MAX(dist, mndist);
+	mndist = FixTwoMul(minDist);     dist = NUMMAX(dist, mndist);
 	if (NumHStems > 0) {
 		Fixed w = idtfmy(dy);
 		w = ac_abs(w);
@@ -145,8 +145,8 @@ PClrSeg botSeg, topSeg; {
 	if (dy < minDist) return;
 	/* left is always < right */
 	if ((tlft <= brght) && (trght >= blft)) { /* overlap */
-		overlaplen = MIN(trght,brght) - MAX(tlft,blft);
-		minlen = MIN(trght-tlft,brght-blft);
+		overlaplen = NUMMIN(trght,brght) - NUMMAX(tlft,blft);
+		minlen = NUMMIN(trght-tlft,brght-blft);
 		if (minlen == overlaplen) dist = dy;
 		else dist = CalcOverlapDist(dy, overlaplen, minlen);
     }
@@ -194,25 +194,25 @@ PClrSeg leftSeg, rightSeg; Fixed *pspc, *pv; {
 	if (dx < minDist) { *pv = 0; return; }
 	/* top is always > bot, independent of YgoesUp */
 	if ((ltop >= rbot) && (lbot <= rtop)) { /* overlap */
-		overlaplen = MIN(ltop,rtop) - MAX(lbot,rbot);
-		minlen = MIN(ltop-lbot,rtop-rbot);
+		overlaplen = NUMMIN(ltop,rtop) - NUMMAX(lbot,rbot);
+		minlen = NUMMIN(ltop-lbot,rtop-rbot);
 		if (minlen == overlaplen) dist = dx;
 		else dist = CalcOverlapDist(dx, overlaplen, minlen);
     }
 	else { /* no overlap; take closer ends */
 		tdst = ac_abs(ltop-rbot);
         bdst = ac_abs(lbot-rtop);
-		dy = MIN(tdst, bdst);
+		dy = NUMMIN(tdst, bdst);
 		dist = (7*dx)/5 + GapDist(dy); /* extra penalty for nonoverlap */
         DEBUG_ROUND(dist) /* DEBUG 8 BIT */
 		if (dy > dx)
             dist *= dy / dx;
     }
 	mndist = FixTwoMul(minDist);
-	dist = MAX(dist, mndist);
+	dist = NUMMAX(dist, mndist);
 	lbonus = leftSeg->sBonus;
 	rbonus = rightSeg->sBonus;
-	bonus = MIN(lbonus,rbonus);
+	bonus = NUMMIN(lbonus,rbonus);
 	*pspc = (bonus > 0)? FixInt(2): 0; /* this is for sol-eol characters */
 	if (NumVStems > 0) {
 		Fixed w = idtfmx(dx);
@@ -241,14 +241,14 @@ PClrSeg leftSeg, rightSeg; {
 	if (dx < minDist) return;
 	/* top is always > bot, independent of YgoesUp */
 	if ((ltop >= rbot) && (lbot <= rtop)) { /* overlap */
-		overlaplen = MIN(ltop,rtop) - MAX(lbot,rbot);
-		minlen = MIN(ltop-lbot,rtop-rbot);
+		overlaplen = NUMMIN(ltop,rtop) - NUMMAX(lbot,rbot);
+		minlen = NUMMIN(ltop-lbot,rtop-rbot);
 		if (minlen == overlaplen) dist = dx;
 		else dist = CalcOverlapDist(dx, overlaplen, minlen);
     }
 	else return;
 	mndist = FixTwoMul(minDist);
-	dist = MAX(dist, mndist);
+	dist = NUMMAX(dist, mndist);
 	l = itfmx (lloc);
 	r = itfmx (rloc);
 	w = ac_abs(r-l);

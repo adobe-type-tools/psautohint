@@ -236,14 +236,6 @@ extern int32_t FRnd(int32_t x);
 #define FracPart(x) ((int32_t)(x) & 0xFF)
 #define FTrunc(x) (((int32_t)(x))>>FixShift)
 #define FIXED2FLOAT(x) (x/256.0)
-#if SUN
-#ifndef MAX
-#define MAX(a,b) ((a) >= (b)? (a) : (b))
-#endif
-#ifndef MIN
-#define MIN(a,b) ((a) <= (b)? (a) : (b))
-#endif
-#endif
 
 #define FixOne (0x100)
 #define FixTwo (0x200)

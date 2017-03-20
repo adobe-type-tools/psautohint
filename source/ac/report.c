@@ -603,7 +603,7 @@ void ReportStemNearMiss(vert, w, minW, b, t, curve)
   bool vert, curve; Fixed w, minW, b, t; {
   (void)sprintf(S0, "%s %s stem near miss: %g instead of %g at %g to %g.",
     vert? "Vertical" : "Horizontal", curve? "curve" : "linear",
-    FixToDbl(w), FixToDbl(minW), FixToDbl(MIN(b,t)), FixToDbl(MAX(b,t)));
+    FixToDbl(w), FixToDbl(minW), FixToDbl(NUMMIN(b,t)), FixToDbl(NUMMAX(b,t)));
   ReportError(S0);
   }
 

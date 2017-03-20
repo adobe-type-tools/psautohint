@@ -351,15 +351,15 @@ int32_t i; void (*nm)(); {
 				if (abs(lstmax-lstmin) > abs(nxtmax-nxtmin)) {
 					/* merge into lst and remove nxt */
 					(*nm)(nxt, lst);
-					lst->sMin = MIN(lstmin,nxtmin);
-					lst->sMax = MAX(lstmax,nxtmax);
-					lst->sBonus = MAX(lst->sBonus, nxt->sBonus);
+					lst->sMin = NUMMIN(lstmin,nxtmin);
+					lst->sMax = NUMMAX(lstmax,nxtmax);
+					lst->sBonus = NUMMAX(lst->sBonus, nxt->sBonus);
 					nxtprv->sNxt = nxt->sNxt; }
 				else { /* merge into nxt and remove lst */
 					(*nm)(lst, nxt);
-					nxt->sMin = MIN(lstmin,nxtmin);
-					nxt->sMax = MAX(lstmax,nxtmax);
-					nxt->sBonus = MAX(lst->sBonus, nxt->sBonus);
+					nxt->sMin = NUMMIN(lstmin,nxtmin);
+					nxt->sMax = NUMMAX(lstmax,nxtmax);
+					nxt->sBonus = NUMMAX(lst->sBonus, nxt->sBonus);
 					lst = lst->sNxt;
 					if (prv == NULL) segLists[i] = lst;
 					else prv->sNxt = lst; }
@@ -547,7 +547,7 @@ void GenVPts(specialCharType) int32_t specialCharType; {
 			}
 			if (!flex1 && !flex2) {
 				Fixed minx, maxx;
-				maxx = MAX(x0,x1); minx = MIN(x0,x1);
+				maxx = NUMMAX(x0,x1); minx = NUMMIN(x0,x1);
 				if (px1-maxx >= FixTwo || px2-maxx >= FixTwo ||
 					px1-minx <= FixTwo || px2-minx <= FixTwo) {
 					FindCurveBBox(x0,y0,px1,py1,px2,py2,x1,y1,&llx,&lly,&urx,&ury);
@@ -735,7 +735,7 @@ void GenHPts() {
 			}
 			if (!flex1 && !flex2) {
 				Fixed miny, maxy; 
-				maxy = MAX(y0,y1); miny = MIN(y0,y1); 
+				maxy = NUMMAX(y0,y1); miny = NUMMIN(y0,y1); 
 				if (py1-maxy >= FixTwo || py2-maxy >= FixTwo ||
 					py1-miny <= FixTwo || py2-miny <= FixTwo) {
 					FindCurveBBox(x0,y0,px1,py1,px2,py2,x1,y1,&llx,&lly,&urx,&ury);
