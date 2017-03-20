@@ -21,10 +21,6 @@ typedef int32_t               Fixed;
 /* macro definitions */
 #define NUMMIN(a, b) ((a) <= (b) ? (a) : (b))
 #define NUMMAX(a, b) ((a) >= (b) ? (a) : (b))
-#ifdef ABS
-#undef ABS
-#endif
-#define ABS(a) ((a) >= 0 ? (a) : -(a))
 /* Round the same way as PS. i.e. -6.5 ==> -6.0 */
 #define LROUND(a) ((a > 0) ? (int32_t)(a + 0.5) : ((a + (int32_t)(-a)) == -0.5) ? (int32_t) a : (int32_t)(a - 0.5))
 #define	 SCALEDRTOL(a, s) (a<0 ? (int32_t) ((a*s) - 0.5) : (int32_t) ((a*s) + 0.5))

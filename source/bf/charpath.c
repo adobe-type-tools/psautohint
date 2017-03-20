@@ -440,10 +440,10 @@ indx dirIx, pathIx;
             return;
             break;
         case RCT:
-            if ((ABS(start->x1 - end->x2) < fixTwo) && (ABS(start->x1 - pathlist[dirIx].path[i-1].x) < fixTwo))
+            if ((abs(start->x1 - end->x2) < fixTwo) && (abs(start->x1 - pathlist[dirIx].path[i-1].x) < fixTwo))
                 yoffset =
                 (start->y1 < end->y2 && end->y2 > 0) || (start->y1 > end->y2 && end->y2 < 0) ? FixOne : -FixOne;
-            else if ((ABS(start->y1 - end->y2) < fixTwo) && (ABS(start->y1 - pathlist[dirIx].path[i-1].y) < fixTwo))
+            else if ((abs(start->y1 - end->y2) < fixTwo) && (abs(start->y1 - pathlist[dirIx].path[i-1].y) < fixTwo))
                 xoffset =
                 (start->x1 < end->x2 && end->x2 > 0) || (start->x1 > end->x2 && end->x2 < 0) ? FixOne : -FixOne;
             else
@@ -942,7 +942,7 @@ static char * _elttype_ (int indx)
 
 static bool nearlyequal_ (Fixed a, Fixed b, Fixed tolerance)
 {
-    return (ABS(a - b) <= tolerance);
+    return (abs(a - b) <= tolerance);
 }
 
 /* Returns whether the hint values are derived from the start,
