@@ -9,7 +9,7 @@ build_script:
   - bash -c "python2 get-pip.py"
   - bash -c "python2 -m pip install -r requirements.txt"
   - make -j
-  - make -j check
+  - make -j4 check
 
 # disable automatic tests
 test: off
