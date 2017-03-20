@@ -1,6 +1,3 @@
-platform:
-  - x86
-
 install:
   - appveyor DownloadFile "http://raw.githubusercontent.com/swig/cccl/master/cccl"
   - appveyor DownloadFile "https://bootstrap.pypa.io/get-pip.py"
