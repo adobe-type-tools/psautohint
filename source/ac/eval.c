@@ -8,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #define MAXF (1 << 15)
 static void AdjustVal(pv,l1,l2,dist,d,hFlg)
-Fixed *pv, l1, l2, dist, d; boolean hFlg; {
+Fixed *pv, l1, l2, dist, d; bool hFlg; {
 	real v, q, r1, r2, rd;
 	Fixed abstmp;
     /* DEBUG 8 BIT. To get the saem result as the old auothint, had to change from FixedOne to FixedTwo. Since the returned weight is proportional to the square of l1 and l2,
@@ -80,7 +80,7 @@ static void EvalHPair(botSeg,topSeg,pspc,pv)
 PClrSeg botSeg, topSeg; Fixed *pspc, *pv; {
 	Fixed brght, blft, bloc, tloc, trght, tlft, ldst, rdst;
 	Fixed mndist, dist, dx, dy, minlen, overlaplen, abstmp;
-	boolean inBotBand, inTopBand;
+	bool inBotBand, inTopBand;
 	int i;
 	*pspc = 0;
 	brght = botSeg->sMax;
@@ -124,7 +124,7 @@ PClrSeg botSeg, topSeg; Fixed *pspc, *pv; {
 		for (i=0; i < NumHStems; i++)
 			if (w == HStems[i]) { *pspc += FixOne; break; }
     }
-	AdjustVal(pv, brght-blft, trght-tlft, dist, dy, TRUE);
+	AdjustVal(pv, brght-blft, trght-tlft, dist, dy, true);
 }
 
 static void HStemMiss(botSeg,topSeg)
@@ -173,7 +173,7 @@ PClrSeg botSeg, topSeg; {
 		}
 	if (minDiff > FixInt(2))
 		return;
-	ReportStemNearMiss(FALSE, w, minW, b, t, 
+	ReportStemNearMiss(false, w, minW, b, t, 
 					   (botSeg->sType == sCURVE) || (topSeg->sType == sCURVE));
 }
 
@@ -220,7 +220,7 @@ PClrSeg leftSeg, rightSeg; Fixed *pspc, *pv; {
 		for (i=0; i < NumVStems; i++)
 			if (w == VStems[i]) { *pspc = *pspc + FixOne; break; }
     }
-	AdjustVal(pv, ltop-lbot, rtop-rbot, dist, dx, FALSE);
+	AdjustVal(pv, ltop-lbot, rtop-rbot, dist, dx, false);
 }
 
 static void VStemMiss(leftSeg,rightSeg)
@@ -264,7 +264,7 @@ PClrSeg leftSeg, rightSeg; {
 		}
 	if (minDiff > FixInt(2))
 		return;
-	ReportStemNearMiss(TRUE, w, minW, l, r, 
+	ReportStemNearMiss(true, w, minW, l, r, 
 					   (leftSeg->sType == sCURVE) || (rightSeg->sType == sCURVE));
 }
 
@@ -279,7 +279,7 @@ Fixed lft, rght, val, spc; PClrSeg lSeg, rSeg; {
 	item->vSpc = spc;
 	item->vSeg1 = lSeg;
 	item->vSeg2 = rSeg;
-	item->vGhst = FALSE;
+	item->vGhst = false;
 	vlist = valList; vprev = NULL;
 	while (vlist != NULL) {
 		if (vlist->vLoc1 >= lft) break;
@@ -311,7 +311,7 @@ Fixed lft, rght, val, spc; PClrSeg lSeg, rSeg; {
 }
 
 static void InsertHValue(bot,top,val,spc,bSeg,tSeg,ghst)
-Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; boolean ghst; {
+Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; bool ghst; {
 	PClrVal item, vlist, vprev, vl;
 	Fixed b;
 	b = itfmy(bot);
@@ -349,7 +349,7 @@ Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; boolean ghst; {
 
 static void AddHValue(bot,top,val,spc,bSeg,tSeg)
 Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; {
-	boolean ghst;
+	bool ghst;
 	if (val == 0) return;
 	if (LePruneValue(val) && spc <= 0) return;
 	if (bSeg->sType == sBEND && tSeg->sType == sBEND) return;
@@ -391,19 +391,19 @@ static void CombineValues() { /* works for both H and V */
 	PClrVal vlist, v1;
 	Fixed loc1, loc2;
 	Fixed val;
-	boolean match;
+	bool match;
 	vlist = valList;
 	while (vlist != NULL) {
 		v1 = vlist->vNxt;
 		loc1 = vlist->vLoc1;
 		loc2 = vlist->vLoc2;
 		val = vlist->vVal;
-		match = FALSE;
+		match = false;
 		while (v1 != NULL && v1->vLoc1 == loc1 && v1->vLoc2 == loc2) {
 			if (v1->vGhst) val = v1->vVal;
 			else val = CombVals(val, v1->vVal);
 			/* increase value to compensate for length squared effect */
-			match = TRUE; v1 = v1->vNxt; }
+			match = true; v1 = v1->vNxt; }
 		if (match) {
 			while (vlist != v1) {
 				vlist->vVal = val; vlist = vlist->vNxt; }

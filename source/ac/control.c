@@ -7,7 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 
 #if ALLOWCSOUTPUT && THISISACMAIN
-extern boolean charstringoutput;
+extern bool charstringoutput;
 #endif
 
 extern void CSWrite(void);
@@ -15,7 +15,7 @@ extern void CSWrite(void);
 static void DoHStems();
 static void DoVStems();
 
-static boolean CounterFailed;
+static bool CounterFailed;
 
 void InitAll(integer reason) {
 	InitData(reason); /* must be first */
@@ -60,7 +60,7 @@ integer PointListCheck(PClrPoint new, PClrPoint lst) {
 		default: {
 			FlushLogFiles();
 			sprintf(globmsg, "Illegal character in point list in %s.\n", fileName);
-			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
 	}
 	if (n1 > n2) {
@@ -68,7 +68,7 @@ integer PointListCheck(PClrPoint new, PClrPoint lst) {
 		n1 = n2;
 		n2 = tmp;
 	}
-	while (TRUE) {
+	while (true) {
 		if (lst == NULL) {
 			return -1;
 		}
@@ -109,22 +109,22 @@ integer PointListCheck(PClrPoint new, PClrPoint lst) {
 	}
 }
 
-static boolean SameColorLists(PClrPoint lst1, PClrPoint lst2) {
+static bool SameColorLists(PClrPoint lst1, PClrPoint lst2) {
 	if (PtLstLen(lst1) != PtLstLen(lst2)) {
-		return FALSE;
+		return false;
 	}
 	while (lst1 != NULL) {/* go through lst1 */
 		if (PointListCheck(lst1, lst2) != 1) {
-			return FALSE;
+			return false;
 		}
 		lst1 = lst1->next;
 	}
-	return TRUE;
+	return true;
 }
 
-boolean SameColors(integer cn1, integer cn2) {
+bool SameColors(integer cn1, integer cn2) {
 	if (cn1 == cn2) {
-		return TRUE;
+		return true;
 	}
 	return SameColorLists(ptLstArray[cn1], ptLstArray[cn2]);
 }
@@ -155,7 +155,7 @@ void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
 	pt->x1 = x1;
 	pt->y1 = y1;
 	pt->c = ch;
-	pt->done = FALSE;
+	pt->done = false;
 	pt->next = NULL;
 	pt->p0 = p0;
 	pt->p1 = p1;
@@ -173,7 +173,7 @@ void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
 }
 
 static void CopyClrFromLst(char clr, register PClrPoint lst) {
-	boolean bvflg = (clr == 'b' || clr == 'v');
+	bool bvflg = (clr == 'b' || clr == 'v');
 	while (lst != NULL) {
 		if (lst->c == clr) {
 			if (bvflg) {
@@ -245,7 +245,7 @@ void AddVPair(PClrVal v, char ch) {
 	AddColorPoint(lft, 0, rght, 0, ch, p0, p1);
 }
 
-static boolean UseCounter(PClrVal sLst, boolean mclr) {
+static bool UseCounter(PClrVal sLst, bool mclr) {
 	integer cnt = 0;
 	Fixed minLoc, midLoc, maxLoc, abstmp, prevBstVal, bestVal;
 	Fixed minDelta, midDelta, maxDelta, loc, delta, th;
@@ -258,7 +258,7 @@ static boolean UseCounter(PClrVal sLst, boolean mclr) {
 		lst = lst->vNxt;
 	}
 	if (cnt < 3) {
-		return FALSE;
+		return false;
 	}
 	cnt -= 3;
 	prevBstVal = 0;
@@ -271,7 +271,7 @@ static boolean UseCounter(PClrVal sLst, boolean mclr) {
 	}
 	bestVal = sLst->vVal;
 	if (prevBstVal > FixInt(1000) || bestVal < prevBstVal * 10) {
-		return FALSE;
+		return false;
 	}
 	newLst = sLst;
 	while (sLst != NULL) {
@@ -307,13 +307,13 @@ static boolean UseCounter(PClrVal sLst, boolean mclr) {
 		else {
 			Hcoloring = newLst;
 		}
-		return TRUE;
+		return true;
 	}
 	if (ac_abs(minDelta - maxDelta) < FixInt(3) &&
 		ac_abs((maxLoc - midLoc) - (midLoc - minLoc)) < FixInt(3)) {
 		ReportError(mclr ? "Near miss for using V counter hinting." : "Near miss for using H counter hinting.");
 	}
-	return FALSE;
+	return false;
 }
 
 static void GetNewPtLst() {
@@ -495,14 +495,14 @@ static void Blues() {
 	EvalH();
 	PruneHVals();
 	FindBestHVals();
-    MergeVals(FALSE);
+    MergeVals(false);
 
 	if (showClrInfo) {
 		ShowHVals(valList);
 		PrintMessage("pick best");
 	}
-	MarkLinks(valList, TRUE);
-	CheckVals(valList, FALSE);
+	MarkLinks(valList, true);
+	CheckVals(valList, false);
 	DoHStems(valList);  /* Report stems and alignment zones, if this has been requested. */
 	PickHVals(valList); /* Moves best ClrVal items from valList to Hcoloring list. (? Choose from set of ClrVals for the samte stem values.) */
 	if (!CounterFailed && HColorChar()) {
@@ -511,21 +511,21 @@ static void Blues() {
 		pruneC = pc;
 		pruneB = pb;
 		pruneA = pa;
-		useH = UseCounter(Hcoloring, FALSE);
+		useH = UseCounter(Hcoloring, false);
 		if (!useH) { /* try to fix */
-			AddBBoxHV(TRUE, TRUE);
-			useH = UseCounter(Hcoloring, FALSE);
+			AddBBoxHV(true, true);
+			useH = UseCounter(Hcoloring, false);
 			if (!useH) { /* still bad news */
 				ReportError("Note: Glyph is in list for using H counter hints, but didn't find any candidates.");
-				CounterFailed = TRUE;
+				CounterFailed = true;
 			}
 		}
 	}
 	else {
-		useH = FALSE;
+		useH = false;
 	}
 	if (Hcoloring == NULL) {
-		AddBBoxHV(TRUE, FALSE);
+		AddBBoxHV(true, false);
 	}
 	if (showClrInfo) {
 		PrintMessage("results");
@@ -545,7 +545,7 @@ static void Blues() {
 static void DoHStems(PClrVal sLst1) {
 	Fixed bot, top;
 	Fixed charTop = MINinteger, charBot = MAXinteger;
-	boolean curved;
+	bool curved;
 	if (!doAligns && !doStems) {
 		return;
 	}
@@ -606,13 +606,13 @@ static void Yellows() {
 	EvalV();
 	PruneVVals();
 	FindBestVVals();
-	MergeVals(TRUE);
+	MergeVals(true);
 	if (showClrInfo) {
 		ShowVVals(valList);
 		PrintMessage("pick best");
 	}
-	MarkLinks(valList, FALSE);
-	CheckVals(valList, TRUE);
+	MarkLinks(valList, false);
+	CheckVals(valList, true);
 	DoVStems(valList);
 	PickVVals(valList);
 	if (!CounterFailed && VColorChar()) {
@@ -621,21 +621,21 @@ static void Yellows() {
 		pruneC = pc;
 		pruneB = pb;
 		pruneA = pa;
-		useV = UseCounter(Vcoloring, TRUE);
+		useV = UseCounter(Vcoloring, true);
 		if (!useV) { /* try to fix */
-			AddBBoxHV(FALSE, TRUE);
-			useV = UseCounter(Vcoloring, TRUE);
+			AddBBoxHV(false, true);
+			useV = UseCounter(Vcoloring, true);
 			if (!useV) { /* still bad news */
 				ReportError("Note: Glyph is in list for using V counter hints, but didn't find any candidates.");
-				CounterFailed = TRUE;
+				CounterFailed = true;
 			}
 		}
 	}
 	else {
-		useV = FALSE;
+		useV = false;
 	}
 	if (Vcoloring == NULL) {
-		AddBBoxHV(FALSE, FALSE);
+		AddBBoxHV(false, false);
 	}
 	if (showClrInfo) {
 		PrintMessage("results");
@@ -654,7 +654,7 @@ static void Yellows() {
 
 static void DoVStems(PClrVal sLst) {
 	Fixed lft, rght;
-	boolean curved;
+	bool curved;
 	if (!doAligns && !doStems) {
 		return;
 	}
@@ -741,12 +741,12 @@ static void AddColorsSetup() {
 	/* PreCheckForSolEol(); */
 }
 
-/* If extracolor is TRUE then it is ok to have multi-level
+/* If extracolor is true then it is ok to have multi-level
  coloring. */
-static void AddColorsInnerLoop(boolean extracolor) {
+static void AddColorsInnerLoop(bool extracolor) {
 	integer solEolCode = 2, retryColoring = 0;
-	boolean isSolEol = FALSE;
-	while (TRUE) {
+	bool isSolEol = false;
+	while (true) {
 		PreGenPts();
 		CheckSmooth();
 		InitShuffleSubpaths();
@@ -796,12 +796,12 @@ static void AddColorsInnerLoop(boolean extracolor) {
 		if (pathStart == NULL || pathStart == pathEnd) {
 			FlushLogFiles();
 			sprintf(globmsg, "No character path in %s.\n", fileName);
-			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
 
 		/* SaveFile(); SaveFile is always called in AddColorsCleanup, so this is a duplciate */
 		InitAll(RESTART);
-		if (writecoloredbez && !ReadCharFile(FALSE, FALSE, FALSE, TRUE)) {
+		if (writecoloredbez && !ReadCharFile(false, false, false, true)) {
 			break;
 		}
 		AddColorsSetup();
@@ -809,21 +809,21 @@ static void AddColorsInnerLoop(boolean extracolor) {
 			break;
 		}
 		if (flexOK) {
-			hasFlex = FALSE;
+			hasFlex = false;
 			AutoAddFlex();
 		}
-		reportErrors = FALSE;
+		reportErrors = false;
 	}
 }
 
 static void AddColorsCleanup() {
 	RemoveRedundantFirstColors();
-	reportErrors = TRUE;
+	reportErrors = true;
 	if (writecoloredbez) {
 
 		if (pathStart == NULL || pathStart == pathEnd) {
 			sprintf(globmsg, "The %s character path vanished while adding hints.\n  File not written.", fileName);
-			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
 		else {
 #if ALLOWCSOUTPUT && THISISACMAIN
@@ -841,7 +841,7 @@ static void AddColorsCleanup() {
 	InitAll(RESTART);
 }
 
-static void AddColors(boolean extracolor) {
+static void AddColors(bool extracolor) {
 	if (pathStart == NULL || pathStart == pathEnd) {
 		PrintMessage("No character path, so no hints.");
 #if ALLOWCSOUTPUT && THISISACMAIN
@@ -856,8 +856,8 @@ static void AddColors(boolean extracolor) {
 #endif
 		return;
 	}
-	reportErrors = TRUE;
-	CounterFailed = bandError = FALSE;
+	reportErrors = true;
+	CounterFailed = bandError = false;
 	CheckPathBBox();
 	CheckForDups();
 	AddColorsSetup();
@@ -865,7 +865,7 @@ static void AddColors(boolean extracolor) {
 		return;
 	}
 	if (flexOK) {
-		hasFlex = FALSE;
+		hasFlex = false;
 		AutoAddFlex();
 	}
 	AddColorsInnerLoop(extracolor);
@@ -873,17 +873,17 @@ static void AddColors(boolean extracolor) {
 	Test();
 }
 
-boolean DoFile(char *fname, boolean extracolor) {
+bool DoFile(char *fname, bool extracolor) {
 	integer lentop = lenTopBands, lenbot = lenBotBands;
 	fileName = fname;
-	if (!ReadCharFile(TRUE, FALSE, FALSE, TRUE)) {
+	if (!ReadCharFile(true, false, false, true)) {
 		sprintf(globmsg, "Cannot open %s file.\n", fileName);
-		LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+		LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 	}
 	PrintMessage(""); /* Just print the file name. */
 	LogYMinMax();
 	AddColors(extracolor);
 	lenTopBands = lentop;
 	lenBotBands = lenbot;
-	return TRUE;
+	return true;
 }

@@ -7,16 +7,16 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "bftoac.h"
 #include "machinedep.h"
 
-static boolean xflat, yflat, xdone, ydone, bbquit;
+static bool xflat, yflat, xdone, ydone, bbquit;
 static integer xstate, ystate, xstart, ystart;
 static Fixed x0, cy0, x1, cy1, xloc, yloc;
 static Fixed x, y, xnxt, ynxt;
 static Fixed yflatstartx, yflatstarty, yflatendx, yflatendy;
 static Fixed xflatstarty, xflatstartx, xflatendx, xflatendy;
-static boolean vert, started, reCheckSmooth;
+static bool vert, started, reCheckSmooth;
 static Fixed loc, frst, lst, fltnvalue;
 static PPathElt e;
-static boolean forMultiMaster = FALSE, inflPtFound = FALSE;
+static bool forMultiMaster = false, inflPtFound = false;
 
 #define STARTING (0)
 #define goingUP (1)
@@ -28,7 +28,7 @@ static boolean forMultiMaster = FALSE, inflPtFound = FALSE;
 #define SDELTA3 (FixInt(10))
 
 static void chkBad() {
-    reCheckSmooth = ResolveConflictBySplit(e,FALSE,NULL,NULL);;
+    reCheckSmooth = ResolveConflictBySplit(e,false,NULL,NULL);;
 }
 
 #define GrTan(n,d) (ac_abs(n)*100 > ac_abs(d)*sCurveTan)
@@ -42,7 +42,7 @@ static void chkYDIR() {
             if (ystart == goingUP) {
                 yflatendx = xloc; yflatendy = yloc; }
             else if (!yflat) {
-                yflatstartx = xloc; yflatstarty = yloc; yflat = TRUE; }
+                yflatstartx = xloc; yflatstarty = yloc; yflat = true; }
             ystate = goingUP; }
     }
     else if (y < yloc) { /* going down */
@@ -52,7 +52,7 @@ static void chkYDIR() {
             if (ystart == goingDOWN) {
                 yflatendx = xloc; yflatendy = yloc; }
             else if (!yflat) {
-                yflatstartx = xloc; yflatstarty = yloc; yflat = TRUE; }
+                yflatstartx = xloc; yflatstarty = yloc; yflat = true; }
             ystate = goingDOWN; }
     }
 }
@@ -61,22 +61,22 @@ static void chkYFLAT() {
     Fixed abstmp;
     if (!yflat) {
         if (LsTan(y-yloc, x-xloc)) {
-            yflat = TRUE; yflatstartx = xloc; yflatstarty = yloc; }
+            yflat = true; yflatstartx = xloc; yflatstarty = yloc; }
         return; }
     if (ystate != ystart) return;
     if (GrTan(y-yloc, x-xloc)) {
-        yflatendx = xloc; yflatendy = yloc; ydone = TRUE; }
+        yflatendx = xloc; yflatendy = yloc; ydone = true; }
 }
 
 static void chkXFLAT() {
     Fixed abstmp;
     if (!xflat) {
         if (LsTan(x-xloc, y-yloc)) {
-            xflat = TRUE; xflatstartx = xloc; xflatstarty = yloc; }
+            xflat = true; xflatstartx = xloc; xflatstarty = yloc; }
         return; }
     if (xstate != xstart) return;
     if (GrTan(x-xloc, y-yloc)) {
-        xflatendx = xloc; xflatendy = yloc; xdone = TRUE; }
+        xflatendx = xloc; xflatendy = yloc; xdone = true; }
 }
 
 static void chkXDIR() {
@@ -87,7 +87,7 @@ static void chkXDIR() {
             if (xstart == goingUP) {
                 xflatendx = xloc; xflatendy = yloc; }
             else if (!xflat) {
-                xflatstartx = xloc; xflatstarty = yloc; xflat = TRUE; }
+                xflatstartx = xloc; xflatstarty = yloc; xflat = true; }
             xstate = goingUP; }
     }
     else if (x < xloc) {
@@ -97,7 +97,7 @@ static void chkXDIR() {
             if (xstart == goingDOWN) {
                 xflatendx = xloc; xflatendy = yloc; }
             else if (!xflat) {
-                xflatstartx = xloc; xflatstarty = yloc; xflat = TRUE; }
+                xflatstartx = xloc; xflatstarty = yloc; xflat = true; }
             xstate = goingDOWN; }
     }
 }
@@ -135,7 +135,7 @@ static void chkDT(c) Cd c; {
                 }
                 else
                 {
-                    inflPtFound = TRUE;
+                    inflPtFound = true;
                     fltnvalue = itfmy(loc);
                 }
             }
@@ -169,7 +169,7 @@ static void chkDT(c) Cd c; {
                 }
                 else
                 {
-                    inflPtFound = TRUE;
+                    inflPtFound = true;
                     fltnvalue = itfmx(loc);
                 }
                 
@@ -206,7 +206,7 @@ static PPathElt PointLine(e, whichcp) PPathElt e; integer whichcp; {
         {
             FlushLogFiles();
             sprintf(globmsg, "Malformed path list (Start) in %s.\n", fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
         e->prev->next = newline;
         e->prev = newline;
@@ -218,7 +218,7 @@ static PPathElt PointLine(e, whichcp) PPathElt e; integer whichcp; {
         {
             FlushLogFiles();
             sprintf(globmsg, "Malformed path list (End) in %s.\n", fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
         e->next = newline;
         newline->prev = e;
@@ -241,7 +241,7 @@ Fixed x, y; PPathElt e; int whichcp; {
     {
         FlushLogFiles();
         sprintf(globmsg, "Malformed path list in %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
 }
 
@@ -259,17 +259,17 @@ Fixed dx, dy; PPathElt e; integer whichcp; {
     {
         FlushLogFiles();
         sprintf(globmsg, "Malformed path list in %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     
 }
 
-static boolean ZeroLength(e) PPathElt e; {
+static bool ZeroLength(e) PPathElt e; {
     Fixed x0, cy0, x1, cy1;
     GetEndPoints(e,&x0,&cy0,&x1,&cy1);
     return (x0 == x1 && cy0 == cy1); }
 
-static boolean ConsiderClipSharpPoint(rx0, ry0, rx1, ry1, rx2, ry2, e)
+static bool ConsiderClipSharpPoint(rx0, ry0, rx1, ry1, rx2, ry2, e)
 Fixed rx0, ry0, rx1, ry1, rx2, ry2; PPathElt e; {
     Fixed x0=rx0, cy0=ry0, x1=rx1, cy1=ry1, x2=rx2, y2=ry2;
     Fixed dx0, dy0, dx1, dy1, nlx, nly;
@@ -281,7 +281,7 @@ Fixed rx0, ry0, rx1, ry1, rx2, ry2; PPathElt e; {
     dx1 = x2 - x1; dy1 = y2 - cy1;
     acfixtopflt(dx0, &rdx0); acfixtopflt(dx1, &rdx1);
     acfixtopflt(dy0, &rdy0); acfixtopflt(dy1, &rdy1);
-    if (rdx1*rdy0 < rdx0*rdy1) return FALSE;
+    if (rdx1*rdy0 < rdx0*rdy1) return false;
     /* clip right turns (point toward inside of character) */
     /* do not clip left turns (point toward outside of character) */
     if (e->type != CLOSEPATH && e->next->type == CLOSEPATH &&
@@ -325,7 +325,7 @@ Fixed rx0, ry0, rx1, ry1, rx2, ry2; PPathElt e; {
         MovePoint(nlx, (dy0 > 0)? nly+FixOne : nly-FixOne, newline, wh1);
         MovePoint((dx0 > 0)? nlx+FixOne : nlx-FixOne, nly, newline, wh2);
     }
-    return TRUE;
+    return true;
 }
 
 void Delete(e) PPathElt e; {
@@ -339,7 +339,7 @@ void Delete(e) PPathElt e; {
 
 /* This procedure is called from BuildFont when adding hints
  to base designs of a multi-master font. */
-boolean GetInflectionPoint(x, y, x1, cy1, x2, y2, x3, y3, inflPt)
+bool GetInflectionPoint(x, y, x1, cy1, x2, y2, x3, y3, inflPt)
 Fixed x, y, x1, cy1, x2, y2, x3, y3;
 Fixed *inflPt;
 {
@@ -352,10 +352,10 @@ Fixed *inflPt;
     c2.x = tfmx(x2); c2.y = tfmy(y2);
     c3.x = tfmx(x3); c3.y = tfmy(y3);
     xstate = ystate = STARTING;
-    xdone = ydone = xflat = yflat = inflPtFound = FALSE;
+    xdone = ydone = xflat = yflat = inflPtFound = false;
     x0 = c0.x; cy0 = c0.y; x1 = c3.x; cy1 = c3.y;
     xloc = x0; yloc = cy0;
-    forMultiMaster = TRUE;
+    forMultiMaster = true;
     FltnCurve(c0, c1, c2, c3, &fltnrec);
     if (inflPtFound)
         *inflPt = fltnvalue;
@@ -369,7 +369,7 @@ static void CheckSCurve(ee) PPathElt ee; {
     {
         FlushLogFiles();
         sprintf(globmsg, "Malformed path list in %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     
     GetEndPoint(ee->prev, &c0.x, &c0.y);
@@ -378,11 +378,11 @@ static void CheckSCurve(ee) PPathElt ee; {
     c2.x = ee->x2; c2.y = ee->y2;
     c3.x = ee->x3; c3.y = ee->y3;
     xstate = ystate = STARTING;
-    xdone = ydone = xflat = yflat = FALSE;
+    xdone = ydone = xflat = yflat = false;
     x0 = c0.x; cy0 = c0.y; x1 = c3.x; cy1 = c3.y;
     xloc = x0; yloc = cy0;
     e = ee;
-    forMultiMaster = FALSE;
+    forMultiMaster = false;
     FltnCurve(c0, c1, c2, c3, &fr);
 }
 
@@ -405,11 +405,11 @@ static void CheckZeroLength() {
 
 void CheckSmooth() {
     PPathElt e, nxt, NxtE;
-    boolean recheck;
+    bool recheck;
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3, smdiff, xx, yy;
     CheckZeroLength();
 restart:
-    reCheckSmooth = FALSE; recheck = FALSE;
+    reCheckSmooth = false; recheck = false;
     e = pathStart;
     while (e != NULL) {
         NxtE = e->next;
@@ -433,7 +433,7 @@ restart:
             /* As of version 2.21 angle blunting will not occur. */
             /*
              if (editChar && ConsiderClipSharpPoint(x0, cy0, x1, cy1, x2, y2, e)) {
-             ReportClipSharpAngle(x1, cy1); recheck = TRUE; }
+             ReportClipSharpAngle(x1, cy1); recheck = true; }
              else */
             if (smdiff > FixInt(160))
                 ReportSharpAngle(x1, cy1);
@@ -453,47 +453,47 @@ static void chkBBDT(c) Cd c; {
     if (vert) {
         lst = y;
         if (!started && ac_abs(x-loc) <= BBdist) {
-            started = TRUE; frst = y; }
-        else if (started && ac_abs(x-loc) > BBdist) bbquit = TRUE;
+            started = true; frst = y; }
+        else if (started && ac_abs(x-loc) > BBdist) bbquit = true;
     }
     else {
         lst = x;
         if (!started && ac_abs(y-loc) <= BBdist) {
-            started = TRUE; frst = x; }
-        else if (started && ac_abs(y-loc) > BBdist) bbquit = TRUE;
+            started = true; frst = x; }
+        else if (started && ac_abs(y-loc) > BBdist) bbquit = true;
     }
 }
 
 void CheckForMultiMoveTo() {
     PPathElt e = pathStart;
-    boolean moveto;
-    moveto = FALSE;
+    bool moveto;
+    moveto = false;
     while (e != NULL) {
-        if (e->type != MOVETO) moveto = FALSE;
-        else if (!moveto) moveto = TRUE;
+        if (e->type != MOVETO) moveto = false;
+        else if (!moveto) moveto = true;
         else Delete(e->prev); /* delete previous moveto */
         e = e->next;
     }
 }
 
 void CheckBBoxEdge(e, vrt, lc, pf, pl)
-PPathElt e; boolean vrt; Fixed lc, *pf, *pl; {
+PPathElt e; bool vrt; Fixed lc, *pf, *pl; {
     FltnRec fr;
     Cd c0, c1, c2, c3;
     if (e->type != CURVETO)
     {
         FlushLogFiles();
         sprintf(globmsg, "Malformed path list in %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     
     GetEndPoint(e->prev, &c0.x, &c0.y);
     fr.report = chkBBDT;
-    bbquit = FALSE;
+    bbquit = false;
     c1.x = e->x1; c1.y = e->y1;
     c2.x = e->x2; c2.y = e->y2;
     c3.x = e->x3; c3.y = e->y3;
-    loc = lc; vert = vrt; started = FALSE;
+    loc = lc; vert = vrt; started = false;
     chkBBDT(c0);
     FltnCurve(c0, c1, c2, c3, &fr);
     *pf = frst; *pl = lst;
@@ -527,20 +527,20 @@ static Fixed ATan(a, b) Fixed a, b; {
     return acpflttofix(&cc);
 }
 
-boolean CheckSmoothness(x0, cy0, x1, cy1, x2, y2, pd)
+bool CheckSmoothness(x0, cy0, x1, cy1, x2, y2, pd)
 Fixed x0, cy0, x1, cy1, x2, y2, *pd; {
     Fixed dx, dy, smdiff, smx, smy, at0, at1, abstmp;
     dx = x0 - x1; dy = cy0 - cy1;
     *pd = 0;
-    if (dx == 0 && dy == 0) return TRUE;
+    if (dx == 0 && dy == 0) return true;
     at0 = ATan(dx, dy);
     dx = x1 - x2; dy = cy1 - y2;
-    if (dx == 0 && dy == 0) return TRUE;
+    if (dx == 0 && dy == 0) return true;
     at1 = ATan(dx, dy);
     smdiff = at0 - at1; if (smdiff < 0) smdiff = -smdiff;
     if (smdiff >= FixInt(180)) smdiff = FixInt(360) - smdiff;
     *pd = smdiff;
-    if (smdiff == 0 || smdiff > FixInt(30)) return TRUE;
+    if (smdiff == 0 || smdiff > FixInt(30)) return true;
     MakeColinear(x1, cy1, x0, cy0, x2, y2, &smx, &smy);
     smx = FHalfRnd(smx);
     smy = FHalfRnd(smy);

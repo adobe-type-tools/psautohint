@@ -51,7 +51,7 @@ static integer CheckForClr() {
   return 0;
   }
 
-boolean PreCheckForColoring() {
+bool PreCheckForColoring() {
   PPathElt e, nxt;
   integer cnt = 0;
   integer chk;
@@ -59,7 +59,7 @@ boolean PreCheckForColoring() {
     if (pathEnd->type == MOVETO) Delete(pathEnd);
     else if (pathEnd->type != CLOSEPATH) {
       ReportMissingClosePath();
-      return FALSE;
+      return false;
       }
     else break;
     }
@@ -74,19 +74,19 @@ boolean PreCheckForColoring() {
       }
     e = e->next;
     }
-  while (TRUE) {
+  while (true) {
     chk = CheckForClr();
-    if (chk == -1) return FALSE;
+    if (chk == -1) return false;
     if (chk == 0) break;
     if (++cnt > 10) {
-      LogMsg("Looping in PreCheckForHints!\n", WARNING, OK, TRUE);
+      LogMsg("Looping in PreCheckForHints!\n", WARNING, OK, true);
       break; }
     }
-  return TRUE;
+  return true;
   }
 
 static PPathElt GetSubpathNext(e) register PPathElt e; {
-  while (TRUE) {
+  while (true) {
      e = e->next;
     if (e == NULL) break;
 	if (e->type == CLOSEPATH) break;
@@ -96,7 +96,7 @@ static PPathElt GetSubpathNext(e) register PPathElt e; {
   }
 
 static PPathElt GetSubpathPrev(e) register PPathElt e; {
-  while (TRUE) {
+  while (true) {
     e = e->prev;
     if (e == NULL) break;
     if (e->type == MOVETO) e = GetClosedBy(e);
@@ -105,22 +105,22 @@ static PPathElt GetSubpathPrev(e) register PPathElt e; {
   return e; 
   }
 
-static boolean AddAutoFlexProp(e, yflag) PPathElt e; boolean yflag; {
+static bool AddAutoFlexProp(e, yflag) PPathElt e; bool yflag; {
   PPathElt e0 = e, e1 = e->next;
   if (e0->type != CURVETO || e1->type != CURVETO)
   {
 	FlushLogFiles();
     sprintf(globmsg, "Illegal input in character file: %s.\n", fileName);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
   /* Don't add flex to linear curves. */
   if (yflag && e0->y3 == e1->y1 && e1->y1 == e1->y2 && e1->y2 == e1->y3)
-    return FALSE;
+    return false;
   else if (e0->x3 == e1->x1 && e1->x1 == e1->x2 && e1->x2 == e1->x3)
-    return FALSE;
+    return false;
   e0->yFlex = yflag; e1->yFlex = yflag;
-  e0->isFlex = TRUE; e1->isFlex = TRUE;
-  return TRUE;
+  e0->isFlex = true; e1->isFlex = true;
+  return true;
   }
 
 
@@ -130,7 +130,7 @@ static void TryYFlex(e, n, x0, y0, x1, y1)
   PPathElt e, n; Fixed x0, y0, x1, y1; {
   Fixed x2, y2, x3, y3, x4, y4, abstmp;
   PPathElt p, q;
-  boolean top, dwn;
+  bool top, dwn;
   longreal d0sq, d1sq, quot, dx, dy;
 
   GetEndPoint(n, &x2, &y2);
@@ -157,9 +157,9 @@ static void TryYFlex(e, n, x0, y0, x1, y1)
     p = GetSubpathPrev(e);
     GetEndPoint(p->prev, &x4, &y4);
     if (ProdLt0(y4-y0,y1-y0)) return; /* y1 and y4 not on same side of y0 */
-    top = (x0 > x1) ? TRUE: FALSE;
-    if (YgoesUp) dwn = (y1 < y0) ? TRUE: FALSE;
-    else dwn = (y1 > y0) ? TRUE: FALSE;
+    top = (x0 > x1) ? true: false;
+    if (YgoesUp) dwn = (y1 < y0) ? true: false;
+    else dwn = (y1 > y0) ? true: false;
     if ((top && !dwn) || (!top && dwn)) return; /* concave */
   }
   if (n != e->next) { /* something in the way */
@@ -169,7 +169,7 @@ static void TryYFlex(e, n, x0, y0, x1, y1)
   if (y0 != y2) {
     ReportTryFlexNearMiss(x0, y0, x2, y2);
     return; }
-  if (AddAutoFlexProp(e, TRUE))
+  if (AddAutoFlexProp(e, true))
     ReportAddFlex();
   }
 
@@ -177,7 +177,7 @@ static void TryXFlex(e, n, x0, y0, x1, y1)
   PPathElt e, n; Fixed x0, y0, x1, y1; {
   Fixed x2, y2, x3, y3, x4, y4, abstmp;
   PPathElt p, q;
-  boolean lft;
+  bool lft;
   longreal d0sq, d1sq, quot, dx, dy;
 
   GetEndPoint(n, &x2, &y2);
@@ -205,8 +205,8 @@ static void TryXFlex(e, n, x0, y0, x1, y1)
     p = GetSubpathPrev(e);
     GetEndPoint(p->prev, &x4, &y4);
     if (ProdLt0(x4-x0,x1-x0)) return; /* x1 and x4 not on same side of x0 */
-    if (YgoesUp) lft = (y0 > y2)? TRUE: FALSE;
-    else lft = (y0 < y2)? TRUE: FALSE;
+    if (YgoesUp) lft = (y0 > y2)? true: false;
+    else lft = (y0 < y2)? true: false;
     if ((lft && x0 > x1) || (!lft && x0 < x1)) return; /* concave */
   }
   if (n != e->next) { /* something in the way */
@@ -216,7 +216,7 @@ static void TryXFlex(e, n, x0, y0, x1, y1)
   if (x0 != x2) {
     ReportTryFlexNearMiss(x0, y0, x2, y2);
     return; }
-  if (AddAutoFlexProp(e, FALSE))
+  if (AddAutoFlexProp(e, false))
     ReportAddFlex();
   }
 

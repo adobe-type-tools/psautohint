@@ -124,7 +124,7 @@ extern void init_ops()
   if (ix > KNOWNOPSIZE)
   {
     LogMsg("Initialization of op table failed.\n",
-      LOGERROR, NONFATALERROR, TRUE);
+      LOGERROR, NONFATALERROR, true);
   }
   /* These are treated as a special case for no particularly good reason
      other than that they are longer than will fit in the above table */
@@ -149,7 +149,7 @@ void GetOperator(int16_t encoding, char *operator)
       return;
     }
   sprintf(globmsg, "The opcode: %d is invalid.\n", (int)encoding);
-  LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 }
 
 /* Checks if the operator passed in is a recognized PS operator.

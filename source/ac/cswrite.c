@@ -28,14 +28,14 @@ extern Fixed GetPathLSB(void);
 FILE *cstmpfile;
 extern FILE *outputfile;
 static Fixed currentx, currenty;
-static boolean firstFlex, wrtColorInfo;
+static bool firstFlex, wrtColorInfo;
 static char S0[128];
 static PClrPoint bst;
 static char bch;
 static Fixed bx, by;
-static boolean bstB;
+static bool bstB;
 static Fixed lsb;
-static boolean needtoSubLSB;
+static bool needtoSubLSB;
 static int16_t trilockcount = 0;
 #if DEBUG
 #else
@@ -84,7 +84,7 @@ static char prevhintmaskstr[HINTMAXSTR];
 static void safestrcat(char *s1, char *s2) {
 	if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
 		sprintf(S0, "ERROR: Hint information overflowing buffer: %s\n", fileName);
-		LogMsg(S0, LOGERROR, FATALERROR, TRUE);
+		LogMsg(S0, LOGERROR, FATALERROR, true);
 	}
 	else {
 		strcat(s1, s2);
@@ -109,7 +109,7 @@ static void wrtfx(Fixed f) {
 	WRTNUM(FTrunc(i));
 }
 
-static void wrtx(Fixed x, boolean subLSB) {
+static void wrtx(Fixed x, bool subLSB) {
 	Fixed i = FRnd(x);
 	if (subLSB) {
 		WRTNUM(FTrunc(i - currentx - lsb));
@@ -135,13 +135,13 @@ static void NewBest(PClrPoint lst) {
 	bst = lst;
 	bch = lst->c;
 	if (bch == 'y' || bch == 'm') {
-		bstB = TRUE;
+		bstB = true;
 		x0 = lst->x0;
 		x1 = lst->x1;
 		bx = MIN(x0, x1);
 	}
 	else {
-		bstB = FALSE;
+		bstB = false;
 		y0 = lst->y0;
 		y1 = lst->y1;
 		by = MIN(y0, y1);
@@ -215,10 +215,10 @@ static void WrtPntLst(PClrPoint lst) {
 
 	ptLst = lst;
 	while (lst != NULL) { /* mark all as not yet done */
-		lst->done = FALSE;
+		lst->done = false;
 		lst = lst->next;
 	}
-	while (TRUE) { /* write in sort order */
+	while (true) { /* write in sort order */
 		lst = ptLst;
 		bst = NULL;
 		while (lst != NULL) { /* find first not yet done as init best */
@@ -257,7 +257,7 @@ static void WrtPntLst(PClrPoint lst) {
 			}
 			lst = lst->next;
 		}
-		bst->done = TRUE; /* mark as having been done */
+		bst->done = true; /* mark as having been done */
 		WritePointItem(bst);
 	}
 }
@@ -275,7 +275,7 @@ static void wrtnewclrs(PPathElt e) {
 	}
 }
 
-static boolean IsFlex(PPathElt e) {
+static bool IsFlex(PPathElt e) {
 	PPathElt e0, e1;
 	if (firstFlex) {
 		e0 = e;
@@ -296,7 +296,7 @@ static void mt(Cd c, PPathElt e) {
 		if (FRnd(c.y) == currenty) {
 			wrtx(c.x, 1);
 			ws("hmoveto");
-			needtoSubLSB = FALSE;
+			needtoSubLSB = false;
 		}
 		else if ((FRnd(c.x) - currentx - FRnd(lsb)) == 0) {
 			wrty(c.y);
@@ -306,7 +306,7 @@ static void mt(Cd c, PPathElt e) {
 			wrtx(c.x, 1);
 			wrty(c.y);
 			ws("rmoveto");
-			needtoSubLSB = FALSE;
+			needtoSubLSB = false;
 		}
 	}
 	else {
@@ -326,9 +326,9 @@ static void mt(Cd c, PPathElt e) {
 }
 
 static Fixed currentFlexx, currentFlexy;
-static boolean firstFlexMT;
+static bool firstFlexMT;
 
-static void wrtFlexx(Fixed x, boolean subLSB) {
+static void wrtFlexx(Fixed x, bool subLSB) {
 	Fixed i = FRnd(x);
 	if (subLSB) {
 		WRTNUM(FTrunc(i - currentFlexx - lsb));
@@ -361,7 +361,7 @@ static void wrtFlexmt(Cd c) {
 			wrtFlexy(c.y);
 			ws("rmoveto");
 		}
-		firstFlexMT = FALSE;
+		firstFlexMT = false;
 	}
 	else {
 		if (FRnd(c.y) == currentFlexy) {
@@ -388,7 +388,7 @@ static void dt(Cd c, PPathElt e) {
 		if (FRnd(c.y) == currenty) {
 			wrtx(c.x, 1);
 			ws("hlineto");
-			needtoSubLSB = FALSE;
+			needtoSubLSB = false;
 		}
 		else if ((FRnd(c.x) - currentx - FRnd(lsb)) == 0) {
 			wrty(c.y);
@@ -397,13 +397,13 @@ static void dt(Cd c, PPathElt e) {
 		else if (FRnd(c.x) == currentx) {
 			wrty(c.y);
 			ws("vlineto");
-			needtoSubLSB = FALSE;
+			needtoSubLSB = false;
 		}
 		else {
 			wrtx(c.x, 1);
 			wrty(c.y);
 			ws("rlineto");
-			needtoSubLSB = FALSE;
+			needtoSubLSB = false;
 		}
 	}
 	else {
@@ -428,7 +428,7 @@ static Cd fc1, fc2, fc3;
 
 static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	integer dmin, delta;
-	boolean yflag;
+	bool yflag;
 	Cd c13;
 	real shrink, r1, r2;
 	if (firstFlex) {
@@ -437,7 +437,7 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 		fc1 = c1;
 		fc2 = c2;
 		fc3 = c3;
-		firstFlex = FALSE;
+		firstFlex = false;
 		return;
 	}
 	yflag = e->yFlex;
@@ -502,7 +502,7 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	WRTNUM(FTrunc(FRnd(currentx)));
 	WRTNUM(FTrunc(FRnd(currenty)));
 	ws("0 callsubr");
-	firstFlex = TRUE;
+	firstFlex = true;
 }
 
 static void ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
@@ -518,7 +518,7 @@ static void ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
 		wrty(c2.y);
 		wrtx(c3.x, 0);
 		ws("vhcurveto");
-		needtoSubLSB = FALSE;
+		needtoSubLSB = false;
 	}
 	else if ((FRnd(c1.x) == currentx) && (c2.y == c3.y)) {
 		wrty(c1.y);
@@ -526,14 +526,14 @@ static void ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
 		wrty(c2.y);
 		wrtx(c3.x, 0);
 		ws("vhcurveto");
-		needtoSubLSB = FALSE;
+		needtoSubLSB = false;
 	}
 	else if ((FRnd(c1.y) == currenty) && (c2.x == c3.x)) {
 		wrtx(c1.x, needtoSubLSB);
 		wrtcd(c2);
 		wrty(c3.y);
 		ws("hvcurveto");
-		needtoSubLSB = FALSE;
+		needtoSubLSB = false;
 	}
 	else {
 		wrtx(c1.x, needtoSubLSB);
@@ -541,10 +541,10 @@ static void ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
 		wrtcd(c2);
 		wrtcd(c3);
 		ws("rrcurveto");
-		needtoSubLSB = FALSE;
+		needtoSubLSB = false;
 	}
 	if (firstFlex) {
-		firstFlexMT = FALSE;
+		firstFlexMT = false;
 	}
 }
 
@@ -589,9 +589,9 @@ void CSWrite(void) {
 		strcpy(prevhintmaskstr, hintmaskstr);
 	}
 
-	firstFlex = TRUE;
-	needtoSubLSB = TRUE;
-	firstFlexMT = TRUE;
+	firstFlex = true;
+	needtoSubLSB = true;
+	firstFlexMT = true;
 
 	currentx = currenty = 0;
 	while (e != NULL) {
@@ -620,7 +620,7 @@ void CSWrite(void) {
 				break;
 			default: {
 				sprintf(S0, "Illegal path list for file: %s.\n", fileName);
-				LogMsg(S0, LOGERROR, NONFATALERROR, TRUE);
+				LogMsg(S0, LOGERROR, NONFATALERROR, true);
 			}
 		}
 

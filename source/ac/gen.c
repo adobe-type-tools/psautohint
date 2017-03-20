@@ -23,7 +23,7 @@ void InitGen(reason) integer reason; {
 }
 
 static void LinkSegment(e, Hflg, seg)
-PPathElt e; boolean Hflg; PClrSeg seg; {
+PPathElt e; bool Hflg; PClrSeg seg; {
 	PSegLnk newlnk;
 	PSegLnkLst newlst, globlst;
 	newlnk = (PSegLnk)Alloc(sizeof(SegLnk));
@@ -41,7 +41,7 @@ PPathElt e; boolean Hflg; PClrSeg seg; {
 }
 
 static void CopySegmentLink(e1, e2, Hflg)
-PPathElt e1, e2; boolean Hflg; {
+PPathElt e1, e2; bool Hflg; {
 	/* copy reference to first link from e1 to e2 */
 	PSegLnkLst newlst;
 	newlst = (PSegLnkLst)Alloc(sizeof(SegLnkLst));
@@ -53,7 +53,7 @@ PPathElt e1, e2; boolean Hflg; {
 
 static void AddSegment(from,to,loc,lftLstNm,rghtLstNm,e1,e2,Hflg,typ)
 Fixed from, to, loc; integer lftLstNm, rghtLstNm;
-PPathElt e1, e2; boolean Hflg; integer typ; {
+PPathElt e1, e2; bool Hflg; integer typ; {
 	PClrSeg seg, segList, prevSeg;
 	integer segNm;
 	seg = (PClrSeg)Alloc(sizeof(ClrSeg));
@@ -75,7 +75,7 @@ PPathElt e1, e2; boolean Hflg; integer typ; {
 	segNm = (from > to)? lftLstNm: rghtLstNm;
 	segList = segLists[segNm];
 	prevSeg = NULL;
-	while (TRUE) { /* keep list in increasing order by sLoc */
+	while (true) { /* keep list in increasing order by sLoc */
 		if (segList == NULL) { /* at end of list */
 			if (prevSeg == NULL) { segLists[segNm] = seg; break; }
 			prevSeg->sNxt = seg; break; }
@@ -89,13 +89,13 @@ PPathElt e1, e2; boolean Hflg; integer typ; {
 void AddVSegment(from,to,loc,p1,p2,typ,i) 
 Fixed from, to, loc; PPathElt p1, p2; integer typ, i; {
  	if (DEBUG) ReportAddVSeg(from, to, loc, i);
-	if (YgoesUp) AddSegment(from,to,loc,0,1,p1,p2,FALSE,typ);
-	else AddSegment(from,to,loc,1,0,p1,p2,FALSE,typ); }
+	if (YgoesUp) AddSegment(from,to,loc,0,1,p1,p2,false,typ);
+	else AddSegment(from,to,loc,1,0,p1,p2,false,typ); }
 
 void AddHSegment(from,to,loc,p1,p2,typ,i)
 Fixed from, to, loc; PPathElt p1, p2; integer typ, i; {
 	if (DEBUG) ReportAddHSeg(from, to, loc, i);
-	AddSegment(from,to,loc,2,3,p1,p2,TRUE,typ); }
+	AddSegment(from,to,loc,2,3,p1,p2,true,typ); }
 
 static Fixed CPFrom(cp2,cp3) Fixed cp2,cp3; {
     Fixed val = 2*(((cp3-cp2)*cpFrom)/200);  /*DEBUG 8 BIT: hack to get same rounding as old version */
@@ -112,7 +112,7 @@ static Fixed CPTo(cp0,cp1) Fixed cp0,cp1; {
 	return val; /* DEBUG 8 BIT to match results with 7 bit fractions */
 }
 
-static boolean TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
+static bool TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
 	/* return true if bend angle is sharp enough (135 degrees or less) */
 	real dx1, dy1, dx2, dy2;
 	double dotprod, lensqprod;
@@ -128,12 +128,12 @@ static boolean TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
 #define TestTan(d1,d2) (abs(d1) > (abs(d2)*bendTan)/1000)
 #define FRound(x) FTrunc(FRnd(x))
 
-static boolean IsCCW(x0,y0,x1,y1,x2,y2)
+static bool IsCCW(x0,y0,x1,y1,x2,y2)
 Fixed x0, y0, x1, y1, x2, y2; {
     /* returns true if (x0,y0) -> (x1,y1) -> (x2,y2) is counter clockwise
 	 in character space */
 	integer dx0, dy0, dx1, dy1;
-	boolean ccw;
+	bool ccw;
 	dx0 = FRound(x1-x0); dy0 = FRound(y1-y0);
 	dx1 = FRound(x2-x1); dy1 = FRound(y2-y1);
 	if (!YgoesUp) { dy0 = -dy0; dy1 = -dy1; }
@@ -144,7 +144,7 @@ Fixed x0, y0, x1, y1, x2, y2; {
 static void DoHBendsNxt(x0,y0,x1,y1,p)
 Fixed x0, y0, x1, y1; PPathElt p; {
 	Fixed x2, y2, delta, strt, end, x3, y3;
-	boolean ysame, ccw, above, doboth;
+	bool ysame, ccw, above, doboth;
 	if (y0 == y1) return;
 	(void)NxtForBend(p,&x2,&y2,&x3,&y3);
 	ysame = ProdLt0(y2-y1,y1-y0); /* y0 and y2 on same side of y1 */
@@ -153,7 +153,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 		 (ProdLt0(x2-x1,x1-x0) ||
           (IsVertical(x0,y0,x1,y1) && TestBend(x0,y0,x1,y1,x2,y2))))) {
 			 delta = FixHalfMul(bendLength);
-			 doboth = FALSE;
+			 doboth = false;
 			 if ((x0 <= x1 && x1 < x2) || (x0 < x1 && x1 <= x2)) {}
 			 else if ((x2 < x1 && x1 <= x0) || (x2 <= x1 && x1 < x0))
 				 delta = -delta;
@@ -163,7 +163,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 				 ccw = IsCCW(x0,y0,x1,y1,x2,y2);
 				 if (above != ccw) delta = -delta;
 			 }
-			 else doboth = TRUE;
+			 else doboth = true;
 			 strt = x1 - delta; end = x1 + delta;
 			 AddHSegment(strt, end, y1, p, (PPathElt)NULL, sBEND, 0);
 			 if (doboth)
@@ -174,7 +174,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 static void DoHBendsPrv(x0,y0,x1,y1,p)
 Fixed x0, y0, x1, y1; PPathElt p; {
 	Fixed x2, y2, delta, strt, end;
-	boolean ysame, ccw, above, doboth;
+	bool ysame, ccw, above, doboth;
 	if (y0 == y1) return;
 	(void)PrvForBend(p,&x2,&y2);
 	ysame = ProdLt0(y2-y0,y0-y1);
@@ -183,7 +183,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 		 (ProdLt0(x2-x0,x0-x1) ||
           (IsVertical(x0,y0,x1,y1) && TestBend(x2,y2,x0,y0,x1,y1))))) {
 			 delta = FixHalfMul(bendLength);
-			 doboth = FALSE;
+			 doboth = false;
 			 if ((x2 < x0 && x0 <= x1) || (x2 <= x0 && x0 < x1)) {}
 			 else if ((x1 < x0 && x0 <= x2) || (x1 <= x0 && x0 < x2))
 				 delta = -delta;
@@ -203,7 +203,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 static void DoVBendsNxt(x0,y0,x1,y1,p)
 Fixed x0, y0, x1, y1; PPathElt p; {
 	Fixed x2, y2, delta, strt, end, x3, y3;
-	boolean xsame, ccw, right, doboth;
+	bool xsame, ccw, right, doboth;
 	if (x0 == x1) return;
 	(void)NxtForBend(p,&x2,&y2,&x3,&y3);
 	xsame = ProdLt0(x2-x1,x1-x0);
@@ -212,7 +212,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 		 (ProdLt0(y2-y1,y1-y0) ||
           (IsHorizontal(x0,y0,x1,y1) && TestBend(x0,y0,x1,y1,x2,y2))))) {
 			 delta = FixHalfMul(bendLength);
-			 doboth = FALSE;
+			 doboth = false;
 			 if ((y0 <= y1 && y1 < y2) || (y0 < y1 && y1 <= y2)) {}
 			 else if ((y2 < y1 && y1 <= y0) || (y2 <= y1 && y1 < y0))
 				 delta = -delta;
@@ -222,7 +222,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 				 if (right != ccw) delta = -delta;
 				 if (!YgoesUp) delta = -delta;
 			 }
-			 else doboth = TRUE;
+			 else doboth = true;
 			 strt = y1 - delta; end = y1 + delta;
 			 AddVSegment(strt, end, x1, p, (PPathElt)NULL, sBEND, 0);
 			 if (doboth)
@@ -233,7 +233,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 static void DoVBendsPrv(x0,y0,x1,y1,p)
 Fixed x0, y0, x1, y1; PPathElt p; {
 	Fixed x2, y2, delta, strt, end;
-	boolean xsame, ccw, right, doboth;
+	bool xsame, ccw, right, doboth;
 	if (x0 == x1) return;
 	(void)PrvForBend(p,&x2,&y2);
 	xsame = ProdLt0(x2-x0,x0-x1);
@@ -242,7 +242,7 @@ Fixed x0, y0, x1, y1; PPathElt p; {
 		 (ProdLt0(y2-y0,y0-y1) ||
           (IsHorizontal(x0,y0,x1,y1) && TestBend(x2,y2,x0,y0,x1,y1))))) {
 			 delta = FixHalfMul(bendLength);
-			 doboth = FALSE;
+			 doboth = false;
 			 if ((y2 < y0 && y0 <= y1) || (y2 <= y0 && y0 < y1)) {}
 			 else if ((y1 < y0 && y0 <= y2) || (y1 <= y0 && y0 < y2))
 				 delta = -delta;
@@ -336,13 +336,13 @@ static void CompactList(i,nm)
 integer i; void (*nm)(); {
 	PClrSeg lst, prv, nxtprv, nxt;
 	Fixed lstmin, lstmax, nxtmin, nxtmax;
-	boolean flg;
+	bool flg;
 	lst = segLists[i]; prv = NULL;
 	while (lst != NULL) {
 		nxt = lst->sNxt; nxtprv = lst;
-		while (TRUE) {
+		while (true) {
 			if ((nxt == NULL) || (nxt->sLoc > lst->sLoc)) {
-				flg = TRUE; break; }
+				flg = true; break; }
 			lstmin = lst->sMin; lstmax = lst->sMax;
 			nxtmin = nxt->sMin; nxtmax = nxt->sMax;
 			if (lstmax >= nxtmin && lstmin <= nxtmax) {
@@ -363,7 +363,7 @@ integer i; void (*nm)(); {
 					lst = lst->sNxt;
 					if (prv == NULL) segLists[i] = lst;
 					else prv->sNxt = lst; }
-				flg = FALSE; break; }
+				flg = false; break; }
 			nxtprv = nxt; nxt = nxt->sNxt; }
 		if (flg) { prv = lst; lst = lst->sNxt; }
     }
@@ -405,30 +405,30 @@ static Fixed AdjDist(d,q) Fixed d,q; {
 /* serifs of ITCGaramond Ultra have points that are not quite horizontal 
  e.g., in H: (53,51)(74,52)(116,54) 
  the following was added to let these through */
-static boolean TstFlat(dmn,dmx) Fixed dmn, dmx; {
+static bool TstFlat(dmn,dmx) Fixed dmn, dmx; {
 	if (dmn < 0) dmn = -dmn; if (dmx < 0) dmx = -dmx;
 	return (dmx >= PSDist(50) && dmn <= PSDist(4));
 }
 
-static boolean NxtHorz(x,y,p) Fixed x,y; PPathElt p; {
+static bool NxtHorz(x,y,p) Fixed x,y; PPathElt p; {
 	Fixed x2, y2, x3, y3;
 	p = NxtForBend(p,&x2,&y2,&x3,&y3);
 	return TstFlat(y2-y,x2-x);
 }
 
-static boolean PrvHorz(x,y,p) Fixed x,y; PPathElt p; {
+static bool PrvHorz(x,y,p) Fixed x,y; PPathElt p; {
 	Fixed x2, y2;
 	p = PrvForBend(p,&x2,&y2);
 	return TstFlat(y2-y,x2-x);
 }
 
-static boolean NxtVert(x,y,p) Fixed x,y; PPathElt p; {
+static bool NxtVert(x,y,p) Fixed x,y; PPathElt p; {
 	Fixed x2, y2, x3, y3;
 	p = NxtForBend(p,&x2,&y2,&x3,&y3);
 	return TstFlat(x2-x,y2-y);
 }
 
-static boolean PrvVert(x,y,p) Fixed x,y; PPathElt p; {
+static bool PrvVert(x,y,p) Fixed x,y; PPathElt p; {
 	Fixed x2, y2;
 	p = PrvForBend(p,&x2,&y2);
 	return TstFlat(x2-x,y2-y);
@@ -437,14 +437,14 @@ static boolean PrvVert(x,y,p) Fixed x,y; PPathElt p; {
 /* PrvSameDir and NxtSameDir were added to check the direction of a
  path and not add a band if the point is not at an extreme and is
  going in the same direction as the previous path. */  
-static boolean TstSameDir(x0,y0,x1,y1,x2,y2)
+static bool TstSameDir(x0,y0,x1,y1,x2,y2)
 Fixed x0, y0, x1, y1, x2, y2; {
 	if (ProdLt0(y0-y1,y1-y2) || ProdLt0(x0-x1,x1-x2))
-		return FALSE;
+		return false;
 	return !TestBend(x0,y0,x1,y1,x2,y2);
 }
 
-static boolean PrvSameDir(x0,y0,x1,y1,p)
+static bool PrvSameDir(x0,y0,x1,y1,p)
 Fixed x0,y0,x1,y1; PPathElt p; {
 	Fixed x2, y2;
 	p = PrvForBend(p,&x2,&y2);
@@ -453,7 +453,7 @@ Fixed x0,y0,x1,y1; PPathElt p; {
 	return TstSameDir(x0,y0,x1,y1,x2,y2);
 }
 
-static boolean NxtSameDir(x0,y0,x1,y1,p)
+static bool NxtSameDir(x0,y0,x1,y1,p)
 Fixed x0,y0,x1,y1; PPathElt p; {
 	Fixed x2, y2, x3, y3;
 	p = NxtForBend(p,&x2,&y2,&x3,&y3);
@@ -465,11 +465,11 @@ Fixed x0,y0,x1,y1; PPathElt p; {
 void GenVPts(specialCharType) integer specialCharType; {
 	/* specialCharType 1 = upper; -1 = lower; 0 = neither */
 	PPathElt p, fl;
-	boolean isVert, flex1, flex2;
+	bool isVert, flex1, flex2;
 	Fixed flx0, fly0, llx, lly, urx, ury, yavg, yend, ydist, q, q2;
 	Fixed prvx, prvy, nxtx, nxty, xx, yy, yd2;
 	p = pathStart;
-	flex1 = flex2 = FALSE;
+	flex1 = flex2 = false;
 	cpTo = CPpercent; cpFrom = 100 - cpTo;  
 	flx0 = fly0 = 0; fl = NULL;
 	while (p != NULL) {
@@ -477,22 +477,22 @@ void GenVPts(specialCharType) integer specialCharType; {
 		GetEndPoints(p,&x0,&y0,&x1,&y1);
 		if (p->type == CURVETO) {
 			Fixed px1, py1, px2, py2;
-			isVert = FALSE;
+			isVert = false;
 			if (p->isFlex) {
 				if (flex1) {
 					if (IsVertical(flx0,fly0,x1,y1))
 						AddVSegment(fly0,y1,x1,fl->prev,p,sLINE,4);
-					flex1 = FALSE; flex2 = TRUE; }
+					flex1 = false; flex2 = true; }
 				else {
-					flex1 = TRUE; flex2 = FALSE;
+					flex1 = true; flex2 = false;
 					flx0 = x0; fly0 = y0; fl = p; }}
-			else flex1 = flex2 = FALSE;
+			else flex1 = flex2 = false;
 			px1 = p->x1; py1 = p->y1; px2 = p->x2; py2 = p->y2;
 			if (!flex2) {
 				if ((q=VertQuo(px1,py1,x0,y0)) == 0) /* first two not vertical */
 					DoVBendsPrv(x0,y0,px1,py1,p);
 				else {
-					isVert = TRUE;
+					isVert = true;
 					if (px1 == x0 ||
 						(px2 != x1 &&
 						 (PrvVert(px1,py1,p) || !PrvSameDir(x1,y1,x0,y0,p)))) {
@@ -518,7 +518,7 @@ void GenVPts(specialCharType) integer specialCharType; {
 						 (px1 != x0 &&
 						  (NxtVert(px2,py2,p) || !NxtSameDir(x0,y0,x1,y1,p)))) {
 							 ydist = AdjDist(y1-CPFrom(py2,y1),q);
-							 isVert = TRUE;
+							 isVert = true;
 							 q2 = VertQuo(x0,y0,x1,y1);
 							 yd2 = (q2 > 0) ? AdjDist(y1-y0, q2) : 0;
 							 if (isVert && q2 > 0 && abs(yd2) > abs(ydist)) {
@@ -554,7 +554,7 @@ void GenVPts(specialCharType) integer specialCharType; {
 					if (urx-maxx > FixTwo || minx-llx > FixTwo) {
 						Fixed loc, frst, lst;
 						loc = (minx-llx > urx-maxx)? llx : urx;
-						CheckBBoxEdge(p,TRUE,loc,&frst,&lst);
+						CheckBBoxEdge(p,true,loc,&frst,&lst);
 						yavg = FixHalfMul(frst+lst);
 						ydist = (frst==lst)? (y1-y0)/10 : FixHalfMul(lst-frst);
 						if (abs(ydist) < bendLength)
@@ -600,24 +600,24 @@ void GenVPts(specialCharType) integer specialCharType; {
 	rightList = segLists[1];
 }
 
-boolean InBlueBand(loc,n,p) Fixed loc; register Fixed *p; integer n; {
+bool InBlueBand(loc,n,p) Fixed loc; register Fixed *p; integer n; {
 	register int i;
 	register Fixed y;
-	if (n <= 0) return FALSE;
+	if (n <= 0) return false;
 	y = itfmy(loc);
 	/* Augment the blue band by bluefuzz in each direction.  This will
      result in "near misses" being colored and so adjusted by the
      PS interpreter. */
 	for (i=0; i < n; i += 2)
 		if ((p[i]-bluefuzz) <= y &&
-			(p[i+1]+bluefuzz) >= y) return TRUE;
-	return FALSE; }
+			(p[i+1]+bluefuzz) >= y) return true;
+	return false; }
 
 static Fixed PickHSpot(x0,y0,x1,y1,xdist,px1,py1,px2,py2,prvx,prvy,nxtx,nxty)
 Fixed x0,y0,x1,y1,xdist,px1,py1,px2,py2,prvx,prvy,nxtx,nxty; {
-	boolean topSeg = (xdist < 0)? TRUE : FALSE;
+	bool topSeg = (xdist < 0)? true : false;
 	Fixed upper, lower;
-	boolean inBlue0, inBlue1;
+	bool inBlue0, inBlue1;
 	if (topSeg) {
 		inBlue0 = InBlueBand(y0, lenTopBands, topBands);
 		inBlue1 = InBlueBand(y1, lenTopBands, topBands);
@@ -649,12 +649,12 @@ Fixed x0,y0,x1,y1,xdist,px1,py1,px2,py2,prvx,prvy,nxtx,nxty; {
 
 void GenHPts() {
 	PPathElt p, fl;
-	boolean isHoriz, flex1, flex2;
+	bool isHoriz, flex1, flex2;
 	Fixed flx0, fly0, llx, lly, urx, ury, xavg, xend, xdist, q, q2;
 	Fixed prvx, prvy, nxtx, nxty, xx, yy, xd2;
 	p = pathStart;
 	bonus = 0; flx0 = fly0 = 0; fl = NULL;
-	flex1 = flex2 = FALSE;
+	flex1 = flex2 = false;
 	cpTo = CPpercent;
 	cpFrom = 100 - cpTo;
 	while (p != NULL) {
@@ -662,23 +662,23 @@ void GenHPts() {
 		GetEndPoints(p,&x0,&y0,&x1,&y1);
 		if (p->type == CURVETO) {
 			Fixed px1, py1, px2, py2;
-			isHoriz = FALSE;
+			isHoriz = false;
 			if (p->isFlex) {
 				if (flex1) {
-					flex1 = FALSE; flex2 = TRUE;
+					flex1 = false; flex2 = true;
 					if (IsHorizontal(flx0,fly0,x1,y1))
 						AddHSegment(flx0,x1,y1,fl->prev,p,sLINE,4);
 				}
 				else {
-					flex1 = TRUE; flex2 = FALSE;
+					flex1 = true; flex2 = false;
 					flx0 = x0; fly0 = y0; fl = p; }}
-			else flex1 = flex2 = FALSE;
+			else flex1 = flex2 = false;
 			px1 = p->x1; py1 = p->y1; px2 = p->x2; py2 = p->y2;
 			if (!flex2) {
 				if ((q=HorzQuo(px1,py1,x0,y0)) == 0)
 					DoHBendsPrv(x0,y0,px1,py1,p);
 				else {
-					isHoriz = TRUE;
+					isHoriz = true;
 					if (py1 == y0 ||
 						(py2 != y1 &&
 						 (PrvHorz(px1,py1,p) || !PrvSameDir(x1,y1,x0,y0,p)))) {
@@ -705,7 +705,7 @@ void GenHPts() {
 						  (NxtHorz(px2,py2,p) || !NxtSameDir(x0,y0,x1,y1,p)))) {
 							 xdist = AdjDist(x1-CPFrom(px2,x1),q);
 							 q2=HorzQuo(x0,y0,x1,y1);
-							 isHoriz = TRUE;
+							 isHoriz = true;
 							 xd2 = (q2 > 0)? AdjDist(x1-x0,q2) : 0;
 							 if (isHoriz && q2 > 0 && abs(xd2) > abs(xdist)) {
 								 Fixed hspot;
@@ -742,7 +742,7 @@ void GenHPts() {
 					if (ury-maxy > FixTwo || miny-lly > FixTwo) {
 						Fixed loc, frst, lst;
 						loc = (miny-lly > ury-maxy)? lly : ury;
-						CheckBBoxEdge(p,FALSE,loc,&frst,&lst);
+						CheckBBoxEdge(p,false,loc,&frst,&lst);
 						xavg = FixHalfMul(frst+lst);
 						xdist = (frst==lst)? (x1-x0)/10 : FixHalfMul(lst-frst);
 						if (abs(xdist) < bendLength)

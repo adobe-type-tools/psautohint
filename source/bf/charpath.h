@@ -16,7 +16,7 @@ typedef struct _t_hintelt {
 typedef struct _t_charpathelt {
   int16_t type; /* RMT, RDT, RCT, CP */
   /* the following fields must be cleared in charpathpriv.c/CheckPath */
-  boolean isFlex:1, sol:1, eol:1, remove:1;
+  bool isFlex:1, sol:1, eol:1, remove:1;
   int unused:12;
   PHintElt hints;
   Fixed x, y, x1, y1, x2, y2, x3, y3; /* absolute coordinates */
@@ -31,11 +31,11 @@ typedef struct _t_pathlist {
 } PathList, *PPathList;
 
 extern int32_t path_entries;  /* number of elements in a character path */
-extern boolean addHints;  /* whether to include hints in the font */
+extern bool addHints;  /* whether to include hints in the font */
 
 extern PCharPathElt AppendCharPathElement(int);
 
-extern boolean CheckCharPath(char *, char *);
+extern bool CheckCharPath(char *, char *);
 
 extern int16_t GetOperandCount(int16_t);
 
@@ -49,7 +49,7 @@ extern void SetHintsDir(indx);
 
 extern int GetHintsDir(void);
 
-extern void SetHintsElt(int16_t, CdPtr, int32_t, int32_t, boolean);
+extern void SetHintsElt(int16_t, CdPtr, int32_t, int32_t, bool);
 
 extern void SetNoHints(void);
 

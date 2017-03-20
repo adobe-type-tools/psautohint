@@ -19,12 +19,12 @@ void InitPick(reason) integer reason; {
 
 #define LtPruneB(val) ((val) < FixOne && ((val)<<10) < pruneB)
 
-static boolean ConsiderPicking(bestSpc, bestVal, colorList, prevBestVal)
+static bool ConsiderPicking(bestSpc, bestVal, colorList, prevBestVal)
 Fixed bestSpc, bestVal, prevBestVal; PClrVal colorList; {
-	if (bestSpc > 0) return TRUE;
+	if (bestSpc > 0) return true;
 	if (colorList == NULL) return bestVal >= pruneD;
-	if (bestVal > pruneA) return TRUE;
-	if (LtPruneB(bestVal)) return FALSE;
+	if (bestVal > pruneA) return true;
+	if (LtPruneB(bestVal)) return false;
 	return (bestVal < FixedPosInf / pruneC) ?
 	(prevBestVal <= bestVal * pruneC) : (prevBestVal / pruneC <= bestVal);
 }
@@ -33,7 +33,7 @@ void PickVVals(valList) PClrVal valList; {
 	PClrVal colorList, rejectList, vlist, prev, best, bestPrev, nxt;
 	Fixed bestVal, prevBestVal; Fixed lft, rght, vlft, vrght;
 	colorList = rejectList = NULL; prevBestVal = 0;
-	while (TRUE) {
+	while (true) {
 		vlist = valList; prev = bestPrev = best = NULL;
 		while (vlist != NULL) {
 			if ((best == NULL || CompareValues(vlist,best,spcBonus,0)) &&
@@ -72,37 +72,37 @@ void PickVVals(valList) PClrVal valList; {
 	Vrejects = rejectList;
 }
 
-static boolean InSerifBand(y0,y1,n,p) register Fixed y0, y1, *p; integer n; {
+static bool InSerifBand(y0,y1,n,p) register Fixed y0, y1, *p; integer n; {
 	register integer i;
-	if (n <= 0) return FALSE;
+	if (n <= 0) return false;
 	y0 = itfmy(y0); y1 = itfmy(y1);
 	if (y0 > y1) { Fixed tmp = y1; y1 = y0; y0 = tmp; }
 	for (i=0; i < n; i += 2)
-		if (p[i] <= y0 && p[i+1] >= y1) return TRUE;
-	return FALSE; }
+		if (p[i] <= y0 && p[i+1] >= y1) return true;
+	return false; }
 
-static boolean ConsiderValForSeg(val, seg, loc, nb, b, ns, s, primary)
+static bool ConsiderValForSeg(val, seg, loc, nb, b, ns, s, primary)
 PClrVal val; PClrSeg seg;
-Fixed loc, *b, *s; integer nb, ns; boolean primary; {
-	if (primary && val->vSpc > 0.0) return TRUE;
-	if (InBlueBand(loc,nb,b)) return TRUE;
+Fixed loc, *b, *s; integer nb, ns; bool primary; {
+	if (primary && val->vSpc > 0.0) return true;
+	if (InBlueBand(loc,nb,b)) return true;
 	if (val->vSpc <= 0.0 &&
-		InSerifBand(seg->sMax, seg->sMin, ns, s)) return FALSE;
-	if (LtPruneB(val->vVal)) return FALSE;
-	return TRUE; }
+		InSerifBand(seg->sMax, seg->sMin, ns, s)) return false;
+	if (LtPruneB(val->vVal)) return false;
+	return true; }
 
 static PClrVal FndBstVal(
 						  seg, seg1Flg, cList, rList, nb, b, ns, s, locFlg, hFlg)
 PClrSeg seg; PClrVal cList, rList;
-boolean seg1Flg; integer nb, ns; Fixed *b, *s;
-boolean locFlg, hFlg; {
+bool seg1Flg; integer nb, ns; Fixed *b, *s;
+bool locFlg, hFlg; {
 	Fixed loc, vloc;
 	PClrVal best, vList, initLst;
 	PClrSeg vseg;
 	best = NULL;
 	loc = seg->sLoc;
 	vList = cList;
-	while (TRUE) {
+	while (true) {
 		initLst = vList;
 		while (vList != NULL) {
 			if (seg1Flg) {vseg = vList->vSeg1; vloc = vList->vLoc1;}
@@ -118,7 +118,7 @@ boolean locFlg, hFlg; {
 				/* ghost values are set to 20 */
 				/* so ghostshift of 3 means prefer nonghost if its
 				 value is > (20 >> 3) */
-				ConsiderValForSeg(vList,seg,loc,nb,b,ns,s,TRUE))
+				ConsiderValForSeg(vList,seg,loc,nb,b,ns,s,true))
 				best = vList;
 			vList = vList->vNxt;
 		}
@@ -134,11 +134,11 @@ boolean locFlg, hFlg; {
 static PClrVal FindBestValForSeg(
 								  seg, seg1Flg, cList, rList, nb, b, ns, s, hFlg)
 PClrSeg seg; PClrVal cList, rList;
-boolean seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
+bool seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
 	PClrVal best, nonghst, ghst = NULL;
-	best = FndBstVal(seg, seg1Flg, cList, rList, nb, b, ns, s, FALSE, hFlg);
+	best = FndBstVal(seg, seg1Flg, cList, rList, nb, b, ns, s, false, hFlg);
 	if (best != NULL && best->vGhst) {
-		nonghst = FndBstVal(seg, seg1Flg, cList, rList, nb, b, ns, s, TRUE, hFlg);
+		nonghst = FndBstVal(seg, seg1Flg, cList, rList, nb, b, ns, s, true, hFlg);
 		/* If nonghst hints are "better" use it instead of ghost band. */
 		if (nonghst != NULL && nonghst->vVal >= FixInt(2)) {
 			/* threshold must be greater than 1.004 for ITC Garamond Ultra "q" */
@@ -149,30 +149,30 @@ boolean seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
 			(ghst == NULL || ghst->vVal < FixSixteenth)) best = NULL;
 		/* threshold must be > .035 for Monotype/Plantin/Bold Thorn
 		 and < .08 for Bookman2/Italic asterisk */
-		else best->pruned = FALSE;
+		else best->pruned = false;
     }
 	return best;
 }
 
-static boolean MembValList(val, vList) register PClrVal val, vList; {
+static bool MembValList(val, vList) register PClrVal val, vList; {
 	while (vList != NULL) {
-		if (val == vList) return TRUE;
+		if (val == vList) return true;
 		vList = vList->vNxt;
     }
-	return FALSE;
+	return false;
 }
 
 static PClrVal PrevVal(val, vList) register PClrVal val, vList; {
 	PClrVal prev;
 	if (val == vList) return NULL;
 	prev = vList; 
-	while (TRUE) {
+	while (true) {
 		vList = vList->vNxt;
 		if (vList == NULL)
 			{
 			FlushLogFiles();
 			sprintf(globmsg, "Malformed value list in %s.\n", fileName);
-			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 			}
 		
 		if (vList == val) return prev;
@@ -198,7 +198,7 @@ void PickHVals(valList) PClrVal valList; {
 	PClrVal newBst;
 	PClrSeg seg1, seg2;
 	colorList = rejectList = NULL; prevBestVal = 0;
-	while (TRUE) {
+	while (true) {
 		vlist = valList;
 		prev = bestPrev = best = NULL;
 		while (vlist != NULL) {
@@ -212,15 +212,15 @@ void PickHVals(valList) PClrVal valList; {
 				FindRealVal(valList, best->vLoc2, best->vLoc1, &seg1, &seg2);
 			}
 			if (seg1->sType == sGHOST) {
-				/*newBst = FindBestValForSeg(seg2, FALSE, valList,
-				 (PClrVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, TRUE);*/
+				/*newBst = FindBestValForSeg(seg2, false, valList,
+				 (PClrVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, true);*/
 				newBst = seg2->sLnk;
 				if (newBst != NULL && newBst != best
 					&& MembValList(newBst,valList)) {
 					best = newBst; bestPrev = PrevVal(best, valList); }}
 			else if (seg2->sType == sGHOST) {
-				/*newBst = FindBestValForSeg(seg1, TRUE, valList,
-				 (PClrVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, TRUE); */
+				/*newBst = FindBestValForSeg(seg1, true, valList,
+				 (PClrVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, true); */
 				newBst = seg2->sLnk;
 				if (newBst != NULL && newBst != best
 					&& MembValList(newBst,valList)) {
@@ -276,7 +276,7 @@ noMore:
 
 static void FindBestValForSegs(sList,seg1Flg,cList,rList,nb,b,ns,s,hFlg)
 PClrSeg sList; PClrVal cList, rList;
-boolean seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
+bool seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
 	PClrVal best;
 	while (sList != NULL) {
 		best = FindBestValForSeg(sList, seg1Flg, cList, rList, nb, b, ns, s, hFlg);
@@ -287,26 +287,26 @@ boolean seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
 static void SetPruned() {
 	register PClrVal vL = valList;
 	while (vL != NULL) {
-		vL->pruned = TRUE;
+		vL->pruned = true;
 		vL = vL->vNxt;
     }
 }
 
 void FindBestHVals() {
 	SetPruned();
-	FindBestValForSegs(topList, FALSE, valList, NULL,
-					   lenTopBands, topBands, 0, (Fixed *)NULL, TRUE);
-	FindBestValForSegs(botList, TRUE, valList, NULL,
-					   lenBotBands, botBands, 0, (Fixed *)NULL, TRUE);
+	FindBestValForSegs(topList, false, valList, NULL,
+					   lenTopBands, topBands, 0, (Fixed *)NULL, true);
+	FindBestValForSegs(botList, true, valList, NULL,
+					   lenBotBands, botBands, 0, (Fixed *)NULL, true);
 	DoPrune();
 }
 
 void FindBestVVals() {
 	SetPruned();
-	FindBestValForSegs(leftList, TRUE, valList, NULL,
-					   0, (Fixed *)NULL, numSerifs, serifs, FALSE);
-	FindBestValForSegs(rightList, FALSE, valList, NULL,
-					   0, (Fixed *)NULL, numSerifs, serifs, FALSE);
+	FindBestValForSegs(leftList, true, valList, NULL,
+					   0, (Fixed *)NULL, numSerifs, serifs, false);
+	FindBestValForSegs(rightList, false, valList, NULL,
+					   0, (Fixed *)NULL, numSerifs, serifs, false);
 	DoPrune();
 }
 

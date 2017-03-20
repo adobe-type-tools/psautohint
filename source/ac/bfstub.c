@@ -7,14 +7,14 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 
 /* Procedures defined in bf/fiblues.c - BuildFont */
-boolean checkbandspacing()
+bool checkbandspacing()
 {
 	return true;
 }
 
-boolean checkbandwidths(overshootptsize, undershoot)
+bool checkbandwidths(overshootptsize, undershoot)
 float overshootptsize;
-boolean undershoot;
+bool undershoot;
 {
 	return true;
 }
@@ -37,4 +37,4 @@ int16_t dirCount;
 {
 }
 
-boolean multiplemaster = 0; /* AC is never run at the MM level */
+bool multiplemaster = 0; /* AC is never run at the MM level */

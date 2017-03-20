@@ -21,25 +21,25 @@ End Edit History.
 #define INLEN -1
 
 extern int32_t DoContEncrypt(
-    char *, FILE *, boolean, int32_t
+    char *, FILE *, bool, int32_t
 );
 
-extern int32_t ContEncrypt(char *indata, FILE  *outstream, boolean fileinput, int32_t incount, boolean dblenc);
+extern int32_t ContEncrypt(char *indata, FILE  *outstream, bool fileinput, int32_t incount, bool dblenc);
 
 extern int16_t DoInitEncrypt(
-    FILE *, int16_t, int32_t, int32_t, boolean
+    FILE *, int16_t, int32_t, int32_t, bool
 );
 
 extern int32_t DoEncrypt(
-    char *, FILE *, boolean, int32_t, int16_t, int32_t, int32_t, boolean, boolean
+    char *, FILE *, bool, int32_t, int16_t, int32_t, int32_t, bool, bool
 );
 
 extern int32_t ContDecrypt(
-    char *, char *, boolean, boolean, int32_t, uint32_t
+    char *, char *, bool, bool, int32_t, uint32_t
 );
 
 extern uint32_t ReadDecFile(
-    FILE *, char *, char *, boolean, int32_t, uint32_t, int16_t
+    FILE *, char *, char *, bool, int32_t, uint32_t, int16_t
 );
 
 extern void SetLenIV (

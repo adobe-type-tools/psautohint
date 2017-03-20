@@ -39,7 +39,7 @@ typedef struct
    int hi;
    } SubsetData;
 
-extern boolean multiplemaster; /* from buildfont.c */
+extern bool multiplemaster; /* from buildfont.c */
 
 extern int16_t strindex(s, t)         /* return index of t in s, -1 if none    */
 char *s, *t;
@@ -67,7 +67,7 @@ char *AllocateMem(unsigned int nelem, unsigned int elsize, const char *descripti
   {
     sprintf(globmsg, "Cannot allocate %d bytes of memory for %s.\n",
       (int) (nelem * elsize), description);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
   return (ptr);
 }
@@ -83,7 +83,7 @@ char *ReallocateMem(char *ptr, unsigned int size, const char *description)
   {
     sprintf(globmsg, "Cannot allocate %d bytes of memory for %s.\n",
       (int) size, description);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
   return (newptr);
 }
@@ -127,11 +127,11 @@ extern FILE *ACOpenFile(char * filename, char *access, int16_t severity)
     switch (severity) {
     case (OPENERROR):
       sprintf(globmsg, "The %s file does not exist or is not accessible (currentdir='%s').\n", filename, dirname);
-      LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+      LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       break;
     case (OPENWARN):
       sprintf(globmsg, "The %s file does not exist or is not accessible (currentdir='%s').\n", filename, dirname);
-      LogMsg(globmsg, WARNING, OK, TRUE);
+      LogMsg(globmsg, WARNING, OK, true);
       break;
     default:
       break;
@@ -147,7 +147,7 @@ char *filename;
   {
     sprintf(globmsg, "File name: %s exceeds max allowable length of %d.\n",
       filename, (int) MAXFILENAME);
-    LogMsg(globmsg, LOGERROR, FATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, FATALERROR, true);
   }
 }
 
@@ -159,7 +159,7 @@ char *charname;
     sprintf(globmsg,
       "Character name: %s exceeds maximum allowable length of %d.\n",
       charname, (int) MAXCHARNAME);
-    LogMsg(globmsg, LOGERROR, FATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, FATALERROR, true);
   }
 }
 
@@ -171,18 +171,18 @@ char *pathname;
     sprintf(globmsg,
       "File name: %s exceeds maximum allowable length of %d.\n",
       pathname, (int) MAXPATHLEN);
-    LogMsg(globmsg, LOGERROR, FATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, FATALERROR, true);
   }
 }
 
-extern boolean BAKFile(filename)
+extern bool BAKFile(filename)
 char *filename;
 {
   int16_t length = (int16_t)strlen(filename);
-  if (length <= 4) return FALSE;
+  if (length <= 4) return false;
   if (!strcmp(&filename[length-4], BAKSUFFIX))
-    return TRUE;
-  return FALSE;
+    return true;
+  return false;
 }
 
 extern int32_t GetMaxBytes()
@@ -243,9 +243,9 @@ GetCharsetLayout()
 static SubsetData *subsetdata = NULL;
 static int allocation = INCREMENT;
 static int allocated = 0;
-static boolean usesSubset = FALSE;
+static bool usesSubset = false;
 
-boolean
+bool
 UsesSubset(void)
    {
    return usesSubset;
@@ -256,7 +256,7 @@ SetSubsetName(char *name)
    {
    strcpy(subsetname, name);
    subsetdata =(SubsetData *)AllocateMem(INCREMENT, sizeof(SubsetData), "SetSubsetName");
-   usesSubset = TRUE;
+   usesSubset = true;
    }
 
 char *
@@ -300,7 +300,7 @@ LoadSubsetData(void)
    fclose(fp);
    }
 
-boolean
+bool
 InSubsetData(int cid)
    {
    int i;
@@ -308,10 +308,10 @@ InSubsetData(int cid)
    for (i = 0; i < allocated; i++)
       {
       if ((cid >= subsetdata[i].lo) && (cid <= subsetdata[i].hi))
-         return TRUE;
+         return true;
       }
 
-   return FALSE;
+   return false;
    }
 
 /*****************************************************************************/
@@ -320,7 +320,7 @@ InSubsetData(int cid)
 /* character set directory name.                                             */
 /*****************************************************************************/
 void
-setcharsetname(boolean release, char *csname, char *baseFontPath)
+setcharsetname(bool release, char *csname, char *baseFontPath)
    {
    char *filename;
    int32_t i;
@@ -332,7 +332,7 @@ setcharsetname(boolean release, char *csname, char *baseFontPath)
    if (filename == NULL)
       {
       LogMsg("CharacterSet keyword not found in fontinfo file.\n",
-            WARNING, OK, TRUE);
+            WARNING, OK, true);
       return;
       }
 
@@ -347,7 +347,7 @@ setcharsetname(boolean release, char *csname, char *baseFontPath)
       sprintf(subsetPath, "%s", subsetname);
       }
 
-   if (!CFileExists(charsetname, FALSE))
+   if (!CFileExists(charsetname, false))
       {
       get_filedelimit(delimit);
       if (((i = (int32_t)strlen(charsetDir)) == 0) || (charsetDir[i - 1] == delimit[0]))
@@ -365,7 +365,7 @@ setcharsetname(boolean release, char *csname, char *baseFontPath)
          sprintf(charsetname, "%s%s%s", charsetDir, delimit, filename);
       }
 
-   if (!CFileExists(subsetPath, FALSE))
+   if (!CFileExists(subsetPath, false))
       {
       get_filedelimit(delimit);
       if (((i = (int32_t)strlen(charsetDir)) == 0) || (charsetDir[i - 1] == delimit[0]))
@@ -440,7 +440,7 @@ int32_t filelength;
   int32_t cc;
 
   cc = ReadDecFile(
-    fd, filename, textptr, TRUE, MAXINT, (uint32_t) (filelength),
+    fd, filename, textptr, true, MAXINT, (uint32_t) (filelength),
     OTHER);
   fclose(fd);
   if (textptr[cc - 1] != NL || textptr[cc - 1] != '\r')
@@ -449,7 +449,7 @@ int32_t filelength;
   return ((int32_t) cc); 
 }           /* ACReadFile */
 
-boolean
+bool
 IsHintRowMatch(char *hintDirName, char *rowDirName)
    {
    char fontDirName[MAXPATHLEN];
@@ -467,7 +467,7 @@ IsHintRowMatch(char *hintDirName, char *rowDirName)
                fontDirName) == 0));
    }
 
-boolean
+bool
 IsInFullCharset(char *bezName)
    {
    FILE *charsetFile;
@@ -477,7 +477,7 @@ IsInFullCharset(char *bezName)
    char cname[128];
 
    if ((charsetFile = ACOpenFile(charsetPath, "r", OPENOK)) == NULL)
-      return FALSE;
+      return false;
    while (fgets(line, 500, charsetFile) != NULL)
       {
       switch (charsetParser)
@@ -489,7 +489,7 @@ IsInFullCharset(char *bezName)
                (STREQ(cname, bezName)))
             {
             fclose(charsetFile);
-            return TRUE;
+            return true;
             }
          break;
       case bf_CHARSET_STANDARD:
@@ -498,14 +498,14 @@ IsInFullCharset(char *bezName)
                (STREQ(cname, bezName)))
             {
             fclose(charsetFile);
-            return TRUE;
+            return true;
             }
          break;
          }
       }
 
    fclose(charsetFile);
-   return FALSE;
+   return false;
    }
 
 /*****************************************************************************/

@@ -37,19 +37,19 @@ static int32_t format;
 /* Prototypes */
 
 static char *InputEnc(
-    char *, boolean, uint32_t *
+    char *, bool, uint32_t *
 );
 
 static void InitEncrypt(
-    FILE *, boolean
+    FILE *, bool
 );
 
 static uint32_t DoDecrypt(
-FILE *, char *, boolean, int32_t, boolean, uint32_t, int16_t, int32_t, boolean
+FILE *, char *, bool, int32_t, bool, uint32_t, int16_t, int32_t, bool
 );
 
 static void SetCryptGlobs(
-    int, int32_t, boolean, int32_t *, int32_t *, int32_t *
+    int, int32_t, bool, int32_t *, int32_t *, int32_t *
 );
 
 #define InitRnum(r,s) {r = (uint32_t) s;}
@@ -76,7 +76,7 @@ static void SetCryptGlobs(
   else ch = (int32_t) *stm++;\
   inchars++;
 
-static void SetCryptGlobs(int crypttype, int32_t formattype, boolean chardata, int32_t *c1, int32_t *c2, int32_t *k)
+static void SetCryptGlobs(int crypttype, int32_t formattype, bool chardata, int32_t *c1, int32_t *c2, int32_t *k)
 {
   format = formattype;
   switch (crypttype)
@@ -100,10 +100,10 @@ static void SetCryptGlobs(int crypttype, int32_t formattype, boolean chardata, i
     return;
     break;
   }
-  LogMsg("Invalid crypt params.\n", LOGERROR, NONFATALERROR, TRUE);
+  LogMsg("Invalid crypt params.\n", LOGERROR, NONFATALERROR, true);
 }
 
-static char *InputEnc(char * stm, boolean fileinput, uint32_t *cipher)
+static char *InputEnc(char * stm, bool fileinput, uint32_t *cipher)
 {
   register int32_t c1, c2;
 
@@ -148,7 +148,7 @@ static char *InputEnc(char * stm, boolean fileinput, uint32_t *cipher)
 
 static char *InputPlain(stm, fileinput, clear)
 char *stm;
-boolean fileinput;
+bool fileinput;
 uint32_t *clear;
 {
   register int32_t c1;
@@ -171,10 +171,10 @@ void SetLenIV (int16_t len)
    ASCII hexadecimal character codes.
    The PS interpreter depends on this when decrypting and uses
    this info to decide whether data is binary or hex encrypted. */
-static void InitEncrypt(FILE *outstream, boolean dblenc)
+static void InitEncrypt(FILE *outstream, bool dblenc)
 {
   register indx j;
-  boolean ok = FALSE;
+  bool ok = false;
   uint32_t randomseed, clear, cipher, origouterrndnum;
   time_t tm;
   int16_t keylen = (dblenc?lenIV:outerlenIV);
@@ -204,7 +204,7 @@ static void InitEncrypt(FILE *outstream, boolean dblenc)
          break;
       if ((cipher < '0' || cipher > '9') && (cipher < 'A' || cipher > 'F')
         && (cipher < 'a' || cipher > 'f'))
-          ok = TRUE;
+          ok = true;
       if (dblenc)
         Encrypt(outerrndnum, cipher, cipher);
       initVec[j] = (char)(cipher & 0xFF);
@@ -216,12 +216,12 @@ static void InitEncrypt(FILE *outstream, boolean dblenc)
 }				/* InitEncrypt */
 
 /* innerrndnum and outerrndnum are globals */
-extern int32_t ContEncrypt(char *indata, FILE  *outstream, boolean fileinput, int32_t incount, boolean dblenc)
+extern int32_t ContEncrypt(char *indata, FILE  *outstream, bool fileinput, int32_t incount, bool dblenc)
 {
   uint32_t clear;
   int32_t encchars = 0;
 
-  while (TRUE)
+  while (true)
   {
     if (fileinput)
     {
@@ -255,16 +255,16 @@ extern int32_t ContEncrypt(char *indata, FILE  *outstream, boolean fileinput, in
   return (encchars);
 }				/* ContEncrypt */
 
-int16_t DoInitEncrypt (FILE *outstream, int16_t enctype, int32_t formattype, int32_t linelen, boolean chardata)
+int16_t DoInitEncrypt (FILE *outstream, int16_t enctype, int32_t formattype, int32_t linelen, bool chardata)
 {
   lineLength = linelen;
   SetCryptGlobs(enctype, formattype, chardata, &C1, &C2, &key);
-  InitEncrypt(outstream, FALSE);
+  InitEncrypt(outstream, false);
   return (0);
 }				/* DoInitEncrypt */
 
 /* returns the number of characters encrypted and written */
-extern int32_t DoContEncrypt(char * indata, FILE *outstream, boolean fileinput, int32_t incount)
+extern int32_t DoContEncrypt(char * indata, FILE *outstream, bool fileinput, int32_t incount)
 {
   uint32_t enccount;
   FILE *instream = (FILE *) indata;
@@ -274,7 +274,7 @@ extern int32_t DoContEncrypt(char * indata, FILE *outstream, boolean fileinput, 
   else if (incount == INLEN)
     incount = (int32_t)strlen(indata);
   clearerr(outstream);
-  enccount = ContEncrypt(indata, outstream, fileinput, incount, FALSE);
+  enccount = ContEncrypt(indata, outstream, fileinput, incount, false);
   if ((fileinput && fileerror(instream)) || fileerror(outstream))
     return (-1);
   else
@@ -286,8 +286,8 @@ extern int32_t DoContEncrypt(char * indata, FILE *outstream, boolean fileinput, 
  * only if we are encrypting characters from memory.
  */
 int32_t DoEncrypt
-  (char *indata, FILE *outstream, boolean fileinput, int32_t incount, int16_t enctype, int32_t formattype, int32_t linelen,
-    boolean chardata, boolean dblenc)
+  (char *indata, FILE *outstream, bool fileinput, int32_t incount, int16_t enctype, int32_t formattype, int32_t linelen,
+    bool chardata, bool dblenc)
 {
 	uint32_t enccount;
 	FILE *instream = (FILE *) indata;
@@ -314,7 +314,7 @@ int32_t DoEncrypt
  * the format and decoding types and the globals dec1 and dec2.
  */
 
-extern int32_t ContDecrypt(char *indata, char *outdata, boolean fileinput, boolean fileoutput, int32_t incount,
+extern int32_t ContDecrypt(char *indata, char *outdata, bool fileinput, bool fileoutput, int32_t incount,
     uint32_t outcount)
 {
   uint32_t cipher, clearchars = 0;
@@ -351,10 +351,10 @@ extern int32_t ContDecrypt(char *indata, char *outdata, boolean fileinput, boole
 }
 
 static uint32_t DoDecrypt
-  (FILE *instream, char *outdata, boolean fileinput,		/* whether input is from file or memory */
-	int32_t incount, boolean fileoutput,		/* whether output is to file or memory */
+  (FILE *instream, char *outdata, bool fileinput,		/* whether input is from file or memory */
+	int32_t incount, bool fileoutput,		/* whether output is to file or memory */
 	uint32_t outcount, int16_t dectype,			/* the type of decryption */
-	int32_t formattype, boolean chardata)
+	int32_t formattype, bool chardata)
 
 {
   uint32_t cipher, seed, clearchars = 0;
@@ -409,8 +409,8 @@ static uint32_t DoDecrypt
 }				/* DoDecrypt */
 
 static uint32_t DoRead
-  (FILE *instream, char *outdata, boolean fileinput,		/* whether input is from file or memory */
-	int32_t incount, boolean fileoutput,		/* whether output is to file or memory */
+  (FILE *instream, char *outdata, bool fileinput,		/* whether input is from file or memory */
+	int32_t incount, bool fileoutput,		/* whether output is to file or memory */
 	uint32_t outcount)
 
 {
@@ -453,11 +453,11 @@ static uint32_t DoRead
 
 
  uint32_t ReadDecFile(FILE *instream, char *filename, char *outbuffer, 
-			boolean fileinput /* whether input is from file or memory */, int32_t incount, uint32_t outcount, 
+			bool fileinput /* whether input is from file or memory */, int32_t incount, uint32_t outcount, 
 			int16_t dectype /* the type of decryption */)
 {
   uint32_t cc;
-	boolean decrypt=1;
+	bool decrypt=1;
 	char c;
 	
 	if(fileinput)
@@ -473,15 +473,15 @@ static uint32_t DoRead
 		decrypt=0;
 	
 	if(decrypt)
-		cc = DoDecrypt(instream, outbuffer, fileinput, incount, FALSE, outcount, dectype, HEX, FALSE);
+		cc = DoDecrypt(instream, outbuffer, fileinput, incount, false, outcount, dectype, HEX, false);
 	else
-		cc= DoRead(instream, outbuffer, fileinput, incount, FALSE, outcount);
+		cc= DoRead(instream, outbuffer, fileinput, incount, false, outcount);
 		
   switch (cc)
   {
   case -1:
     sprintf(globmsg, "A file error occurred in the %s file.\n", filename);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     break;
   }
   return (cc);

@@ -40,23 +40,23 @@ static char * SolEol1List[] = {
 
 static char * SolEolNeg1List[] = { "question", NULL };
 
-boolean StrEqual(s1, s2) register char *s1, *s2; {
+bool StrEqual(s1, s2) register char *s1, *s2; {
   register unsigned char c1, c2;
-  while (TRUE) {
+  while (true) {
     c1 = *s1++; c2 = *s2++;
-    if (c1 != c2) return FALSE;
-    if (c1 == 0 && c2 == 0) return TRUE;
-    if (c1 == 0 || c2 == 0) return FALSE;
+    if (c1 != c2) return false;
+    if (c1 == 0 && c2 == 0) return true;
+    if (c1 == 0 || c2 == 0) return false;
     }
   }
 
-extern boolean FindNameInList(nm, lst) char *nm, **lst; {
+extern bool FindNameInList(nm, lst) char *nm, **lst; {
   char **l, *lnm;
   l = lst;
-  while (TRUE) {
+  while (true) {
     lnm = *l;
-    if (lnm == NULL) return FALSE;
-    if (StrEqual(lnm, nm)) return TRUE;
+    if (lnm == NULL) return false;
+    if (StrEqual(lnm, nm)) return true;
     l++;
     }
   }
@@ -68,15 +68,15 @@ char *charlist, *ColorList[];
   const char* setList = "(), \t\n\r";
   char *token;
   int16_t length;
-  boolean firstTime = TRUE;
+  bool firstTime = true;
   int16_t ListEntries = COUNTERDEFAULTENTRIES;
 
-  while (TRUE)
+  while (true)
   {
     if (firstTime)
     {
       token = (char *)strtok(charlist, setList);
-      firstTime = FALSE;
+      firstTime = false;
     }
     else token = (char *)strtok(NULL, setList);
     if (token == NULL) break;
@@ -87,7 +87,7 @@ char *charlist, *ColorList[];
     {
 	  FlushLogFiles();
       sprintf(globmsg, "Exceeded counter hints list size. (maximum is %d.)\n  Cannot add %s or subsequent characters.\n", (int) COUNTERLISTSIZE, token);
-      LogMsg(globmsg, WARNING, OK, TRUE);
+      LogMsg(globmsg, WARNING, OK, true);
       break;
     }
     length = (int16_t)strlen(token);
@@ -111,7 +111,7 @@ integer SpecialCharType() {
   return 0;
   }
 
-boolean HColorChar() {
+bool HColorChar() {
 #if PYTHONLIB
   if(featurefiledata)
   {
@@ -121,7 +121,7 @@ boolean HColorChar() {
 	  return FindNameInList(bezGlyphName, HColorList);
   }
 
-boolean VColorChar() {
+bool VColorChar() {
 #if PYTHONLIB
   if(featurefiledata)
   {
@@ -131,7 +131,7 @@ boolean VColorChar() {
   return FindNameInList(bezGlyphName, VColorList);
   }
 
-boolean NoBlueChar() {
+bool NoBlueChar() {
 #if PYTHONLIB
   if(featurefiledata)
   {
@@ -158,18 +158,18 @@ integer SolEolCharCode() {
 
 /* This change was made to prevent bogus sol-eol's.  And to prevent
    adding sol-eol if there are a lot of subpaths. */
-boolean SpecialSolEol() {
+bool SpecialSolEol() {
   integer code = SolEolCharCode();
   integer count;
-  if (code == 2) return FALSE;
+  if (code == 2) return false;
   count = CountSubPaths();
-  if (code != 0 && count != 2) return FALSE;
-  if (code == 0 && count > 3) return FALSE;
-  return TRUE;
+  if (code != 0 && count != 2) return false;
+  if (code == 0 && count > 3) return false;
+  return true;
   }
 
 static PPathElt SubpathEnd(e) PPathElt e; {
-  while (TRUE) {
+  while (true) {
     e = e->next;
     if (e == NULL) return pathEnd;
     if (e->type == MOVETO) return e->prev;
@@ -186,9 +186,9 @@ static PPathElt SubpathStart(e) PPathElt e; {
 
 static PPathElt SolEol(e) PPathElt e; {
   e = SubpathStart(e);
-  e->sol = TRUE;
+  e->sol = true;
   e = SubpathEnd(e);
-  e->eol = TRUE;
+  e->eol = true;
   return e;
   }
 
@@ -201,10 +201,10 @@ static void SolEolAll() {
     }
   }
 
-static void SolEolUpperOrLower(upper) boolean upper; {
+static void SolEolUpperOrLower(upper) bool upper; {
   PPathElt e, s1, s2;
   Fixed x1, y1, s1y, s2y;
-  boolean s1Upper;
+  bool s1Upper;
   if (pathStart == NULL) return;
   e = s1 = pathStart->next;
   GetEndPoint(e, &x1, &y1);
@@ -228,12 +228,12 @@ void AddSolEol() {
   switch (SolEolCharCode()) {
     /* 1 means upper, -1 means lower, 0 means all */
     case 0: SolEolAll(); break;
-    case 1: SolEolUpperOrLower(TRUE); break;
-    case -1: SolEolUpperOrLower(FALSE); break;
+    case 1: SolEolUpperOrLower(true); break;
+    case -1: SolEolUpperOrLower(false); break;
     }
   }
 
-boolean MoveToNewClrs() {
+bool MoveToNewClrs() {
 #if PYTHONLIB
   if(featurefiledata)
   {

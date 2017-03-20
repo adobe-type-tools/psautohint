@@ -158,7 +158,7 @@ void ReportSmoothError(x, y) Fixed x, y; {
 
 void ReportAddFlex() {
   if (hasFlex) return;
-  hasFlex = TRUE;
+  hasFlex = true;
   PrintMessage("FYI: added flex operators to this character.");
   }
 
@@ -222,19 +222,19 @@ void ExpectedMoveTo(e) PPathElt e; {
     case CURVETO: s = (char *)"curveto"; break;
     case CLOSEPATH: s = (char *)"closepath"; break;
     default:
-/*      LogMsg("Malformed path list.\n", LOGERROR, NONFATALERROR, TRUE); */
+/*      LogMsg("Malformed path list.\n", LOGERROR, NONFATALERROR, true); */
 	  break;
     }
   FlushLogFiles();
   (void)sprintf (globmsg, "Path for %s character has a %s where a moveto was expected.\n  The file is probably truncated.", fileName, s); 
-  LogMsg (globmsg, LOGERROR, NONFATALERROR, TRUE);
+  LogMsg (globmsg, LOGERROR, NONFATALERROR, true);
   }
 
 
 void ReportMissingClosePath() {
   FlushLogFiles();
   (void)sprintf(globmsg, "Missing closepath in %s character.\n  The file is probably truncated.", fileName);
-  LogMsg (globmsg, LOGERROR, NONFATALERROR, TRUE); 
+  LogMsg (globmsg, LOGERROR, NONFATALERROR, true); 
 }
 
 void ReportTryFlexNearMiss(x0, y0, x2, y2) Fixed x0, y0, x2, y2; {
@@ -245,7 +245,7 @@ void ReportTryFlexNearMiss(x0, y0, x2, y2) Fixed x0, y0, x2, y2; {
   }
 
 void ReportTryFlexError(CPflg, x, y)
-  boolean CPflg; Fixed x, y; {
+  bool CPflg; Fixed x, y; {
   (void)sprintf(S0,
     CPflg ? "Please move closepath from %g %g so can add flex." :
             "Please remove zero length element at %g %g so can add flex.",
@@ -307,7 +307,7 @@ void ReportConflictCnt(e, cnt) PPathElt e; integer cnt; {
 
 
 void ReportRemFlare(e,e2,hFlg,i)
-  PPathElt e, e2; boolean hFlg; integer i; {
+  PPathElt e, e2; bool hFlg; integer i; {
   Fixed ex1, ey1, ex2, ey2;
   if (!showClrInfo) return;
   GetEndPoint(e, &ex1, &ey1);
@@ -439,7 +439,7 @@ void ReportAddVVal(val) PClrVal val; {
 
 
 void ReportFndBstVal(seg,val,hFlg)
-  PClrSeg seg; PClrVal val; boolean hFlg; {
+  PClrSeg seg; PClrVal val; bool hFlg; {
   if (hFlg) {
     sprintf(S0, "FndBstVal: sLoc %g sLft %g sRght %g ",
       FixToDbl(itfmy(seg->sLoc)),
@@ -463,7 +463,7 @@ void ReportFndBstVal(seg,val,hFlg)
 
 
 void ReportCarry(l0, l1, loc, clrs, vert)
-  Fixed l0, l1, loc; PClrVal clrs; boolean vert; {
+  Fixed l0, l1, loc; PClrVal clrs; bool vert; {
   if (!showClrInfo) return;
   if (vert) {
     ShowVVal(clrs); loc = itfmx(loc); l0 = itfmx(l0); l1 = itfmx(l1); }
@@ -600,7 +600,7 @@ void ReportBandNearMiss(str, loc, blu) char * str; Fixed loc, blu; {
   }
 
 void ReportStemNearMiss(vert, w, minW, b, t, curve)
-  boolean vert, curve; Fixed w, minW, b, t; {
+  bool vert, curve; Fixed w, minW, b, t; {
   (void)sprintf(S0, "%s %s stem near miss: %g instead of %g at %g to %g.",
     vert? "Vertical" : "Horizontal", curve? "curve" : "linear",
     FixToDbl(w), FixToDbl(minW), FixToDbl(MIN(b,t)), FixToDbl(MAX(b,t)));

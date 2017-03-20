@@ -48,7 +48,7 @@ typedef struct _TransitElt
 
 
 extern void ReadTransitional (
-boolean
+bool
 );
 
 extern void PreReadTransitional();
@@ -58,7 +58,7 @@ extern void CopyTransitionalToTable();
 extern void AssembleTransitionals();
 
 extern char **TransitionalCharsHintList(
-boolean, int16_t *, indx
+bool, int16_t *, indx
 );
 
 extern void Free_TransitionalList();

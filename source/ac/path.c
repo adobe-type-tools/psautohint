@@ -15,7 +15,7 @@ static void NumberSubpath(e) register PPathElt e; {
   PPathElt first;
   integer cnt;
   first = e; cnt = 0;
-  while (TRUE) {
+  while (true) {
     e->count = cnt;
     e = GetSubpathNext(e);
     if (e == first) break;
@@ -24,11 +24,11 @@ static void NumberSubpath(e) register PPathElt e; {
   }
 
 static integer TstClrLsts(l1, l2, flg)
-  PSegLnkLst l1, l2; boolean flg; {
+  PSegLnkLst l1, l2; bool flg; {
   integer result, i;
   result = -1;
   if (l1 != NULL) while (l2 != NULL) {
-    i = TestColorLst(l1, l2->lnk->seg->sLnk, flg, FALSE);
+    i = TestColorLst(l1, l2->lnk->seg->sLnk, flg, false);
     if (i == 0) return 0;
     if (i == 1) result = 1;
     l2 = l2->next;
@@ -42,30 +42,30 @@ static integer ClrLstLen(lst) PSegLnkLst lst; {
     cnt++; lst = lst->next; }
   return cnt; }
 
-static boolean SameClrLsts(l1, l2, flg)
-  PSegLnkLst l1, l2; boolean flg; {
-  if (ClrLstLen(l1) != ClrLstLen(l2)) return FALSE;
-  return (TstClrLsts(l1, l2, flg) == -1) ? TRUE : FALSE;
+static bool SameClrLsts(l1, l2, flg)
+  PSegLnkLst l1, l2; bool flg; {
+  if (ClrLstLen(l1) != ClrLstLen(l2)) return false;
+  return (TstClrLsts(l1, l2, flg) == -1) ? true : false;
   }
 
 static void FindConflicts(e) PPathElt e; {
   /* find conflicts in subpath for e */
   PSegLnkLst hLst, vLst, phLst, pvLst;
-  boolean checked;
+  bool checked;
   PPathElt start, p;
   integer h, v;
   if (e->type != MOVETO) e = GetDest(e);
-  while (TRUE) {
+  while (true) {
     hLst = e->Hs;
     vLst = e->Vs;
     if (hLst == NULL && vLst == NULL) goto Nxt;
     /* search for previous subpath element with conflicting colors */
     start = e;
     p = GetSubpathPrev(e);
-    checked = TRUE;
+    checked = true;
     while (p != start) {
       if (checked) {
-	if (p->type == CLOSEPATH) checked = FALSE;
+	if (p->type == CLOSEPATH) checked = false;
 	}
       phLst = p->Hs;
       pvLst = p->Vs;
@@ -75,7 +75,7 @@ static void FindConflicts(e) PPathElt e; {
       else if (hLst == NULL && phLst == NULL) h = -1;
       else h = 1;
       if (vLst != NULL && pvLst != NULL)
-        v = TstClrLsts(vLst, pvLst, TRUE);
+        v = TstClrLsts(vLst, pvLst, true);
       else if (vLst == NULL && pvLst == NULL) v = -1;
       else v = 1;
       if (checked && h == -1 && v == -1 &&
@@ -101,7 +101,7 @@ static integer CountConflicts(e) PPathElt e; {
   PPathElt first, conflict;
   first = e; cnt = conflicts = nc = 0;
   NumberSubpath(e);
-  while (TRUE) {
+  while (true) {
     conflict = e->conflict;
     if (conflict == NULL) goto Nxt;
     c = conflict->count;
@@ -112,8 +112,8 @@ static integer CountConflicts(e) PPathElt e; {
   return conflicts;
   }
 
-static boolean TestColorSection(first, after)
-  /* returns FALSE if there is a conflict, TRUE otherwise */
+static bool TestColorSection(first, after)
+  /* returns false if there is a conflict, true otherwise */
   PPathElt first, after; {
   PPathElt e;
   PSegLnkLst hLst, vLst, hPrv, vPrv;
@@ -122,26 +122,26 @@ static boolean TestColorSection(first, after)
     hLst = e->Hs;
     vLst = e->Vs;
     if (hLst != NULL && !SameClrLsts(hLst,hPrv,YgoesUp)) {
-      if (TestColorLst(hLst, Hprimary, YgoesUp, TRUE)==0) return FALSE;
+      if (TestColorLst(hLst, Hprimary, YgoesUp, true)==0) return false;
       hPrv = hLst;
       }
-    if (vLst != NULL && !SameClrLsts(vLst,vPrv,TRUE)) {
-      if (TestColorLst(vLst, Vprimary, TRUE, TRUE)==0) return FALSE;
+    if (vLst != NULL && !SameClrLsts(vLst,vPrv,true)) {
+      if (TestColorLst(vLst, Vprimary, true, true)==0) return false;
       vPrv = vLst;
       }
     e = GetSubpathNext(e); }
-  return TRUE; }
+  return true; }
 
-static boolean StartsOkWithPrimaryClrs(cp)
+static bool StartsOkWithPrimaryClrs(cp)
   PPathElt cp; {
-  /* return TRUE if proposed cp yields subpath whose
+  /* return true if proposed cp yields subpath whose
      first coloring section is consistent with the primary coloring */
   PPathElt e, conflict, first;
   integer c, cnt;
   first = e = cp;
   NumberSubpath(e);
   cnt = 0;
-  while (TRUE) {
+  while (true) {
     conflict = e->conflict;
     if (conflict != NULL) {
       c = conflict->count;
@@ -152,24 +152,24 @@ static boolean StartsOkWithPrimaryClrs(cp)
   /* e is start of new coloring in subpath */
   return TestColorSection(first, e); }
 
-static boolean OkCandidate(cp,conflict,isShort)
-  PPathElt cp, conflict; boolean isShort; {
+static bool OkCandidate(cp,conflict,isShort)
+  PPathElt cp, conflict; bool isShort; {
   PPathElt cpConflict, nxt, nxtConflict;
-  if (cp == conflict) return FALSE;
+  if (cp == conflict) return false;
   cpConflict = cp->conflict;
-  if (cpConflict == conflict) return FALSE;
-  if (!isShort) return TRUE;
+  if (cpConflict == conflict) return false;
+  if (!isShort) return true;
   /* don't put short closepath between two conflicting elements */
   nxt = cp->next;
-  if (nxt == NULL) return TRUE;
+  if (nxt == NULL) return true;
   nxtConflict = nxt->conflict;
-  if (nxtConflict == cp) return FALSE;
-  return TRUE;
+  if (nxtConflict == cp) return false;
+  return true;
   }
 
-static boolean OkJunction(p,e) PPathElt p,e; {
+static bool OkJunction(p,e) PPathElt p,e; {
   Fixed x, y, x0, y0, x1, y1, sm;
-  if (p->isFlex && e->isFlex) return FALSE;
+  if (p->isFlex && e->isFlex) return false;
   if (e->type == CURVETO) { x0 = e->x1; y0 = e->y1; }
   else GetEndPoint(e, &x0, &y0);
   if (p->type == CURVETO) { x1 = p->x2; y1 = p->y2; }
@@ -181,23 +181,23 @@ static boolean OkJunction(p,e) PPathElt p,e; {
 static PPathElt FindMinConflict(e) PPathElt e; {
   PPathElt conflict, cp, cpnxt, bestCP, first, prevConflict;
   integer best, cnt;
-  boolean isShort;
+  bool isShort;
   first = e;
   if (e->type != MOVETO) e = GetDest(e);
   best = 10000;
   prevConflict = bestCP = NULL;
-  while (TRUE) {
+  while (true) {
     conflict = e->conflict;
     if (conflict == NULL || conflict == prevConflict) goto Nxt;
-    cp = e; isShort = FALSE;
-    while (TRUE) { /* search for a possible place for a closepath */
+    cp = e; isShort = false;
+    while (true) { /* search for a possible place for a closepath */
       if ((cp->type == LINETO || cp->type == CLOSEPATH) && !IsShort(cp)) break;
       if (!OkCandidate(cp,conflict,isShort)) { cp = NULL; break; }
       cp = GetSubpathPrev(cp);
       }
     if (cp == NULL) { /* consider short cp */
-      cp = e; isShort = TRUE;
-      while (TRUE) {
+      cp = e; isShort = true;
+      while (true) {
 	if (cp->type == CLOSEPATH || cp->type == LINETO) break;
         if (cp->type == CURVETO && cp != e) {
           cpnxt = GetSubpathNext(cp);
@@ -236,21 +236,21 @@ static PPathElt FindMinConflict(e) PPathElt e; {
 static PPathElt NewCP(cp) PPathElt cp; {
   PPathElt first;
   first = cp;
-  while (TRUE) {
+  while (true) {
     if (cp->newCP) return cp;
     cp = GetSubpathPrev(cp);
     if (cp == first) return cp;
     }
   }
 
-static boolean ReorderSubpaths() {
+static bool ReorderSubpaths() {
   /* if first subpath conflicts with primary,
      and there is a later subpath that does not,
      do tailsubpaths until later one becomes first */
   PPathElt e, first;
   first = e = pathStart;
-  if (!SubpathConflictsWithPrimary(e)) return FALSE;
-  while (TRUE) {
+  if (!SubpathConflictsWithPrimary(e)) return false;
+  while (true) {
     e = GetClosedBy(e);
     if (e == NULL) break;
     e = e->next; /* moveto */
@@ -263,35 +263,35 @@ static boolean ReorderSubpaths() {
        and there is a later subpath that does not,
        do tailsubpaths until later one becomes first */
     e = GetClosedBy(first);
-    if (StartsOkWithPrimaryClrs(NewCP(e))) return FALSE;
-    while (TRUE) {
+    if (StartsOkWithPrimaryClrs(NewCP(e))) return false;
+    while (true) {
       e = e->next; /* moveto */
-      if (e == NULL) return FALSE;
+      if (e == NULL) return false;
       e = GetClosedBy(e);
-      if (e == NULL) return FALSE;
+      if (e == NULL) return false;
       if (StartsOkWithPrimaryClrs(NewCP(e))) break;
       }
     }
   first = GetDest(e);
  Rt: if (DEBUG) ReportMoveSubpath(first, "front");
-  while (TRUE) {
+  while (true) {
     e = pathStart;
     if (e == first) break;
     if (DEBUG) ReportMoveSubpath(e, "end");
     MoveSubpathToEnd(e);
     }
-  return TRUE;
+  return true;
   }
 
-boolean RotateSubpaths(flg) boolean flg; {
+bool RotateSubpaths(flg) bool flg; {
   PPathElt e, cp, nxt;
-  boolean chng = FALSE, chngSub;
+  bool chng = false, chngSub;
   DEBUG = flg;
   e = pathStart;
   if (DEBUG) PrintMessage("RotateSubpaths");
   while (e != NULL) {
     e->conflict = NULL;
-    e->newCP = FALSE;
+    e->newCP = false;
     e = e->next;
     }
   e = pathStart;
@@ -302,14 +302,14 @@ boolean RotateSubpaths(flg) boolean flg; {
     nxt = e->next;
     if (cp == NULL) goto Nxt;
     if (cp->type == CLOSEPATH) goto Nxt;
-    cp->newCP = TRUE;
+    cp->newCP = true;
       /* dont change yet so preserve info for ReorderSubpaths */
-    chng = TRUE;
+    chng = true;
    Nxt: e = nxt;
     }
   chngSub = chng;
   if (DEBUG) PrintMessage("ReorderSubpaths");
-  if (ReorderSubpaths()) chng = TRUE;
+  if (ReorderSubpaths()) chng = true;
   if (!chngSub) goto Done;
   e = pathStart; /* must reload since may have reordered */
   while (e != NULL) {

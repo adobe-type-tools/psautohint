@@ -3,14 +3,14 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /***********************************************************************/
 
 extern void AddCharListEntry(
-char *, char *, int32_t, int32_t, boolean, boolean, boolean, boolean
+char *, char *, int32_t, int32_t, bool, bool, bool, bool
 );
 
-extern boolean CheckCharListEntry(
-char *, char *, boolean, boolean, boolean, boolean, indx
+extern bool CheckCharListEntry(
+char *, char *, bool, bool, bool, bool, indx
 );
 
-extern boolean NameInCharList (
+extern bool NameInCharList (
 char *
 );
 
@@ -20,15 +20,15 @@ char *
 
 /*
 extern void makecharlist(
-boolean, boolean, char *, indx
+bool, bool, char *, indx
 );*/
 
 extern void sortcharlist(
-boolean
+bool
 );
 
-extern boolean CompareCharListToBez (
-char *, boolean, indx, boolean
+extern bool CompareCharListToBez (
+char *, bool, indx, bool
 );
 /*
 extern void CopyCharListToTable (
@@ -36,7 +36,7 @@ void
 );*/
 
 extern void CheckAllListInTable (
-boolean
+bool
 );
 
 extern void FreeCharList (
@@ -44,6 +44,6 @@ void
 );
 
 extern void ResetCharListBools(
-boolean, indx
+bool, indx
 );
 

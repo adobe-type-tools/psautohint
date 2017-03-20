@@ -33,15 +33,15 @@ extern double atan2( double, double );
 #define FLATTEN 4
 #define GHOST 5
 
-boolean flexexists;
-extern boolean multiplemaster;
-boolean cubeLibrary;
-boolean bereallyQuiet = 1;
+bool flexexists;
+extern bool multiplemaster;
+bool cubeLibrary;
+bool bereallyQuiet = 1;
 char *currentChar; /* name of the current char for error messages */
-extern boolean ReadCharFile();
+extern bool ReadCharFile();
 
 #if ! AC_C_LIB
-static boolean firstMT;
+static bool firstMT;
 #endif
 static char *startbuff, **outbuff;
 static int16_t dirCount, byteCount, buffSize;
@@ -52,16 +52,16 @@ static char outstr[100];
 
 /* Prototypes */
 static void AddLine(indx, indx);
-static boolean CheckFlexOK(indx);
-static boolean ChangetoCurve(indx, indx);
-static void CheckFlexValues(int16_t *, indx, indx, boolean *, boolean *);
+static bool CheckFlexOK(indx);
+static bool ChangetoCurve(indx, indx);
+static void CheckFlexValues(int16_t *, indx, indx, bool *, bool *);
 static void CheckForZeroLengthCP(void);
 static void CheckHandVStem3(void);
 static void CombinePaths(void);
-static boolean CompareCharPaths(char *, boolean);
+static bool CompareCharPaths(char *, bool);
 static void Ct(Cd, Cd, Cd, indx, int16_t);
-static boolean CurveBBox(indx, int16_t, int32_t, Fixed *);
-static void FindHandVStem3(PHintElt *, indx, boolean *);
+static bool CurveBBox(indx, int16_t, int32_t, Fixed *);
+static void FindHandVStem3(PHintElt *, indx, bool *);
 static void FreePathElements(indx, indx);
 static void GetCoordFromType(int16_t, CdPtr, indx, indx);
 static int32_t GetCPIx(indx, int32_t);
@@ -78,11 +78,11 @@ static void InconsistentPointCount(char *, indx, int, int);
 static void InsertHint(PHintElt, indx, int16_t, int16_t);
 static void MtorDt(Cd, indx, int16_t);
 static void OptimizeCT(indx);
-static void OptimizeMtorDt(indx, int16_t *, boolean *, boolean *);
+static void OptimizeMtorDt(indx, int16_t *, bool *, bool *);
 static void ReadHints(PHintElt, indx);
 static int ReadandAssignHints(void);
-static void ReadHorVStem3Values(indx, int16_t, int16_t, boolean *);
-static void SetSbandWidth(char *, boolean, Transitions *, int);
+static void ReadHorVStem3Values(indx, int16_t, int16_t, bool *);
+static void SetSbandWidth(char *, bool, Transitions *, int);
 static void Vhct(Cd, Cd, Cd, indx, int16_t);
 static void WriteFlex(indx);
 static void WriteHints(indx);
@@ -91,7 +91,7 @@ static void WriteSbandWidth(void);
 static void WriteX(Fixed);
 static void WriteY(Fixed);
 static void WriteToBuffer(void);
-static boolean ZeroLengthCP(indx, indx);
+static bool ZeroLengthCP(indx, indx);
 
 #if AC_C_LIB
 void GetMasterDirName(char *dirname, indx ix)
@@ -184,7 +184,7 @@ int32_t pathIx;
         if (pathlist[dirIx].path[ix].type == CP)
             return ix;
     sprintf(globmsg, "No closepath in character: %s.\n", currentChar);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     return (-1);
 }
 
@@ -197,7 +197,7 @@ static int GetMTIx(indx dirIx, indx pathIx)
         if (pathlist[dirIx].path[ix].type == RMT)
             return ix;
     sprintf(globmsg, "No moveto in character: %s.\n", currentChar);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     return (-1);
 }
 
@@ -237,10 +237,10 @@ retry:
                     goto retry;
             }
             sprintf(globmsg, "Bad character description file: %s.\n", currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         default:
             sprintf(globmsg, "Illegal operator in character file: %s.\n", currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
 }
 
@@ -295,7 +295,7 @@ static void GetPathType(int16_t pathtype, char *str)
         case CP:  strcpy(str, "closepath"); break;
         default:
             sprintf(globmsg, "Illegal path type: %d in character: %s.\n", pathtype, currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
 }
 
@@ -340,7 +340,7 @@ static void InconsistentPointCount(char *filename, indx ix,
     GetMasterDirName(pathdir1, 0);
     GetMasterDirName(pathdir2, ix);
     sprintf(globmsg, "The character: %s will not be included in the font\n  because the version in %s has a total of %d elements and\n  the one in %s has %d elements.\n", filename, pathdir1, (int)entries1, pathdir2, (int)entries2);
-    LogMsg(globmsg, WARNING, OK, TRUE);
+    LogMsg(globmsg, WARNING, OK, true);
 }
 
 static void InconsistentPathType(char *filename, indx ix, int16_t type1,
@@ -359,18 +359,18 @@ static void InconsistentPathType(char *filename, indx ix, int16_t type1,
     sprintf(globmsg, "The character: %s will not be included in the font\n  because the version in %s has path type %s at coord: %d %d\n  and the one in %s has type %s at coord %d %d.\n",
             filename, pathdir1, typestr1, (int) coord1.x, (int) coord1.y, pathdir2,
             typestr2, (int) coord2.x, (int) coord2.y);
-    LogMsg(globmsg, WARNING, OK, TRUE);
+    LogMsg(globmsg, WARNING, OK, true);
 }
 
 /* Returns whether changing the line to a curve is successful. */
-static boolean ChangetoCurve(dirIx, pathIx)
+static bool ChangetoCurve(dirIx, pathIx)
 indx dirIx, pathIx;
 {
     Cd start, end, ctl1, ctl2;
     PCharPathElt pathElt = &pathlist[dirIx].path[pathIx];
     
     if (pathElt->type == RCT)
-        return TRUE;
+        return true;
     /* Use the 1/3 rule to convert a line to a curve, i.e. put the control points
      1/3 of the total distance from each end point. */
     GetEndPoints(dirIx, pathIx, &start, &end);
@@ -391,10 +391,10 @@ indx dirIx, pathIx;
     pathElt->ry2 = pathElt->y2 - pathElt->y1;
     pathElt->rx3 = pathElt->x3 - pathElt->x2;
     pathElt->ry3 = pathElt->y3 - pathElt->y2;
-    return TRUE;
+    return true;
 }
 
-static boolean ZeroLengthCP(dirIx, pathIx)
+static bool ZeroLengthCP(dirIx, pathIx)
 indx dirIx, pathIx;
 {
     Cd startPt, endPt;
@@ -420,7 +420,7 @@ indx dirIx, pathIx;
             GetMasterDirName(dirname, dirIx);
             sprintf(globmsg,
                     "Please convert the point closepath in directory: %s, character: %s to a line closepath.\n", dirname, currentChar);
-            LogMsg(globmsg, WARNING, OK, TRUE);
+            LogMsg(globmsg, WARNING, OK, true);
         }
         return;
     }
@@ -435,7 +435,7 @@ indx dirIx, pathIx;
             if (!bereallyQuiet) {
                 GetMasterDirName(dirname, dirIx);
                 sprintf(globmsg, "Please convert the point closepath to a line closepath in directory: %s, character: %s.\n", dirname, currentChar);
-                LogMsg(globmsg, WARNING, OK, TRUE);
+                LogMsg(globmsg, WARNING, OK, true);
             }
             return;
             break;
@@ -451,7 +451,7 @@ indx dirIx, pathIx;
                 if (!bereallyQuiet) {
                     GetMasterDirName(dirname, dirIx);
                     sprintf(globmsg, "Could not modify point closepath in directory '%s', character: %s near (%d, %d).\n", dirname, currentChar, FTrunc8(end->x), FTrunc8(end->y));
-                    LogMsg(globmsg, WARNING, OK, TRUE);
+                    LogMsg(globmsg, WARNING, OK, true);
                 }
                 return;
             }
@@ -459,7 +459,7 @@ indx dirIx, pathIx;
         default:
             GetMasterDirName(dirname, dirIx);
             sprintf(globmsg, "Bad character description file: %s/%s.\n", dirname, currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     
     thisone = &(pathlist[dirIx].path[pathIx]);
@@ -495,7 +495,7 @@ static void BestLine(PCharPathElt start, PCharPathElt end, Fixed *dx, Fixed *dy)
         fprintf(OUTPUTBUFF, "  cx=%f cy=%f ***\n", cx, cy);
 #endif /*DEBUG_PCP*/
         sprintf(globmsg, "Unexpected tangent in character path: %s.\n", currentChar);
-        LogMsg(globmsg, WARNING, OK, TRUE);
+        LogMsg(globmsg, WARNING, OK, true);
         return;
     }
     
@@ -556,10 +556,10 @@ static void AddLineCube(indx dirIx, indx pathIx)
     /* Hints are only present in the hintsdirIx. */
     
     if (pathlist[dirIx].path[pathIx].type == RDT) {
-        pathlist[dirIx].path[pathIx].remove = TRUE;
+        pathlist[dirIx].path[pathIx].remove = true;
         if (pathlist[dirIx].path[pathIx + 1].type != CP) {
             sprintf(globmsg, "Expected CP in path: %s.\n", currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
         
         /* If there's another path in the character, we need to compensate */
@@ -571,7 +571,7 @@ static void AddLineCube(indx dirIx, indx pathIx)
                 pathlist[dirIx].path[pathIx + 2].ry += pathlist[dirIx].path[pathIx].ry;
             } else {
                 sprintf(globmsg, "Expected second RMT in path: %s.\n", currentChar);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             }
         }
         
@@ -615,7 +615,7 @@ static void AddLineCube(indx dirIx, indx pathIx)
     } else {
         /* Not a RCT or RDT - error - unexpected path element type. */
         sprintf(globmsg, "Bad character description file: %s.\n", currentChar);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
 }
 
@@ -663,11 +663,11 @@ static Path_Name_ Path_Names[1];
 /* Checks that character paths for multiple masters have the same
  number of points and in the same path order.  If this isn't the
  case the character is not included in the font. */
-static boolean CompareCharPaths(char *filename, boolean fortransitionals)
+static bool CompareCharPaths(char *filename, bool fortransitionals)
 {
     indx dirix, ix, i;
     int32_t totalPathElt, minPathLen;
-    boolean ok = TRUE;
+    bool ok = true;
     int16_t type1, type2;
     
     totalPathElt = minPathLen = MAXINT;
@@ -697,23 +697,23 @@ static boolean CompareCharPaths(char *filename, boolean fortransitionals)
         if (hintsdirIx == dirix) {
             char hintFileName[MAXPATHLEN];
             sprintf(hintFileName, "%s/hints/%s", Path_Names[dirix].dirnam, filename);
-            if (FileExists(hintFileName, FALSE)) {
-                if (!ReadCharFile(TRUE, TRUE, FALSE, FALSE))
-                    return FALSE;
+            if (FileExists(hintFileName, false)) {
+                if (!ReadCharFile(true, true, false, false))
+                    return false;
 #if ! AC_C_LIB
                 if (!ReadHintsFile(hintFileName, &pathlist[dirix]))
 #endif
-                    return FALSE;
+                    return false;
                 
             } else {
                 /* read char data and hints from bez file */
-                if (!ReadCharFile(TRUE, TRUE, addHints, FALSE))
-                    return FALSE;
+                if (!ReadCharFile(true, true, addHints, false))
+                    return false;
             }
         } else {
             /* read char data only */
-            if (!ReadCharFile(TRUE, TRUE, FALSE, FALSE))
-                return FALSE;
+            if (!ReadCharFile(true, true, false, false))
+                return false;
         }
         
         if (dirix == 0)
@@ -722,7 +722,7 @@ static boolean CompareCharPaths(char *filename, boolean fortransitionals)
             if (path_entries != totalPathElt)
             {
                 InconsistentPointCount(filename, dirix, totalPathElt, path_entries);
-                ok = FALSE;
+                ok = false;
             }
         minPathLen = NUMMIN(NUMMIN(path_entries, totalPathElt), minPathLen);
     }
@@ -746,7 +746,7 @@ static boolean CompareCharPaths(char *filename, boolean fortransitionals)
                 {
                     InconsistentPathType(filename, dirix,
                                          pathlist[0].path[i].type, pathlist[dirix].path[i].type, i);
-                    ok = FALSE;
+                    ok = false;
                     /* skip to next subpath */
                     while (++i < minPathLen && (pathlist[0].path[i].type != CP));
                 }
@@ -756,7 +756,7 @@ static boolean CompareCharPaths(char *filename, boolean fortransitionals)
     return ok;
 }
 
-static void SetSbandWidth(char *charname, boolean fortransit, Transitions* trptr, int trgroupnum)
+static void SetSbandWidth(char *charname, bool fortransit, Transitions* trptr, int trgroupnum)
 {
 #if !AC_C_LIB
     int16_t width;
@@ -776,7 +776,7 @@ static void SetSbandWidth(char *charname, boolean fortransit, Transitions* trptr
             pathlist[dirix].width = 1000;
             
 #else
-            GetWidthandBbox(charname, &width, &bbox, FALSE, dirix);
+            GetWidthandBbox(charname, &width, &bbox, false, dirix);
             pathlist[dirix].sb = bbox.llx;
             pathlist[dirix].width = width;
 #endif
@@ -788,7 +788,7 @@ static void WriteSbandWidth()
 {
     int16_t subrix, length, opcount = GetOperandCount(SBX);
     indx ix, j, startix = 0;
-    boolean writeSubrOnce, sbsame = TRUE, wsame = TRUE;
+    bool writeSubrOnce, sbsame = true, wsame = true;
     
     for (ix = 1; ix < dirCount; ix++)
     {
@@ -851,7 +851,7 @@ static void WriteSbandWidth()
     WriteStr("sbx\n");
 }
 
-static boolean CurveBBox(indx dirIx, int16_t hinttype, int32_t pathIx, Fixed *value)
+static bool CurveBBox(indx dirIx, int16_t hinttype, int32_t pathIx, Fixed *value)
 {
     Cd startPt, endPt;
     Fixed llx, lly, urx, ury, minval, maxval;
@@ -881,7 +881,7 @@ static boolean CurveBBox(indx dirIx, int16_t hinttype, int32_t pathIx, Fixed *va
             break;
         default:
             sprintf(globmsg, "Illegal hint type in character: %s.\n", currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     if (p1 - maxval >= FixOne || p2 - maxval >= FixOne ||
         p1 - minval <= FixOne || p2 - minval <= FixOne)
@@ -896,10 +896,10 @@ static boolean CurveBBox(indx dirIx, int16_t hinttype, int32_t pathIx, Fixed *va
                 *value = (hinttype == RB || hinttype == RV + ESCVAL) ? ITFMY(*minbx) : ITFMX(*minbx);
             else
                 *value = (hinttype == RB || hinttype == RV + ESCVAL) ? ITFMY(*maxbx) : ITFMX(*maxbx);
-            return TRUE;
+            return true;
         }
     }
-    return FALSE;
+    return false;
 }
 #if __CENTERLINE__
 static char * _HintType_(int typ)
@@ -940,7 +940,7 @@ static char * _elttype_ (int indx)
 
 #endif
 
-static boolean nearlyequal_ (Fixed a, Fixed b, Fixed tolerance)
+static bool nearlyequal_ (Fixed a, Fixed b, Fixed tolerance)
 {
     return (ABS(a - b) <= tolerance);
 }
@@ -955,7 +955,7 @@ static int16_t GetPointType(int16_t hinttype, Fixed value, int32_t *pathEltIx)
     Cd startPt, endPt;
     Fixed startval, endval, loc;
     int16_t pathtype;
-    boolean tryAgain = TRUE;
+    bool tryAgain = true;
     int32_t pathIx = *pathEltIx - 1;
     
 #if __CENTERLINE__
@@ -986,7 +986,7 @@ retry:
             break;
         default:
             sprintf(globmsg, "Illegal hint type in character: %s.\n", currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     
     /* Check for exactly equal first, in case endval = startval + 1. jvz 1nov95 */
@@ -1029,7 +1029,7 @@ retry:
     { /* try looking at other end of line or curve */
         pathIx++;
         *pathEltIx += 1;
-        tryAgain = FALSE;
+        tryAgain = false;
 #if __CENTERLINE__
         if (TRACE) fprintf(stderr," (Retry w/PathEltix=%d) ", *pathEltIx);
 #endif
@@ -1172,7 +1172,7 @@ static void InsertHint(PHintElt currHintElt, indx pathEltIx,
                     {
                         sprintf(globmsg, "Malformed path list: %s, dir: %d, element: %d != RCT.\n",
                                 currentChar, ix, pathIx);
-                        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                     }
                     if (!GetInflectionPoint(startPt.x, startPt.y, pathElt.x1, pathElt.y1,
                                             pathElt.x2, pathElt.y2, pathElt.x3, pathElt.y3, value))
@@ -1193,7 +1193,7 @@ static void InsertHint(PHintElt currHintElt, indx pathEltIx,
                     break;
                 default:
                     sprintf(globmsg, "Illegal point type in character: %s.\n", currentChar);
-                    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             }
             /* Assign correct value for bottom band if first path element
              is a ghost band. */
@@ -1244,10 +1244,10 @@ static int ReadandAssignHints()
     return 0;
 }
 
-static boolean DoubleCheckFlexVals(dirnum, eltix, hintdirnum)
+static bool DoubleCheckFlexVals(dirnum, eltix, hintdirnum)
 indx dirnum, eltix, hintdirnum;
 {
-    boolean vert = (pathlist[hintdirnum].path[eltix].x == pathlist[hintdirnum].path[eltix+1].x3);
+    bool vert = (pathlist[hintdirnum].path[eltix].x == pathlist[hintdirnum].path[eltix+1].x3);
     if (vert) {
         return (pathlist[dirnum].path[eltix].x == pathlist[dirnum].path[eltix+1].x3);
     }
@@ -1256,11 +1256,11 @@ indx dirnum, eltix, hintdirnum;
     }
 }
 
-static boolean CheckFlexOK(ix)
+static bool CheckFlexOK(ix)
 indx ix;
 {
     indx i;
-    boolean flexOK = pathlist[hintsdirIx].path[ix].isFlex;
+    bool flexOK = pathlist[hintsdirIx].path[ix].isFlex;
     PCharPathElt end;
     char pathdir[MAXPATHLEN];
     
@@ -1272,8 +1272,8 @@ indx ix;
                 end = &pathlist[i].path[ix];
                 GetMasterDirName(pathdir, i);
                 sprintf(globmsg, "Flex will not be included in character: %s in '%s' at element %d near (%d, %d) because the character does not have flex in each design.\n", currentChar, pathdir, (int) ix, FTrunc8(end->x), FTrunc8(end->y));
-                LogMsg(globmsg, WARNING, OK, TRUE);
-                return FALSE;
+                LogMsg(globmsg, WARNING, OK, true);
+                return false;
             }
             else {
                 pathlist[i].path[ix].isFlex = flexOK;
@@ -1287,19 +1287,19 @@ static void OptimizeCT(ix)
 indx ix;
 {
     int16_t newtype;
-    boolean vhct = TRUE, hvct = TRUE;
+    bool vhct = true, hvct = true;
     indx i;
     
     for (i = 0; i < dirCount; i++)
         if (pathlist[i].path[ix].rx1 != 0 || pathlist[i].path[ix].ry3 != 0)
         {
-            vhct = FALSE;
+            vhct = false;
             break;
         }
     for (i = 0; i < dirCount; i++)
         if (pathlist[i].path[ix].ry1 != 0 || pathlist[i].path[ix].rx3 != 0)
         {
-            hvct = FALSE;
+            hvct = false;
             break;
         }
     if (vhct)
@@ -1341,7 +1341,7 @@ static void Hvct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
             break;
         default:
             sprintf(globmsg, "Invalid index value: %d defined for curveto command1 in character: %s.\n", (int)ix, currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             break;
     }
 }
@@ -1368,7 +1368,7 @@ static void Vhct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
             break;
         default:
             sprintf(globmsg,"Invalid index value: %d defined for curveto command2 in character:%s.\n", (int)ix, currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             break;
     }
 }
@@ -1402,18 +1402,18 @@ static void Ct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
             break;
         default:
             sprintf(globmsg,"Invalid index value: %d defined for curveto command3 in character: %s.\n", (int)ix, currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             break;
     }
 }
 
 static void ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
-                                boolean *errormsg)
+                                bool *errormsg)
 {
     indx ix;
     PHintElt *hintElt;
     int16_t count, newhinttype;
-    boolean ok = TRUE;
+    bool ok = true;
     Fixed min, dmin, mid, dmid, max, dmax;
     char dirname[MAXPATHLEN];
     
@@ -1434,13 +1434,13 @@ static void ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
         if (*hintElt == NULL || (*hintElt)->next == NULL || (*hintElt)->next->next == NULL)
         {
             sprintf(globmsg, "Invalid format for hint operator: hstem3 or vstem3 in character: %s/%s.\n", dirname, currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
         if ((*hintElt)->type != hinttype || (*hintElt)->next->type != hinttype
             || (*hintElt)->next->next->type != hinttype)
         {
             sprintf(globmsg, "Invalid format for hint operator: hstem3 or vstem3 in character: %s in '%s'.\n", currentChar, dirname);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
         min = (*hintElt)->leftorbot;
         dmin = (*hintElt)->rightortop - min;
@@ -1452,7 +1452,7 @@ static void ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
         if (dmin != dmax ||
             (((mid + dmid/2) - (min + dmin/2)) != ((max + dmax/2) - (mid + dmid/2))))
         {
-            ok = FALSE;
+            ok = false;
             break;
         }
     }
@@ -1467,8 +1467,8 @@ static void ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
                     FTrunc8((*hintElt)->leftorbot), FTrunc8((*hintElt)->rightortop), FTrunc8((*hintElt)->rightortop - (*hintElt)->leftorbot),
                     FTrunc8((*hintElt)->next->leftorbot), FTrunc8((*hintElt)->next->rightortop), FTrunc8((*hintElt)->next->rightortop - (*hintElt)->next->leftorbot),
                     FTrunc8((*hintElt)->next->next->leftorbot), FTrunc8((*hintElt)->next->next->rightortop), FTrunc8((*hintElt)->next->next->rightortop - (*hintElt)->next->next->leftorbot));
-            LogMsg(globmsg, WARNING, OK, TRUE);
-            *errormsg = FALSE;
+            LogMsg(globmsg, WARNING, OK, true);
+            *errormsg = false;
         }
         for (ix = 0; ix < dirCount; ix++)
         {
@@ -1494,7 +1494,7 @@ static void ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
 static void FindHandVStem3(hintElt, pathIx, errormsg)
 PHintElt *hintElt;
 indx pathIx;
-boolean *errormsg;
+bool *errormsg;
 {
     int16_t count = 1;
     
@@ -1518,7 +1518,7 @@ boolean *errormsg;
 static void CheckHandVStem3()
 {
     indx ix;
-    boolean errormsg = TRUE;
+    bool errormsg = true;
     
     FindHandVStem3(&pathlist[hintsdirIx].mainhints, MAINHINTS, &errormsg);
     for (ix = 0; ix < path_entries; ix++)
@@ -1526,7 +1526,7 @@ static void CheckHandVStem3()
 }
 
 static void CheckFlexValues(int16_t *operator, indx eltix, indx flexix,
-                            boolean *xequal, boolean *yequal)
+                            bool *xequal, bool *yequal)
 {
     indx ix;
     Cd coord;
@@ -1534,45 +1534,45 @@ static void CheckFlexValues(int16_t *operator, indx eltix, indx flexix,
     *operator = RMT;
     if (flexix < 2) return;
     
-    *xequal = *yequal = TRUE;
+    *xequal = *yequal = true;
     for (ix = 1; ix < dirCount; ix++)
         switch (flexix)
     {
         case 2:
             if ((coord.x = pathlist[ix].path[eltix].rx2) != pathlist[ix-1].path[eltix].rx2)
-                *xequal = FALSE;
+                *xequal = false;
             if ((coord.y = pathlist[ix].path[eltix].ry2) != pathlist[ix-1].path[eltix].ry2)
-                *yequal = FALSE;
+                *yequal = false;
             break;
         case 3:
             if ((coord.x = pathlist[ix].path[eltix].rx3) != pathlist[ix-1].path[eltix].rx3)
-                *xequal = FALSE;
+                *xequal = false;
             if ((coord.y = pathlist[ix].path[eltix].ry3) != pathlist[ix-1].path[eltix].ry3)
-                *yequal = FALSE;
+                *yequal = false;
             break;
         case 4:
             if ((coord.x = pathlist[ix].path[eltix+1].rx1) != pathlist[ix-1].path[eltix+1].rx1)
-                *xequal = FALSE;
+                *xequal = false;
             if ((coord.y = pathlist[ix].path[eltix+1].ry1) != pathlist[ix-1].path[eltix+1].ry1)
-                *yequal = FALSE;
+                *yequal = false;
             break;
         case 5:
             if ((coord.x = pathlist[ix].path[eltix+1].rx2) != pathlist[ix-1].path[eltix+1].rx2)
-                *xequal = FALSE;
+                *xequal = false;
             if ((coord.y = pathlist[ix].path[eltix+1].ry2) != pathlist[ix-1].path[eltix+1].ry2)
-                *yequal = FALSE;
+                *yequal = false;
             break;
         case 6:
             if ((coord.x = pathlist[ix].path[eltix+1].rx3) != pathlist[ix-1].path[eltix+1].rx3)
-                *xequal = FALSE;
+                *xequal = false;
             if ((coord.y = pathlist[ix].path[eltix+1].ry3) != pathlist[ix-1].path[eltix+1].ry3)
-                *yequal = FALSE;
+                *yequal = false;
             break;
         case 7:
             if ((coord.x = pathlist[ix].path[eltix+1].x3) != pathlist[ix-1].path[eltix+1].x3)
-                *xequal = FALSE;
+                *xequal = false;
             if ((coord.y = pathlist[ix].path[eltix+1].y3) != pathlist[ix-1].path[eltix+1].y3)
-                *yequal = FALSE;
+                *yequal = false;
             break;
     }
     if (!(*xequal) && !(*yequal))
@@ -1581,12 +1581,12 @@ static void CheckFlexValues(int16_t *operator, indx eltix, indx flexix,
     if (*xequal && (coord.x == 0))
     {
         *operator = VMT;
-        *xequal = FALSE;
+        *xequal = false;
     }
     if (*yequal && (coord.y == 0))
     {
         *operator = HMT;
-        *yequal = FALSE;
+        *yequal = false;
     }
 }
 
@@ -1641,9 +1641,9 @@ static void WriteFlex(eltix)
 indx eltix;
 {
 #if ! AC_C_LIB
-    boolean vert = (pathlist[hintsdirIx].path[eltix].x == pathlist[hintsdirIx].path[eltix+1].x3);
+    bool vert = (pathlist[hintsdirIx].path[eltix].x == pathlist[hintsdirIx].path[eltix+1].x3);
     Cd coord, coord0; /* array of reference points */
-    boolean xsame, ysame, writeSubrOnce;
+    bool xsame, ysame, writeSubrOnce;
     char operator[MAXOPLEN]; /* rmt, hmt, vmt */
     int16_t optype;
     indx ix, j, opix, startix;
@@ -1660,7 +1660,7 @@ indx eltix;
     {
         if (j == 7)
             WRTNUM(DMIN);
-        xsame = ysame = FALSE;
+        xsame = ysame = false;
         CheckFlexValues(&optype, eltix, j, &xsame, &ysame);
         opcount = GetOperandCount(optype);
         if ((xsame && !ysame) || (!xsame && ysame))
@@ -1747,7 +1747,7 @@ indx eltix;
         }
     } /* end of j for loop */
     WriteStr("0 subr\n");
-    flexexists = TRUE;
+    flexexists = true;
     UnallocateMem (refPtArray);
     
 #endif /* AC_C_LIB */
@@ -1760,7 +1760,7 @@ indx pathEltIx;
     int16_t rmcount, rvcount, hinttype;
     int16_t opcount, subrIx, length;
     PHintElt *hintArray;
-    boolean lbsame, rtsame, writeSubrOnce;
+    bool lbsame, rtsame, writeSubrOnce;
     
     /* hintArray contains the pointers to the beginning of the linked list of hints for
      each design at pathEltIx. */
@@ -1784,13 +1784,13 @@ indx pathEltIx;
             /* for normal fonts, translate vstem hints left by sidebearing */
                 hintArray[ix]->leftorbot -= IntToFix(pathlist[ix].sb);
         }
-        lbsame = rtsame = TRUE;
+        lbsame = rtsame = true;
         for (ix = 1; ix < dirCount; ix++)
         {
             if (hintArray[ix]->leftorbot != hintArray[ix-1]->leftorbot)
-                lbsame = FALSE;
+                lbsame = false;
             if (hintArray[ix]->rightortop != hintArray[ix-1]->rightortop)
-                rtsame = FALSE;
+                rtsame = false;
         }
         if (lbsame && rtsame)
         {
@@ -1864,7 +1864,7 @@ indx pathEltIx;
                 break;
             default:
                 sprintf(globmsg, "Illegal hint type: %d in character: %s.\n", hinttype, currentChar);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
         for (ix = 0; ix < dirCount; ix++)
             hintArray[ix] = (hintArray[ix]->next == NULL) ? NULL : hintArray[ix]->next;
@@ -1930,7 +1930,7 @@ static void WritePathElt(indx dirIx, indx eltIx, int16_t pathType,
         {
             sprintf(globmsg, "Illegal path operator %d found in character: %s.\n",
                     (int)pathType, currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
     }
 }
@@ -1938,11 +1938,11 @@ static void WritePathElt(indx dirIx, indx eltIx, int16_t pathType,
 static void OptimizeMtorDt(eltix, op, xequal, yequal)
 indx eltix;
 int16_t *op;
-boolean *xequal, *yequal;
+bool *xequal, *yequal;
 {
     indx ix;
     
-    *xequal = *yequal = TRUE;
+    *xequal = *yequal = true;
     for (ix = 1; ix < dirCount; ix++)
     {
         *xequal = *xequal &&
@@ -1953,16 +1953,16 @@ boolean *xequal, *yequal;
     if (*xequal && pathlist[0].path[eltix].rx == 0)
     {
         *op = (*op == RMT) ? VMT : VDT;
-        *xequal = FALSE;
+        *xequal = false;
     }
     else if (*yequal && pathlist[0].path[eltix].ry == 0)
     {
         *op = (*op == RMT) ? HMT : HDT;
-        *yequal = FALSE;
+        *yequal = false;
     }
 }
 
-static boolean CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
+static bool CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
 {
     PCharPathElt path1 = &pathlist[dir1].path[eltIx], path2 = &pathlist[dir2].path[eltIx];
     char dirname[MAXPATHLEN];
@@ -2004,7 +2004,7 @@ static boolean CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t 
         default:
             GetMasterDirName(dirname, dir1);
             sprintf(globmsg, "Invalid index value: %d defined for curveto command4 in character: %s. Op=%d, dir=%s near (%d %d).\n", (int)opIx, currentChar, (int)op, dirname, FTrunc8(path1->x), FTrunc8(path1->y));
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             break;
     }
 	
@@ -2013,21 +2013,21 @@ static boolean CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t 
 
 /* Checks if path element values are the same for the RCT, HVCT and VHCT
  operators in each master directory between operands startIx to
- startIx + length.  Returns TRUE if they are the same and FALSE otherwise. */
-static boolean SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
+ startIx + length.  Returns true if they are the same and false otherwise. */
+static bool SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
 {
     indx ix, dirIx;
     /*  PCharPathElt path0 = &pathlist[0].path[eltIx]; */
-    boolean same = TRUE;
+    bool same = true;
     
     for (ix = 0; ix < length; ix++)
     {
         for (dirIx = 1; dirIx < dirCount; dirIx++)
             if (!(same = same && CoordsEqual(dirIx, 0, startIx, eltIx, op)))
-                return FALSE;
+                return false;
         startIx++;
     }
-    return TRUE;
+    return true;
 }
 
 /* Takes multiple path descriptions for the same character name and
@@ -2039,14 +2039,14 @@ static void CombinePaths()
     indx ix, eltix, opix, startIx, dirIx;
     int16_t length, subrIx, opcount, op;
     char operator[MAXOPLEN];
-    boolean xequal, yequal;
+    bool xequal, yequal;
     
     if (!cubeLibrary)
         WriteSbandWidth();
     if (addHints && (pathlist[hintsdirIx].mainhints != NULL))
         WriteHints(MAINHINTS);
     WriteStr("sc\n");
-    firstMT = TRUE;
+    firstMT = true;
     for (eltix = 0; eltix < path_entries; eltix++)
     {
         /* A RDT may be tagged 'remove' because it is followed by a point CP. */
@@ -2054,7 +2054,7 @@ static void CombinePaths()
         if (pathlist[0].path[eltix].remove)
             continue;
         
-        xequal = yequal = FALSE;
+        xequal = yequal = false;
         if (addHints && (pathlist[hintsdirIx].path[eltix].hints != NULL))
             WriteHints(eltix);
         switch (pathlist[0].path[eltix].type)
@@ -2064,7 +2064,7 @@ static void CombinePaths()
                 /* don't want this for cube */
                     for (ix = 0; ix < dirCount; ix++)
                         pathlist[ix].path[eltix].rx -= IntToFix(pathlist[ix].sb);
-                firstMT = FALSE;
+                firstMT = false;
             case RDT:
             case CP:
                 break;
@@ -2084,7 +2084,7 @@ static void CombinePaths()
                 break;
             default:
                 sprintf(globmsg, "Unknown operator in character: %s.\n", currentChar);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
         op = pathlist[0].path[eltix].type;
         if (op != RCT && op != HVCT && op != VHCT && op != CP)
@@ -2176,7 +2176,7 @@ extern int16_t GetOperandCount(int16_t op)
             break;
         default:
             sprintf(globmsg, "Unknown operator in character: %s.\n", currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             break;
     }
     else				/* handle escape operators */
@@ -2205,7 +2205,7 @@ extern void GetLengthandSubrIx(int16_t opcount, int16_t *length, int16_t *subrIx
             else *length = opcount;
     if (((*length) * dirCount) > FONTSTKLIMIT) {
         sprintf(globmsg, "Font stack limit exceeded for character: %s.\n", currentChar);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     if (!cubeLibrary) {
         switch (*length) {
@@ -2216,7 +2216,7 @@ extern void GetLengthandSubrIx(int16_t opcount, int16_t *length, int16_t *subrIx
             case 6: *subrIx = 11; break;
             default:
                 sprintf(globmsg, "Illegal operand length for character: %s.\n", currentChar);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                 break;
         }
     } else { /* CUBE */
@@ -2230,7 +2230,7 @@ extern void GetLengthandSubrIx(int16_t opcount, int16_t *length, int16_t *subrIx
                     case 6: *subrIx = 11; break;
                     default:
                         sprintf(globmsg, "Illegal operand length for character: %s.\n", currentChar);
-                        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                         break;
                 }
                 break;
@@ -2243,7 +2243,7 @@ extern void GetLengthandSubrIx(int16_t opcount, int16_t *length, int16_t *subrIx
                     case 4: *subrIx = 15; break;
                     default:
                         sprintf(globmsg, "Illegal operand length for character: %s.\n", currentChar);
-                        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                         break;
                 }
                 break;
@@ -2254,7 +2254,7 @@ extern void GetLengthandSubrIx(int16_t opcount, int16_t *length, int16_t *subrIx
                     case 2: *subrIx = 17; break;
                     default:
                         sprintf(globmsg, "Illegal operand length for character: %s.\n", currentChar);
-                        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                         break;
                 }
                 break;
@@ -2264,13 +2264,13 @@ extern void GetLengthandSubrIx(int16_t opcount, int16_t *length, int16_t *subrIx
                     case 1: *subrIx = 18; break;
                     default:
                         sprintf(globmsg, "Illegal operand length for character: %s.\n", currentChar);
-                        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+                        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                         break;
                 }
                 break;
                 
             default:
-                LogMsg("Illegal dirCount.\n", LOGERROR, NONFATALERROR, TRUE);
+                LogMsg("Illegal dirCount.\n", LOGERROR, NONFATALERROR, true);
                 break;
         }
     }
@@ -2310,14 +2310,14 @@ extern int GetHintsDir(void)
     return hintsdirIx;
 }
 /*
- extern boolean MergeCharPaths(outbuffer, charname, filename,
+ extern bool MergeCharPaths(outbuffer, charname, filename,
  fortransit, tr, trgroupnum)
  char **outbuffer, *charname, *filename;
- boolean fortransit;
+ bool fortransit;
  Transitions *tr;
  int trgroupnum;
  {
- boolean ok;
+ bool ok;
  int i, ix;
  
  byteCount = 1;  
@@ -2364,7 +2364,7 @@ extern int GetHintsDir(void)
  {
  if (ReadandAssignHints()) {
  sprintf(globmsg, "Path problem in ReadAndAssignHints, character %s.\n", charname);
- LogMsg(globmsg, LOGERROR, FATALERROR, TRUE);
+ LogMsg(globmsg, LOGERROR, FATALERROR, true);
  }
  CheckHandVStem3();
  }

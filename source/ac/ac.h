@@ -142,7 +142,7 @@ typedef struct _pthelt {
   struct _pthelt *prev, *next, *conflict;
   int16_t type;
   PSegLnkLst Hs, Vs;
-  boolean Hcopy:1, Vcopy:1, isFlex:1, yFlex:1, newCP:1, sol:1, eol:1;
+  bool Hcopy:1, Vcopy:1, isFlex:1, yFlex:1, newCP:1, sol:1, eol:1;
   int unused:9;
   int16_t count, newcolors;
   Fixed x, y, x1, y1, x2, y2, x3, y3;
@@ -157,7 +157,7 @@ typedef struct _clrpnt {
     /* p0 is source of x0,y0; p1 is source of x1,y1 */
   char c;
     /* tells what kind of coloring: 'b' 'y' 'm' or 'v' */
-  boolean done;
+  bool done;
   } ClrPoint, *PClrPoint;
 
 typedef struct {
@@ -176,13 +176,13 @@ extern int featurefilesize;
 #endif
 
 extern PPathElt pathStart, pathEnd;
-extern boolean YgoesUp;
-extern boolean useV, useH, autoVFix, autoHFix, autoLinearCurveFix;
-extern boolean AutoExtraDEBUG, debugColorPath, DEBUG, logging;
-extern boolean editChar; /* whether character can be modified when adding hints */
-extern boolean scalehints;
-extern boolean showHs, showVs, bandError, listClrInfo;
-extern boolean reportErrors, hasFlex, flexOK, flexStrict, showClrInfo;
+extern bool YgoesUp;
+extern bool useV, useH, autoVFix, autoHFix, autoLinearCurveFix;
+extern bool AutoExtraDEBUG, debugColorPath, DEBUG, logging;
+extern bool editChar; /* whether character can be modified when adding hints */
+extern bool scalehints;
+extern bool showHs, showVs, bandError, listClrInfo;
+extern bool reportErrors, hasFlex, flexOK, flexStrict, showClrInfo;
 extern Fixed hBigDist, vBigDist, initBigDist, minDist, minMidPt, ghostWidth,
   ghostLength, bendLength, bandMargin, maxFlare,
   maxBendMerge, maxMerge, minColorElementLength, flexCand,
@@ -214,12 +214,12 @@ extern Fixed VStems[MAXSTEMS], HStems[MAXSTEMS];
 extern integer NumVStems, NumHStems;
 extern char *HColorList[], *VColorList[];
 extern integer NumHColors, NumVColors;
-extern boolean makehintslog;
-extern boolean writecoloredbez;
+extern bool makehintslog;
+extern bool writecoloredbez;
 extern Fixed bluefuzz;
-extern boolean doAligns, doStems;
-extern boolean idInFile;
-extern boolean roundToInt;
+extern bool doAligns, doStems;
+extern bool idInFile;
+extern bool roundToInt;
 extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at the start of the bex file. */
 
 /* macros */
@@ -300,7 +300,7 @@ extern void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 
 extern int AddCounterColorChars();
-extern boolean FindNameInList();
+extern bool FindNameInList();
 extern void ACGetVersion();
 extern void PruneElementColorSegs();
 extern int TestColorLst(/*lst, colorList, flg, Hflg, doLst*/);
@@ -316,24 +316,24 @@ extern void ClrBBox();
 extern void SetMaxStemDist(/* int dist */);
 extern void CheckPathBBox();
 extern integer SpecialCharType();
-extern boolean VColorChar();
-extern boolean HColorChar();
-extern boolean NoBlueChar();
+extern bool VColorChar();
+extern bool HColorChar();
+extern bool NoBlueChar();
 extern integer SolEolCharCode(/*s*/);
-extern boolean SpecialSolEol();
-extern boolean MoveToNewClrs();
+extern bool SpecialSolEol();
+extern bool MoveToNewClrs();
 extern void CheckSmooth();
 extern void CheckBBoxEdge(/*e, vrt, lc, pf, pl*/);
-extern boolean CheckBBoxes(/*e1, e2*/);
-extern boolean CheckSmoothness(/*x0, y0, x1, y1, x2, y2, pd*/);
+extern bool CheckBBoxes(/*e1, e2*/);
+extern bool CheckSmoothness(/*x0, y0, x1, y1, x2, y2, pd*/);
 extern void CheckForDups();
-extern boolean showClrInfo;
+extern bool showClrInfo;
 extern void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0, PPathElt p1);
 extern void AddHPair(PClrVal v, char ch);
 extern void AddVPair(PClrVal v, char ch);
 extern void XtraClrs(/*e*/);
-extern boolean CreateTimesFile();
-extern boolean DoFile(char *fname, boolean extracolor);
+extern bool CreateTimesFile();
+extern bool DoFile(char *fname, bool extracolor);
 extern void DoList(/*filenames*/);
 extern void EvalV();
 extern void EvalH();
@@ -341,11 +341,11 @@ extern void GenVPts();
 extern void CheckVal(/*val, vert*/);
 extern void CheckTfmVal(/*b, t, vert*/);
 extern void CheckVals(/*vlst, vert*/);
-extern boolean DoFixes();
-extern boolean FindLineSeg();
+extern bool DoFixes();
+extern bool FindLineSeg();
 extern void FltnCurve(/*c0, c1, c2, c3, pfr*/);
-extern boolean ReadFontInfo();
-extern boolean InBlueBand(/*loc,n,p*/);
+extern bool ReadFontInfo();
+extern bool InBlueBand(/*loc,n,p*/);
 extern void GenHPts();
 extern void PreGenPts();
 extern PPathElt GetDest(/*cldest*/);
@@ -354,17 +354,17 @@ extern void GetEndPoint(/*e, x1p, y1p*/);
 extern void GetEndPoints(/*p,px0,py0,px1,py1*/);
 extern Fixed VertQuo(/*xk,yk,xl,yl*/);
 extern Fixed HorzQuo(/*xk,yk,xl,yl*/);
-extern boolean IsTiny(/*e*/);
-extern boolean IsShort(/*e*/);
+extern bool IsTiny(/*e*/);
+extern bool IsShort(/*e*/);
 extern PPathElt NxtForBend(/*p,px2,py2,px3,py3*/);
 extern PPathElt PrvForBend(/*p,px2,py2*/);
-extern boolean IsLower(/*p*/);
-extern boolean IsUpper(/*p*/);
-extern boolean CloseSegs(/*s1,s2,vert*/);
-extern boolean DoAllIgnoreTime();
-extern boolean DoArgsIgnoreTime();
-extern boolean DoArgs(int cnt, char* names[], boolean extraColor, boolean* renameLog, boolean release);
-extern boolean DoAll(boolean extraColor, boolean release, boolean *renameLog, boolean quiet);
+extern bool IsLower(/*p*/);
+extern bool IsUpper(/*p*/);
+extern bool CloseSegs(/*s1,s2,vert*/);
+extern bool DoAllIgnoreTime();
+extern bool DoArgsIgnoreTime();
+extern bool DoArgs(int cnt, char* names[], bool extraColor, bool* renameLog, bool release);
+extern bool DoAll(bool extraColor, bool release, bool *renameLog, bool quiet);
 
 extern void DoPrune();
 extern void PruneVVals();
@@ -379,12 +379,12 @@ extern void InitAuto();
 extern void InitData(integer reason);
 extern void InitFix();
 extern void InitGen();
-extern boolean RotateSubpaths(/*flg*/);
+extern bool RotateSubpaths(/*flg*/);
 extern void InitPick();
 extern void AutoAddFlex();
 extern integer PointListCheck(/*new,lst*/);
-extern boolean SameColors(/*cn1, cn2*/);
-extern boolean PreCheckForColoring();
+extern bool SameColors(/*cn1, cn2*/);
+extern bool PreCheckForColoring();
 extern integer CountSubPaths();
 extern void PickVVals(/*valList*/);
 extern void PickHVals(/*valList*/);
@@ -414,7 +414,7 @@ extern void ReportRemFlare(/*e*/);
 extern void ReportRemConflict(/*e*/);
 extern void ReportRotateSubpath(/*e*/);
 extern void ReportRemShortColors(/*ex, ey*/);
-extern boolean   ResolveConflictBySplit(/*e,Hflg,lnk1,lnk2*/);
+extern bool   ResolveConflictBySplit(/*e,Hflg,lnk1,lnk2*/);
 extern void ReportPossibleLoop(/*e*/);
 extern void ShowHVal(/*val*/);
 extern void ShowHVals(/*lst*/);
@@ -452,10 +452,10 @@ extern void RMovePoint();
 extern void AddVSegment();
 extern void AddHSegment();
 extern void Delete();
-extern boolean StrEqual();
-extern boolean ReadCharFile();
+extern bool StrEqual();
+extern bool ReadCharFile();
 extern double FixToDbl(/*f*/);
-extern boolean CompareValues();
+extern bool CompareValues();
 extern void SaveFile();
 extern void CheckForMultiMoveTo();
 extern double fabs();

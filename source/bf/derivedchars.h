@@ -9,15 +9,15 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define DERIVEDCHARFILENAME "derivedchars"
 
 extern void free_derivedtables(
-boolean, indx
+bool, indx
 );
 
 extern char **make_derivedchars(
-boolean, int16_t *, indx
+bool, int16_t *, indx
 );
 
 extern void readderived (
-boolean, indx
+bool, indx
 );
 
 extern void CheckDerivedFileSizes(

@@ -25,7 +25,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define DEFAULTOVRSHTPTSIZE 9.51  /* Default overshoot point size. */
 
 static const char *keywordtab[KWTABLESIZE];
-static boolean tab_initialized = FALSE;
+static bool tab_initialized = false;
 static FINODE finode;
 static FIPTR fiptr = &finode;
 static char endNotice[] = "EndNotice";
@@ -48,7 +48,7 @@ static void make_error_return(
 );
 
 static  void make_normal_return(
-    char *, boolean
+    char *, bool
 );
 
 static  void append_normal_return(
@@ -76,7 +76,7 @@ static  void check_for_boolean(
 );
 
 static void check_for_matrix(
-    char *, char *, boolean
+    char *, char *, bool
 );
 
 static void check_PS_comment(
@@ -84,15 +84,15 @@ static void check_PS_comment(
 );
 
 static  void checkovershootvalue(
-  char *, boolean, boolean
+  char *, bool, bool
 );
 
-static boolean checkovershoots(
+static bool checkovershoots(
   void
 );
 
 static char *get_middle_lines(
-    char *, char *, boolean
+    char *, char *, bool
 );
 
 static char *get_keyword_value(
@@ -108,7 +108,7 @@ static char *get_base_font_path(
 );
 
 static char *GetHVStems(
-  char *, boolean
+  char *, bool
 );
 
 static void CheckStemSnap(
@@ -116,7 +116,7 @@ static void CheckStemSnap(
 );
 
 #ifdef SUN
-static boolean valueOK = TRUE;
+static bool valueOK = true;
 #endif
 
 void fiptrfree(FIPTR ptr)
@@ -178,7 +178,7 @@ static void make_error_return(int16_t exit_status, char *error_msg1, char *error
 /* make_normal_return copies the string argument into the 
  * the return value string and assigns the normal return 
  * exit status. The caller should free the arg.*/
-static  void make_normal_return(char *arg, boolean arg_is_string)
+static  void make_normal_return(char *arg, bool arg_is_string)
 {
   fiptr->value_string = AllocateMem((unsigned) (strlen(arg) + 1), sizeof(char),
     "fontinfo return");
@@ -213,7 +213,7 @@ char *arg;
     UnallocateMem(temp);
   }
   fiptr->exit_status = NORMAL_RETURN;
-  fiptr->value_is_string = FALSE;
+  fiptr->value_is_string = false;
 }
 
 /* If lineargs is an int, put the int to the value string.
@@ -231,7 +231,7 @@ char *key, *lineargs;
     if ((float) j == f)
     {
       sprintf(lineargs, "%d", j);
-      make_normal_return(lineargs, FALSE);
+      make_normal_return(lineargs, false);
       return;
     }
   }
@@ -249,7 +249,7 @@ char *key, *lineargs;
   if (lb == 0) /* must be an integer */
     check_for_int(key, lineargs);
   else
-    check_for_matrix(key, lineargs, FALSE);
+    check_for_matrix(key, lineargs, false);
 }
 
 /* If lineargs is a decimal number, put the decimal number to
@@ -271,7 +271,7 @@ char *key, *lineargs;
   else
   {
     sprintf(lineargs, "%g", f);
-    make_normal_return(lineargs, FALSE);
+    make_normal_return(lineargs, false);
   }
 }
 
@@ -295,7 +295,7 @@ char *key, *lineargs;
   }
   rp[0] = '\0';         /* trash character after ) to put in string
                terminator */
-  make_normal_return(lp + 1, TRUE);
+  make_normal_return(lp + 1, true);
 }
 
 int misspace(int c)
@@ -310,7 +310,7 @@ int misdigit(int c)
 	return c>='0' && c<='9';
 }
 
-/* If lineargs is a boolean, put the boolean to the value string.  
+/* If lineargs is a bool, put the bool to the value string.  
  *  Otherwise, put an error message to the value string. */
 static  void check_for_boolean(key, lineargs)
 char *key, *lineargs;
@@ -321,13 +321,13 @@ char *key, *lineargs;
   {
   }
   if (!strncmp(&lineargs[i], "false", 5))
-    make_normal_return("false", FALSE);
+    make_normal_return("false", false);
   else if (!strncmp(&lineargs[i], "true", 4))
-    make_normal_return("true", FALSE);
+    make_normal_return("true", false);
   else
   {
     sprintf(globmsg,
-      "boolean value expected on the same line of %s file as ", fifilename);
+      "bool value expected on the same line of %s file as ", fifilename);
     make_error_return(ERROR_RETURN, globmsg, key, "\n  instead of ", lineargs);
   }
 }
@@ -336,7 +336,7 @@ char *key, *lineargs;
    If lineargs is a PostScript format matrix (enclosed in square
    brackets) put the matrix to the value string.  Otherwise, put
    an error message to the value string. */
-static void check_for_matrix (char *key, char *lineargs, boolean append)
+static void check_for_matrix (char *key, char *lineargs, bool append)
 {
   char *lb, *rb;
   lb = (char *)strchr (lineargs, '[');
@@ -349,7 +349,7 @@ static void check_for_matrix (char *key, char *lineargs, boolean append)
   }
   rb [1] = '\0';   /* trash character after ] to put in string terminator */
   if (!append)
-    make_normal_return (lb, FALSE);
+    make_normal_return (lb, false);
   else
     append_normal_return(lb);
 }
@@ -376,7 +376,7 @@ char *line;
  * matches the param, endkey.  If matrix is true then it
  * checks that the line is a matrix before appending otherwise
  * it checks that the line is a comment. */
-static char *get_middle_lines(char *beginkey, char *endkey, boolean matrix)
+static char *get_middle_lines(char *beginkey, char *endkey, bool matrix)
 {
   FILE *fifile;
   char *line, linekey[LINELEN], linebuf[LINELEN + 1];
@@ -409,7 +409,7 @@ static char *get_middle_lines(char *beginkey, char *endkey, boolean matrix)
       if (!matrix)
         check_PS_comment(linebuf);
       else
-        check_for_matrix(beginkey, linebuf, TRUE);
+        check_for_matrix(beginkey, linebuf, true);
     else
     {
       fclose(fifile);
@@ -450,7 +450,7 @@ static void init_kw_tab()
 {
   if (tab_initialized)
       return;
-  tab_initialized = TRUE;
+  tab_initialized = true;
   /* These are the keywords actually used on the Mac */
   keywordtab[ADOBECOPYRIGHT] = "AdobeCopyright";
   keywordtab[BASEFONTPATH] = "BaseFontPath";
@@ -581,7 +581,7 @@ static void init_kw_tab()
    is returned in the value string.  Otherwise, an error message
    will be written to the returned value string.
 */
-extern FIPTR filookup(char *keyword, boolean optional)
+extern FIPTR filookup(char *keyword, bool optional)
 {
   int16_t kwindex;
   char *fs;
@@ -700,13 +700,13 @@ extern FIPTR filookup(char *keyword, boolean optional)
     check_for_num(keyword, fs);
     break;
   case MASTERDIRS:
-    fs = get_middle_lines(keyword, endDirs, FALSE);
+    fs = get_middle_lines(keyword, endDirs, false);
     if (fs == NULL)
       make_error_return(ERROR_RETURN,
         "Could not find keyword ", endDirs, " in file ", fifilename);
     break;
   case COPYRIGHTNOTICE:
-    fs = get_middle_lines(keyword, endNotice, FALSE);
+    fs = get_middle_lines(keyword, endNotice, false);
     if (fs == NULL)
       make_error_return(ERROR_RETURN,
         "No EndNotice line found in ", fifilename, " file.", EOS);
@@ -765,20 +765,20 @@ extern FIPTR filookup(char *keyword, boolean optional)
   case FONTMATRIX:
   case STEMSNAPH:
   case STEMSNAPV:
-    check_for_matrix(keyword, fs, FALSE);
+    check_for_matrix(keyword, fs, false);
     break;
   case DOMINANTH:
   case DOMINANTV:
     check_for_intormatrix(keyword, fs);
     break;
   case PHANTOMVECTORS:
-    fs = get_middle_lines(keyword, endVectors, TRUE);
+    fs = get_middle_lines(keyword, endVectors, true);
     if (fs == NULL)
       make_error_return(ERROR_RETURN,
         "Could not find keyword ", endVectors, " in file ", fifilename);
     break;
   case PRIMARYINSTANCES:
-    fs = get_middle_lines(keyword, endInstance, TRUE);
+    fs = get_middle_lines(keyword, endInstance, true);
     if (fs == NULL)
       make_error_return(ERROR_RETURN,
         "Could not find keyword ", endInstance, " in file ", fifilename);
@@ -811,7 +811,7 @@ extern  void ResetFntInfoFileName(void)
 /* Looks up the value of the specified keyword in the fontinfo
    file.  If the keyword doesn't exist and this is an optional
    key, returns a NULL.  Otherwise, returns the value string. */
-extern char *GetFntInfo(char *keyword, boolean optional)
+extern char *GetFntInfo(char *keyword, bool optional)
 {
   FIPTR fptr;
   char *returnstring = NULL;
@@ -835,7 +835,7 @@ extern char *GetFntInfo(char *keyword, boolean optional)
 			return NULL;
 		}else{
 			sprintf(globmsg, "ERROR: Fontinfo: Couldn't find fontinfo for %s\n", keyword);
-			LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
 	}else{
 #endif
@@ -856,12 +856,12 @@ extern char *GetFntInfo(char *keyword, boolean optional)
   case ERROR_RETURN:
     sprintf(globmsg, "%s\n", fptr->value_string);
 	UnallocateMem(fptr->value_string);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     break;
   default:
 	UnallocateMem(fptr->value_string);
     LogMsg("Unknown exit status from fontinfo lookup.\n",
-      LOGERROR, NONFATALERROR, TRUE);
+      LOGERROR, NONFATALERROR, true);
 	break;
   }
   return (returnstring);
@@ -877,7 +877,7 @@ extern char *GetFntInfo(char *keyword, boolean optional)
    In case of an error, cleanup is called, which never returns
  */
 
-extern int GetFIInt(char *keyword, boolean optional)
+extern int GetFIInt(char *keyword, bool optional)
 {
   FIPTR fptr;
   int temp;
@@ -900,11 +900,11 @@ extern int GetFIInt(char *keyword, boolean optional)
   case ERROR_RETURN:
     sprintf(globmsg, "%s\n", fptr->value_string);
 	UnallocateMem(fptr->value_string);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   default:
 	UnallocateMem(fptr->value_string);
     LogMsg("Unknown exit status from fontinfo lookup.\n",
-      LOGERROR, NONFATALERROR, TRUE);
+      LOGERROR, NONFATALERROR, true);
   }
   return (MAXINT);
 }
@@ -917,7 +917,7 @@ extern void FreeFontInfo(char *ptr)
 }
 
 /* Appends Aux{H,V}Stems which is optional to StemSnap{H,V} respectively. */
-static char *GetHVStems(char *kw, boolean optional)
+static char *GetHVStems(char *kw, bool optional)
 {
   char *fistr1, *fistr2, *newfistr;
   char *end, *start;
@@ -948,12 +948,12 @@ static char *GetHVStems(char *kw, boolean optional)
    current font directory and not for all input directories
    (e.g., for a multi-master font).
  */  
-extern void ParseIntStems(char *kw, boolean optional, int32_t maxstems, int *stems, int32_t *pnum, char *blendstr)
+extern void ParseIntStems(char *kw, bool optional, int32_t maxstems, int *stems, int32_t *pnum, char *blendstr)
 {
   char c;
   char *line;  
   int val, cnt, i, ix, j, temp, targetCnt = -1, total = 0;
-  boolean singleint = FALSE;
+  bool singleint = false;
   int16_t dirCount = (blendstr == NULL ? 1 : GetTotalInputDirs());
   char *initline;
 
@@ -971,7 +971,7 @@ extern void ParseIntStems(char *kw, boolean optional, int32_t maxstems, int *ste
     if (targetCnt > 0)
          {
         sprintf(globmsg, "The keyword: %s does not have the same number of values\n  in each master design.\n", kw);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
          }
       else
             continue;  /* optional keyword not found */
@@ -980,10 +980,10 @@ extern void ParseIntStems(char *kw, boolean optional, int32_t maxstems, int *ste
     /* Check for single integer instead of matrix. */
     if ((strlen(line) != 0) && (strchr(line, '[') == 0))
     {
-      singleint = TRUE;
+      singleint = true;
       goto numlst;
     }
-    while (TRUE) 
+    while (true) 
     {
       c = *line++;
       switch (c) 
@@ -1003,12 +1003,12 @@ extern void ParseIntStems(char *kw, boolean optional, int32_t maxstems, int *ste
       if (total >= maxstems)
       {
         sprintf (globmsg, "Cannot have more than %d values in fontinfo file array: \n  %s\n", (int) maxstems, initline);
-      LogMsg (globmsg, LOGERROR, NONFATALERROR, TRUE);
+      LogMsg (globmsg, LOGERROR, NONFATALERROR, true);
       }
       if (val < 1)
       {
         sprintf (globmsg, "Cannot have a value < 1 in fontinfo file array: \n  %s\n", line);
-        LogMsg (globmsg, LOGERROR, NONFATALERROR, TRUE);
+        LogMsg (globmsg, LOGERROR, NONFATALERROR, true);
       }
       stems[total++] = val;
       cnt++;
@@ -1038,7 +1038,7 @@ extern void ParseIntStems(char *kw, boolean optional, int32_t maxstems, int *ste
     {
 		UnallocateMem(initline);
       sprintf(globmsg, "The keyword: %s does not have the same number of values\n  in each master design.\n", kw);
-      LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+      LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     targetCnt = cnt;
     *pnum += cnt;
@@ -1083,19 +1083,19 @@ char *direction;
   if (dominantVal == MAXINT)
   {
     sprintf(globmsg, "A StemSnap%s array is specified, but a Dominant%s value\n  is not defined.  This may cause stem width problems.\n", direction, direction);
-    LogMsg(globmsg, WARNING, OK, TRUE);
+    LogMsg(globmsg, WARNING, OK, true);
     return;
   }
   if ((stemcnt > 2) && (domValCnt != MAXDOMINANTSTEMS))
   {
     sprintf(globmsg, "There must be two values in the Dominant{H,V} arrays if there are\n  more than two values in the StemSnap{H,V} arrays in the %s file.\n", FIFILENAME);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
   for (ix = 0; ix < stemcnt; ix++)
     if (dominantVal == stems[ix])
       return;
   sprintf(globmsg, "The Dominant%s value: %d must be included in\n  the StemSnap%s array in the %s file.\n", direction, dominantVal, direction, FIFILENAME);
-  LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 }
 
 
@@ -1123,7 +1123,7 @@ CheckRequiredKWs (void)
       sprintf(globmsg, "FontName in %s exceeds max length of %d.\n",
       fifilename, (int) (MAXFONTNAME-1));
 		UnallocateMem(s);
-      LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+      LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       }
 		UnallocateMem(s);
    s = GetFntInfo("Encoding",
@@ -1180,11 +1180,11 @@ CheckRequiredKWs (void)
       }
    if ((s = GetFntInfo("OvershootPtsize", ACOPTIONAL)) != NULL)
       overshootptsize = atof(s) - 0.49;
-   if (checkbandwidths(overshootptsize, TRUE) ||
-      checkbandwidths(overshootptsize, FALSE) ||
+   if (checkbandwidths(overshootptsize, true) ||
+      checkbandwidths(overshootptsize, false) ||
       checkbandspacing() || !checkovershoots())
    LogMsg("Can't continue because of problem with "
-         "alignment zones in fontinfo file.\n", LOGERROR, NONFATALERROR, TRUE);
+         "alignment zones in fontinfo file.\n", LOGERROR, NONFATALERROR, true);
 #endif
    }
 
@@ -1194,7 +1194,7 @@ CheckRequiredKWs (void)
 
 static checkovershootvalue(keyword, optional, positive)
 char *keyword;
-boolean optional, positive;
+bool optional, positive;
 {
   int value;
 
@@ -1205,36 +1205,36 @@ boolean optional, positive;
       if (value < 0)
       {
         sprintf(globmsg, "The keyword %s has a value of %d.\n  It should be greater than or equal to 0.\n", keyword, value);
-        LogMsg(globmsg, LOGERROR, OK, TRUE);
-        valueOK = FALSE;
+        LogMsg(globmsg, LOGERROR, OK, true);
+        valueOK = false;
       }
     }
     else
       if (value > 0)
       {
         sprintf(globmsg, "The keyword %s has a value of %d.\n  It should be less than or equal to 0.\n", keyword, value);
-        LogMsg(globmsg, LOGERROR, OK, TRUE);
-        valueOK = FALSE;
+        LogMsg(globmsg, LOGERROR, OK, true);
+        valueOK = false;
       }
   }
 }
 
-/* Returns TRUE if all values have the correct sign i.e. positive or negative. */
-static boolean checkovershoots()
+/* Returns true if all values have the correct sign i.e. positive or negative. */
+static bool checkovershoots()
 {
-  valueOK = TRUE;
-  checkovershootvalue("BaselineOvershoot", MANDATORY, FALSE);
-  checkovershootvalue("CapOvershoot", MANDATORY, TRUE);
-  checkovershootvalue("LcOvershoot", ACOPTIONAL, TRUE);
-  checkovershootvalue("FigOvershoot", ACOPTIONAL, TRUE);
-  checkovershootvalue("SuperiorOvershoot", ACOPTIONAL, FALSE);
-  checkovershootvalue("OrdinalOvershoot", ACOPTIONAL, FALSE);
-  checkovershootvalue("AscenderOvershoot", ACOPTIONAL, TRUE);
-  checkovershootvalue("DescenderOvershoot", ACOPTIONAL, FALSE);
-  checkovershootvalue("Baseline5Overshoot", ACOPTIONAL, FALSE);
-  checkovershootvalue("Baseline6Overshoot", ACOPTIONAL, FALSE);
-  checkovershootvalue("Height5Overshoot", ACOPTIONAL, TRUE);
-  checkovershootvalue("Height6Overshoot", ACOPTIONAL, TRUE);
+  valueOK = true;
+  checkovershootvalue("BaselineOvershoot", MANDATORY, false);
+  checkovershootvalue("CapOvershoot", MANDATORY, true);
+  checkovershootvalue("LcOvershoot", ACOPTIONAL, true);
+  checkovershootvalue("FigOvershoot", ACOPTIONAL, true);
+  checkovershootvalue("SuperiorOvershoot", ACOPTIONAL, false);
+  checkovershootvalue("OrdinalOvershoot", ACOPTIONAL, false);
+  checkovershootvalue("AscenderOvershoot", ACOPTIONAL, true);
+  checkovershootvalue("DescenderOvershoot", ACOPTIONAL, false);
+  checkovershootvalue("Baseline5Overshoot", ACOPTIONAL, false);
+  checkovershootvalue("Baseline6Overshoot", ACOPTIONAL, false);
+  checkovershootvalue("Height5Overshoot", ACOPTIONAL, true);
+  checkovershootvalue("Height6Overshoot", ACOPTIONAL, true);
   return valueOK;
 }
 

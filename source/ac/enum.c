@@ -12,20 +12,20 @@ int IncludeFile(struct direct * direntry)
 {
 
   if (strcmp(direntry->d_name, ".notdef") == 0) 
-	return(TRUE); /* added 22Apr98 */
+	return(true); /* added 22Apr98 */
 
   /* skip dot and .BAK files */
   if (direntry->d_name[0] != '.' && !BAKFile(direntry->d_name))
-    return (TRUE);
-  return (FALSE);
+    return (true);
+  return (false);
 }
 
-boolean DoAllIgnoreTime(extracolor, includefile)
-boolean extracolor;
+bool DoAllIgnoreTime(extracolor, includefile)
+bool extracolor;
 	int (*includefile) (const struct direct *);
 {
   indx ix;
-  boolean result = TRUE;
+  bool result = true;
   int16_t count;
   struct direct **namelist;
  
@@ -33,27 +33,27 @@ boolean extracolor;
   if (count == -1)
   {
     sprintf(globmsg, "Can't read the %s directory.\n", inPrefix);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, TRUE);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
   
   for (ix = 0; ix < count; ix++)
     if (!DoFile(namelist[ix]->d_name, extracolor)) 
     {
-      result = FALSE; 
+      result = false; 
       continue; 
     }
 	ACFREEMEM(namelist);
   return result;
   }
 
-boolean DoArgsIgnoreTime(cnt, nms, extracolor)
-int cnt; char *nms[]; boolean extracolor; {
+bool DoArgsIgnoreTime(cnt, nms, extracolor)
+int cnt; char *nms[]; bool extracolor; {
   int i;
-  boolean result = TRUE;
+  bool result = true;
   
   for (i = 0; i < cnt; i++) {
     if (!DoFile(nms[i], extracolor))
-      result = FALSE;
+      result = false;
     }
   return result;
   }

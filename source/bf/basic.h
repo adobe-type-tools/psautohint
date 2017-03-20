@@ -15,10 +15,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <string.h>
 #include <setjmp.h>
 #include <sys/types.h>
-typedef bool boolean;
-
-#define FALSE false
-#define TRUE true
 
 /* macro definitions */
 #define NUMMIN(a, b) ((a) <= (b) ? (a) : (b))
@@ -60,7 +56,7 @@ typedef int indx;		/* for indexes that could be either short or
 extern char globmsg[MAXMSGLEN + 1];	/* used to format the string passed to LogMsg */
 
 extern void LogMsg(
-    char *, int16_t, int16_t, boolean
+    char *, int16_t, int16_t, bool
 );
 
 extern int16_t WarnCount(

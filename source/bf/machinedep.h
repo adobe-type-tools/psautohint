@@ -36,7 +36,7 @@ End Edit History
 
 extern void FlushLogMsg(void);
 
-extern boolean createlockfile (
+extern bool createlockfile (
     char *, char *
 );
 
@@ -102,17 +102,17 @@ extern uint32_t ACGetFileSize(
 );
 
 /* Checks if the character set directory exists. */
-extern boolean DirExists(
-    char *, boolean, boolean, boolean
+extern bool DirExists(
+    char *, bool, bool, bool
 );
 
 /* Checks for the existence of the specified file. */
-extern boolean FileExists(
+extern bool FileExists(
     const char *, int16_t
 );
 
 /* Checks for the existence of the specified file. */
-extern boolean CFileExists(
+extern bool CFileExists(
     const char *, int16_t
 );
 
@@ -142,11 +142,11 @@ extern void  SetMacFileType(
 );
 
 extern void ScanBezFiles(
-    boolean, indx, boolean
+    bool, indx, bool
 );
 
 extern void ScanDirFiles(
-    boolean, char *
+    bool, char *
 );
 
 extern void AppendFile (

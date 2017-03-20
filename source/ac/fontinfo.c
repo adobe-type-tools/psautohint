@@ -22,7 +22,7 @@ static void ParseStems(kw, stems, pnum)
 }
 
 static void GetKeyValue(keyword, optional, value)
-  char *keyword; boolean optional; int32_t *value;
+  char *keyword; bool optional; int32_t *value;
 {
   char *fontinfostr;
   
@@ -36,7 +36,7 @@ static void GetKeyValue(keyword, optional, value)
   return;
 }
 
-static void GetKeyFixedValue(char* keyword, boolean optional, Fixed *value)
+static void GetKeyFixedValue(char* keyword, bool optional, Fixed *value)
 {
   char *fontinfostr;
   float tempValue;
@@ -52,7 +52,7 @@ static void GetKeyFixedValue(char* keyword, boolean optional, Fixed *value)
   return;
 }
 
-boolean ReadFontInfo() {
+bool ReadFontInfo() {
   char *fontinfostr;
   int32_t 
     AscenderHeight,
@@ -79,7 +79,7 @@ boolean ReadFontInfo() {
     OrdinalOvershoot,
     SuperiorBaseline,
     SuperiorOvershoot;
-  boolean ORDINARYCOLORING = !scalinghints && writecoloredbez;
+  bool ORDINARYCOLORING = !scalinghints && writecoloredbez;
 
     AscenderHeight =
     AscenderOvershoot =
@@ -128,7 +128,7 @@ boolean ReadFontInfo() {
   flexOK = (fontinfostr != NULL) && (fontinfostr[0]!='\0') && strcmp(fontinfostr, "false");
 
    ACFREEMEM(fontinfostr);
-  fontinfostr = GetFntInfo("FlexStrict", TRUE);
+  fontinfostr = GetFntInfo("FlexStrict", true);
 if (fontinfostr != NULL) 
   flexStrict = strcmp(fontinfostr, "false");
    ACFREEMEM(fontinfostr);
@@ -224,5 +224,5 @@ if (fontinfostr != NULL)
     }
   if (scalinghints)
     ResetFntInfoFileName ();
-  return TRUE;
+  return true;
   }
