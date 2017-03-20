@@ -11,10 +11,10 @@ extern void ReportRemHSeg(Fixed from, Fixed to, Fixed loc);
 
 
 static PSegLnkLst Hlnks, Vlnks;
-static integer cpFrom, cpTo;
+static int32_t cpFrom, cpTo;
 
-void InitGen(reason) integer reason; {
-	integer i;
+void InitGen(reason) int32_t reason; {
+	int32_t i;
 	switch (reason) {
 		case STARTUP: case RESTART:
 			for (i = 0; i < 4; i++) segLists[i] = NULL;
@@ -52,10 +52,10 @@ PPathElt e1, e2; bool Hflg; {
 }
 
 static void AddSegment(from,to,loc,lftLstNm,rghtLstNm,e1,e2,Hflg,typ)
-Fixed from, to, loc; integer lftLstNm, rghtLstNm;
-PPathElt e1, e2; bool Hflg; integer typ; {
+Fixed from, to, loc; int32_t lftLstNm, rghtLstNm;
+PPathElt e1, e2; bool Hflg; int32_t typ; {
 	PClrSeg seg, segList, prevSeg;
-	integer segNm;
+	int32_t segNm;
 	seg = (PClrSeg)Alloc(sizeof(ClrSeg));
 	seg->sLoc = loc;
 	if (from > to) { seg->sMax = from; seg->sMin = to; }
@@ -87,13 +87,13 @@ PPathElt e1, e2; bool Hflg; integer typ; {
 }
 
 void AddVSegment(from,to,loc,p1,p2,typ,i) 
-Fixed from, to, loc; PPathElt p1, p2; integer typ, i; {
+Fixed from, to, loc; PPathElt p1, p2; int32_t typ, i; {
  	if (DEBUG) ReportAddVSeg(from, to, loc, i);
 	if (YgoesUp) AddSegment(from,to,loc,0,1,p1,p2,false,typ);
 	else AddSegment(from,to,loc,1,0,p1,p2,false,typ); }
 
 void AddHSegment(from,to,loc,p1,p2,typ,i)
-Fixed from, to, loc; PPathElt p1, p2; integer typ, i; {
+Fixed from, to, loc; PPathElt p1, p2; int32_t typ, i; {
 	if (DEBUG) ReportAddHSeg(from, to, loc, i);
 	AddSegment(from,to,loc,2,3,p1,p2,true,typ); }
 
@@ -132,7 +132,7 @@ static bool IsCCW(x0,y0,x1,y1,x2,y2)
 Fixed x0, y0, x1, y1, x2, y2; {
     /* returns true if (x0,y0) -> (x1,y1) -> (x2,y2) is counter clockwise
 	 in character space */
-	integer dx0, dy0, dx1, dy1;
+	int32_t dx0, dy0, dx1, dy1;
 	bool ccw;
 	dx0 = FRound(x1-x0); dy0 = FRound(y1-y0);
 	dx1 = FRound(x2-x1); dy1 = FRound(y2-y1);
@@ -277,7 +277,7 @@ static void MergeVSegs(seg1, seg2) PClrSeg seg1, seg2; {
 	MergeLnkSegs(seg1, seg2, Vlnks);
 }
 
-static void ReportRemSeg(l, lst) integer l; PClrSeg lst; {
+static void ReportRemSeg(l, lst) int32_t l; PClrSeg lst; {
 	Fixed from, to, loc;
 	/* this assumes !YgoesUp */
 	switch (l) {
@@ -292,7 +292,7 @@ static void ReportRemSeg(l, lst) integer l; PClrSeg lst; {
 }
 
 /* Filters out bogus bend segments. */
-static void RemExtraBends(l0, l1) integer l0, l1;
+static void RemExtraBends(l0, l1) int32_t l0, l1;
 {
 	register PClrSeg lst0, lst, n, p;
 	PClrSeg nxt, prv;
@@ -333,7 +333,7 @@ static void RemExtraBends(l0, l1) integer l0, l1;
 }
 
 static void CompactList(i,nm)
-integer i; void (*nm)(); {
+int32_t i; void (*nm)(); {
 	PClrSeg lst, prv, nxtprv, nxt;
 	Fixed lstmin, lstmax, nxtmin, nxtmax;
 	bool flg;
@@ -462,7 +462,7 @@ Fixed x0,y0,x1,y1; PPathElt p; {
 	return TstSameDir(x0,y0,x1,y1,x2,y2);
 }
 
-void GenVPts(specialCharType) integer specialCharType; {
+void GenVPts(specialCharType) int32_t specialCharType; {
 	/* specialCharType 1 = upper; -1 = lower; 0 = neither */
 	PPathElt p, fl;
 	bool isVert, flex1, flex2;
@@ -600,7 +600,7 @@ void GenVPts(specialCharType) integer specialCharType; {
 	rightList = segLists[1];
 }
 
-bool InBlueBand(loc,n,p) Fixed loc; register Fixed *p; integer n; {
+bool InBlueBand(loc,n,p) Fixed loc; register Fixed *p; int32_t n; {
 	register int i;
 	register Fixed y;
 	if (n <= 0) return false;

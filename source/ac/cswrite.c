@@ -427,7 +427,7 @@ static Fixed flX, flY;
 static Cd fc1, fc2, fc3;
 
 static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
-	integer dmin, delta;
+	int32_t dmin, delta;
 	bool yflag;
 	Cd c13;
 	float shrink, r1, r2;

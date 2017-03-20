@@ -9,7 +9,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 static PClrVal Vrejects, Hrejects;
 
-void InitPick(reason) integer reason; {
+void InitPick(reason) int32_t reason; {
 	switch (reason) {
 		case STARTUP:
 		case RESTART:
@@ -72,8 +72,8 @@ void PickVVals(valList) PClrVal valList; {
 	Vrejects = rejectList;
 }
 
-static bool InSerifBand(y0,y1,n,p) register Fixed y0, y1, *p; integer n; {
-	register integer i;
+static bool InSerifBand(y0,y1,n,p) register Fixed y0, y1, *p; int32_t n; {
+	register int32_t i;
 	if (n <= 0) return false;
 	y0 = itfmy(y0); y1 = itfmy(y1);
 	if (y0 > y1) { Fixed tmp = y1; y1 = y0; y0 = tmp; }
@@ -83,7 +83,7 @@ static bool InSerifBand(y0,y1,n,p) register Fixed y0, y1, *p; integer n; {
 
 static bool ConsiderValForSeg(val, seg, loc, nb, b, ns, s, primary)
 PClrVal val; PClrSeg seg;
-Fixed loc, *b, *s; integer nb, ns; bool primary; {
+Fixed loc, *b, *s; int32_t nb, ns; bool primary; {
 	if (primary && val->vSpc > 0.0) return true;
 	if (InBlueBand(loc,nb,b)) return true;
 	if (val->vSpc <= 0.0 &&
@@ -94,7 +94,7 @@ Fixed loc, *b, *s; integer nb, ns; bool primary; {
 static PClrVal FndBstVal(
 						  seg, seg1Flg, cList, rList, nb, b, ns, s, locFlg, hFlg)
 PClrSeg seg; PClrVal cList, rList;
-bool seg1Flg; integer nb, ns; Fixed *b, *s;
+bool seg1Flg; int32_t nb, ns; Fixed *b, *s;
 bool locFlg, hFlg; {
 	Fixed loc, vloc;
 	PClrVal best, vList, initLst;
@@ -134,7 +134,7 @@ bool locFlg, hFlg; {
 static PClrVal FindBestValForSeg(
 								  seg, seg1Flg, cList, rList, nb, b, ns, s, hFlg)
 PClrSeg seg; PClrVal cList, rList;
-bool seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
+bool seg1Flg, hFlg; int32_t nb, ns; Fixed *b, *s; {
 	PClrVal best, nonghst, ghst = NULL;
 	best = FndBstVal(seg, seg1Flg, cList, rList, nb, b, ns, s, false, hFlg);
 	if (best != NULL && best->vGhst) {
@@ -276,7 +276,7 @@ noMore:
 
 static void FindBestValForSegs(sList,seg1Flg,cList,rList,nb,b,ns,s,hFlg)
 PClrSeg sList; PClrVal cList, rList;
-bool seg1Flg, hFlg; integer nb, ns; Fixed *b, *s; {
+bool seg1Flg, hFlg; int32_t nb, ns; Fixed *b, *s; {
 	PClrVal best;
 	while (sList != NULL) {
 		best = FindBestValForSeg(sList, seg1Flg, cList, rList, nb, b, ns, s, hFlg);

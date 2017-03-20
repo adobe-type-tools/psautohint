@@ -8,9 +8,9 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 
 
-integer CountSubPaths() {
+int32_t CountSubPaths() {
   register PPathElt e = pathStart;
-  integer cnt = 0;
+  int32_t cnt = 0;
   while (e != NULL) {
     if (e->type == MOVETO) cnt++;
     e = e->next;
@@ -37,7 +37,7 @@ void RoundPathCoords() {
     }
   }
 
-static integer CheckForClr() {
+static int32_t CheckForClr() {
   PPathElt mt, cp;
   mt = pathStart;
   while (mt != NULL) {
@@ -53,8 +53,8 @@ static integer CheckForClr() {
 
 bool PreCheckForColoring() {
   PPathElt e, nxt;
-  integer cnt = 0;
-  integer chk;
+  int32_t cnt = 0;
+  int32_t chk;
   while (pathEnd != NULL) {
     if (pathEnd->type == MOVETO) Delete(pathEnd);
     else if (pathEnd->type != CLOSEPATH) {

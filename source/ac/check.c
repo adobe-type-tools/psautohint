@@ -8,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 
 static bool xflat, yflat, xdone, ydone, bbquit;
-static integer xstate, ystate, xstart, ystart;
+static int32_t xstate, ystate, xstart, ystart;
 static Fixed x0, cy0, x1, cy1, xloc, yloc;
 static Fixed x, y, xnxt, ynxt;
 static Fixed yflatstartx, yflatstarty, yflatendx, yflatendy;
@@ -180,7 +180,7 @@ static void chkDT(c) Cd c; {
 }
 
 #define FQ(x) ((int32_t)((x) >> 6))
-static integer CPDirection(x1,cy1,x2,y2,x3,y3) Fixed x1,cy1,x2,y2,x3,y3; {
+static int32_t CPDirection(x1,cy1,x2,y2,x3,y3) Fixed x1,cy1,x2,y2,x3,y3; {
     int32_t q, q1, q2, q3;
     q1 = FQ(x2)*FQ(y3-cy1);
     q2 = FQ(x1)*FQ(y2-y3);
@@ -191,7 +191,7 @@ static integer CPDirection(x1,cy1,x2,y2,x3,y3) Fixed x1,cy1,x2,y2,x3,y3; {
     return 0;
 }
 
-static PPathElt PointLine(e, whichcp) PPathElt e; integer whichcp; {
+static PPathElt PointLine(e, whichcp) PPathElt e; int32_t whichcp; {
     PPathElt newline;
     if (whichcp == cpCurve1) whichcp = cpStart;
     else if (whichcp == cpCurve2) whichcp = cpEnd;
@@ -246,7 +246,7 @@ Fixed x, y; PPathElt e; int whichcp; {
 }
 
 void RMovePoint(dx, dy, whichcp, e)
-Fixed dx, dy; PPathElt e; integer whichcp; {
+Fixed dx, dy; PPathElt e; int32_t whichcp; {
     if (whichcp == cpStart) { e = e->prev; whichcp = cpEnd; }
     if (whichcp == cpEnd) {
         if (e->type == CLOSEPATH) e = GetDest(e);
@@ -313,7 +313,7 @@ Fixed rx0, ry0, rx1, ry1, rx2, ry2; PPathElt e; {
     }
     else {
         float dydx0, dydx1;
-        integer wh1, wh2;
+        int32_t wh1, wh2;
         dx0 = x0 - nlx; dy0 = cy0 - nly;
         acfixtopflt(dx0, &rdx0); acfixtopflt(dy0, &rdy0);
         dydx0 = rdy0 / rdx0; if (dydx0 < 0) dydx0 = -dydx0;
@@ -416,7 +416,7 @@ restart:
         if (e->type == MOVETO || IsTiny(e) || e->isFlex) goto Nxt;
         GetEndPoint(e, &x1, &cy1);
         if (e->type == CURVETO) {
-            integer cpd0, cpd1;
+            int32_t cpd0, cpd1;
             x2 = e->x1; y2 = e->y1; x3 = e->x2; y3 = e->y2;
             GetEndPoint(e->prev, &x0, &cy0);
             cpd0 = CPDirection(x0,cy0,x2,y2,x3,y3);

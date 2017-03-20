@@ -7,10 +7,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define MAXCNT (100)
 
 static unsigned char *links;
-static integer rowcnt;
+static int32_t rowcnt;
 
 void InitShuffleSubpaths() {
-	register integer cnt = -1;
+	register int32_t cnt = -1;
 	register PPathElt e = pathStart;
 	while (e != NULL) { /* every element is marked with its subpath count */
 		if (e->type == MOVETO) cnt++;
@@ -32,7 +32,7 @@ void InitShuffleSubpaths() {
 }
 
 static void PrintLinks() {
-	integer i, j;
+	int32_t i, j;
 	PrintMessage("Links ");
 	for (i = 0; i < rowcnt; i++) {
 		sprintf(globmsg, "%d  ", i);
@@ -54,7 +54,7 @@ static void PrintLinks() {
 }
 
 static void PrintSumLinks(sumlinks) char *sumlinks; {
-	integer i;
+	int32_t i;
 	PrintMessage("Sumlinks ");
 	for (i = 0; i < rowcnt; i++) {
 		sprintf(globmsg, "%d  ", i);
@@ -72,7 +72,7 @@ static void PrintSumLinks(sumlinks) char *sumlinks; {
 }
 
 static void PrintOutLinks(unsigned char *outlinks) {
-	integer i;
+	int32_t i;
 	PrintMessage("Outlinks ");
 	for (i = 0; i < rowcnt; i++) {
 		sprintf(globmsg, "%d  ", i);
@@ -90,7 +90,7 @@ static void PrintOutLinks(unsigned char *outlinks) {
 }
 
 void MarkLinks(vL,hFlg) PClrVal vL; bool hFlg; {
-	register integer i, j;
+	register int32_t i, j;
 	register PClrSeg seg;
 	register PPathElt e;
 	if (links == NULL) return;
@@ -119,9 +119,9 @@ void MarkLinks(vL,hFlg) PClrVal vL; bool hFlg; {
 }
 
 static void Outpath(links, outlinks, output, bst)
-unsigned char *links, *outlinks, *output; integer bst; {
+unsigned char *links, *outlinks, *output; int32_t bst; {
 	register unsigned char *lnks, *outlnks;
-	register integer i = bst;
+	register int32_t i = bst;
 	register PPathElt e = pathStart;
 	while (e != NULL) {
 		if (e->count == i) break;
@@ -149,7 +149,7 @@ unsigned char *links, *outlinks, *output; integer bst; {
 void DoShuffleSubpaths() {
 	unsigned char sumlinks[MAXCNT], output[MAXCNT], outlinks[MAXCNT];
 	register unsigned char *lnks;
-	register integer i, j, bst, bstsum, bstlnks;
+	register int32_t i, j, bst, bstsum, bstlnks;
 	if (links == NULL) return;
 	if (DEBUG)
 		PrintLinks();

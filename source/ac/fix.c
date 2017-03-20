@@ -10,10 +10,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define maxFixes (100)
 static Fixed HFixYs[maxFixes], HFixDYs[maxFixes];
 static Fixed VFixXs[maxFixes], VFixDXs[maxFixes];
-static integer HFixCount, VFixCount;
+static int32_t HFixCount, VFixCount;
 static Fixed bPrev, tPrev;
 
-void InitFix(reason) integer reason; {
+void InitFix(reason) int32_t reason; {
   switch (reason) {
     case STARTUP: case RESTART:
       HFixCount = VFixCount = 0;
@@ -69,8 +69,8 @@ static void RecordForFix(vert, w, minW, b, t)
   }
 
 static bool CheckForInsideBands(loc, blues, numblues)
-  Fixed loc, *blues; integer numblues; {
-  integer i;
+  Fixed loc, *blues; int32_t numblues; {
+  int32_t i;
   for (i = 0; i < numblues; i += 2) {
     if (loc >= blues[i] && loc <= blues[i+1]) return true;
     }
@@ -79,8 +79,8 @@ static bool CheckForInsideBands(loc, blues, numblues)
 
 #define bFuzz (FixInt(6))
 static void CheckForNearBands(loc, blues, numblues) 
-  Fixed loc, *blues; integer numblues; { 
-  integer i; 
+  Fixed loc, *blues; int32_t numblues; { 
+  int32_t i; 
   bool bottom = true;
   for (i = 0; i < numblues; i++) { 
     if ((bottom && loc >= blues[i]-bFuzz && loc < blues[i]) ||
@@ -135,7 +135,7 @@ void CheckTfmVal (b, t, vert) Fixed b, t; bool vert; {
 
 void CheckVal(val, vert) PClrVal val; bool vert; {
   Fixed *stems;
-  integer numstems, i;
+  int32_t numstems, i;
   Fixed wd, diff, minDiff, minW, b, t, w;
   bool curve = false;
   if (vert) {
@@ -268,7 +268,7 @@ static void FixVs(fixx, fixdx)
 
 bool DoFixes() {
   bool didfixes = false;
-  integer i;
+  int32_t i;
   if (HFixCount > 0 && autoHFix) {
     PrintMessage("Fixing horizontal near misses.");
     didfixes = true;

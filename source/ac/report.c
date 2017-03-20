@@ -297,7 +297,7 @@ void ReportConflictCheck(e, conflict, cp)
   ReportError(S0);
   }
 
-void ReportConflictCnt(e, cnt) PPathElt e; integer cnt; {
+void ReportConflictCnt(e, cnt) PPathElt e; int32_t cnt; {
   Fixed ex, ey;
   GetEndPoint(e, &ex, &ey);
   (void) sprintf(S0, "%g %g conflict count = %d",
@@ -307,7 +307,7 @@ void ReportConflictCnt(e, cnt) PPathElt e; integer cnt; {
 
 
 void ReportRemFlare(e,e2,hFlg,i)
-  PPathElt e, e2; bool hFlg; integer i; {
+  PPathElt e, e2; bool hFlg; int32_t i; {
   Fixed ex1, ey1, ex2, ey2;
   if (!showClrInfo) return;
   GetEndPoint(e, &ex1, &ey1);
@@ -550,7 +550,7 @@ void ListClrInfo() { /* debugging routine */
   }
 
 void ReportAddVSeg(from, to, loc, i)
-  Fixed from, to, loc; integer i; {
+  Fixed from, to, loc; int32_t i; {
   if (!showClrInfo || !showVs) return;
   (void)sprintf(S0, "add vseg %g %g to %g %g %d",
     FixToDbl(itfmx(loc)), FixToDbl(itfmy(from)),
@@ -559,7 +559,7 @@ void ReportAddVSeg(from, to, loc, i)
   }
 
 void ReportAddHSeg(from, to, loc, i)
-  Fixed from, to, loc; integer i; {
+  Fixed from, to, loc; int32_t i; {
   if (!showClrInfo || !showHs) return;
   (void)sprintf(S0, "add hseg %g %g to %g %g %d",
     FixToDbl(itfmx(from)), FixToDbl(itfmy(loc)),
@@ -660,7 +660,7 @@ void ReportMergeVVal(l0,r0,l1,r1,v0,s0,v1,s1)
   }
 
 void ReportPruneHVal(val,v,i)
-  PClrVal val,v; integer i; {
+  PClrVal val,v; int32_t i; {
   if (!showClrInfo) return;
   sprintf(S0, "PruneHVal: %d\n\t", i);
   PrinMsg(S0);
@@ -671,7 +671,7 @@ void ReportPruneHVal(val,v,i)
   }
 
 void ReportPruneVVal(val,v,i)
-  PClrVal val,v; integer i; {
+  PClrVal val,v; int32_t i; {
   if (!showClrInfo) return;
   sprintf(S0, "PruneVVal: %d\n\t", i);
   PrinMsg(S0);

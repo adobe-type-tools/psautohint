@@ -23,9 +23,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <stdint.h>
 
 typedef int32_t               Fixed;
-typedef int32_t               integer;
-#define MAXinteger            INT32_MAX
-#define MINinteger            INT32_MIN
 
 /***********************************************************************/
 /* Other definitions                                                   */

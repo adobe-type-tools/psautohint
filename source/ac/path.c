@@ -13,7 +13,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static void NumberSubpath(e) register PPathElt e; {
   /* number the elements of the subpath starting at e */
   PPathElt first;
-  integer cnt;
+  int32_t cnt;
   first = e; cnt = 0;
   while (true) {
     e->count = cnt;
@@ -23,9 +23,9 @@ static void NumberSubpath(e) register PPathElt e; {
     }
   }
 
-static integer TstClrLsts(l1, l2, flg)
+static int32_t TstClrLsts(l1, l2, flg)
   PSegLnkLst l1, l2; bool flg; {
-  integer result, i;
+  int32_t result, i;
   result = -1;
   if (l1 != NULL) while (l2 != NULL) {
     i = TestColorLst(l1, l2->lnk->seg->sLnk, flg, false);
@@ -36,8 +36,8 @@ static integer TstClrLsts(l1, l2, flg)
   return result;
   }
 
-static integer ClrLstLen(lst) PSegLnkLst lst; {
-  integer cnt = 0;
+static int32_t ClrLstLen(lst) PSegLnkLst lst; {
+  int32_t cnt = 0;
   while (lst != NULL) {
     cnt++; lst = lst->next; }
   return cnt; }
@@ -53,7 +53,7 @@ static void FindConflicts(e) PPathElt e; {
   PSegLnkLst hLst, vLst, phLst, pvLst;
   bool checked;
   PPathElt start, p;
-  integer h, v;
+  int32_t h, v;
   if (e->type != MOVETO) e = GetDest(e);
   while (true) {
     hLst = e->Hs;
@@ -95,9 +95,9 @@ static void FindConflicts(e) PPathElt e; {
     }
   }
 
-static integer CountConflicts(e) PPathElt e; {
+static int32_t CountConflicts(e) PPathElt e; {
   /* e is a proposed closepath. return number of color conflicts */
-  integer conflicts, nc, c, cnt;
+  int32_t conflicts, nc, c, cnt;
   PPathElt first, conflict;
   first = e; cnt = conflicts = nc = 0;
   NumberSubpath(e);
@@ -137,7 +137,7 @@ static bool StartsOkWithPrimaryClrs(cp)
   /* return true if proposed cp yields subpath whose
      first coloring section is consistent with the primary coloring */
   PPathElt e, conflict, first;
-  integer c, cnt;
+  int32_t c, cnt;
   first = e = cp;
   NumberSubpath(e);
   cnt = 0;
@@ -180,7 +180,7 @@ static bool OkJunction(p,e) PPathElt p,e; {
 
 static PPathElt FindMinConflict(e) PPathElt e; {
   PPathElt conflict, cp, cpnxt, bestCP, first, prevConflict;
-  integer best, cnt;
+  int32_t best, cnt;
   bool isShort;
   first = e;
   if (e->type != MOVETO) e = GetDest(e);
