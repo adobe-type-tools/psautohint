@@ -313,8 +313,6 @@ Fixed lft, rght, val, spc; PClrSeg lSeg, rSeg; {
 static void InsertHValue(bot,top,val,spc,bSeg,tSeg,ghst)
 Fixed bot, top, val, spc; PClrSeg bSeg, tSeg; bool ghst; {
 	PClrVal item, vlist, vprev, vl;
-	Fixed b;
-	b = itfmy(bot);
 	vlist = valList; vprev = NULL;
 	while (vlist != NULL) {
 		if (vlist->vLoc2 >= top) break;
