@@ -1332,13 +1332,13 @@ def main():
 		CheckEnvironment()
 	except FDKEnvironmentError,e:
 		logMsg(e)
-		return
+		return 1
 
 	try:
 		options = getOptions()
 	except ACOptionParseError,e:
 		logMsg(e)
-		return
+		return 1
 
 	# verify that all files exist.
 	try:
@@ -1348,10 +1348,10 @@ def main():
 	if gLogFile:
 		gLogFile.close()
 		
-	return
+	return 0
 
 
 if __name__=='__main__':
-	main()
+	sys.exit(main())
 	
 
