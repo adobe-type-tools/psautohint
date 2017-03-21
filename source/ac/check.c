@@ -3,6 +3,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /***********************************************************************/
 /* check.c */
 
+#include <math.h>
+
 #include "ac.h"
 #include "bftoac.h"
 #include "machinedep.h"
@@ -397,7 +399,6 @@ Fixed tx, ty, x0, cy0, x1, cy1, *xptr, *yptr; {
 }
 
 #define DEG(x) ((x)*57.29577951308232088)
-extern double atan2();
 static Fixed ATan(a, b) Fixed a, b; {
     float aa, bb, cc;
     acfixtopflt(a, &aa); acfixtopflt(b, &bb);
