@@ -24,6 +24,8 @@ char *bezoutput=0;
 int bezoutputalloc=0;
 int bezoutputactual=0;
 
+bool scalinghints = false;
+
 extern int compatiblemode; /*forces the definition of colors even before a color sub*/
 
 jmp_buf aclibmark;   /* to handle exit() calls in the library version*/
