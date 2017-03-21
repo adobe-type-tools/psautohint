@@ -29,6 +29,7 @@ CFLAGS = \
 	-DIS_LIB \
 	-Wunused-but-set-variable \
 	-Wunused-function \
+	-Wunknown-pragmas \
 	-Wno-unknown-warning-option \
 	-Wno-shift-negative-value \
 	-Werror \

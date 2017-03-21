@@ -292,9 +292,7 @@ bool CFileExists(const char *filename, int16_t errormsg)
 
 bool DirExists(char *dirname, bool absolute, bool create, bool errormsg)
 {
-#ifndef _WIN32
-#pragma unused(absolute)
-#endif
+    (void)absolute;
     int32_t access_denied = access(dirname, F_OK);
     
     if (access_denied)
@@ -479,18 +477,14 @@ char *baseFontPath;
  void CreateResourceFile(filename)
 char *filename;
 {
-#ifndef _WIN32
-#pragma unused(filename)
-#endif
+    (void)filename;
 }
 
 /* Returns full pathname of current working directory. */
 void GetFullPathname(char *dirname, int16_t vRefNum, int32_t dirID)
 {
-#ifndef _WIN32
-#pragma unused(vRefNum)
-#pragma unused(dirID)
-#endif
+	(void)vRefNum;
+	(void)dirID;
 	getcwd(dirname, MAXPATHLEN); 
    /* Append unix delimiter. */
    strcat(dirname, Delimiter);
@@ -539,10 +533,8 @@ void SetMacFileType(filename, filetype)
 char *filename;
 char *filetype;
 {
-#ifndef _WIN32
-#pragma unused(filename)
-#pragma unused(filetype)
-#endif
+    (void)filename;
+    (void)filetype;
 }
 
 

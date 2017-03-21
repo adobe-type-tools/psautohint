@@ -67,9 +67,7 @@ AC_RETRYPTR reportRetryCB = NULL;
 
 static void * defaultAC_memmanage(void *ctxptr, void *old, uint32_t size)
 	{
-#ifndef _WIN32
-#pragma unused(ctxptr)	
-#endif
+		(void)ctxptr;
 		if (size > 0)
 		{
 		if (NULL == old)
