@@ -330,8 +330,8 @@ void MergeVals(vert) bool vert; {
 	bool ghst;
 	FindBestVals(valList);
     /* We want to get rid of wider hstems in favor or overlapping smaller hstems only if we are NOT reporting all possible alignment zones. */
-    if (addStemExtremesCB == NULL)
-        return;
+	if (addStemExtremesCB == NULL)
+		return;
     
 	for (vL = valList; vL != NULL; vL = vL->vNxt) vL->merge = false;
 	while (true) {

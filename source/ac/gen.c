@@ -406,7 +406,8 @@ static Fixed AdjDist(d,q) Fixed d,q; {
  e.g., in H: (53,51)(74,52)(116,54) 
  the following was added to let these through */
 static bool TstFlat(dmn,dmx) Fixed dmn, dmx; {
-	if (dmn < 0) dmn = -dmn; if (dmx < 0) dmx = -dmx;
+	if (dmn < 0) dmn = -dmn;
+	if (dmx < 0) dmx = -dmx;
 	return (dmx >= PSDist(50) && dmn <= PSDist(4));
 }
 

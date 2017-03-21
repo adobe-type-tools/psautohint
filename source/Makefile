@@ -31,6 +31,7 @@ CFLAGS = \
 	-Wunused-function \
 	-Wunknown-pragmas \
 	-Wunused-variable \
+	-Wmisleading-indentation \
 	-Wno-unknown-warning-option \
 	-Wno-shift-negative-value \
 	-Werror \
