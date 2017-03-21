@@ -76,7 +76,6 @@ LIB_OBJS = \
 	$(OBJ_DIR)/bf/filookup.o \
 	$(OBJ_DIR)/bf/illtobez.o \
 	$(OBJ_DIR)/bf/machinedep.o \
-	$(OBJ_DIR)/bf/rawPStobez.o \
 	$(NULL)
 
 default: $(PRG_TARGET)

@@ -384,9 +384,6 @@ CheckFileBufferLen(char **, char *);
 extern void
 WriteBlendEntry(FILE *, char *, char *, bool);
 
-extern int
-WriteStart(FILE *, const char *);
-
 /*****************************************************************************/
 /* Gets the name of the file containing the current uniqueID.                */
 /*****************************************************************************/
