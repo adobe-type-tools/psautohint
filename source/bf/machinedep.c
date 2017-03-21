@@ -166,12 +166,6 @@ static void LogMsg1(char *str, int16_t level, int16_t code, bool prefix)
   	}
 }
 
- void getidfilename(str)
-char *str;
-{
-  strcpy(str, uniqueIDFile);
-}
-
  void set_uniqueIDFile(str)
 char *str;
 {

@@ -14,9 +14,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static char charsetDir[MAXPATHLEN];
 static char charsetname[MAXPATHLEN];
 static char charsetPath[MAXPATHLEN];
-static char subsetPath[MAXPATHLEN];
-static char subsetname[MAXPATHLEN];
-static char working_dir[MAXPATHLEN];/* name of directory where bf was invoked*/
 static int16_t total_inputdirs = 1;   /* number of input directories           */
 static int32_t MaxBytes;
 char globmsg[MAXMSGLEN + 1];        /* used to format messages               */
@@ -97,22 +94,6 @@ void UnallocateMem(void *ptr)
 #endif
 }
 
-extern uint32_t CheckFileBufferLen(buffer, filename)
-char **buffer, *filename;
-{
-  int32_t filelen;
-
-  filelen = ACGetFileSize (filename);
-  if (filelen > MaxBytes) { /* renner Tue Sep 11 14:59:37 1990 */
-#if 0
-    fprintf(stderr,"Calling realloc: %d vs %d\n", filelen, MaxBytes); fflush(stderr);
-#endif
-    MaxBytes = filelen + 5;
-    *buffer = (char *)ReallocateMem(*buffer, (unsigned)(MaxBytes * sizeof(char)), "file buffer");
-  }
-  return filelen;
-}
-
 /* ACOpenFile tries to open a file with the access attribute
    specified.  If fopen fails an error message is printed
    and the program exits if severity = FATAL. */
@@ -159,18 +140,6 @@ char *charname;
     sprintf(globmsg,
       "Character name: %s exceeds maximum allowable length of %d.\n",
       charname, (int) MAXCHARNAME);
-    LogMsg(globmsg, LOGERROR, FATALERROR, true);
-  }
-}
-
-extern void PathNameLenOK(pathname)
-char *pathname;
-{
-  if (strlen(pathname) >= MAXPATHLEN)
-  {
-    sprintf(globmsg,
-      "File name: %s exceeds maximum allowable length of %d.\n",
-      pathname, (int) MAXPATHLEN);
     LogMsg(globmsg, LOGERROR, FATALERROR, true);
   }
 }
@@ -241,7 +210,6 @@ GetCharsetLayout()
 
 #define INCREMENT 3
 static SubsetData *subsetdata = NULL;
-static int allocation = INCREMENT;
 static int allocated = 0;
 static bool usesSubset = false;
 
@@ -249,55 +217,6 @@ bool
 UsesSubset(void)
    {
    return usesSubset;
-   }
-
-void
-SetSubsetName(char *name)
-   {
-   strcpy(subsetname, name);
-   subsetdata =(SubsetData *)AllocateMem(INCREMENT, sizeof(SubsetData), "SetSubsetName");
-   usesSubset = true;
-   }
-
-char *
-GetSubsetName(void)
-   {
-   return(subsetname);
-   }
-
-char *
-GetSubsetPath(void)
-   {
-   return(subsetPath);
-   }
-
-void
-LoadSubsetData(void)
-   {
-   FILE *fp = ACOpenFile(subsetPath, "r", OPENERROR);
-   int lo;
-   int hi;
-   int scanned;
-
-   while ((scanned = fscanf(fp, "%d-%d", &lo, &hi)) > 0)
-      {
-      if (scanned == 1)
-         subsetdata[allocated].lo = subsetdata[allocated].hi = lo;
-      else
-         {
-         subsetdata[allocated].lo = lo;
-         subsetdata[allocated].hi = hi;
-         }
-
-      if (++allocated >= allocation)
-         {
-         allocation += INCREMENT;
-         subsetdata = (SubsetData *)ReallocateMem((char *)subsetdata,
-               allocation*sizeof(SubsetData), "LoadSubsetData");
-         }
-      }
-
-   fclose(fp);
    }
 
 bool
@@ -313,99 +232,6 @@ InSubsetData(int cid)
 
    return false;
    }
-
-/*****************************************************************************/
-/* Returns the name of the character set file.  If the filename exists on    */
-/* the current directory use that file, otherwise, preface it with the       */
-/* character set directory name.                                             */
-/*****************************************************************************/
-void
-setcharsetname(bool release, char *csname, char *baseFontPath)
-   {
-   char *filename;
-   int32_t i;
-   char delimit[2];
-
-   charsetname[0] = csname[0] = '\0';
-
-   filename = GetFntInfo("CharacterSet", !release);
-   if (filename == NULL)
-      {
-      LogMsg("CharacterSet keyword not found in fontinfo file.\n",
-            WARNING, OK, true);
-      return;
-      }
-
-   if (baseFontPath != NULL)
-      {
-      sprintf(charsetname, "%s%s", baseFontPath, filename);
-      sprintf(subsetPath, "%s%s", baseFontPath, subsetname);
-      }
-   else
-      {
-      sprintf(charsetname, "%s", filename);
-      sprintf(subsetPath, "%s", subsetname);
-      }
-
-   if (!CFileExists(charsetname, false))
-      {
-      get_filedelimit(delimit);
-      if (((i = (int32_t)strlen(charsetDir)) == 0) || (charsetDir[i - 1] == delimit[0]))
-         delimit[0] = '\0';
-
-      if (charsetParser == bf_CHARSET_CID)
-         {
-         sprintf(charsetname, "%s%s%s%s%s%s%s",
-               charsetDir, delimit,
-               filename, delimit,
-               BF_LAYOUTS, delimit,
-               charsetLayout);
-         }
-      else
-         sprintf(charsetname, "%s%s%s", charsetDir, delimit, filename);
-      }
-
-   if (!CFileExists(subsetPath, false))
-      {
-      get_filedelimit(delimit);
-      if (((i = (int32_t)strlen(charsetDir)) == 0) || (charsetDir[i - 1] == delimit[0]))
-         delimit[0] = '\0';
-
-      if (charsetParser == bf_CHARSET_CID)
-         {
-         sprintf(subsetPath, "%s%s%s%s%s%s%s",
-               charsetDir, delimit,
-               filename, delimit,
-               BF_SUBSETS, delimit,
-               subsetname);
-         }
-      else
-         sprintf(subsetPath, "%s%s%s", charsetDir, delimit, subsetname);
-      }
-   
-   UnallocateMem(filename);
-   PathNameLenOK(charsetname);
-   strcpy(csname, charsetname);
-   strcpy(charsetPath, charsetname);
-   }
-
-extern void get_working_dir(dirname)
-char *dirname;
-{
-  strcpy(dirname, working_dir);
-}
-
-extern void init_working_dir()
-{
-  GetFullPathname(working_dir, 0, MININT);
-  strcpy(initialWorkingDir, working_dir);
-  initialWorkingDirLength = (int)strlen(initialWorkingDir);
-}
-
-extern void set_working_dir()
-{
-  set_current_dir(working_dir);
-}
 
 extern char *GetFItoAFMCharSetName()
 {
