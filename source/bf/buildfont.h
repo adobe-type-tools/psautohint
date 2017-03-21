@@ -233,12 +233,6 @@ extern void
 getcharsetname(char *);
 
 /*****************************************************************************/
-/* Returns the name of the character set file.                               */
-/*****************************************************************************/
-extern void
-setcharsetname(bool , char *, char *);
-
-/*****************************************************************************/
 /* Returns the name of the encoding file.                                    */
 /*****************************************************************************/
 extern void
@@ -318,56 +312,16 @@ extern bool ConvertCharFiles(char *inputDir,
 				);
 
 /*****************************************************************************/
-/* Creates an Adobe Font Metrics (AFM) file.                                 */
-/*****************************************************************************/
-extern int
-make_afm(bool);
-
-extern int
-ReadWriteFile(FILE *, char *);
-
-/*****************************************************************************/
-/* Looks up a keyword in the fontinfo file and writes the value to the       */
-/* given output file.                                                        */
-/*****************************************************************************/
-extern int
-WriteEntry(FILE *, char *, char *, bool, bool);
-
-/*****************************************************************************/
-/* Returns whether given character is in StandardEncoding.                   */
-/*****************************************************************************/
-extern bool
-InStandardEncoding(char *, int32_t *);
-
-/*****************************************************************************/
-/* Writes copyright notice and trademark information.                        */
-/*****************************************************************************/
-extern int
-WriteCopyrightsAndTrademark(FILE *, char);
-
-/*****************************************************************************/
-/* Frees composite table.                                                    */
-/*****************************************************************************/
-extern void
-FreeCompTab(void);
-
-/*****************************************************************************/
 /* Deallocates memory and deletes temporary files.                           */
 /*****************************************************************************/
 extern int
 cleanup(int16_t);
-
-extern char *
-GetBaseFontPath(bool);
 
 extern void
 FileNameLenOK(char *);
 
 extern void
 CharNameLenOK(char *);
-
-extern void
-PathNameLenOK(char *);
 
 extern char *
 AllocateMem(unsigned int, unsigned int, const char *);
@@ -378,47 +332,8 @@ ReallocateMem(char *, unsigned int, const char *);
 extern void
 UnallocateMem(void *ptr);
 
-extern uint32_t
-CheckFileBufferLen(char **, char *);
-
-extern void
-WriteBlendEntry(FILE *, char *, char *, bool);
-
-/*****************************************************************************/
-/* Gets the name of the file containing the current uniqueID.                */
-/*****************************************************************************/
-extern void
-getidfilename(char *);
-
 extern int32_t
 ACReadFile(char *, FILE *, char *, int32_t);
-
-extern int32_t
-getmaxcomps(void);
-
-extern int32_t
-getrealcomps(void);
-
-extern void
-get_working_dir(char *);
-
-extern void
-init_working_dir(void);
-
-extern void
-set_working_dir(void);
-
-extern void
-LoadSubsetData(void);
-
-extern void
-SetSubsetName(char *name);
-
-extern char *
-GetSubsetName(void);
-
-extern char *
-GetSubsetPath(void);
 
 extern bool
 UsesSubset(void);
