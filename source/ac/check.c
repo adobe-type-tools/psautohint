@@ -58,7 +58,6 @@ static void chkYDIR() {
 }
 
 static void chkYFLAT() {
-    Fixed abstmp;
     if (!yflat) {
         if (LsTan(y-yloc, x-xloc)) {
             yflat = true; yflatstartx = xloc; yflatstarty = yloc; }
@@ -69,7 +68,6 @@ static void chkYFLAT() {
 }
 
 static void chkXFLAT() {
-    Fixed abstmp;
     if (!xflat) {
         if (LsTan(x-xloc, y-yloc)) {
             xflat = true; xflatstartx = xloc; xflatstarty = yloc; }
@@ -103,7 +101,6 @@ static void chkXDIR() {
 }
 
 static void chkDT(c) Cd c; {
-    Fixed abstmp;
     Fixed loc;
 
     x = c.x, y = c.y;
@@ -330,7 +327,7 @@ restart:
 #define BBdist (FixInt(20)) /* DEBUG 8 BIT. DOuble value from 10 to 20 for change in coordinate system. */
 
 static void chkBBDT(c) Cd c; {
-    Fixed x = c.x, y = c.y, abstmp;
+    Fixed x = c.x, y = c.y;
     if (bbquit) return;
     if (vert) {
         lst = y;
@@ -411,7 +408,7 @@ static Fixed ATan(a, b) Fixed a, b; {
 
 bool CheckSmoothness(x0, cy0, x1, cy1, x2, y2, pd)
 Fixed x0, cy0, x1, cy1, x2, y2, *pd; {
-    Fixed dx, dy, smdiff, smx, smy, at0, at1, abstmp;
+    Fixed dx, dy, smdiff, smx, smy, at0, at1;
     dx = x0 - x1; dy = cy0 - cy1;
     *pd = 0;
     if (dx == 0 && dy == 0) return true;

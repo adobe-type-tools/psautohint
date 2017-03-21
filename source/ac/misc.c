@@ -128,7 +128,7 @@ static bool AddAutoFlexProp(e, yflag) PPathElt e; bool yflag; {
 
 static void TryYFlex(e, n, x0, y0, x1, y1)
   PPathElt e, n; Fixed x0, y0, x1, y1; {
-  Fixed x2, y2, x3, y3, x4, y4, abstmp;
+  Fixed x2, y2, x3, y3, x4, y4;
   PPathElt p, q;
   bool top, dwn;
   double d0sq, d1sq, quot, dx, dy;
@@ -175,7 +175,7 @@ static void TryYFlex(e, n, x0, y0, x1, y1)
 
 static void TryXFlex(e, n, x0, y0, x1, y1)
   PPathElt e, n; Fixed x0, y0, x1, y1; {
-  Fixed x2, y2, x3, y3, x4, y4, abstmp;
+  Fixed x2, y2, x3, y3, x4, y4;
   PPathElt p, q;
   bool lft;
   double d0sq, d1sq, quot, dx, dy;
@@ -222,7 +222,7 @@ static void TryXFlex(e, n, x0, y0, x1, y1)
 
 void AutoAddFlex() {
   PPathElt e, n;
-  Fixed x0, y0, x1, y1, abstmp;
+  Fixed x0, y0, x1, y1;
   e = pathStart;
   while (e != NULL) {
     if (e->type != CURVETO || e->isFlex) goto Nxt;

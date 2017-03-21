@@ -30,6 +30,7 @@ CFLAGS = \
 	-Wunused-but-set-variable \
 	-Wunused-function \
 	-Wunknown-pragmas \
+	-Wunused-variable \
 	-Wno-unknown-warning-option \
 	-Wno-shift-negative-value \
 	-Werror \

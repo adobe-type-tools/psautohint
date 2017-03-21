@@ -247,7 +247,7 @@ void AddVPair(PClrVal v, char ch) {
 
 static bool UseCounter(PClrVal sLst, bool mclr) {
 	int32_t cnt = 0;
-	Fixed minLoc, midLoc, maxLoc, abstmp, prevBstVal, bestVal;
+	Fixed minLoc, midLoc, maxLoc, prevBstVal, bestVal;
 	Fixed minDelta, midDelta, maxDelta, loc, delta, th;
 	PClrVal lst, newLst;
 	minLoc = midLoc = maxLoc = FixInt(20000);
@@ -690,7 +690,6 @@ static void RemoveRedundantFirstColors() {
 
 static void AddColorsSetup() {
 	int i;
-	Fixed abstmp;
 	vBigDist = 0;
 	for (i = 0; i < NumVStems; i++) {
 		if (VStems[i] > vBigDist) {

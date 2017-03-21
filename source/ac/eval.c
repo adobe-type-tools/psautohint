@@ -10,7 +10,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 static void AdjustVal(pv,l1,l2,dist,d,hFlg)
 Fixed *pv, l1, l2, dist, d; bool hFlg; {
 	float v, q, r1, r2, rd;
-	Fixed abstmp;
     /* DEBUG 8 BIT. To get the saem result as the old auothint, had to change from FixedOne to FixedTwo. Since the returned weight is proportional to the square of l1 and l2,
      these need to be clamped to twice the old clamped value, else when the clamped values are used, the weight comes out as 1/4 of the original value. */
 	if (dist < FixTwo)
@@ -79,7 +78,7 @@ FTrunc(((d) * (d)) / 40) : ((int32_t)  (((double)(d)) * (d) / (40*256))))
 static void EvalHPair(botSeg,topSeg,pspc,pv)
 PClrSeg botSeg, topSeg; Fixed *pspc, *pv; {
 	Fixed brght, blft, bloc, tloc, trght, tlft, ldst, rdst;
-	Fixed mndist, dist, dx, dy, minlen, overlaplen, abstmp;
+	Fixed mndist, dist, dx, dy, minlen, overlaplen;
 	bool inBotBand, inTopBand;
 	int i;
 	*pspc = 0;
@@ -129,7 +128,7 @@ PClrSeg botSeg, topSeg; Fixed *pspc, *pv; {
 
 static void HStemMiss(botSeg,topSeg)
 PClrSeg botSeg, topSeg; {
-	Fixed brght, blft, bloc, tloc, trght, tlft, abstmp;
+	Fixed brght, blft, bloc, tloc, trght, tlft;
 	Fixed mndist, dist, dy, minlen, overlaplen;
 	Fixed b, t, diff, minDiff, minW, w, sw;
 	int i;
@@ -180,7 +179,7 @@ PClrSeg botSeg, topSeg; {
 static void EvalVPair(leftSeg,rightSeg,pspc,pv)
 PClrSeg leftSeg, rightSeg; Fixed *pspc, *pv; {
 	Fixed ltop, lbot, lloc, rloc, rtop, rbot, tdst, bdst;
-	Fixed mndist, dx, dy, dist, overlaplen, minlen, abstmp;
+	Fixed mndist, dx, dy, dist, overlaplen, minlen;
 	Fixed bonus, lbonus, rbonus;
 	int i;
 	*pspc = 0;
@@ -226,7 +225,7 @@ PClrSeg leftSeg, rightSeg; Fixed *pspc, *pv; {
 static void VStemMiss(leftSeg,rightSeg)
 PClrSeg leftSeg, rightSeg; {
 	Fixed ltop, lbot, lloc, rloc, rtop, rbot;
-	Fixed mndist, dx, dist, overlaplen, minlen, abstmp;
+	Fixed mndist, dx, dist, overlaplen, minlen;
 	Fixed l, r, diff, minDiff, minW, w, sw;
 	int i;
 	if (NumVStems == 0)
