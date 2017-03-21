@@ -5,6 +5,8 @@
 #                                                                       #
 #########################################################################
 
+NULL =
+
 # Configuration
 OBJ_DIR = .
 SRC_DIR = .
@@ -28,7 +30,8 @@ CFLAGS = \
 	-Wunused-but-set-variable \
 	-Wno-unknown-warning-option \
 	-Wno-shift-negative-value \
-	-Werror
+	-Werror \
+	$(NULL)
 
 ifeq ($(OS),Windows_NT)
 EXE = .exe
@@ -72,7 +75,8 @@ LIB_OBJS = \
 	$(OBJ_DIR)/bf/filookup.o \
 	$(OBJ_DIR)/bf/illtobez.o \
 	$(OBJ_DIR)/bf/machinedep.o \
-	$(OBJ_DIR)/bf/rawPStobez.o
+	$(OBJ_DIR)/bf/rawPStobez.o \
+	$(NULL)
 
 default: $(PRG_TARGET)
 
