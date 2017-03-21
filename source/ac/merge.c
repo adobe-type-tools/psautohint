@@ -112,7 +112,7 @@ void PruneVVals() {
 	PClrVal sLst, sL;
 	PClrSeg seg1, seg2, sg1, sg2;
 	Fixed lft, rht, l, r, prndist;
-	Fixed val, v, abstmp;
+	Fixed val, v;
 	bool flg, otherLft, otherRht;
 	sLst = valList;
 	prndist = PRNDIST;
@@ -164,7 +164,7 @@ void PruneHVals() {
 	PClrVal sLst, sL;
 	PClrSeg seg1, seg2, sg1, sg2;
 	Fixed bot, top, t, b;
-	Fixed val, v, abstmp, prndist;
+	Fixed val, v, prndist;
 	bool flg, otherTop, otherBot, topInBlue, botInBlue, ghst;
 	sLst = valList;
 	prndist = PRNDIST;
@@ -326,7 +326,7 @@ void MergeVals(vert) bool vert; {
 	PClrVal bstV, bV;
 	PClrSeg seg1, seg2, sg1, sg2;
 	Fixed bot, top, b, t;
-	Fixed val, v, spc, s, abstmp;
+	Fixed val, v, spc, s;
 	bool ghst;
 	FindBestVals(valList);
     /* We want to get rid of wider hstems in favor or overlapping smaller hstems only if we are NOT reporting all possible alignment zones. */

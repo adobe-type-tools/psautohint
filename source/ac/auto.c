@@ -145,7 +145,7 @@ static int32_t TestColor(s, colorList, flg, doLst)
   PClrSeg s; PClrVal colorList; bool flg, doLst; {
   /* -1 means already in colorList; 0 means conflicts; 1 means ok to add */
   PClrVal v, clst;
-  Fixed top, bot, cTop, cBot, vT, vB, loc, abstmp;
+  Fixed top, bot, cTop, cBot, vT, vB, loc;
   bool loc1;
   if (s == NULL) return -1;
   v = s->sLnk; loc = s->sLoc;
@@ -286,7 +286,7 @@ static bool TryResolveConflict(e,Hflg)
   PSegLnkLst lst, lnk1, lnk2;
   PClrSeg seg, seg1, seg2;
   PClrVal val1, val2;
-  Fixed lc1, lc2, loc0, loc1, loc2, loc3, x0, y0, x1, y1, abstmp;
+  Fixed lc1, lc2, loc0, loc1, loc2, loc3, x0, y0, x1, y1;
   RemDupLnks(e,Hflg);
   typ = e->type;
   if (typ == MOVETO) GetEndPoints(GetClosedBy(e), &x0, &y0, &x1, &y1);
@@ -571,7 +571,7 @@ static PPathElt ColorBBox(e) PPathElt e; {
   }
 
 static bool IsFlare(loc,e,n,Hflg) Fixed loc; PPathElt e, n; bool Hflg; {
-  Fixed x, y, abstmp;
+  Fixed x, y;
   while (e != n) {
     GetEndPoint(e,&x,&y);
     if ((Hflg && abs(y-loc) > maxFlare) || (!Hflg && abs(x-loc) > maxFlare))
@@ -582,7 +582,7 @@ static bool IsFlare(loc,e,n,Hflg) Fixed loc; PPathElt e, n; bool Hflg; {
   }
 
 static bool IsTopSegOfVal(loc, top, bot) Fixed loc, top, bot; {
-  Fixed d1, d2, abstmp;
+  Fixed d1, d2;
   d1 = top-loc; d2 = bot-loc;
   return (abs(d1) <= abs(d2))? true : false;
   }
@@ -615,7 +615,7 @@ static void RemFlares(Hflg) bool Hflg; {
   PPathElt e, n;
   PClrSeg seg1, seg2;
   PClrVal val1, val2;
-  Fixed diff, abstmp;
+  Fixed diff;
   bool nxtE;
   bool Nm1, Nm2;
   if (Hflg) {Nm1 = true; Nm2 = false;} else {Nm1 = false; Nm2 = true;}
@@ -704,7 +704,7 @@ static void ProClrs(e,hFlg,loc)
   PPathElt e; Fixed loc; bool hFlg; {
   PSegLnkLst lst, plst;
   PPathElt prv;
-  Fixed cx, cy, dst, abstmp;
+  Fixed cx, cy, dst;
   lst = ElmntClrSegLst(e, hFlg);
   if (lst == NULL) return;
   if (hFlg ? e->Hcopy : e->Vcopy) return;
@@ -746,7 +746,7 @@ static void RemPromotedClrs() {
 static void RemShortColors() {
   /* Must not change colors at a short element. */
   PPathElt e;
-  Fixed cx, cy, ex, ey, abstmp;
+  Fixed cx, cy, ex, ey;
   e = pathStart;
   cx = 0; cy = 0;
   while (e != NULL) {
