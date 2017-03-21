@@ -109,13 +109,12 @@ PClrVal sLst, sL; bool hFlg; int32_t i; {
 /* The changes made here and in PruneHVals are to fix a bug in
  MinisterLight/E where the top left point was not getting colored. */
 void PruneVVals() {
-	PClrVal sLst, sL, sPrv;
+	PClrVal sLst, sL;
 	PClrSeg seg1, seg2, sg1, sg2;
 	Fixed lft, rht, l, r, prndist;
 	Fixed val, v, abstmp;
 	bool flg, otherLft, otherRht;
 	sLst = valList;
-	sPrv = NULL;
 	prndist = PRNDIST;
 	while (sLst != NULL) {
 		flg = true; otherLft = otherRht = false;
@@ -155,20 +154,19 @@ void PruneVVals() {
 					flg = false; break; }
 			}
 			NxtSL: sL = sL->vNxt; }
-		if (flg) { sPrv = sLst; sLst = sLst->vNxt; }
+		if (flg) { sLst = sLst->vNxt; }
     }
 	DoPrune();
 }
 
 #define Fix16 (FixOne << 4)
 void PruneHVals() {
-	PClrVal sLst, sL, sPrv;
+	PClrVal sLst, sL;
 	PClrSeg seg1, seg2, sg1, sg2;
 	Fixed bot, top, t, b;
 	Fixed val, v, abstmp, prndist;
 	bool flg, otherTop, otherBot, topInBlue, botInBlue, ghst;
 	sLst = valList;
-	sPrv = NULL;
 	prndist = PRNDIST;
 	while (sLst != NULL) {
 		flg = true; otherTop = otherBot = false;
@@ -275,7 +273,6 @@ void PruneHVals() {
 			sL = sL->vNxt;
 		}
 		if (flg) {
-			sPrv = sLst;
 			sLst = sLst->vNxt;
 		}
     }

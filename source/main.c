@@ -153,7 +153,6 @@ static char *getFileData(char *name)
 
 static void writeFileData(char *name, char *output, char *fSuffix)
 {
-	size_t fileSize;
 	FILE *fp;
 	size_t nameSize = 1 + strlen(name);
 	char *savedName;
@@ -171,7 +170,7 @@ static void writeFileData(char *name, char *output, char *fSuffix)
 		savedName = malloc(nameSize);
 
 	fp = fopen(savedName, "w");
-	fileSize = fwrite(output, 1, strlen(output), fp);
+	fwrite(output, 1, strlen(output), fp);
 	fclose(fp);
 
 	if (usedNewName)

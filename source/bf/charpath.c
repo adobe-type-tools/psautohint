@@ -302,11 +302,10 @@ static void GetPathType(int16_t pathtype, char *str)
 static void FreePathElements(startix, stopix)
 indx startix, stopix;
 {
-    indx i, j;
+    indx j;
     
     for (j = startix; j < stopix; j++)
     {
-		i=0;
 #if 0
         PHintElt hintElt, next;
         if (pathlist[j].path != NULL)

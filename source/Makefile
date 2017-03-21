@@ -25,6 +25,8 @@ CFLAGS = \
 	-DAC_C_LIB=1 \
 	-DACLIB_EXPORTS \
 	-DIS_LIB \
+	-Wunused-but-set-variable \
+	-Wno-unknown-warning-option \
 	-Wno-shift-negative-value \
 	-Werror
 
