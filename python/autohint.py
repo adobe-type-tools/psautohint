@@ -1273,12 +1273,13 @@ def hintFile(options):
 				bp.close()
 				if not options.debug:
 					os.remove(tempBezNew)
+					os.remove(tempBez)
 			else:
 				newBezString = None
 			bezString, width = glyphFontDict[fdIndex][name]
 			newBezStrings[name] = [newBezString, bezString, width]
 		if not options.debug:
-			removeTempFiles( [tempBezes, tempFI] )
+			removeTempFiles( [tempFI] )
 
 		for name in newBezStrings:
 			newBezString, bezString, width = newBezStrings[name]
