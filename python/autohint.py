@@ -533,13 +533,14 @@ def logMsg(*args):
 				gLogFile.flush()
 
 def CheckEnvironment():
-	command = "autohintexe -u"
-	report = FDKUtils.runShellCmd(command)
-	if "version" not in report:
-		logMsg("Please re-install the FDK. The path to the program 'autohintexe' is not in the environment variable PATH.")
-		raise FDKEnvironmentError
-	
-	return
+	try:
+		import psautohintmodule
+	except ImportError:
+		command = "autohintexe -u"
+		report = FDKUtils.runShellCmd(command)
+		if "version" not in report:
+			logMsg("Please re-install the FDK. The path to the program 'autohintexe' is not in the environment variable PATH.")
+			raise FDKEnvironmentError
 
 global nameAliasDict
 nameAliasDict = {}
@@ -638,15 +639,23 @@ def getOptions():
 
 		if arg == "-h":
 			print __help__
-			command = "autohintexe -v"
-			report = FDKUtils.runShellCmd(command)
-			logMsg( report)
+			try:
+				import psautohintmodule
+				print "Lib version:", psautohintmodule.version
+			except ImportError:
+				command = "autohintexe -v"
+				report = FDKUtils.runShellCmd(command)
+				logMsg( report)
 			raise ACOptionParseError
 		elif arg == "-u":
 			print __usage__
-			command = "autohintexe -v"
-			report = FDKUtils.runShellCmd(command)
-			logMsg( report)
+			try:
+				import psautohintmodule
+				print "Lib version:", psautohintmodule.version
+			except ImportError:
+				command = "autohintexe -v"
+				report = FDKUtils.runShellCmd(command)
+				logMsg( report)
 			raise ACOptionParseError
 		elif arg == "-hfd":
 			print __FDDoc__
@@ -1235,10 +1244,6 @@ def hintFile(options):
 				# and getting output with std.readline()
 
 		# 	Call auto-hint library on bez string.
-		bp = open(tempBez, "wt")
-		bp.write(bezString)
-		bp.close()
-
 		#print "oldBezString", oldBezString
 		#print ""
 		#print "bezString", bezString
@@ -1246,27 +1251,38 @@ def hintFile(options):
 		if oldBezString != "" and oldBezString == bezString:
 			newBezString = oldHintBezString
 		else:
-			if os.path.exists(tempBezNew):
-				os.remove(tempBezNew)
-			command = "autohintexe %s%s%s%s -s .new -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, tempFI, tempBez)
-			if  options.debug:
-				print command
-			report = FDKUtils.runShellCmd(command)
-			if report:
-				if not options.verbose and not options.quiet:
-					logMsg("") # end series of "."
-				logMsg(report)
-			if os.path.exists(tempBezNew):
-				bp = open(tempBezNew, "rt")
-				newBezString = bp.read()
+			newBezString = None
+			try:
+				import psautohintmodule
+				with open(tempFI, "rb") as fileFI:
+					newBezString = psautohintmodule.autohint(fileFI.read(), [bezString],
+                                                options.verbose, options.allowChanges, not options.noHintSub, options.allowDecimalCoords)
+					newBezString = newBezString[0]
+				fontInfo = ""
+			except ImportError:
+				bp = open(tempBez, "wt")
+				bp.write(bezString)
 				bp.close()
-				if options.debug:
-					print "Wrote AC fontinfo data file to", tempFI
-					print "Wrote AC output bez file to", tempBezNew
-				else:
+
+				if os.path.exists(tempBezNew):
 					os.remove(tempBezNew)
-			else:
-				newBezString = None
+				command = "autohintexe %s%s%s%s -s .new -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, tempFI, tempBez)
+				if  options.debug:
+					print command
+				report = FDKUtils.runShellCmd(command)
+				if report:
+					if not options.verbose and not options.quiet:
+						logMsg("") # end series of "."
+					logMsg(report)
+				if os.path.exists(tempBezNew):
+					bp = open(tempBezNew, "rt")
+					newBezString = bp.read()
+					bp.close()
+					if options.debug:
+						print "Wrote AC fontinfo data file to", tempFI
+						print "Wrote AC output bez file to", tempBezNew
+					else:
+						os.remove(tempBezNew)
 			
 		if not newBezString:
 			if not options.verbose and not options.quiet:
