@@ -6,10 +6,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define ESCVAL 100
 #define MAXOPLEN 5
 
-#ifdef SUN
-extern char beginsubr[10], endsubr[8], preflx[7], newcolors[10];
-#endif
-
 extern void GetOperator(
   int16_t, char *
 );

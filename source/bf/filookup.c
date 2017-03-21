@@ -12,9 +12,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifdef ACLIB_EXPORTS
 #include "ac.h"
 #endif
-#if SUN
-#include      <math.h>
-#endif
 #define     EOS      ""
 #define     NOMATCH     -1
 #define MAXFONTNAME 30          /* max length of the FontName = 36 chars  PS
@@ -102,10 +99,6 @@ static char *get_base_font_path(
 static char *GetHVStems(
   char *, bool
 );
-
-#ifdef SUN
-static bool valueOK = true;
-#endif
 
 void fiptrfree(FIPTR ptr)
 {
@@ -1042,60 +1035,6 @@ extern void ParseIntStems(char *kw, bool optional, int32_t maxstems, int *stems,
   *pnum = cnt;
 }
 
-
-
-
-
-
-#ifdef SUN
-
-static checkovershootvalue(keyword, optional, positive)
-char *keyword;
-bool optional, positive;
-{
-  int value;
-
-  if ((value = GetFIInt(keyword, optional)) != MAXINT)
-  {
-    if (positive)
-    {
-      if (value < 0)
-      {
-        sprintf(globmsg, "The keyword %s has a value of %d.\n  It should be greater than or equal to 0.\n", keyword, value);
-        LogMsg(globmsg, LOGERROR, OK, true);
-        valueOK = false;
-      }
-    }
-    else
-      if (value > 0)
-      {
-        sprintf(globmsg, "The keyword %s has a value of %d.\n  It should be less than or equal to 0.\n", keyword, value);
-        LogMsg(globmsg, LOGERROR, OK, true);
-        valueOK = false;
-      }
-  }
-}
-
-/* Returns true if all values have the correct sign i.e. positive or negative. */
-static bool checkovershoots()
-{
-  valueOK = true;
-  checkovershootvalue("BaselineOvershoot", MANDATORY, false);
-  checkovershootvalue("CapOvershoot", MANDATORY, true);
-  checkovershootvalue("LcOvershoot", ACOPTIONAL, true);
-  checkovershootvalue("FigOvershoot", ACOPTIONAL, true);
-  checkovershootvalue("SuperiorOvershoot", ACOPTIONAL, false);
-  checkovershootvalue("OrdinalOvershoot", ACOPTIONAL, false);
-  checkovershootvalue("AscenderOvershoot", ACOPTIONAL, true);
-  checkovershootvalue("DescenderOvershoot", ACOPTIONAL, false);
-  checkovershootvalue("Baseline5Overshoot", ACOPTIONAL, false);
-  checkovershootvalue("Baseline6Overshoot", ACOPTIONAL, false);
-  checkovershootvalue("Height5Overshoot", ACOPTIONAL, true);
-  checkovershootvalue("Height6Overshoot", ACOPTIONAL, true);
-  return valueOK;
-}
-
-#endif
 
 /*
  * get_base_font_path reads the BaseFontPath entry out of this 

@@ -16,18 +16,11 @@ typedef struct op_element
   char operator[MAXOPLEN];
 } op_element;
 
-#ifdef SUN
-#define KNOWNOPSIZE 32
-#else
 #define KNOWNOPSIZE 18
-#endif
 
 static struct op_element *op_table = NULL;
 
 /* Globals used outside this module. */
-#ifdef SUN
-char beginsubr[10], endsubr[8], preflx[7], newcolors[10];
-#endif
 
 extern void init_ops()
 {
@@ -48,14 +41,6 @@ extern void init_ops()
 
   Operators for which the encoding value has been incremented by ESCVAL must
      be preceded by an escape when written to the output charstring. */
-#ifdef SUN
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'r', 'b', '\0', '\0');
-  op_table[ix++].encoding = RB;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'r', 'y', '\0', '\0');
-  op_table[ix++].encoding = RY;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 's', 'u', 'b', 'r');
-  op_table[ix++].encoding = DOSUB;
-#endif
   sprintf(op_table[ix].operator, "%c%c%c%c", 'v', 'm', 't', '\0');
   op_table[ix++].encoding = VMT;
   sprintf(op_table[ix].operator, "%c%c%c%c", 'r', 'd', 't', '\0');
@@ -91,51 +76,15 @@ extern void init_ops()
   op_table[ix++].encoding = SC;
   sprintf(op_table[ix].operator, "%c%c%c%c", 'i', 'd', '\0', '\0');
   op_table[ix++].encoding = ID;
-#ifdef SUN
-  sprintf(op_table[ix].operator, "%c%c%c%c", 's', 'n', 'c', '\0');
-  op_table[ix++].encoding = SNC;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'e', 'n', 'c', '\0');
-  op_table[ix++].encoding = ENC;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'f', 'l', 'x', '\0');
-  op_table[ix++].encoding = FLX;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 's', 'o', 'l', '\0');
-  op_table[ix++].encoding = SOL;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'e', 'o', 'l', '\0');
-  op_table[ix++].encoding = EOL;
-#endif
   /* escape operators start here */
   sprintf(op_table[ix].operator, "%c%c%c%c", 'c', 'c', '\0', '\0');
   op_table[ix++].encoding = CC + ESCVAL;
-#ifdef SUN
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'f', 'l', '\0', '\0');
-  op_table[ix++].encoding = FL + ESCVAL;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'r', 'm', '\0', '\0');
-  op_table[ix++].encoding = RM + ESCVAL;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'r', 'v', '\0', '\0');
-  op_table[ix++].encoding = RV + ESCVAL;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'd', 'i', 'v', '\0');
-  op_table[ix++].encoding = DIV + ESCVAL;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'd', 'o', '\0', '\0');
-  op_table[ix++].encoding = DO + ESCVAL;
-  sprintf(op_table[ix].operator, "%c%c%c%c", 'p', 'o', 'p', 'n');
-  op_table[ix++].encoding = POP + ESCVAL;
-#endif
 
   if (ix > KNOWNOPSIZE)
   {
     LogMsg("Initialization of op table failed.\n",
       LOGERROR, NONFATALERROR, true);
   }
-  /* These are treated as a special case for no particularly good reason
-     other than that they are longer than will fit in the above table */
-#ifdef SUN
-  sprintf(beginsubr, "%s%c%c%c%c", "begin", 's', 'u', 'b', 'r');
-
-  sprintf(endsubr, "%s%c%c%c%c", "end", 's', 'u', 'b', 'r');
-  sprintf(preflx, "%s%c%c%c", "pre", 'f', 'l', 'x');
-  sprintf(newcolors, "%s%c%c%c%c%c%c", "new", 'c', 'o', 'l', 'o', 'r', 's');
-#endif
-
 }
 
 void GetOperator(int16_t encoding, char *operator)
