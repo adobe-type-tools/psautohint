@@ -83,14 +83,6 @@ static void check_PS_comment(
     char *
 );
 
-static  void checkovershootvalue(
-  char *, bool, bool
-);
-
-static bool checkovershoots(
-  void
-);
-
 static char *get_middle_lines(
     char *, char *, bool
 );
@@ -109,10 +101,6 @@ static char *get_base_font_path(
 
 static char *GetHVStems(
   char *, bool
-);
-
-static void CheckStemSnap(
-  char *
 );
 
 #ifdef SUN
@@ -1052,50 +1040,6 @@ extern void ParseIntStems(char *kw, bool optional, int32_t maxstems, int *stems,
   /* Reset pnum so just the first set of snap values is written
      in the top level Private dictionary. */
   *pnum = cnt;
-}
-
-/* This proc checks for the existence of StemSnap{H,V}.  If it is
-   specified in the fontinfo file then it checks that the corresponding
-   Dominant{H,V} value (if it exists) is also in the StemSnap array.
-   If it is not an error message is issued.  Also checks that if there
-   are more than two values in the StemSnap{H,V} arrays then there must
-   be two values in the Dominant{H,V} arrays. */
-static void CheckStemSnap(direction)
-char *direction;
-{
-  int stems[MAXSTEMSNAP];
-  int32_t stemcnt, dominantVal = MAXINT, domValCnt = 0;
-  char key[15];
-  indx ix;
-  
-  key[0] = '\0';
-  sprintf(key, "Dominant%s", direction);
-  ParseIntStems (key, ACOPTIONAL, (int32_t) MAXDOMINANTSTEMS, stems, &stemcnt, NULL);
-  if (stemcnt > 0)
-  {
-    dominantVal = stems[0];
-    domValCnt = stemcnt;
-  }
-  sprintf(key, "StemSnap%s", direction);
-  ParseIntStems (key, ACOPTIONAL, (int32_t) MAXSTEMSNAP, stems, &stemcnt, NULL);
-  if (stemcnt <= 0)
-    return;
-  if (dominantVal == MAXINT)
-  {
-    sprintf(globmsg, "A StemSnap%s array is specified, but a Dominant%s value\n  is not defined.  This may cause stem width problems.\n", direction, direction);
-    LogMsg(globmsg, WARNING, OK, true);
-    return;
-  }
-  if ((stemcnt > 2) && (domValCnt != MAXDOMINANTSTEMS))
-  {
-    sprintf(globmsg, "There must be two values in the Dominant{H,V} arrays if there are\n  more than two values in the StemSnap{H,V} arrays in the %s file.\n", FIFILENAME);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
-  }
-  for (ix = 0; ix < stemcnt; ix++)
-    if (dominantVal == stems[ix])
-      return;
-  sprintf(globmsg, "The Dominant%s value: %d must be included in\n  the StemSnap%s array in the %s file.\n", direction, dominantVal, direction, FIFILENAME);
-  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 }
 
 
