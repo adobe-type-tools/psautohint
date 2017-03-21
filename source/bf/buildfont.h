@@ -281,35 +281,8 @@ ParseFont(FILE *, FILE *, int32_t, int32_t *, int32_t *, int32_t *, int32_t *, b
 extern char *
 printer_filename(char *);
 
-extern int
-convert_PScharfile(const char *, const char *);
-
-/*****************************************************************************/
-/* Converts raw PS files to relativized bez format.                          */
-/*****************************************************************************/
-extern int
-convert_rawPSfiles(bool);
-
-extern void
-convert_illcharfile(const char *, const char *);
-
-extern void
-convert_illfiles(bool);
-
-extern int32_t
-process_chars(bool, bool, bool, int32_t *, int32_t *, bool, bool);
-
-extern void
-set_scale(float *);
-
 extern int16_t
 strindex(char *, char *);
-
-extern bool ConvertCharFiles(char *inputDir,	
-				bool release,				
-				float scale,				
-				void (*convertFunc)(const char *, const char *)	
-				);
 
 /*****************************************************************************/
 /* Deallocates memory and deletes temporary files.                           */
