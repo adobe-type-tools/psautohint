@@ -82,16 +82,20 @@ clean:
 	rm -f $(PRG_TARGET)
 	rm -f $(LIB_TARGET)
 
+COMPILE = $(if $(filter $V,1),,@echo "  CC $< ";)$(CC)
+LINK    = $(if $(filter $V,1),,@echo "  LD $@ ";)$(CC)
+ARCHIVE = $(if $(filter $V,1),,@echo "  AR $@ ";)$(AR)
+
 # Program
 $(PRG_TARGET): $(PRG_OBJS) $(PRG_SRCS) $(LIB_TARGET)
-	$(CC) $(CFLAGS) -o $@ $(PRG_OBJS) $(PRG_LIBS)
+	$(LINK) $(CFLAGS) -o $@ $(PRG_OBJS) $(PRG_LIBS)
 
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.c
-	$(CC) $(CFLAGS) -DEXECUTABLE=1 -c $< -o $@
+	$(COMPILE) $(CFLAGS) -DEXECUTABLE=1 -c $< -o $@
 
 # Library
 $(LIB_TARGET): $(LIB_OBJS)
-	$(AR) -rvs $@ $?
+	$(ARCHIVE) -rs $@ $?
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(COMPILE) $(CFLAGS) -c $< -o $@
