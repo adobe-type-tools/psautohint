@@ -191,60 +191,6 @@ static int32_t CPDirection(x1,cy1,x2,y2,x3,y3) Fixed x1,cy1,x2,y2,x3,y3; {
     return 0;
 }
 
-static PPathElt PointLine(e, whichcp) PPathElt e; int32_t whichcp; {
-    PPathElt newline;
-    if (whichcp == cpCurve1) whichcp = cpStart;
-    else if (whichcp == cpCurve2) whichcp = cpEnd;
-    if (whichcp == cpEnd && e->type == CLOSEPATH) {
-        e = GetDest(e); e = e->next; whichcp = cpStart; }
-    newline = (PPathElt)Alloc(sizeof(PathElt));
-    newline->type = LINETO;
-    if (whichcp == cpStart) { /* insert line in front of e */
-        newline->next = e;
-        newline->prev = e->prev;
-        if (e == pathStart)
-        {
-            FlushLogFiles();
-            sprintf(globmsg, "Malformed path list (Start) in %s.\n", fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
-        }
-        e->prev->next = newline;
-        e->prev = newline;
-    }
-    else { /* add line after e */
-        newline->next = e->next;
-        e->next->prev = newline;
-        if (e == pathEnd)
-        {
-            FlushLogFiles();
-            sprintf(globmsg, "Malformed path list (End) in %s.\n", fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
-        }
-        e->next = newline;
-        newline->prev = e;
-    }
-    GetEndPoint(newline->prev, &newline->x, &newline->y);
-    return newline;
-}
-
-static void MovePoint(x, y, e, whichcp)
-Fixed x, y; PPathElt e; int whichcp; {
-    if (whichcp == cpStart) { e = e->prev; whichcp = cpEnd; }
-    if (whichcp == cpEnd) {
-        if (e->type == CLOSEPATH) e = GetDest(e);
-        if (e->type == CURVETO) { e->x3 = x; e->y3 = y; }
-        else { e->x = x; e->y = y; }
-        return;
-    }
-    if (whichcp == cpCurve1) { e->x1 = x; e->y1 = y; return; }
-    if (whichcp == cpCurve2) { e->x2 = x; e->y2 = y; return; }
-    {
-        FlushLogFiles();
-        sprintf(globmsg, "Malformed path list in %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
-    }
-}
-
 void RMovePoint(dx, dy, whichcp, e)
 Fixed dx, dy; PPathElt e; int32_t whichcp; {
     if (whichcp == cpStart) { e = e->prev; whichcp = cpEnd; }
@@ -262,70 +208,6 @@ Fixed dx, dy; PPathElt e; int32_t whichcp; {
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     
-}
-
-static bool ZeroLength(e) PPathElt e; {
-    Fixed x0, cy0, x1, cy1;
-    GetEndPoints(e,&x0,&cy0,&x1,&cy1);
-    return (x0 == x1 && cy0 == cy1); }
-
-static bool ConsiderClipSharpPoint(rx0, ry0, rx1, ry1, rx2, ry2, e)
-Fixed rx0, ry0, rx1, ry1, rx2, ry2; PPathElt e; {
-    Fixed x0=rx0, cy0=ry0, x1=rx1, cy1=ry1, x2=rx2, y2=ry2;
-    Fixed dx0, dy0, dx1, dy1, nlx, nly;
-    float rdx0, rdx1, rdy0, rdy1;
-    PPathElt newline;
-    x0 = itfmx(x0);   x1 = itfmx(x1);   x2 = itfmx(x2);
-    cy0 = itfmy(cy0);   cy1 = itfmy(cy1);   y2 = itfmy(y2);
-    dx0 = x1 - x0; dy0 = cy1 - cy0;
-    dx1 = x2 - x1; dy1 = y2 - cy1;
-    acfixtopflt(dx0, &rdx0); acfixtopflt(dx1, &rdx1);
-    acfixtopflt(dy0, &rdy0); acfixtopflt(dy1, &rdy1);
-    if (rdx1*rdy0 < rdx0*rdy1) return false;
-    /* clip right turns (point toward inside of character) */
-    /* do not clip left turns (point toward outside of character) */
-    if (e->type != CLOSEPATH && e->next->type == CLOSEPATH &&
-        ZeroLength(e->next))
-        newline = e->next;
-    else
-        newline = PointLine(e,cpEnd); /* insert a zero length line */
-    GetEndPoint(newline, &nlx, &nly);
-    (void)NxtForBend(newline, &x1, &cy1, &x2, &y2);
-    PrvForBend(newline, &x0, &cy0);
-    /* x0 cy0 is the point before newline */
-    /* x1 cy1 is the point after newline */
-    /* nlx nly is the location of newline */
-    if (cy0 == nly)
-        MovePoint(nlx, (cy1 > cy0) ? nly+FixOne : nly-FixOne, newline, cpEnd);
-    else if (cy1 == nly)
-        MovePoint(nlx, (cy0 > cy1) ? nly+FixOne : nly-FixOne, newline, cpStart);
-    else if (x0 == nlx)
-        MovePoint((x1 > x0) ? nlx+FixOne : nlx-FixOne, nly, newline, cpEnd);
-    else if (x1 == nlx)
-        MovePoint((x0 > x1) ? nlx+FixOne : nlx-FixOne, nly, newline, cpStart);
-    else if (ProdGe0(nlx-x0,x1-nlx)) { /* nlx between x0 and x1 */
-        MovePoint((x1 > x0) ? nlx+FixHalf : nlx-FixHalf, nly, newline, cpEnd);
-        MovePoint((x0 > x1) ? nlx+FixHalf : nlx-FixHalf, nly, newline, cpStart);
-    }
-    else if (ProdGe0(nly-cy0,cy1-nly)) { /* nly between cy0 and cy1 */
-        MovePoint(nlx, (cy1 > cy0)? nly+FixHalf : nly-FixHalf, newline, cpEnd);
-        MovePoint(nlx, (cy0 > cy1)? nly+FixHalf : nly-FixHalf, newline, cpStart);
-    }
-    else {
-        float dydx0, dydx1;
-        int32_t wh1, wh2;
-        dx0 = x0 - nlx; dy0 = cy0 - nly;
-        acfixtopflt(dx0, &rdx0); acfixtopflt(dy0, &rdy0);
-        dydx0 = rdy0 / rdx0; if (dydx0 < 0) dydx0 = -dydx0;
-        dx1 = x1 - nlx; dy1 = cy1 - nly;
-        acfixtopflt(dx1, &rdx1); acfixtopflt(dy1, &rdy1);
-        dydx1 = rdy1 / rdx1; if (dydx1 < 0) dydx1 = -dydx1;
-        if (dydx1 < dydx0) { wh1 = cpStart; wh2 = cpEnd; }
-        else { wh2 = cpStart; wh1 = cpEnd; }
-        MovePoint(nlx, (dy0 > 0)? nly+FixOne : nly-FixOne, newline, wh1);
-        MovePoint((dx0 > 0)? nlx+FixOne : nlx-FixOne, nly, newline, wh2);
-    }
-    return true;
 }
 
 void Delete(e) PPathElt e; {

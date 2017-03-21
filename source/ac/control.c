@@ -688,25 +688,6 @@ static void RemoveRedundantFirstColors() {
 	}
 }
 
-static void PreCheckForSolEol() {
-	int32_t code;
-	Fixed yStart, yEnd, x1, y1;
-	if (!SpecialSolEol() || useV || useH || pathStart == NULL) {
-		return;
-	}
-	code = SolEolCharCode();
-	if (code == 0) {
-		return;
-	}
-	GetEndPoint(pathStart, &x1, &y1);
-	yStart = itfmy(y1);
-	GetEndPoint(GetDest(pathEnd), &x1, &y1);
-	yEnd = itfmy(y1);
-	if (editChar && ((code == 1 && yStart > yEnd) || (code == -1 && yStart < yEnd))) {
-		MoveSubpathToEnd(pathStart);
-	}
-}
-
 static void AddColorsSetup() {
 	int i;
 	Fixed abstmp;

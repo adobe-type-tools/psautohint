@@ -303,7 +303,6 @@ extern void ClrHBnds();
 extern void ReClrHBnds();
 extern void AddBBoxHV(/*Hflg*/);
 extern void ClrBBox();
-extern void SetMaxStemDist(/* int dist */);
 extern void CheckPathBBox();
 extern int32_t SpecialCharType();
 extern bool VColorChar();

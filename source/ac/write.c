@@ -78,19 +78,6 @@ ws(S0);                             \
 
 
 
-static void wrtfx(Fixed f) {
-    if ((roundToInt) || (FracPart(f) == 0))
-    {
-        Fixed i = FRnd(f);
-        WRTNUM(FTrunc(i));
-    }
-    else
-    {
-        float r = (float)FIXED2FLOAT(f);
-        WRTRNUM(r);
-    }
-}
-
 static void wrtx(Fixed x) {
 	Fixed i;
     Fixed dx;

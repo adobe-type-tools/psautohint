@@ -213,18 +213,6 @@ void InitData(int32_t reason)
   }
 
 
-static void setOutputPrefix (prefix)
-char *prefix;
-{
-  get_filename(outPrefix, prefix, "");
-}
-
-void SetMaxStemDist(int dist)
-{
-  maxStemDist = dist;
-}
-
-
 /* Returns whether coloring was successful. */  
 bool AutoColor(
 			 bool release,

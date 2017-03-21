@@ -295,13 +295,6 @@ static void ReadHintInfo(nm, str) char nm;  const char *str; {
     SetHintsElt(hinttype, &c0, elt1, elt2, (bool)!startchar);
   }
   
-static int32_t StrLen(s) register char *s; {
-  register int32_t cnt = 0;
-  while (*s++ != 0) cnt++;
-  return cnt;
-  }
-
-
 /*Used instead of StringEqual to keep ac from cloberring source string*/
  
 int isPrefix(const char *s, const char* pref)
