@@ -67,28 +67,6 @@ extern void ResetFntInfoFileName(
 void
 );
 
-/* get_private_blues formats the BlueValue-related data in the
-   fontinfo file for use in the Private dictionary. */
-
-extern char *get_private_blues(
-    bool
-);
-
-/* get_blended_blues formats the BlueValue-related data for
-   multiple master fonts. */
-extern char *get_blended_blues(
-  bool, bool
-);
-
-/* This proc attempts to test for required fontinfo keywords
-   early in the running of buildfont, rather than have the lack
-   of one of them cause buildfont to blow up just as it goes
-   to assemble the font. */
-
-extern void CheckRequiredKWs (
-void
-);
-
 extern void ParseIntStems(
 char *, bool, int32_t, int *, int32_t*, char *
 );
