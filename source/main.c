@@ -18,8 +18,6 @@ FILE *reportFile = NULL;
 
 bool verbose = true; /* if true don't number of characters processed. */
 
-bool scalinghints = false;
-
 /* EXECUTABLE defined means it is being compiled as a command-line tool;
 if not defined, it is being compiled as a Python module.
 */
