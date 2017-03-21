@@ -945,6 +945,15 @@ static dump_path(bool reverse)
 
 #endif
 
+static char outstr[MAXLINE];	/* contains string to be encrypted */
+
+static int WriteStart(FILE *outfile, const char *name)
+{
+  sprintf(outstr, "%%%s\nsc\n", name);
+  (void) DoContEncrypt(outstr, outfile, false, INLEN);
+  return 0;
+}
+
 void convert_illcharfile(const char *charname, const char *filename)
 {
     FILE *infile, *outfile;
