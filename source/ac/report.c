@@ -43,13 +43,8 @@ void OpenLogFiles() {
   char host[50];
   logfile = ACOpenFile(TMPLOG, "w", OPENERROR);
   GetInputDirName(dir, "");
-#ifdef SUN
-  cuserid(uid);
-  gethostname (host, 50);
-#else
   strcpy(host, "Local machine");
   strcpy(uid, "local");
-#endif
   fprintf (logfile, "\n# %s -- %s\n# %s\n", uid, host, dir);
   ACGetVersion("AC", globmsg);
   fprintf(logfile, "# %s#\n\n", globmsg);

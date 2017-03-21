@@ -1023,9 +1023,7 @@ void convert_illfiles(bool rel)
                                                "path structure");
     final_path = (struct path_element *) AllocateMem(MAXPOINTS, sizeof(path_element), "final path structure");
     convertedchars = 0;
-#if SUN
-	ConvertCharFiles(ILLDIR, release, scale, convert_illcharfile);
-#elif defined(_WIN32)
+#if defined(_WIN32)
 	ConvertCharFiles(ILLDIR, release, scale, convert_illcharfile);
 #else
 	ConvertInputDirFiles(ILLDIR, convert_illcharfile);
