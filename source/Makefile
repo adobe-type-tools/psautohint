@@ -27,14 +27,7 @@ CFLAGS = \
 	-DAC_C_LIB=1 \
 	-DACLIB_EXPORTS \
 	-DIS_LIB \
-	-Wunused-but-set-variable \
-	-Wunused-function \
-	-Wunknown-pragmas \
-	-Wunused-variable \
-	-Wmisleading-indentation \
-	-Wno-unknown-warning-option \
-	-Wno-shift-negative-value \
-	-Werror \
+	-Wall \
 	$(NULL)
 
 ifeq ($(OS),Windows_NT)
