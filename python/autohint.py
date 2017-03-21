@@ -1047,6 +1047,8 @@ def hintFile(options):
 
 	# temp file names for input and output bez files, and for the fontinfo file.
 	tempBaseName = os.tempnam()
+	tempBez = tempBaseName + ".bez"
+	tempBezNew = tempBez + ".new"
 	tempFI = tempBaseName + ".fi"
 	
 	#print "tempBaseName", tempBaseName
@@ -1118,6 +1120,7 @@ def hintFile(options):
 	# 	Get charstring.
 	removeHints = 1
 	isCID = fontData.isCID()
+	lastFDIndex = None
 	reportCB = ACreport
 	anyGlyphChanged = 0
 	pListChanged = 0
@@ -1149,8 +1152,6 @@ def hintFile(options):
 	dotCount = 0
 	seenGlyphCount = 0
 	processedGlyphCount = 0
-	newBezStrings = {}
-	glyphFontDict = {}
 	for name in glyphList:
 		prevACIdentifier = None
 		seenGlyphCount +=1
@@ -1167,9 +1168,14 @@ def hintFile(options):
 		# get new fontinfo string if FD array index has changed, as
 		# as each FontDict has different alignment zones.
 		gid = fontData.getGlyphID(name)
-		fdIndex = 0
 		if isCID: #
 			fdIndex = fontData.getfdIndex(gid)
+			if not fdIndex == lastFDIndex:
+				lastFDIndex = fdIndex
+				fdDict = fontData.getFontInfo(psName, path, options.allow_no_blues, options.noFlex, options.vCounterGlyphs, options.hCounterGlyphs, fdIndex)
+				fp = open(tempFI, "wt")
+				fp.write(fdDict.getFontInfo())
+				fp.close()
 		else:
 			if (fdGlyphDict != None):
 				try:
@@ -1177,6 +1183,13 @@ def hintFile(options):
 				except KeyError:
 					# use default dict.
 					fdIndex = 0
+				if lastFDIndex != fdIndex:
+					lastFDIndex = fdIndex
+					fdDict = fontDictList[fdIndex]
+					fp = open(tempFI, "wt")
+					fp.write(fdDict.getFontInfo())
+					fp.close()
+			
 
 		# 	Build autohint point list identifier
 
@@ -1206,116 +1219,90 @@ def hintFile(options):
 			else:
 				pListChanged = 1
 
+		if options.verbose:
+			if fdGlyphDict:
+				logMsg("Hinting %s with fdDict %s." % (aliasName(name), fdDict.DictName) )
+			else:
+				logMsg("Hinting %s." % aliasName(name))
+		else:
+			logMsg(".,")
+			dotCount += 1
+			if dotCount > 40:
+				dotCount = 0
+				logMsg("") # I do this to never have more than 40 dots on a line.
+				# This in turn give reasonable performance when calling autohint in a subprocess
+				# and getting output with std.readline()
+
+		# 	Call auto-hint library on bez string.
+		bp = open(tempBez, "wt")
+		bp.write(bezString)
+		bp.close()
+
+		#print "oldBezString", oldBezString
+		#print ""
+		#print "bezString", bezString
+		
 		if oldBezString != "" and oldBezString == bezString:
-			newBezStrings[name] = [oldHintBezString, bezString, width]
+			newBezString = oldHintBezString
 		else:
-			if not fdIndex in glyphFontDict:
-				glyphFontDict[fdIndex] = {}
-			glyphFontDict[fdIndex][name] = [bezString, width]
-
-
-	# 	Call auto-hint library on bez strings.
-	for fdIndex in glyphFontDict:
-		# get new fontinfo string if FD array index has changed, as
-		# as each FontDict has different alignment zones.
-		gid = fontData.getGlyphID(name)
-		if isCID: #
-			fdIndex = fontData.getfdIndex(gid)
-			fdDict = fontData.getFontInfo(psName, path, options.allow_no_blues, options.noFlex, options.vCounterGlyphs, options.hCounterGlyphs, fdIndex)
-			fp = open(tempFI, "wt")
-			fp.write(fdDict.getFontInfo())
-			fp.close()
-		else:
-			if (fdGlyphDict != None):
-				fdDict = fontDictList[fdIndex]
-				fp = open(tempFI, "wt")
-				fp.write(fdDict.getFontInfo())
-				fp.close()
-		if options.debug:
-			print "Wrote AC fontinfo data file to", tempFI
-
-		tempBezFilenames = {}
-		for name in glyphFontDict[fdIndex]:
-			tempBez = tempBaseName + name + ".bez"
-			tempBezNew = tempBez + ".new"
-			bezString = glyphFontDict[fdIndex][name][0]
-			bp = open(tempBez, "wt")
-			bp.write(bezString)
-			bp.close()
-
-			tempBezFilenames[name] = tempBez
-
 			if os.path.exists(tempBezNew):
 				os.remove(tempBezNew)
-
-			if options.verbose:
-				if fdGlyphDict:
-					logMsg("Hinting %s with fdDict %s." % (aliasName(name), fdDict.DictName) )
-				else:
-					logMsg("Hinting %s." % aliasName(name))
-
-		tempBezes = " ".join(['"%s"' % v for v in tempBezFilenames.values()])
-		command = 'autohintexe %s%s%s%s -s .new -f "%s" %s' % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, tempFI, tempBezes)
-		if  options.debug:
-			print command
-		report = FDKUtils.runShellCmd(command)
-		if report:
-			if not options.verbose:
-				logMsg("") # end series of "."
-			logMsg(report)
-
-		for name in tempBezFilenames:
-			tempBez = tempBezFilenames[name]
-			tempBezNew = tempBez + ".new"
+			command = "autohintexe %s%s%s%s -s .new -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, tempFI, tempBez)
+			if  options.debug:
+				print command
+			report = FDKUtils.runShellCmd(command)
+			if report:
+				if not options.verbose:
+					logMsg("") # end series of "."
+				logMsg(report)
 			if os.path.exists(tempBezNew):
 				bp = open(tempBezNew, "rt")
 				newBezString = bp.read()
 				bp.close()
-				if not options.debug:
+				if options.debug:
+					print "Wrote AC fontinfo data file to", tempFI
+					print "Wrote AC output bez file to", tempBezNew
+				else:
 					os.remove(tempBezNew)
-					os.remove(tempBez)
 			else:
 				newBezString = None
-			bezString, width = glyphFontDict[fdIndex][name]
-			newBezStrings[name] = [newBezString, bezString, width]
-		if not options.debug:
-			removeTempFiles( [tempFI] )
+			
+		if not newBezString:
+			if not options.verbose:
+				logMsg("")
+			logMsg("%s Error - failure in processing outline data." % aliasName(name))
+			continue
+			
+		if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
+			print "No hints added!"
 
-		for name in newBezStrings:
-			newBezString, bezString, width = newBezStrings[name]
-			if not newBezString:
-				if not options.verbose:
-					logMsg("")
-				logMsg("%s Error - failure in processing outline data." % aliasName(name))
-				continue
+		if options.logOnly:
+			continue
+			
+		# 	Convert bez to charstring, and update CFF.
+		anyGlyphChanged = 1
+		fontData.updateFromBez(newBezString, name, width, options.verbose)
 
-			if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
-				print "No hints added!"
+		
+		if options.usePlistFile:
+			bezString = "%% %s%s%s" % (name, os.linesep, newBezString)
+			ACidentifier = makeACIdentifier(bezString)
+			# add glyph hint entry to plist file
+			if options.allowChanges:
+				if prevACIdentifier and (prevACIdentifier != ACidentifier):
+					logMsg("\t%s Glyph outline changed" % aliasName(name))
+					dotCount = 0
 
-			if options.logOnly:
-				continue
-
-			# 	Convert bez to charstring, and update CFF.
-			anyGlyphChanged = 1
-			fontData.updateFromBez(newBezString, name, width, options.verbose)
-
-			if options.usePlistFile:
-				bezString = "%% %s%s%s" % (name, os.linesep, newBezString)
-				ACidentifier = makeACIdentifier(bezString)
-				# add glyph hint entry to plist file
-				if options.allowChanges:
-					if prevACIdentifier and (prevACIdentifier != ACidentifier):
-						logMsg("\t%s Glyph outline changed" % aliasName(name))
-						dotCount = 0
-
-				fontPlist[kACIDKey][name] = (ACidentifier, time.asctime(), bezString, newBezString )
+			fontPlist[kACIDKey][name] = (ACidentifier, time.asctime(), bezString, newBezString )
 
 	if not options.verbose:
 		print "" # print final new line after progress dots.
 
-	if not options.debug:
+	if  options.debug:
+		print "Wrote input AC bez file to", tempBez
+	else:
 		tempPathCFF = options.inputPath + kTempCFFSuffix # created when a PS file is opened.
-		removeTempFiles( [tempPathCFF] )
+		removeTempFiles( [tempBez, tempBezNew, tempFI, tempPathCFF] )
 					
 	if not options.logOnly:
 		if anyGlyphChanged:
