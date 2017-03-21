@@ -12,8 +12,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "fipublic.h"
 #include "machinedep.h"
 #include "opcodes.h"
-#include "optable.h"
 #define PRINT_READ (0)
+#define ESCVAL 100
 
 #ifdef IS_LIB
 extern const char *bezstring;
