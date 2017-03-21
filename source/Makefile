@@ -70,7 +70,6 @@ LIB_OBJS = \
 	$(OBJ_DIR)/bf/cryptprocs.o \
 	$(OBJ_DIR)/bf/fileops.o \
 	$(OBJ_DIR)/bf/filookup.o \
-	$(OBJ_DIR)/bf/illtobez.o \
 	$(OBJ_DIR)/bf/machinedep.o \
 	$(NULL)
 
