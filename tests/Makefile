@@ -14,7 +14,7 @@ TESTS:=$(FONTS:%.ufo=%.tst)
 all: $(TESTS)
 
 %.tst: export PATH:=$(SRC_DIR):$(PATH)
-%.tst: %.ufo $(SRC_DIR)/autohintexe$(EXE) $(PYT_DIR)/autohint.py
+%.tst: %.ufo
 	@echo "	Testing $<"
 	@rm -rf $@
 	@python2 $(PYT_DIR)/autohint.py -all -qq -o $@ $<
