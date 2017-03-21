@@ -30,52 +30,6 @@ void GetMasterDirName(char *dirname, indx ix)
 }
 #endif
 
-/* Locates the first CP following the given path element. */
-/* Returns number of operands for the given operator. */
-extern int16_t GetOperandCount(int16_t op)
-{
-    int16_t count;
-    
-    if (op < ESCVAL)
-        switch(op)
-    {
-        case CP:
-        case HDT:
-        case HMT:
-        case VDT:
-        case VMT:
-            count = 1;
-            break;
-        case RMT:
-        case RDT:
-        case RB:
-        case RY:
-        case SBX:
-            count = 2;
-            break;
-        case HVCT:
-        case VHCT:
-            count = 4;
-            break;
-        case RCT:
-            count = 6;
-            break;
-        default:
-            sprintf(globmsg, "Unknown operator in character: %s.\n", currentChar);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
-            break;
-    }
-    else				/* handle escape operators */
-        switch (op - ESCVAL)
-    {
-        case RM:
-        case RV:
-            count = 2;
-            break;
-    }
-    return count;
-}
-
 /* Returns the subr number to use for a given operator in subrIx and
  checks that the argument length of each subr call does not
  exceed the font interpreter stack limit. */

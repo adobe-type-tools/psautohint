@@ -37,8 +37,6 @@ extern PCharPathElt AppendCharPathElement(int);
 
 extern bool CheckCharPath(char *, char *);
 
-extern int16_t GetOperandCount(int16_t);
-
 extern void GetLengthandSubrIx(int16_t, int16_t *, int16_t *);
 
 extern void ResetMaxPathEntries(void);
