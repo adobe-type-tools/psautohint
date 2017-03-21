@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
      static void Blues()
      */
 
-	int allowEdit, roundCoords, allowHintSub, fixStems, debug, badParam;
+	int allowEdit, roundCoords, allowHintSub, debug, badParam;
 	bool argumentIsBezData = false;
 	char *fontInfoFileName=NULL; /* font info file name, or suffix of environment variable holding the fontfino string. */
 	char *fontinfo = NULL; /* the string of fontinfo data */
@@ -223,7 +223,11 @@ int main(int argc, char *argv[])
 	int16_t total_files = 0;
 	int result, argi;
 
-	badParam = fixStems = debug = doAligns = doStems = allstems = false;
+	badParam = false;
+	debug = false;
+	doAligns = false;
+	doStems = false;
+	allstems = false;
 	allowEdit = allowHintSub = roundCoords = true;
 	fileSuffix = (char *)dfltExt;
 
@@ -313,9 +317,6 @@ int main(int argc, char *argv[])
 				break;
 			case 'D':
 				debug = true;
-				break;
-			case 'F':
-				fixStems = true;
 				break;
 			case 'a':
 				allstems = 1;
