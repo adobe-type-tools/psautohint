@@ -11,7 +11,11 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef AC_C_LIB_H_
 #define AC_C_LIB_H_
 
+#if !defined(_MSC_VER) || _MSC_VER >= 1600
 #include <stdint.h>
+#else
+#include "winstdint.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
