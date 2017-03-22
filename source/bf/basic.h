@@ -6,7 +6,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef BASIC_H
 #define BASIC_H
 #include <stdlib.h>
-#include <stdint.h>
 #include <ctype.h>
 
 #include <stdlib.h>
@@ -16,8 +15,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <sys/types.h>
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1800
+#include <stdint.h>
 #include <stdbool.h>
 #else
+#include "winstdint.h"
 typedef unsigned char bool;
 #define true 1
 #define false 0
