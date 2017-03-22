@@ -13,4 +13,4 @@ install:
 script:
   - export CFLAGS="-Wno-strict-prototypes -Wno-maybe-uninitialized"
   - python setup.py install
-  - make check
+  - make -j check
