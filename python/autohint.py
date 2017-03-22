@@ -8,7 +8,7 @@ autohint -h
 autohint -u
 autohint -hfd
 autohint -pfd
-autohint [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>] [-cf path] [-a] [-logOnly] [-log <logFile path>] [-r] [-q] [-c] [-nf] [-ns] [-nb] [-wd] [-o <output font path>]  font-path
+autohint [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>] [-cf path] [-a] [-logOnly] [-log <logFile path>] [-r] [-q] [-qq] [-c] [-nf] [-ns] [-nb] [-wd] [-o <output font path>]  font-path
 
 Auto-hinting program for PostScript and OpenType/CFF fonts.
 """
@@ -106,6 +106,9 @@ alignment zones in an "fontinfo" file.
 -q	Quiet mode
 	Will suppress comments from the auto-hinting library about recommended 
 	glyph outline changes.
+
+-qq	Really quiet mode
+	Will suppress all normal messages.
 
 -c	Permit changes to the glyph outline
 	When this is turned on, the autohint program will fix a few issues:
@@ -467,6 +470,7 @@ class ACOptions:
 		self.hintAll = 0
 		self.rehint = 0
 		self.verbose = 1
+		self.quiet = 0
 		self.allowChanges = 0
 		self.noFlex = 0
 		self.noHintSub = 0
@@ -527,13 +531,6 @@ def logMsg(*args):
 			if gLogFile:
 				gLogFile.write(msg + os.linesep)
 				gLogFile.flush()
-
-def ACreport(*args):
-	# long function used by the hinting library
-	for arg in args:
-		print arg,
-	if arg[-1] != os.linesep:
-		print
 
 def CheckEnvironment():
 	command = "autohintexe -u"
@@ -667,6 +664,9 @@ def getOptions():
 		elif arg == "-r":
 			options.rehint = 1
 		elif arg == "-q":
+			options.verbose = 0
+		elif arg == "-qq":
+			options.quiet = 1
 			options.verbose = 0
 		elif arg == "-c":
 			options.allowChanges = 1
@@ -909,16 +909,16 @@ def makeACIdentifier(bezText):
 	bezText = whiteSpacePattern.sub("", bezText)
 	return bezText
 
-def openFile(path, outFilePath, useHashMap):
+def openFile(path, outFilePath, useHashMap, options):
 	if os.path.isfile(path):
-		font =  openOpenTypeFile(path, outFilePath)
+		font =  openOpenTypeFile(path, outFilePath, options)
 	else:
 		# maybe it is a a UFO font.
 		# We always use the hash map to skip glyphs that have been previously processed, unless the user has report only, not make changes.
-		font =  openUFOFile(path, outFilePath, useHashMap)
+		font =  openUFOFile(path, outFilePath, useHashMap, options)
 	return font
 
-def openUFOFile(path, outFilePath, useHashMap):
+def openUFOFile(path, outFilePath, useHashMap, options):
 	# Check if has glyphs/contents.plist
 	contentsPath = os.path.join(path, "glyphs", "contents.plist")
 	if not os.path.exists(contentsPath):
@@ -929,8 +929,9 @@ def openUFOFile(path, outFilePath, useHashMap):
 	# If user has specified a path other than the source font path, then copy the entire
 	# ufo font, and operate on the copy.
 	if (outFilePath != None) and (os.path.abspath(path) != os.path.abspath(outFilePath)):
-		msg = "Copying from source UFO font to output UFO font before processing..."
-		logMsg(msg)
+		if not options.quiet:
+			msg = "Copying from source UFO font to output UFO font before processing..."
+			logMsg(msg)
 		if os.path.exists(outFilePath):
 			shutil.rmtree(outFilePath)
 		shutil.copytree(path , outFilePath)
@@ -940,7 +941,7 @@ def openUFOFile(path, outFilePath, useHashMap):
 	font.requiredHistory.append(ufoTools.kCheckOutlineName) # Programs in this list must be run before autohint, if the outlines have been edited.
 	return font
 	
-def openOpenTypeFile(path, outFilePath):
+def openOpenTypeFile(path, outFilePath, options):
 	# If input font is  CFF or PS, build a dummy ttFont in memory..
 	# return ttFont, and flag if is a real OTF font Return flag is 0 if OTF, 1 if CFF, and 2 if PS/
 	fontType  = 0 # OTF
@@ -1024,11 +1025,12 @@ def hintFile(options):
 
 	path = options.inputPath
 	fontFileName = os.path.basename(path)
-	logMsg("Hinting font %s. Start time: %s." % (path, time.asctime()))
+	if not options.quiet:
+		logMsg("Hinting font %s. Start time: %s." % (path, time.asctime()))
 
 	try:
 		useHashMap = not options.logOnly # for UFO fonts only. We always use the hash map, unless the user has said to only report issues.
-		fontData = openFile(path, options.outputPath, useHashMap)
+		fontData = openFile(path, options.outputPath, useHashMap, options)
 		fontData.allowDecimalCoords = options.allowDecimalCoords
 		if options.writeToDefaultLayer and hasattr(fontData, "setWriteToDefault"): # UFO fonts only
 			fontData.setWriteToDefault()
@@ -1112,7 +1114,7 @@ def hintFile(options):
 		fp.write(fdDict.getFontInfo())
 		fp.close()
 	else:
-		if not options.verbose:
+		if not options.verbose and not options.quiet:
 			logMsg("Note: Using alternate FDDict global values from fontinfo file for some glyphs. Remove option '-q' to see which dict is used for which glyphs.")
 
 
@@ -1121,7 +1123,6 @@ def hintFile(options):
 	removeHints = 1
 	isCID = fontData.isCID()
 	lastFDIndex = None
-	reportCB = ACreport
 	anyGlyphChanged = 0
 	pListChanged = 0
 	if isCID:
@@ -1224,7 +1225,7 @@ def hintFile(options):
 				logMsg("Hinting %s with fdDict %s." % (aliasName(name), fdDict.DictName) )
 			else:
 				logMsg("Hinting %s." % aliasName(name))
-		else:
+		elif not options.quiet:
 			logMsg(".,")
 			dotCount += 1
 			if dotCount > 40:
@@ -1252,7 +1253,7 @@ def hintFile(options):
 				print command
 			report = FDKUtils.runShellCmd(command)
 			if report:
-				if not options.verbose:
+				if not options.verbose and not options.quiet:
 					logMsg("") # end series of "."
 				logMsg(report)
 			if os.path.exists(tempBezNew):
@@ -1268,7 +1269,7 @@ def hintFile(options):
 				newBezString = None
 			
 		if not newBezString:
-			if not options.verbose:
+			if not options.verbose and not options.quiet:
 				logMsg("")
 			logMsg("%s Error - failure in processing outline data." % aliasName(name))
 			continue
@@ -1295,7 +1296,7 @@ def hintFile(options):
 
 			fontPlist[kACIDKey][name] = (ACidentifier, time.asctime(), bezString, newBezString )
 
-	if not options.verbose:
+	if not options.verbose and not options.quiet:
 		print "" # print final new line after progress dots.
 
 	if  options.debug:
@@ -1306,7 +1307,8 @@ def hintFile(options):
 					
 	if not options.logOnly:
 		if anyGlyphChanged:
-			logMsg("Saving font file with new hints..." + time.asctime())
+			if not options.quiet:
+				logMsg("Saving font file with new hints..." + time.asctime())
 			fontData.saveChanges()
 		else:
 			fontData.close()
@@ -1324,7 +1326,8 @@ def hintFile(options):
 		fontPlist.write(fontPlistFilePath)
 	if processedGlyphCount != seenGlyphCount:
 		logMsg("Skipped %s of %s glyphs." % (seenGlyphCount - processedGlyphCount, seenGlyphCount))
-	logMsg("Done with font %s. End time: %s." % (path, time.asctime()))
+	if not options.quiet:
+		logMsg("Done with font %s. End time: %s." % (path, time.asctime()))
 
 def main():
 

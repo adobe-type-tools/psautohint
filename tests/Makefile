@@ -17,5 +17,5 @@ all: $(TESTS)
 %.tst: %.ufo $(SRC_DIR)/autohintexe$(EXE) $(PYT_DIR)/autohint.py
 	@echo "	Testing $<"
 	@rm -rf $@
-	@python2 $(PYT_DIR)/autohint.py -all -q -o $@ $< 2>&1 >/dev/null
+	@python2 $(PYT_DIR)/autohint.py -all -qq -o $@ $<
 	@diff -Naur $< $@

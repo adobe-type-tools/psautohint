@@ -426,7 +426,7 @@ class UFOFontData:
 
 	def convertToBez(self, glyphName, removeHints, beVerbose, doAll = 0):
 		# convertGLIFToBez does not yet support hints - no need for removeHints arg.
-		bezString, width = convertGLIFToBez(self, glyphName, doAll)
+		bezString, width = convertGLIFToBez(self, glyphName, beVerbose, doAll)
 		hasHints = self.checkForHints(glyphName)
 		return bezString, width, hasHints
 
@@ -762,7 +762,6 @@ class UFOFontData:
 		self.fontInfo, tempList = parsePList(fontInfoPath)
 
 	def updateLayerContents(self, contentsFilePath):
-		print "Calling updateLayerContents"
 		if os.path.exists(contentsFilePath):
 			contentsList= plistlib.readPlist(contentsFilePath)
 			# If the layer name already exists, don't add a new one, or change the path
@@ -1439,14 +1438,15 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 	return bezstring, curX, curY
 
 
-def convertGLIFToBez(ufoFontData, glyphName, doAll= 0):
+def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll= 0):
 	width, outlineXML, skip = ufoFontData.getOrSkipGlyphXML(glyphName, doAll)
 
 	if skip:
 		return None, width
 
 	if outlineXML == None:
-		print "Glyph '%s' has no outline data" % (glyphName)
+		if beVerbose:
+			print "Glyph '%s' has no outline data" % (glyphName)
 		return None, width
 
 	curX = curY = 0
