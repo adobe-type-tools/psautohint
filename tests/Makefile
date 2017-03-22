@@ -4,18 +4,15 @@ ROOT_DIR = ..
 SRC_DIR = $(ROOT_DIR)/source
 PYT_DIR = $(ROOT_DIR)/python
 
-ifeq ($(OS),Windows_NT)
-EXE = .exe
-endif
+PYTHON ?= python2
 
 FONTS:=$(wildcard data/*/*/font.ufo)
 TESTS:=$(FONTS:%.ufo=%.tst)
 
 all: $(TESTS)
 
-%.tst: export PATH:=$(SRC_DIR):$(PATH)
 %.tst: %.ufo
 	@echo "	Testing $<"
 	@rm -rf $@
-	@python2 $(PYT_DIR)/autohint.py -all -qq -o $@ $<
+	@$(PYTHON) $(PYT_DIR)/autohint.py -all -qq -o $@ $<
 	@diff -Naur $< $@
