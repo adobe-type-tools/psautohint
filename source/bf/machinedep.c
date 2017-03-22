@@ -286,8 +286,8 @@ bool CFileExists(const char *filename, int16_t errormsg)
 
 bool DirExists(char *dirname, bool absolute, bool create, bool errormsg)
 {
-    (void)absolute;
     int32_t access_denied = access(dirname, F_OK);
+    (void)absolute;
     
     if (access_denied)
     {
