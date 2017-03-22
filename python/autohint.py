@@ -1341,7 +1341,7 @@ def main():
 		options = getOptions()
 	except ACOptionParseError,e:
 		logMsg(e)
-		return 1
+		return not e
 
 	# verify that all files exist.
 	try:
