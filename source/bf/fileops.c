@@ -3,7 +3,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /***********************************************************************/
 
 #include "buildfont.h"
-#include "afmcharsetdefs.h"
 #include "cryptdefs.h"
 #include "fipublic.h"
 #include "machinedep.h"
@@ -230,18 +229,6 @@ InSubsetData(int cid)
 
    return false;
    }
-
-extern char *GetFItoAFMCharSetName()
-{
-  char *filename;
-  
-  if (strlen(charsetDir) == 0)
-    return NULL; 
-  filename = AllocateMem((unsigned int)(strlen(charsetDir) + strlen(AFMCHARSETTABLE) + 2),
-    sizeof(char), "AFM charset filename");
-  get_filename(filename, charsetDir, AFMCHARSETTABLE);
-  return filename;
-}
 
 extern int16_t GetTotalInputDirs()
 {
