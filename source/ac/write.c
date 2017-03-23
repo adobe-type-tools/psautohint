@@ -608,9 +608,6 @@ void SaveFile() {
 #ifdef IS_LIB
 	}
 #endif
-#ifdef ENCRYPTOUTPUT
-	DoInitEncrypt(outputfile, OTHER, HEX, 64, false);
-#endif
 	sprintf(S0, "%% %s\n", fileName);
 	ws(S0);
 	wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
