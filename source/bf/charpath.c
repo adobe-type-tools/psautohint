@@ -7,11 +7,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "buildfont.h"
 #include "bftoac.h"
 #include "charpath.h"
-#include "chartable.h"
-#include "masterfont.h"
-#include "opcodes.h"
-#include "hintfile.h"
-#include "transitionalchars.h"
 
 
 bool cubeLibrary;
@@ -19,14 +14,6 @@ char *currentChar; /* name of the current char for error messages */
 
 static int16_t dirCount;
 static indx hintsdirIx;
-
-#if AC_C_LIB
-void GetMasterDirName(char *dirname, indx ix)
-{
-	if (dirname)
-		dirname[0] = '\0';
-}
-#endif
 
 /* Returns the subr number to use for a given operator in subrIx and
  checks that the argument length of each subr call does not
