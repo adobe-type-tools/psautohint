@@ -100,11 +100,6 @@ static char *GetHVStems(
   char *, bool
 );
 
-void fiptrfree(FIPTR ptr)
-{
-	UnallocateMem(ptr->value_string);
-}
-
 /*  Look up the keyword parameter in the table to get the index */
 static int16_t lookup(key)
 char *key;
@@ -279,14 +274,14 @@ char *key, *lineargs;
   make_normal_return(lp + 1, true);
 }
 
-int misspace(int c)
+static int misspace(int c)
 {
 	if (c==' ' || c=='\n' || c=='\r' || c=='\t')
 		return 1;
 	return 0;
 }
 
-int misdigit(int c)
+static int misdigit(int c)
 {
 	return c>='0' && c<='9';
 }
@@ -562,7 +557,7 @@ static void init_kw_tab()
    is returned in the value string.  Otherwise, an error message
    will be written to the returned value string.
 */
-extern FIPTR filookup(char *keyword, bool optional)
+static FIPTR filookup(char *keyword, bool optional)
 {
   int16_t kwindex;
   char *fs;
@@ -850,44 +845,6 @@ extern char *GetFntInfo(char *keyword, bool optional)
 	}
 #endif
 	return NULL;
-}
-
-/* This proc looks up an integer fontinfo value and returns:
-   1) the integer value found for the keyword
-   2) MAXINT if the keyword was not found
-   In case of an error, cleanup is called, which never returns
- */
-
-extern int GetFIInt(char *keyword, bool optional)
-{
-  FIPTR fptr;
-  int temp;
-
-  fptr = filookup(keyword, optional);
-  switch (fptr->exit_status)
-  {
-  case NORMAL_RETURN:
-    sscanf(fptr->value_string, "%d", &temp);
-	UnallocateMem(fptr->value_string);
-    return (temp);
-    break;
-  case OPTIONAL_NOT_FOUND:
-    if (optional)
-    {
-	UnallocateMem(fptr->value_string);
-      return (MAXINT);
-    }
-    /* fall through intentionally */
-  case ERROR_RETURN:
-    sprintf(globmsg, "%s\n", fptr->value_string);
-	UnallocateMem(fptr->value_string);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
-  default:
-	UnallocateMem(fptr->value_string);
-    LogMsg("Unknown exit status from fontinfo lookup.\n",
-      LOGERROR, NONFATALERROR, true);
-  }
-  return (MAXINT);
 }
 
 /* FreeFontInfo frees the memory associated with the pointer ptr.

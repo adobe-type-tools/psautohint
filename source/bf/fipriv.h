@@ -8,30 +8,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef FIPRIVATE_H
 #define FIPRIVATE_H
 
-/* Builds the undershoot and overshoot band arrays. */
-extern int build_bands(
-  void
-);
-
-/* looks up specified keyword in fontinfo file. */
-extern FIPTR filookup(
-    char *, bool
-);
-
-/* Frees the value string associated with fiptr. */
-extern void fiptrfree(
-    FIPTR
-);
-
-/* These procs check that band widths and band spacing are within limits. */
-extern bool checkbandwidths(
-  float, bool
-);
-
-extern bool checkbandspacing(
-    void
-);
-
 extern void WriteBlendedArray(
 int *, int, int, char *
 );
