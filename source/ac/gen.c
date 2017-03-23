@@ -1,6 +1,8 @@
 /* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
 
+#include <math.h>
+
 #include "ac.h"
 #include "bftoac.h"
 
@@ -120,7 +122,7 @@ static bool TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
 	acfixtopflt(y2-y1, &dy2);
 	dotprod = dx1*dx2 + dy1*dy2;
 	lensqprod = (dx1*dx1 + dy1*dy1) * (dx2*dx2 + dy2*dy2);
-	return (dotprod*dotprod / lensqprod) <= .5;
+	return roundf((dotprod*dotprod / lensqprod) * 1000) / 1000 <= .5f;
 }
 
 #define TestTan(d1,d2) (abs(d1) > (abs(d2)*bendTan)/1000)
