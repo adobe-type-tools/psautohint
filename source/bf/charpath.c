@@ -14,7 +14,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "transitionalchars.h"
 
 
-extern bool multiplemaster;
 bool cubeLibrary;
 char *currentChar; /* name of the current char for error messages */
 

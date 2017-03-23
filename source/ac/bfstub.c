@@ -18,5 +18,3 @@ int totalvals, subarraysz;
 int16_t dirCount;
 {
 }
-
-bool multiplemaster = 0; /* AC is never run at the MM level */

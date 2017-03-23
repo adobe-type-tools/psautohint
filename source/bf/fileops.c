@@ -36,8 +36,6 @@ typedef struct
    int hi;
    } SubsetData;
 
-extern bool multiplemaster; /* from buildfont.c */
-
 extern int16_t strindex(s, t)         /* return index of t in s, -1 if none    */
 char *s, *t;
 {
@@ -398,21 +396,9 @@ ReadNames(char *cname, char *filename, int32_t *masters, int32_t *hintDir,
 
             if (total_assigns == 1) strcpy(filename, cname);
 
-	    if (multiplemaster) {
-	      FileNameLenOK(filename);
-
-	      if (total_assigns < 3) *masters = GetTotalInputDirs();
-
-	      if (total_assigns < 4)
-		*hintDir = GetHintsDir();
-	      else
-		--*hintDir; /* hintDir is zero-origin */
-	    }
-	    else {
-	      strcpy(filename, cname);
-	      *masters = 1;
-	      *hintDir = 0;
-	    }
+	    strcpy(filename, cname);
+	    *masters = 1;
+	    *hintDir = 0;
 
             done = 1;
             }
