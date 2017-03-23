@@ -540,6 +540,7 @@ def CheckEnvironment():
 		report = FDKUtils.runShellCmd(command)
 		if "version" not in report:
 			logMsg("Please re-install the FDK. The path to the program 'autohintexe' is not in the environment variable PATH.")
+			logMsg("Or install 'psautohintmodule' module.")
 			raise FDKEnvironmentError
 
 global nameAliasDict
