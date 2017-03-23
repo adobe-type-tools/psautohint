@@ -114,8 +114,7 @@ static Fixed CPTo(cp0,cp1) Fixed cp0,cp1; {
 
 static bool TestBend(x0,y0,x1,y1,x2,y2) Fixed x0, y0, x1, y1, x2, y2; {
 	/* return true if bend angle is sharp enough (135 degrees or less) */
-	float dx1, dy1, dx2, dy2;
-	double dotprod, lensqprod;
+	float dx1, dy1, dx2, dy2, dotprod, lensqprod;
 	acfixtopflt(x1-x0, &dx1);
 	acfixtopflt(y1-y0, &dy1);
 	acfixtopflt(x2-x1, &dx2);
