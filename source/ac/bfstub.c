@@ -6,24 +6,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    be defined because of AC's dependency on filookup, but not on fiblues. */
 #include "ac.h"
 
-/* Procedures defined in bf/fiblues.c - BuildFont */
-bool checkbandspacing()
-{
-	return true;
-}
-
-bool checkbandwidths(overshootptsize, undershoot)
-float overshootptsize;
-bool undershoot;
-{
-	return true;
-}
-
-int build_bands()
-{
-	return true;
-}
-
 void SetMasterDir(dirindx)
 indx dirindx;
 {

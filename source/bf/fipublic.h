@@ -54,11 +54,6 @@ extern char *GetFntInfo(
     char *, bool
 );
 
-/* returns MAXINT if optional and not found */
-extern int GetFIInt(
-char *, bool
-);
-
 extern void SetFntInfoFileName(
 char *
 );
