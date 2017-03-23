@@ -5,7 +5,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #include "buildfont.h"
 #include "filookup.h"
-#include "fipriv.h"
 #include "fipublic.h"
 #include "machinedep.h"
 #include "masterfont.h"
@@ -899,8 +898,6 @@ extern void ParseIntStems(char *kw, bool optional, int32_t maxstems, int *stems,
   for (ix = 0; ix < dirCount; ix++)
   {
     cnt = 0;
-    if (blendstr != NULL)
-      SetMasterDir(ix);
     if (STREQ(kw, "AuxHStems") || STREQ(kw, "AuxVStems"))
       initline = GetHVStems(kw, optional);
     else initline = GetFntInfo (kw, optional);
@@ -984,9 +981,6 @@ extern void ParseIntStems(char *kw, bool optional, int32_t maxstems, int *stems,
   } /* end of for loop */
   if (blendstr == NULL || total == 0)
     return;
-  /* Write array of blended snap values to blendstr to be put in
-     Blend dict of Private dictionary. */
-  WriteBlendedArray(stems, total, cnt, blendstr);
   /* Reset pnum so just the first set of snap values is written
      in the top level Private dictionary. */
   *pnum = cnt;
