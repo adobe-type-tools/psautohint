@@ -54,10 +54,6 @@ extern void SetDefaultWeightVector(
   void
 );
 
-extern void SetMasterDir(
-indx
-);
-
 extern int TotalWtVecs(
   void
 );

@@ -43,7 +43,6 @@ LIB_OBJS = \
 	$(OBJ_DIR)/ac/acfixed.o \
 	$(OBJ_DIR)/ac/auto.o \
 	$(OBJ_DIR)/ac/bbox.o \
-	$(OBJ_DIR)/ac/bfstub.o \
 	$(OBJ_DIR)/ac/charprop.o \
 	$(OBJ_DIR)/ac/check.o \
 	$(OBJ_DIR)/ac/control.o \
