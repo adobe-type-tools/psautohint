@@ -3,6 +3,8 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /***********************************************************************/
 /* write.c */
 
+#include <assert.h>
+
 #include "ac.h"
 #include "cryptdefs.h"
 #include "fipublic.h"
@@ -42,24 +44,20 @@ int32_t FRnd(int32_t x){
 
 /* returns the number of characters written and possibly encrypted*/
 static int32_t WriteString(char *str) {
-	if (bezoutput) {
-		if ((bezoutputactual + (int)strlen(str)) >= bezoutputalloc) {
-			int desiredsize = NUMMAX(bezoutputalloc * 2, (bezoutputalloc + (int)strlen(str)));
-			bezoutput = (char *)ACREALLOCMEM(bezoutput, desiredsize);
-			if (bezoutput) {
-				bezoutputalloc = desiredsize;
-			}
-			else {
-				return (-1); /*FATAL ERROR*/
-			}
+	assert(bezoutput != NULL);
+	if ((bezoutputactual + (int)strlen(str)) >= bezoutputalloc) {
+		int desiredsize = NUMMAX(bezoutputalloc * 2, (bezoutputalloc + (int)strlen(str)));
+		bezoutput = (char *)ACREALLOCMEM(bezoutput, desiredsize);
+		if (bezoutput) {
+			bezoutputalloc = desiredsize;
 		}
-		strcat(bezoutput, str);
-		bezoutputactual += (int)strlen(str);
-		return (int32_t)strlen(str);
+		else {
+			return (-1); /*FATAL ERROR*/
+		}
 	}
-	else {
-		return DoContEncrypt((char *)str, outputfile, false, (uint32_t)INLEN);
-	}
+	strcat(bezoutput, str);
+	bezoutputactual += (int)strlen(str);
+	return (int32_t)strlen(str);
 }
 
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal p;laces. */
