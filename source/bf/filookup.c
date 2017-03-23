@@ -7,7 +7,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "filookup.h"
 #include "fipublic.h"
 #include "machinedep.h"
-#include "masterfont.h"
 #ifdef ACLIB_EXPORTS
 #include "ac.h"
 #endif
