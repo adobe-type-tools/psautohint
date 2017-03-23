@@ -55,7 +55,6 @@ Windows specific names instead.
 #define BUFFERSZ 512		/* buffer size used by unique id file */
 #define MAXIDFILELEN 100	/* maximum length of line in unique id file */
 
-static char ibmfilename[] = "ibmprinterfont.unprot";
 static char uniqueIDFile[MAXPATHLEN];
 static int16_t warncnt = 0;
 #if defined (_WIN32)
@@ -99,7 +98,7 @@ int (*userproc)(int16_t);
 }
 
 /* called by LogMsg and when exiting (tidyup) */
- void FlushLogMsg(void)
+static void FlushLogMsg(void)
 {
   /* if message happened exactly 2 times, don't treat it specially */
   if (logCount == 1) {
@@ -172,72 +171,16 @@ char *str;
   strcpy(uniqueIDFile, str);
 }
 
-
-static char afmfilename[] = "AFM";
-static char macfilename[] = "macprinterfont.unprot";
-
-
 void get_filename(char *name, char *str, const char *basename)
 {
   sprintf(name, "%s%s%s", str, Delimiter, basename);
-}
-
-void get_afm_filename(name)
-char *name;
-{
-  strcpy(name, afmfilename);
-}
-
- void get_ibm_fontname(ibmfontname)
-char *ibmfontname;
-{
-  strcpy(ibmfontname, ibmfilename);
-}
-
-void get_mac_fontname(macfontname)
-char *macfontname;
-{
-  strcpy(macfontname, macfilename);
-}
-
-void get_time(time_t* value)
-{
-	time(value);
-}
-
-void get_datetime(datetimestr)
-char *datetimestr;
-{
-  time_t secs;
-
-  get_time(&secs);
-  strncpy(datetimestr, ctime(&secs), 24);
-  /* skip the 24th character, which is a newline */
-  datetimestr[24] = '\0';
-}
-
-
-/* Sets the current directory to the one specified. */
-void set_current_dir(current_dir)
-char *current_dir;
-{
-  if ((chdir(current_dir)) != 0) {
-    sprintf(globmsg,"Unable to cd to directory: '%s'.\n", current_dir);
-    LogMsg(globmsg, WARNING, OK, true);
-  }
-}
-
-
-void get_current_dir(char *currdir)
-{
-  (void) getcwd(currdir, MAXPATHLEN);
 }
 
 
 
 /* Returns true if the given file exists, is not a directory
    and user has read permission, otherwise it returns false. */
-bool FileExists(const char *filename, int16_t errormsg)
+static bool FileExists(const char *filename, int16_t errormsg)
 {
   struct stat stbuff;
   int filedesc;
@@ -277,11 +220,6 @@ bool FileExists(const char *filename, int16_t errormsg)
   }
 
   return true;
-}
-
-bool CFileExists(const char *filename, int16_t errormsg)
-{
-	return FileExists(filename, errormsg);
 }
 
 bool DirExists(char *dirname, bool absolute, bool create, bool errormsg)
@@ -376,44 +314,6 @@ char *oldName, *newName;
 }
 
 
-void MoveDerivedFile(filename, basedir, fromDir, toDir)
-char *filename, *basedir, *fromDir, *toDir;
-{
-  char fromname[MAXPATHLEN], toname[MAXPATHLEN];
-
-  if (basedir == NULL)
-  {
-    get_filename(fromname, fromDir, filename);
-    get_filename(toname, toDir, filename);
-  }
-  else
-  {
-    sprintf(fromname, "%s%s%s%s", basedir, fromDir, Delimiter, filename);
-    sprintf(toname, "%s%s%s%s", basedir, toDir, Delimiter, filename);
-  }
-  RenameFile(fromname, toname);
-}
-
-
-
-
-void AppendFile (start, end)
-char *start, *end;
-{
-  FILE *file1, *file2;
-  char buffer [200];
-  file2 = ACOpenFile (end, "r", OPENOK);
-  if (file2 == NULL) 
-    return;
-  file1 = ACOpenFile (start, "a", OPENWARN);
-  while (fgets (buffer, 200, file2) != NULL)
-    fputs (buffer, file1);
-  fclose (file1);
-  fclose (file2);
-} 
-
-
-
 /* Converts :'s to /'s.  Colon's before the first alphabetic
    character are converted to ../ */
 char *CheckBFPath(baseFontPath)
@@ -466,151 +366,6 @@ char *baseFontPath;
   return startpath;
 }
 
-/* Dummy procedures */
-
- void CreateResourceFile(filename)
-char *filename;
-{
-    (void)filename;
-}
-
-/* Returns full pathname of current working directory. */
-void GetFullPathname(char *dirname, int16_t vRefNum, int32_t dirID)
-{
-	(void)vRefNum;
-	(void)dirID;
-	getcwd(dirname, MAXPATHLEN); 
-   /* Append unix delimiter. */
-   strcat(dirname, Delimiter);
-}
-
-/* Creates a file called .BFLOCK or .ACLOCK in the current directory.
-   If checkexists is true this proc will check if .BFLOCK or .ACLOCK exists
-   before creating it.  If it does exist an error message will
-   be displayed and buildfont will exit.
-   The .BFLOCK file is used to indicate that buildfont is currently
-   being run in the directory. The .ACLOCK file is used to indicate 
-   that AC is currently being run in the directory. */
-bool createlockfile(fileToOpen, baseFontPath)
-char *fileToOpen;
-char *baseFontPath;  /* for error msg only; cd has been done */
-{
-  FILE *bf;
-
-  if (CFileExists(BFFILE, false))
-  {
-    sprintf(globmsg, "BuildFont is already running in the %s directory.\n", 
-      (strlen(baseFontPath))? baseFontPath : "current");
-    LogMsg(globmsg, LOGERROR, OK, true);
-    return false;
-  }
-  if (CFileExists(ACFILE, false))
-  {
-    sprintf(globmsg, "AC is already running in the %s directory.\n", 
-      (strlen(baseFontPath))? baseFontPath : "current");
-    LogMsg(globmsg, LOGERROR, OK, true);
-    return false;
-  }
-  bf = ACOpenFile(fileToOpen, "w", OPENOK);
-  if (bf == NULL)
-  {
-    sprintf(globmsg, 
-      "Cannot open the %s%s file.\n", baseFontPath, fileToOpen);
-    LogMsg(globmsg, LOGERROR, OK, true);
-    return false;
-  }
-  fclose(bf);
-  return true;
-}
-
-void SetMacFileType(filename, filetype)
-char *filename;
-char *filetype;
-{
-    (void)filename;
-    (void)filetype;
-}
-
-
-void closefiles()
-{
-#ifndef IS_LIB
-	Write("Warning: closefiles unimplemented\n");
-#endif
- /* register int counter, bad_ones = 0;
-*/
-  /* leave open stdin, stdout, stderr and console */
-  /*for (counter = 4; counter < _NFILE; counter++)
-    if (fclose(&_file[counter]))
-      bad_ones++;
-      */
-}
-
-void get_filedelimit(delimit)
-char *delimit;
-{
-  strcpy(delimit, Delimiter);
-}
-
-/*
-extern get_afm_filename(char *name)
-{
-  char fontname[MAXFILENAME];
-
-  get_mac_fontname(fontname);
-  sprintf(name, "%s%s", fontname, ".AFM");
-  FileNameLenOK(name);
-}
-
-extern get_ibm_fontname(ibmfontname)
-char *ibmfontname;
-{
-  char *fontinfostr;
-
-  if ((fontinfostr = GetFntInfo("PCFileNamePrefix", ACOPTIONAL)) == NULL)
-    strcpy(ibmfontname, ibmfilename);
-  else
-  {
-    if (strlen(fontinfostr) != 5)
-    {
-      sprintf(globmsg, "PCFileNamePrefix in the %s file must be exactly 5 characters.\n", FIFILENAME);
-      LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
-    }
-    strcpy(ibmfontname, fontinfostr);
-    strcat(ibmfontname, "___.PFB");
-    FreeFontInfo(fontinfostr);
-  }
-}
-
-extern get_mac_fontname(macfontname)
-char *macfontname;
-{
-  char *fontinfostr, *fontname;
-
-  fontinfostr = GetFntInfo("FontName", MANDATORY);
-  fontname = printer_filename(fontinfostr);
-  strcpy(macfontname, fontname);
-  FreeFontInfo(fontinfostr);
-  UnallocateMem(fontname);
-}
-
-extern get_time(value)
-int32_t *value;
-{
-  GetDateTime(value);
-}
-
-extern get_datetime(char *datetimestr)
-{
-  int32_t secs;
-  char datestr[25], timestr[25];
-
-  get_time(&secs);
-  IUDateString(secs, abbrevDate, datestr);
-  IUTimeString(secs, true, timestr);
-  sprintf(datetimestr, "%p %p", datestr, timestr);
-}
-*/
 /* copies from one path ref num to another - can be different forks of same file */
 
 int bf_alphasort(const struct direct **f1, const struct direct **f2)

@@ -70,7 +70,6 @@ static void printHelp(void)
 
 static int main_cleanup(int16_t code)
 {
-	closefiles();
 	if (code != AC_Success)
 		exit(code);
 

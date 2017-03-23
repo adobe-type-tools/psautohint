@@ -217,8 +217,6 @@ ACLIB_API void  AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR st
 
 int cleanup(int16_t code)
 {
-  closefiles();
-  
 	if (code==FATALERROR || code==NONFATALERROR)
 		longjmp(aclibmark, -1);
 	else
