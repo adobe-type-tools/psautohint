@@ -109,12 +109,8 @@ bool ReadFontInfo() {
   NumHColors = NumVColors = 0;
   lenBotBands = lenTopBands = 0;
 
-  if (scalinghints)
-  {
-    SetFntInfoFileName (SCALEDHINTSINFO);
-  }
   /* check for FlexOK, AuxHStems, AuxVStems */
-  else  /* for intelligent scaling, it's too hard to check these */
+  if (!scalinghints)  /* for intelligent scaling, it's too hard to check these */
   {
     ParseStems("StemSnapH", HStems, &NumHStems);
     ParseStems("StemSnapV", VStems, &NumVStems);
@@ -222,7 +218,5 @@ if (fontinfostr != NULL)
     topBands[lenTopBands++] = ScaleAbs(FixInt(Height6));
     topBands[lenTopBands++] = ScaleAbs(FixInt(Height6 + Height6Overshoot));
     }
-  if (scalinghints)
-    ResetFntInfoFileName ();
   return true;
   }

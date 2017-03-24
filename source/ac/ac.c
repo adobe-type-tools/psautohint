@@ -177,7 +177,6 @@ void InitData(int32_t reason)
       listClrInfo = DEBUG;
       if (scalinghints)
       {
-        SetFntInfoFileName (SCALEDHINTSINFO);
         s = GetFntInfo("OrigEmSqUnits", MANDATORY);
         sscanf(s, "%g", &origEmSquare);
 		ACFREEMEM(s);
@@ -185,7 +184,6 @@ void InitData(int32_t reason)
       }
       else 
       {
-        ResetFntInfoFileName();
         bluefuzz = DEFAULTBLUEFUZZ;
      }
       /* fall through */

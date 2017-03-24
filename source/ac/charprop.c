@@ -100,11 +100,8 @@ char *charlist, *ColorList[];
 int32_t SpecialCharType() {
   /* 1 = upper; -1 = lower; 0 = neither */
 #if PYTHONLIB
-  if(featurefiledata)
-  {
 	if (FindNameInList(FL_glyphname, UpperSpecialChars)) return 1;
     if (FindNameInList(FL_glyphname, LowerSpecialChars)) return -1;
-  }
 #endif
   if (FindNameInList(bezGlyphName, UpperSpecialChars)) return 1;
   if (FindNameInList(bezGlyphName, LowerSpecialChars)) return -1;
@@ -113,42 +110,30 @@ int32_t SpecialCharType() {
 
 bool HColorChar() {
 #if PYTHONLIB
-  if(featurefiledata)
-  {
 	return FindNameInList(FL_glyphname, HColorList);
-  }
 #endif
 	  return FindNameInList(bezGlyphName, HColorList);
   }
 
 bool VColorChar() {
 #if PYTHONLIB
-  if(featurefiledata)
-  {
 	return FindNameInList(FL_glyphname, VColorList);
-  }
 #endif
   return FindNameInList(bezGlyphName, VColorList);
   }
 
 bool NoBlueChar() {
 #if PYTHONLIB
-  if(featurefiledata)
-  {
 	return FindNameInList(FL_glyphname, NoBlueList);
-  }
 #endif
   return FindNameInList(bezGlyphName, NoBlueList);
   }
 
 int32_t SolEolCharCode() {
 #if PYTHONLIB
-  if(featurefiledata)
-  {
 	if (FindNameInList(FL_glyphname, SolEol0List)) return 0;
     if (FindNameInList(FL_glyphname, SolEol1List)) return 1;
     if (FindNameInList(FL_glyphname, SolEolNeg1List)) return -1;
-  }
 #endif
   if (FindNameInList(bezGlyphName, SolEol0List)) return 0;
   if (FindNameInList(bezGlyphName, SolEol1List)) return 1;
@@ -235,10 +220,7 @@ void AddSolEol() {
 
 bool MoveToNewClrs() {
 #if PYTHONLIB
-  if(featurefiledata)
-  {
 	  return StrEqual(FL_glyphname, "percent") || StrEqual(FL_glyphname, "perthousand");
-  }
 #endif
   return StrEqual(fileName, "percent") || StrEqual(fileName, "perthousand");
   }
