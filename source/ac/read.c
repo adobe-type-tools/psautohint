@@ -3,6 +3,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /***********************************************************************/
 /* read.c */
 
+#include <assert.h>
 #include <math.h>
 
 #include "ac.h"
@@ -588,46 +589,18 @@ char *file_name;
 bool ReadCharFile(normal, forBlendData, readHints, prependprefix)
 bool normal, forBlendData, readHints, prependprefix; 
 {
-  char infile[MAXPATHLEN];
-  FILE *fd;
-  char *inputbuff;
-  int32_t cc;
-  uint32_t filelen;
+  assert(bezstring != NULL);
+
   currentx = currenty = tempx = tempy = stkindex = 0;
   flex = idInFile = startchar = false;
   forMultiMaster = forBlendData;
   includeHints = readHints;
-  if (prependprefix
-	&& !featurefiledata  
-  ) {
-    if (normal)
-      sprintf(infile, "%s%s", inPrefix, fileName);
-    else
-      sprintf(infile, "%s%s", outPrefix, fileName);
-  }
-  else {
-    strcpy(infile, fileName);
-  }
-  if (bezstring)
-  {
-    inputbuff=(char*)bezstring;
-    cc=(int32_t)strlen(inputbuff);
-  }
-  else
-  {
-  fd = ACOpenFile(infile, "rb", OPENWARN);
-  if (fd == NULL) return false;
-  filelen = ACGetFileSize(infile);
-  inputbuff = (char *) ACNEWMEM(filelen+5);
-  cc = ACReadFile((char *)inputbuff, fd, (char *)infile, filelen);
-  inputbuff[cc] = '\0';
-  }
   
 #if PRINT_READ
-  fprintf(OUTPUTBUFF, "%s", inputbuff);
+  fprintf(OUTPUTBUFF, "%s", bezstring);
 #endif
 
-  ParseString(inputbuff);
+  ParseString(bezstring);
 
   return true;
 }
