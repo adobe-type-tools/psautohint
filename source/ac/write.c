@@ -13,7 +13,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 #define WRTABS_COMMENT (0)
 
-FILE *outputfile;
 Fixed currentx, currenty;
 bool firstFlex, wrtColorInfo;
 char S0[128];
@@ -589,21 +588,11 @@ static void NumberPath() {
 }
 
 void SaveFile() {
+	assert(bezoutput != NULL);
 	register PPathElt e = pathStart;
 	Cd c1, c2, c3;
-	char outfile[MAXPATHLEN], tempfilename[MAXPATHLEN];
+	char outfile[MAXPATHLEN];
 /* AddSolEol(); */
-	if (bezoutput) {
-		outputfile = NULL;
-	}
-	else {
-		sprintf(tempfilename, "%s%s", outPrefix, TEMPFILE);
-		outputfile = ACOpenFile(tempfilename, "wb", OPENWARN);
-		if (outputfile == NULL) {
-			return;
-		}
-		subpathcount = 1;
-	}
 	sprintf(S0, "%% %s\n", fileName);
 	ws(S0);
 	wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
@@ -680,9 +669,6 @@ void SaveFile() {
 		e = e->next;
 	}
 	ws("ed\n");
-#ifdef ISLIB
-	fclose(outputfile);
-#endif
 
 		sprintf(outfile, "%s%s", outPrefix, fileName);
 }
