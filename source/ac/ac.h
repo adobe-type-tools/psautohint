@@ -166,11 +166,7 @@ typedef struct {
 
 /* global data */
 
-#ifdef IS_LIB
-extern FFEntry *featurefiledata;
-extern int featurefilesize;
-
-#elif defined( AC_C_LIB)
+#if defined(IS_LIB) || defined(AC_C_LIB)
 extern FFEntry *featurefiledata;
 extern int featurefilesize;
 #endif
