@@ -45,6 +45,7 @@ module1 = Extension("_psautohint",
 
 if platform.system() == "Windows":
     module1.include_dirs.append("source/include/winextras")
+    module1.define_macros.append(('_CRT_SECURE_NO_WARNINGS', 1))
 
 setup (name = "PsAutoHint",
        version = "1.0",
