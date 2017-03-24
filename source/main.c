@@ -25,11 +25,6 @@ if not defined, it is being compiled as a Python module.
 extern jmp_buf aclibmark;
 #endif
 
-#if ALLOWCSOUTPUT
-bool charstringoutput = false;
-static void read_char_widths(void);
-#endif
-
 #ifndef _WIN32
 extern int unlink(const char *);
 #endif
@@ -354,11 +349,6 @@ int main(int argc, char *argv[])
 				exit(0);
 				break;
 				break;
-#if ALLOWCSOUTPUT
-			case 'C':
-				charstringoutput = true;
-				break;
-#endif
 			default:
 				fprintf(OUTPUTBUFF, "Error. %s is an invalid parameter.\n", current_arg);
 				badParam = true;
@@ -380,11 +370,6 @@ int main(int argc, char *argv[])
 		exit(NONFATALERROR);
 #else
 		longjmp(aclibmark, -1);
-#endif
-
-#if ALLOWCSOUTPUT
-	if (charstringoutput)
-		read_char_widths();
 #endif
 
 	AC_SetReportCB(reportCB, verbose);
@@ -445,87 +430,3 @@ int main(int argc, char *argv[])
 	return 0;
 }
 /* end of main */
-
-#if ALLOWCSOUTPUT
-
-typedef struct _wid {
-	int wid;
-	char nam[60];
-} WidthElt;
-
-static WidthElt *widthsarray = NULL;
-static int numwidths = 0;
-static int maxnumwidths = 0;
-#define WIDTHINCR 50
-#define STREQ(a, b) (((a)[0] == (b)[0]) && (strcmp((a), (b)) == 0))
-
-static void init_widthsarray(void)
-{
-	if (widthsarray != NULL) {
-		ACFREEMEM(widthsarray);
-		widthsarray = NULL;
-	}
-	widthsarray = (WidthElt *)calloc(WIDTHINCR + 1, sizeof(WidthElt));
-	if (widthsarray == NULL) {
-		LogMsg("Could not allocate widths.\n", LOGERROR, OK, false);
-	}
-	numwidths = 0;
-	maxnumwidths = WIDTHINCR;
-}
-
-static void set_char_width(char *cname, int width)
-{
-	if (numwidths == maxnumwidths) {
-		widthsarray = (WidthElt *)realloc(widthsarray, (maxnumwidths + WIDTHINCR + 1) * sizeof(WidthElt));
-		if (widthsarray == NULL) {
-			LogMsg("Could not re-allocate widths.\n", LOGERROR, OK, false);
-		}
-		maxnumwidths += WIDTHINCR;
-	}
-
-	widthsarray[numwidths].wid = width;
-	strcpy(widthsarray[numwidths].nam, cname);
-	numwidths++;
-}
-
-int get_char_width(char *cname)
-{
-	int i;
-	for (i = 0; i < numwidths; i++) {
-		if (STREQ(widthsarray[i].nam, cname)) {
-			return (widthsarray[i].wid);
-		}
-	}
-	sprintf(globmsg, "Could not find width for '%s'. Assuming 1000.\n", cname);
-	LogMsg(globmsg, INFO, OK, false);
-	return (1000);
-}
-
-/* Adds width info to char_table. */
-static void read_char_widths(void)
-{
-	FILE *fwidth;
-#define WIDTHMAXLINE 80
-	char cname[50];
-	char line[WIDTHMAXLINE + 1];
-	int width;
-	indx ix;
-
-	init_widthsarray();
-	fwidth = ACOpenFile("widths.ps", "r", OPENERROR);
-	while (fgets(line, WIDTHMAXLINE, fwidth) != NULL) {
-		if (((line[0] == '%') || (ix = strindex(line, "/")) == -1)) {
-			continue;
-		}
-		if (sscanf(&line[ix + 1], " %s %d", cname, &width) != 2) {
-			sprintf(globmsg, "%s file line: %s can't be parsed.\n  It should have the format: "
-							 "/<char name> <width> WDef\n",
-					"widths.ps", line);
-			fclose(fwidth);
-			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
-		}
-		set_char_width(cname, width);
-	}
-	fclose(fwidth);
-}
-#endif /* ALLOWCSOUTPUT */

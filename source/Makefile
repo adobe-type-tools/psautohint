@@ -45,7 +45,6 @@ LIB_OBJS = \
 	$(OBJ_DIR)/ac/charprop.o \
 	$(OBJ_DIR)/ac/check.o \
 	$(OBJ_DIR)/ac/control.o \
-	$(OBJ_DIR)/ac/cswrite.o \
 	$(OBJ_DIR)/ac/eval.o \
 	$(OBJ_DIR)/ac/fix.o \
 	$(OBJ_DIR)/ac/flat.o \

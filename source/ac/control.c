@@ -6,10 +6,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "ac.h"
 #include "machinedep.h"
 
-#if ALLOWCSOUTPUT && THISISACMAIN
-extern bool charstringoutput;
-#endif
-
 extern void CSWrite(void);
 
 static void DoHStems();
@@ -806,16 +802,7 @@ static void AddColorsCleanup() {
 			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
 		else {
-#if ALLOWCSOUTPUT && THISISACMAIN
-			if (charstringoutput) {
-				CSWrite();
-			}
-			else {
-#endif
 				SaveFile();
-#if ALLOWCSOUTPUT && THISISACMAIN
-			}
-#endif
 		}
 	}
 	InitAll(RESTART);
@@ -824,16 +811,7 @@ static void AddColorsCleanup() {
 static void AddColors(bool extracolor) {
 	if (pathStart == NULL || pathStart == pathEnd) {
 		PrintMessage("No character path, so no hints.");
-#if ALLOWCSOUTPUT && THISISACMAIN
-		if (charstringoutput) {
-			CSWrite();
-		}
-		else {
-#endif
 			SaveFile(); /* make sure it gets saved with no coloring */
-#if ALLOWCSOUTPUT && THISISACMAIN
-		}
-#endif
 		return;
 	}
 	reportErrors = true;
