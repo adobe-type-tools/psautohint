@@ -61,7 +61,6 @@ LIB_OBJS = \
 	$(OBJ_DIR)/ac/write.o \
 	$(OBJ_DIR)/bf/charpath.o \
 	$(OBJ_DIR)/bf/charpathpriv.o \
-	$(OBJ_DIR)/bf/cryptprocs.o \
 	$(OBJ_DIR)/bf/fileops.o \
 	$(OBJ_DIR)/bf/filookup.o \
 	$(OBJ_DIR)/bf/machinedep.o \

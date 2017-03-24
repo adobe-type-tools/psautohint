@@ -6,7 +6,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include <assert.h>
 
 #include "ac.h"
-#include "cryptdefs.h"
 #include "fipublic.h"
 #include "machinedep.h"
 #include <math.h>
