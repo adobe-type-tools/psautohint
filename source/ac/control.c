@@ -850,7 +850,6 @@ static void AddColors(bool extracolor) {
 	}
 	AddColorsInnerLoop(extracolor);
 	AddColorsCleanup();
-	Test();
 }
 
 bool DoFile(char *fname, bool extracolor) {
