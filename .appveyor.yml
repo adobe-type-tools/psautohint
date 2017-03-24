@@ -1,8 +1,7 @@
 build_script:
-  - pip install -r requirements.txt
   - python setup.py install
   - python python/autohint.py -u
-  - set PATH=%PATH%;C:\cygwin\bin
+# - set PATH=%PATH%;C:\cygwin\bin
 # - make PYTHON=python check
 
 # disable automatic tests
