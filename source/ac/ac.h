@@ -166,10 +166,8 @@ typedef struct {
 
 /* global data */
 
-#if defined(IS_LIB) || defined(AC_C_LIB)
 extern FFEntry *featurefiledata;
 extern int featurefilesize;
-#endif
 
 extern PPathElt pathStart, pathEnd;
 extern bool YgoesUp;

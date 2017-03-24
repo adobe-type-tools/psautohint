@@ -20,11 +20,9 @@ static char initialWorkingDir[MAXPATHLEN];
 static int initialWorkingDirLength;
 
 
-#if IS_LIB
 typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, uint32_t size);
 extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;
 extern void *AC_memmanageCtxPtr;
-#endif
 
 
 typedef struct
@@ -48,13 +46,11 @@ char *s, *t;
 
 char *AllocateMem(unsigned int nelem, unsigned int elsize, const char *description)
 {
-#if IS_LIB
+ /* calloc(nelem, elsize) */ 
  char *ptr = (char *)AC_memmanageFuncPtr(AC_memmanageCtxPtr, NULL, nelem * elsize);
  if (NULL != ptr)
 	 memset((void *)ptr, 0x0, nelem * elsize);
-#else
-  char *ptr = (char *)calloc(nelem, elsize);
-#endif
+
   if (ptr == NULL)
   {
     sprintf(globmsg, "Cannot allocate %d bytes of memory for %s.\n",
@@ -66,11 +62,9 @@ char *AllocateMem(unsigned int nelem, unsigned int elsize, const char *descripti
 
 char *ReallocateMem(char *ptr, unsigned int size, const char *description)
 {
-#if IS_LIB
+ /* realloc(ptr, size) */
  char *newptr = (char *)AC_memmanageFuncPtr(AC_memmanageCtxPtr, (void *)ptr, size);
-#else
-  char *newptr = (char *)realloc(ptr, size);
-#endif
+
   if (newptr == NULL)
   {
     sprintf(globmsg, "Cannot allocate %d bytes of memory for %s.\n",
@@ -82,11 +76,8 @@ char *ReallocateMem(char *ptr, unsigned int size, const char *description)
 
 void UnallocateMem(void *ptr)
 {
-#if IS_LIB
+	/* free(ptr) */
 	AC_memmanageFuncPtr(AC_memmanageCtxPtr, (void *)ptr, 0);
-#else
-	if (ptr != NULL) {free((char *) ptr); ptr = NULL;}
-#endif
 }
 
 /* ACOpenFile tries to open a file with the access attribute
