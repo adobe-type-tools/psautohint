@@ -444,7 +444,6 @@ import sys
 import os
 import re
 import time
-from fontTools.ttLib import TTFont, getTableModule
 import plistlib
 import warnings
 import FDKUtils
@@ -952,6 +951,9 @@ def openUFOFile(path, outFilePath, useHashMap, options):
 	return font
 	
 def openOpenTypeFile(path, outFilePath, options):
+	from BezTools import CFFFontData
+	from fontTools.ttLib import TTFont, getTableModule
+
 	# If input font is  CFF or PS, build a dummy ttFont in memory..
 	# return ttFont, and flag if is a real OTF font Return flag is 0 if OTF, 1 if CFF, and 2 if PS/
 	fontType  = 0 # OTF
@@ -1012,7 +1014,6 @@ def openOpenTypeFile(path, outFilePath, options):
 			logMsg("Attempted to read font %s  as CFF." % path)
 			raise ACFontError("Error parsing font file <%s>." % path)
 
-	from BezTools import CFFFontData
 	fontData = CFFFontData(ttFont, path, outFilePath, fontType, logMsg)
 	return fontData
 

@@ -7,9 +7,6 @@ os:
   - linux
   - osx
 
-install:
-  - pip install -r requirements.txt
-
 script:
   - export CFLAGS="-Wno-strict-prototypes -Wno-maybe-uninitialized"
   - python setup.py install
