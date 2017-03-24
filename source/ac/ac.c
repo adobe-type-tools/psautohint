@@ -15,10 +15,6 @@ extern int unlink(const char *);
 
 #define MAXSTEMDIST 150  /* initial maximum stem width allowed for hints */
 
-#if ALLOWCSOUTPUT && THISISACMAIN
-extern bool charstringoutput;
-#endif
-
 PPathElt pathStart, pathEnd;
 bool YgoesUp;
 bool useV, useH, autoVFix, autoHFix, autoLinearCurveFix, editChar;
@@ -227,12 +223,6 @@ bool AutoColor(
 	makehintslog=doLog;
   (void) InitAll(STARTUP);
 
-#if ALLOWCSOUTPUT && THISISACMAIN
-  if (charstringoutput) {
-	setOutputPrefix("CharString");
-	DirExists("CharString", false, true, false);
-  }
-#endif
   if (!ReadFontInfo()) return false;
   editChar = changeChar;
   roundToInt = roundCoords;

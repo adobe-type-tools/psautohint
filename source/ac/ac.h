@@ -12,12 +12,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 /* widely used definitions */
 
 
-#if THISISACMAIN
-#define ALLOWCSOUTPUT 1
-#else
-#define ALLOWCSOUTPUT 0
-#endif
-
 #if defined(THINK_C)
 #define L_cuserid 20 /*ASP: was defined stdio.h*/
 #endif
