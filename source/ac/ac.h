@@ -346,7 +346,6 @@ extern PPathElt PrvForBend(/*p,px2,py2*/);
 extern bool IsLower(/*p*/);
 extern bool IsUpper(/*p*/);
 extern bool CloseSegs(/*s1,s2,vert*/);
-extern bool DoArgsIgnoreTime();
 extern bool DoArgs(int cnt, char* names[], bool extraColor, bool* renameLog, bool release);
 extern bool DoAll(bool extraColor, bool release, bool *renameLog, bool quiet);
 
