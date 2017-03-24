@@ -39,7 +39,6 @@ Fixed temp1;
   if (origEmSquare == 0.0)
   {
     char *fistr;
-    SetFntInfoFileName (SCALEDHINTSINFO);
     if ((fistr = GetFntInfo("OrigEmSqUnits", ACOPTIONAL)) == NULL)
       origEmSquare = 1000.0;
     else
@@ -47,7 +46,6 @@ Fixed temp1;
       sscanf(fistr, "%g", &origEmSquare);
    ACFREEMEM(fistr);
     }
-    ResetFntInfoFileName ();
   }
   temp1 = (Fixed)(1000.0 / origEmSquare * ((float) unscaled));
   return temp1;
@@ -60,7 +58,6 @@ Fixed temp1;
   if (origEmSquare == 0.0)
   {
     char *fistr;
-    SetFntInfoFileName (SCALEDHINTSINFO);
     if ((fistr = GetFntInfo("OrigEmSqUnits", ACOPTIONAL)) == NULL)
       origEmSquare = 1000.0;
     else
@@ -68,7 +65,6 @@ Fixed temp1;
       sscanf(fistr, "%g", &origEmSquare);
    ACFREEMEM(fistr);
     }
-    ResetFntInfoFileName ();
   }
   temp1 = (Fixed)(origEmSquare / 1000.0 * ((float) scaled));
   temp1 = FRnd (temp1);

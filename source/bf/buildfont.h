@@ -71,7 +71,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define MININT                   -32768
 #endif
 #define MULTIFONTBBOXFILENAME    ".bfmultifontbbox"
-#define SCALEDHINTSINFO          "scaledhintsinfo"
 #define SUBRSFILENAME            ".bfsubrs.bin"
 #define TEMPFILE                 ".bftempfile"
 #define UNINITWIDTH              -1          
