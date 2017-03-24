@@ -441,7 +441,6 @@ extern double fabs();
 #define RESTART (1)
 
 void ListClrInfo(/**/);
-void Test();
 
 extern void InitAll(/*reason*/);
 

@@ -579,12 +579,6 @@ static void ParseString(s) const char * s; {
     }
   }
 
-#define TESTING (false)
-#if TESTING
-static unsigned char ibuff[MAXBYTES + 2];
-static int32_t inputlen;
-#endif /*TESTING*/
-
 void SetReadFileName(file_name)
 char *file_name;
 {
@@ -633,53 +627,7 @@ bool normal, forBlendData, readHints, prependprefix;
   fprintf(OUTPUTBUFF, "%s", inputbuff);
 #endif
 
-#if TESTING
-  inputlen = cc;
-  for (i = 0; i <= cc; i++) ibuff[i] = inputbuff[i];
-#endif
   ParseString(inputbuff);
 
-#if TESTING
-  if (normal) {
-    fd = ACOpenFile("file.old", "wb", OPENWARN);
-    if (fd == NULL) return false;
-    fprintf(fd, "%s", ibuff);
-    fclose(fd);
-    }
-#endif
   return true;
 }
-
-void Test() {
-#if TESTING
-  unsigned char buff[MAXBYTES + 2], *s;
-  char infile[MAXPATHLEN];
-  FILE *fd;
-  int32_t cc, i;
-
-  sprintf(infile, "%s%s", outPrefix, fileName);
-  fd = ACOpenFile(infile, "rb", OPENWARN);
-  if (fd == NULL) return;
-  cc = ReadDecFile(
-     fd, (char *)infile, (char *)buff,
-     true, MAXBYTES, (uint32_t)MAXBYTES, OTHER);
-  fclose(fd);
-  if (cc >= MAXBYTES) { cc--; buff[cc] = 0; goto mismatch; }
-  buff[cc] = 0;
-  if (cc != inputlen) {
-    LogMsg("Test: file length different.\n", WARNING, OK, true);
-    goto mismatch; }
-  for (i = 0; i < cc; i++)
-    if (buff[i] != ibuff[i]) {
-      LogMsg("Test: file contents different.\n", WARNING, OK, true);
-      goto mismatch; }
-/*  return; */
-  mismatch:
-  fd = ACOpenFile("file.new", "wb", OPENWARN);
-  if (fd == NULL) return;
-  fprintf(fd, "%s", buff);
-  fclose(fd);
-#endif
-  }
-
-
