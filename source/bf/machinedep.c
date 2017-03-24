@@ -368,11 +368,6 @@ char *baseFontPath;
 
 /* copies from one path ref num to another - can be different forks of same file */
 
-int bf_alphasort(const struct direct **f1, const struct direct **f2)
-{
-	return strcmp((*f1)->d_name, (*f2)->d_name);
-}
-
 #if defined(_MSC_VER) && ( _MSC_VER < 1800)
 float roundf(float x)
 {
@@ -380,82 +375,6 @@ float roundf(float x)
     return val;
 }
 #endif
-
-
-#ifdef _WIN32
-	
-int BFscandir(char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort)
-{
-	int fail=0;
-	int count=0;
-	HANDLE hFind; 
-    WIN32_FIND_DATA finddata; 
-	struct direct dp;
-	char * searchstring;
-
-	searchstring=(char*) AllocateMem(6+((unsigned int)strlen(dirName)), sizeof(char), "scandir dirname");
-	strcpy(searchstring, ".\\");
-	strcat(searchstring, dirName);
-	if(searchstring[strlen(searchstring)-1]=='\\')
-		strcat(searchstring, "*");
-	else
-		strcat(searchstring, "\\*");
-
-	hFind = FindFirstFile(searchstring, &finddata); 
-
-	while (hFind!=INVALID_HANDLE_VALUE)
-	{
-		if (!strcmp(finddata.cFileName, ".")==0 && !strcmp(finddata.cFileName, "..")==0)
-			++count;
-		if(!FindNextFile(hFind, &finddata))
-			break;
-	}
-	FindClose(hFind);
-
-	if(count>0)
-	{
-		int i;
-		*nameList = (struct direct **) AllocateMem(count, sizeof(struct direct *), "scandir namelist");
-		for (i = 0 ; i<count; i++)
-		{
-			(*nameList)[i]=(struct direct *) AllocateMem(1, sizeof(struct direct), "scandir direct");
-		}
-	}
-	count=0;
-	
-	hFind = FindFirstFile(searchstring, &finddata); 
-
-	while (hFind!=INVALID_HANDLE_VALUE)
-	{
-		if (!strcmp(finddata.cFileName, ".")==0 && !strcmp(finddata.cFileName, "..")==0)
-		{
-			strncpy(dp.d_name, finddata.cFileName, MAXNAMLEN);
-			if(IncludeFile((struct direct *)&dp))
-			{
-				*((*nameList)[count++])=dp;
-			}
-		}
-		if(!FindNextFile(hFind, &finddata))
-			break;
-	}
-	FindClose(hFind);
-	
-	if(count>0)
-	{
-		qsort(*nameList, count,sizeof(struct direct *), Sort);
-	}
-	return count;
-}
-#else
-int BFscandir(const char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort)
-{
-	int count=0;
-	count =  scandir(dirName, nameList, IncludeFile, Sort);
-	/* qsort(*nameList, count,sizeof(struct direct *), Sort); */
-	return count;
-}
-#endif
-
 
 
  unsigned char *CtoPstr(char *filename)

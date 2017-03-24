@@ -284,7 +284,6 @@ ACLIB_API int  AutoColorString(const char *srcbezdata, const char *fontinfo, cha
 			   1,
 		       names, 
 			   false, /*quiet*/ 
-                false, /* doAll*/
                 roundCoords,
                 false);/* do log */
 	/* result == true is good */

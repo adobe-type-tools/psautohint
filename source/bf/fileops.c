@@ -8,8 +8,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 #include "charpath.h"
 
-#define BAKSUFFIX ".BAK"
-
 static char charsetDir[MAXPATHLEN];
 static char charsetname[MAXPATHLEN];
 static char charsetPath[MAXPATHLEN];
@@ -139,16 +137,6 @@ char *charname;
       charname, (int) MAXCHARNAME);
     LogMsg(globmsg, LOGERROR, FATALERROR, true);
   }
-}
-
-extern bool BAKFile(filename)
-char *filename;
-{
-  int16_t length = (int16_t)strlen(filename);
-  if (length <= 4) return false;
-  if (!strcmp(&filename[length-4], BAKSUFFIX))
-    return true;
-  return false;
 }
 
 extern int32_t GetMaxBytes()
