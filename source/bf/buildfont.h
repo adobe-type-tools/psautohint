@@ -115,16 +115,6 @@ typedef struct
    } Cd, *CdPtr;
 
 
-
-/*****************************************************************************/
-/* Defines parsing method based on fontinfo key CharacterSetFileType         */
-/*****************************************************************************/
-typedef enum
-   {
-   bf_CHARSET_STANDARD,
-   bf_CHARSET_CID
-   } CharsetParser;
-
 #define BF_LAYOUTS               "layouts"
 #define BF_SUBSETS               "subsets"
 #define BF_STD_LAYOUT            "standard"
@@ -137,23 +127,10 @@ extern char bezdir[MAXPATHLEN];
 extern bool scalinghints;
 
 /*****************************************************************************/
-/* Tries to open the given file with the access attribute specified.  If it  */
-/* fails an error message is printed and the program exits.                  */
-/*****************************************************************************/
-extern FILE *
-ACOpenFile(char *, char *, int16_t);
-
-/*****************************************************************************/
 /* Deletes the specified file from the bez directory.                        */
 /*****************************************************************************/
 extern void
 DeleteBezFile(char *, char *);
-
-/*****************************************************************************/
-/* Reads successive character and file names from character set file.        */
-/*****************************************************************************/
-extern char *
-ReadNames(char *, char *, int32_t *, int32_t *, FILE *);
 
 /*****************************************************************************/
 /* Reads a token from the data buffer.                                       */
@@ -180,21 +157,6 @@ readcomposite(bool, indx);
 extern int
 computesbandbbx(char *, char *, int32_t, BboxPtr, bool, int32_t, int32_t);
 
-extern int32_t
-GetMaxBytes(void);
-
-extern void
-SetMaxBytes(int32_t);
-
-extern CharsetParser
-GetCharsetParser();
-
-extern void
-SetCharsetLayout(char *fontinfoString);
-
-extern char *
-GetCharsetLayout();
-
 /*****************************************************************************/
 /* Sets the global variable charsetDir.                                      */
 /*****************************************************************************/
@@ -218,12 +180,6 @@ set_uniqueIDFile(char *);
 /*****************************************************************************/
 extern int
 TransformPoint(int32_t *, int32_t*, bool);
-
-/*****************************************************************************/
-/* Returns the name of the character set file.                               */
-/*****************************************************************************/
-extern void
-getcharsetname(char *);
 
 /*****************************************************************************/
 /* Returns the name of the encoding file.                                    */
@@ -258,36 +214,11 @@ GetFontMatrix(char *, char *);
 extern int16_t
 GetTotalInputDirs(void);
 
-extern void
-SetTotalInputDirs(int16_t);
-
-/*****************************************************************************/
-/* Parse the private dict portion of an ASCII format font.                   */
-/*****************************************************************************/
-extern void
-ParseFont(FILE *, FILE *, int32_t, int32_t *, int32_t *, int32_t *, int32_t *, bool);
-
-/*****************************************************************************/
-/* Program to derive printer font file name for the mac from the PostScript  */
-/* printer font name.                                                        */
-/*****************************************************************************/
-extern char *
-printer_filename(char *);
-
-extern int16_t
-strindex(char *, char *);
-
 /*****************************************************************************/
 /* Deallocates memory and deletes temporary files.                           */
 /*****************************************************************************/
 extern int
 cleanup(int16_t);
-
-extern void
-FileNameLenOK(char *);
-
-extern void
-CharNameLenOK(char *);
 
 extern char *
 AllocateMem(unsigned int, unsigned int, const char *);
@@ -297,11 +228,5 @@ ReallocateMem(char *, unsigned int, const char *);
 
 extern void
 UnallocateMem(void *ptr);
-
-extern int32_t
-ACReadFile(char *, FILE *, char *, int32_t);
-
-extern bool
-UsesSubset(void);
 
 #endif /*BUILDFONT_H*/
