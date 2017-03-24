@@ -4,7 +4,6 @@ from distutils.core import setup, Extension
 module1 = Extension("_psautohint",
                     define_macros = [
                         ('AC_C_LIB', 1),
-                        ('ACLIB_EXPORTS', 1),
                     ],
                     include_dirs = [
                         "source/include/ac",
