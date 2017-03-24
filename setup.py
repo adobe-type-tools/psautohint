@@ -1,7 +1,7 @@
 import platform
 from distutils.core import setup, Extension
 
-module1 = Extension("psautohintmodule",
+module1 = Extension("_psautohint",
                     define_macros = [
                         ('AC_C_LIB', 1),
                         ('ACLIB_EXPORTS', 1),
@@ -13,7 +13,7 @@ module1 = Extension("psautohintmodule",
                         "source/bf",
                     ],
                     sources = [
-                        "source/psautohintmodule.c",
+                        "source/_psautohint.c",
                         "source/ac/ac.c",
                         "source/ac/ac_C_lib.c",
                         "source/ac/acfixed.c",

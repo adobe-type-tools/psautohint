@@ -168,7 +168,7 @@ static char psautohint_doc[] =
 /* clang-format off */
 static struct PyModuleDef psautohint_module = {
   PyModuleDef_HEAD_INIT,
-  "psautohintmodule",
+  "_psautohint",
   psautohint_doc,
   0,
   psautohint_methods,
@@ -179,7 +179,7 @@ static struct PyModuleDef psautohint_module = {
 /* clang-format on */
 
 PyMODINIT_FUNC
-PyInit_psautohintmodule(void)
+PyInit__psautohint(void)
 {
   PyObject* m;
 
@@ -193,11 +193,11 @@ PyInit_psautohintmodule(void)
 }
 #else /* Python < 3 */
 PyMODINIT_FUNC
-initpsautohintmodule(void)
+init_psautohint(void)
 {
   PyObject* m;
 
-  m = Py_InitModule3("psautohintmodule", psautohint_methods, psautohint_doc);
+  m = Py_InitModule3("_psautohint", psautohint_methods, psautohint_doc);
   if (m == NULL)
     return;
 

@@ -534,13 +534,13 @@ def logMsg(*args):
 
 def CheckEnvironment():
 	try:
-		import psautohintmodule
+		import _psautohint
 	except ImportError:
 		command = "autohintexe -u"
 		report = FDKUtils.runShellCmd(command)
 		if "version" not in report:
 			logMsg("Please re-install the FDK. The path to the program 'autohintexe' is not in the environment variable PATH.")
-			logMsg("Or install 'psautohintmodule' module.")
+			logMsg("Or install '_psautohint' module.")
 			raise FDKEnvironmentError
 
 global nameAliasDict
@@ -641,8 +641,8 @@ def getOptions():
 		if arg == "-h":
 			print __help__
 			try:
-				import psautohintmodule
-				print "Lib version:", psautohintmodule.version
+				import _psautohint
+				print "Lib version:", _psautohint.version
 			except ImportError:
 				command = "autohintexe -v"
 				report = FDKUtils.runShellCmd(command)
@@ -651,8 +651,8 @@ def getOptions():
 		elif arg == "-u":
 			print __usage__
 			try:
-				import psautohintmodule
-				print "Lib version:", psautohintmodule.version
+				import _psautohint
+				print "Lib version:", _psautohint.version
 			except ImportError:
 				command = "autohintexe -v"
 				report = FDKUtils.runShellCmd(command)
@@ -1254,9 +1254,9 @@ def hintFile(options):
 		else:
 			newBezString = None
 			try:
-				import psautohintmodule
+				import _psautohint
 				with open(tempFI, "rb") as fileFI:
-					newBezString = psautohintmodule.autohint(fileFI.read(), [bezString],
+					newBezString = _psautohint.autohint(fileFI.read(), [bezString],
                                                 options.verbose, options.allowChanges, not options.noHintSub, options.allowDecimalCoords)
 					newBezString = newBezString[0]
 				fontInfo = ""
