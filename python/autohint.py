@@ -1289,8 +1289,7 @@ def hintFile(options):
 		if not newBezString:
 			if not options.verbose and not options.quiet:
 				logMsg("")
-			logMsg("%s Error - failure in processing outline data." % aliasName(name))
-			continue
+			raise ACHintError("%s Error - failure in processing outline data." % aliasName(name))
 			
 		if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
 			print "No hints added!"
@@ -1364,8 +1363,9 @@ def main():
 	# verify that all files exist.
 	try:
 		hintFile(options)
-	except (ACFontError, ufoTools.UFOParseError),e:
+	except (ACFontError, ACHintError, ufoTools.UFOParseError),e:
 		logMsg("\t%s" % e)
+		return 1
 	if gLogFile:
 		gLogFile.close()
 		
