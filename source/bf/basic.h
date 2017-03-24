@@ -65,12 +65,4 @@ extern void LogMsg(
     char *, int16_t, int16_t, bool
 );
 
-extern int16_t WarnCount(
-    void
-);
-
-extern void ResetWarnCount(
-    void
-);
-
 #endif /*BASIC_H*/
