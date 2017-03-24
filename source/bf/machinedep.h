@@ -56,20 +56,11 @@ extern void  RenameFile(
 
 void FlushLogFiles();
 void OpenLogFiles();
-typedef int (* includeFile) (const struct direct *);
-typedef int (* sortFn)(const struct direct **, const struct direct **);
 
-#ifdef _WIN32
-int BFscandir(char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort);
-#else
-int BFscandir(const char* dirName, struct direct ***nameList, includeFile IncludeFile, sortFn Sort);
-#endif
 extern char *GetPathName (
    char *
 );
 
-
-extern int bf_alphasort(const struct direct **f1, const struct direct **f2);
 
 #if defined(_MSC_VER) && ( _MSC_VER < 1800)
 float roundf(float x);

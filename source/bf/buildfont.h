@@ -163,12 +163,6 @@ extern char *
 ReadToken(char *, char *, char *, char *);
 
 /*****************************************************************************/
-/* Returns whether file has .BAK suffix.                                     */
-/*****************************************************************************/
-extern bool
-BAKFile(char *);
-
-/*****************************************************************************/
 /* Reads the file composites.ps, if it exists, and attempts to create        */
 /* composite chars. for those listed.                                        */
 /*****************************************************************************/

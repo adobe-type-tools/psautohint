@@ -221,7 +221,6 @@ bool AutoColor(
 			 int16_t total_files,
 			 char *fileNamePtr[],
 			 bool quiet,
-             bool doAll,
              bool roundCoords,
 			 bool doLog)
 {
@@ -259,11 +258,6 @@ bool AutoColor(
     		result = DoArgsIgnoreTime(total_files, fileNamePtr, extracolor, &renameLog, release);
     
     }
-#ifndef IS_GGL
-	if (doAll)
-   	 if (scalinghints)
-      result = DoAllIgnoreTime(extracolor, IncludeFile);
-#endif
 
   return(result);
 }
