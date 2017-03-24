@@ -25,7 +25,6 @@ CFLAGS = \
 	-I$(SRC_DIR)/ac \
 	-I$(SRC_DIR)/bf \
 	-DAC_C_LIB=1 \
-	-DACLIB_EXPORTS \
 	-Wall \
 	$(NULL)
 

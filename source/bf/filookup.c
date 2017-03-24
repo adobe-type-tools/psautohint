@@ -7,9 +7,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "filookup.h"
 #include "fipublic.h"
 #include "machinedep.h"
-#ifdef ACLIB_EXPORTS
 #include "ac.h"
-#endif
 #define     EOS      ""
 #define     NOMATCH     -1
 #define MAXFONTNAME 30          /* max length of the FontName = 36 chars  PS
@@ -790,7 +788,6 @@ extern char *GetFntInfo(char *keyword, bool optional)
   FIPTR fptr;
   char *returnstring = NULL;
 
-#ifdef ACLIB_EXPORTS
 	if (featurefiledata!=NULL)
 	{
 		int i;
@@ -812,7 +809,6 @@ extern char *GetFntInfo(char *keyword, bool optional)
 			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
 	}else{
-#endif
 
   fptr = filookup(keyword, optional);
   switch (fptr->exit_status)
@@ -839,9 +835,7 @@ extern char *GetFntInfo(char *keyword, bool optional)
 	break;
   }
   return (returnstring);
-#ifdef ACLIB_EXPORTS
 	}
-#endif
 	return NULL;
 }
 
