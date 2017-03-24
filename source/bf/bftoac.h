@@ -8,7 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef BFTOAC_H
 #define BFTOAC_H
 
-extern bool AutoColor(bool, bool, bool, bool, bool, int16_t, char *[], bool, bool, bool);
+extern bool AutoColor(bool, bool, bool, bool, bool, bool, bool, bool);
 
 extern bool CreateACTimes (void);
 

@@ -229,7 +229,6 @@ int cleanup(int16_t code)
 ACLIB_API int  AutoColorString(const char *srcbezdata, const char *fontinfo, char *dstbezdata, int *length, int allowEdit, int allowHintSub, int roundCoords, int debug)
 {
 	int value, result;
-	char *names[]={""};
 	
 	if (!srcbezdata)
 		return AC_InvalidParameterError;
@@ -281,8 +280,6 @@ ACLIB_API int  AutoColorString(const char *srcbezdata, const char *fontinfo, cha
 			   (bool)debug, /*debug*/
 			   allowHintSub, /* extracolor*/ 
 			   allowEdit, /*editChars*/ 
-			   1,
-		       names, 
 			   false, /*quiet*/ 
                 roundCoords,
                 false);/* do log */

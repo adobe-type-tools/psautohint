@@ -218,13 +218,10 @@ bool AutoColor(
 			 bool debug,
 			 bool extracolor,
 			 bool changeChar,
-			 int16_t total_files,
-			 char *fileNamePtr[],
 			 bool quiet,
              bool roundCoords,
 			 bool doLog)
 {
-  bool result, renameLog = false;
   char *tempstring;
 
 	makehintslog=doLog;
@@ -249,16 +246,7 @@ bool AutoColor(
   else set_charsetdir("\0");
   if(doLog)
 	  OpenLogFiles();
-  /* It is possible to do both DoArgs and DoAll when called from
-     BuildFont.  The derived character names are hinted by calling
-     DoArgs since they should always be rehinted, even in release mode. */
-  if (total_files > 0) /* user specified file names */
-    {
-    	if (fileNamePtr[0][0]=='\0')
-    		result = DoArgsIgnoreTime(total_files, fileNamePtr, extracolor, &renameLog, release);
-    
-    }
 
-  return(result);
+  return DoFile("", extracolor);
 }
 
