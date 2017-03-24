@@ -17,11 +17,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define L_cuserid 12
 #endif
 
-#if !IS_LIB
-static FILE *yminfile, *ymaxfile, *logfile, *vertfile, *horzfile;
-#else
 extern AC_REPORTFUNCPTR libReportCB;
-#endif
 static char S0[512];
 
 double FixToDbl(f) Fixed f; {
@@ -37,111 +33,35 @@ void ACGetVersion(char *name, char *str)
 }
 
 void OpenLogFiles() {
-#if !IS_LIB
-  char dir[MAXPATHLEN];
-  char uid[L_cuserid];
-  char host[50];
-  logfile = ACOpenFile(TMPLOG, "w", OPENERROR);
-  GetInputDirName(dir, "");
-  strcpy(host, "Local machine");
-  strcpy(uid, "local");
-  fprintf (logfile, "\n# %s -- %s\n# %s\n", uid, host, dir);
-  ACGetVersion("AC", globmsg);
-  fprintf(logfile, "# %s#\n\n", globmsg);
-  if (!logging) return;
-  yminfile = ACOpenFile(YMINFILE, "w", OPENERROR);
-  ymaxfile = ACOpenFile(YMAXFILE, "w", OPENERROR);
-  horzfile = ACOpenFile(HORZFILE, "w", OPENERROR);
-  vertfile = ACOpenFile(VERTFILE, "w", OPENERROR);
-#endif
   }
 
 void FlushLogFiles()
 {
-#if !IS_LIB
-  fflush(logfile);
-  if (!logging) return;
-  fflush(yminfile);
-  fflush(ymaxfile);
-  fflush(horzfile);
-  fflush(vertfile);
-#endif
 }
 
 void CloseLogFiles() {
-#if !IS_LIB
-  fclose(logfile);
-  if (!logging) return;
-  fclose(yminfile);
-  fclose(ymaxfile);
-  fclose(horzfile);
-  fclose(vertfile);
-/*
-  (cd ..;sort -u ymin.tmp | sort -n > ymin.log; rm ymin.tmp) !
-  (cd ..;sort -u ymax.tmp | sort -n > ymax.log; rm ymax.tmp) !
-  (cd ..;sort -u horz.tmp | sort -n > horz.log; rm horz.tmp) !
-  (cd ..;sort -u vert.tmp | sort -n > vert.log; rm vert.tmp) !
-*/
-#endif
   }
 
 void LogYMinMax() {
-#if !IS_LIB
-  PPathElt e = pathStart;
-  Fixed temp, y, ymax = FixInt(-10000), ymin = FixInt(10000);
-  if (!logging || e == NULL || e == pathEnd) return;
-  while (e != NULL) {
-    GetEndPoint(e, &temp, &y);
-    if (y < ymin) ymin = y;
-    if (y > ymax) ymax = y;
-    e = e->next;
-    }
-  /* The path element coordinates may have been transformed by -FixTwoMul
-     so check if ymin > ymax and switch values if true.
-     The untransformed coordinates will be written to the ymin and ymax
-     files. */
-  if (ymin > ymax)
-    { temp = ymin;  ymin = ymax;  ymax = temp; }
-  (void)fprintf(yminfile, "%g\t%s\n", FixToDbl(itfmy(ymin)), fileName);
-  (void)fprintf(ymaxfile, "%g\t%s\n", FixToDbl(itfmy(ymax)), fileName);
-#endif
   }
 
-#if IS_LIB
 #define EndLine()
-#else
-static void EndLine() {
-  if (!makehintslog)
-    return;
-  (void)fprintf(logfile, "\n");
-  }
-#endif
 
 #define PrinMsg(s) PrintMessage(s)
 
 
 void PrintMessage(s) char * s; {
-#if !IS_LIB
-  if (!makehintslog)
-    return;
-  (void)fprintf(logfile, "%s: %s\n", fileName, s);
- #else
  	char msgBuffer[512];
  	if ((libReportCB != NULL) && (strlen(s) > 0))
  		{
 	 	sprintf(msgBuffer, "\t%s", s);
 	 	libReportCB(msgBuffer);
  		}
-#endif
   }
 
 
 void ReportError(s) char * s; {
-#if !IS_LIB
-  if (reportErrors) PrintMessage(s);
-#else
    if (reportErrors && (libReportCB != NULL)) PrintMessage(s);
-#endif
   }
 
 void ReportSmoothError(x, y) Fixed x, y; {

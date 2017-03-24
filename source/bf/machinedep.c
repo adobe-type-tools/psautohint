@@ -83,13 +83,8 @@ void ResetWarnCount()
     warncnt = 0;
 }
 
-#ifdef IS_LIB
 #define Write(s) { if (libReportCB != NULL)libReportCB( s);}
 #define WriteWarnorErr(f,s) {if (libErrorReportCB != NULL) libErrorReportCB( s);}
-#else
-#define Write(s) 
-#define WriteWarnorErr(f,s)
-#endif
 
 void set_errorproc(userproc)
 int (*userproc)(int16_t);

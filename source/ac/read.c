@@ -15,9 +15,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define PRINT_READ (0)
 #define ESCVAL 100
 
-#ifdef IS_LIB
 extern const char *bezstring;
-#endif
 
 char bezGlyphName[64];
 
@@ -606,9 +604,7 @@ bool normal, forBlendData, readHints, prependprefix;
   forMultiMaster = forBlendData;
   includeHints = readHints;
   if (prependprefix
-#ifdef IS_LIB
 	&& !featurefiledata  
-#endif
   ) {
     if (normal)
       sprintf(infile, "%s%s", inPrefix, fileName);
@@ -618,7 +614,6 @@ bool normal, forBlendData, readHints, prependprefix;
   else {
     strcpy(infile, fileName);
   }
-#ifdef IS_LIB
   if (bezstring)
   {
     inputbuff=(char*)bezstring;
@@ -626,16 +621,13 @@ bool normal, forBlendData, readHints, prependprefix;
   }
   else
   {
-#endif
   fd = ACOpenFile(infile, "rb", OPENWARN);
   if (fd == NULL) return false;
   filelen = ACGetFileSize(infile);
   inputbuff = (char *) ACNEWMEM(filelen+5);
   cc = ACReadFile((char *)inputbuff, fd, (char *)infile, filelen);
   inputbuff[cc] = '\0';
-#ifdef IS_LIB
   }
-#endif
   
 #if PRINT_READ
   fprintf(OUTPUTBUFF, "%s", inputbuff);
@@ -646,18 +638,6 @@ bool normal, forBlendData, readHints, prependprefix;
   for (i = 0; i <= cc; i++) ibuff[i] = inputbuff[i];
 #endif
   ParseString(inputbuff);
-#if !TESTING 
-#ifndef IS_LIB
-  { char *s;
-    s = inputbuff;
-    for (i = 0; i < cc; i++) *s++ = 0; /* erase the plain text version */
-    }
-#endif
-#endif
-#ifndef IS_LIB
-  fclose(fd);
-  ACFREEMEM(inputbuff);
-#endif
 
 #if TESTING
   if (normal) {

@@ -593,21 +593,17 @@ void SaveFile() {
 	Cd c1, c2, c3;
 	char outfile[MAXPATHLEN], tempfilename[MAXPATHLEN];
 /* AddSolEol(); */
-#ifdef IS_LIB
 	if (bezoutput) {
 		outputfile = NULL;
 	}
 	else {
-#endif
 		sprintf(tempfilename, "%s%s", outPrefix, TEMPFILE);
 		outputfile = ACOpenFile(tempfilename, "wb", OPENWARN);
 		if (outputfile == NULL) {
 			return;
 		}
 		subpathcount = 1;
-#ifdef IS_LIB
 	}
-#endif
 	sprintf(S0, "%% %s\n", fileName);
 	ws(S0);
 	wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
@@ -688,15 +684,5 @@ void SaveFile() {
 	fclose(outputfile);
 #endif
 
-#ifndef IS_LIB
-	if (featurefiledata) {
-		sprintf(outfile, "%s", fileName);
-	}
-	else {
-#endif
 		sprintf(outfile, "%s%s", outPrefix, fileName);
-#ifndef IS_LIB
-	}
-	RenameFile(tempfilename, outfile);
-#endif
 }
