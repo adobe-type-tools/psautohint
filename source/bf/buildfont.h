@@ -12,14 +12,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #define OUTPUTBUFF stderr
 #endif
 
-#define ASCIIFONTNAME            "font.ps"
-#define CHARSTRINGSFILENAME      ".bfees.bin"
-#define COMPAFMFILE              ".bfcomposites.afm"
-#define COMPFILE                 "composites.ps"
-#define COMPOSITESFILENAME       ".bfees2.bin"
-#define DEFAULTWIDTH             500
-#define ENCFILENAME              ".bfencodingfile"
-#define FONTBBOXFILENAME         ".bffontbbox"
 #define FONTSTKLIMIT             22
                                     /*****************************************/
                                     /* font interpreter stack limit - Note   */
@@ -28,83 +20,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
                                     /* callothersubr # are also pushed on    */
                                     /* the stack, the effective value is 22. */
                                     /*****************************************/
-#define INTEGER 0
-#define KERNAFMFILE              "kerning.afm"
-#define MAXBYTES                 13000
-                                    /*****************************************/
-                                    /* max number of bytes in a decrypted    */
-                                    /* bez file or encoded charstring        */
-                                    /*****************************************/
-#define MAXCHARNAME              37
-                                    /*****************************************/
-                                    /* max character name length (including  */
-                                    /* byte for null terminator) - a bug in  */
-                                    /* early LW ROMs limits PS names to      */
-                                    /* 36 bytes                              */
-                                    /*****************************************/
-#define MAXCHARS                 400
-                                    /*****************************************/
-                                    /* max characters in a font (including   */
-                                    /* composites)                           */
-                                    /*****************************************/
-#define MAXENCLINE               65000
-                                    /*****************************************/
-                                    /* linelength used when encrypting       */
-                                    /*****************************************/
-#define MAXFILENAME              32
-                                    /*****************************************/
-                                    /* max relative file name length         */
-                                    /* (including byte for null terminator)  */
-                                    /* - limit imposed by max Mac filename   */
-                                    /* length - note that max Mac foldername */
-                                    /* would be 34 chars because of colons   */
-                                    /* and that for root is 29 chars         */
-                                    /*****************************************/
-#ifndef MAXINT
-#define MAXINT                   32767
-#endif
-#define MAXLINE                  1000
-                                    /*****************************************/
-                                    /* maximum length of a line              */
-                                    /*****************************************/
-#ifndef MININT
-#define MININT                   -32768
-#endif
-#define MULTIFONTBBOXFILENAME    ".bfmultifontbbox"
-#define SUBRSFILENAME            ".bfsubrs.bin"
-#define TEMPFILE                 ".bftempfile"
-#define UNINITWIDTH              -1          
-                                    /*****************************************/
-                                    /* width value if no width seen yet      */
-                                    /*****************************************/
-#define UNSCALEDASCIIFONT        "font.unscaled"
-#define WIDTHSFILENAME           "widths.ps"
-#define diskfontmax              65000
-
 
 /*****************************************************************************/
 /* the following are for scanning "PostScript format" input file lines       */
 /*****************************************************************************/
 
-#define COMMENT(s)               (s[strspn(s, " \n\r\t\v\f")] == '%')
-#define BLANK(s)                 (sscanf(s, "%*s") == EOF)
 #define STREQ(a,b)               (((a)[0] == (b)[0]) && (strcmp((a),(b)) == 0))
 #define STRNEQ(a,b)              (((a)[0] != (b)[0]) || (strcmp((a),(b)) != 0))
-
-#define NL                       '\012'
-                                    /*****************************************/
-                                    /* Since the Mac treats both '\n' and    */
-                                    /* '\r' as ASCII 13 (i.e. carr. return)  */
-                                    /* need to define this.                  */
-                                    /*****************************************/
-
-/*****************************************************************************/
-/* Defines character bounding box.                                           */
-/*****************************************************************************/
-typedef struct Bbox
-   {
-   int32_t llx, lly, urx, ury;
-   } Bbox, *BboxPtr;
 
 /*****************************************************************************/
 /* Defines character point coordinates.                                      */
@@ -115,98 +37,13 @@ typedef struct
    } Cd, *CdPtr;
 
 
-#define BF_LAYOUTS               "layouts"
-#define BF_SUBSETS               "subsets"
-#define BF_STD_LAYOUT            "standard"
-
-#define OPENERROR                2
-#define OPENWARN                 1
-#define OPENOK                   0
-
-extern char bezdir[MAXPATHLEN];
 extern bool scalinghints;
-
-/*****************************************************************************/
-/* Deletes the specified file from the bez directory.                        */
-/*****************************************************************************/
-extern void
-DeleteBezFile(char *, char *);
-
-/*****************************************************************************/
-/* Reads a token from the data buffer.                                       */
-/*****************************************************************************/
-extern char *
-ReadToken(char *, char *, char *, char *);
-
-/*****************************************************************************/
-/* Reads the file composites.ps, if it exists, and attempts to create        */
-/* composite chars. for those listed.                                        */
-/*****************************************************************************/
-extern int32_t
-make_composites(bool, bool, int32_t *, char *, bool, char **);
-
-/*****************************************************************************/
-/* Returns the max number of composites for the font.                        */
-/*****************************************************************************/
-extern int
-readcomposite(bool, indx);
-
-/*****************************************************************************/
-/* Computes the character bounding box.                                      */
-/*****************************************************************************/
-extern int
-computesbandbbx(char *, char *, int32_t, BboxPtr, bool, int32_t, int32_t);
 
 /*****************************************************************************/
 /* Sets the global variable charsetDir.                                      */
 /*****************************************************************************/
 extern void
 set_charsetdir(char *);
-
-/*****************************************************************************/
-/* Sets the global variable matrix.                                          */
-/*****************************************************************************/
-extern int
-set_matrix(char *);
-
-/*****************************************************************************/
-/* Sets the global variable uniqueIDFile.                                    */
-/*****************************************************************************/
-extern void
-set_uniqueIDFile(char *);
-
-/*****************************************************************************/
-/* Transforms a point using the global variable, matrix.                     */
-/*****************************************************************************/
-extern int
-TransformPoint(int32_t *, int32_t*, bool);
-
-/*****************************************************************************/
-/* Returns the name of the encoding file.                                    */
-/*****************************************************************************/
-extern void
-get_encodingfilename(char *, bool, int);
-
-/*****************************************************************************/
-/* Make an Adobe PS font or a release font.                                  */
-/*****************************************************************************/
-extern int
-makePSfont(char *, bool, bool, bool, int32_t, int32_t, int32_t);
-
-/*****************************************************************************/
-/* Make a Macintosh printer font.                                            */
-/*****************************************************************************/
-extern int
-makelwfn(char *, char *, char);
-
-/*****************************************************************************/
-/* Make an IBM printer font.                                                 */
-/*****************************************************************************/
-extern int
-makeibmfont(char *, char *, char);
-
-extern void
-GetFontMatrix(char *, char *);
 
 /*****************************************************************************/
 /* Returns the total number of input directories.                            */

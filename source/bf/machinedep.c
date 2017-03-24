@@ -55,7 +55,6 @@ Windows specific names instead.
 #define BUFFERSZ 512		/* buffer size used by unique id file */
 #define MAXIDFILELEN 100	/* maximum length of line in unique id file */
 
-static char uniqueIDFile[MAXPATHLEN];
 static int16_t warncnt = 0;
 #if defined (_WIN32)
 static char Delimiter[] = "\\";
@@ -158,12 +157,6 @@ static void LogMsg1(char *str, int16_t level, int16_t code, bool prefix)
   	{
     (*errorproc)(code);
   	}
-}
-
- void set_uniqueIDFile(str)
-char *str;
-{
-  strcpy(uniqueIDFile, str);
 }
 
 void get_filename(char *name, char *str, const char *basename)
