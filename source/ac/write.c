@@ -571,7 +571,7 @@ cp(const ACFontInfo* fontinfo, PPathElt e)
 }
 
 static void
-NumberPath()
+NumberPath(void)
 {
     register int16_t cnt;
     register PPathElt e;

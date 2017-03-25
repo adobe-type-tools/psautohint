@@ -73,7 +73,7 @@ UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled)
 }
 
 static Fixed
-Pop()
+Pop(void)
 {
     if (stkindex <= 0) {
         sprintf(globmsg, "Stack underflow while reading %s file.\n", fileName);
@@ -83,7 +83,8 @@ Pop()
     return stk[stkindex];
 }
 
-static void Push(r) Fixed r;
+static void
+Push(Fixed r)
 {
     if (stkindex >= STKMAX) {
         sprintf(globmsg, "Stack underflow while reading %s file.\n", fileName);
@@ -94,13 +95,14 @@ static void Push(r) Fixed r;
 }
 
 static void
-Pop2()
+Pop2(void)
 {
     (void)Pop();
     (void)Pop();
 }
 
-static void PopPCd(pcd) Cd* pcd;
+static void
+PopPCd(Cd* pcd)
 {
     pcd->y = Pop();
     pcd->x = Pop();
@@ -110,7 +112,8 @@ static void PopPCd(pcd) Cd* pcd;
     currentx += (dx);                                                          \
     currenty += (dy)
 
-static PPathElt AppendElement(etype) int32_t etype;
+static PPathElt
+AppendElement(int32_t etype)
 {
     PPathElt e;
     e = (PPathElt)Alloc(sizeof(PathElt));
@@ -125,7 +128,7 @@ static PPathElt AppendElement(etype) int32_t etype;
 }
 
 static void
-psDIV()
+psDIV(void)
 {
     Fixed x, y;
     y = Pop();
@@ -309,7 +312,7 @@ psHVCT(const ACFontInfo* fontinfo)
 }
 
 static void
-psCP()
+psCP(void)
 {
     if (!forMultiMaster)
         AppendElement(CLOSEPATH);
@@ -373,8 +376,8 @@ psFLX(const ACFontInfo* fontinfo)
     flex = false;
 }
 
-static void ReadHintInfo(nm, str) char nm;
-const char* str;
+static void
+ReadHintInfo(char nm, const char* str)
 {
     Cd c0;
     int16_t hinttype =
@@ -422,7 +425,7 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                             psCT(fontinfo);
                             break;
                         case 'p':
-                            psCP(fontinfo);
+                            psCP();
                             break;
                         default:
                             goto badFile;

@@ -10,8 +10,8 @@
 #include "ac.h"
 
 #define MAXF (1 << 15)
-static void AdjustVal(pv, l1, l2, dist, d, hFlg) Fixed *pv, l1, l2, dist, d;
-bool hFlg;
+static void
+AdjustVal(Fixed* pv, Fixed l1, Fixed l2, Fixed dist, Fixed d, bool hFlg)
 {
     float v, q, r1, r2, rd;
     /* DEBUG 8 BIT. To get the saem result as the old auothint, had to change
@@ -65,7 +65,8 @@ done:
     *pv = acpflttofix(&v);
 }
 
-static Fixed CalcOverlapDist(d, overlaplen, minlen) Fixed d, overlaplen, minlen;
+static Fixed
+CalcOverlapDist(Fixed d, Fixed overlaplen, Fixed minlen)
 {
     float r = (float)d, ro = (float)overlaplen, rm = (float)minlen;
     r = r * ((float)(1.0 + 0.4 * (1.0 - ro / rm)));
@@ -91,8 +92,8 @@ static Fixed CalcOverlapDist(d, overlaplen, minlen) Fixed d, overlaplen, minlen;
  there was a yet earlier version which used a 8 bit fraction, and this is a bug.
  */
 
-static void EvalHPair(botSeg, topSeg, pspc, pv) PClrSeg botSeg, topSeg;
-Fixed *pspc, *pv;
+static void
+EvalHPair(PClrSeg botSeg, PClrSeg topSeg, Fixed* pspc, Fixed* pv)
 {
     Fixed brght, blft, bloc, tloc, trght, tlft, ldst, rdst;
     Fixed mndist, dist, dx, dy, minlen, overlaplen;
@@ -160,7 +161,8 @@ Fixed *pspc, *pv;
     AdjustVal(pv, brght - blft, trght - tlft, dist, dy, true);
 }
 
-static void HStemMiss(botSeg, topSeg) PClrSeg botSeg, topSeg;
+static void
+HStemMiss(PClrSeg botSeg, PClrSeg topSeg)
 {
     Fixed brght, blft, bloc, tloc, trght, tlft;
     Fixed mndist, dist, dy, minlen, overlaplen;
@@ -215,8 +217,8 @@ static void HStemMiss(botSeg, topSeg) PClrSeg botSeg, topSeg;
                        (botSeg->sType == sCURVE) || (topSeg->sType == sCURVE));
 }
 
-static void EvalVPair(leftSeg, rightSeg, pspc, pv) PClrSeg leftSeg, rightSeg;
-Fixed *pspc, *pv;
+static void
+EvalVPair(PClrSeg leftSeg, PClrSeg rightSeg, Fixed* pspc, Fixed* pv)
 {
     Fixed ltop, lbot, lloc, rloc, rtop, rbot, tdst, bdst;
     Fixed mndist, dx, dy, dist, overlaplen, minlen;
@@ -269,7 +271,8 @@ Fixed *pspc, *pv;
     AdjustVal(pv, ltop - lbot, rtop - rbot, dist, dx, false);
 }
 
-static void VStemMiss(leftSeg, rightSeg) PClrSeg leftSeg, rightSeg;
+static void
+VStemMiss(PClrSeg leftSeg, PClrSeg rightSeg)
 {
     Fixed ltop, lbot, lloc, rloc, rtop, rbot;
     Fixed mndist, dx, dist, overlaplen, minlen;
@@ -319,9 +322,9 @@ static void VStemMiss(leftSeg, rightSeg) PClrSeg leftSeg, rightSeg;
                                               (rightSeg->sType == sCURVE));
 }
 
-static void InsertVValue(lft, rght, val, spc, lSeg, rSeg) Fixed lft, rght, val,
-  spc;
-PClrSeg lSeg, rSeg;
+static void
+InsertVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PClrSeg lSeg,
+             PClrSeg rSeg)
 {
     register PClrVal item, vlist, vprev;
     item = (PClrVal)Alloc(sizeof(ClrVal));
@@ -358,9 +361,9 @@ PClrSeg lSeg, rSeg;
 
 #define LePruneValue(val) ((val) < FixOne && ((val) << 10) <= pruneValue)
 
-static void AddVValue(lft, rght, val, spc, lSeg, rSeg) Fixed lft, rght, val,
-  spc;
-PClrSeg lSeg, rSeg;
+static void
+AddVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PClrSeg lSeg,
+          PClrSeg rSeg)
 {
     if (val == 0)
         return;
@@ -377,10 +380,9 @@ PClrSeg lSeg, rSeg;
     InsertVValue(lft, rght, val, spc, lSeg, rSeg);
 }
 
-static void InsertHValue(bot, top, val, spc, bSeg, tSeg, ghst) Fixed bot, top,
-  val, spc;
-PClrSeg bSeg, tSeg;
-bool ghst;
+static void
+InsertHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, PClrSeg bSeg,
+             PClrSeg tSeg, bool ghst)
 {
     PClrVal item, vlist, vprev, vl;
     vlist = valList;
@@ -425,8 +427,9 @@ bool ghst;
         ReportAddHVal(item);
 }
 
-static void AddHValue(bot, top, val, spc, bSeg, tSeg) Fixed bot, top, val, spc;
-PClrSeg bSeg, tSeg;
+static void
+AddHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, PClrSeg bSeg,
+          PClrSeg tSeg)
 {
     bool ghst;
     if (val == 0)
@@ -452,7 +455,8 @@ mfabs(float in)
     return -in;
 }
 
-static Fixed CombVals(v1, v2) Fixed v1, v2;
+static Fixed
+CombVals(Fixed v1, Fixed v2)
 {
     register int32_t i;
     float r1, r2;
@@ -477,7 +481,7 @@ static Fixed CombVals(v1, v2) Fixed v1, v2;
 }
 
 static void
-CombineValues()
+CombineValues(void)
 { /* works for both H and V */
     PClrVal vlist, v1;
     Fixed loc1, loc2;
@@ -510,7 +514,7 @@ CombineValues()
 }
 
 void
-EvalV()
+EvalV(void)
 {
     PClrSeg lList, rList;
     Fixed lft, rght;
@@ -535,7 +539,7 @@ EvalV()
 }
 
 void
-EvalH()
+EvalH(void)
 {
     PClrSeg bList, tList, lst, ghostSeg;
     Fixed lstLoc, tempLoc, cntr;

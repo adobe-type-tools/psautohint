@@ -14,7 +14,7 @@ static unsigned char* links;
 static int32_t rowcnt;
 
 void
-InitShuffleSubpaths()
+InitShuffleSubpaths(void)
 {
     register int32_t cnt = -1;
     register PPathElt e = pathStart;
@@ -38,7 +38,7 @@ InitShuffleSubpaths()
 }
 
 static void
-PrintLinks()
+PrintLinks(void)
 {
     int32_t i, j;
     PrintMessage("Links ");
@@ -62,7 +62,8 @@ PrintLinks()
     }
 }
 
-static void PrintSumLinks(sumlinks) char* sumlinks;
+static void
+PrintSumLinks(char* sumlinks)
 {
     int32_t i;
     PrintMessage("Sumlinks ");
@@ -101,8 +102,8 @@ PrintOutLinks(unsigned char* outlinks)
     PrintMessage("\n");
 }
 
-void MarkLinks(vL, hFlg) PClrVal vL;
-bool hFlg;
+void
+MarkLinks(PClrVal vL, bool hFlg)
 {
     register int32_t i, j;
     register PClrSeg seg;
@@ -141,9 +142,9 @@ bool hFlg;
     }
 }
 
-static void Outpath(links, outlinks, output, bst) unsigned char *links,
-  *outlinks, *output;
-int32_t bst;
+static void
+Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
+        int32_t bst)
 {
     register unsigned char *lnks, *outlnks;
     register int32_t i = bst;
@@ -173,7 +174,7 @@ int32_t bst;
  had the most problems with this which caused huge files
  to be created. */
 void
-DoShuffleSubpaths()
+DoShuffleSubpaths(void)
 {
     unsigned char sumlinks[MAXCNT], output[MAXCNT], outlinks[MAXCNT];
     register unsigned char* lnks;

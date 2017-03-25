@@ -9,16 +9,16 @@
 
 #include "ac.h"
 
-static bool CloseElements(e1, e2, loc1, loc2, vert)
-/* true iff you can go from e1 to e2 without going out of band loc1..loc2 */
-/* if vert is true, then band is vert (test x values) */
-/* else band is horizontal (test y values) */
-/* band is expanded by CLSMRG in each direction */
 #define CLSMRG (PSDist(20))
-  register PPathElt e1,
-  e2;
-register Fixed loc1, loc2;
-register bool vert;
+
+/* true iff you can go from e1 to e2 without going out of band loc1..loc2
+ * if vert is true, then band is vert (test x values)
+ * else band is horizontal (test y values)
+ * band is expanded by CLSMRG in each direction
+ */
+static bool
+CloseElements(register PPathElt e1, register PPathElt e2, register Fixed loc1,
+              register Fixed loc2, register bool vert)
 {
     register Fixed tmp;
     Fixed x, y;
@@ -55,8 +55,8 @@ register bool vert;
     }
 }
 
-bool CloseSegs(s1, s2, vert) PClrSeg s1, s2;
-bool vert;
+bool
+CloseSegs(PClrSeg s1, PClrSeg s2, bool vert)
 {
     /* true if the elements for these segs are "close" in the path */
     PPathElt e1, e2;
@@ -76,7 +76,7 @@ bool vert;
 }
 
 void
-DoPrune()
+DoPrune(void)
 {
     /* Step through valList to the first item which is not pruned; set
     that to be the head of the list. Then remove from the list
@@ -100,9 +100,8 @@ DoPrune()
     }
 }
 
-static PClrVal PruneOne(sLst, hFlg, sL, i) PClrVal sLst, sL;
-bool hFlg;
-int32_t i;
+static PClrVal
+PruneOne(PClrVal sLst, bool hFlg, PClrVal sL, int32_t i)
 {
     /* Simply set the 'pruned' field to True for sLst. */
     if (hFlg)
@@ -138,7 +137,7 @@ int32_t i;
 /* The changes made here and in PruneHVals are to fix a bug in
  MinisterLight/E where the top left point was not getting colored. */
 void
-PruneVVals()
+PruneVVals(void)
 {
     PClrVal sLst, sL;
     PClrSeg seg1, seg2, sg1, sg2;
@@ -214,7 +213,7 @@ PruneVVals()
 
 #define Fix16 (FixOne << 4)
 void
-PruneHVals()
+PruneHVals(void)
 {
     PClrVal sLst, sL;
     PClrSeg seg1, seg2, sg1, sg2;
@@ -272,16 +271,15 @@ PruneHVals()
                                                segments are close to each
                                                other.*/
 
-                (
-                  val < Fix16 ||
-                  /* needs to be greater than FixOne << 3 for
-                   HelveticaNeue 95 Black G has val == 2.125
-                   Poetica/ItalicOne H has val == .66  */
-                  ((!topInBlue || top == t) &&
-                   (!botInBlue || bot == b))) /* either val is small ( < Fixed
-                                                 16) or, for both bot and top,
-                                                 the value is the same as SL,
-                                                 and not in a blue zone. */
+                (val < Fix16 ||
+                 /* needs to be greater than FixOne << 3 for
+                  HelveticaNeue 95 Black G has val == 2.125
+                  Poetica/ItalicOne H has val == .66  */
+                 ((!topInBlue || top == t) &&
+                  (!botInBlue || bot == b))) /* either val is small ( < Fixed
+                                                16) or, for both bot and top,
+                                                the value is the same as SL,
+                                                and not in a blue zone. */
 
                 ) {
                 sLst = PruneOne(sLst, true, sL, 5);
@@ -347,7 +345,8 @@ PruneHVals()
     DoPrune();
 }
 
-static void FindBestVals(vL) register PClrVal vL;
+static void
+FindBestVals(register PClrVal vL)
 {
     register Fixed bV, bS;
     register Fixed t, b;
@@ -384,11 +383,9 @@ static void FindBestVals(vL) register PClrVal vL;
 /* The following changes were made to fix a problem in Ryumin-Light and
  possibly other fonts as well.  The old version causes bogus coloring
  and extra newcolors. */
-static void ReplaceVals(oldB, oldT, newB, newT, newBst,
-                        vert) register Fixed oldB,
-  oldT, newB, newT;
-bool vert;
-register PClrVal newBst;
+static void
+ReplaceVals(register Fixed oldB, register Fixed oldT, register Fixed newB,
+            register Fixed newT, register PClrVal newBst, bool vert)
 {
     register PClrVal vL;
     for (vL = valList; vL != NULL; vL = vL->vNxt) {
@@ -411,7 +408,8 @@ register PClrVal newBst;
     }
 }
 
-void MergeVals(vert) bool vert;
+void
+MergeVals(bool vert)
 {
     register PClrVal vLst, vL;
     PClrVal bstV, bV;

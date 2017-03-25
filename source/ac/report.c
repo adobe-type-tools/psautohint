@@ -24,7 +24,8 @@
 extern AC_REPORTFUNCPTR libReportCB;
 static char S0[512];
 
-double FixToDbl(f) Fixed f;
+double
+FixToDbl(Fixed f)
 {
     float r;
     acfixtopflt(f, &r);
@@ -42,7 +43,8 @@ ACGetVersion(char* name, char* str)
 
 #define PrinMsg(s) PrintMessage(s)
 
-void PrintMessage(s) char* s;
+void
+PrintMessage(char* s)
 {
     char msgBuffer[512];
     if ((libReportCB != NULL) && (strlen(s) > 0)) {
@@ -51,13 +53,15 @@ void PrintMessage(s) char* s;
     }
 }
 
-void ReportError(s) char* s;
+void
+ReportError(char* s)
 {
     if (reportErrors && (libReportCB != NULL))
         PrintMessage(s);
 }
 
-void ReportSmoothError(x, y) Fixed x, y;
+void
+ReportSmoothError(Fixed x, Fixed y)
 {
     (void)sprintf(S0, "Junction at %g %g may need smoothing.",
                   FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
@@ -65,7 +69,7 @@ void ReportSmoothError(x, y) Fixed x, y;
 }
 
 void
-ReportAddFlex()
+ReportAddFlex(void)
 {
     if (hasFlex)
         return;
@@ -73,22 +77,24 @@ ReportAddFlex()
     PrintMessage("FYI: added flex operators to this character.");
 }
 
-void ReportClipSharpAngle(x, y) Fixed x, y;
+void
+ReportClipSharpAngle(Fixed x, Fixed y)
 {
     (void)sprintf(S0, "FYI: Too sharp angle at %g %g has been clipped.",
                   FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
     PrintMessage(S0);
 }
 
-void ReportSharpAngle(x, y) Fixed x, y;
+void
+ReportSharpAngle(Fixed x, Fixed y)
 {
     (void)sprintf(S0, "FYI: angle at %g %g is very sharp. Please check.",
                   FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
     PrintMessage(S0);
 }
 
-void ReportLinearCurve(e, x0, y0, x1, y1) PPathElt e;
-Fixed x0, y0, x1, y1;
+void
+ReportLinearCurve(PPathElt e, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     if (autoLinearCurveFix) {
         e->type = LINETO;
@@ -105,8 +111,8 @@ Fixed x0, y0, x1, y1;
     PrintMessage(S0);
 }
 
-static void ReportNonHVError(x0, y0, x1, y1, s) Fixed x0, y0, x1, y1;
-char* s;
+static void
+ReportNonHVError(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char* s)
 {
     Fixed dx, dy;
     x0 = itfmx(x0);
@@ -124,17 +130,20 @@ char* s;
     }
 }
 
-void ReportNonHError(x0, y0, x1, y1) Fixed x0, y0, x1, y1;
+void
+ReportNonHError(Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     ReportNonHVError(x0, y0, x1, y1, "horizontal");
 }
 
-void ReportNonVError(x0, y0, x1, y1) Fixed x0, y0, x1, y1;
+void
+ReportNonVError(Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     ReportNonHVError(x0, y0, x1, y1, "vertical");
 }
 
-void ExpectedMoveTo(e) PPathElt e;
+void
+ExpectedMoveTo(PPathElt e)
 {
     char* s;
     switch (e->type) {
@@ -159,7 +168,7 @@ void ExpectedMoveTo(e) PPathElt e;
 }
 
 void
-ReportMissingClosePath()
+ReportMissingClosePath(void)
 {
     (void)sprintf(
       globmsg,
@@ -168,7 +177,8 @@ ReportMissingClosePath()
     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 }
 
-void ReportTryFlexNearMiss(x0, y0, x2, y2) Fixed x0, y0, x2, y2;
+void
+ReportTryFlexNearMiss(Fixed x0, Fixed y0, Fixed x2, Fixed y2)
 {
     (void)sprintf(S0, "Curves from %g %g to %g %g near miss for adding flex.",
                   FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x2)),
@@ -176,8 +186,8 @@ void ReportTryFlexNearMiss(x0, y0, x2, y2) Fixed x0, y0, x2, y2;
     ReportError(S0);
 }
 
-void ReportTryFlexError(CPflg, x, y) bool CPflg;
-Fixed x, y;
+void
+ReportTryFlexError(bool CPflg, Fixed x, Fixed y)
 {
     (void)sprintf(
       S0, CPflg ? "Please move closepath from %g %g so can add flex."
@@ -186,7 +196,8 @@ Fixed x, y;
     ReportError(S0);
 }
 
-void ReportSplit(e) PPathElt e;
+void
+ReportSplit(PPathElt e)
 {
     Fixed x0, y0, x1, y1;
     GetEndPoints(e, &x0, &y0, &x1, &y1);
@@ -197,7 +208,8 @@ void ReportSplit(e) PPathElt e;
     PrintMessage(S0);
 }
 
-void AskForSplit(e) PPathElt e;
+void
+AskForSplit(PPathElt e)
 {
     Fixed x0, y0, x1, y1;
     if (e->type == MOVETO)
@@ -209,7 +221,8 @@ void AskForSplit(e) PPathElt e;
     ReportError(S0);
 }
 
-void ReportPossibleLoop(e) PPathElt e;
+void
+ReportPossibleLoop(PPathElt e)
 {
     Fixed x0, y0, x1, y1;
     if (e->type == MOVETO)
@@ -223,7 +236,8 @@ void ReportPossibleLoop(e) PPathElt e;
     ReportError(S0);
 }
 
-void ReportConflictCheck(e, conflict, cp) PPathElt e, conflict, cp;
+void
+ReportConflictCheck(PPathElt e, PPathElt conflict, PPathElt cp)
 {
     Fixed ex, ey, cx, cy, cpx, cpy;
     GetEndPoint(e, &ex, &ey);
@@ -236,8 +250,8 @@ void ReportConflictCheck(e, conflict, cp) PPathElt e, conflict, cp;
     ReportError(S0);
 }
 
-void ReportConflictCnt(e, cnt) PPathElt e;
-int32_t cnt;
+void
+ReportConflictCnt(PPathElt e, int32_t cnt)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
@@ -246,9 +260,8 @@ int32_t cnt;
     ReportError(S0);
 }
 
-void ReportRemFlare(e, e2, hFlg, i) PPathElt e, e2;
-bool hFlg;
-int32_t i;
+void
+ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i)
 {
     Fixed ex1, ey1, ex2, ey2;
     if (!showClrInfo)
@@ -262,7 +275,8 @@ int32_t i;
     PrintMessage(S0);
 }
 
-void ReportRemConflict(e) PPathElt e;
+void
+ReportRemConflict(PPathElt e)
 {
     Fixed ex, ey;
     if (!showClrInfo)
@@ -273,7 +287,8 @@ void ReportRemConflict(e) PPathElt e;
     ReportError(S0);
 }
 
-void ReportRotateSubpath(e) PPathElt e;
+void
+ReportRotateSubpath(PPathElt e)
 {
     Fixed ex, ey;
     if (!showClrInfo)
@@ -284,7 +299,8 @@ void ReportRotateSubpath(e) PPathElt e;
     PrintMessage(S0);
 }
 
-void ReportRemShortColors(ex, ey) Fixed ex, ey;
+void
+ReportRemShortColors(Fixed ex, Fixed ey)
 {
     if (!showClrInfo)
         return;
@@ -293,7 +309,8 @@ void ReportRemShortColors(ex, ey) Fixed ex, ey;
     PrintMessage(S0);
 }
 
-static void PrntVal(v) Fixed v;
+static void
+PrntVal(Fixed v)
 {
     if (v >= FixInt(100000))
         sprintf(S0, "%d", FTrunc(v));
@@ -302,7 +319,8 @@ static void PrntVal(v) Fixed v;
     PrinMsg(S0);
 }
 
-static void ShwHV(val) PClrVal val;
+static void
+ShwHV(PClrVal val)
 {
     Fixed bot, top;
     bot = itfmy(val->vLoc1);
@@ -316,7 +334,8 @@ static void ShwHV(val) PClrVal val;
         PrinMsg(" G");
 }
 
-void ShowHVal(val) PClrVal val;
+void
+ShowHVal(PClrVal val)
 {
     Fixed l, r;
     PClrSeg seg;
@@ -335,7 +354,8 @@ void ShowHVal(val) PClrVal val;
     PrinMsg(S0);
 }
 
-void ShowHVals(lst) PClrVal lst;
+void
+ShowHVals(PClrVal lst)
 {
     while (lst != NULL) {
         ShowHVal(lst);
@@ -344,13 +364,15 @@ void ShowHVals(lst) PClrVal lst;
     }
 }
 
-void ReportAddHVal(val) PClrVal val;
+void
+ReportAddHVal(PClrVal val)
 {
     ShowHVal(val);
     EndLine();
 }
 
-static void ShwVV(val) PClrVal val;
+static void
+ShwVV(PClrVal val)
 {
     Fixed lft, rht;
     lft = itfmx(val->vLoc1);
@@ -362,7 +384,8 @@ static void ShwVV(val) PClrVal val;
     PrinMsg(S0);
 }
 
-void ShowVVal(val) PClrVal val;
+void
+ShowVVal(PClrVal val)
 {
     Fixed b, t;
     PClrSeg seg;
@@ -381,7 +404,8 @@ void ShowVVal(val) PClrVal val;
     PrinMsg(S0);
 }
 
-void ShowVVals(lst) PClrVal lst;
+void
+ShowVVals(PClrVal lst)
 {
     while (lst != NULL) {
         ShowVVal(lst);
@@ -390,15 +414,15 @@ void ShowVVals(lst) PClrVal lst;
     }
 }
 
-void ReportAddVVal(val) PClrVal val;
+void
+ReportAddVVal(PClrVal val)
 {
     ShowVVal(val);
     EndLine();
 }
 
-void ReportFndBstVal(seg, val, hFlg) PClrSeg seg;
-PClrVal val;
-bool hFlg;
+void
+ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg)
 {
     if (hFlg) {
         sprintf(S0, "FndBstVal: sLoc %g sLft %g sRght %g ",
@@ -422,9 +446,8 @@ bool hFlg;
     EndLine();
 }
 
-void ReportCarry(l0, l1, loc, clrs, vert) Fixed l0, l1, loc;
-PClrVal clrs;
-bool vert;
+void
+ReportCarry(Fixed l0, Fixed l1, Fixed loc, PClrVal clrs, bool vert)
 {
     if (!showClrInfo)
         return;
@@ -444,7 +467,8 @@ bool vert;
     PrintMessage(S0);
 }
 
-void ReportBestCP(e, cp) PPathElt e, cp;
+void
+ReportBestCP(PPathElt e, PPathElt cp)
 {
     Fixed ex, ey, px, py;
     GetEndPoint(e, &ex, &ey);
@@ -458,7 +482,8 @@ void ReportBestCP(e, cp) PPathElt e, cp;
     PrintMessage(S0);
 }
 
-void LogColorInfo(pl) PClrPoint pl;
+void
+LogColorInfo(PClrPoint pl)
 {
     char c = pl->c;
     Fixed lft, rht, top, bot, wdth;
@@ -478,14 +503,16 @@ void LogColorInfo(pl) PClrPoint pl;
     }
 }
 
-static void LstHVal(val) PClrVal val;
+static void
+LstHVal(PClrVal val)
 {
     PrinMsg("\t");
     ShowHVal(val);
     PrinMsg(" ");
 }
 
-static void LstVVal(val) PClrVal val;
+static void
+LstVVal(PClrVal val)
 {
     PrinMsg("\t");
     ShowVVal(val);
@@ -493,7 +520,7 @@ static void LstVVal(val) PClrVal val;
 }
 
 void
-ListClrInfo()
+ListClrInfo(void)
 { /* debugging routine */
     PPathElt e;
     PSegLnkLst hLst, vLst;
@@ -525,8 +552,8 @@ ListClrInfo()
     }
 }
 
-void ReportAddVSeg(from, to, loc, i) Fixed from, to, loc;
-int32_t i;
+void
+ReportAddVSeg(Fixed from, Fixed to, Fixed loc, int32_t i)
 {
     if (!showClrInfo || !showVs)
         return;
@@ -536,8 +563,8 @@ int32_t i;
     PrintMessage(S0);
 }
 
-void ReportAddHSeg(from, to, loc, i) Fixed from, to, loc;
-int32_t i;
+void
+ReportAddHSeg(Fixed from, Fixed to, Fixed loc, int32_t i)
 {
     if (!showClrInfo || !showHs)
         return;
@@ -547,7 +574,8 @@ int32_t i;
     PrintMessage(S0);
 }
 
-void ReportRemVSeg(from, to, loc) Fixed from, to, loc;
+void
+ReportRemVSeg(Fixed from, Fixed to, Fixed loc)
 {
     if (!showClrInfo || !showVs)
         return;
@@ -557,7 +585,8 @@ void ReportRemVSeg(from, to, loc) Fixed from, to, loc;
     PrintMessage(S0);
 }
 
-void ReportRemHSeg(from, to, loc) Fixed from, to, loc;
+void
+ReportRemHSeg(Fixed from, Fixed to, Fixed loc)
 {
     if (!showClrInfo || !showHs)
         return;
@@ -567,23 +596,23 @@ void ReportRemHSeg(from, to, loc) Fixed from, to, loc;
     PrintMessage(S0);
 }
 
-void ReportBandError(str, loc, blu) char* str;
-Fixed loc, blu;
+void
+ReportBandError(char* str, Fixed loc, Fixed blu)
 {
     (void)sprintf(S0, "Near miss %s horizontal zone at %g instead of %g.", str,
                   FixToDbl(loc), FixToDbl(blu));
     ReportError(S0);
 }
-void ReportBandNearMiss(str, loc, blu) char* str;
-Fixed loc, blu;
+void
+ReportBandNearMiss(char* str, Fixed loc, Fixed blu)
 {
     (void)sprintf(S0, "Near miss %s horizontal zone at %g instead of %g.", str,
                   FixToDbl(loc), FixToDbl(blu));
     ReportError(S0);
 }
 
-void ReportStemNearMiss(vert, w, minW, b, t, curve) bool vert, curve;
-Fixed w, minW, b, t;
+void
+ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t, bool curve)
 {
     (void)sprintf(S0, "%s %s stem near miss: %g instead of %g at %g to %g.",
                   vert ? "Vertical" : "Horizontal", curve ? "curve" : "linear",
@@ -592,8 +621,8 @@ Fixed w, minW, b, t;
     ReportError(S0);
 }
 
-void ReportColorConflict(x0, y0, x1, y1, ch) Fixed x0, y0, x1, y1;
-char ch;
+void
+ReportColorConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch)
 {
     unsigned char s[2];
     s[0] = ch;
@@ -603,22 +632,25 @@ char ch;
     ReportError(S0);
 }
 
-void ReportDuplicates(x, y) Fixed x, y;
+void
+ReportDuplicates(Fixed x, Fixed y)
 {
     (void)sprintf(S0, "Check for duplicate subpath at %g %g.", FixToDbl(x),
                   FixToDbl(y));
     ReportError(S0);
 }
 
-void ReportBBoxBogus(llx, lly, urx, ury) Fixed llx, lly, urx, ury;
+void
+ReportBBoxBogus(Fixed llx, Fixed lly, Fixed urx, Fixed ury)
 {
     (void)sprintf(S0, "Character bounding box looks bogus: %g %g %g %g.",
                   FixToDbl(llx), FixToDbl(lly), FixToDbl(urx), FixToDbl(ury));
     ReportError(S0);
 }
 
-void ReportMergeHVal(b0, t0, b1, t1, v0, s0, v1, s1) Fixed b0, t0, b1, t1, v0,
-  s0, v1, s1;
+void
+ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
+                Fixed v1, Fixed s1)
 {
     if (!showClrInfo)
         return;
@@ -634,8 +666,9 @@ void ReportMergeHVal(b0, t0, b1, t1, v0, s0, v1, s1) Fixed b0, t0, b1, t1, v0,
     PrintMessage(S0);
 }
 
-void ReportMergeVVal(l0, r0, l1, r1, v0, s0, v1, s1) Fixed l0, r0, l1, r1, v0,
-  s0, v1, s1;
+void
+ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
+                Fixed v1, Fixed s1)
 {
     if (!showClrInfo)
         return;
@@ -651,8 +684,8 @@ void ReportMergeVVal(l0, r0, l1, r1, v0, s0, v1, s1) Fixed l0, r0, l1, r1, v0,
     PrintMessage(S0);
 }
 
-void ReportPruneHVal(val, v, i) PClrVal val, v;
-int32_t i;
+void
+ReportPruneHVal(PClrVal val, PClrVal v, int32_t i)
 {
     if (!showClrInfo)
         return;
@@ -664,8 +697,8 @@ int32_t i;
     EndLine();
 }
 
-void ReportPruneVVal(val, v, i) PClrVal val, v;
-int32_t i;
+void
+ReportPruneVVal(PClrVal val, PClrVal v, int32_t i)
 {
     if (!showClrInfo)
         return;
@@ -677,8 +710,8 @@ int32_t i;
     EndLine();
 }
 
-void ReportMoveSubpath(e, s) PPathElt e;
-char* s;
+void
+ReportMoveSubpath(PPathElt e, char* s)
 {
     Fixed x, y;
     GetEndPoint(e, &x, &y);

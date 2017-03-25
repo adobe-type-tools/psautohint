@@ -11,9 +11,8 @@
 #include "ac.h"
 
 /* Procedures defined in stems/stemreport.c - StemHist */
-void AddVStem(top, bottom, curved) Fixed top;
-Fixed bottom;
-bool curved;
+void
+AddVStem(Fixed top, Fixed bottom, bool curved)
 {
     if (curved && !allstems)
         return;
@@ -23,9 +22,8 @@ bool curved;
     }
 }
 
-void AddHStem(right, left, curved) Fixed right;
-Fixed left;
-bool curved;
+void
+AddHStem(Fixed right, Fixed left, bool curved)
 {
     if (curved && !allstems)
         return;
@@ -35,14 +33,16 @@ bool curved;
     }
 }
 
-void AddCharExtremes(bot, top) Fixed bot, top;
+void
+AddCharExtremes(Fixed bot, Fixed top)
 {
     if (addCharExtremesCB != NULL) {
         addCharExtremesCB(top, bot, bezGlyphName);
     }
 }
 
-void AddStemExtremes(bot, top) Fixed bot, top;
+void
+AddStemExtremes(Fixed bot, Fixed top)
 {
     if (addStemExtremesCB != NULL) {
         addStemExtremesCB(top, bot, bezGlyphName);

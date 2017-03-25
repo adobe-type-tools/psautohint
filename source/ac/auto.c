@@ -12,7 +12,8 @@
 
 static bool clrBBox, clrHBounds, clrVBounds, haveHBnds, haveVBnds, mergeMain;
 
-void InitAuto(reason) int32_t reason;
+void
+InitAuto(int32_t reason)
 {
     switch (reason) {
         case STARTUP:
@@ -21,22 +22,24 @@ void InitAuto(reason) int32_t reason;
     }
 }
 
-static PPathElt GetSubPathNxt(e) PPathElt e;
+static PPathElt
+GetSubPathNxt(PPathElt e)
 {
     if (e->type == CLOSEPATH)
         return GetDest(e);
     return e->next;
 }
 
-static PPathElt GetSubPathPrv(e) PPathElt e;
+static PPathElt
+GetSubPathPrv(PPathElt e)
 {
     if (e->type == MOVETO)
         e = GetClosedBy(e);
     return e->prev;
 }
 
-static PClrVal FindClosestVal(sLst, loc) PClrVal sLst;
-Fixed loc;
+static PClrVal
+FindClosestVal(PClrVal sLst, Fixed loc)
 {
     Fixed dist = FixInt(10000), bot, top, d;
     PClrVal best = NULL;
@@ -65,7 +68,8 @@ Fixed loc;
     return best;
 }
 
-static void CpyHClr(e) PPathElt e;
+static void
+CpyHClr(PPathElt e)
 {
     Fixed x1, y1;
     PClrVal best;
@@ -75,7 +79,8 @@ static void CpyHClr(e) PPathElt e;
         AddHPair(best, 'b');
 }
 
-static void CpyVClr(e) PPathElt e;
+static void
+CpyVClr(PPathElt e)
 {
     Fixed x1, y1;
     PClrVal best;
@@ -85,8 +90,8 @@ static void CpyVClr(e) PPathElt e;
         AddVPair(best, 'y');
 }
 
-static void PruneColorSegs(e, hFlg) PPathElt e;
-bool hFlg;
+static void
+PruneColorSegs(PPathElt e, bool hFlg)
 {
     PSegLnkLst lst, nxt, prv;
     PSegLnk lnk;
@@ -120,7 +125,7 @@ bool hFlg;
 }
 
 void
-PruneElementColorSegs()
+PruneElementColorSegs(void)
 {
     register PPathElt e;
     e = pathStart;
@@ -133,9 +138,8 @@ PruneElementColorSegs()
 
 #define ElmntClrSegLst(e, hFlg) (hFlg) ? (e)->Hs : (e)->Vs
 
-static void RemLnk(e, hFlg, rm) PPathElt e;
-bool hFlg;
-PSegLnkLst rm;
+static void
+RemLnk(PPathElt e, bool hFlg, PSegLnkLst rm)
 {
     PSegLnkLst lst, prv, nxt;
     lst = hFlg ? e->Hs : e->Vs;
@@ -159,7 +163,8 @@ PSegLnkLst rm;
     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 }
 
-static bool AlreadyOnList(v, lst) register PClrVal v, lst;
+static bool
+AlreadyOnList(register PClrVal v, register PClrVal lst)
 {
     while (lst != NULL) {
         if (v == lst)
@@ -169,17 +174,20 @@ static bool AlreadyOnList(v, lst) register PClrVal v, lst;
     return false;
 }
 
-static void AutoVSeg(sLst) PClrVal sLst;
+static void
+AutoVSeg(PClrVal sLst)
 {
     AddVPair(sLst, 'y');
 }
 
-static void AutoHSeg(sLst) PClrVal sLst;
+static void
+AutoHSeg(PClrVal sLst)
 {
     AddHPair(sLst, 'b');
 }
 
-static void AddHColoring(h) PClrVal h;
+static void
+AddHColoring(PClrVal h)
 {
     if (useH || AlreadyOnList(h, Hcoloring))
         return;
@@ -188,7 +196,8 @@ static void AddHColoring(h) PClrVal h;
     AutoHSeg(h);
 }
 
-static void AddVColoring(v) PClrVal v;
+static void
+AddVColoring(PClrVal v)
 {
     if (useV || AlreadyOnList(v, Vcoloring))
         return;
@@ -197,9 +206,8 @@ static void AddVColoring(v) PClrVal v;
     AutoVSeg(v);
 }
 
-static int32_t TestColor(s, colorList, flg, doLst) PClrSeg s;
-PClrVal colorList;
-bool flg, doLst;
+static int32_t
+TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
 {
     /* -1 means already in colorList; 0 means conflicts; 1 means ok to add */
     PClrVal v, clst;
@@ -283,9 +291,8 @@ bool flg, doLst;
 #define TestHColorLst(h) TestColorLst(h, Hcoloring, YgoesUp, true)
 #define TestVColorLst(v) TestColorLst(v, Vcoloring, true, true)
 
-int TestColorLst(lst, colorList, flg, doLst) PSegLnkLst lst;
-PClrVal colorList;
-bool flg, doLst;
+int
+TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst)
 {
     /* -1 means already in colorList; 0 means conflicts; 1 means ok to add */
     int result, i, cnt;
@@ -320,9 +327,9 @@ bool flg, doLst;
     FixedMidPoint(b1, a3, b2);                                                 \
     FixedMidPoint(a3, a2, b1);
 
-bool ResolveConflictBySplit(e, Hflg, lnk1, lnk2) register PPathElt e;
-bool Hflg;
-PSegLnkLst lnk1, lnk2;
+bool
+ResolveConflictBySplit(register PPathElt e, bool Hflg, PSegLnkLst lnk1,
+                       PSegLnkLst lnk2)
 {
     /* insert new pathelt immediately following e */
     /* e gets first half of split; new gets second */
@@ -379,8 +386,8 @@ PSegLnkLst lnk1, lnk2;
     return true;
 }
 
-static void RemDupLnks(e, Hflg) PPathElt e;
-bool Hflg;
+static void
+RemDupLnks(PPathElt e, bool Hflg)
 {
     PSegLnkLst l1, l2, l2nxt;
     l1 = Hflg ? e->Hs : e->Vs;
@@ -402,8 +409,8 @@ bool Hflg;
 
 /* The changes made here were to fix a problem in MinisterLight/E.
    The top left point was not getting colored. */
-static bool TryResolveConflict(e, Hflg) PPathElt e;
-bool Hflg;
+static bool
+TryResolveConflict(PPathElt e, bool Hflg)
 {
     int32_t typ;
     PSegLnkLst lst, lnk1, lnk2;
@@ -530,7 +537,7 @@ CheckColorSegs(PPathElt e, bool flg, bool Hflg)
 }
 
 static void
-CheckElmntClrSegs()
+CheckElmntClrSegs(void)
 {
     PPathElt e;
     e = pathStart;
@@ -540,8 +547,8 @@ CheckElmntClrSegs()
         e = e->next;
     }
 }
-static bool ClrLstsClash(lst1, lst2, flg) PSegLnkLst lst1, lst2;
-bool flg;
+static bool
+ClrLstsClash(PSegLnkLst lst1, PSegLnkLst lst2, bool flg)
 {
     PClrSeg seg;
     PClrVal val;
@@ -563,7 +570,8 @@ bool flg;
     return false;
 }
 
-static PSegLnkLst BestFromLsts(lst1, lst2) PSegLnkLst lst1, lst2;
+static PSegLnkLst
+BestFromLsts(PSegLnkLst lst1, PSegLnkLst lst2)
 {
     PSegLnkLst lst, bst;
     PClrSeg seg;
@@ -587,8 +595,9 @@ static PSegLnkLst BestFromLsts(lst1, lst2) PSegLnkLst lst1, lst2;
     return bst;
 }
 
-static bool ClrsClash(e, p, hLst, vLst, phLst, pvLst) PPathElt e, p;
-PSegLnkLst *hLst, *vLst, *phLst, *pvLst;
+static bool
+ClrsClash(PPathElt e, PPathElt p, PSegLnkLst* hLst, PSegLnkLst* vLst,
+          PSegLnkLst* phLst, PSegLnkLst* pvLst)
 {
     bool clash = false;
     PSegLnkLst bst, new;
@@ -617,9 +626,9 @@ PSegLnkLst *hLst, *vLst, *phLst, *pvLst;
     return clash;
 }
 
-static void GetColorLsts(e, phLst, pvLst, ph, pv) PPathElt e;
-PSegLnkLst *phLst, *pvLst;
-int32_t *ph, *pv;
+static void
+GetColorLsts(PPathElt e, PSegLnkLst* phLst, PSegLnkLst* pvLst, int32_t* ph,
+             int32_t* pv)
 {
     PSegLnkLst hLst, vLst;
     int32_t h, v;
@@ -649,7 +658,8 @@ int32_t *ph, *pv;
     *pv = v;
 }
 
-static void ReClrBounds(e) PPathElt e;
+static void
+ReClrBounds(PPathElt e)
 {
     if (!useH) {
         if (clrHBounds && Hcoloring == NULL && !haveHBnds)
@@ -673,8 +683,8 @@ static void ReClrBounds(e) PPathElt e;
     }
 }
 
-static void AddColorLst(lst, vert) PSegLnkLst lst;
-bool vert;
+static void
+AddColorLst(PSegLnkLst lst, bool vert)
 {
     PClrVal val;
     PClrSeg seg;
@@ -689,8 +699,8 @@ bool vert;
     }
 }
 
-static void StartNewColoring(e, hLst, vLst) PPathElt e;
-PSegLnkLst hLst, vLst;
+static void
+StartNewColoring(PPathElt e, PSegLnkLst hLst, PSegLnkLst vLst)
 {
     ReClrBounds(e);
     if (e->newcolors != 0) {
@@ -711,12 +721,14 @@ PSegLnkLst hLst, vLst;
         AddColorLst(vLst, true);
 }
 
-static bool IsIn(h, v) int32_t h, v;
+static bool
+IsIn(int32_t h, int32_t v)
 {
     return (h == -1 && v == -1);
 }
 
-static bool IsOk(h, v) int32_t h, v;
+static bool
+IsOk(int32_t h, int32_t v)
 {
     return (h != 0 && v != 0);
 }
@@ -728,7 +740,8 @@ static bool IsOk(h, v) int32_t h, v;
     if (!useH && h == 1)                                                       \
     AddColorLst(hLst, false)
 
-static void SetHColors(lst) PClrVal lst;
+static void
+SetHColors(PClrVal lst)
 {
     if (useH)
         return;
@@ -739,7 +752,8 @@ static void SetHColors(lst) PClrVal lst;
     }
 }
 
-static void SetVColors(lst) PClrVal lst;
+static void
+SetVColors(PClrVal lst)
 {
     if (useV)
         return;
@@ -750,7 +764,8 @@ static void SetVColors(lst) PClrVal lst;
     }
 }
 
-PClrVal CopyClrs(lst) PClrVal lst;
+PClrVal
+CopyClrs(PClrVal lst)
 {
     PClrVal v, vlst;
     int cnt;
@@ -770,7 +785,8 @@ PClrVal CopyClrs(lst) PClrVal lst;
     return vlst;
 }
 
-static PPathElt ColorBBox(e) PPathElt e;
+static PPathElt
+ColorBBox(PPathElt e)
 {
     e = FindSubpathBBox(e);
     ClrBBox();
@@ -778,9 +794,8 @@ static PPathElt ColorBBox(e) PPathElt e;
     return e;
 }
 
-static bool IsFlare(loc, e, n, Hflg) Fixed loc;
-PPathElt e, n;
-bool Hflg;
+static bool
+IsFlare(Fixed loc, PPathElt e, PPathElt n, bool Hflg)
 {
     Fixed x, y;
     while (e != n) {
@@ -793,7 +808,8 @@ bool Hflg;
     return true;
 }
 
-static bool IsTopSegOfVal(loc, top, bot) Fixed loc, top, bot;
+static bool
+IsTopSegOfVal(Fixed loc, Fixed top, Fixed bot)
 {
     Fixed d1, d2;
     d1 = top - loc;
@@ -801,18 +817,17 @@ static bool IsTopSegOfVal(loc, top, bot) Fixed loc, top, bot;
     return (abs(d1) <= abs(d2)) ? true : false;
 }
 
-static void RemFlareLnk(e, hFlg, rm, e2, i) PPathElt e, e2;
-bool hFlg;
-PSegLnkLst rm;
-int32_t i;
+static void
+RemFlareLnk(PPathElt e, bool hFlg, PSegLnkLst rm, PPathElt e2, int32_t i)
 {
     RemLnk(e, hFlg, rm);
     if (showClrInfo)
         ReportRemFlare(e, e2, hFlg, i);
 }
 
-bool CompareValues(val1, val2, factor, ghstshift) register PClrVal val1, val2;
-int32_t factor, ghstshift;
+bool
+CompareValues(register PClrVal val1, register PClrVal val2, int32_t factor,
+              int32_t ghstshift)
 {
     register Fixed v1 = val1->vVal, v2 = val2->vVal, mx;
     mx = v1 > v2 ? v1 : v2;
@@ -838,7 +853,8 @@ int32_t factor, ghstshift;
                                        : (v1 / factor > v2);
 }
 
-static void RemFlares(Hflg) bool Hflg;
+static void
+RemFlares(bool Hflg)
 {
     PSegLnkLst lst1, lst2, nxt1, nxt2;
     PPathElt e, n;
@@ -918,9 +934,8 @@ static void RemFlares(Hflg) bool Hflg;
     }
 }
 
-static void CarryIfNeed(loc, vert, clrs) PClrVal clrs;
-Fixed loc;
-bool vert;
+static void
+CarryIfNeed(Fixed loc, bool vert, PClrVal clrs)
 {
     PClrSeg seg;
     PClrVal seglnk;
@@ -975,9 +990,8 @@ bool vert;
 #define PRODIST                                                                \
     (FixInt(100)) /* DEBUG 8 BIT. Needed to double test from 50 to 100 for     \
                      change in coordinate system */
-static void ProClrs(e, hFlg, loc) PPathElt e;
-Fixed loc;
-bool hFlg;
+static void
+ProClrs(PPathElt e, bool hFlg, Fixed loc)
 {
     PSegLnkLst lst, plst;
     PPathElt prv;
@@ -1008,7 +1022,7 @@ bool hFlg;
 }
 
 static void
-PromoteColors()
+PromoteColors(void)
 {
     PPathElt e;
     Fixed cx, cy;
@@ -1022,7 +1036,7 @@ PromoteColors()
 }
 
 static void
-RemPromotedClrs()
+RemPromotedClrs(void)
 {
     PPathElt e;
     e = pathStart;
@@ -1040,7 +1054,7 @@ RemPromotedClrs()
 }
 
 static void
-RemShortColors()
+RemShortColors(void)
 {
     /* Must not change colors at a short element. */
     PPathElt e;
@@ -1063,9 +1077,8 @@ RemShortColors()
     }
 }
 
-void AutoExtraColors(movetoNewClrs, soleol, solWhere) bool movetoNewClrs,
-  soleol;
-int32_t solWhere;
+void
+AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
 {
     int32_t h, v, ph, pv;
     PPathElt e, cp, p;
@@ -1073,7 +1086,7 @@ int32_t solWhere;
     PSegLnkLst hLst, vLst, phLst, pvLst;
     PClrVal mtVclrs, mtHclrs, prvHclrs, prvVclrs;
 
-    bool (*Tst)(), newClrs = true;
+    bool (*Tst)(int32_t, int32_t), newClrs = true;
     bool isSpc;
     Fixed x, y;
 

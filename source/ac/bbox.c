@@ -14,7 +14,8 @@
 static Fixed xmin, ymin, xmax, ymax, vMn, vMx, hMn, hMx;
 static PPathElt pxmn, pxmx, pymn, pymx, pe, pvMn, pvMx, phMn, phMx;
 
-static void FPBBoxPt(c) Cd c;
+static void
+FPBBoxPt(Cd c)
 {
     if (c.x < xmin) {
         xmin = c.x;
@@ -35,7 +36,7 @@ static void FPBBoxPt(c) Cd c;
 }
 
 static void
-FindPathBBox()
+FindPathBBox(void)
 {
     FltnRec fr;
     register PPathElt e;
@@ -85,7 +86,8 @@ FindPathBBox()
     ymax = FHalfRnd(ymax);
 }
 
-PPathElt FindSubpathBBox(e) PPathElt e;
+PPathElt
+FindSubpathBBox(PPathElt e)
 {
     FltnRec fr;
     Cd c0, c1, c2, c3;
@@ -179,7 +181,7 @@ FindCurveBBox(Fixed x0, Fixed y0, Fixed px1, Fixed py1, Fixed px2, Fixed py2,
 }
 
 void
-ClrVBnds()
+ClrVBnds(void)
 {
     Fixed tmp;
     PPathElt p;
@@ -202,13 +204,13 @@ ClrVBnds()
 }
 
 void
-ReClrVBnds()
+ReClrVBnds(void)
 {
     AddColorPoint(vMn, 0, vMx, 0, 'y', pvMn, pvMx);
 }
 
 void
-ClrHBnds()
+ClrHBnds(void)
 {
     Fixed tmp;
     PPathElt p;
@@ -231,14 +233,13 @@ ClrHBnds()
 }
 
 void
-ReClrHBnds()
+ReClrHBnds(void)
 {
     AddColorPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
 }
 
-static bool CheckValOverlaps(lft, rht, lst, xflg) Fixed lft, rht;
-PClrVal lst;
-bool xflg;
+static bool
+CheckValOverlaps(Fixed lft, Fixed rht, PClrVal lst, bool xflg)
 {
     Fixed lft2, rht2, tmp;
     if (xflg) {
@@ -275,7 +276,8 @@ bool xflg;
     return false;
 }
 
-void AddBBoxHV(Hflg, subs) bool Hflg, subs;
+void
+AddBBoxHV(bool Hflg, bool subs)
 {
     PPathElt e;
     PClrVal val;
@@ -357,7 +359,7 @@ void AddBBoxHV(Hflg, subs) bool Hflg, subs;
 }
 
 void
-ClrBBox()
+ClrBBox(void)
 {
     Fixed llx, lly, urx, ury, tmp;
     PPathElt p, p0, p1;
@@ -394,7 +396,7 @@ ClrBBox()
 }
 
 void
-CheckPathBBox()
+CheckPathBBox(void)
 {
     Fixed llx, lly, urx, ury, tmp;
     FindPathBBox();
@@ -432,7 +434,8 @@ GetPathLSB(void)
     return (llx);
 }
 
-bool CheckBBoxes(e1, e2) PPathElt e1, e2;
+bool
+CheckBBoxes(PPathElt e1, PPathElt e2)
 {
     /* return true if e1 and e2 in same subpath or i
        the bbox for one is inside the bbox of the other */

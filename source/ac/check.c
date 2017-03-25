@@ -35,7 +35,7 @@ static bool forMultiMaster = false, inflPtFound = false;
 #define SDELTA3 (FixInt(10))
 
 static void
-chkBad()
+chkBad(void)
 {
     reCheckSmooth = ResolveConflictBySplit(e, false, NULL, NULL);
     ;
@@ -45,7 +45,7 @@ chkBad()
 #define LsTan(n, d) (abs(n) * 100 < abs(d) * sCurveTan)
 
 static void
-chkYDIR()
+chkYDIR(void)
 {
     if (y > yloc) { /* going up */
         if (ystate == goingUP)
@@ -83,7 +83,7 @@ chkYDIR()
 }
 
 static void
-chkYFLAT()
+chkYFLAT(void)
 {
     if (!yflat) {
         if (LsTan(y - yloc, x - xloc)) {
@@ -103,7 +103,7 @@ chkYFLAT()
 }
 
 static void
-chkXFLAT()
+chkXFLAT(void)
 {
     if (!xflat) {
         if (LsTan(x - xloc, y - yloc)) {
@@ -123,7 +123,7 @@ chkXFLAT()
 }
 
 static void
-chkXDIR()
+chkXDIR(void)
 {
     if (x > xloc) { /* going up */
         if (xstate == goingUP)
@@ -160,7 +160,8 @@ chkXDIR()
     }
 }
 
-static void chkDT(c) Cd c;
+static void
+chkDT(Cd c)
 {
     Fixed loc;
 
@@ -234,8 +235,8 @@ static void chkDT(c) Cd c;
 }
 
 #define FQ(x) ((int32_t)((x) >> 6))
-static int32_t CPDirection(x1, cy1, x2, y2, x3, y3) Fixed x1, cy1, x2, y2, x3,
-  y3;
+static int32_t
+CPDirection(Fixed x1, Fixed cy1, Fixed x2, Fixed y2, Fixed x3, Fixed y3)
 {
     int32_t q, q1, q2, q3;
     q1 = FQ(x2) * FQ(y3 - cy1);
@@ -249,9 +250,8 @@ static int32_t CPDirection(x1, cy1, x2, y2, x3, y3) Fixed x1, cy1, x2, y2, x3,
     return 0;
 }
 
-void RMovePoint(dx, dy, whichcp, e) Fixed dx, dy;
-PPathElt e;
-int32_t whichcp;
+void
+RMovePoint(Fixed dx, Fixed dy, int32_t whichcp, PPathElt e)
 {
     if (whichcp == cpStart) {
         e = e->prev;
@@ -285,7 +285,8 @@ int32_t whichcp;
     }
 }
 
-void Delete(e) PPathElt e;
+void
+Delete(PPathElt e)
 {
     PPathElt nxt, prv;
     nxt = e->next;
@@ -300,7 +301,8 @@ void Delete(e) PPathElt e;
         pathStart = nxt;
 }
 
-static void CheckSCurve(ee) PPathElt ee;
+static void
+CheckSCurve(PPathElt ee)
 {
     FltnRec fr;
     Cd c0, c1, c2, c3;
@@ -331,7 +333,7 @@ static void CheckSCurve(ee) PPathElt ee;
 }
 
 static void
-CheckZeroLength()
+CheckZeroLength(void)
 {
     PPathElt e, NxtE;
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3;
@@ -360,7 +362,7 @@ CheckZeroLength()
 }
 
 void
-CheckSmooth()
+CheckSmooth(void)
 {
     PPathElt e, nxt, NxtE;
     bool recheck;
@@ -418,7 +420,8 @@ restart:
     (FixInt(20)) /* DEBUG 8 BIT. DOuble value from 10 to 20 for change in      \
                     coordinate system. */
 
-static void chkBBDT(c) Cd c;
+static void
+chkBBDT(Cd c)
 {
     Fixed x = c.x, y = c.y;
     if (bbquit)
@@ -441,7 +444,7 @@ static void chkBBDT(c) Cd c;
 }
 
 void
-CheckForMultiMoveTo()
+CheckForMultiMoveTo(void)
 {
     PPathElt e = pathStart;
     bool moveto;
@@ -457,9 +460,8 @@ CheckForMultiMoveTo()
     }
 }
 
-void CheckBBoxEdge(e, vrt, lc, pf, pl) PPathElt e;
-bool vrt;
-Fixed lc, *pf, *pl;
+void
+CheckBBoxEdge(PPathElt e, bool vrt, Fixed lc, Fixed* pf, Fixed* pl)
 {
     FltnRec fr;
     Cd c0, c1, c2, c3;
@@ -486,8 +488,9 @@ Fixed lc, *pf, *pl;
     *pl = lst;
 }
 
-static void MakeColinear(tx, ty, x0, cy0, x1, cy1, xptr, yptr) Fixed tx, ty, x0,
-  cy0, x1, cy1, *xptr, *yptr;
+static void
+MakeColinear(Fixed tx, Fixed ty, Fixed x0, Fixed cy0, Fixed x1, Fixed cy1,
+             Fixed* xptr, Fixed* yptr)
 {
     Fixed dx, dy;
     float rdx, rdy, dxdy, dxsq, dysq, dsq, xi, yi, rx, ry, rx0, ry0;
@@ -525,7 +528,8 @@ static void MakeColinear(tx, ty, x0, cy0, x1, cy1, xptr, yptr) Fixed tx, ty, x0,
 }
 
 #define DEG(x) ((x)*57.29577951308232088)
-static Fixed ATan(a, b) Fixed a, b;
+static Fixed
+ATan(Fixed a, Fixed b)
 {
     float aa, bb, cc;
     acfixtopflt(a, &aa);
@@ -536,8 +540,9 @@ static Fixed ATan(a, b) Fixed a, b;
     return acpflttofix(&cc);
 }
 
-bool CheckSmoothness(x0, cy0, x1, cy1, x2, y2, pd) Fixed x0, cy0, x1, cy1, x2,
-  y2, *pd;
+bool
+CheckSmoothness(Fixed x0, Fixed cy0, Fixed x1, Fixed cy1, Fixed x2, Fixed y2,
+                Fixed* pd)
 {
     Fixed dx, dy, smdiff, smx, smy, at0, at1;
     dx = x0 - x1;
@@ -568,7 +573,7 @@ bool CheckSmoothness(x0, cy0, x1, cy1, x2, y2, pd) Fixed x0, cy0, x1, cy1, x2,
 }
 
 void
-CheckForDups()
+CheckForDups(void)
 {
     register PPathElt ob, nxt;
     register Fixed x, y;
@@ -594,7 +599,8 @@ foundMatch:
     ReportDuplicates(x, y);
 }
 
-void MoveSubpathToEnd(e) PPathElt e;
+void
+MoveSubpathToEnd(PPathElt e)
 {
     PPathElt subEnd, subStart, subNext, subPrev;
     subEnd = (e->type == CLOSEPATH) ? e : GetClosedBy(e);

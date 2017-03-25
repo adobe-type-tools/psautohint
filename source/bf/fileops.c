@@ -59,7 +59,7 @@ UnallocateMem(void* ptr)
 }
 
 extern int16_t
-GetTotalInputDirs()
+GetTotalInputDirs(void)
 {
     return total_inputdirs;
 }

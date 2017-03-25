@@ -16,7 +16,8 @@ static Fixed VFixXs[maxFixes], VFixDXs[maxFixes];
 static int32_t HFixCount, VFixCount;
 static Fixed bPrev, tPrev;
 
-void InitFix(reason) int32_t reason;
+void
+InitFix(int32_t reason)
 {
     switch (reason) {
         case STARTUP:
@@ -26,22 +27,24 @@ void InitFix(reason) int32_t reason;
     }
 }
 
-static void RecordHFix(y, dy) Fixed y, dy;
+static void
+RecordHFix(Fixed y, Fixed dy)
 {
     HFixYs[HFixCount] = y;
     HFixDYs[HFixCount] = dy;
     HFixCount++;
 }
 
-static void RecordVFix(x, dx) Fixed x, dx;
+static void
+RecordVFix(Fixed x, Fixed dx)
 {
     VFixXs[VFixCount] = x;
     VFixDXs[VFixCount] = dx;
     VFixCount++;
 }
 
-static void RecordForFix(vert, w, minW, b, t) bool vert;
-Fixed w, minW, b, t;
+static void
+RecordForFix(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t)
 {
     Fixed mn, mx, delta;
     if (b < t) {
@@ -78,8 +81,8 @@ Fixed w, minW, b, t;
     }
 }
 
-static bool CheckForInsideBands(loc, blues, numblues) Fixed loc, *blues;
-int32_t numblues;
+static bool
+CheckForInsideBands(Fixed loc, Fixed* blues, int32_t numblues)
 {
     int32_t i;
     for (i = 0; i < numblues; i += 2) {
@@ -90,8 +93,8 @@ int32_t numblues;
 }
 
 #define bFuzz (FixInt(6))
-static void CheckForNearBands(loc, blues, numblues) Fixed loc, *blues;
-int32_t numblues;
+static void
+CheckForNearBands(Fixed loc, Fixed* blues, int32_t numblues)
 {
     int32_t i;
     bool bottom = true;
@@ -111,8 +114,8 @@ int32_t numblues;
     }
 }
 
-bool FindLineSeg(loc, sL) Fixed loc;
-PClrSeg sL;
+bool
+FindLineSeg(Fixed loc, PClrSeg sL)
 {
     while (sL != NULL) {
         if (sL->sLoc == loc && sL->sType == sLINE)
@@ -126,9 +129,8 @@ PClrSeg sL;
 /* Traverses hSegList to check for near misses to
    the horizontal alignment zones. The list contains
    segments that may or may not have hints added. */
-void CheckTfmVal(hSegList, bandList, length) PClrSeg hSegList;
-Fixed* bandList;
-int32_t length;
+void
+CheckTfmVal(PClrSeg hSegList, Fixed* bandList, int32_t length)
 {
     Fixed tfmval;
     PClrSeg sList = hSegList;
@@ -142,8 +144,8 @@ int32_t length;
     }
 }
 #else
-void CheckTfmVal(b, t, vert) Fixed b, t;
-bool vert;
+void
+CheckTfmVal(Fixed b, Fixed t, bool vert)
 {
     if (t < b) {
         Fixed tmp;
@@ -160,8 +162,8 @@ bool vert;
 }
 #endif
 
-void CheckVal(val, vert) PClrVal val;
-bool vert;
+void
+CheckVal(PClrVal val, bool vert)
 {
     Fixed* stems;
     int32_t numstems, i;
@@ -208,8 +210,8 @@ bool vert;
         RecordForFix(vert, w, minW, b, t);
 }
 
-void CheckVals(vlst, vert) PClrVal vlst;
-bool vert;
+void
+CheckVals(PClrVal vlst, bool vert)
 {
     while (vlst != NULL) {
         CheckVal(vlst, vert);
@@ -217,8 +219,8 @@ bool vert;
     }
 }
 
-static void FixH(e, fixy, fixdy) PPathElt e;
-Fixed fixy, fixdy;
+static void
+FixH(PPathElt e, Fixed fixy, Fixed fixdy)
 {
     PPathElt prev, nxt;
     RMovePoint(0, fixdy, cpStart, e);
@@ -233,7 +235,8 @@ Fixed fixy, fixdy;
         RMovePoint(0, fixdy, cpCurve1, nxt);
 }
 
-static void FixHs(fixy, fixdy) Fixed fixy, fixdy;
+static void
+FixHs(Fixed fixy, Fixed fixdy)
 { /* y dy in user space */
     PPathElt e;
     Fixed xlst, ylst, xinit, yinit;
@@ -270,8 +273,8 @@ static void FixHs(fixy, fixdy) Fixed fixy, fixdy;
     }
 }
 
-static void FixV(e, fixx, fixdx) PPathElt e;
-Fixed fixx, fixdx;
+static void
+FixV(PPathElt e, Fixed fixx, Fixed fixdx)
 {
     PPathElt prev, nxt;
     RMovePoint(fixdx, 0, cpStart, e);
@@ -286,7 +289,8 @@ Fixed fixx, fixdx;
         RMovePoint(fixdx, 0, cpCurve1, nxt);
 }
 
-static void FixVs(fixx, fixdx) Fixed fixx, fixdx;
+static void
+FixVs(Fixed fixx, Fixed fixdx)
 { /* x dx in user space */
     PPathElt e;
     Fixed xlst, ylst, xinit, yinit;
@@ -324,7 +328,7 @@ static void FixVs(fixx, fixdx) Fixed fixx, fixdx;
 }
 
 bool
-DoFixes()
+DoFixes(void)
 {
     bool didfixes = false;
     int32_t i;

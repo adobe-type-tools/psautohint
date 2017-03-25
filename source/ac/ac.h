@@ -58,7 +58,7 @@
 typedef struct {
   int16_t limit;
   Fixed feps;
-  void (*report)();
+  void (*report)(Cd);
   Cd ll, ur;
   Fixed llx, lly;
   } FltnRec, *PFltnRec;
@@ -313,7 +313,6 @@ void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
 void AddHPair(PClrVal v, char ch);
 void AddVPair(PClrVal v, char ch);
 void XtraClrs(PPathElt e);
-bool CreateTimesFile();
 bool DoFile(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
             bool extracolor);
 void EvalV(void);

@@ -11,8 +11,8 @@
 
 #define fixedScale ((float)(FixOne))
 
-void acfixtopflt(x, pf) Fixed x;
-float* pf;
+void
+acfixtopflt(Fixed x, float* pf)
 
 #ifdef sun3
 {
@@ -25,7 +25,8 @@ float* pf;
 }
 #endif
 
-Fixed acpflttofix(pf) float* pf;
+Fixed
+acpflttofix(float* pf)
 {
     float f = *pf;
     if (f >= FixedPosInf / fixedScale)

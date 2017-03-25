@@ -210,13 +210,13 @@ CopyClrFromLst(char clr, register PClrPoint lst)
 }
 
 void
-CopyMainV()
+CopyMainV(void)
 {
     CopyClrFromLst('m', ptLstArray[0]);
 }
 
 void
-CopyMainH()
+CopyMainH(void)
 {
     CopyClrFromLst('v', ptLstArray[0]);
 }
@@ -346,7 +346,7 @@ UseCounter(PClrVal sLst, bool mclr)
 }
 
 static void
-GetNewPtLst()
+GetNewPtLst(void)
 {
     if (numPtLsts >= maxPtLsts) { /* increase size */
         PClrPoint* newArray;
@@ -664,7 +664,7 @@ DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1)
 }
 
 static void
-Yellows()
+Yellows(void)
 {
     Fixed pv, pd, pc, pb, pa;
     PClrVal sLst;
@@ -760,7 +760,7 @@ DoVStems(PClrVal sLst)
 }
 
 static void
-RemoveRedundantFirstColors()
+RemoveRedundantFirstColors(void)
 {
     register PPathElt e;
     if (numPtLsts < 2 || !SameColors(0, 1)) {
@@ -777,7 +777,7 @@ RemoveRedundantFirstColors()
 }
 
 static void
-AddColorsSetup()
+AddColorsSetup(void)
 {
     int i;
     vBigDist = 0;

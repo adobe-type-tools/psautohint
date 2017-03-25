@@ -23,8 +23,8 @@ End Edit History
 
 static int16_t warncnt = 0;
 
-static int (*errorproc)(
-  int16_t); /* proc to be called from LogMsg if error occurs */
+/* proc to be called from LogMsg if error occurs */
+static int (*errorproc)(int16_t);
 
 /* used for cacheing of log messages */
 static char lastLogStr[MAXMSGLEN + 1] = "";
@@ -45,7 +45,8 @@ static void LogMsg1(char* str, int16_t level, int16_t code, bool prefix);
             libErrorReportCB(s);                                               \
     }
 
-void set_errorproc(userproc) int (*userproc)(int16_t);
+void
+set_errorproc(int (*userproc)(int16_t))
 {
     errorproc = userproc;
 }

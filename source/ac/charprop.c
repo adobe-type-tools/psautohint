@@ -59,7 +59,8 @@ static char* SolEol1List[] = { "i", "j", "questiondown", "semicolon", NULL };
 
 static char* SolEolNeg1List[] = { "question", NULL };
 
-bool StrEqual(s1, s2) register char *s1, *s2;
+bool
+StrEqual(register char* s1, register char* s2)
 {
     register unsigned char c1, c2;
     while (true) {
@@ -74,7 +75,8 @@ bool StrEqual(s1, s2) register char *s1, *s2;
     }
 }
 
-extern bool FindNameInList(nm, lst) char *nm, **lst;
+extern bool
+FindNameInList(char* nm, char** lst)
 {
     char **l, *lnm;
     l = lst;
@@ -89,8 +91,8 @@ extern bool FindNameInList(nm, lst) char *nm, **lst;
 }
 
 /* Adds specified characters to CounterColorList array. */
-extern int AddCounterColorChars(charlist, ColorList) char *charlist,
-  *ColorList[];
+extern int
+AddCounterColorChars(char* charlist, char* ColorList[])
 {
     const char* setList = "(), \t\n\r";
     char* token;
@@ -126,7 +128,7 @@ extern int AddCounterColorChars(charlist, ColorList) char *charlist,
 }
 
 int32_t
-SpecialCharType()
+SpecialCharType(void)
 {
 /* 1 = upper; -1 = lower; 0 = neither */
 #if PYTHONLIB
@@ -143,7 +145,7 @@ SpecialCharType()
 }
 
 bool
-HColorChar()
+HColorChar(void)
 {
 #if PYTHONLIB
     return FindNameInList(FL_glyphname, HColorList);
@@ -152,7 +154,7 @@ HColorChar()
 }
 
 bool
-VColorChar()
+VColorChar(void)
 {
 #if PYTHONLIB
     return FindNameInList(FL_glyphname, VColorList);
@@ -161,7 +163,7 @@ VColorChar()
 }
 
 bool
-NoBlueChar()
+NoBlueChar(void)
 {
 #if PYTHONLIB
     return FindNameInList(FL_glyphname, NoBlueList);
@@ -170,7 +172,7 @@ NoBlueChar()
 }
 
 int32_t
-SolEolCharCode()
+SolEolCharCode(void)
 {
 #if PYTHONLIB
     if (FindNameInList(FL_glyphname, SolEol0List))
@@ -192,7 +194,7 @@ SolEolCharCode()
 /* This change was made to prevent bogus sol-eol's.  And to prevent
    adding sol-eol if there are a lot of subpaths. */
 bool
-SpecialSolEol()
+SpecialSolEol(void)
 {
     int32_t code = SolEolCharCode();
     int32_t count;
@@ -206,7 +208,8 @@ SpecialSolEol()
     return true;
 }
 
-static PPathElt SubpathEnd(e) PPathElt e;
+static PPathElt
+SubpathEnd(PPathElt e)
 {
     while (true) {
         e = e->next;
@@ -217,7 +220,8 @@ static PPathElt SubpathEnd(e) PPathElt e;
     }
 }
 
-static PPathElt SubpathStart(e) PPathElt e;
+static PPathElt
+SubpathStart(PPathElt e)
 {
     while (e != pathStart) {
         if (e->type == MOVETO)
@@ -227,7 +231,8 @@ static PPathElt SubpathStart(e) PPathElt e;
     return e;
 }
 
-static PPathElt SolEol(e) PPathElt e;
+static PPathElt
+SolEol(PPathElt e)
 {
     e = SubpathStart(e);
     e->sol = true;
@@ -237,7 +242,7 @@ static PPathElt SolEol(e) PPathElt e;
 }
 
 static void
-SolEolAll()
+SolEolAll(void)
 {
     PPathElt e;
     e = pathStart->next;
@@ -247,7 +252,8 @@ SolEolAll()
     }
 }
 
-static void SolEolUpperOrLower(upper) bool upper;
+static void
+SolEolUpperOrLower(bool upper)
 {
     PPathElt e, s1, s2;
     Fixed x1, y1, s1y, s2y;
@@ -274,7 +280,7 @@ static void SolEolUpperOrLower(upper) bool upper;
 /* This change was made to prevent bogus sol-eol's.  And to prevent
    adding sol-eol if there are a lot of subpaths. */
 void
-AddSolEol()
+AddSolEol(void)
 {
     if (pathStart == NULL)
         return;
@@ -295,7 +301,7 @@ AddSolEol()
 }
 
 bool
-MoveToNewClrs()
+MoveToNewClrs(void)
 {
 #if PYTHONLIB
     return StrEqual(FL_glyphname, "percent") ||

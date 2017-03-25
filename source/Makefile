@@ -26,6 +26,7 @@ CFLAGS = \
 	-I$(SRC_DIR)/bf \
 	-Wall \
 	-Wdeclaration-after-statement \
+	-Wstrict-prototypes \
 	$(NULL)
 
 ifeq ($(OS),Windows_NT)
