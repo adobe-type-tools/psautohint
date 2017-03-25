@@ -589,7 +589,6 @@ static void NumberPath() {
 void SaveFile() {
 	register PPathElt e = pathStart;
 	Cd c1, c2, c3;
-	char outfile[MAXPATHLEN];
 
 	assert(bezoutput != NULL);
 
@@ -670,6 +669,4 @@ void SaveFile() {
 		e = e->next;
 	}
 	ws("ed\n");
-
-		sprintf(outfile, "%s%s", outPrefix, fileName);
 }

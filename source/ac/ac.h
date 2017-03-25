@@ -180,8 +180,6 @@ extern float theta, hBigDistR, vBigDistR, maxVal, minVal;
 extern int32_t DMIN, DELTA, CPpercent, bendTan, sCurveTan;
 extern PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
 extern char * fileName;
-extern char outPrefix[MAXPATHLEN], *outSuffix;
-extern char inPrefix[MAXPATHLEN], *inSuffix;
 extern PClrSeg segLists[4]; /* left, right, top, bot */
 extern PClrPoint pointList, *ptLstArray;
 extern int32_t ptLstIndex, numPtLsts, maxPtLsts;

@@ -31,8 +31,6 @@ int32_t lenTopBands, lenBotBands, numSerifs, DMIN, DELTA, CPpercent;
 int32_t bendTan, sCurveTan;
 PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
 char * fileName;
-char outPrefix[MAXPATHLEN];
-char inPrefix[MAXPATHLEN];
 PClrSeg segLists[4];
 Fixed VStems[MAXSTEMS], HStems[MAXSTEMS];
 int32_t NumVStems, NumHStems;
@@ -216,8 +214,6 @@ bool AutoColor(
              bool roundCoords,
 			 bool doLog)
 {
-  char *tempstring;
-
 	makehintslog=doLog;
   (void) InitAll(STARTUP);
 
@@ -229,9 +225,6 @@ bool AutoColor(
   autoLinearCurveFix = editChar;
   if (debug)
     DEBUG = showClrInfo = showHs = showVs = listClrInfo = true;
-  if ((tempstring = getenv(CHARSETVAR)) != NULL)
-    set_charsetdir(tempstring);
-  else set_charsetdir("\0");
   if(doLog)
 	  OpenLogFiles();
 

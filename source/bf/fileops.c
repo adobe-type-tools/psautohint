@@ -7,7 +7,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 #include "charpath.h"
 
-static char charsetDir[MAXPATHLEN];
 static int16_t total_inputdirs = 1;   /* number of input directories           */
 char globmsg[MAXMSGLEN + 1];        /* used to format messages               */
 
@@ -50,13 +49,6 @@ void UnallocateMem(void *ptr)
 {
 	/* free(ptr) */
 	AC_memmanageFuncPtr(AC_memmanageCtxPtr, (void *)ptr, 0);
-}
-
-/* Sets the global variable charsetDir. */
-extern void set_charsetdir(dirname)
-char *dirname;
-{
-  strcpy(charsetDir, dirname);
 }
 
 extern int16_t GetTotalInputDirs()
