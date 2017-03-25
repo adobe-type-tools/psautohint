@@ -279,7 +279,6 @@ ACLIB_API int  AutoColorString(const char *srcbezdata, const char *fontinfo, cha
 			   (bool)debug, /*debug*/
 			   allowHintSub, /* extracolor*/ 
 			   allowEdit, /*editChars*/ 
-			   false, /*quiet*/ 
                 roundCoords);
 	/* result == true is good */
 	/* The following call to cleanup() always returns control to just after the setjmp() function call above,,
