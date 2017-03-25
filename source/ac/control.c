@@ -8,13 +8,13 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 extern void CSWrite(void);
 
-static void DoHStems();
-static void DoVStems();
+static void DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1);
+static void DoVStems(PClrVal sLst);
 
 static bool CounterFailed;
 
-void InitAll(int32_t reason) {
-	InitData(reason); /* must be first */
+void InitAll(const ACFontInfo* fontinfo, int32_t reason) {
+	InitData(fontinfo, reason); /* must be first */
 	InitAuto(reason);
 	InitFix(reason);
 	InitGen(reason);
@@ -339,7 +339,7 @@ void XtraClrs(PPathElt e) {
 	pointList = ptLstArray[ptLstIndex];
 }
 
-static void Blues() {
+static void Blues(const ACFontInfo* fontinfo) {
 	Fixed pv, pd, pc, pb, pa;
 	PClrVal sLst;
 
@@ -498,7 +498,7 @@ static void Blues() {
 	}
 	MarkLinks(valList, true);
 	CheckVals(valList, false);
-	DoHStems(valList);  /* Report stems and alignment zones, if this has been requested. */
+	DoHStems(fontinfo, valList);  /* Report stems and alignment zones, if this has been requested. */
 	PickHVals(valList); /* Moves best ClrVal items from valList to Hcoloring list. (? Choose from set of ClrVals for the samte stem values.) */
 	if (!CounterFailed && HColorChar()) {
 		pruneValue = pv;
@@ -537,7 +537,7 @@ static void Blues() {
 	}
 }
 
-static void DoHStems(PClrVal sLst1) {
+static void DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1) {
 	Fixed bot, top;
 	Fixed charTop = INT32_MIN, charBot = INT32_MAX;
 	bool curved;
@@ -568,11 +568,11 @@ static void DoHStems(PClrVal sLst1) {
 		AddHStem(top, bot, curved);
 		sLst1 = sLst1->vNxt;
 		if (top != INT32_MIN || bot != INT32_MAX) {
-			AddStemExtremes(UnScaleAbs(bot), UnScaleAbs(top));
+			AddStemExtremes(UnScaleAbs(fontinfo, bot), UnScaleAbs(fontinfo, top));
 		}
 	}
 	if (charTop != INT32_MIN || charBot != INT32_MAX) {
-		AddCharExtremes(UnScaleAbs(charBot), UnScaleAbs(charTop));
+		AddCharExtremes(UnScaleAbs(fontinfo, charBot), UnScaleAbs(fontinfo, charTop));
 	}
 }
 
@@ -718,14 +718,14 @@ static void AddColorsSetup() {
 
 /* If extracolor is true then it is ok to have multi-level
  coloring. */
-static void AddColorsInnerLoop(bool extracolor) {
+static void AddColorsInnerLoop(const ACFontInfo* fontinfo, bool extracolor) {
 	int32_t solEolCode = 2, retryColoring = 0;
 	bool isSolEol = false;
 	while (true) {
 		PreGenPts();
 		CheckSmooth();
 		InitShuffleSubpaths();
-		Blues();
+		Blues(fontinfo);
 		if (!doAligns) {
 			Yellows();
 		}
@@ -774,8 +774,8 @@ static void AddColorsInnerLoop(bool extracolor) {
 		}
 
 		/* SaveFile(); SaveFile is always called in AddColorsCleanup, so this is a duplciate */
-		InitAll(RESTART);
-		if (writecoloredbez && !ReadCharFile(false, false, false, true)) {
+		InitAll(fontinfo, RESTART);
+		if (writecoloredbez && !ReadCharFile(fontinfo, false, false, false, true)) {
 			break;
 		}
 		AddColorsSetup();
@@ -790,7 +790,7 @@ static void AddColorsInnerLoop(bool extracolor) {
 	}
 }
 
-static void AddColorsCleanup() {
+static void AddColorsCleanup(const ACFontInfo* fontinfo) {
 	RemoveRedundantFirstColors();
 	reportErrors = true;
 	if (writecoloredbez) {
@@ -800,16 +800,16 @@ static void AddColorsCleanup() {
 			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
 		else {
-				SaveFile();
+				SaveFile(fontinfo);
 		}
 	}
-	InitAll(RESTART);
+	InitAll(fontinfo, RESTART);
 }
 
-static void AddColors(bool extracolor) {
+static void AddColors(const ACFontInfo* fontinfo, bool extracolor) {
 	if (pathStart == NULL || pathStart == pathEnd) {
 		PrintMessage("No character path, so no hints.");
-			SaveFile(); /* make sure it gets saved with no coloring */
+			SaveFile(fontinfo); /* make sure it gets saved with no coloring */
 		return;
 	}
 	reportErrors = true;
@@ -824,19 +824,19 @@ static void AddColors(bool extracolor) {
 		hasFlex = false;
 		AutoAddFlex();
 	}
-	AddColorsInnerLoop(extracolor);
-	AddColorsCleanup();
+	AddColorsInnerLoop(fontinfo, extracolor);
+	AddColorsCleanup(fontinfo);
 }
 
-bool DoFile(char *fname, bool extracolor) {
+bool DoFile(const ACFontInfo* fontinfo, char *fname, bool extracolor) {
 	int32_t lentop = lenTopBands, lenbot = lenBotBands;
 	fileName = fname;
-	if (!ReadCharFile(true, false, false, true)) {
+	if (!ReadCharFile(fontinfo, true, false, false, true)) {
 		sprintf(globmsg, "Cannot open %s file.\n", fileName);
 		LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 	}
 	PrintMessage(""); /* Just print the file name. */
-	AddColors(extracolor);
+	AddColors(fontinfo, extracolor);
 	lenTopBands = lentop;
 	lenBotBands = lenbot;
 	return true;

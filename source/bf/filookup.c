@@ -11,10 +11,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #include "machinedep.h"
 #include "ac.h"
 
-static char *GetHVStems(
-  char *, bool
-);
-
 static int misspace(int c)
 {
 	if (c==' ' || c=='\n' || c=='\r' || c=='\t')
@@ -31,20 +27,20 @@ static int misdigit(int c)
    file.  If the keyword doesn't exist and this is an optional
    key, returns a NULL.  Otherwise, returns the value string. */
 extern char*
-GetFntInfo(char* keyword, bool optional)
+GetFntInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
 {
     char* returnstring = NULL;
     int i;
 
-    assert(featurefiledata != NULL);
+    assert(fontinfo != NULL);
 
-    for (i = 0; i < featurefiledata->size; i++) {
-        if (featurefiledata->entries[i].key &&
-            !strcmp(featurefiledata->entries[i].key, keyword)) {
+    for (i = 0; i < fontinfo->size; i++) {
+        if (fontinfo->entries[i].key &&
+            !strcmp(fontinfo->entries[i].key, keyword)) {
             returnstring = (char*)AllocateMem(
-              (unsigned)strlen(featurefiledata->entries[i].value) + 1,
-              sizeof(char), "GetFntInfo return str");
-            strcpy(returnstring, featurefiledata->entries[i].value);
+              (unsigned)strlen(fontinfo->entries[i].value) + 1, sizeof(char),
+              "GetFntInfo return str");
+            strcpy(returnstring, fontinfo->entries[i].value);
             return returnstring;
         }
     }
@@ -59,13 +55,13 @@ GetFntInfo(char* keyword, bool optional)
 }
 
 /* Appends Aux{H,V}Stems which is optional to StemSnap{H,V} respectively. */
-static char *GetHVStems(char *kw, bool optional)
+static char *GetHVStems(const ACFontInfo* fontinfo, char *kw, bool optional)
 {
   char *fistr1, *fistr2, *newfistr;
   char *end, *start;
   
-  fistr1 = GetFntInfo(( (STREQ(kw, "AuxHStems")) ? "StemSnapH" : "StemSnapV"), optional);
-  fistr2 = GetFntInfo(kw, ACOPTIONAL);
+  fistr1 = GetFntInfo(fontinfo, ( (STREQ(kw, "AuxHStems")) ? "StemSnapH" : "StemSnapV"), optional);
+  fistr2 = GetFntInfo(fontinfo, kw, ACOPTIONAL);
   if (fistr2 == NULL) return fistr1;
   if (fistr1 == NULL) return fistr2;
   /* Merge two arrays. */
@@ -90,7 +86,7 @@ static char *GetHVStems(char *kw, bool optional)
    current font directory and not for all input directories
    (e.g., for a multi-master font).
  */  
-extern void ParseIntStems(char *kw, bool optional, int32_t maxstems, int *stems, int32_t *pnum, char *blendstr)
+extern void ParseIntStems(const ACFontInfo* fontinfo, char *kw, bool optional, int32_t maxstems, int *stems, int32_t *pnum, char *blendstr)
 {
   char c;
   char *line;  
@@ -104,8 +100,8 @@ extern void ParseIntStems(char *kw, bool optional, int32_t maxstems, int *stems,
   {
     cnt = 0;
     if (STREQ(kw, "AuxHStems") || STREQ(kw, "AuxVStems"))
-      initline = GetHVStems(kw, optional);
-    else initline = GetFntInfo (kw, optional);
+      initline = GetHVStems(fontinfo, kw, optional);
+    else initline = GetFntInfo (fontinfo, kw, optional);
     if (initline == NULL)
     {
     if (targetCnt > 0)

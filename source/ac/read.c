@@ -31,14 +31,14 @@ static bool forMultiMaster, includeHints;
 
 static float origEmSquare = 0.0;
 
-Fixed ScaleAbs(unscaled) Fixed unscaled; {
+Fixed ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled) {
 Fixed temp1;
   if (!scalinghints)
     return unscaled;
   if (origEmSquare == 0.0)
   {
     char *fistr;
-    if ((fistr = GetFntInfo("OrigEmSqUnits", ACOPTIONAL)) == NULL)
+    if ((fistr = GetFntInfo(fontinfo, "OrigEmSqUnits", ACOPTIONAL)) == NULL)
       origEmSquare = 1000.0;
     else
     {
@@ -50,14 +50,14 @@ Fixed temp1;
   return temp1;
 }
 
-Fixed UnScaleAbs(scaled) Fixed scaled; {
+Fixed UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled){
 Fixed temp1;
   if (!scalinghints)
     return scaled;
   if (origEmSquare == 0.0)
   {
     char *fistr;
-    if ((fistr = GetFntInfo("OrigEmSqUnits", ACOPTIONAL)) == NULL)
+    if ((fistr = GetFntInfo(fontinfo, "OrigEmSqUnits", ACOPTIONAL)) == NULL)
       origEmSquare = 1000.0;
     else
     {
@@ -118,14 +118,14 @@ static void psDIV() {
   Push(x);
   }
 
-static void RDcurveto(c1, c2, c3) Cd c1, c2, c3; {
+static void RDcurveto(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3) {
   if (!forMultiMaster)
   {
     PPathElt new;
     new = AppendElement(CURVETO);
-    new->x1 = tfmx(ScaleAbs(c1.x)); new->y1 = tfmy(ScaleAbs(c1.y));
-    new->x2 = tfmx(ScaleAbs(c2.x)); new->y2 = tfmy(ScaleAbs(c2.y));
-    new->x3 = tfmx(ScaleAbs(c3.x)); new->y3 = tfmy(ScaleAbs(c3.y));
+    new->x1 = tfmx(ScaleAbs(fontinfo, c1.x)); new->y1 = tfmy(ScaleAbs(fontinfo, c1.y));
+    new->x2 = tfmx(ScaleAbs(fontinfo, c2.x)); new->y2 = tfmy(ScaleAbs(fontinfo, c2.y));
+    new->x3 = tfmx(ScaleAbs(fontinfo, c3.x)); new->y3 = tfmy(ScaleAbs(fontinfo, c3.y));
   }
   else
   {
@@ -142,12 +142,12 @@ static void RDcurveto(c1, c2, c3) Cd c1, c2, c3; {
   }
   }
 
-static void RDmtlt(etype) int32_t etype; {
+static void RDmtlt(const ACFontInfo* fontinfo, int32_t etype) {
   if (!forMultiMaster)
   {
     PPathElt new;
     new = AppendElement(etype);
-    new->x = tfmx(ScaleAbs(currentx)); new->y = tfmy(ScaleAbs(currenty));
+    new->x = tfmx(ScaleAbs(fontinfo, currentx)); new->y = tfmy(ScaleAbs(fontinfo, currenty));
       return;
   }
   else
@@ -159,29 +159,29 @@ static void RDmtlt(etype) int32_t etype; {
   }
   }
 
-#define RDlineto() RDmtlt(LINETO)
-#define RDmoveto() RDmtlt(MOVETO)
+#define RDlineto() RDmtlt(fontinfo, LINETO)
+#define RDmoveto() RDmtlt(fontinfo, MOVETO)
 
-static void psRDT() {
+static void psRDT(const ACFontInfo* fontinfo) {
   Cd c;
   PopPCd(&c);
   tempx = c.x; tempy = c.y;
   DoDelta(c.x, c.y);
   RDlineto(); }
 
-static void psHDT() {
+static void psHDT(const ACFontInfo* fontinfo) {
   Fixed dx;
   tempy = 0;
   dx = tempx = Pop(); currentx += dx;
   RDlineto(); }
 
-static void psVDT() {
+static void psVDT(const ACFontInfo* fontinfo) {
   Fixed dy;
   tempx = 0;
   dy = tempy = Pop(); currenty += dy;
   RDlineto(); }
 
-static void psRMT() {
+static void psRMT(const ACFontInfo* fontinfo) {
   Cd c;
   PopPCd(&c);
   if (flex) return;
@@ -189,43 +189,43 @@ static void psRMT() {
   DoDelta(c.x, c.y);
   RDmoveto(); }
 
-static void psHMT() {
+static void psHMT(const ACFontInfo* fontinfo) {
   Fixed dx;
   tempy = 0;
   dx = tempx = Pop(); currentx += dx;
   RDmoveto(); }
 
-static void psVMT() {
+static void psVMT(const ACFontInfo* fontinfo) {
   Fixed dy;
   tempx = 0;
   dy = tempy = Pop(); currenty += dy;
   RDmoveto(); }
 
-static void Rct(c1, c2, c3) Cd c1, c2, c3; {
+static void Rct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3){
   tempx = currentx; tempy = currenty;
   DoDelta(c1.x,c1.y); c1.x = currentx; c1.y = currenty;
   DoDelta(c2.x,c2.y); c2.x = currentx; c2.y = currenty;
   DoDelta(c3.x,c3.y); c3.x = currentx; c3.y = currenty;
-  RDcurveto(c1, c2, c3); }
+  RDcurveto(fontinfo, c1, c2, c3); }
 
-static void psRCT() {
+static void psRCT(const ACFontInfo* fontinfo) {
   Cd c1, c2, c3;
   PopPCd(&c3); PopPCd(&c2); PopPCd(&c1);
-  Rct(c1, c2, c3); }
+  Rct(fontinfo, c1, c2, c3); }
 
-static void psVHCT() {
+static void psVHCT(const ACFontInfo* fontinfo) {
   Cd c1, c2, c3;
   c3.y = 0; c3.x = Pop();
   PopPCd(&c2);
   c1.y = Pop(); c1.x = 0;
-  Rct(c1, c2, c3); }
+  Rct(fontinfo, c1, c2, c3); }
 
-static void psHVCT() {
+static void psHVCT(const ACFontInfo* fontinfo) {
   Cd c1, c2, c3;
   c3.y = Pop(); c3.x = 0;
   PopPCd(&c2);
   c1.y = 0; c1.x = Pop();
-  Rct(c1, c2, c3); }
+  Rct(fontinfo, c1, c2, c3); }
 
 static void psCP() {
   if (!forMultiMaster)
@@ -234,7 +234,7 @@ static void psCP() {
     AppendCharPathElement(CP);
   }
 
-static void psMT() {
+static void psMT(const ACFontInfo* fontinfo) {
   Cd c;
   c.y = Pop(); c.x = Pop();
   tempx = c.x - currentx; tempy = c.y - currenty;
@@ -242,7 +242,7 @@ static void psMT() {
   RDmoveto();
   }
 
-static void psDT() {
+static void psDT(const ACFontInfo* fontinfo) {
   Cd c;
   c.y = Pop(); c.x = Pop();
   tempx = c.x - currentx; tempy = c.y - currenty;
@@ -250,20 +250,20 @@ static void psDT() {
   RDlineto();
   }
 
-static void psCT() {
+static void psCT(const ACFontInfo* fontinfo) {
   Cd c1, c2, c3;
   tempx = currentx; tempy = currenty;
   PopPCd(&c3); PopPCd(&c2); PopPCd(&c1);
-  RDcurveto(c1, c2, c3); }
+  RDcurveto(fontinfo, c1, c2, c3); }
 
-static void psFLX() {
+static void psFLX(const ACFontInfo* fontinfo) {
   Cd c0, c1, c2, c3, c4, c5;
   int32_t i;
   for (i = 0; i < 5; i++) (void) Pop();
   PopPCd(&c5); PopPCd(&c4); PopPCd(&c3);
   PopPCd(&c2); PopPCd(&c1); PopPCd(&c0);
-  Rct(c0, c1, c2);
-  Rct(c3, c4, c5);
+  Rct(fontinfo, c0, c1, c2);
+  Rct(fontinfo, c3, c4, c5);
   flex = false;
   }
 
@@ -300,24 +300,24 @@ int isPrefix(const char *s, const char* pref)
 	return 1;
 }
 
-static void DoName(nm, buff, len) const char * nm, *buff; int len; {
+static void DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len) {
   switch (len) {
     case 2:
       switch (nm[0]) {
         case 'c': /* ct, cp */
           switch (nm[1]) {
-            case 't': psCT(); break;
-	    case 'p': psCP(); break;
+            case 't': psCT(fontinfo); break;
+	    case 'p': psCP(fontinfo); break;
 	    default: goto badFile;
 	    }
           break;
 	case 'm': /* mt */
           if (nm[1] != 't') goto badFile;
-	  psMT();
+	  psMT(fontinfo);
 	  break;
 	case 'd': /* dt */
           if (nm[1] != 't') goto badFile;
-	  psDT();
+	  psDT(fontinfo);
 	  break;
 	case 's': /* sc */
           if (nm[1] != 'c') goto badFile;
@@ -345,25 +345,25 @@ static void DoName(nm, buff, len) const char * nm, *buff; int len; {
         case 'r': /* rdt, rmt, rct */
           if (nm[2] != 't') goto badFile;
           switch (nm[1]) {
-            case 'd': psRDT(); break;
-	    case 'm': psRMT(); break;
-	    case 'c': psRCT(); break;
+            case 'd': psRDT(fontinfo); break;
+	    case 'm': psRMT(fontinfo); break;
+	    case 'c': psRCT(fontinfo); break;
 	    default: goto badFile;
             }
           break;
 	case 'h': /* hdt, hmt */
           if (nm[2] != 't') goto badFile;
           switch (nm[1]) {
-            case 'd': psHDT(); break;
-	    case 'm': psHMT(); break;
+            case 'd': psHDT(fontinfo); break;
+	    case 'm': psHMT(fontinfo); break;
 	    default: goto badFile;
             }
           break;
 	case 'v': /* vdt, vmt */
           if (nm[2] != 't') goto badFile;
           switch (nm[1]) {
-            case 'd': psVDT(); break;
-	    case 'm': psVMT(); break;
+            case 'd': psVDT(fontinfo); break;
+	    case 'm': psVMT(fontinfo); break;
 	    default: goto badFile;
             }
           break;
@@ -380,7 +380,7 @@ static void DoName(nm, buff, len) const char * nm, *buff; int len; {
 	    }
           break;
 	case 'f': /* flx */
-          if (nm[1] == 'l' && nm[2] == 'x') psFLX();
+          if (nm[1] == 'l' && nm[2] == 'x') psFLX(fontinfo);
 	  else goto badFile;
 	  break;
 	case 'd': /* div */
@@ -395,11 +395,11 @@ static void DoName(nm, buff, len) const char * nm, *buff; int len; {
       switch (nm[0]) {
         case 'v': /* vhct */
           if (nm[1] != 'h') goto badFile;
-	  psVHCT();
+	  psVHCT(fontinfo);
 	  break;
 	case 'h': /* hvct */
           if (nm[1] != 'v') goto badFile;
-	  psHVCT();
+	  psHVCT(fontinfo);
 	  break;
         default: goto badFile;
         }
@@ -445,7 +445,7 @@ static void DoName(nm, buff, len) const char * nm, *buff; int len; {
   }
   }
 
-static void ParseString(s) const char * s; {
+static void ParseString(const ACFontInfo* fontinfo, const char* s){
   const char * s0;
     char c;
     char *c0;
@@ -513,7 +513,7 @@ static void ParseString(s) const char * s; {
 			if (c == 0)
 				break;
             }
-          DoName(s0, s, s-s0-1);
+          DoName(fontinfo, s0, s, s-s0-1);
 		if (c == '\0')
 			s--;
          continue;
@@ -567,8 +567,7 @@ static void ParseString(s) const char * s; {
     }
   }
 
-bool ReadCharFile(normal, forBlendData, readHints, prependprefix)
-bool normal, forBlendData, readHints, prependprefix; 
+bool ReadCharFile(const ACFontInfo* fontinfo, bool normal, bool forBlendData, bool readHints, bool prependprefix)
 {
   assert(bezstring != NULL);
 
@@ -581,7 +580,7 @@ bool normal, forBlendData, readHints, prependprefix;
   fprintf(OUTPUTBUFF, "%s", bezstring);
 #endif
 
-  ParseString(bezstring);
+  ParseString(fontinfo, bezstring);
 
   return true;
 }
