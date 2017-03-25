@@ -195,8 +195,8 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
 
 /* Returns whether coloring was successful. */
 bool
-AutoColor(const ACFontInfo* fontinfo, bool fixStems, bool debug,
-          bool extracolor, bool changeChar, bool roundCoords)
+AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
+          bool debug, bool extracolor, bool changeChar, bool roundCoords)
 {
     InitAll(fontinfo, STARTUP);
 
@@ -212,5 +212,5 @@ AutoColor(const ACFontInfo* fontinfo, bool fixStems, bool debug,
     if (debug)
         DEBUG = showClrInfo = showHs = showVs = listClrInfo = true;
 
-    return DoFile(fontinfo, "", extracolor);
+    return DoFile(fontinfo, srcbezdata, "", extracolor);
 }
