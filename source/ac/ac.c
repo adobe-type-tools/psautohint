@@ -207,7 +207,6 @@ bool AutoColor(
 			 bool debug,
 			 bool extracolor,
 			 bool changeChar,
-			 bool quiet,
              bool roundCoords)
 {
   (void) InitAll(STARTUP);
