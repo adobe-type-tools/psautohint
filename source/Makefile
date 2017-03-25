@@ -26,6 +26,7 @@ CFLAGS = \
 	-I$(SRC_DIR)/bf \
 	-DAC_C_LIB=1 \
 	-Wall \
+	-Wdeclaration-after-statement \
 	$(NULL)
 
 ifeq ($(OS),Windows_NT)
