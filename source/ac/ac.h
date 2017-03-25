@@ -442,5 +442,5 @@ void AddHStem();
 void AddCharExtremes();
 void AddStemExtremes ();
 
-bool AutoColor(bool release, bool fixStems, bool debug, bool extracolor,
+bool AutoColor(bool fixStems, bool debug, bool extracolor,
                bool changeChar, bool quiet, bool roundCoords, bool doLog);

@@ -275,7 +275,6 @@ ACLIB_API int  AutoColorString(const char *srcbezdata, const char *fontinfo, cha
 	*bezoutput=0;
 	
 	result = AutoColor(
-		       false, /* whether any new coloring should cause error */
 		       false,  /*fixStems*/
 			   (bool)debug, /*debug*/
 			   allowHintSub, /* extracolor*/ 
