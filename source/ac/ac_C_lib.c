@@ -14,8 +14,7 @@ const char *libversion = "1.6.0";
 const char *progname="AC_C_lib";
 char editingResource=0;
 
-FFEntry *featurefiledata;
-int featurefilesize;
+ACFontInfo *featurefiledata;
 
 char *FL_glyphname=0;
 
@@ -53,70 +52,78 @@ static void skippsstring(const char **current)
 	}while(parencount>0);
 }
 
-static void FreeFontInfoArray(void)
+static void
+FreeFontInfoArray(ACFontInfo* fontinfo)
 {
-	int i;
-	
-	for (i=0; i<featurefilesize; i++)
-	{
-		if (featurefiledata[i].value[0])
-		{
-			ACFREEMEM(featurefiledata[i].value);
-		}
-	}
-	ACFREEMEM(featurefiledata);
-	
+  int i;
+
+  for (i = 0; i < fontinfo->size; i++) {
+    if (fontinfo->entries[i].value[0]) {
+      ACFREEMEM(fontinfo->entries[i].value);
+    }
+  }
+  ACFREEMEM(fontinfo->entries);
+  ACFREEMEM(fontinfo);
 }
+
+static ACFontInfo*
+NewFontInfoArray(int size)
+{
+  ACFontInfo* fontinfo = (ACFontInfo*)ACNEWMEM(sizeof(ACFontInfo));
+  fontinfo->size = size;
+  fontinfo->entries = (FFEntry*)ACNEWMEM(size * sizeof(FFEntry));
+  return fontinfo;
+}
+
 static int ParseFontInfo(const char *fontinfo)
 {
 	const char *kwstart, *kwend, *tkstart, *current;
 	int i;
 
-	featurefilesize=34;
-	featurefiledata= ( FFEntry *) ACNEWMEM(featurefilesize*sizeof(FFEntry));
-	featurefiledata[0].key="OrigEmSqUnits";
-	featurefiledata[1].key="FontName";
-	featurefiledata[2].key="FlexOK";
+	featurefiledata = NewFontInfoArray(34);
+	featurefiledata->entries[0].key="OrigEmSqUnits";
+	featurefiledata->entries[1].key="FontName";
+	featurefiledata->entries[2].key="FlexOK";
 	/* Blue Values */
-	featurefiledata[3].key="BaselineOvershoot";
-	featurefiledata[4].key="BaselineYCoord";
-	featurefiledata[5].key="CapHeight";
-	featurefiledata[6].key="CapOvershoot";
-	featurefiledata[7].key="LcHeight";
-	featurefiledata[8].key="LcOvershoot";
-	featurefiledata[9].key="AscenderHeight";
-	featurefiledata[10].key="AscenderOvershoot";
-	featurefiledata[11].key="FigHeight";
-	featurefiledata[12].key="FigOvershoot";
-	featurefiledata[13].key="Height5";
-	featurefiledata[14].key="Height5Overshoot";
-	featurefiledata[15].key="Height6";
-	featurefiledata[16].key="Height6Overshoot";
+	featurefiledata->entries[3].key="BaselineOvershoot";
+	featurefiledata->entries[4].key="BaselineYCoord";
+	featurefiledata->entries[5].key="CapHeight";
+	featurefiledata->entries[6].key="CapOvershoot";
+	featurefiledata->entries[7].key="LcHeight";
+	featurefiledata->entries[8].key="LcOvershoot";
+	featurefiledata->entries[9].key="AscenderHeight";
+	featurefiledata->entries[10].key="AscenderOvershoot";
+	featurefiledata->entries[11].key="FigHeight";
+	featurefiledata->entries[12].key="FigOvershoot";
+	featurefiledata->entries[13].key="Height5";
+	featurefiledata->entries[14].key="Height5Overshoot";
+	featurefiledata->entries[15].key="Height6";
+	featurefiledata->entries[16].key="Height6Overshoot";
 	/* Other Values */
-	featurefiledata[17].key="Baseline5Overshoot";
-	featurefiledata[18].key="Baseline5";
-	featurefiledata[19].key="Baseline6Overshoot";
-	featurefiledata[20].key="Baseline6";
-	featurefiledata[21].key="SuperiorOvershoot";
-	featurefiledata[22].key="SuperiorBaseline";
-	featurefiledata[23].key="OrdinalOvershoot";
-	featurefiledata[24].key="OrdinalBaseline";
-	featurefiledata[25].key="DescenderOvershoot";
-	featurefiledata[26].key="DescenderHeight";
+	featurefiledata->entries[17].key="Baseline5Overshoot";
+	featurefiledata->entries[18].key="Baseline5";
+	featurefiledata->entries[19].key="Baseline6Overshoot";
+	featurefiledata->entries[20].key="Baseline6";
+	featurefiledata->entries[21].key="SuperiorOvershoot";
+	featurefiledata->entries[22].key="SuperiorBaseline";
+	featurefiledata->entries[23].key="OrdinalOvershoot";
+	featurefiledata->entries[24].key="OrdinalBaseline";
+	featurefiledata->entries[25].key="DescenderOvershoot";
+	featurefiledata->entries[26].key="DescenderHeight";
 	
-	featurefiledata[27].key="DominantV";
-	featurefiledata[28].key="StemSnapV";
-	featurefiledata[29].key="DominantH";
-	featurefiledata[30].key="StemSnapH";
-	featurefiledata[31].key="VCounterChars";
-	featurefiledata[32].key="HCounterChars";
+	featurefiledata->entries[27].key="DominantV";
+	featurefiledata->entries[28].key="StemSnapV";
+	featurefiledata->entries[29].key="DominantH";
+	featurefiledata->entries[30].key="StemSnapH";
+	featurefiledata->entries[31].key="VCounterChars";
+	featurefiledata->entries[32].key="HCounterChars";
 	/* later addenda */
-	featurefiledata[33].key="BlueFuzz";
+	featurefiledata->entries[33].key="BlueFuzz";
 	
 	
-	for (i=0; i<featurefilesize; i++)
+	for (i=0; i<featurefiledata->size; i++)
 	{
-		featurefiledata[i].value="";
+		featurefiledata->entries[i].value="";
 	}
 	
 	if(!fontinfo)
@@ -145,20 +152,20 @@ static int ParseFontInfo(const char *fontinfo)
 			skipnonblanks();
 		
 		kwLen = (int)(kwend - kwstart);
-		for (i=0; i<featurefilesize; i++)
+		for (i=0; i<featurefiledata->size; i++)
 		{
-			size_t matchLen = NUMMAX(kwLen, strlen(featurefiledata[i].key));
-			if(!strncmp(featurefiledata[i].key, kwstart, matchLen))
+			size_t matchLen = NUMMAX(kwLen, strlen(featurefiledata->entries[i].key));
+			if(!strncmp(featurefiledata->entries[i].key, kwstart, matchLen))
 			{
-				featurefiledata[i].value=(char *)ACNEWMEM( current-tkstart+1 );
-				if (!featurefiledata[i].value)
+				featurefiledata->entries[i].value=(char *)ACNEWMEM( current-tkstart+1 );
+				if (!featurefiledata->entries[i].value)
 					return AC_MemoryError;
-				strncpy(featurefiledata[i].value, tkstart, current-tkstart);
-				featurefiledata[i].value[current-tkstart]='\0';
+				strncpy(featurefiledata->entries[i].value, tkstart, current-tkstart);
+				featurefiledata->entries[i].value[current-tkstart]='\0';
 				break;
 			}
 		}
-		if (i==featurefilesize)
+		if (i==featurefiledata->size)
 		{
 			char *temp;
 			temp=(char*)ACNEWMEM(tkstart-kwstart+1);
@@ -241,12 +248,12 @@ ACLIB_API int  AutoColorString(const char *srcbezdata, const char *fontinfo, cha
 	
 	if(value==-1){
 		/* a fatal error occurred soemwhere. */
-		FreeFontInfoArray();
+		FreeFontInfoArray(featurefiledata);
 		return AC_FatalError;
 		
 	}else if(value==1){
 		/* AutoColor was called succesfully */
-		FreeFontInfoArray();
+		FreeFontInfoArray(featurefiledata);
 		if (bezoutputactual<*length)
 		{
 			strncpy(dstbezdata, bezoutput, bezoutputactual+1);
@@ -269,7 +276,7 @@ ACLIB_API int  AutoColorString(const char *srcbezdata, const char *fontinfo, cha
 	bezoutput=(char*)ACNEWMEM(bezoutputalloc);
 	if(!bezoutput)
 	{
-		FreeFontInfoArray();
+		FreeFontInfoArray(featurefiledata);
 		return AC_MemoryError;
 	}
 	*bezoutput=0;

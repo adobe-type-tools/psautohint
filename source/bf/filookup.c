@@ -37,12 +37,12 @@ extern char *GetFntInfo(char *keyword, bool optional)
 
   assert(featurefiledata != NULL);
 
-		for (i=0; i<featurefilesize; i++)
+		for (i=0; i<featurefiledata->size; i++)
 		{
-			if(featurefiledata[i].key && !strcmp(featurefiledata[i].key, keyword))
+			if(featurefiledata->entries[i].key && !strcmp(featurefiledata->entries[i].key, keyword))
 			{
-				returnstring = (char *)AllocateMem((unsigned)strlen(featurefiledata[i].value)+1, sizeof(char), "GetFntInfo return str");
-				strcpy(returnstring, featurefiledata[i].value);
+				returnstring = (char *)AllocateMem((unsigned)strlen(featurefiledata->entries[i].value)+1, sizeof(char), "GetFntInfo return str");
+				strcpy(returnstring, featurefiledata->entries[i].value);
 				return returnstring;
 			}
 		}

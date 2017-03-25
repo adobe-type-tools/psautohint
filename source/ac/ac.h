@@ -158,10 +158,14 @@ typedef struct {
 	char *key, *value;
 } FFEntry;
 
+typedef struct {
+  FFEntry *entries;
+  int size;
+} ACFontInfo;
+
 /* global data */
 
-extern FFEntry *featurefiledata;
-extern int featurefilesize;
+extern ACFontInfo *featurefiledata;
 
 extern PPathElt pathStart, pathEnd;
 extern bool YgoesUp;
