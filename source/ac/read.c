@@ -575,12 +575,6 @@ static void ParseString(s) const char * s; {
     }
   }
 
-void SetReadFileName(file_name)
-char *file_name;
-{
-  fileName = file_name;
-}
-
 bool ReadCharFile(normal, forBlendData, readHints, prependprefix)
 bool normal, forBlendData, readHints, prependprefix; 
 {

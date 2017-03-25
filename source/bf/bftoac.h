@@ -10,16 +10,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 extern bool AutoColor(bool, bool, bool, bool, bool, bool, bool, bool);
 
-extern bool CreateACTimes (void);
-
 extern void FindCurveBBox(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *, Fixed *, Fixed *, Fixed *);
-
-extern bool GetInflectionPoint(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *);
-
-extern bool ReadCharFileNames (char *, bool *);
-
-extern void setPrefix(char *);
-
-extern void SetReadFileName(char *);
 
 #endif /*BFTOAC_H*/
