@@ -298,7 +298,7 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     result = AutoColor(fontinfo,     /* font info */
                        srcbezdata,   /* input glyph */
                        false,        /*fixStems*/
-                       (bool)debug,  /*debug*/
+                       debug,        /* debug */
                        allowHintSub, /* extracolor*/
                        allowEdit,    /*editChars*/
                        roundCoords);
