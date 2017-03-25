@@ -35,32 +35,32 @@ typedef unsigned char bool;
 static void
 reportCB(char* msg)
 {
-  fprintf(stdout, "%s\n", msg);
+    fprintf(stdout, "%s\n", msg);
 }
 
-static void *
-memoryManager(void *ctx, void *ptr, uint32_t size)
+static void*
+memoryManager(void* ctx, void* ptr, uint32_t size)
 {
-  if (!ptr && !size)
-    return NULL;
+    if (!ptr && !size)
+        return NULL;
 
 #if PY_MAJOR_VERSION >= 3
-  if (ptr && size)
-    ptr = PyMem_RawRealloc(ptr, size);
-  else if (size)
-    ptr = PyMem_RawCalloc(1, size);
-  else
-    PyMem_RawFree(ptr);
+    if (ptr && size)
+        ptr = PyMem_RawRealloc(ptr, size);
+    else if (size)
+        ptr = PyMem_RawCalloc(1, size);
+    else
+        PyMem_RawFree(ptr);
 #else
-  if (ptr && size)
-    ptr = PyMem_Realloc(ptr, size);
-  else if (size)
-    ptr = PyMem_Malloc(size);
-  else
-    PyMem_Free(ptr);
+    if (ptr && size)
+        ptr = PyMem_Realloc(ptr, size);
+    else if (size)
+        ptr = PyMem_Malloc(size);
+    else
+        PyMem_Free(ptr);
 #endif
 
-  return ptr;
+    return ptr;
 }
 
 static PyObject* PsAutoHintError;
@@ -90,86 +90,88 @@ static char autohint_doc[] =
 static PyObject*
 autohint(PyObject* self, PyObject* args)
 {
-  int allowEdit = true, roundCoords = true, allowHintSub = true;
-  int verbose = true;
-  int debug = false;
-  PyObject* inSeq = NULL;
-  PyObject* fontObj = NULL;
-  PyObject* outSeq = NULL;
-  int bezLen = 0;
-  char* fontInfo = NULL;
-  bool error = false;
+    int allowEdit = true, roundCoords = true, allowHintSub = true;
+    int verbose = true;
+    int debug = false;
+    PyObject* inSeq = NULL;
+    PyObject* fontObj = NULL;
+    PyObject* outSeq = NULL;
+    int bezLen = 0;
+    char* fontInfo = NULL;
+    bool error = false;
 
-  if (!PyArg_ParseTuple(args, "O!O|iiiii", &PyBytes_Type, &fontObj, &inSeq,
-                        &verbose, &allowEdit, &allowHintSub, &roundCoords,
-                        &debug))
-    return NULL;
+    if (!PyArg_ParseTuple(args, "O!O|iiiii", &PyBytes_Type, &fontObj, &inSeq,
+                          &verbose, &allowEdit, &allowHintSub, &roundCoords,
+                          &debug))
+        return NULL;
 
-  inSeq = PySequence_Fast(inSeq, "argument must be sequence");
-  if (!inSeq)
-    return NULL;
+    inSeq = PySequence_Fast(inSeq, "argument must be sequence");
+    if (!inSeq)
+        return NULL;
 
-  fontInfo = PyBytes_AsString(fontObj);
+    fontInfo = PyBytes_AsString(fontObj);
 
-  AC_SetMemManager(NULL, memoryManager);
-  AC_SetReportCB(reportCB, verbose);
+    AC_SetMemManager(NULL, memoryManager);
+    AC_SetReportCB(reportCB, verbose);
 
-  bezLen = PySequence_Fast_GET_SIZE(inSeq);
-  outSeq = PyTuple_New(bezLen);
-  if (!outSeq) {
-    error = true;
-  } else {
-    int i = 0;
-    for (i = 0; i < bezLen; i++) {
-      char* bezData = NULL;
-      char* output = NULL;
-      int outputSize = 0;
-      int result;
-
-      PyObject* itemObj = PySequence_Fast_GET_ITEM(inSeq, i);
-
-      bezData = PyBytes_AsString(itemObj);
-      if (!bezData) {
+    bezLen = PySequence_Fast_GET_SIZE(inSeq);
+    outSeq = PyTuple_New(bezLen);
+    if (!outSeq) {
         error = true;
-        break;
-      }
+    } else {
+        int i = 0;
+        for (i = 0; i < bezLen; i++) {
+            char* bezData = NULL;
+            char* output = NULL;
+            int outputSize = 0;
+            int result;
 
-      outputSize = 4 * strlen(bezData);
-      output = malloc(outputSize);
+            PyObject* itemObj = PySequence_Fast_GET_ITEM(inSeq, i);
 
-      result = AutoColorString(bezData, fontInfo, output, &outputSize,
-                               allowEdit, allowHintSub, roundCoords, debug);
-      if (result == AC_DestBuffOfloError) {
-        free(output);
-        output = malloc(outputSize);
-        AC_SetReportCB(reportCB, false);
-        result = AutoColorString(bezData, fontInfo, output, &outputSize,
-                                 allowEdit, allowHintSub, roundCoords, debug);
-        AC_SetReportCB(reportCB, verbose);
-      }
+            bezData = PyBytes_AsString(itemObj);
+            if (!bezData) {
+                error = true;
+                break;
+            }
 
-      if (outputSize != 0 && result == AC_Success) {
-        PyObject* bezObj = PyBytes_FromString(output);
-        PyTuple_SET_ITEM(outSeq, i, bezObj);
-      }
+            outputSize = 4 * strlen(bezData);
+            output = malloc(outputSize);
 
-      free(output);
-      if (result != AC_Success) {
-        PyErr_SetString(PsAutoHintError, "Hinting glyph failed");
-        error = true;
-        break;
-      }
+            result =
+              AutoColorString(bezData, fontInfo, output, &outputSize, allowEdit,
+                              allowHintSub, roundCoords, debug);
+            if (result == AC_DestBuffOfloError) {
+                free(output);
+                output = malloc(outputSize);
+                AC_SetReportCB(reportCB, false);
+                result =
+                  AutoColorString(bezData, fontInfo, output, &outputSize,
+                                  allowEdit, allowHintSub, roundCoords, debug);
+                AC_SetReportCB(reportCB, verbose);
+            }
+
+            if (outputSize != 0 && result == AC_Success) {
+                PyObject* bezObj = PyBytes_FromString(output);
+                PyTuple_SET_ITEM(outSeq, i, bezObj);
+            }
+
+            free(output);
+            if (result != AC_Success) {
+                PyErr_SetString(PsAutoHintError, "Hinting glyph failed");
+                error = true;
+                break;
+            }
+        }
     }
-  }
 
-  Py_XDECREF(inSeq);
+    Py_XDECREF(inSeq);
 
-  if (error) {
-    Py_XDECREF(outSeq);
-    return NULL;
-  }
+    if (error) {
+        Py_XDECREF(outSeq);
+        return NULL;
+    }
 
-  return outSeq;
+    return outSeq;
 }
 
 /* clang-format off */
@@ -185,10 +187,10 @@ static char psautohint_doc[] =
   "autohint() -- Autohint glyphs.\n";
 
 #define SETUPMODULE                                                            \
-  PyModule_AddStringConstant(m, "version", AC_getVersion());                   \
-  PsAutoHintError = PyErr_NewException("psautohint.error", NULL, NULL);        \
-  Py_INCREF(PsAutoHintError);                                                  \
-  PyModule_AddObject(m, "error", PsAutoHintError);
+    PyModule_AddStringConstant(m, "version", AC_getVersion());                 \
+    PsAutoHintError = PyErr_NewException("psautohint.error", NULL, NULL);      \
+    Py_INCREF(PsAutoHintError);                                                \
+    PyModule_AddObject(m, "error", PsAutoHintError);
 
 #if PY_MAJOR_VERSION >= 3
 /* clang-format off */
@@ -207,28 +209,28 @@ static struct PyModuleDef psautohint_module = {
 PyMODINIT_FUNC
 PyInit__psautohint(void)
 {
-  PyObject* m;
+    PyObject* m;
 
-  m = PyModule_Create(&psautohint_module);
-  if (m == NULL)
-    return NULL;
+    m = PyModule_Create(&psautohint_module);
+    if (m == NULL)
+        return NULL;
 
-  SETUPMODULE
+    SETUPMODULE
 
-  return m;
+    return m;
 }
 #else /* Python < 3 */
 PyMODINIT_FUNC
 init_psautohint(void)
 {
-  PyObject* m;
+    PyObject* m;
 
-  m = Py_InitModule3("_psautohint", psautohint_methods, psautohint_doc);
-  if (m == NULL)
+    m = Py_InitModule3("_psautohint", psautohint_methods, psautohint_doc);
+    if (m == NULL)
+        return;
+
+    SETUPMODULE
+
     return;
-
-  SETUPMODULE
-
-  return;
 }
 #endif
