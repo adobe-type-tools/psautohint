@@ -285,7 +285,7 @@ static bool ReorderSubpaths() {
   return true;
   }
 
-bool RotateSubpaths(flg) bool flg; {
+static bool RotateSubpaths(flg) bool flg; {
   PPathElt e, cp, nxt;
   bool chng = false, chngSub;
   DEBUG = flg;
