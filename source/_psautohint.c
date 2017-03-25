@@ -42,7 +42,7 @@ static void *
 memoryManager(void *ctx, void *ptr, uint32_t size)
 {
   if (!ptr && !size)
-    return;
+    return NULL;
 
 #if PY_MAJOR_VERSION >= 3
   if (ptr && size)
