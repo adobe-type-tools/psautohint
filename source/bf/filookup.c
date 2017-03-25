@@ -30,30 +30,32 @@ static int misdigit(int c)
 /* Looks up the value of the specified keyword in the fontinfo
    file.  If the keyword doesn't exist and this is an optional
    key, returns a NULL.  Otherwise, returns the value string. */
-extern char *GetFntInfo(char *keyword, bool optional)
+extern char*
+GetFntInfo(char* keyword, bool optional)
 {
-  char *returnstring = NULL;
-		int i;
+    char* returnstring = NULL;
+    int i;
 
-  assert(featurefiledata != NULL);
+    assert(featurefiledata != NULL);
 
-		for (i=0; i<featurefiledata->size; i++)
-		{
-			if(featurefiledata->entries[i].key && !strcmp(featurefiledata->entries[i].key, keyword))
-			{
-				returnstring = (char *)AllocateMem((unsigned)strlen(featurefiledata->entries[i].value)+1, sizeof(char), "GetFntInfo return str");
-				strcpy(returnstring, featurefiledata->entries[i].value);
-				return returnstring;
-			}
-		}
-	
-		if(optional){
-			return NULL;
-		}else{
-			sprintf(globmsg, "ERROR: Fontinfo: Couldn't find fontinfo for %s\n", keyword);
-			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
-		}
-	return NULL;
+    for (i = 0; i < featurefiledata->size; i++) {
+        if (featurefiledata->entries[i].key &&
+            !strcmp(featurefiledata->entries[i].key, keyword)) {
+            returnstring = (char*)AllocateMem(
+              (unsigned)strlen(featurefiledata->entries[i].value) + 1,
+              sizeof(char), "GetFntInfo return str");
+            strcpy(returnstring, featurefiledata->entries[i].value);
+            return returnstring;
+        }
+    }
+
+    if (!optional) {
+        sprintf(globmsg, "ERROR: Fontinfo: Couldn't find fontinfo for %s\n",
+                keyword);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+    }
+
+    return NULL;
 }
 
 /* Appends Aux{H,V}Stems which is optional to StemSnap{H,V} respectively. */
