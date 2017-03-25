@@ -109,7 +109,6 @@ static bool AddAutoFlexProp(e, yflag) PPathElt e; bool yflag; {
   PPathElt e0 = e, e1 = e->next;
   if (e0->type != CURVETO || e1->type != CURVETO)
   {
-	FlushLogFiles();
     sprintf(globmsg, "Illegal input in character file: %s.\n", fileName);
     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }

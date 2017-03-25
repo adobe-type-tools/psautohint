@@ -37,7 +37,6 @@ int32_t NumVStems, NumHStems;
 Fixed topBands[MAXBLUES], botBands[MAXBLUES], serifs[MAXSERIFS];
 PClrPoint pointList, *ptLstArray;
 int32_t ptLstIndex, numPtLsts, maxPtLsts;
-bool makehintslog = true;
 bool writecoloredbez = true;
 Fixed bluefuzz;
 bool doAligns, doStems;
@@ -113,7 +112,6 @@ unsigned char * Alloc(int32_t sz)
 	vmfree += sz;
 	if (vmfree > vmlast) /* Error! need to make VMSIZE bigger */
 		{
-		FlushLogFiles();
 		sprintf (globmsg, "Exceeded VM size for hints in file: %s.\n",
 				 fileName);
 		LogMsg(globmsg, LOGERROR, FATALERROR, true);
@@ -210,10 +208,8 @@ bool AutoColor(
 			 bool extracolor,
 			 bool changeChar,
 			 bool quiet,
-             bool roundCoords,
-			 bool doLog)
+             bool roundCoords)
 {
-	makehintslog=doLog;
   (void) InitAll(STARTUP);
 
   if (!ReadFontInfo()) return false;
@@ -224,8 +220,6 @@ bool AutoColor(
   autoLinearCurveFix = editChar;
   if (debug)
     DEBUG = showClrInfo = showHs = showVs = listClrInfo = true;
-  if(doLog)
-	  OpenLogFiles();
 
   return DoFile("", extracolor);
 }

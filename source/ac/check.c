@@ -202,7 +202,6 @@ Fixed dx, dy; PPathElt e; int32_t whichcp; {
     if (whichcp == cpCurve1) { e->x1 += dx; e->y1 += dy; return; }
     if (whichcp == cpCurve2) { e->x2 += dx; e->y2 += dy; return; }
     {
-        FlushLogFiles();
         sprintf(globmsg, "Malformed path list in %s.\n", fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
@@ -223,7 +222,6 @@ static void CheckSCurve(ee) PPathElt ee; {
     Cd c0, c1, c2, c3;
     if (ee->type != CURVETO)
     {
-        FlushLogFiles();
         sprintf(globmsg, "Malformed path list in %s.\n", fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
@@ -338,7 +336,6 @@ PPathElt e; bool vrt; Fixed lc, *pf, *pl; {
     Cd c0, c1, c2, c3;
     if (e->type != CURVETO)
     {
-        FlushLogFiles();
         sprintf(globmsg, "Malformed path list in %s.\n", fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }

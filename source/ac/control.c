@@ -54,7 +54,6 @@ int32_t PointListCheck(PClrPoint new, PClrPoint lst) {
 			break;
 		}
 		default: {
-			FlushLogFiles();
 			sprintf(globmsg, "Illegal character in point list in %s.\n", fileName);
 			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
@@ -770,7 +769,6 @@ static void AddColorsInnerLoop(bool extracolor) {
 			reportRetryCB();
 		}
 		if (pathStart == NULL || pathStart == pathEnd) {
-			FlushLogFiles();
 			sprintf(globmsg, "No character path in %s.\n", fileName);
 			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
@@ -838,7 +836,6 @@ bool DoFile(char *fname, bool extracolor) {
 		LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 	}
 	PrintMessage(""); /* Just print the file name. */
-	LogYMinMax();
 	AddColors(extracolor);
 	lenTopBands = lentop;
 	lenBotBands = lenbot;

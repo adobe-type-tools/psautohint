@@ -50,7 +50,6 @@ static void FindPathBBox() {
         break;
       default:
       {
-		FlushLogFiles();
         sprintf (globmsg, "Undefined operator in %s character.\n", fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       }
@@ -107,7 +106,6 @@ PPathElt FindSubpathBBox(e) PPathElt e; {
 #endif
       default:
       {
-		FlushLogFiles();
         sprintf (globmsg, "Undefined operator in %s character.\n", fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       }
