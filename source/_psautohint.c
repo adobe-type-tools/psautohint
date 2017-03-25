@@ -157,7 +157,27 @@ autohint(PyObject* self, PyObject* args)
 
             MEMFREE(output);
             if (result != AC_Success) {
-                PyErr_SetString(PsAutoHintError, "Hinting glyph failed");
+                switch (result) {
+                    case AC_FontinfoParseFail:
+                        PyErr_SetString(PsAutoHintError,
+                                        "Parsing font info failed");
+                        break;
+                    case AC_FatalError:
+                        PyErr_SetString(PsAutoHintError, "Fatal error");
+                        break;
+                    case AC_MemoryError:
+                        PyErr_NoMemory();
+                        break;
+                    case AC_UnknownError:
+                        PyErr_SetString(PsAutoHintError, "Hinting failed");
+                        break;
+                    case AC_DestBuffOfloError:
+                        PyErr_SetString(PsAutoHintError, "Dest buffer small");
+                        break;
+                    case AC_InvalidParameterError:
+                        PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
+                        break;
+                }
                 error = true;
                 break;
             }
