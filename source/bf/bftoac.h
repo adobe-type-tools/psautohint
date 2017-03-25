@@ -8,8 +8,6 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef BFTOAC_H
 #define BFTOAC_H
 
-extern bool AutoColor(bool, bool, bool, bool, bool, bool, bool, bool);
-
 extern void FindCurveBBox(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *, Fixed *, Fixed *, Fixed *);
 
 #endif /*BFTOAC_H*/
