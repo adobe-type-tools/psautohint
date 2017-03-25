@@ -12,10 +12,6 @@
 #include "fipublic.h"
 #include "machinedep.h"
 
-#ifndef _WIN32
-extern int unlink(const char*);
-#endif
-
 #define MAXSTEMDIST 150 /* initial maximum stem width allowed for hints */
 
 PPathElt pathStart, pathEnd;

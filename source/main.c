@@ -30,10 +30,6 @@ if not defined, it is being compiled as a Python module.
 extern jmp_buf aclibmark;
 #endif
 
-#ifndef _WIN32
-extern int unlink(const char*);
-#endif
-
 static void openReportFile(char* name, char* fSuffix);
 
 static void
