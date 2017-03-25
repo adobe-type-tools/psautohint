@@ -25,28 +25,12 @@ typedef unsigned char bool;
 #endif
 
 typedef int32_t               Fixed;
+typedef int indx;		/* for indexes that could be either short or
+				   long - let the compiler decide */
 
 /* macro definitions */
 #define NUMMIN(a, b) ((a) <= (b) ? (a) : (b))
 #define NUMMAX(a, b) ((a) >= (b) ? (a) : (b))
-/* Round the same way as PS. i.e. -6.5 ==> -6.0 */
-#define LROUND(a) ((a > 0) ? (int32_t)(a + 0.5) : ((a + (int32_t)(-a)) == -0.5) ? (int32_t) a : (int32_t)(a - 0.5))
-#define	 SCALEDRTOL(a, s) (a<0 ? (int32_t) ((a*s) - 0.5) : (int32_t) ((a*s) + 0.5))
-
-
-typedef int indx;		/* for indexes that could be either short or
-				   long - let the compiler decide */
-
-#define RAWPSDIR "pschars"
-#define ILLDIR "ill"
-#define BEZDIR "bez"
-#define UNSCALEDBEZ "bez.unscaled"
-#define TMPDIR "._tmp"
-#ifdef MAXPATHLEN
-#undef MAXPATHLEN
-#endif
-#define MAXPATHLEN 1024		/* max path name len for a dir or folder
-				   (includes 1 byte for null terminator) */
 
 /* defines for LogMsg code param */
 #define OK 0
