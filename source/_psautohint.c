@@ -38,27 +38,28 @@ reportCB(char* msg)
     fprintf(stdout, "%s\n", msg);
 }
 
+#if PY_MAJOR_VERSION >= 3
+#define MEMNEW(size) PyMem_RawCalloc(1, size)
+#define MEMFREE(ptr) PyMem_RawFree(ptr)
+#define MEMRENEW(ptr, size) PyMem_RawRealloc(ptr, size)
+#else
+#define MEMNEW(size) PyMem_Malloc(size)
+#define MEMFREE(ptr) PyMem_Free(ptr)
+#define MEMRENEW(ptr, size) PyMem_Realloc(ptr, size)
+#endif
+
 static void*
 memoryManager(void* ctx, void* ptr, uint32_t size)
 {
     if (!ptr && !size)
         return NULL;
 
-#if PY_MAJOR_VERSION >= 3
     if (ptr && size)
-        ptr = PyMem_RawRealloc(ptr, size);
+        ptr = MEMRENEW(ptr, size);
     else if (size)
-        ptr = PyMem_RawCalloc(1, size);
+        ptr = MEMNEW(size);
     else
-        PyMem_RawFree(ptr);
-#else
-    if (ptr && size)
-        ptr = PyMem_Realloc(ptr, size);
-    else if (size)
-        ptr = PyMem_Malloc(size);
-    else
-        PyMem_Free(ptr);
-#endif
+        MEMFREE(ptr);
 
     return ptr;
 }
@@ -135,14 +136,13 @@ autohint(PyObject* self, PyObject* args)
             }
 
             outputSize = 4 * strlen(bezData);
-            output = malloc(outputSize);
+            output = MEMNEW(outputSize);
 
             result =
               AutoColorString(bezData, fontInfo, output, &outputSize, allowEdit,
                               allowHintSub, roundCoords, debug);
             if (result == AC_DestBuffOfloError) {
-                free(output);
-                output = malloc(outputSize);
+                output = MEMRENEW(output, outputSize);
                 AC_SetReportCB(reportCB, false);
                 result =
                   AutoColorString(bezData, fontInfo, output, &outputSize,
@@ -155,7 +155,7 @@ autohint(PyObject* self, PyObject* args)
                 PyTuple_SET_ITEM(outSeq, i, bezObj);
             }
 
-            free(output);
+            MEMFREE(output);
             if (result != AC_Success) {
                 PyErr_SetString(PsAutoHintError, "Hinting glyph failed");
                 error = true;
