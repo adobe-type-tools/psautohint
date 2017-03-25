@@ -11,7 +11,7 @@
 #include "machinedep.h"
 
 int32_t
-CountSubPaths()
+CountSubPaths(void)
 {
     register PPathElt e = pathStart;
     int32_t cnt = 0;
@@ -23,7 +23,7 @@ CountSubPaths()
     return cnt;
 }
 void
-RoundPathCoords()
+RoundPathCoords(void)
 {
     register PPathElt e;
     e = pathStart;
@@ -44,7 +44,7 @@ RoundPathCoords()
 }
 
 static int32_t
-CheckForClr()
+CheckForClr(void)
 {
     PPathElt mt, cp;
     mt = pathStart;
@@ -64,7 +64,7 @@ CheckForClr()
 }
 
 bool
-PreCheckForColoring()
+PreCheckForColoring(void)
 {
     PPathElt e, nxt;
     int32_t cnt = 0;
@@ -109,7 +109,8 @@ PreCheckForColoring()
     return true;
 }
 
-static PPathElt GetSubpathNext(e) register PPathElt e;
+static PPathElt
+GetSubpathNext(register PPathElt e)
 {
     while (true) {
         e = e->next;
@@ -123,7 +124,8 @@ static PPathElt GetSubpathNext(e) register PPathElt e;
     return e;
 }
 
-static PPathElt GetSubpathPrev(e) register PPathElt e;
+static PPathElt
+GetSubpathPrev(register PPathElt e)
 {
     while (true) {
         e = e->prev;
@@ -137,8 +139,8 @@ static PPathElt GetSubpathPrev(e) register PPathElt e;
     return e;
 }
 
-static bool AddAutoFlexProp(e, yflag) PPathElt e;
-bool yflag;
+static bool
+AddAutoFlexProp(PPathElt e, bool yflag)
 {
     PPathElt e0 = e, e1 = e->next;
     if (e0->type != CURVETO || e1->type != CURVETO) {
@@ -161,8 +163,8 @@ bool yflag;
     0.11 /* 0.33^2 : two curves must be in approximate length ratio of 1:3 or  \
             better */
 
-static void TryYFlex(e, n, x0, y0, x1, y1) PPathElt e, n;
-Fixed x0, y0, x1, y1;
+static void
+TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     Fixed x2, y2, x3, y3, x4, y4;
     PPathElt p, q;
@@ -223,8 +225,8 @@ Fixed x0, y0, x1, y1;
         ReportAddFlex();
 }
 
-static void TryXFlex(e, n, x0, y0, x1, y1) PPathElt e, n;
-Fixed x0, y0, x1, y1;
+static void
+TryXFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     Fixed x2, y2, x3, y3, x4, y4;
     PPathElt p, q;
@@ -286,7 +288,7 @@ Fixed x0, y0, x1, y1;
 }
 
 void
-AutoAddFlex()
+AutoAddFlex(void)
 {
     PPathElt e, n;
     Fixed x0, y0, x1, y1;

@@ -8,6 +8,6 @@ os:
   - osx
 
 script:
-  - export CFLAGS="-Wno-strict-prototypes -Wno-maybe-uninitialized"
+  - export CFLAGS="-Wno-maybe-uninitialized"
   - python setup.py install
   - make -j check

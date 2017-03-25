@@ -12,7 +12,8 @@
 
 static PClrVal Vrejects, Hrejects;
 
-void InitPick(reason) int32_t reason;
+void
+InitPick(int32_t reason)
 {
     switch (reason) {
         case STARTUP:
@@ -23,10 +24,9 @@ void InitPick(reason) int32_t reason;
 
 #define LtPruneB(val) ((val) < FixOne && ((val) << 10) < pruneB)
 
-static bool ConsiderPicking(bestSpc, bestVal, colorList,
-                            prevBestVal) Fixed bestSpc,
-  bestVal, prevBestVal;
-PClrVal colorList;
+static bool
+ConsiderPicking(Fixed bestSpc, Fixed bestVal, PClrVal colorList,
+                Fixed prevBestVal)
 {
     if (bestSpc > 0)
         return true;
@@ -40,7 +40,8 @@ PClrVal colorList;
                                             : (prevBestVal / pruneC <= bestVal);
 }
 
-void PickVVals(valList) PClrVal valList;
+void
+PickVVals(PClrVal valList)
 {
     PClrVal colorList, rejectList, vlist, prev, best, bestPrev, nxt;
     Fixed bestVal, prevBestVal;
@@ -107,8 +108,8 @@ void PickVVals(valList) PClrVal valList;
     Vrejects = rejectList;
 }
 
-static bool InSerifBand(y0, y1, n, p) register Fixed y0, y1, *p;
-int32_t n;
+static bool
+InSerifBand(Fixed y0, Fixed y1, int32_t n, Fixed* p)
 {
     register int32_t i;
     if (n <= 0)
@@ -126,11 +127,9 @@ int32_t n;
     return false;
 }
 
-static bool ConsiderValForSeg(val, seg, loc, nb, b, ns, s, primary) PClrVal val;
-PClrSeg seg;
-Fixed loc, *b, *s;
-int32_t nb, ns;
-bool primary;
+static bool
+ConsiderValForSeg(PClrVal val, PClrSeg seg, Fixed loc, int32_t nb, Fixed* b,
+                  int32_t ns, Fixed* s, bool primary)
 {
     if (primary && val->vSpc > 0.0)
         return true;
@@ -143,13 +142,9 @@ bool primary;
     return true;
 }
 
-static PClrVal FndBstVal(seg, seg1Flg, cList, rList, nb, b, ns, s, locFlg,
-                         hFlg) PClrSeg seg;
-PClrVal cList, rList;
-bool seg1Flg;
-int32_t nb, ns;
-Fixed *b, *s;
-bool locFlg, hFlg;
+static PClrVal
+FndBstVal(PClrSeg seg, bool seg1Flg, PClrVal cList, PClrVal rList, int32_t nb,
+          Fixed* b, int32_t ns, Fixed* s, bool locFlg, bool hFlg)
 {
     Fixed loc, vloc;
     PClrVal best, vList, initLst;
@@ -192,12 +187,9 @@ bool locFlg, hFlg;
 }
 
 #define FixSixteenth (0x10)
-static PClrVal FindBestValForSeg(seg, seg1Flg, cList, rList, nb, b, ns, s,
-                                 hFlg) PClrSeg seg;
-PClrVal cList, rList;
-bool seg1Flg, hFlg;
-int32_t nb, ns;
-Fixed *b, *s;
+static PClrVal
+FindBestValForSeg(PClrSeg seg, bool seg1Flg, PClrVal cList, PClrVal rList,
+                  int32_t nb, Fixed* b, int32_t ns, Fixed* s, bool hFlg)
 {
     PClrVal best, nonghst, ghst = NULL;
     best = FndBstVal(seg, seg1Flg, cList, rList, nb, b, ns, s, false, hFlg);
@@ -224,7 +216,8 @@ Fixed *b, *s;
     return best;
 }
 
-static bool MembValList(val, vList) register PClrVal val, vList;
+static bool
+MembValList(PClrVal val, PClrVal vList)
 {
     while (vList != NULL) {
         if (val == vList)
@@ -234,7 +227,8 @@ static bool MembValList(val, vList) register PClrVal val, vList;
     return false;
 }
 
-static PClrVal PrevVal(val, vList) register PClrVal val, vList;
+static PClrVal
+PrevVal(register PClrVal val, register PClrVal vList)
 {
     PClrVal prev;
     if (val == vList)
@@ -253,9 +247,8 @@ static PClrVal PrevVal(val, vList) register PClrVal val, vList;
     }
 }
 
-static void FindRealVal(vlist, top, bot, pseg1, pseg2) PClrVal vlist;
-PClrSeg *pseg1, *pseg2;
-Fixed top, bot;
+static void
+FindRealVal(PClrVal vlist, Fixed top, Fixed bot, PClrSeg* pseg1, PClrSeg* pseg2)
 {
     while (vlist != NULL) {
         if (vlist->vLoc2 == top && vlist->vLoc1 == bot && !vlist->vGhst) {
@@ -267,7 +260,8 @@ Fixed top, bot;
     }
 }
 
-void PickHVals(valList) PClrVal valList;
+void
+PickHVals(PClrVal valList)
 {
     PClrVal vlist, colorList, rejectList, bestPrev, prev, best, nxt;
     Fixed bestVal, prevBestVal;
@@ -389,12 +383,9 @@ noMore:
     Hrejects = rejectList;
 }
 
-static void FindBestValForSegs(sList, seg1Flg, cList, rList, nb, b, ns, s,
-                               hFlg) PClrSeg sList;
-PClrVal cList, rList;
-bool seg1Flg, hFlg;
-int32_t nb, ns;
-Fixed *b, *s;
+static void
+FindBestValForSegs(PClrSeg sList, bool seg1Flg, PClrVal cList, PClrVal rList,
+                   int32_t nb, Fixed* b, int32_t ns, Fixed* s, bool hFlg)
 {
     PClrVal best;
     while (sList != NULL) {
@@ -406,7 +397,7 @@ Fixed *b, *s;
 }
 
 static void
-SetPruned()
+SetPruned(void)
 {
     register PClrVal vL = valList;
     while (vL != NULL) {
@@ -416,7 +407,7 @@ SetPruned()
 }
 
 void
-FindBestHVals()
+FindBestHVals(void)
 {
     SetPruned();
     FindBestValForSegs(topList, false, valList, NULL, lenTopBands, topBands, 0,
@@ -427,7 +418,7 @@ FindBestHVals()
 }
 
 void
-FindBestVVals()
+FindBestVVals(void)
 {
     SetPruned();
     FindBestValForSegs(leftList, true, valList, NULL, 0, (Fixed*)NULL,

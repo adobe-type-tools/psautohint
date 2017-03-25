@@ -13,7 +13,8 @@
 #define GetSubpathNext(e) ((e)->type == CLOSEPATH) ? GetDest(e) : (e)->next
 #define GetSubpathPrev(e) ((e)->type == MOVETO) ? GetClosedBy(e) : (e)->prev
 
-static void NumberSubpath(e) register PPathElt e; {
+static void 
+NumberSubpath (register PPathElt e) {
   /* number the elements of the subpath starting at e */
   PPathElt first;
   int32_t cnt;
@@ -26,8 +27,8 @@ static void NumberSubpath(e) register PPathElt e; {
     }
   }
 
-static int32_t TstClrLsts(l1, l2, flg)
-  PSegLnkLst l1, l2; bool flg; {
+static int32_t 
+TstClrLsts (PSegLnkLst l1, PSegLnkLst l2, bool flg) {
   int32_t result, i;
   result = -1;
   if (l1 != NULL) while (l2 != NULL) {
@@ -39,19 +40,21 @@ static int32_t TstClrLsts(l1, l2, flg)
   return result;
   }
 
-static int32_t ClrLstLen(lst) PSegLnkLst lst; {
+static int32_t 
+ClrLstLen (PSegLnkLst lst) {
   int32_t cnt = 0;
   while (lst != NULL) {
     cnt++; lst = lst->next; }
   return cnt; }
 
-static bool SameClrLsts(l1, l2, flg)
-  PSegLnkLst l1, l2; bool flg; {
+static bool 
+SameClrLsts (PSegLnkLst l1, PSegLnkLst l2, bool flg) {
   if (ClrLstLen(l1) != ClrLstLen(l2)) return false;
   return (TstClrLsts(l1, l2, flg) == -1) ? true : false;
   }
 
-static void FindConflicts(e) PPathElt e; {
+static void 
+FindConflicts (PPathElt e) {
   /* find conflicts in subpath for e */
   PSegLnkLst hLst, vLst, phLst, pvLst;
   bool checked;
@@ -98,7 +101,8 @@ static void FindConflicts(e) PPathElt e; {
     }
   }
 
-static int32_t CountConflicts(e) PPathElt e; {
+static int32_t 
+CountConflicts (PPathElt e) {
   /* e is a proposed closepath. return number of color conflicts */
   int32_t conflicts, nc, c, cnt;
   PPathElt first, conflict;
@@ -115,9 +119,12 @@ static int32_t CountConflicts(e) PPathElt e; {
   return conflicts;
   }
 
-static bool TestColorSection(first, after)
+static bool 
+TestColorSection (
   /* returns false if there is a conflict, true otherwise */
-  PPathElt first, after; {
+    PPathElt first,
+    PPathElt after
+) {
   PPathElt e;
   PSegLnkLst hLst, vLst, hPrv, vPrv;
   e = first; hPrv = vPrv = NULL;
@@ -135,8 +142,8 @@ static bool TestColorSection(first, after)
     e = GetSubpathNext(e); }
   return true; }
 
-static bool StartsOkWithPrimaryClrs(cp)
-  PPathElt cp; {
+static bool 
+StartsOkWithPrimaryClrs (PPathElt cp) {
   /* return true if proposed cp yields subpath whose
      first coloring section is consistent with the primary coloring */
   PPathElt e, conflict, first;
@@ -155,8 +162,8 @@ static bool StartsOkWithPrimaryClrs(cp)
   /* e is start of new coloring in subpath */
   return TestColorSection(first, e); }
 
-static bool OkCandidate(cp,conflict,isShort)
-  PPathElt cp, conflict; bool isShort; {
+static bool 
+OkCandidate (PPathElt cp, PPathElt conflict, bool isShort) {
   PPathElt cpConflict, nxt, nxtConflict;
   if (cp == conflict) return false;
   cpConflict = cp->conflict;
@@ -170,7 +177,8 @@ static bool OkCandidate(cp,conflict,isShort)
   return true;
   }
 
-static bool OkJunction(p,e) PPathElt p,e; {
+static bool 
+OkJunction (PPathElt p, PPathElt e) {
   Fixed x, y, x0, y0, x1, y1, sm;
   if (p->isFlex && e->isFlex) return false;
   if (e->type == CURVETO) { x0 = e->x1; y0 = e->y1; }
@@ -181,7 +189,8 @@ static bool OkJunction(p,e) PPathElt p,e; {
   return CheckSmoothness(x0, y0, x, y, x1, y1, &sm);
   }
 
-static PPathElt FindMinConflict(e) PPathElt e; {
+static PPathElt 
+FindMinConflict (PPathElt e) {
   PPathElt conflict, cp, cpnxt, bestCP, first, prevConflict;
   int32_t best, cnt;
   bool isShort;
@@ -235,7 +244,8 @@ static PPathElt FindMinConflict(e) PPathElt e; {
 
 #define SubpathConflictsWithPrimary(e) (!TestColorSection(e, GetClosedBy(e)))
 
-static PPathElt NewCP(cp) PPathElt cp; {
+static PPathElt 
+NewCP (PPathElt cp) {
   PPathElt first;
   first = cp;
   while (true) {
@@ -245,7 +255,8 @@ static PPathElt NewCP(cp) PPathElt cp; {
     }
   }
 
-static bool ReorderSubpaths() {
+static bool 
+ReorderSubpaths (void) {
   /* if first subpath conflicts with primary,
      and there is a later subpath that does not,
      do tailsubpaths until later one becomes first */
@@ -285,7 +296,8 @@ static bool ReorderSubpaths() {
   return true;
   }
 
-static bool RotateSubpaths(flg) bool flg; {
+static bool 
+RotateSubpaths (bool flg) {
   PPathElt e, cp, nxt;
   bool chng = false, chngSub;
   DEBUG = flg;

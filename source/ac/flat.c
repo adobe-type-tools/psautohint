@@ -9,9 +9,8 @@
 
 #include "ac.h"
 
-static void FMiniFltn(f0, f1, f2, f3, pfr, inside) Cd f0, f1, f2, f3;
-register PFltnRec pfr;
-bool inside;
+static void
+FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, register PFltnRec pfr, bool inside)
 {
 /* Like FFltnCurve, but assumes abs(deltas) <= 127 pixels */
 /* 8 bits of fraction gives enough precision for splitting curves */
@@ -288,15 +287,12 @@ bool inside;
     FixedMidPoint(b0, a2, b1);                                                 \
     a3 = b0
 
-static void FFltnCurve(c0, c1, c2, c3, pfr, inrect)
-  /* inrect = !testRect */
-  Cd c0,
-  c1, c2, c3;
-register PFltnRec pfr;
-register bool inrect;
+/* inrect = !testRect */
 /* Like FltnCurve, but works in the Fixed domain. */
 /* abs values of coords must be < 2^14 so will not overflow when
    find midpoint by add and shift */
+static void
+FFltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr, bool inrect)
 {
     Cd d0, d1, d2, d3;
     register Fixed llx, lly, urx, ury;
@@ -387,8 +383,8 @@ ReportC3:
     (*pfr->report)(c3);
 }
 
-void FltnCurve(c0, c1, c2, c3, pfr) Cd c0, c1, c2, c3;
-PFltnRec pfr;
+void
+FltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr)
 {
     pfr->limit =
       6; /* limit on how many times a bez curve can be split in half by

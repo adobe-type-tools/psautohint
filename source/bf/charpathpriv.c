@@ -25,7 +25,7 @@ bool addHints = true;
 static void CheckPath(void);
 
 static void
-CheckPath()
+CheckPath(void)
 {
 
     if (currPathList->path == NULL) {
@@ -95,7 +95,7 @@ SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2,
    not the path element information needed for making blended
    fonts. */
 extern void
-SetNoHints()
+SetNoHints(void)
 {
     addHints = false;
 }

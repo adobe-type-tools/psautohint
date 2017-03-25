@@ -18,7 +18,8 @@ extern void ReportRemHSeg(Fixed from, Fixed to, Fixed loc);
 static PSegLnkLst Hlnks, Vlnks;
 static int32_t cpFrom, cpTo;
 
-void InitGen(reason) int32_t reason;
+void
+InitGen(int32_t reason)
 {
     int32_t i;
     switch (reason) {
@@ -30,9 +31,8 @@ void InitGen(reason) int32_t reason;
     }
 }
 
-static void LinkSegment(e, Hflg, seg) PPathElt e;
-bool Hflg;
-PClrSeg seg;
+static void
+LinkSegment(PPathElt e, bool Hflg, PClrSeg seg)
 {
     PSegLnk newlnk;
     PSegLnkLst newlst, globlst;
@@ -55,8 +55,8 @@ PClrSeg seg;
     }
 }
 
-static void CopySegmentLink(e1, e2, Hflg) PPathElt e1, e2;
-bool Hflg;
+static void
+CopySegmentLink(PPathElt e1, PPathElt e2, bool Hflg)
 {
     /* copy reference to first link from e1 to e2 */
     PSegLnkLst newlst;
@@ -72,13 +72,9 @@ bool Hflg;
     }
 }
 
-static void AddSegment(from, to, loc, lftLstNm, rghtLstNm, e1, e2, Hflg,
-                       typ) Fixed from,
-  to, loc;
-int32_t lftLstNm, rghtLstNm;
-PPathElt e1, e2;
-bool Hflg;
-int32_t typ;
+static void
+AddSegment(Fixed from, Fixed to, Fixed loc, int32_t lftLstNm, int32_t rghtLstNm,
+           PPathElt e1, PPathElt e2, bool Hflg, int32_t typ)
 {
     PClrSeg seg, segList, prevSeg;
     int32_t segNm;
@@ -131,9 +127,9 @@ int32_t typ;
     }
 }
 
-void AddVSegment(from, to, loc, p1, p2, typ, i) Fixed from, to, loc;
-PPathElt p1, p2;
-int32_t typ, i;
+void
+AddVSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
+            int32_t typ, int32_t i)
 {
     if (DEBUG)
         ReportAddVSeg(from, to, loc, i);
@@ -143,16 +139,17 @@ int32_t typ, i;
         AddSegment(from, to, loc, 1, 0, p1, p2, false, typ);
 }
 
-void AddHSegment(from, to, loc, p1, p2, typ, i) Fixed from, to, loc;
-PPathElt p1, p2;
-int32_t typ, i;
+void
+AddHSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
+            int32_t typ, int32_t i)
 {
     if (DEBUG)
         ReportAddHSeg(from, to, loc, i);
     AddSegment(from, to, loc, 2, 3, p1, p2, true, typ);
 }
 
-static Fixed CPFrom(cp2, cp3) Fixed cp2, cp3;
+static Fixed
+CPFrom(Fixed cp2, Fixed cp3)
 {
     Fixed val =
       2 * (((cp3 - cp2) * cpFrom) /
@@ -163,7 +160,8 @@ static Fixed CPFrom(cp2, cp3) Fixed cp2, cp3;
     return val; /* DEBUG 8 BIT to match results with 7 bit fractions */
 }
 
-static Fixed CPTo(cp0, cp1) Fixed cp0, cp1;
+static Fixed
+CPTo(Fixed cp0, Fixed cp1)
 {
     Fixed val =
       2 * (((cp1 - cp0) * cpTo) /
@@ -173,7 +171,8 @@ static Fixed CPTo(cp0, cp1) Fixed cp0, cp1;
     return val; /* DEBUG 8 BIT to match results with 7 bit fractions */
 }
 
-static bool TestBend(x0, y0, x1, y1, x2, y2) Fixed x0, y0, x1, y1, x2, y2;
+static bool
+TestBend(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed x2, Fixed y2)
 {
     /* return true if bend angle is sharp enough (135 degrees or less) */
     float dx1, dy1, dx2, dy2, dotprod, lensqprod;
@@ -189,7 +188,8 @@ static bool TestBend(x0, y0, x1, y1, x2, y2) Fixed x0, y0, x1, y1, x2, y2;
 #define TestTan(d1, d2) (abs(d1) > (abs(d2) * bendTan) / 1000)
 #define FRound(x) FTrunc(FRnd(x))
 
-static bool IsCCW(x0, y0, x1, y1, x2, y2) Fixed x0, y0, x1, y1, x2, y2;
+static bool
+IsCCW(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed x2, Fixed y2)
 {
     /* returns true if (x0,y0) -> (x1,y1) -> (x2,y2) is counter clockwise
          in character space */
@@ -207,8 +207,8 @@ static bool IsCCW(x0, y0, x1, y1, x2, y2) Fixed x0, y0, x1, y1, x2, y2;
     return ccw;
 }
 
-static void DoHBendsNxt(x0, y0, x1, y1, p) Fixed x0, y0, x1, y1;
-PPathElt p;
+static void
+DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 {
     Fixed x2, y2, delta, strt, end, x3, y3;
     bool ysame, ccw, above, doboth;
@@ -242,8 +242,8 @@ PPathElt p;
     }
 }
 
-static void DoHBendsPrv(x0, y0, x1, y1, p) Fixed x0, y0, x1, y1;
-PPathElt p;
+static void
+DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 {
     Fixed x2, y2, delta, strt, end;
     bool ysame, ccw, above, doboth;
@@ -276,8 +276,8 @@ PPathElt p;
     }
 }
 
-static void DoVBendsNxt(x0, y0, x1, y1, p) Fixed x0, y0, x1, y1;
-PPathElt p;
+static void
+DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 {
     Fixed x2, y2, delta, strt, end, x3, y3;
     bool xsame, ccw, right, doboth;
@@ -311,8 +311,8 @@ PPathElt p;
     }
 }
 
-static void DoVBendsPrv(x0, y0, x1, y1, p) Fixed x0, y0, x1, y1;
-PPathElt p;
+static void
+DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 {
     Fixed x2, y2, delta, strt, end;
     bool xsame, ccw, right, doboth;
@@ -345,8 +345,8 @@ PPathElt p;
     }
 }
 
-static void MergeLnkSegs(seg1, seg2, lst) PSegLnkLst lst;
-PClrSeg seg1, seg2;
+static void
+MergeLnkSegs(PClrSeg seg1, PClrSeg seg2, PSegLnkLst lst)
 {
     /* replace lnk refs to seg1 by seg2 */
     PSegLnk lnk;
@@ -358,18 +358,20 @@ PClrSeg seg1, seg2;
     }
 }
 
-static void MergeHSegs(seg1, seg2) PClrSeg seg1, seg2;
+static void
+MergeHSegs(PClrSeg seg1, PClrSeg seg2)
 {
     MergeLnkSegs(seg1, seg2, Hlnks);
 }
 
-static void MergeVSegs(seg1, seg2) PClrSeg seg1, seg2;
+static void
+MergeVSegs(PClrSeg seg1, PClrSeg seg2)
 {
     MergeLnkSegs(seg1, seg2, Vlnks);
 }
 
-static void ReportRemSeg(l, lst) int32_t l;
-PClrSeg lst;
+static void
+ReportRemSeg(int32_t l, PClrSeg lst)
 {
     Fixed from, to, loc;
     /* this assumes !YgoesUp */
@@ -399,7 +401,8 @@ PClrSeg lst;
 }
 
 /* Filters out bogus bend segments. */
-static void RemExtraBends(l0, l1) int32_t l0, l1;
+static void
+RemExtraBends(int32_t l0, int32_t l1)
 {
     register PClrSeg lst0, lst, n, p;
     PClrSeg nxt, prv;
@@ -452,8 +455,8 @@ static void RemExtraBends(l0, l1) int32_t l0, l1;
     }
 }
 
-static void CompactList(i, nm) int32_t i;
-void (*nm)();
+static void
+CompactList(int32_t i, void (*nm)(PClrSeg, PClrSeg))
 {
     PClrSeg lst, prv, nxtprv, nxt;
     Fixed lstmin, lstmax, nxtmin, nxtmax;
@@ -506,9 +509,9 @@ void (*nm)();
     }
 }
 
-static Fixed PickVSpot(x0, y0, x1, y1, px1, py1, px2, py2, prvx, prvy, nxtx,
-                       nxty) Fixed x0,
-  y0, x1, y1, px1, py1, px2, py2, prvx, prvy, nxtx, nxty;
+static Fixed
+PickVSpot(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed px1, Fixed py1,
+          Fixed px2, Fixed py2, Fixed prvx, Fixed prvy, Fixed nxtx, Fixed nxty)
 {
     register Fixed a1, a2;
     if (x0 == px1 && x1 != px2)
@@ -537,7 +540,8 @@ static Fixed PickVSpot(x0, y0, x1, y1, px1, py1, px2, py2, prvx, prvy, nxtx,
     return FixHalfMul(x0 + x1);
 }
 
-static Fixed AdjDist(d, q) Fixed d, q;
+static Fixed
+AdjDist(Fixed d, Fixed q)
 {
     Fixed val;
     if (q == FixOne) {
@@ -552,7 +556,8 @@ static Fixed AdjDist(d, q) Fixed d, q;
 /* serifs of ITCGaramond Ultra have points that are not quite horizontal
  e.g., in H: (53,51)(74,52)(116,54)
  the following was added to let these through */
-static bool TstFlat(dmn, dmx) Fixed dmn, dmx;
+static bool
+TstFlat(Fixed dmn, Fixed dmx)
 {
     if (dmn < 0)
         dmn = -dmn;
@@ -561,32 +566,32 @@ static bool TstFlat(dmn, dmx) Fixed dmn, dmx;
     return (dmx >= PSDist(50) && dmn <= PSDist(4));
 }
 
-static bool NxtHorz(x, y, p) Fixed x, y;
-PPathElt p;
+static bool
+NxtHorz(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2, x3, y3;
     p = NxtForBend(p, &x2, &y2, &x3, &y3);
     return TstFlat(y2 - y, x2 - x);
 }
 
-static bool PrvHorz(x, y, p) Fixed x, y;
-PPathElt p;
+static bool
+PrvHorz(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2;
     p = PrvForBend(p, &x2, &y2);
     return TstFlat(y2 - y, x2 - x);
 }
 
-static bool NxtVert(x, y, p) Fixed x, y;
-PPathElt p;
+static bool
+NxtVert(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2, x3, y3;
     p = NxtForBend(p, &x2, &y2, &x3, &y3);
     return TstFlat(x2 - x, y2 - y);
 }
 
-static bool PrvVert(x, y, p) Fixed x, y;
-PPathElt p;
+static bool
+PrvVert(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2;
     p = PrvForBend(p, &x2, &y2);
@@ -596,15 +601,16 @@ PPathElt p;
 /* PrvSameDir and NxtSameDir were added to check the direction of a
  path and not add a band if the point is not at an extreme and is
  going in the same direction as the previous path. */
-static bool TstSameDir(x0, y0, x1, y1, x2, y2) Fixed x0, y0, x1, y1, x2, y2;
+static bool
+TstSameDir(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed x2, Fixed y2)
 {
     if (ProdLt0(y0 - y1, y1 - y2) || ProdLt0(x0 - x1, x1 - x2))
         return false;
     return !TestBend(x0, y0, x1, y1, x2, y2);
 }
 
-static bool PrvSameDir(x0, y0, x1, y1, p) Fixed x0, y0, x1, y1;
-PPathElt p;
+static bool
+PrvSameDir(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 {
     Fixed x2, y2;
     p = PrvForBend(p, &x2, &y2);
@@ -613,8 +619,8 @@ PPathElt p;
     return TstSameDir(x0, y0, x1, y1, x2, y2);
 }
 
-static bool NxtSameDir(x0, y0, x1, y1, p) Fixed x0, y0, x1, y1;
-PPathElt p;
+static bool
+NxtSameDir(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 {
     Fixed x2, y2, x3, y3;
     p = NxtForBend(p, &x2, &y2, &x3, &y3);
@@ -625,7 +631,8 @@ PPathElt p;
     return TstSameDir(x0, y0, x1, y1, x2, y2);
 }
 
-void GenVPts(specialCharType) int32_t specialCharType;
+void
+GenVPts(int32_t specialCharType)
 {
     /* specialCharType 1 = upper; -1 = lower; 0 = neither */
     PPathElt p, fl;
@@ -790,9 +797,8 @@ void GenVPts(specialCharType) int32_t specialCharType;
     rightList = segLists[1];
 }
 
-bool InBlueBand(loc, n, p) Fixed loc;
-register Fixed* p;
-int32_t n;
+bool
+InBlueBand(Fixed loc, int32_t n, register Fixed* p)
 {
     register int i;
     register Fixed y;
@@ -808,9 +814,10 @@ int32_t n;
     return false;
 }
 
-static Fixed PickHSpot(x0, y0, x1, y1, xdist, px1, py1, px2, py2, prvx, prvy,
-                       nxtx, nxty) Fixed x0,
-  y0, x1, y1, xdist, px1, py1, px2, py2, prvx, prvy, nxtx, nxty;
+static Fixed
+PickHSpot(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed xdist, Fixed px1,
+          Fixed py1, Fixed px2, Fixed py2, Fixed prvx, Fixed prvy, Fixed nxtx,
+          Fixed nxty)
 {
     bool topSeg = (xdist < 0) ? true : false;
     Fixed upper, lower;
@@ -862,7 +869,7 @@ static Fixed PickHSpot(x0, y0, x1, y1, xdist, px1, py1, px2, py2, prvx, prvy,
 }
 
 void
-GenHPts()
+GenHPts(void)
 {
     PPathElt p, fl;
     bool isHoriz, flex1, flex2;
@@ -1020,7 +1027,7 @@ GenHPts()
 }
 
 void
-PreGenPts()
+PreGenPts(void)
 {
     Hlnks = Vlnks = NULL;
     segLists[0] = NULL;

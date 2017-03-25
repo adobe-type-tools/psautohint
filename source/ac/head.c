@@ -10,7 +10,8 @@
 #include "ac.h"
 #include "machinedep.h"
 
-PPathElt GetDest(cldest) register PPathElt cldest;
+PPathElt
+GetDest(register PPathElt cldest)
 {
     if (cldest == NULL)
         return NULL;
@@ -23,7 +24,8 @@ PPathElt GetDest(cldest) register PPathElt cldest;
     }
 }
 
-PPathElt GetClosedBy(clsdby) register PPathElt clsdby;
+PPathElt
+GetClosedBy(register PPathElt clsdby)
 {
     if (clsdby == NULL)
         return NULL;
@@ -40,8 +42,8 @@ PPathElt GetClosedBy(clsdby) register PPathElt clsdby;
     }
 }
 
-void GetEndPoint(e, x1p, y1p) register PPathElt e;
-Fixed *x1p, *y1p;
+void
+GetEndPoint(register PPathElt e, Fixed* x1p, Fixed* y1p)
 {
     if (e == NULL) {
         *x1p = 0;
@@ -75,15 +77,16 @@ retry:
     }
 }
 
-void GetEndPoints(p, px0, py0, px1, py1) PPathElt p;
-Fixed *px0, *py0, *px1, *py1;
+void
+GetEndPoints(PPathElt p, Fixed* px0, Fixed* py0, Fixed* px1, Fixed* py1)
 {
     GetEndPoint(p, px1, py1);
     GetEndPoint(p->prev, px0, py0);
 }
 
 #define Interpolate(q, v0, q0, v1, q1) (v0 + (q - q0) * ((v1 - v0) / (q1 - q0)))
-static Fixed HVness(pq) float* pq;
+static Fixed
+HVness(float* pq)
 {
     register float q;
     float result;
@@ -106,7 +109,8 @@ static Fixed HVness(pq) float* pq;
     return acpflttofix(&result);
 }
 
-Fixed VertQuo(xk, yk, xl, yl) Fixed xk, yk, xl, yl;
+Fixed
+VertQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl)
 {
     /* FixOne means exactly vertical. 0 means not vertical */
     /* intermediate values mean almost vertical */
@@ -131,7 +135,8 @@ Fixed VertQuo(xk, yk, xl, yl) Fixed xk, yk, xl, yl;
     return HVness(&q);
 }
 
-Fixed HorzQuo(xk, yk, xl, yl) Fixed xk, yk, xl, yl;
+Fixed
+HorzQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl)
 {
     register Fixed xabs, yabs;
     float rx, ry, q;
@@ -154,14 +159,16 @@ Fixed HorzQuo(xk, yk, xl, yl) Fixed xk, yk, xl, yl;
     return HVness(&q);
 }
 
-bool IsTiny(e) PPathElt e;
+bool
+IsTiny(PPathElt e)
 {
     Fixed x0, y0, x1, y1;
     GetEndPoints(e, &x0, &y0, &x1, &y1);
     return ((abs(x0 - x1) < FixTwo) && (abs(y0 - y1) < FixTwo)) ? true : false;
 }
 
-bool IsShort(e) PPathElt e;
+bool
+IsShort(PPathElt e)
 {
     Fixed x0, y0, x1, y1, dx, dy, mn, mx;
     GetEndPoints(e, &x0, &y0, &x1, &y1);
@@ -180,8 +187,8 @@ bool IsShort(e) PPathElt e;
                          change in coordinare system. */
 }
 
-PPathElt NxtForBend(p, px2, py2, px3, py3) PPathElt p;
-Fixed *px2, *py2, *px3, *py3;
+PPathElt
+NxtForBend(PPathElt p, Fixed* px2, Fixed* py2, Fixed* px3, Fixed* py3)
 {
     PPathElt nxt, nxtMT = NULL;
     Fixed x, y, x2, y2;
@@ -222,8 +229,8 @@ Fixed *px2, *py2, *px3, *py3;
     return nxt;
 }
 
-PPathElt PrvForBend(p, px2, py2) PPathElt p;
-Fixed *px2, *py2;
+PPathElt
+PrvForBend(PPathElt p, Fixed* px2, Fixed* py2)
 {
     PPathElt prv, prvCP = NULL;
     Fixed x2, y2;
@@ -263,8 +270,8 @@ Bogus:
     return prv;
 }
 
-static bool CheckHeight(upperFlag, p) bool upperFlag;
-PPathElt p;
+static bool
+CheckHeight(bool upperFlag, PPathElt p)
 {
     PPathElt ee;
     Fixed y, yy;
@@ -281,12 +288,14 @@ PPathElt p;
     return true;
 }
 
-bool IsLower(p) PPathElt p;
+bool
+IsLower(PPathElt p)
 {
     return CheckHeight(false, p);
 }
 
-bool IsUpper(p) PPathElt p;
+bool
+IsUpper(PPathElt p)
 {
     return CheckHeight(true, p);
 }
