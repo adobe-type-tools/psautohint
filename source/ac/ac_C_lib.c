@@ -1,53 +1,65 @@
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. *//* AC_C_lib.c */
-
+/*
+ * Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/).
+ * All Rights Reserved.
+ *
+ * This software is licensed as OpenSource, under the Apache License, Version
+ * 2.0.
+ * This license is available at: http://opensource.org/licenses/Apache-2.0.
+ */
 
 #include "setjmp.h"
 
-#include "ac_C_lib.h"
 #include "ac.h"
+#include "ac_C_lib.h"
 #include "bftoac.h"
 #include "machinedep.h"
 
+const char* libversion = "1.6.0";
+const char* progname = "AC_C_lib";
+char editingResource = 0;
 
-const char *libversion = "1.6.0";
-const char *progname="AC_C_lib";
-char editingResource=0;
+char* FL_glyphname = 0;
 
-char *FL_glyphname=0;
-
-const char *bezstring=0;
-char *bezoutput=0;
-int bezoutputalloc=0;
-int bezoutputactual=0;
+const char* bezstring = 0;
+char* bezoutput = 0;
+int bezoutputalloc = 0;
+int bezoutputactual = 0;
 
 bool scalinghints = false;
 
-extern int compatiblemode; /*forces the definition of colors even before a color sub*/
+extern int
+  compatiblemode; /*forces the definition of colors even before a color sub*/
 
-jmp_buf aclibmark;   /* to handle exit() calls in the library version*/
+jmp_buf aclibmark; /* to handle exit() calls in the library version*/
 
+#define skipblanks()                                                           \
+    while (*current == '\t' || *current == '\n' || *current == ' ' ||          \
+           *current == '\r')                                                   \
+    current++
+#define skipnonblanks()                                                        \
+    while (*current != '\t' && *current != '\n' && *current != ' ' &&          \
+           *current != '\r' && *current != '\0')                               \
+    current++
+#define skipmatrix()                                                           \
+    while (*current != '\0' && *current != ']')                                \
+    current++
 
-#define skipblanks() while(*current=='\t' || *current=='\n' || *current==' ' || *current=='\r') current++
-#define skipnonblanks() while(*current!='\t' && *current!='\n' && *current!=' ' && *current!='\r'&& *current!='\0') current++
-#define skipmatrix() while(*current!='\0' && *current!=']') current++
-
-static void skippsstring(const char **current)
+static void
+skippsstring(const char** current)
 {
-	int parencount=0;
-	
-	do
-	{
-		if(**current=='(')
-			parencount++;
-		else if(**current==')')
-			parencount--;
-		else if(**current=='\0')
-			return;
-			
-		(*current)++;
-		
-	}while(parencount>0);
+    int parencount = 0;
+
+    do {
+        if (**current == '(')
+            parencount++;
+        else if (**current == ')')
+            parencount--;
+        else if (**current == '\0')
+            return;
+
+        (*current)++;
+
+    } while (parencount > 0);
 }
 
 static void
@@ -182,54 +194,58 @@ ParseFontInfo(const char* data)
     return fontinfo;
 }
 
-ACLIB_API void  AC_SetMemManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func)
+ACLIB_API void
+AC_SetMemManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func)
 {
-	setAC_memoryManager(ctxptr, func);
+    setAC_memoryManager(ctxptr, func);
 }
 
-ACLIB_API void  AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose)
+ACLIB_API void
+AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose)
 {
-	if (verbose)
-		libReportCB = reportCB;
-	else
-		libReportCB = NULL;
-	
-	libErrorReportCB = reportCB;
+    if (verbose)
+        libReportCB = reportCB;
+    else
+        libReportCB = NULL;
+
+    libErrorReportCB = reportCB;
 }
 
-
-ACLIB_API void  AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB, unsigned int allStems)
+ACLIB_API void
+AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB,
+                    unsigned int allStems)
 {
-	allstems = allStems;
-	addHStemCB = hstemCB;
-	addVStemCB = vstemCB;
-	doStems = 1;
+    allstems = allStems;
+    addHStemCB = hstemCB;
+    addVStemCB = vstemCB;
+    doStems = 1;
 
-	addCharExtremesCB = NULL;
-	addStemExtremesCB = NULL;
-	doAligns = 0;
+    addCharExtremesCB = NULL;
+    addStemExtremesCB = NULL;
+    doAligns = 0;
 }
 
-ACLIB_API void  AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB)
+ACLIB_API void
+AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB)
 {
-	addCharExtremesCB = charCB;
-	addStemExtremesCB = stemCB;
-	doAligns = 1;
+    addCharExtremesCB = charCB;
+    addStemExtremesCB = stemCB;
+    doAligns = 1;
 
-	addHStemCB = NULL;
-	addVStemCB = NULL;
-	doStems = 0;
+    addHStemCB = NULL;
+    addVStemCB = NULL;
+    doStems = 0;
 }
 
-
-int cleanup(int16_t code)
+int
+cleanup(int16_t code)
 {
-	if (code==FATALERROR || code==NONFATALERROR)
-		longjmp(aclibmark, -1);
-	else
-		longjmp(aclibmark, 1);
+    if (code == FATALERROR || code == NONFATALERROR)
+        longjmp(aclibmark, -1);
+    else
+        longjmp(aclibmark, 1);
 
-	return 0; /* we dont actually ever get here */
+    return 0; /* we dont actually ever get here */
 }
 
 ACLIB_API int
@@ -297,19 +313,21 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     return AC_UnknownError; /*Shouldn't get here*/
 }
 
-ACLIB_API void AC_initCallGlobals(void)
+ACLIB_API void
+AC_initCallGlobals(void)
 {
-	libReportCB = NULL;
-	libErrorReportCB = NULL;
-	addCharExtremesCB = NULL;
-	addStemExtremesCB = NULL;
-	doAligns = 0;
-	addHStemCB = NULL;
-	addVStemCB = NULL;
-	doStems = 0;
+    libReportCB = NULL;
+    libErrorReportCB = NULL;
+    addCharExtremesCB = NULL;
+    addStemExtremesCB = NULL;
+    doAligns = 0;
+    addHStemCB = NULL;
+    addVStemCB = NULL;
+    doStems = 0;
 }
 
-ACLIB_API const char *AC_getVersion(void)
+ACLIB_API const char*
+AC_getVersion(void)
 {
-	return libversion;
+    return libversion;
 }
