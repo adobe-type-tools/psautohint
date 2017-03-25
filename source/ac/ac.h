@@ -195,7 +195,7 @@ extern char * fileName;
 extern PClrSeg segLists[4]; /* left, right, top, bot */
 extern PClrPoint pointList, *ptLstArray;
 extern int32_t ptLstIndex, numPtLsts, maxPtLsts;
-extern void AddStemExtremes(Fixed bot, Fixed top);
+void AddStemExtremes(Fixed bot, Fixed top);
 
 #define leftList (segLists[0])
 #define rightList (segLists[1])
@@ -226,7 +226,7 @@ extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at t
 #define FixShift (8)
 #define FixInt(i) (((int32_t)(i)) << FixShift)
 #define FixReal(i) ((int32_t)((i) *256.0))
-extern int32_t FRnd(int32_t x);
+int32_t FRnd(int32_t x);
 #define FHalfRnd(x) ((int32_t)(((x)+(1<<7)) & ~0xFF))
 #define FracPart(x) ((int32_t)(x) & 0xFF)
 #define FTrunc(x) (((int32_t)(x))>>FixShift)
@@ -263,16 +263,16 @@ extern int32_t FRnd(int32_t x);
 
 /* The fix to float and float to fixed procs are different for ac because it
    uses 24 bit of int32_t and 8 bits of fraction. */
-extern void acfixtopflt(Fixed x, float *pf);
-extern Fixed acpflttofix(float *pv);
+void acfixtopflt(Fixed x, float *pf);
+Fixed acpflttofix(float *pv);
 
-extern unsigned char * Alloc(int32_t sz); /* Sub-allocator */
+unsigned char * Alloc(int32_t sz); /* Sub-allocator */
 
 
 
 extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;
 extern void *AC_memmanageCtxPtr;
-extern void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
+void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 
 
@@ -286,162 +286,162 @@ extern void setAC_memoryManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 
 
-extern int AddCounterColorChars();
-extern bool FindNameInList();
-extern void ACGetVersion();
-extern void PruneElementColorSegs();
-extern int TestColorLst(/*lst, colorList, flg, Hflg, doLst*/);
-extern PClrVal CopyClrs(/*lst*/);
-extern void AutoExtraColors(/*movetoNewClrs, soleol, solWhere*/);
-extern PPathElt FindSubpathBBox(/*e*/);
-extern void ClrVBnds();
-extern void ReClrVBnds();
-extern void ClrHBnds();
-extern void ReClrHBnds();
-extern void AddBBoxHV(/*Hflg*/);
-extern void ClrBBox();
-extern void CheckPathBBox();
-extern int32_t SpecialCharType();
-extern bool VColorChar();
-extern bool HColorChar();
-extern bool NoBlueChar();
-extern int32_t SolEolCharCode(/*s*/);
-extern bool SpecialSolEol();
-extern bool MoveToNewClrs();
-extern void CheckSmooth();
-extern void CheckBBoxEdge(/*e, vrt, lc, pf, pl*/);
-extern bool CheckBBoxes(/*e1, e2*/);
-extern bool CheckSmoothness(/*x0, y0, x1, y1, x2, y2, pd*/);
-extern void CheckForDups();
-extern bool showClrInfo;
-extern void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0, PPathElt p1);
-extern void AddHPair(PClrVal v, char ch);
-extern void AddVPair(PClrVal v, char ch);
-extern void XtraClrs(/*e*/);
-extern bool CreateTimesFile();
-extern bool DoFile(const ACFontInfo* fontinfo, const char* srcglyph,
+int AddCounterColorChars();
+bool FindNameInList();
+void ACGetVersion();
+void PruneElementColorSegs();
+int TestColorLst(/*lst, colorList, flg, Hflg, doLst*/);
+PClrVal CopyClrs(/*lst*/);
+void AutoExtraColors(/*movetoNewClrs, soleol, solWhere*/);
+PPathElt FindSubpathBBox(/*e*/);
+void ClrVBnds();
+void ReClrVBnds();
+void ClrHBnds();
+void ReClrHBnds();
+void AddBBoxHV(/*Hflg*/);
+void ClrBBox();
+void CheckPathBBox();
+int32_t SpecialCharType();
+bool VColorChar();
+bool HColorChar();
+bool NoBlueChar();
+int32_t SolEolCharCode(/*s*/);
+bool SpecialSolEol();
+bool MoveToNewClrs();
+void CheckSmooth();
+void CheckBBoxEdge(/*e, vrt, lc, pf, pl*/);
+bool CheckBBoxes(/*e1, e2*/);
+bool CheckSmoothness(/*x0, y0, x1, y1, x2, y2, pd*/);
+void CheckForDups();
+bool showClrInfo;
+void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0, PPathElt p1);
+void AddHPair(PClrVal v, char ch);
+void AddVPair(PClrVal v, char ch);
+void XtraClrs(/*e*/);
+bool CreateTimesFile();
+bool DoFile(const ACFontInfo* fontinfo, const char* srcglyph,
                    char* fname, bool extracolor);
-extern void DoList(/*filenames*/);
-extern void EvalV();
-extern void EvalH();
-extern void GenVPts();
-extern void CheckVal(/*val, vert*/);
-extern void CheckTfmVal(/*b, t, vert*/);
-extern void CheckVals(/*vlst, vert*/);
-extern bool DoFixes();
-extern bool FindLineSeg();
-extern void FltnCurve(/*c0, c1, c2, c3, pfr*/);
-extern bool ReadFontInfo(const ACFontInfo* fontinfo);
-extern bool InBlueBand(/*loc,n,p*/);
-extern void GenHPts();
-extern void PreGenPts();
-extern PPathElt GetDest(/*cldest*/);
-extern PPathElt GetClosedBy(/*clsdby*/);
-extern void GetEndPoint(/*e, x1p, y1p*/);
-extern void GetEndPoints(/*p,px0,py0,px1,py1*/);
-extern Fixed VertQuo(/*xk,yk,xl,yl*/);
-extern Fixed HorzQuo(/*xk,yk,xl,yl*/);
-extern bool IsTiny(/*e*/);
-extern bool IsShort(/*e*/);
-extern PPathElt NxtForBend(/*p,px2,py2,px3,py3*/);
-extern PPathElt PrvForBend(/*p,px2,py2*/);
-extern bool IsLower(/*p*/);
-extern bool IsUpper(/*p*/);
-extern bool CloseSegs(/*s1,s2,vert*/);
+void DoList(/*filenames*/);
+void EvalV();
+void EvalH();
+void GenVPts();
+void CheckVal(/*val, vert*/);
+void CheckTfmVal(/*b, t, vert*/);
+void CheckVals(/*vlst, vert*/);
+bool DoFixes();
+bool FindLineSeg();
+void FltnCurve(/*c0, c1, c2, c3, pfr*/);
+bool ReadFontInfo(const ACFontInfo* fontinfo);
+bool InBlueBand(/*loc,n,p*/);
+void GenHPts();
+void PreGenPts();
+PPathElt GetDest(/*cldest*/);
+PPathElt GetClosedBy(/*clsdby*/);
+void GetEndPoint(/*e, x1p, y1p*/);
+void GetEndPoints(/*p,px0,py0,px1,py1*/);
+Fixed VertQuo(/*xk,yk,xl,yl*/);
+Fixed HorzQuo(/*xk,yk,xl,yl*/);
+bool IsTiny(/*e*/);
+bool IsShort(/*e*/);
+PPathElt NxtForBend(/*p,px2,py2,px3,py3*/);
+PPathElt PrvForBend(/*p,px2,py2*/);
+bool IsLower(/*p*/);
+bool IsUpper(/*p*/);
+bool CloseSegs(/*s1,s2,vert*/);
 
-extern void DoPrune();
-extern void PruneVVals();
-extern void PruneHVals();
-extern void MergeVals(/*vert*/);
-extern void MergeFromMainColors(char ch);
-extern void RoundPathCoords();
-extern void MoveSubpathToEnd(/*e*/);
-extern void AddSolEol();
-extern void InitAuto();
-extern void InitData(const ACFontInfo* fontinfo, int32_t reason);
-extern void InitFix();
-extern void InitGen();
-extern bool RotateSubpaths(/*flg*/);
-extern void InitPick();
-extern void AutoAddFlex();
-extern int32_t PointListCheck(/*new,lst*/);
-extern bool SameColors(/*cn1, cn2*/);
-extern bool PreCheckForColoring();
-extern int32_t CountSubPaths();
-extern void PickVVals(/*valList*/);
-extern void PickHVals(/*valList*/);
-extern void FindBestHVals();
-extern void FindBestVVals();
-extern void PrintMessage(/*s*/);
-extern void ReportError(/*s*/);
-extern void ReportSmoothError(/*x, y*/);
-extern void ReportBadClosePathForAutoColoring(/*e*/);
-extern void ReportAddFlex();
-extern void ReportClipSharpAngle(/*x, y*/);
-extern void ReportSharpAngle(/*x, y*/);
-extern void ReportLinearCurve(/*e, x0, y0, x1, y1*/);
-extern void ReportNonHError(/*x0, y0, x1, y1*/);
-extern void ReportNonVError(/*x0, y0, x1, y1*/);
-extern void ExpectedMoveTo(/*e*/);
-extern void ReportMissingClosePath();
-extern void ReportTryFlexNearMiss(/*x0, y0, x2, y2*/);
-extern void ReportTryFlexError(/*CPflg, x, y*/);
-extern void AskForSplit(/*e*/);
-extern void ReportSplit(/*e*/);
-extern void ReportConflictCheck(/*e, conflict, cp*/);
-extern void ReportConflictCnt(/*e, cnt*/);
-extern void ReportMoveSubpath(/*e*/);
-extern void ReportRemFlare(/*e*/);
-extern void ReportRemConflict(/*e*/);
-extern void ReportRotateSubpath(/*e*/);
-extern void ReportRemShortColors(/*ex, ey*/);
-extern bool   ResolveConflictBySplit(/*e,Hflg,lnk1,lnk2*/);
-extern void ReportPossibleLoop(/*e*/);
-extern void ShowHVal(/*val*/);
-extern void ShowHVals(/*lst*/);
-extern void ReportAddHVal(/*val*/);
-extern void ShowVVal(/*val*/);
-extern void ShowVVals(/*lst*/);
-extern void ReportAddVVal(/*val*/);
-extern void ReportFndBstVal(/*seg,val,hFlg*/);
-extern void ReportCarry(/*l0, l1, loc, clrs, vert*/);
-extern void ReportBestCP(/*e, cp*/);
-extern void LogColorInfo(/*pl*/);
-extern void ReportAddVSeg(/*from, to, loc, i*/);
-extern void ReportAddHSeg(/*from, to, loc, i*/);
+void DoPrune();
+void PruneVVals();
+void PruneHVals();
+void MergeVals(/*vert*/);
+void MergeFromMainColors(char ch);
+void RoundPathCoords();
+void MoveSubpathToEnd(/*e*/);
+void AddSolEol();
+void InitAuto();
+void InitData(const ACFontInfo* fontinfo, int32_t reason);
+void InitFix();
+void InitGen();
+bool RotateSubpaths(/*flg*/);
+void InitPick();
+void AutoAddFlex();
+int32_t PointListCheck(/*new,lst*/);
+bool SameColors(/*cn1, cn2*/);
+bool PreCheckForColoring();
+int32_t CountSubPaths();
+void PickVVals(/*valList*/);
+void PickHVals(/*valList*/);
+void FindBestHVals();
+void FindBestVVals();
+void PrintMessage(/*s*/);
+void ReportError(/*s*/);
+void ReportSmoothError(/*x, y*/);
+void ReportBadClosePathForAutoColoring(/*e*/);
+void ReportAddFlex();
+void ReportClipSharpAngle(/*x, y*/);
+void ReportSharpAngle(/*x, y*/);
+void ReportLinearCurve(/*e, x0, y0, x1, y1*/);
+void ReportNonHError(/*x0, y0, x1, y1*/);
+void ReportNonVError(/*x0, y0, x1, y1*/);
+void ExpectedMoveTo(/*e*/);
+void ReportMissingClosePath();
+void ReportTryFlexNearMiss(/*x0, y0, x2, y2*/);
+void ReportTryFlexError(/*CPflg, x, y*/);
+void AskForSplit(/*e*/);
+void ReportSplit(/*e*/);
+void ReportConflictCheck(/*e, conflict, cp*/);
+void ReportConflictCnt(/*e, cnt*/);
+void ReportMoveSubpath(/*e*/);
+void ReportRemFlare(/*e*/);
+void ReportRemConflict(/*e*/);
+void ReportRotateSubpath(/*e*/);
+void ReportRemShortColors(/*ex, ey*/);
+bool   ResolveConflictBySplit(/*e,Hflg,lnk1,lnk2*/);
+void ReportPossibleLoop(/*e*/);
+void ShowHVal(/*val*/);
+void ShowHVals(/*lst*/);
+void ReportAddHVal(/*val*/);
+void ShowVVal(/*val*/);
+void ShowVVals(/*lst*/);
+void ReportAddVVal(/*val*/);
+void ReportFndBstVal(/*seg,val,hFlg*/);
+void ReportCarry(/*l0, l1, loc, clrs, vert*/);
+void ReportBestCP(/*e, cp*/);
+void LogColorInfo(/*pl*/);
+void ReportAddVSeg(/*from, to, loc, i*/);
+void ReportAddHSeg(/*from, to, loc, i*/);
 #if 0
-extern void ReportBandError(/*str, loc, blu*/);
+void ReportBandError(/*str, loc, blu*/);
 #else
-extern void ReportBandNearMiss(/*str, loc, blu*/);
+void ReportBandNearMiss(/*str, loc, blu*/);
 #endif
-extern void ReportStemNearMiss(/*vert, w, minW, b, t*/);
-extern void ReportColorConflict(/*x0, y0, x1, y1, ch*/);
-extern void ReportDuplicates(/*x, y*/);
-extern void ReportBBoxBogus(/*llx, lly, urx, ury*/);
-extern void ReportMergeHVal(/*b0,t0,b1,t1,v0,s0,v1,s1*/);
-extern void ReportMergeVVal(/*l0,r0,l1,r1,v0,s0,v1,s1*/);
-extern void ReportPruneHVal(/*val*/);
-extern void ReportPruneVVal(/*val*/);
-extern Fixed ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled);
-extern Fixed UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled);
-extern void InitShuffleSubpaths();
-extern void MarkLinks(/*vL,hFlg*/);
-extern void DoShuffleSubpaths();
-extern void CopyMainH();
-extern void CopyMainV();
-extern void RMovePoint();
-extern void AddVSegment();
-extern void AddHSegment();
-extern void Delete();
-extern bool StrEqual();
-extern bool ReadCharFile(const ACFontInfo* fontinfo, const char* srcglyph,
+void ReportStemNearMiss(/*vert, w, minW, b, t*/);
+void ReportColorConflict(/*x0, y0, x1, y1, ch*/);
+void ReportDuplicates(/*x, y*/);
+void ReportBBoxBogus(/*llx, lly, urx, ury*/);
+void ReportMergeHVal(/*b0,t0,b1,t1,v0,s0,v1,s1*/);
+void ReportMergeVVal(/*l0,r0,l1,r1,v0,s0,v1,s1*/);
+void ReportPruneHVal(/*val*/);
+void ReportPruneVVal(/*val*/);
+Fixed ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled);
+Fixed UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled);
+void InitShuffleSubpaths();
+void MarkLinks(/*vL,hFlg*/);
+void DoShuffleSubpaths();
+void CopyMainH();
+void CopyMainV();
+void RMovePoint();
+void AddVSegment();
+void AddHSegment();
+void Delete();
+bool StrEqual();
+bool ReadCharFile(const ACFontInfo* fontinfo, const char* srcglyph,
                          bool normal, bool forBlendData, bool readHints,
                          bool prependprefix);
-extern double FixToDbl(/*f*/);
-extern bool CompareValues();
-extern void SaveFile(const ACFontInfo* fontinfo);
-extern void CheckForMultiMoveTo();
-extern double fabs();
+double FixToDbl(/*f*/);
+bool CompareValues();
+void SaveFile(const ACFontInfo* fontinfo);
+void CheckForMultiMoveTo();
+double fabs();
 #define STARTUP (0)
 #define RESTART (1)
 
