@@ -35,18 +35,6 @@ extern bool addHints;  /* whether to include hints in the font */
 
 extern PCharPathElt AppendCharPathElement(int);
 
-extern bool CheckCharPath(char *, char *);
-
-extern void GetLengthandSubrIx(int16_t, int16_t *, int16_t *);
-
-extern void ResetMaxPathEntries(void);
-
-extern void SetCurrPathList(PPathList);
-
-extern void SetHintsDir(indx);
-
-extern int GetHintsDir(void);
-
 extern void SetHintsElt(int16_t, CdPtr, int32_t, int32_t, bool);
 
 extern void SetNoHints(void);
