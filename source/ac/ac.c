@@ -205,7 +205,6 @@ void InitData(int32_t reason)
 
 /* Returns whether coloring was successful. */  
 bool AutoColor(
-			 bool release,
 			 bool fixStems,
 			 bool debug,
 			 bool extracolor,
