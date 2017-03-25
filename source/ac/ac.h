@@ -21,12 +21,6 @@
 
 /* widely used definitions */
 
-
-#if defined(THINK_C)
-#define L_cuserid 20 /*ASP: was defined stdio.h*/
-#endif
-
-
 /* number of default entries in counter color character list. */
 #define COUNTERDEFAULTENTRIES 4
 #define COUNTERLISTSIZE 64
