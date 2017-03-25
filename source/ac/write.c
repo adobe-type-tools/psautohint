@@ -587,10 +587,12 @@ static void NumberPath() {
 }
 
 void SaveFile() {
-	assert(bezoutput != NULL);
 	register PPathElt e = pathStart;
 	Cd c1, c2, c3;
 	char outfile[MAXPATHLEN];
+
+	assert(bezoutput != NULL);
+
 /* AddSolEol(); */
 	sprintf(S0, "%% %s\n", fileName);
 	ws(S0);

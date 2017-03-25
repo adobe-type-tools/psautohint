@@ -32,10 +32,10 @@ static int misdigit(int c)
    key, returns a NULL.  Otherwise, returns the value string. */
 extern char *GetFntInfo(char *keyword, bool optional)
 {
-  assert(featurefiledata != NULL);
   char *returnstring = NULL;
-
 		int i;
+
+  assert(featurefiledata != NULL);
 
 		for (i=0; i<featurefilesize; i++)
 		{
