@@ -1,6 +1,12 @@
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-/***********************************************************************/
+/*
+ * Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/).
+ * All Rights Reserved.
+ *
+ * This software is licensed as OpenSource, under the Apache License, Version
+ * 2.0.
+ * This license is available at: http://opensource.org/licenses/Apache-2.0.
+ */
+
 /* opcodes for PS operators */
 /* The assignment of mnemonics to constants in this file has two purposes:
    1) establish the value of encoded operators that are put in the 

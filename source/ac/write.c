@@ -1,7 +1,11 @@
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-/***********************************************************************/
-/* write.c */
+/*
+ * Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/).
+ * All Rights Reserved.
+ *
+ * This software is licensed as OpenSource, under the Apache License, Version
+ * 2.0.
+ * This license is available at: http://opensource.org/licenses/Apache-2.0.
+ */
 
 #include <assert.h>
 
@@ -21,110 +25,106 @@ char bch;
 Fixed bx, by;
 bool bstB;
 int16_t subpathcount;
-extern char *bezoutput;
+extern char* bezoutput;
 extern int bezoutputalloc;
 extern int bezoutputactual;
 
 #define ws(str) WriteString(str)
 int writeAbsolute = 1;
 
-int32_t FRnd(int32_t x){
-    /* This is meant to work on Fixed 24.8 values, not the elt path (x,y) which are 25.7 */
+int32_t
+FRnd(int32_t x)
+{
+    /* This is meant to work on Fixed 24.8 values, not the elt path (x,y) which
+     * are 25.7 */
     int32_t r;
     r = x;
-    if (roundToInt)
-    {
-        r = r+ (1<<7);
+    if (roundToInt) {
+        r = r + (1 << 7);
         r = r & ~0xFF;
     }
     return r;
 }
 
 /* returns the number of characters written and possibly encrypted*/
-static int32_t WriteString(char *str) {
-	assert(bezoutput != NULL);
-	if ((bezoutputactual + (int)strlen(str)) >= bezoutputalloc) {
-		int desiredsize = NUMMAX(bezoutputalloc * 2, (bezoutputalloc + (int)strlen(str)));
-		bezoutput = (char *)ACREALLOCMEM(bezoutput, desiredsize);
-		if (bezoutput) {
-			bezoutputalloc = desiredsize;
-		}
-		else {
-			return (-1); /*FATAL ERROR*/
-		}
-	}
-	strcat(bezoutput, str);
-	bezoutputactual += (int)strlen(str);
-	return (int32_t)strlen(str);
+static int32_t
+WriteString(char* str)
+{
+    assert(bezoutput != NULL);
+    if ((bezoutputactual + (int)strlen(str)) >= bezoutputalloc) {
+        int desiredsize =
+          NUMMAX(bezoutputalloc * 2, (bezoutputalloc + (int)strlen(str)));
+        bezoutput = (char*)ACREALLOCMEM(bezoutput, desiredsize);
+        if (bezoutput) {
+            bezoutputalloc = desiredsize;
+        } else {
+            return (-1); /*FATAL ERROR*/
+        }
+    }
+    strcat(bezoutput, str);
+    bezoutputactual += (int)strlen(str);
+    return (int32_t)strlen(str);
 }
 
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal p;laces. */
-#define WRTNUM(i)                           \
-	{                                       \
-		sprintf(S0, "%d ", (int32_t)(i)); \
-		ws(S0);                             \
-	}
+#define WRTNUM(i)                                                              \
+    {                                                                          \
+        sprintf(S0, "%d ", (int32_t)(i));                                      \
+        ws(S0);                                                                \
+    }
 
+#define WRTRNUM(i)                                                             \
+    {                                                                          \
+        sprintf(S0, "%0.2f ", roundf((float)(i)*100) / 100);                   \
+        ws(S0);                                                                \
+    }
 
-#define WRTRNUM(i)                           \
-{                                       \
-sprintf(S0, "%0.2f ", roundf((float)(i)*100)/100); \
-ws(S0);                             \
-}
-
-
-
-static void wrtx(Fixed x) {
-	Fixed i;
+static void
+wrtx(Fixed x)
+{
+    Fixed i;
     Fixed dx;
-    if ((roundToInt) || (FracPart(x) == 0))
-    {
+    if ((roundToInt) || (FracPart(x) == 0)) {
         i = FRnd(x);
         dx = i - currentx;
         WRTNUM(FTrunc(dx));
         currentx = i;
-    }
-    else
-    {
+    } else {
         float r;
         i = x - currentx;
         currentx = x;
         r = (float)FIXED2FLOAT(i);
         WRTRNUM(r);
     }
-
 }
 
-static void wrtxa(Fixed x) {
-	Fixed i;
-    if ((roundToInt) || (FracPart(x) == 0))
-    {
+static void
+wrtxa(Fixed x)
+{
+    Fixed i;
+    if ((roundToInt) || (FracPart(x) == 0)) {
         i = FRnd(x);
         WRTNUM(FTrunc(i));
         currentx = i;
-    }
-    else
-    {
+    } else {
         float r;
         currentx = x;
         r = (float)FIXED2FLOAT(x);
         WRTRNUM(r);
     }
-    
 }
 
-static void wrty(Fixed y) {
-	Fixed i;
+static void
+wrty(Fixed y)
+{
+    Fixed i;
     Fixed dy;
-    if ((roundToInt) || (FracPart(y) == 0))
-    {
+    if ((roundToInt) || (FracPart(y) == 0)) {
         i = FRnd(y);
         dy = i - currenty;
         WRTNUM(FTrunc(dy));
         currenty = i;
-    }
-    else
-    {
+    } else {
         float r;
         i = y - currenty;
         currenty = y;
@@ -133,16 +133,15 @@ static void wrty(Fixed y) {
     }
 }
 
-static void wrtya(Fixed y) {
-	Fixed i;
-    if ((roundToInt) || (FracPart(y) == 0))
-    {
+static void
+wrtya(Fixed y)
+{
+    Fixed i;
+    if ((roundToInt) || (FracPart(y) == 0)) {
         i = FRnd(y);
         WRTNUM(FTrunc(i));
         currenty = i;
-    }
-    else
-    {
+    } else {
         float r;
         currenty = y;
         r = (float)FIXED2FLOAT(y);
@@ -150,210 +149,214 @@ static void wrtya(Fixed y) {
     }
 }
 
-#define wrtcd(c) \
-wrtx(c.x);   \
-wrty(c.y)
+#define wrtcd(c)                                                               \
+    wrtx(c.x);                                                                 \
+    wrty(c.y)
 
-#define wrtcda(c) \
-wrtxa(c.x);   \
-wrtya(c.y)
+#define wrtcda(c)                                                              \
+    wrtxa(c.x);                                                                \
+    wrtya(c.y)
 
 /*To avoid pointless hint subs*/
 #define HINTMAXSTR 2048
 static char hintmaskstr[HINTMAXSTR];
 static char prevhintmaskstr[HINTMAXSTR];
 
-void safestrcat(char *s1, char *s2) {
-	if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
-		sprintf(S0, "ERROR: Hint information overflowing buffer: %s\n", fileName);
-		LogMsg(S0, LOGERROR, FATALERROR, true);
-	}
-	else {
-		strcat(s1, s2);
-	}
+void
+safestrcat(char* s1, char* s2)
+{
+    if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
+        sprintf(S0, "ERROR: Hint information overflowing buffer: %s\n",
+                fileName);
+        LogMsg(S0, LOGERROR, FATALERROR, true);
+    } else {
+        strcat(s1, s2);
+    }
 }
 
-#define sws(str) safestrcat(hintmaskstr, (char *)str)
+#define sws(str) safestrcat(hintmaskstr, (char*)str)
 
-#define SWRTNUM(i) {                    \
-sprintf(S0, "%d ", (int32_t)(i)); \
-sws(S0);                            \
+#define SWRTNUM(i)                                                             \
+    {                                                                          \
+        sprintf(S0, "%d ", (int32_t)(i));                                      \
+        sws(S0);                                                               \
+    }
+
+#define SWRTNUMA(i)                                                            \
+    {                                                                          \
+        sprintf(S0, "%0.2f ", roundf((float)(i)*100) / 100);                   \
+        sws(S0);                                                               \
+    }
+
+static void
+NewBest(PClrPoint lst)
+{
+    Fixed x0, x1, y0, y1;
+    bst = lst;
+    bch = lst->c;
+    if (bch == 'y' || bch == 'm') {
+        bstB = true;
+        x0 = lst->x0;
+        x1 = lst->x1;
+        bx = NUMMIN(x0, x1);
+    } else {
+        bstB = false;
+        y0 = lst->y0;
+        y1 = lst->y1;
+        by = NUMMIN(y0, y1);
+    }
 }
 
-#define SWRTNUMA(i) {                    \
-sprintf(S0, "%0.2f ", roundf((float)(i)*100)/100); \
-sws(S0);                            \
-}
-
-static void NewBest(PClrPoint lst) {
-	Fixed x0, x1, y0, y1;
-	bst = lst;
-	bch = lst->c;
-	if (bch == 'y' || bch == 'm') {
-		bstB = true;
-		x0 = lst->x0;
-		x1 = lst->x1;
-		bx = NUMMIN(x0, x1);
-	}
-	else {
-		bstB = false;
-		y0 = lst->y0;
-		y1 = lst->y1;
-		by = NUMMIN(y0, y1);
-	}
-}
-
-static void WriteOne(const ACFontInfo* fontinfo, Fixed s) { /* write s to output file */
-	Fixed r = UnScaleAbs(fontinfo, s);
-	if (scalinghints) {
-		r = FRnd(r);
-	}
-	if (FracPart(r) == 0) {
-		SWRTNUM(FTrunc(r))
-	}
-	else {
+static void
+WriteOne(const ACFontInfo* fontinfo, Fixed s)
+{ /* write s to output file */
+    Fixed r = UnScaleAbs(fontinfo, s);
+    if (scalinghints) {
+        r = FRnd(r);
+    }
+    if (FracPart(r) == 0) {
+        SWRTNUM(FTrunc(r))
+    } else {
         float d = (float)FIXED2FLOAT(r);
-        if (writeAbsolute)
-        {
+        if (writeAbsolute) {
             SWRTNUMA(d);
-        }
-        else
-        {
-             d = (float)((d+0.005)*100);
+        } else {
+            d = (float)((d + 0.005) * 100);
             SWRTNUM(d);
             sws("100 div ");
         }
     }
 }
 
-static void WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst) {
-	switch (lst->c) {
-		case 'b':
-		case 'v':
-			WriteOne(fontinfo, lst->y0);
-			WriteOne(fontinfo, lst->y1 - lst->y0);
-			sws(((lst->c == 'b') ? "rb" : "rv"));
-			break;
-		case 'y':
-		case 'm':
-			WriteOne(fontinfo, lst->x0);
-			WriteOne(fontinfo, lst->x1 - lst->x0);
-			sws(((lst->c == 'y') ? "ry" : "rm"));
-			break;
-		default: {
-			sprintf(S0, "Illegal point list data for file: %s.\n",
-					fileName);
-			LogMsg(S0, LOGERROR, NONFATALERROR, true);
-		}
-	}
-	sws(" % ");
-	SWRTNUM(lst->p0 != NULL ? lst->p0->count : 0);
-	SWRTNUM(lst->p1 != NULL ? lst->p1->count : 0);
-	sws("\n");
-}
-
-static void WrtPntLst(const ACFontInfo* fontinfo, PClrPoint lst) {
-	PClrPoint ptLst;
-	char ch;
-	Fixed x0, x1, y0, y1;
-	ptLst = lst;
-
-	while (lst != NULL) {/* mark all as not yet done */
-		lst->done = false;
-		lst = lst->next;
-	}
-	while (true) {/* write in sort order */
-		lst = ptLst;
-		bst = NULL;
-		while (lst != NULL) {/* find first not yet done as init best */
-			if (!lst->done) {
-				NewBest(lst);
-				break;
-			}
-			lst = lst->next;
-		}
-		if (bst == NULL) {
-			break; /* finished with entire list */
-		}
-		lst = bst->next;
-		while (lst != NULL) {/* search for best */
-			if (!lst->done) {
-				ch = lst->c;
-				if (ch > bch) {
-					NewBest(lst);
-				}
-				else if (ch == bch) {
-					if (bstB) {
-						x0 = lst->x0;
-						x1 = lst->x1;
-						if (NUMMIN(x0, x1) < bx) {
-							NewBest(lst);
-						}
-					}
-					else {
-						y0 = lst->y0;
-						y1 = lst->y1;
-						if (NUMMIN(y0, y1) < by) {
-							NewBest(lst);
-						}
-					}
-				}
-			}
-			lst = lst->next;
-		}
-		bst->done = true; /* mark as having been done */
-		WritePointItem(fontinfo, bst);
-	}
-}
-
-static void wrtnewclrs(const ACFontInfo* fontinfo, PPathElt e) {
-	if (!wrtColorInfo) {
-		return;
-	}
-	hintmaskstr[0] = '\0';
-	WrtPntLst(fontinfo, ptLstArray[e->newcolors]);
-	if (strcmp(prevhintmaskstr, hintmaskstr)) {
-		ws("beginsubr snc\n");
-		ws(hintmaskstr);
-		ws("endsubr enc\nnewcolors\n");
-		strcpy(prevhintmaskstr, hintmaskstr);
-	}
-}
-
-bool IsFlex(PPathElt e) {
-	PPathElt e0, e1;
-	if (firstFlex) {
-		e0 = e;
-		e1 = e->next;
-	}
-	else {
-		e0 = e->prev;
-		e1 = e;
-	}
-	return (e0 != NULL && e0->isFlex && e1 != NULL && e1->isFlex);
-}
-
-static void mt(const ACFontInfo* fontinfo, Cd c, PPathElt e) {
-	if (e->newcolors != 0) {
-		wrtnewclrs(fontinfo, e);
-	}
-    if (writeAbsolute)
-    {
-		wrtcda(c);
-		ws("mt\n");
+static void
+WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst)
+{
+    switch (lst->c) {
+        case 'b':
+        case 'v':
+            WriteOne(fontinfo, lst->y0);
+            WriteOne(fontinfo, lst->y1 - lst->y0);
+            sws(((lst->c == 'b') ? "rb" : "rv"));
+            break;
+        case 'y':
+        case 'm':
+            WriteOne(fontinfo, lst->x0);
+            WriteOne(fontinfo, lst->x1 - lst->x0);
+            sws(((lst->c == 'y') ? "ry" : "rm"));
+            break;
+        default: {
+            sprintf(S0, "Illegal point list data for file: %s.\n", fileName);
+            LogMsg(S0, LOGERROR, NONFATALERROR, true);
+        }
     }
-    else
-    {
-        
+    sws(" % ");
+    SWRTNUM(lst->p0 != NULL ? lst->p0->count : 0);
+    SWRTNUM(lst->p1 != NULL ? lst->p1->count : 0);
+    sws("\n");
+}
+
+static void
+WrtPntLst(const ACFontInfo* fontinfo, PClrPoint lst)
+{
+    PClrPoint ptLst;
+    char ch;
+    Fixed x0, x1, y0, y1;
+    ptLst = lst;
+
+    while (lst != NULL) { /* mark all as not yet done */
+        lst->done = false;
+        lst = lst->next;
+    }
+    while (true) { /* write in sort order */
+        lst = ptLst;
+        bst = NULL;
+        while (lst != NULL) { /* find first not yet done as init best */
+            if (!lst->done) {
+                NewBest(lst);
+                break;
+            }
+            lst = lst->next;
+        }
+        if (bst == NULL) {
+            break; /* finished with entire list */
+        }
+        lst = bst->next;
+        while (lst != NULL) { /* search for best */
+            if (!lst->done) {
+                ch = lst->c;
+                if (ch > bch) {
+                    NewBest(lst);
+                } else if (ch == bch) {
+                    if (bstB) {
+                        x0 = lst->x0;
+                        x1 = lst->x1;
+                        if (NUMMIN(x0, x1) < bx) {
+                            NewBest(lst);
+                        }
+                    } else {
+                        y0 = lst->y0;
+                        y1 = lst->y1;
+                        if (NUMMIN(y0, y1) < by) {
+                            NewBest(lst);
+                        }
+                    }
+                }
+            }
+            lst = lst->next;
+        }
+        bst->done = true; /* mark as having been done */
+        WritePointItem(fontinfo, bst);
+    }
+}
+
+static void
+wrtnewclrs(const ACFontInfo* fontinfo, PPathElt e)
+{
+    if (!wrtColorInfo) {
+        return;
+    }
+    hintmaskstr[0] = '\0';
+    WrtPntLst(fontinfo, ptLstArray[e->newcolors]);
+    if (strcmp(prevhintmaskstr, hintmaskstr)) {
+        ws("beginsubr snc\n");
+        ws(hintmaskstr);
+        ws("endsubr enc\nnewcolors\n");
+        strcpy(prevhintmaskstr, hintmaskstr);
+    }
+}
+
+bool
+IsFlex(PPathElt e)
+{
+    PPathElt e0, e1;
+    if (firstFlex) {
+        e0 = e;
+        e1 = e->next;
+    } else {
+        e0 = e->prev;
+        e1 = e;
+    }
+    return (e0 != NULL && e0->isFlex && e1 != NULL && e1->isFlex);
+}
+
+static void
+mt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
+{
+    if (e->newcolors != 0) {
+        wrtnewclrs(fontinfo, e);
+    }
+    if (writeAbsolute) {
+        wrtcda(c);
+        ws("mt\n");
+    } else {
+
         if (FRnd(c.y) == currenty) {
             wrtx(c.x);
             ws("hmt\n");
-        }
-        else if (FRnd(c.x) == currentx) {
+        } else if (FRnd(c.x) == currentx) {
             wrty(c.y);
             ws("vmt\n");
-        }
-        else {
+        } else {
             wrtcd(c);
             ws("rmt\n");
         }
@@ -366,106 +369,101 @@ static void mt(const ACFontInfo* fontinfo, Cd c, PPathElt e) {
     }
 }
 
-static void dt(const ACFontInfo* fontinfo, Cd c, PPathElt e) {
-	if (e->newcolors != 0) {
-		wrtnewclrs(fontinfo, e);
-	}
-    if (writeAbsolute)
-    {
-		wrtcda(c);
-		ws("dt\n");
+static void
+dt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
+{
+    if (e->newcolors != 0) {
+        wrtnewclrs(fontinfo, e);
     }
-    else
-    {
+    if (writeAbsolute) {
+        wrtcda(c);
+        ws("dt\n");
+    } else {
         if (FRnd(c.y) == currenty) {
             wrtx(c.x);
             ws("hdt\n");
-        }
-        else if (FRnd(c.x) == currentx) {
+        } else if (FRnd(c.x) == currentx) {
             wrty(c.y);
             ws("vdt\n");
-        }
-        else {
+        } else {
             wrtcd(c);
             ws("rdt\n");
         }
     }
-	if (e->eol) {
-		ws("eol\n");
-	}
-	if (e->sol) {
-		ws("sol\n");
-	}
+    if (e->eol) {
+        ws("eol\n");
+    }
+    if (e->sol) {
+        ws("sol\n");
+    }
 }
 
 Fixed flX, flY;
 Cd fc1, fc2, fc3;
 
-#define wrtpreflx2(c) \
-wrtcd(c);         \
-ws("rmt\npreflx2\n")
+#define wrtpreflx2(c)                                                          \
+    wrtcd(c);                                                                  \
+    ws("rmt\npreflx2\n")
 
-#define wrtpreflx2a(c) \
-wrtcda(c);         \
-ws("rmt\npreflx2a\n")
+#define wrtpreflx2a(c)                                                         \
+    wrtcda(c);                                                                 \
+    ws("rmt\npreflx2a\n")
 
-static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
-	int32_t dmin, delta;
-	bool yflag;
-	Cd c13;
-	float shrink, r1, r2;
-	if (firstFlex) {
-		flX = currentx;
-		flY = currenty;
-		fc1 = c1;
-		fc2 = c2;
-		fc3 = c3;
-		firstFlex = false;
-		return;
-	}
-	yflag = e->yFlex;
-	dmin = DMIN;
-	delta = DELTA;
-	ws("preflx1\n");
-	if (yflag) {
-		if (fc3.y == c3.y) {
-			c13.y = c3.y;
-		}
-		else {
-			acfixtopflt(fc3.y - c3.y, &shrink);
-			shrink = (float)delta / shrink;
-			if (shrink < 0.0) {
-				shrink = -shrink;
-			}
-			acfixtopflt(fc3.y - c3.y, &r1);
-			r1 *= shrink;
-			acfixtopflt(c3.y, &r2);
-			r1 += r2;
-			c13.y = acpflttofix(&r1);
-		}
-		c13.x = fc3.x;
-	}
-	else {
-		if (fc3.x == c3.x) {
-			c13.x = c3.x;
-		}
-		else {
-			acfixtopflt(fc3.x - c3.x, &shrink);
-			shrink = (float)delta / shrink;
-			if (shrink < 0.0) {
-				shrink = -shrink;
-			}
-			acfixtopflt(fc3.x - c3.x, &r1);
-			r1 *= shrink;
-			acfixtopflt(c3.x, &r2);
-			r1 += r2;
-			c13.x = acpflttofix(&r1);
-		}
-		c13.y = fc3.y;
-	}
-    
-    if (writeAbsolute)
-    {
+static void
+wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e)
+{
+    int32_t dmin, delta;
+    bool yflag;
+    Cd c13;
+    float shrink, r1, r2;
+    if (firstFlex) {
+        flX = currentx;
+        flY = currenty;
+        fc1 = c1;
+        fc2 = c2;
+        fc3 = c3;
+        firstFlex = false;
+        return;
+    }
+    yflag = e->yFlex;
+    dmin = DMIN;
+    delta = DELTA;
+    ws("preflx1\n");
+    if (yflag) {
+        if (fc3.y == c3.y) {
+            c13.y = c3.y;
+        } else {
+            acfixtopflt(fc3.y - c3.y, &shrink);
+            shrink = (float)delta / shrink;
+            if (shrink < 0.0) {
+                shrink = -shrink;
+            }
+            acfixtopflt(fc3.y - c3.y, &r1);
+            r1 *= shrink;
+            acfixtopflt(c3.y, &r2);
+            r1 += r2;
+            c13.y = acpflttofix(&r1);
+        }
+        c13.x = fc3.x;
+    } else {
+        if (fc3.x == c3.x) {
+            c13.x = c3.x;
+        } else {
+            acfixtopflt(fc3.x - c3.x, &shrink);
+            shrink = (float)delta / shrink;
+            if (shrink < 0.0) {
+                shrink = -shrink;
+            }
+            acfixtopflt(fc3.x - c3.x, &r1);
+            r1 *= shrink;
+            acfixtopflt(c3.x, &r2);
+            r1 += r2;
+            c13.x = acpflttofix(&r1);
+        }
+        c13.y = fc3.y;
+    }
+
+    if (writeAbsolute) {
         wrtpreflx2a(c13);
         wrtpreflx2a(fc1);
         wrtpreflx2a(fc2);
@@ -487,9 +485,8 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
         WRTNUM(FTrunc(FRnd(currentx)));
         WRTNUM(FTrunc(FRnd(currenty)));
         ws("flxa\n");
-    }
-    else {
-        
+    } else {
+
         wrtpreflx2(c13);
         wrtpreflx2(fc1);
         wrtpreflx2(fc2);
@@ -511,162 +508,164 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
         WRTNUM(FTrunc(FRnd(currentx)));
         WRTNUM(FTrunc(FRnd(currenty)));
         ws("flx\n");
-	}
-	firstFlex = true;
+    }
+    firstFlex = true;
 }
 
-static void ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PPathElt e) {
-	if (e->newcolors != 0) {
-		wrtnewclrs(fontinfo, e);
-	}
-	if (e->isFlex && IsFlex(e)) {
-		wrtflex(c1, c2, c3, e);
-	}
-    else if (writeAbsolute)
-    {
+static void
+ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PPathElt e)
+{
+    if (e->newcolors != 0) {
+        wrtnewclrs(fontinfo, e);
+    }
+    if (e->isFlex && IsFlex(e)) {
+        wrtflex(c1, c2, c3, e);
+    } else if (writeAbsolute) {
         wrtcda(c1);
         wrtcda(c2);
         wrtcda(c3);
         ws("ct\n");
-    }
-    else
-    {
+    } else {
         if ((FRnd(c1.x) == currentx) && (c2.y == c3.y)) {
             wrty(c1.y);
             wrtcd(c2);
             wrtx(c3.x);
             ws("vhct\n");
-        }
-        else if ((FRnd(c1.y) == currenty) && (c2.x == c3.x)) {
+        } else if ((FRnd(c1.y) == currenty) && (c2.x == c3.x)) {
             wrtx(c1.x);
             wrtcd(c2);
             wrty(c3.y);
             ws("hvct\n");
-        }
-        else {
+        } else {
             wrtcd(c1);
             wrtcd(c2);
             wrtcd(c3);
             ws("rct\n");
         }
     }
-	if (e->eol) {
-		ws("eol\n");
-	}
-	if (e->sol) {
-		ws("sol\n");
-	}
+    if (e->eol) {
+        ws("eol\n");
+    }
+    if (e->sol) {
+        ws("sol\n");
+    }
 }
 
-static void cp(const ACFontInfo* fontinfo, PPathElt e) {
-	if (e->newcolors != 0) {
-		wrtnewclrs(fontinfo, e);
-	}
-	if (idInFile) {
-		WRTNUM(subpathcount++);
-		ws("id\n");
-	}
-	ws("cp\n");
-	if (e->eol) {
-		ws("eol\n");
-	}
-	if (e->sol) {
-		ws("sol\n");
-	}
+static void
+cp(const ACFontInfo* fontinfo, PPathElt e)
+{
+    if (e->newcolors != 0) {
+        wrtnewclrs(fontinfo, e);
+    }
+    if (idInFile) {
+        WRTNUM(subpathcount++);
+        ws("id\n");
+    }
+    ws("cp\n");
+    if (e->eol) {
+        ws("eol\n");
+    }
+    if (e->sol) {
+        ws("sol\n");
+    }
 }
 
-static void NumberPath() {
-	register int16_t cnt;
-	register PPathElt e;
-	e = pathStart;
-	cnt = 1;
-	while (e != NULL) {
-		e->count = cnt++;
-		e = e->next;
-	}
+static void
+NumberPath()
+{
+    register int16_t cnt;
+    register PPathElt e;
+    e = pathStart;
+    cnt = 1;
+    while (e != NULL) {
+        e->count = cnt++;
+        e = e->next;
+    }
 }
 
-void SaveFile(const ACFontInfo* fontinfo) {
-	register PPathElt e = pathStart;
-	Cd c1, c2, c3;
+void
+SaveFile(const ACFontInfo* fontinfo)
+{
+    register PPathElt e = pathStart;
+    Cd c1, c2, c3;
 
-	assert(bezoutput != NULL);
+    assert(bezoutput != NULL);
 
-/* AddSolEol(); */
-	sprintf(S0, "%% %s\n", fileName);
-	ws(S0);
-	wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
-	NumberPath();
-	prevhintmaskstr[0] = '\0';
-	if (wrtColorInfo && (!e->newcolors)) {
-		hintmaskstr[0] = '\0';
-		WrtPntLst(fontinfo, ptLstArray[0]);
-		ws(hintmaskstr);
-		strcpy(prevhintmaskstr, hintmaskstr);
-	}
+    /* AddSolEol(); */
+    sprintf(S0, "%% %s\n", fileName);
+    ws(S0);
+    wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
+    NumberPath();
+    prevhintmaskstr[0] = '\0';
+    if (wrtColorInfo && (!e->newcolors)) {
+        hintmaskstr[0] = '\0';
+        WrtPntLst(fontinfo, ptLstArray[0]);
+        ws(hintmaskstr);
+        strcpy(prevhintmaskstr, hintmaskstr);
+    }
 
-	ws("sc\n");
-	firstFlex = true;
-	currentx = currenty = 0;
-	while (e != NULL) {
-		switch (e->type) {
-			case CURVETO:
-				c1.x = UnScaleAbs(fontinfo, itfmx(e->x1));
-				c1.y = UnScaleAbs(fontinfo, itfmy(e->y1));
-				c2.x = UnScaleAbs(fontinfo, itfmx(e->x2));
-				c2.y = UnScaleAbs(fontinfo, itfmy(e->y2));
-				c3.x = UnScaleAbs(fontinfo, itfmx(e->x3));
-				c3.y = UnScaleAbs(fontinfo, itfmy(e->y3));
-				ct(fontinfo, c1, c2, c3, e);
-				break;
-			case LINETO:
-				c1.x = UnScaleAbs(fontinfo, itfmx(e->x));
-				c1.y = UnScaleAbs(fontinfo, itfmy(e->y));
-				dt(fontinfo, c1, e);
-				break;
-			case MOVETO:
-				c1.x = UnScaleAbs(fontinfo, itfmx(e->x));
-				c1.y = UnScaleAbs(fontinfo, itfmy(e->y));
-				mt(fontinfo, c1, e);
-				break;
-			case CLOSEPATH:
-				cp(fontinfo, e);
-				break;
-			default: {
-				sprintf(S0, "Illegal path list for file: %s.\n", fileName);
-				LogMsg(S0, LOGERROR, NONFATALERROR, true);
-			}
-		}
+    ws("sc\n");
+    firstFlex = true;
+    currentx = currenty = 0;
+    while (e != NULL) {
+        switch (e->type) {
+            case CURVETO:
+                c1.x = UnScaleAbs(fontinfo, itfmx(e->x1));
+                c1.y = UnScaleAbs(fontinfo, itfmy(e->y1));
+                c2.x = UnScaleAbs(fontinfo, itfmx(e->x2));
+                c2.y = UnScaleAbs(fontinfo, itfmy(e->y2));
+                c3.x = UnScaleAbs(fontinfo, itfmx(e->x3));
+                c3.y = UnScaleAbs(fontinfo, itfmy(e->y3));
+                ct(fontinfo, c1, c2, c3, e);
+                break;
+            case LINETO:
+                c1.x = UnScaleAbs(fontinfo, itfmx(e->x));
+                c1.y = UnScaleAbs(fontinfo, itfmy(e->y));
+                dt(fontinfo, c1, e);
+                break;
+            case MOVETO:
+                c1.x = UnScaleAbs(fontinfo, itfmx(e->x));
+                c1.y = UnScaleAbs(fontinfo, itfmy(e->y));
+                mt(fontinfo, c1, e);
+                break;
+            case CLOSEPATH:
+                cp(fontinfo, e);
+                break;
+            default: {
+                sprintf(S0, "Illegal path list for file: %s.\n", fileName);
+                LogMsg(S0, LOGERROR, NONFATALERROR, true);
+            }
+        }
 #if WRTABS_COMMENT
-		ws(" % ");
-		WRTNUM(e->count)
-		switch (e->type) {
-			case CURVETO:
-				wrtfx(c1.x);
-				wrtfx(c1.y);
-				wrtfx(c2.x);
-				wrtfx(c2.y);
-				wrtfx(c3.x);
-				wrtfx(c3.y);
-				ws("ct");
-				break;
-			case LINETO:
-				wrtfx(c1.x);
-				wrtfx(c1.y);
-				ws("dt");
-				break;
-			case MOVETO:
-				wrtfx(c1.x);
-				wrtfx(c1.y);
-				ws("mt");
-				break;
-			case CLOSEPATH:
-				ws("cp");
-				break;
-		}
-		ws("\n");
+        ws(" % ");
+        WRTNUM(e->count)
+        switch (e->type) {
+            case CURVETO:
+                wrtfx(c1.x);
+                wrtfx(c1.y);
+                wrtfx(c2.x);
+                wrtfx(c2.y);
+                wrtfx(c3.x);
+                wrtfx(c3.y);
+                ws("ct");
+                break;
+            case LINETO:
+                wrtfx(c1.x);
+                wrtfx(c1.y);
+                ws("dt");
+                break;
+            case MOVETO:
+                wrtfx(c1.x);
+                wrtfx(c1.y);
+                ws("mt");
+                break;
+            case CLOSEPATH:
+                ws("cp");
+                break;
+        }
+        ws("\n");
 #endif
-		e = e->next;
-	}
-	ws("ed\n");
+        e = e->next;
+    }
+    ws("ed\n");
 }

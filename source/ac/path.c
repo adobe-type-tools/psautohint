@@ -1,14 +1,17 @@
-/* Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-This software is licensed as OpenSource, under the Apache License, Version 2.0. This license is available at: http://opensource.org/licenses/Apache-2.0. */
-/***********************************************************************/
-/* path.c */
-
+/*
+ * Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/).
+ * All Rights Reserved.
+ *
+ * This software is licensed as OpenSource, under the Apache License, Version
+ * 2.0.
+ * This license is available at: http://opensource.org/licenses/Apache-2.0.
+ */
 
 #include "ac.h"
 
 #if 0
-#define GetSubpathNext(e) ((e)->type == CLOSEPATH)? GetDest(e) : (e)->next
-#define GetSubpathPrev(e) ((e)->type == MOVETO)? GetClosedBy(e) : (e)->prev
+#define GetSubpathNext(e) ((e)->type == CLOSEPATH) ? GetDest(e) : (e)->next
+#define GetSubpathPrev(e) ((e)->type == MOVETO) ? GetClosedBy(e) : (e)->prev
 
 static void NumberSubpath(e) register PPathElt e; {
   /* number the elements of the subpath starting at e */
@@ -230,8 +233,7 @@ static PPathElt FindMinConflict(e) PPathElt e; {
   return bestCP;
   }
 
-#define SubpathConflictsWithPrimary(e) \
-    (!TestColorSection(e, GetClosedBy(e)))
+#define SubpathConflictsWithPrimary(e) (!TestColorSection(e, GetClosedBy(e)))
 
 static PPathElt NewCP(cp) PPathElt cp; {
   PPathElt first;
