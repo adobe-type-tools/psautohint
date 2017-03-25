@@ -12,21 +12,19 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 
 int32_t NumHColors, NumVColors;
 
-static void ParseStems(kw, stems, pnum)
-  char *kw; Fixed *stems; int32_t *pnum; 
+static void ParseStems(const ACFontInfo* fontinfo, char* kw, Fixed* stems, int32_t* pnum)
 {
   int istems[MAXSTEMS], i;
-  ParseIntStems (kw, ACOPTIONAL, MAXSTEMS, istems, pnum, NULL);
+  ParseIntStems (fontinfo, kw, ACOPTIONAL, MAXSTEMS, istems, pnum, NULL);
   for (i = 0; i < *pnum; i++)
     stems[i] = FixInt (istems[i]);
 }
 
-static void GetKeyValue(keyword, optional, value)
-  char *keyword; bool optional; int32_t *value;
+static void GetKeyValue(const ACFontInfo* fontinfo, char* keyword, bool optional, int32_t* value)
 {
   char *fontinfostr;
   
- fontinfostr  = GetFntInfo(keyword, optional);
+ fontinfostr  = GetFntInfo(fontinfo, keyword, optional);
 
   if ((fontinfostr != NULL) && (fontinfostr[0] != 0))
   {
@@ -36,12 +34,12 @@ static void GetKeyValue(keyword, optional, value)
   return;
 }
 
-static void GetKeyFixedValue(char* keyword, bool optional, Fixed *value)
+static void GetKeyFixedValue(const ACFontInfo* fontinfo, char* keyword, bool optional, Fixed *value)
 {
   char *fontinfostr;
   float tempValue;
   
- fontinfostr  = GetFntInfo(keyword, optional);
+ fontinfostr  = GetFntInfo(fontinfo, keyword, optional);
 
   if ((fontinfostr != NULL) && (fontinfostr[0] != 0))
   {
@@ -52,7 +50,7 @@ static void GetKeyFixedValue(char* keyword, bool optional, Fixed *value)
   return;
 }
 
-bool ReadFontInfo() {
+bool ReadFontInfo(const ACFontInfo* fontinfo) {
   char *fontinfostr;
   int32_t 
     AscenderHeight,
@@ -112,111 +110,111 @@ bool ReadFontInfo() {
   /* check for FlexOK, AuxHStems, AuxVStems */
   if (!scalinghints)  /* for intelligent scaling, it's too hard to check these */
   {
-    ParseStems("StemSnapH", HStems, &NumHStems);
-    ParseStems("StemSnapV", VStems, &NumVStems);
+    ParseStems(fontinfo, "StemSnapH", HStems, &NumHStems);
+    ParseStems(fontinfo, "StemSnapV", VStems, &NumVStems);
 	if (NumHStems == 0)
 	{
-    ParseStems("DominantH", HStems, &NumHStems);
-    ParseStems("DominantV", VStems, &NumVStems);
+    ParseStems(fontinfo, "DominantH", HStems, &NumHStems);
+    ParseStems(fontinfo, "DominantV", VStems, &NumVStems);
 	}
   }
-  fontinfostr = GetFntInfo("FlexOK", !ORDINARYCOLORING);
+  fontinfostr = GetFntInfo(fontinfo, "FlexOK", !ORDINARYCOLORING);
   flexOK = (fontinfostr != NULL) && (fontinfostr[0]!='\0') && strcmp(fontinfostr, "false");
 
    ACFREEMEM(fontinfostr);
-  fontinfostr = GetFntInfo("FlexStrict", true);
+  fontinfostr = GetFntInfo(fontinfo, "FlexStrict", true);
 if (fontinfostr != NULL) 
   flexStrict = strcmp(fontinfostr, "false");
    ACFREEMEM(fontinfostr);
 
  	/* get bluefuzz. It is already set to its default value in ac.c::InitData().
 	GetKeyFixedValue does nto change the value if it is not present in fontinfo.  */
-   GetKeyFixedValue("BlueFuzz", ACOPTIONAL, &bluefuzz);
+   GetKeyFixedValue(fontinfo, "BlueFuzz", ACOPTIONAL, &bluefuzz);
 
   /* Check for counter coloring characters. */
-  if ((fontinfostr = GetFntInfo("VCounterChars", ACOPTIONAL)) != NULL)
+  if ((fontinfostr = GetFntInfo(fontinfo, "VCounterChars", ACOPTIONAL)) != NULL)
   {
     NumVColors = AddCounterColorChars(fontinfostr, VColorList);
    ACFREEMEM(fontinfostr);
   };
-  if ((fontinfostr = GetFntInfo("HCounterChars", ACOPTIONAL)) != NULL)
+  if ((fontinfostr = GetFntInfo(fontinfo, "HCounterChars", ACOPTIONAL)) != NULL)
   {
     NumHColors = AddCounterColorChars(fontinfostr, HColorList);
    ACFREEMEM(fontinfostr);
   };
-  GetKeyValue("AscenderHeight", ACOPTIONAL, &AscenderHeight);
-  GetKeyValue("AscenderOvershoot", ACOPTIONAL, &AscenderOvershoot);
-  GetKeyValue("BaselineYCoord", !ORDINARYCOLORING, &BaselineYCoord);
-  GetKeyValue("BaselineOvershoot", !ORDINARYCOLORING, &BaselineOvershoot);
-  GetKeyValue("Baseline5", ACOPTIONAL, &Baseline5);
-  GetKeyValue("Baseline5Overshoot", ACOPTIONAL, &Baseline5Overshoot);
-  GetKeyValue("Baseline6", ACOPTIONAL, &Baseline6);
-  GetKeyValue("Baseline6Overshoot", ACOPTIONAL, &Baseline6Overshoot);
-  GetKeyValue("CapHeight", !ORDINARYCOLORING, &CapHeight);
-  GetKeyValue("CapOvershoot", !ORDINARYCOLORING, &CapOvershoot);
-  GetKeyValue("DescenderHeight", ACOPTIONAL, &DescenderHeight);
-  GetKeyValue("DescenderOvershoot", ACOPTIONAL, &DescenderOvershoot);
-  GetKeyValue("FigHeight", ACOPTIONAL, &FigHeight);
-  GetKeyValue("FigOvershoot", ACOPTIONAL, &FigOvershoot);
-  GetKeyValue("Height5", ACOPTIONAL, &Height5);
-  GetKeyValue("Height5Overshoot", ACOPTIONAL, &Height5Overshoot);
-  GetKeyValue("Height6", ACOPTIONAL, &Height6);
-  GetKeyValue("Height6Overshoot", ACOPTIONAL, &Height6Overshoot);
-  GetKeyValue("LcHeight", ACOPTIONAL, &LcHeight);
-  GetKeyValue("LcOvershoot", ACOPTIONAL, &LcOvershoot);
-  GetKeyValue("OrdinalBaseline", ACOPTIONAL, &OrdinalBaseline);
-  GetKeyValue("OrdinalOvershoot", ACOPTIONAL, &OrdinalOvershoot);
-  GetKeyValue("SuperiorBaseline", ACOPTIONAL, &SuperiorBaseline);
-  GetKeyValue("SuperiorOvershoot", ACOPTIONAL, &SuperiorOvershoot);
+  GetKeyValue(fontinfo, "AscenderHeight", ACOPTIONAL, &AscenderHeight);
+  GetKeyValue(fontinfo, "AscenderOvershoot", ACOPTIONAL, &AscenderOvershoot);
+  GetKeyValue(fontinfo, "BaselineYCoord", !ORDINARYCOLORING, &BaselineYCoord);
+  GetKeyValue(fontinfo, "BaselineOvershoot", !ORDINARYCOLORING, &BaselineOvershoot);
+  GetKeyValue(fontinfo, "Baseline5", ACOPTIONAL, &Baseline5);
+  GetKeyValue(fontinfo, "Baseline5Overshoot", ACOPTIONAL, &Baseline5Overshoot);
+  GetKeyValue(fontinfo, "Baseline6", ACOPTIONAL, &Baseline6);
+  GetKeyValue(fontinfo, "Baseline6Overshoot", ACOPTIONAL, &Baseline6Overshoot);
+  GetKeyValue(fontinfo, "CapHeight", !ORDINARYCOLORING, &CapHeight);
+  GetKeyValue(fontinfo, "CapOvershoot", !ORDINARYCOLORING, &CapOvershoot);
+  GetKeyValue(fontinfo, "DescenderHeight", ACOPTIONAL, &DescenderHeight);
+  GetKeyValue(fontinfo, "DescenderOvershoot", ACOPTIONAL, &DescenderOvershoot);
+  GetKeyValue(fontinfo, "FigHeight", ACOPTIONAL, &FigHeight);
+  GetKeyValue(fontinfo, "FigOvershoot", ACOPTIONAL, &FigOvershoot);
+  GetKeyValue(fontinfo, "Height5", ACOPTIONAL, &Height5);
+  GetKeyValue(fontinfo, "Height5Overshoot", ACOPTIONAL, &Height5Overshoot);
+  GetKeyValue(fontinfo, "Height6", ACOPTIONAL, &Height6);
+  GetKeyValue(fontinfo, "Height6Overshoot", ACOPTIONAL, &Height6Overshoot);
+  GetKeyValue(fontinfo, "LcHeight", ACOPTIONAL, &LcHeight);
+  GetKeyValue(fontinfo, "LcOvershoot", ACOPTIONAL, &LcOvershoot);
+  GetKeyValue(fontinfo, "OrdinalBaseline", ACOPTIONAL, &OrdinalBaseline);
+  GetKeyValue(fontinfo, "OrdinalOvershoot", ACOPTIONAL, &OrdinalOvershoot);
+  GetKeyValue(fontinfo, "SuperiorBaseline", ACOPTIONAL, &SuperiorBaseline);
+  GetKeyValue(fontinfo, "SuperiorOvershoot", ACOPTIONAL, &SuperiorOvershoot);
 
   lenBotBands = lenTopBands = 0;
   if (BaselineYCoord != UNDEFINED && BaselineOvershoot != UNDEFINED) {
-    botBands[lenBotBands++] = ScaleAbs(FixInt(BaselineYCoord + BaselineOvershoot));
-    botBands[lenBotBands++] = ScaleAbs(FixInt(BaselineYCoord));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(BaselineYCoord + BaselineOvershoot));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(BaselineYCoord));
     }
   if (Baseline5 != UNDEFINED && Baseline5Overshoot != UNDEFINED) {
-    botBands[lenBotBands++] = ScaleAbs(FixInt(Baseline5 + Baseline5Overshoot));
-    botBands[lenBotBands++] = ScaleAbs(FixInt(Baseline5));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(Baseline5 + Baseline5Overshoot));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(Baseline5));
     }
   if (Baseline6 != UNDEFINED && Baseline6Overshoot != UNDEFINED) {
-    botBands[lenBotBands++] = ScaleAbs(FixInt(Baseline6 + Baseline6Overshoot));
-    botBands[lenBotBands++] = ScaleAbs(FixInt(Baseline6));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(Baseline6 + Baseline6Overshoot));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(Baseline6));
     }
   if (SuperiorBaseline != UNDEFINED && SuperiorOvershoot != UNDEFINED) {
-    botBands[lenBotBands++] = ScaleAbs(FixInt(SuperiorBaseline + SuperiorOvershoot));
-    botBands[lenBotBands++] = ScaleAbs(FixInt(SuperiorBaseline));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(SuperiorBaseline + SuperiorOvershoot));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(SuperiorBaseline));
     }
   if (OrdinalBaseline != UNDEFINED && OrdinalOvershoot != UNDEFINED) {
-    botBands[lenBotBands++] = ScaleAbs(FixInt(OrdinalBaseline + OrdinalOvershoot));
-    botBands[lenBotBands++] = ScaleAbs(FixInt(OrdinalBaseline));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(OrdinalBaseline + OrdinalOvershoot));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(OrdinalBaseline));
     }
   if (DescenderHeight != UNDEFINED && DescenderOvershoot != UNDEFINED) {
-    botBands[lenBotBands++] = ScaleAbs(FixInt(DescenderHeight + DescenderOvershoot));
-    botBands[lenBotBands++] = ScaleAbs(FixInt(DescenderHeight));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(DescenderHeight + DescenderOvershoot));
+    botBands[lenBotBands++] = ScaleAbs(fontinfo, FixInt(DescenderHeight));
     }
   if (CapHeight != UNDEFINED && CapOvershoot != UNDEFINED) {
-    topBands[lenTopBands++] = ScaleAbs(FixInt(CapHeight));
-    topBands[lenTopBands++] = ScaleAbs(FixInt(CapHeight + CapOvershoot));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(CapHeight));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(CapHeight + CapOvershoot));
     }
   if (LcHeight != UNDEFINED && LcOvershoot != UNDEFINED) {
-    topBands[lenTopBands++] = ScaleAbs(FixInt(LcHeight));
-    topBands[lenTopBands++] = ScaleAbs(FixInt(LcHeight + LcOvershoot));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(LcHeight));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(LcHeight + LcOvershoot));
     }
   if (AscenderHeight != UNDEFINED && AscenderOvershoot != UNDEFINED) {
-    topBands[lenTopBands++] = ScaleAbs(FixInt(AscenderHeight));
-    topBands[lenTopBands++] = ScaleAbs(FixInt(AscenderHeight + AscenderOvershoot));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(AscenderHeight));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(AscenderHeight + AscenderOvershoot));
     }
   if (FigHeight != UNDEFINED && FigOvershoot != UNDEFINED) {
-    topBands[lenTopBands++] = ScaleAbs(FixInt(FigHeight));
-    topBands[lenTopBands++] = ScaleAbs(FixInt(FigHeight + FigOvershoot));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(FigHeight));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(FigHeight + FigOvershoot));
     }
   if (Height5 != UNDEFINED && Height5Overshoot != UNDEFINED) {
-    topBands[lenTopBands++] = ScaleAbs(FixInt(Height5));
-    topBands[lenTopBands++] = ScaleAbs(FixInt(Height5 + Height5Overshoot));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(Height5));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(Height5 + Height5Overshoot));
     }
   if (Height6 != UNDEFINED && Height6Overshoot != UNDEFINED) {
-    topBands[lenTopBands++] = ScaleAbs(FixInt(Height6));
-    topBands[lenTopBands++] = ScaleAbs(FixInt(Height6 + Height6Overshoot));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(Height6));
+    topBands[lenTopBands++] = ScaleAbs(fontinfo, FixInt(Height6 + Height6Overshoot));
     }
   return true;
   }

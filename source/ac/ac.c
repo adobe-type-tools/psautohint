@@ -120,7 +120,7 @@ unsigned char * Alloc(int32_t sz)
   }
 
 
-void InitData(int32_t reason)
+void InitData(const ACFontInfo* fontinfo, int32_t reason)
  {
   register char *s;
   float tmp, origEmSquare;
@@ -173,7 +173,7 @@ void InitData(int32_t reason)
       listClrInfo = DEBUG;
       if (scalinghints)
       {
-        s = GetFntInfo("OrigEmSqUnits", MANDATORY);
+        s = GetFntInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
         sscanf(s, "%g", &origEmSquare);
 		ACFREEMEM(s);
         bluefuzz = (Fixed) (origEmSquare / 2000.0); /* .5 pixel */
@@ -203,12 +203,12 @@ void InitData(int32_t reason)
 
 /* Returns whether coloring was successful. */  
 bool
-AutoColor(bool fixStems, bool debug, bool extracolor, bool changeChar,
-          bool roundCoords)
+AutoColor(const ACFontInfo* fontinfo, bool fixStems, bool debug, bool extracolor,
+          bool changeChar, bool roundCoords)
 {
-    (void)InitAll(STARTUP);
+    InitAll(fontinfo, STARTUP);
 
-    if (!ReadFontInfo())
+    if (!ReadFontInfo(fontinfo))
         return false;
 
     editChar = changeChar;
@@ -220,6 +220,5 @@ AutoColor(bool fixStems, bool debug, bool extracolor, bool changeChar,
     if (debug)
         DEBUG = showClrInfo = showHs = showVs = listClrInfo = true;
 
-    return DoFile("", extracolor);
+    return DoFile(fontinfo, "", extracolor);
 }
-

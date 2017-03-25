@@ -8,6 +8,7 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
 #ifndef FIPUBLIC_H
 #define FIPUBLIC_H
 
+#include "ac.h"
 #include "basic.h"
 
 #define		ACOPTIONAL		1
@@ -21,10 +22,12 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
    file.  If the keyword doesn't exist and this is an optional
    key, returns a NULL.	 Otherwise, returns the value string. */
 extern char *GetFntInfo(
+    const ACFontInfo*,
     char *, bool
 );
 
 extern void ParseIntStems(
+    const ACFontInfo* fontinfo,
 char *, bool, int32_t, int *, int32_t*, char *
 );
 

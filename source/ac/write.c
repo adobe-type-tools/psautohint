@@ -203,8 +203,8 @@ static void NewBest(PClrPoint lst) {
 	}
 }
 
-static void WriteOne(Fixed s) { /* write s to output file */
-	Fixed r = UnScaleAbs(s);
+static void WriteOne(const ACFontInfo* fontinfo, Fixed s) { /* write s to output file */
+	Fixed r = UnScaleAbs(fontinfo, s);
 	if (scalinghints) {
 		r = FRnd(r);
 	}
@@ -226,18 +226,18 @@ static void WriteOne(Fixed s) { /* write s to output file */
     }
 }
 
-static void WritePointItem(PClrPoint lst) {
+static void WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst) {
 	switch (lst->c) {
 		case 'b':
 		case 'v':
-			WriteOne(lst->y0);
-			WriteOne(lst->y1 - lst->y0);
+			WriteOne(fontinfo, lst->y0);
+			WriteOne(fontinfo, lst->y1 - lst->y0);
 			sws(((lst->c == 'b') ? "rb" : "rv"));
 			break;
 		case 'y':
 		case 'm':
-			WriteOne(lst->x0);
-			WriteOne(lst->x1 - lst->x0);
+			WriteOne(fontinfo, lst->x0);
+			WriteOne(fontinfo, lst->x1 - lst->x0);
 			sws(((lst->c == 'y') ? "ry" : "rm"));
 			break;
 		default: {
@@ -252,7 +252,7 @@ static void WritePointItem(PClrPoint lst) {
 	sws("\n");
 }
 
-static void WrtPntLst(PClrPoint lst) {
+static void WrtPntLst(const ACFontInfo* fontinfo, PClrPoint lst) {
 	PClrPoint ptLst;
 	char ch;
 	Fixed x0, x1, y0, y1;
@@ -302,16 +302,16 @@ static void WrtPntLst(PClrPoint lst) {
 			lst = lst->next;
 		}
 		bst->done = true; /* mark as having been done */
-		WritePointItem(bst);
+		WritePointItem(fontinfo, bst);
 	}
 }
 
-static void wrtnewclrs(PPathElt e) {
+static void wrtnewclrs(const ACFontInfo* fontinfo, PPathElt e) {
 	if (!wrtColorInfo) {
 		return;
 	}
 	hintmaskstr[0] = '\0';
-	WrtPntLst(ptLstArray[e->newcolors]);
+	WrtPntLst(fontinfo, ptLstArray[e->newcolors]);
 	if (strcmp(prevhintmaskstr, hintmaskstr)) {
 		ws("beginsubr snc\n");
 		ws(hintmaskstr);
@@ -333,9 +333,9 @@ bool IsFlex(PPathElt e) {
 	return (e0 != NULL && e0->isFlex && e1 != NULL && e1->isFlex);
 }
 
-static void mt(Cd c, PPathElt e) {
+static void mt(const ACFontInfo* fontinfo, Cd c, PPathElt e) {
 	if (e->newcolors != 0) {
-		wrtnewclrs(e);
+		wrtnewclrs(fontinfo, e);
 	}
     if (writeAbsolute)
     {
@@ -366,9 +366,9 @@ static void mt(Cd c, PPathElt e) {
     }
 }
 
-static void dt(Cd c, PPathElt e) {
+static void dt(const ACFontInfo* fontinfo, Cd c, PPathElt e) {
 	if (e->newcolors != 0) {
-		wrtnewclrs(e);
+		wrtnewclrs(fontinfo, e);
 	}
     if (writeAbsolute)
     {
@@ -515,9 +515,9 @@ static void wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	firstFlex = true;
 }
 
-static void ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
+static void ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PPathElt e) {
 	if (e->newcolors != 0) {
-		wrtnewclrs(e);
+		wrtnewclrs(fontinfo, e);
 	}
 	if (e->isFlex && IsFlex(e)) {
 		wrtflex(c1, c2, c3, e);
@@ -558,9 +558,9 @@ static void ct(Cd c1, Cd c2, Cd c3, PPathElt e) {
 	}
 }
 
-static void cp(PPathElt e) {
+static void cp(const ACFontInfo* fontinfo, PPathElt e) {
 	if (e->newcolors != 0) {
-		wrtnewclrs(e);
+		wrtnewclrs(fontinfo, e);
 	}
 	if (idInFile) {
 		WRTNUM(subpathcount++);
@@ -586,7 +586,7 @@ static void NumberPath() {
 	}
 }
 
-void SaveFile() {
+void SaveFile(const ACFontInfo* fontinfo) {
 	register PPathElt e = pathStart;
 	Cd c1, c2, c3;
 
@@ -600,7 +600,7 @@ void SaveFile() {
 	prevhintmaskstr[0] = '\0';
 	if (wrtColorInfo && (!e->newcolors)) {
 		hintmaskstr[0] = '\0';
-		WrtPntLst(ptLstArray[0]);
+		WrtPntLst(fontinfo, ptLstArray[0]);
 		ws(hintmaskstr);
 		strcpy(prevhintmaskstr, hintmaskstr);
 	}
@@ -611,26 +611,26 @@ void SaveFile() {
 	while (e != NULL) {
 		switch (e->type) {
 			case CURVETO:
-				c1.x = UnScaleAbs(itfmx(e->x1));
-				c1.y = UnScaleAbs(itfmy(e->y1));
-				c2.x = UnScaleAbs(itfmx(e->x2));
-				c2.y = UnScaleAbs(itfmy(e->y2));
-				c3.x = UnScaleAbs(itfmx(e->x3));
-				c3.y = UnScaleAbs(itfmy(e->y3));
-				ct(c1, c2, c3, e);
+				c1.x = UnScaleAbs(fontinfo, itfmx(e->x1));
+				c1.y = UnScaleAbs(fontinfo, itfmy(e->y1));
+				c2.x = UnScaleAbs(fontinfo, itfmx(e->x2));
+				c2.y = UnScaleAbs(fontinfo, itfmy(e->y2));
+				c3.x = UnScaleAbs(fontinfo, itfmx(e->x3));
+				c3.y = UnScaleAbs(fontinfo, itfmy(e->y3));
+				ct(fontinfo, c1, c2, c3, e);
 				break;
 			case LINETO:
-				c1.x = UnScaleAbs(itfmx(e->x));
-				c1.y = UnScaleAbs(itfmy(e->y));
-				dt(c1, e);
+				c1.x = UnScaleAbs(fontinfo, itfmx(e->x));
+				c1.y = UnScaleAbs(fontinfo, itfmy(e->y));
+				dt(fontinfo, c1, e);
 				break;
 			case MOVETO:
-				c1.x = UnScaleAbs(itfmx(e->x));
-				c1.y = UnScaleAbs(itfmy(e->y));
-				mt(c1, e);
+				c1.x = UnScaleAbs(fontinfo, itfmx(e->x));
+				c1.y = UnScaleAbs(fontinfo, itfmy(e->y));
+				mt(fontinfo, c1, e);
 				break;
 			case CLOSEPATH:
-				cp(e);
+				cp(fontinfo, e);
 				break;
 			default: {
 				sprintf(S0, "Illegal path list for file: %s.\n", fileName);

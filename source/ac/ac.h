@@ -5,6 +5,10 @@ This software is licensed as OpenSource, under the Apache License, Version 2.0. 
  control.c:Blues() 
  static void Blues() 
  */
+
+#ifndef AC_AC_H_
+#define AC_AC_H_
+
 #include "ac_C_lib.h"
 #include "buildfont.h"
 
@@ -165,8 +169,6 @@ typedef struct {
 
 /* global data */
 
-extern ACFontInfo *featurefiledata;
-
 extern PPathElt pathStart, pathEnd;
 extern bool YgoesUp;
 extern bool useV, useH, autoVFix, autoHFix, autoLinearCurveFix;
@@ -311,7 +313,7 @@ extern void AddHPair(PClrVal v, char ch);
 extern void AddVPair(PClrVal v, char ch);
 extern void XtraClrs(/*e*/);
 extern bool CreateTimesFile();
-extern bool DoFile(char *fname, bool extracolor);
+extern bool DoFile(const ACFontInfo* fontinfo, char *fname, bool extracolor);
 extern void DoList(/*filenames*/);
 extern void EvalV();
 extern void EvalH();
@@ -322,7 +324,7 @@ extern void CheckVals(/*vlst, vert*/);
 extern bool DoFixes();
 extern bool FindLineSeg();
 extern void FltnCurve(/*c0, c1, c2, c3, pfr*/);
-extern bool ReadFontInfo();
+extern bool ReadFontInfo(const ACFontInfo* fontinfo);
 extern bool InBlueBand(/*loc,n,p*/);
 extern void GenHPts();
 extern void PreGenPts();
@@ -349,7 +351,7 @@ extern void RoundPathCoords();
 extern void MoveSubpathToEnd(/*e*/);
 extern void AddSolEol();
 extern void InitAuto();
-extern void InitData(int32_t reason);
+extern void InitData(const ACFontInfo* fontinfo, int32_t reason);
 extern void InitFix();
 extern void InitGen();
 extern bool RotateSubpaths(/*flg*/);
@@ -413,8 +415,8 @@ extern void ReportMergeHVal(/*b0,t0,b1,t1,v0,s0,v1,s1*/);
 extern void ReportMergeVVal(/*l0,r0,l1,r1,v0,s0,v1,s1*/);
 extern void ReportPruneHVal(/*val*/);
 extern void ReportPruneVVal(/*val*/);
-extern Fixed ScaleAbs();
-extern Fixed UnScaleAbs();
+extern Fixed ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled);
+extern Fixed UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled);
 extern void InitShuffleSubpaths();
 extern void MarkLinks(/*vL,hFlg*/);
 extern void DoShuffleSubpaths();
@@ -425,10 +427,10 @@ extern void AddVSegment();
 extern void AddHSegment();
 extern void Delete();
 extern bool StrEqual();
-extern bool ReadCharFile();
+extern bool ReadCharFile(const ACFontInfo* fontinfo, bool normal, bool forBlendData, bool readHints, bool prependprefix);
 extern double FixToDbl(/*f*/);
 extern bool CompareValues();
-extern void SaveFile();
+extern void SaveFile(const ACFontInfo* fontinfo);
 extern void CheckForMultiMoveTo();
 extern double fabs();
 #define STARTUP (0)
@@ -436,7 +438,7 @@ extern double fabs();
 
 void ListClrInfo(/**/);
 
-extern void InitAll(/*reason*/);
+void InitAll(const ACFontInfo* fontinfo, int32_t reason);
 
 void AddVStem();
 void AddHStem();
@@ -444,5 +446,7 @@ void AddHStem();
 void AddCharExtremes();
 void AddStemExtremes ();
 
-bool AutoColor(bool fixStems, bool debug, bool extracolor,
+bool AutoColor(const ACFontInfo* fontinfo, bool fixStems, bool debug, bool extracolor,
                bool changeChar, bool roundCoords);
+
+#endif /* AC_AC_H_ */
