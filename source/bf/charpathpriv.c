@@ -57,18 +57,6 @@ extern PCharPathElt AppendCharPathElement(int pathtype)
   return (&currPathList->path[path_entries - 1]);
 }
 
-/* Called from CompareCharPaths when a new character is being read. */
-extern void ResetMaxPathEntries()
-{
-  maxPathEntries = MAXPATHELT;
-}
-
-extern void SetCurrPathList(plist)
-PPathList plist;
-{
-  currPathList = plist;
-}
-
 extern void SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2, bool mainhints)
 {
   PHintElt *hintEntry;
