@@ -85,7 +85,6 @@ char *charlist, *ColorList[];
     /* Currently, ColorList must end with a NULL pointer. */
     if (ListEntries == (COUNTERLISTSIZE-1)) 
     {
-	  FlushLogFiles();
       sprintf(globmsg, "Exceeded counter hints list size. (maximum is %d.)\n  Cannot add %s or subsequent characters.\n", (int) COUNTERLISTSIZE, token);
       LogMsg(globmsg, WARNING, OK, true);
       break;

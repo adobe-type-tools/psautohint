@@ -17,9 +17,6 @@ End Edit History
 
 extern void set_errorproc( int (*)(int16_t) );
 
-void FlushLogFiles();
-void OpenLogFiles();
-
 #if defined(_MSC_VER) && ( _MSC_VER < 1800)
 float roundf(float x);
 #endif

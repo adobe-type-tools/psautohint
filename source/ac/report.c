@@ -32,19 +32,6 @@ void ACGetVersion(char *name, char *str)
   sprintf(str, "%s ac library version %s.\n", name, VERSION);
 }
 
-void OpenLogFiles() {
-  }
-
-void FlushLogFiles()
-{
-}
-
-void CloseLogFiles() {
-  }
-
-void LogYMinMax() {
-  }
-
 #define EndLine()
 
 #define PrinMsg(s) PrintMessage(s)
@@ -140,14 +127,12 @@ void ExpectedMoveTo(e) PPathElt e; {
 /*      LogMsg("Malformed path list.\n", LOGERROR, NONFATALERROR, true); */
 	  break;
     }
-  FlushLogFiles();
   (void)sprintf (globmsg, "Path for %s character has a %s where a moveto was expected.\n  The file is probably truncated.", fileName, s); 
   LogMsg (globmsg, LOGERROR, NONFATALERROR, true);
   }
 
 
 void ReportMissingClosePath() {
-  FlushLogFiles();
   (void)sprintf(globmsg, "Missing closepath in %s character.\n  The file is probably truncated.", fileName);
   LogMsg (globmsg, LOGERROR, NONFATALERROR, true); 
 }

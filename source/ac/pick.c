@@ -170,7 +170,6 @@ static PClrVal PrevVal(val, vList) register PClrVal val, vList; {
 		vList = vList->vNxt;
 		if (vList == NULL)
 			{
-			FlushLogFiles();
 			sprintf(globmsg, "Malformed value list in %s.\n", fileName);
 			LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 			}

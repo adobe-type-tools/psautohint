@@ -200,7 +200,6 @@ extern Fixed VStems[MAXSTEMS], HStems[MAXSTEMS];
 extern int32_t NumVStems, NumHStems;
 extern char *HColorList[], *VColorList[];
 extern int32_t NumHColors, NumVColors;
-extern bool makehintslog;
 extern bool writecoloredbez;
 extern Fixed bluefuzz;
 extern bool doAligns, doStems;
@@ -360,7 +359,6 @@ extern void PickVVals(/*valList*/);
 extern void PickHVals(/*valList*/);
 extern void FindBestHVals();
 extern void FindBestVVals();
-extern void LogYMinMax();
 extern void PrintMessage(/*s*/);
 extern void ReportError(/*s*/);
 extern void ReportSmoothError(/*x, y*/);
@@ -443,4 +441,4 @@ void AddCharExtremes();
 void AddStemExtremes ();
 
 bool AutoColor(bool fixStems, bool debug, bool extracolor,
-               bool changeChar, bool quiet, bool roundCoords, bool doLog);
+               bool changeChar, bool quiet, bool roundCoords);

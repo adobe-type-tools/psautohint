@@ -73,7 +73,6 @@ Fixed temp1;
 static Fixed Pop() {
   if (stkindex <= 0)
   {
-	FlushLogFiles();
     sprintf (globmsg, "Stack underflow while reading %s file.\n", fileName);
     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
@@ -84,7 +83,6 @@ static Fixed Pop() {
 static void Push(r) Fixed r; {
   if (stkindex >= STKMAX)
   {
-	FlushLogFiles();
     sprintf (globmsg, "Stack underflow while reading %s file.\n", fileName);
     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
@@ -279,7 +277,6 @@ static void ReadHintInfo(nm, str) char nm;  const char *str; {
   /* Look for comment of path elements used to determine this band. */
   if (sscanf(str, " %% %d %d", &elt1, &elt2) != 2)
   {
-	FlushLogFiles();
     sprintf(globmsg, "Extra hint information required for blended fonts is not in\n  character file: %s.  Please re-hint using the latest software.\n  Hints will not be included in this font.\n", fileName);
     LogMsg(globmsg, WARNING, NONFATALERROR, true);
     SetNoHints();
@@ -443,7 +440,6 @@ static void DoName(nm, buff, len) const char * nm, *buff; int len; {
 	strncpy(op, nm, len);
 	op[len]=0;
 
-	FlushLogFiles();
     sprintf(globmsg, "Bad file format. Unknown operator: %s in %s character.\n", op, fileName);
     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
@@ -499,7 +495,6 @@ static void ParseString(s) const char * s; {
       case 0: /* end of file */
         if (stkindex != 0)
         {
-		  FlushLogFiles();
           sprintf (globmsg, 
             "Bad input file.  Numbers left on stack at end of %s file.\n",
             fileName);
@@ -523,7 +518,6 @@ static void ParseString(s) const char * s; {
 			s--;
          continue;
           }
-		FlushLogFiles();
         sprintf (globmsg, "Unexpected character in %s file.\n", fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
       }
@@ -553,7 +547,6 @@ static void ParseString(s) const char * s; {
             }
               /* Push(r); */
               if (stkindex >= STKMAX) {
-                  FlushLogFiles();
                   sprintf (globmsg, "Stack overflow while reading %s file.\n",
                            fileName);
                   LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
@@ -564,7 +557,6 @@ static void ParseString(s) const char * s; {
               goto nxtChar;
           }
           else {
-              FlushLogFiles();
               sprintf (globmsg,
                        "Illegal number terminator while reading %s file.\n",
                        fileName);

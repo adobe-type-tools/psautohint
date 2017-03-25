@@ -212,7 +212,6 @@ static void FixHs(fixy, fixdy)
 	break;
       default:
 		{
-		  FlushLogFiles();
 		  sprintf(globmsg, "Illegal operator in path list in %s.\n", fileName);
 		  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}
@@ -257,7 +256,6 @@ static void FixVs(fixx, fixdx)
 	break;
       default:
 		{
-		  FlushLogFiles();
 		  sprintf(globmsg, "Illegal operator in point list in %s.\n", fileName);
 		  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 		}

@@ -110,7 +110,6 @@ static void RemLnk(e,hFlg,rm)
       return; }
     prv = lst; lst = nxt;
     }
-  FlushLogFiles();
   sprintf(globmsg, "Badly formatted segment list in file: %s.\n", fileName);
   LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
   }
@@ -506,7 +505,6 @@ static void StartNewColoring(e, hLst, vLst)
   ReClrBounds(e);
   if (e->newcolors != 0)
 	{
-	  FlushLogFiles();
 	  sprintf(globmsg, "Uninitialized extra hints list in file: %s.\n", fileName);
 	  LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 	}
