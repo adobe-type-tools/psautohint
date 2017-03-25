@@ -38,6 +38,31 @@ reportCB(char* msg)
   fprintf(stdout, "%s\n", msg);
 }
 
+static void *
+memoryManager(void *ctx, void *ptr, uint32_t size)
+{
+  if (!ptr && !size)
+    return;
+
+#if PY_MAJOR_VERSION >= 3
+  if (ptr && size)
+    ptr = PyMem_RawRealloc(ptr, size);
+  else if (size)
+    ptr = PyMem_RawCalloc(1, size);
+  else
+    PyMem_RawFree(ptr);
+#else
+  if (ptr && size)
+    ptr = PyMem_Realloc(ptr, size);
+  else if (size)
+    ptr = PyMem_Malloc(size);
+  else
+    PyMem_Free(ptr);
+#endif
+
+  return ptr;
+}
+
 static PyObject* PsAutoHintError;
 
 static char autohint_doc[] =
@@ -86,6 +111,7 @@ autohint(PyObject* self, PyObject* args)
 
   fontInfo = PyBytes_AsString(fontObj);
 
+  AC_SetMemManager(NULL, memoryManager);
   AC_SetReportCB(reportCB, verbose);
 
   bezLen = PySequence_Fast_GET_SIZE(inSeq);
