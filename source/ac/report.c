@@ -17,10 +17,6 @@
 #define HORZFILE "horz.tmp"
 #define VERTFILE "vert.tmp"
 
-#ifdef _WIN32
-#define L_cuserid 12
-#endif
-
 extern AC_REPORTFUNCPTR libReportCB;
 static char S0[512];
 
