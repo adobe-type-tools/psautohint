@@ -23,13 +23,6 @@ FILE* reportFile = NULL;
 
 bool verbose = true; /* if true don't number of characters processed. */
 
-/* EXECUTABLE defined means it is being compiled as a command-line tool;
-if not defined, it is being compiled as a Python module.
-*/
-#ifndef EXECUTABLE
-extern jmp_buf aclibmark;
-#endif
-
 static void openReportFile(char* name, char* fSuffix);
 
 static void
@@ -288,19 +281,11 @@ main(int argc, char* argv[])
                 break;
             case 'u':
                 printUsage();
-#ifdef EXECUTABLE
                 exit(0);
-#else
-                longjmp(aclibmark, 1);
-#endif
                 break;
             case 'h':
                 printHelp();
-#ifdef EXECUTABLE
                 exit(0);
-#else
-                longjmp(aclibmark, 1);
-#endif
                 break;
             case 'e':
                 allowEdit = false;
@@ -423,11 +408,7 @@ main(int argc, char* argv[])
     }
 
     if (badParam)
-#ifdef EXECUTABLE
         exit(NONFATALERROR);
-#else
-        longjmp(aclibmark, -1);
-#endif
 
     AC_SetReportCB(reportCB, verbose);
     argi = firstFileNameIndex - 1;
