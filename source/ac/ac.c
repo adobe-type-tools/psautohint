@@ -202,24 +202,24 @@ void InitData(int32_t reason)
 
 
 /* Returns whether coloring was successful. */  
-bool AutoColor(
-			 bool fixStems,
-			 bool debug,
-			 bool extracolor,
-			 bool changeChar,
-             bool roundCoords)
+bool
+AutoColor(bool fixStems, bool debug, bool extracolor, bool changeChar,
+          bool roundCoords)
 {
-  (void) InitAll(STARTUP);
+    (void)InitAll(STARTUP);
 
-  if (!ReadFontInfo()) return false;
-  editChar = changeChar;
-  roundToInt = roundCoords;
-  if ((editChar) && fixStems)
-    autoVFix = autoHFix = fixStems;
-  autoLinearCurveFix = editChar;
-  if (debug)
-    DEBUG = showClrInfo = showHs = showVs = listClrInfo = true;
+    if (!ReadFontInfo())
+        return false;
 
-  return DoFile("", extracolor);
+    editChar = changeChar;
+    roundToInt = roundCoords;
+    autoLinearCurveFix = editChar;
+    if (editChar && fixStems)
+        autoVFix = autoHFix = fixStems;
+
+    if (debug)
+        DEBUG = showClrInfo = showHs = showVs = listClrInfo = true;
+
+    return DoFile("", extracolor);
 }
 
