@@ -24,7 +24,6 @@ CFLAGS = \
 	-I$(SRC_DIR)/include/ac \
 	-I$(SRC_DIR)/ac \
 	-I$(SRC_DIR)/bf \
-	-DAC_C_LIB=1 \
 	-Wall \
 	-Wdeclaration-after-statement \
 	$(NULL)
