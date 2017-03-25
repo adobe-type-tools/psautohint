@@ -19,8 +19,6 @@
 #define PRINT_READ (0)
 #define ESCVAL 100
 
-extern const char* bezstring;
-
 char bezGlyphName[64];
 
 static Fixed currentx, currenty; /* used to calculate absolute coordinates */
@@ -742,10 +740,10 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
 }
 
 bool
-ReadCharFile(const ACFontInfo* fontinfo, bool normal, bool forBlendData,
-             bool readHints, bool prependprefix)
+ReadCharFile(const ACFontInfo* fontinfo, const char* srcglyph, bool normal,
+             bool forBlendData, bool readHints, bool prependprefix)
 {
-    assert(bezstring != NULL);
+    assert(srcglyph != NULL);
 
     currentx = currenty = tempx = tempy = stkindex = 0;
     flex = idInFile = startchar = false;
@@ -753,10 +751,10 @@ ReadCharFile(const ACFontInfo* fontinfo, bool normal, bool forBlendData,
     includeHints = readHints;
 
 #if PRINT_READ
-    fprintf(OUTPUTBUFF, "%s", bezstring);
+    fprintf(OUTPUTBUFF, "%s", srcglyph);
 #endif
 
-    ParseString(fontinfo, bezstring);
+    ParseString(fontinfo, srcglyph);
 
     return true;
 }

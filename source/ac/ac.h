@@ -319,7 +319,8 @@ extern void AddHPair(PClrVal v, char ch);
 extern void AddVPair(PClrVal v, char ch);
 extern void XtraClrs(/*e*/);
 extern bool CreateTimesFile();
-extern bool DoFile(const ACFontInfo* fontinfo, char *fname, bool extracolor);
+extern bool DoFile(const ACFontInfo* fontinfo, const char* srcglyph,
+                   char* fname, bool extracolor);
 extern void DoList(/*filenames*/);
 extern void EvalV();
 extern void EvalH();
@@ -433,7 +434,9 @@ extern void AddVSegment();
 extern void AddHSegment();
 extern void Delete();
 extern bool StrEqual();
-extern bool ReadCharFile(const ACFontInfo* fontinfo, bool normal, bool forBlendData, bool readHints, bool prependprefix);
+extern bool ReadCharFile(const ACFontInfo* fontinfo, const char* srcglyph,
+                         bool normal, bool forBlendData, bool readHints,
+                         bool prependprefix);
 extern double FixToDbl(/*f*/);
 extern bool CompareValues();
 extern void SaveFile(const ACFontInfo* fontinfo);
@@ -452,7 +455,7 @@ void AddHStem();
 void AddCharExtremes();
 void AddStemExtremes ();
 
-bool AutoColor(const ACFontInfo* fontinfo, bool fixStems, bool debug, bool extracolor,
-               bool changeChar, bool roundCoords);
+bool AutoColor(const ACFontInfo* fontinfo, const char* srcglyph, bool fixStems,
+               bool debug, bool extracolor, bool changeChar, bool roundCoords);
 
 #endif /* AC_AC_H_ */

@@ -20,7 +20,6 @@ char editingResource = 0;
 
 char* FL_glyphname = 0;
 
-const char* bezstring = 0;
 char* bezoutput = 0;
 int bezoutputalloc = 0;
 int bezoutputactual = 0;
@@ -287,8 +286,6 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
         }
     }
 
-    bezstring = srcbezdata;
-
     bezoutputalloc = *length;
     bezoutputactual = 0;
     bezoutput = (char*)ACNEWMEM(bezoutputalloc);
@@ -299,6 +296,7 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     *bezoutput = 0;
 
     result = AutoColor(fontinfo,     /* font info */
+                       srcbezdata,   /* input glyph */
                        false,        /*fixStems*/
                        (bool)debug,  /*debug*/
                        allowHintSub, /* extracolor*/

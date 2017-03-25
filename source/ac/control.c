@@ -814,7 +814,8 @@ AddColorsSetup()
 /* If extracolor is true then it is ok to have multi-level
  coloring. */
 static void
-AddColorsInnerLoop(const ACFontInfo* fontinfo, bool extracolor)
+AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
+                   bool extracolor)
 {
     int32_t solEolCode = 2, retryColoring = 0;
     bool isSolEol = false;
@@ -876,7 +877,7 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, bool extracolor)
          * a duplciate */
         InitAll(fontinfo, RESTART);
         if (writecoloredbez &&
-            !ReadCharFile(fontinfo, false, false, false, true)) {
+            !ReadCharFile(fontinfo, srcglyph, false, false, false, true)) {
             break;
         }
         AddColorsSetup();
@@ -911,7 +912,7 @@ AddColorsCleanup(const ACFontInfo* fontinfo)
 }
 
 static void
-AddColors(const ACFontInfo* fontinfo, bool extracolor)
+AddColors(const ACFontInfo* fontinfo, const char* srcglyph, bool extracolor)
 {
     if (pathStart == NULL || pathStart == pathEnd) {
         PrintMessage("No character path, so no hints.");
@@ -930,21 +931,22 @@ AddColors(const ACFontInfo* fontinfo, bool extracolor)
         hasFlex = false;
         AutoAddFlex();
     }
-    AddColorsInnerLoop(fontinfo, extracolor);
+    AddColorsInnerLoop(fontinfo, srcglyph, extracolor);
     AddColorsCleanup(fontinfo);
 }
 
 bool
-DoFile(const ACFontInfo* fontinfo, char* fname, bool extracolor)
+DoFile(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
+       bool extracolor)
 {
     int32_t lentop = lenTopBands, lenbot = lenBotBands;
     fileName = fname;
-    if (!ReadCharFile(fontinfo, true, false, false, true)) {
+    if (!ReadCharFile(fontinfo, srcglyph, true, false, false, true)) {
         sprintf(globmsg, "Cannot open %s file.\n", fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     PrintMessage(""); /* Just print the file name. */
-    AddColors(fontinfo, extracolor);
+    AddColors(fontinfo, srcglyph, extracolor);
     lenTopBands = lentop;
     lenBotBands = lenbot;
     return true;
