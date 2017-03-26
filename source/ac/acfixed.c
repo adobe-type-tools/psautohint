@@ -9,29 +9,21 @@
 
 #include "ac.h"
 
-#define fixedScale ((float)(FixOne))
+#define FIXEDSCALE ((float)(FixOne))
 
 void
 acfixtopflt(Fixed x, float* pf)
-
-#ifdef sun3
 {
-    *pf = (float)x;
-    fixscale(pf);
+    *pf = (float)x / FIXEDSCALE;
 }
-#else /* sun4 */
-{
-    *pf = (float)x / fixedScale;
-}
-#endif
 
 Fixed
 acpflttofix(float* pf)
 {
     float f = *pf;
-    if (f >= FixedPosInf / fixedScale)
+    if (f >= FixedPosInf / FIXEDSCALE)
         return FixedPosInf;
-    if (f <= FixedNegInf / fixedScale)
+    if (f <= FixedNegInf / FIXEDSCALE)
         return FixedNegInf;
-    return (Fixed)(f * fixedScale);
+    return (Fixed)(f * FIXEDSCALE);
 }
