@@ -28,6 +28,7 @@ CFLAGS = \
 	-Wdeclaration-after-statement \
 	-Wstrict-prototypes \
 	-Wextra \
+	-Wunused-macros \
 	-O3 \
 	$(NULL)
 

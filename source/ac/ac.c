@@ -51,8 +51,6 @@ AC_REPORTSTEMPTR addVStemCB = NULL;
 AC_REPORTZONEPTR addCharExtremesCB = NULL;
 AC_REPORTZONEPTR addStemExtremesCB = NULL;
 AC_RETRYPTR reportRetryCB = NULL;
-#define CHARSETVAR "CHARSETDIR"
-#define BAKFILE "hints.log.BAK"
 
 static void*
 defaultAC_memmanage(void* ctxptr, void* old, uint32_t size)

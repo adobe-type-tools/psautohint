@@ -10,13 +10,6 @@
 #include "ac.h"
 #include "machinedep.h"
 
-#define MAXFILENAME 32
-
-#define YMINFILE "ymin.tmp"
-#define YMAXFILE "ymax.tmp"
-#define HORZFILE "horz.tmp"
-#define VERTFILE "vert.tmp"
-
 extern AC_REPORTFUNCPTR libReportCB;
 static char S0[512];
 
