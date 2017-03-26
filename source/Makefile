@@ -27,6 +27,7 @@ CFLAGS = \
 	-Wall \
 	-Wdeclaration-after-statement \
 	-Wstrict-prototypes \
+	-Wextra \
 	-O3 \
 	$(NULL)
 
