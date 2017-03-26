@@ -301,7 +301,6 @@ bool CheckBBoxes(PPathElt e1, PPathElt e2);
 bool CheckSmoothness(Fixed x0, Fixed cy0, Fixed x1, Fixed cy1, Fixed x2,
                      Fixed y2, Fixed* pd);
 void CheckForDups(void);
-bool showClrInfo;
 void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
                    PPathElt p1);
 void AddHPair(PClrVal v, char ch);
