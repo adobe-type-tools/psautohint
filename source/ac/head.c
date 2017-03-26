@@ -208,7 +208,7 @@ NxtForBend(PPathElt p, Fixed* px2, Fixed* py2, Fixed* px3, Fixed* py3)
         } else
             nxt = nxt->next;
         if (nxt == NULL) { /* forget it */
-            *px2 = *py2 = *px3 = *py3 = FixInt(-9999);
+            *px2 = *py2 = *px3 = *py3 = -FixInt(9999);
             return nxt;
         }
         if (!IsTiny(nxt))
@@ -266,7 +266,7 @@ PrvForBend(PPathElt p, Fixed* px2, Fixed* py2)
     }
     return prv;
 Bogus:
-    *px2 = *py2 = FixInt(-9999);
+    *px2 = *py2 = -FixInt(9999);
     return prv;
 }
 

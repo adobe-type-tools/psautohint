@@ -491,7 +491,7 @@ LogColorInfo(PClrPoint pl)
         bot = pl->y0;
         top = pl->y1;
         wdth = top - bot;
-        if (wdth == FixInt(-21) || wdth == FixInt(-20))
+        if (wdth == -FixInt(21) || wdth == -FixInt(20))
             return; /* ghost pair */
         (void)printf("%4g  %-30s%5g%5g\n", FixToDbl(wdth), fileName,
                      FixToDbl(bot), FixToDbl(top));
