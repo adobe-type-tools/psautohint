@@ -25,9 +25,7 @@ char bch;
 Fixed bx, by;
 bool bstB;
 int16_t subpathcount;
-extern char* bezoutput;
-extern int bezoutputalloc;
-extern int bezoutputactual;
+extern ACBuffer* bezoutput;
 
 int writeAbsolute = 1;
 
@@ -50,18 +48,18 @@ static int32_t
 WriteString(char* str)
 {
     assert(bezoutput != NULL);
-    if ((bezoutputactual + (int)strlen(str)) >= bezoutputalloc) {
-        int desiredsize =
-          NUMMAX(bezoutputalloc * 2, (bezoutputalloc + (int)strlen(str)));
-        bezoutput = (char*)ACREALLOCMEM(bezoutput, desiredsize);
-        if (bezoutput) {
-            bezoutputalloc = desiredsize;
+    if ((bezoutput->length + (int)strlen(str)) >= bezoutput->capacity) {
+        int desiredsize = NUMMAX(bezoutput->capacity * 2,
+                                 (bezoutput->capacity + (int)strlen(str)));
+        bezoutput->data = (char*)ACREALLOCMEM(bezoutput->data, desiredsize);
+        if (bezoutput->data) {
+            bezoutput->capacity = desiredsize;
         } else {
             return (-1); /*FATAL ERROR*/
         }
     }
-    strcat(bezoutput, str);
-    bezoutputactual += (int)strlen(str);
+    strcat(bezoutput->data, str);
+    bezoutput->length += (int)strlen(str);
     return (int32_t)strlen(str);
 }
 
