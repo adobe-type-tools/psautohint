@@ -877,7 +877,7 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
          * a duplciate */
         InitAll(fontinfo, RESTART);
         if (writecoloredbez &&
-            !ReadCharFile(fontinfo, srcglyph, false, false, false, true)) {
+            !ReadCharFile(fontinfo, srcglyph, false, false)) {
             break;
         }
         AddColorsSetup();
@@ -941,7 +941,7 @@ DoFile(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
 {
     int32_t lentop = lenTopBands, lenbot = lenBotBands;
     fileName = fname;
-    if (!ReadCharFile(fontinfo, srcglyph, true, false, false, true)) {
+    if (!ReadCharFile(fontinfo, srcglyph, false, false)) {
         sprintf(globmsg, "Cannot open %s file.\n", fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
