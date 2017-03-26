@@ -162,7 +162,7 @@ HorzQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl)
 bool
 IsTiny(PPathElt e)
 {
-    Fixed x0, y0, x1, y1;
+    Fixed x0 = 0, y0 = 0, x1 = 0, y1 = 0;
     GetEndPoints(e, &x0, &y0, &x1, &y1);
     return ((abs(x0 - x1) < FixTwo) && (abs(y0 - y1) < FixTwo)) ? true : false;
 }
@@ -170,7 +170,7 @@ IsTiny(PPathElt e)
 bool
 IsShort(PPathElt e)
 {
-    Fixed x0, y0, x1, y1, dx, dy, mn, mx;
+    Fixed x0 = 0, y0 = 0, x1 = 0, y1 = 0, dx = 0, dy = 0, mn = 0, mx = 0;
     GetEndPoints(e, &x0, &y0, &x1, &y1);
     dx = abs(x0 - x1);
     dy = abs(y0 - y1);

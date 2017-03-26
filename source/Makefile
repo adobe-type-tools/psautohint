@@ -27,6 +27,7 @@ CFLAGS = \
 	-Wall \
 	-Wdeclaration-after-statement \
 	-Wstrict-prototypes \
+	-O3 \
 	$(NULL)
 
 ifeq ($(OS),Windows_NT)

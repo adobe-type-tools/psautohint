@@ -42,7 +42,7 @@ int32_t
 PointListCheck(PClrPoint new, PClrPoint lst)
 {
     /* -1 means not a member, 1 means already a member, 0 means conflicts */
-    Fixed l1, l2, n1, n2, tmp, halfMargin;
+    Fixed l1 = 0, l2 = 0, n1 = 0, n2 = 0, tmp, halfMargin;
     char ch = new->c;
     halfMargin = FixHalfMul(bandMargin);
     halfMargin = FixHalfMul(halfMargin);
@@ -380,7 +380,7 @@ XtraClrs(PPathElt e)
 static void
 Blues(const ACFontInfo* fontinfo)
 {
-    Fixed pv, pd, pc, pb, pa;
+    Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
     PClrVal sLst;
 
     /*
@@ -666,7 +666,7 @@ DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1)
 static void
 Yellows(void)
 {
-    Fixed pv, pd, pc, pb, pa;
+    Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
     PClrVal sLst;
     if (showClrInfo) {
         PrintMessage("generate yellows");

@@ -153,9 +153,8 @@ ExpectedMoveTo(PPathElt e)
             s = (char*)"closepath";
             break;
         default:
-            /*      LogMsg("Malformed path list.\n", LOGERROR, NONFATALERROR,
-             * true); */
-            break;
+            LogMsg("Malformed path list.\n", LOGERROR, NONFATALERROR, true);
+            return;
     }
     (void)sprintf(globmsg, "Path for %s character has a %s where a moveto was "
                            "expected.\n  The file is probably truncated.",

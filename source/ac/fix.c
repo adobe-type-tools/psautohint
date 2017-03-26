@@ -239,7 +239,7 @@ static void
 FixHs(Fixed fixy, Fixed fixdy)
 { /* y dy in user space */
     PPathElt e;
-    Fixed xlst, ylst, xinit, yinit;
+    Fixed xlst = 0, ylst = 0, xinit = 0, yinit = 0;
     fixy = tfmy(fixy);
     fixdy = dtfmy(fixdy);
     e = pathStart;
@@ -293,7 +293,7 @@ static void
 FixVs(Fixed fixx, Fixed fixdx)
 { /* x dx in user space */
     PPathElt e;
-    Fixed xlst, ylst, xinit, yinit;
+    Fixed xlst = 0, ylst = 0, xinit = 0, yinit = 0;
     fixx = tfmx(fixx);
     fixdx = dtfmx(fixdx);
     e = pathStart;
