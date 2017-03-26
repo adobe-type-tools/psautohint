@@ -29,7 +29,6 @@ extern char* bezoutput;
 extern int bezoutputalloc;
 extern int bezoutputactual;
 
-#define ws(str) WriteString(str)
 int writeAbsolute = 1;
 
 int32_t
@@ -70,13 +69,13 @@ WriteString(char* str)
 #define WRTNUM(i)                                                              \
     {                                                                          \
         sprintf(S0, "%d ", (int32_t)(i));                                      \
-        ws(S0);                                                                \
+        WriteString(S0);                                                       \
     }
 
 #define WRTRNUM(i)                                                             \
     {                                                                          \
         sprintf(S0, "%0.2f ", roundf((float)(i)*100) / 100);                   \
-        ws(S0);                                                                \
+        WriteString(S0);                                                       \
     }
 
 static void
@@ -318,9 +317,9 @@ wrtnewclrs(const ACFontInfo* fontinfo, PPathElt e)
     hintmaskstr[0] = '\0';
     WrtPntLst(fontinfo, ptLstArray[e->newcolors]);
     if (strcmp(prevhintmaskstr, hintmaskstr)) {
-        ws("beginsubr snc\n");
-        ws(hintmaskstr);
-        ws("endsubr enc\nnewcolors\n");
+        WriteString("beginsubr snc\n");
+        WriteString(hintmaskstr);
+        WriteString("endsubr enc\nnewcolors\n");
         strcpy(prevhintmaskstr, hintmaskstr);
     }
 }
@@ -347,25 +346,25 @@ mt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
     }
     if (writeAbsolute) {
         wrtcda(c);
-        ws("mt\n");
+        WriteString("mt\n");
     } else {
 
         if (FRnd(c.y) == currenty) {
             wrtx(c.x);
-            ws("hmt\n");
+            WriteString("hmt\n");
         } else if (FRnd(c.x) == currentx) {
             wrty(c.y);
-            ws("vmt\n");
+            WriteString("vmt\n");
         } else {
             wrtcd(c);
-            ws("rmt\n");
+            WriteString("rmt\n");
         }
     }
     if (e->eol) {
-        ws("eol\n");
+        WriteString("eol\n");
     }
     if (e->sol) {
-        ws("sol\n");
+        WriteString("sol\n");
     }
 }
 
@@ -377,24 +376,24 @@ dt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
     }
     if (writeAbsolute) {
         wrtcda(c);
-        ws("dt\n");
+        WriteString("dt\n");
     } else {
         if (FRnd(c.y) == currenty) {
             wrtx(c.x);
-            ws("hdt\n");
+            WriteString("hdt\n");
         } else if (FRnd(c.x) == currentx) {
             wrty(c.y);
-            ws("vdt\n");
+            WriteString("vdt\n");
         } else {
             wrtcd(c);
-            ws("rdt\n");
+            WriteString("rdt\n");
         }
     }
     if (e->eol) {
-        ws("eol\n");
+        WriteString("eol\n");
     }
     if (e->sol) {
-        ws("sol\n");
+        WriteString("sol\n");
     }
 }
 
@@ -403,11 +402,11 @@ Cd fc1, fc2, fc3;
 
 #define wrtpreflx2(c)                                                          \
     wrtcd(c);                                                                  \
-    ws("rmt\npreflx2\n")
+    WriteString("rmt\npreflx2\n")
 
 #define wrtpreflx2a(c)                                                         \
     wrtcda(c);                                                                 \
-    ws("rmt\npreflx2a\n")
+    WriteString("rmt\npreflx2a\n")
 
 static void
 wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e)
@@ -428,7 +427,7 @@ wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e)
     yflag = e->yFlex;
     dmin = DMIN;
     delta = DELTA;
-    ws("preflx1\n");
+    WriteString("preflx1\n");
     if (yflag) {
         if (fc3.y == c3.y) {
             c13.y = c3.y;
@@ -484,7 +483,7 @@ wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e)
         WRTNUM(yflag);
         WRTNUM(FTrunc(FRnd(currentx)));
         WRTNUM(FTrunc(FRnd(currenty)));
-        ws("flxa\n");
+        WriteString("flxa\n");
     } else {
 
         wrtpreflx2(c13);
@@ -507,7 +506,7 @@ wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e)
         WRTNUM(yflag);
         WRTNUM(FTrunc(FRnd(currentx)));
         WRTNUM(FTrunc(FRnd(currenty)));
-        ws("flx\n");
+        WriteString("flx\n");
     }
     firstFlex = true;
 }
@@ -524,30 +523,30 @@ ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PPathElt e)
         wrtcda(c1);
         wrtcda(c2);
         wrtcda(c3);
-        ws("ct\n");
+        WriteString("ct\n");
     } else {
         if ((FRnd(c1.x) == currentx) && (c2.y == c3.y)) {
             wrty(c1.y);
             wrtcd(c2);
             wrtx(c3.x);
-            ws("vhct\n");
+            WriteString("vhct\n");
         } else if ((FRnd(c1.y) == currenty) && (c2.x == c3.x)) {
             wrtx(c1.x);
             wrtcd(c2);
             wrty(c3.y);
-            ws("hvct\n");
+            WriteString("hvct\n");
         } else {
             wrtcd(c1);
             wrtcd(c2);
             wrtcd(c3);
-            ws("rct\n");
+            WriteString("rct\n");
         }
     }
     if (e->eol) {
-        ws("eol\n");
+        WriteString("eol\n");
     }
     if (e->sol) {
-        ws("sol\n");
+        WriteString("sol\n");
     }
 }
 
@@ -559,14 +558,14 @@ cp(const ACFontInfo* fontinfo, PPathElt e)
     }
     if (idInFile) {
         WRTNUM(subpathcount++);
-        ws("id\n");
+        WriteString("id\n");
     }
-    ws("cp\n");
+    WriteString("cp\n");
     if (e->eol) {
-        ws("eol\n");
+        WriteString("eol\n");
     }
     if (e->sol) {
-        ws("sol\n");
+        WriteString("sol\n");
     }
 }
 
@@ -593,18 +592,18 @@ SaveFile(const ACFontInfo* fontinfo)
 
     /* AddSolEol(); */
     sprintf(S0, "%% %s\n", fileName);
-    ws(S0);
+    WriteString(S0);
     wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
     NumberPath();
     prevhintmaskstr[0] = '\0';
     if (wrtColorInfo && (!e->newcolors)) {
         hintmaskstr[0] = '\0';
         WrtPntLst(fontinfo, ptLstArray[0]);
-        ws(hintmaskstr);
+        WriteString(hintmaskstr);
         strcpy(prevhintmaskstr, hintmaskstr);
     }
 
-    ws("sc\n");
+    WriteString("sc\n");
     firstFlex = true;
     currentx = currenty = 0;
     while (e != NULL) {
@@ -637,7 +636,7 @@ SaveFile(const ACFontInfo* fontinfo)
             }
         }
 #if WRTABS_COMMENT
-        ws(" % ");
+        WriteString(" % ");
         WRTNUM(e->count)
         switch (e->type) {
             case CURVETO:
@@ -647,25 +646,25 @@ SaveFile(const ACFontInfo* fontinfo)
                 wrtfx(c2.y);
                 wrtfx(c3.x);
                 wrtfx(c3.y);
-                ws("ct");
+                WriteString("ct");
                 break;
             case LINETO:
                 wrtfx(c1.x);
                 wrtfx(c1.y);
-                ws("dt");
+                WriteString("dt");
                 break;
             case MOVETO:
                 wrtfx(c1.x);
                 wrtfx(c1.y);
-                ws("mt");
+                WriteString("mt");
                 break;
             case CLOSEPATH:
-                ws("cp");
+                WriteString("cp");
                 break;
         }
-        ws("\n");
+        WriteString("\n");
 #endif
         e = e->next;
     }
-    ws("ed\n");
+    WriteString("ed\n");
 }
