@@ -373,7 +373,7 @@ MergeVSegs(PClrSeg seg1, PClrSeg seg2)
 static void
 ReportRemSeg(int32_t l, PClrSeg lst)
 {
-    Fixed from, to, loc;
+    Fixed from = 0, to = 0, loc = 0;
     /* this assumes !YgoesUp */
     switch (l) {
         case 1:

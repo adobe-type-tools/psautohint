@@ -616,10 +616,10 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
     const char* s0;
     char c;
     char* c0;
-    bool neg;
+    bool neg = false;
     bool isReal;
     float rval;
-    int32_t val;
+    int32_t val = 0;
     Fixed r;
     pathStart = pathEnd = NULL;
     bezGlyphName[0] = 0;

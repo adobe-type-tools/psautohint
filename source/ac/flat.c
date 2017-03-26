@@ -41,7 +41,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, register PFltnRec pfr, bool inside)
 #define MiniBlkSz (10)
 #define mdpt(a, b) (((int32_t)(a) + (int32_t)(b)) >> 1)
     int32_t cds[MiniBlkSz * MiniFltnMaxDepth], dpth, eps;
-    int32_t bbLLX, bbLLY, bbURX, bbURY;
+    int32_t bbLLX = 0, bbLLY = 0, bbURX = 0, bbURY = 0;
     register int32_t* p;
     p = cds;
     dpth = 1;
