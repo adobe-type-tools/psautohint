@@ -20,9 +20,7 @@ char editingResource = 0;
 
 char* FL_glyphname = 0;
 
-char* bezoutput = 0;
-int bezoutputalloc = 0;
-int bezoutputactual = 0;
+ACBuffer* bezoutput = NULL;
 
 bool scalinghints = false;
 
@@ -82,6 +80,38 @@ NewFontInfo(int size)
     fontinfo->size = size;
     fontinfo->entries = (FFEntry*)ACNEWMEM(size * sizeof(FFEntry));
     return fontinfo;
+}
+
+static ACBuffer*
+NewBuffer(int size)
+{
+    ACBuffer* buffer;
+
+    if (size <= 0)
+        return NULL;
+
+    buffer = (ACBuffer*)ACNEWMEM(sizeof(ACBuffer));
+    if (!buffer)
+        return NULL;
+
+    buffer->data = (char*)ACNEWMEM(size);
+    if (!buffer->data) {
+        ACFREEMEM(buffer);
+        return NULL;
+    }
+
+    buffer->data[0] = '\0';
+    buffer->capacity = size;
+    buffer->length = 0;
+
+    return buffer;
+}
+
+static void
+FreeBuffer(ACBuffer* buffer)
+{
+    ACFREEMEM(buffer->data);
+    ACFREEMEM(buffer);
 }
 
 static ACFontInfo*
@@ -272,28 +302,23 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     } else if (value == 1) {
         /* AutoColor was called succesfully */
         FreeFontInfo(fontinfo);
-        if (bezoutputactual < *length) {
-            strncpy(dstbezdata, bezoutput, bezoutputactual + 1);
-            *length = bezoutputactual + 1;
-            ACFREEMEM(bezoutput);
-            bezoutputalloc = 0;
+        if (bezoutput->length < *length) {
+            *length = bezoutput->length + 1;
+            strncpy(dstbezdata, bezoutput->data, *length);
+            FreeBuffer(bezoutput);
             return AC_Success;
         } else {
-            *length = bezoutputactual + 1;
-            ACFREEMEM(bezoutput);
-            bezoutputalloc = 0;
+            *length = bezoutput->length + 1;
+            FreeBuffer(bezoutput);
             return AC_DestBuffOfloError;
         }
     }
 
-    bezoutputalloc = *length;
-    bezoutputactual = 0;
-    bezoutput = (char*)ACNEWMEM(bezoutputalloc);
+    bezoutput = NewBuffer(*length);
     if (!bezoutput) {
         FreeFontInfo(fontinfo);
         return AC_MemoryError;
     }
-    *bezoutput = 0;
 
     result = AutoColor(fontinfo,     /* font info */
                        srcbezdata,   /* input glyph */

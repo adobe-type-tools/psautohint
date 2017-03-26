@@ -167,6 +167,12 @@ typedef struct {
   int size;
 } ACFontInfo;
 
+typedef struct {
+  char* data;   /* character data held in the buffer */
+  int length;   /* actual length of the data */
+  int capacity; /* allocated memory size */
+} ACBuffer;
+
 /* global data */
 
 extern PPathElt pathStart, pathEnd;
