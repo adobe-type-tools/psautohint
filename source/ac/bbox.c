@@ -414,7 +414,7 @@ CheckPathBBox(void)
         lly = ury;
         ury = tmp;
     }
-    if (llx < FixInt(-600) || lly < FixInt(-600) || urx > FixInt(1600) ||
+    if (llx < -FixInt(600) || lly < -FixInt(600) || urx > FixInt(1600) ||
         ury > FixInt(1600))
         ReportBBoxBogus(llx, lly, urx, ury);
 }
