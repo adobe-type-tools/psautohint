@@ -64,7 +64,7 @@ FreeFontInfo(ACFontInfo* fontinfo)
 {
     int i;
 
-    for (i = 0; i < fontinfo->size; i++) {
+    for (i = 0; i < fontinfo->length; i++) {
         if (fontinfo->entries[i].value[0]) {
             ACFREEMEM(fontinfo->entries[i].value);
         }
@@ -74,11 +74,25 @@ FreeFontInfo(ACFontInfo* fontinfo)
 }
 
 static ACFontInfo*
-NewFontInfo(int size)
+NewFontInfo(int length)
 {
-    ACFontInfo* fontinfo = (ACFontInfo*)ACNEWMEM(sizeof(ACFontInfo));
-    fontinfo->size = size;
-    fontinfo->entries = (FFEntry*)ACNEWMEM(size * sizeof(FFEntry));
+    ACFontInfo* fontinfo;
+
+    if (length <= 0)
+        return NULL;
+
+    fontinfo = (ACFontInfo*)ACNEWMEM(sizeof(ACFontInfo));
+    if (!fontinfo)
+        return NULL;
+
+    fontinfo->entries = (FFEntry*)ACNEWMEM(length * sizeof(FFEntry));
+    if (!fontinfo->entries) {
+        ACFREEMEM(fontinfo);
+        return NULL;
+    }
+
+    fontinfo->length = length;
+
     return fontinfo;
 }
 
@@ -114,59 +128,61 @@ FreeBuffer(ACBuffer* buffer)
     ACFREEMEM(buffer);
 }
 
-static ACFontInfo*
-ParseFontInfo(const char* data)
+static int
+ParseFontInfo(const char* data, ACFontInfo** fontinfo)
 {
     const char *kwstart, *kwend, *tkstart, *current;
     int i;
 
-    ACFontInfo* fontinfo = NewFontInfo(34);
+    ACFontInfo* info = *fontinfo = NewFontInfo(34);
+    if (!info)
+        return AC_MemoryError;
 
-    fontinfo->entries[0].key = "OrigEmSqUnits";
-    fontinfo->entries[1].key = "FontName";
-    fontinfo->entries[2].key = "FlexOK";
+    info->entries[0].key = "OrigEmSqUnits";
+    info->entries[1].key = "FontName";
+    info->entries[2].key = "FlexOK";
     /* Blue Values */
-    fontinfo->entries[3].key = "BaselineOvershoot";
-    fontinfo->entries[4].key = "BaselineYCoord";
-    fontinfo->entries[5].key = "CapHeight";
-    fontinfo->entries[6].key = "CapOvershoot";
-    fontinfo->entries[7].key = "LcHeight";
-    fontinfo->entries[8].key = "LcOvershoot";
-    fontinfo->entries[9].key = "AscenderHeight";
-    fontinfo->entries[10].key = "AscenderOvershoot";
-    fontinfo->entries[11].key = "FigHeight";
-    fontinfo->entries[12].key = "FigOvershoot";
-    fontinfo->entries[13].key = "Height5";
-    fontinfo->entries[14].key = "Height5Overshoot";
-    fontinfo->entries[15].key = "Height6";
-    fontinfo->entries[16].key = "Height6Overshoot";
+    info->entries[3].key = "BaselineOvershoot";
+    info->entries[4].key = "BaselineYCoord";
+    info->entries[5].key = "CapHeight";
+    info->entries[6].key = "CapOvershoot";
+    info->entries[7].key = "LcHeight";
+    info->entries[8].key = "LcOvershoot";
+    info->entries[9].key = "AscenderHeight";
+    info->entries[10].key = "AscenderOvershoot";
+    info->entries[11].key = "FigHeight";
+    info->entries[12].key = "FigOvershoot";
+    info->entries[13].key = "Height5";
+    info->entries[14].key = "Height5Overshoot";
+    info->entries[15].key = "Height6";
+    info->entries[16].key = "Height6Overshoot";
     /* Other Values */
-    fontinfo->entries[17].key = "Baseline5Overshoot";
-    fontinfo->entries[18].key = "Baseline5";
-    fontinfo->entries[19].key = "Baseline6Overshoot";
-    fontinfo->entries[20].key = "Baseline6";
-    fontinfo->entries[21].key = "SuperiorOvershoot";
-    fontinfo->entries[22].key = "SuperiorBaseline";
-    fontinfo->entries[23].key = "OrdinalOvershoot";
-    fontinfo->entries[24].key = "OrdinalBaseline";
-    fontinfo->entries[25].key = "DescenderOvershoot";
-    fontinfo->entries[26].key = "DescenderHeight";
+    info->entries[17].key = "Baseline5Overshoot";
+    info->entries[18].key = "Baseline5";
+    info->entries[19].key = "Baseline6Overshoot";
+    info->entries[20].key = "Baseline6";
+    info->entries[21].key = "SuperiorOvershoot";
+    info->entries[22].key = "SuperiorBaseline";
+    info->entries[23].key = "OrdinalOvershoot";
+    info->entries[24].key = "OrdinalBaseline";
+    info->entries[25].key = "DescenderOvershoot";
+    info->entries[26].key = "DescenderHeight";
 
-    fontinfo->entries[27].key = "DominantV";
-    fontinfo->entries[28].key = "StemSnapV";
-    fontinfo->entries[29].key = "DominantH";
-    fontinfo->entries[30].key = "StemSnapH";
-    fontinfo->entries[31].key = "VCounterChars";
-    fontinfo->entries[32].key = "HCounterChars";
+    info->entries[27].key = "DominantV";
+    info->entries[28].key = "StemSnapV";
+    info->entries[29].key = "DominantH";
+    info->entries[30].key = "StemSnapH";
+    info->entries[31].key = "VCounterChars";
+    info->entries[32].key = "HCounterChars";
     /* later addenda */
-    fontinfo->entries[33].key = "BlueFuzz";
+    info->entries[33].key = "BlueFuzz";
 
-    for (i = 0; i < fontinfo->size; i++) {
-        fontinfo->entries[i].value = "";
+    for (i = 0; i < info->length; i++) {
+        info->entries[i].value = "";
     }
 
     if (!data)
-        return fontinfo;
+        return AC_Success;
 
     current = data;
     while (*current) {
@@ -190,27 +206,26 @@ ParseFontInfo(const char* data)
             skipnonblanks();
 
         kwLen = (int)(kwend - kwstart);
-        for (i = 0; i < fontinfo->size; i++) {
-            size_t matchLen = NUMMAX(kwLen, strlen(fontinfo->entries[i].key));
-            if (!strncmp(fontinfo->entries[i].key, kwstart, matchLen)) {
-                fontinfo->entries[i].value =
-                  (char*)ACNEWMEM(current - tkstart + 1);
-                if (!fontinfo->entries[i].value) {
-                    FreeFontInfo(fontinfo);
-                    return NULL;
+        for (i = 0; i < info->length; i++) {
+            size_t matchLen = NUMMAX(kwLen, strlen(info->entries[i].key));
+            if (!strncmp(info->entries[i].key, kwstart, matchLen)) {
+                info->entries[i].value = (char*)ACNEWMEM(current - tkstart + 1);
+                if (!info->entries[i].value) {
+                    FreeFontInfo(info);
+                    return AC_MemoryError;
                 }
-                strncpy(fontinfo->entries[i].value, tkstart, current - tkstart);
-                fontinfo->entries[i].value[current - tkstart] = '\0';
+                strncpy(info->entries[i].value, tkstart, current - tkstart);
+                info->entries[i].value[current - tkstart] = '\0';
                 break;
             }
         }
 
-        if (i == fontinfo->size) {
+        if (i == info->length) {
             char* temp;
             temp = (char*)ACNEWMEM(tkstart - kwstart + 1);
             if (!temp) {
-                FreeFontInfo(fontinfo);
-                return NULL;
+                FreeFontInfo(info);
+                return AC_MemoryError;
             }
             strncpy(temp, kwstart, tkstart - kwstart);
             temp[tkstart - kwstart] = '\0';
@@ -220,7 +235,7 @@ ParseFontInfo(const char* data)
         skipblanks();
     }
 
-    return fontinfo;
+    return AC_Success;
 }
 
 ACLIB_API void
@@ -288,8 +303,7 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     if (!srcbezdata)
         return AC_InvalidParameterError;
 
-    fontinfo = ParseFontInfo(fontinfodata);
-    if (!fontinfo)
+    if (ParseFontInfo(fontinfodata, &fontinfo))
         return AC_FontinfoParseFail;
 
     set_errorproc(cleanup);

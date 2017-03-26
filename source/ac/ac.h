@@ -163,8 +163,8 @@ typedef struct {
 } FFEntry;
 
 typedef struct {
-  FFEntry *entries;
-  int size;
+  FFEntry *entries; /* font information entries */
+  int length;       /* number of the entries */
 } ACFontInfo;
 
 typedef struct {

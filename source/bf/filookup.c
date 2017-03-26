@@ -42,7 +42,7 @@ GetFntInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
 
     assert(fontinfo != NULL);
 
-    for (i = 0; i < fontinfo->size; i++) {
+    for (i = 0; i < fontinfo->length; i++) {
         if (fontinfo->entries[i].key &&
             !strcmp(fontinfo->entries[i].key, keyword)) {
             returnstring = (char*)AllocateMem(
