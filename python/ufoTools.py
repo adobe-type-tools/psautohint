@@ -1022,7 +1022,7 @@ class UFOFontData:
 		if len(data) < 128:
 			hash = data
 		else:
-			hash = hashlib.sha512(data).hexdigest()
+			hash = hashlib.sha512(data.encode("utf-8")).hexdigest()
 		return hash, dataList
 
 	def getComponentOutline(self, componentItem):
