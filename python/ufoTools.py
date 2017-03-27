@@ -1822,7 +1822,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 						else:
 							fixStartPoint(outlineItem, opList) # Fix the start/implied end path of the previous path.
 					opList = []
-		 			outlineItem = XMLElement('contour')
+					outlineItem = XMLElement('contour')
 					newOutline.append(outlineItem)
 
 				if (newHintMaskName != None):
