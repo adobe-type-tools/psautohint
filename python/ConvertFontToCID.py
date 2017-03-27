@@ -153,7 +153,7 @@ class FDDict:
 						bluePairList.append((topPos, bottomPos, tempKey, self.DictName, isBottomZone))
 						
 			if bluePairList:
-				bluePairList.sort()
+				bluePairList = sorted(bluePairList)
 				prevPair = bluePairList[0]
 				zoneBuffer = 2*self.BlueFuzz + 1
 				for pair in bluePairList[1:]:
@@ -392,7 +392,7 @@ def mergeFDDicts(prevDictList, privateDict):
 		zoneList = zoneDict.keys()
 		if not zoneList:
 			continue
-		zoneList.sort()
+		zoneList = sorted(zoneList)
 		# Now check for conflicts.
 		prevZone = zoneList[0]
 		goodZoneList.append(prevZone[1])
@@ -430,7 +430,7 @@ def mergeFDDicts(prevDictList, privateDict):
 		stemList = stemDict.keys()
 		if not stemList:
 			continue
-		stemList.sort()
+		stemList = sorted(stemList)
 		# Now check for conflicts.
 		prevStem = stemList[0]
 		goodStemList.append(prevStem)

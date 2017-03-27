@@ -513,7 +513,7 @@ class UFOFontData:
 		hashPath = os.path.join(hashDir, kAdobHashMapName)
 
 		hasMapKeys = hashMap.keys()
-		hasMapKeys.sort()
+		hasMapKeys = sorted(hasMapKeys)
 		data = ["{"]
 		for gName in hasMapKeys:
 			data.append("'%s': %s," % (gName, hashMap[gName]))
