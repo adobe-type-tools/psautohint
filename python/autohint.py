@@ -843,7 +843,7 @@ def  openFontPlistFile(psName, dirPath):
 		
 	if  fontPlist == None:
 		fontPlist =  plistlib.Plist()
-	if not fontPlist.has_key(kACIDKey):
+	if kACIDKey not in fontPlist:
 		fontPlist[kACIDKey] = {}
 	return fontPlist, filePath, isNewPlistFile
 

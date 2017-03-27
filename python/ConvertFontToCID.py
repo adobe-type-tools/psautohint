@@ -327,7 +327,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName, blueF
 		defaultFDDict.buildBlueLists()
 		gi = 0
 		for gname in glyphList:
-			if not fdGlyphDict.has_key(gname):
+			if gname not in fdGlyphDict:
 			 	fdGlyphDict[gname] = [0, gi]
 			gi += 1
 					

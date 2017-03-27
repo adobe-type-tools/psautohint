@@ -1128,7 +1128,7 @@ def	parsePList(filePath, dictKey = None):
 			if skipKeyData:
 				continue
 
-			if plistDict.has_key(lastName):
+			if lastName in plistDict:
 				raise UFOParseError("Encountered duplicate key name '%s' in '%s'." % (lastName, filePath) )
 			if child.tag == "array":
 				list = []
