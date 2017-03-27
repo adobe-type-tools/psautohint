@@ -448,7 +448,7 @@ class UFOFontData:
 		for glyphName, glifXML in self.newGlyphMap.items():
 			glyphPath = self.getWriteGlyphPath(glyphName)
 			#print("Saving file", glyphPath)
-			fp = open(glyphPath, "wt")
+			fp = open(glyphPath, "wb")
 			et = ET.ElementTree(glifXML)
 			et.write(fp, encoding="UTF-8", xml_declaration=True)
 			fp.close()
