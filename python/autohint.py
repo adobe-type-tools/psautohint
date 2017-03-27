@@ -580,7 +580,7 @@ def expandNames(glyphName):
 def parseGlyphListArg(glyphString):
 	glyphString = re.sub(r"[ \t\r\n,]+",  ",",  glyphString)
 	glyphList = glyphString.split(",")
-	glyphList = map(expandNames, glyphList)
+	glyphList = [expandNames(n) for n in glyphList]
 	glyphList =  filter(None, glyphList)
 	return glyphList
 
