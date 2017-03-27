@@ -4,7 +4,7 @@ ROOT_DIR = ..
 SRC_DIR = $(ROOT_DIR)/source
 PYT_DIR = $(ROOT_DIR)/python
 
-PYTHON ?= python2
+PYTHON ?= python
 
 FONTS:=$(wildcard data/*/*/font.ufo)
 TESTS:=$(FONTS:%.ufo=%.tst)
