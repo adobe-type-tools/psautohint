@@ -673,7 +673,7 @@ class UFOFontData:
 				width = int(eval(widthXML.get("width")))
 			else:
 				width = 1000
-		except UFOParseError,e:
+		except UFOParseError as e:
 			print("Error. skipping glyph '%s' because of parse error: %s" % (glyphName, e.message))
 			return None, None, None
 		return width, glifXML, outlineXML
