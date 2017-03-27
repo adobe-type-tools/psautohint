@@ -1353,20 +1353,20 @@ def main():
 
 	try:
 		CheckEnvironment()
-	except FDKEnvironmentError,e:
+	except FDKEnvironmentError as e:
 		logMsg(e)
 		return 1
 
 	try:
 		options = getOptions()
-	except ACOptionParseError,e:
+	except ACOptionParseError as e:
 		logMsg(e)
 		return not e
 
 	# verify that all files exist.
 	try:
 		hintFile(options)
-	except (ACFontError, ACHintError, ufoTools.UFOParseError),e:
+	except (ACFontError, ACHintError, ufoTools.UFOParseError) as e:
 		logMsg("\t%s" % e)
 		return 1
 	if gLogFile:
