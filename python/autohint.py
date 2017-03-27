@@ -1259,9 +1259,9 @@ def hintFile(options):
 			try:
 				import _psautohint
 				with open(tempFI, "rb") as fileFI:
-					newBezString = _psautohint.autohint(fileFI.read(), [bezString],
+					newBezString = _psautohint.autohint(fileFI.read(), [bezString.encode("ascii")],
                                                 options.verbose, options.allowChanges, not options.noHintSub, options.allowDecimalCoords)
-					newBezString = newBezString[0]
+					newBezString = newBezString[0].decode("ascii")
 				fontInfo = ""
 			except ImportError:
 				bp = open(tempBez, "wt")
