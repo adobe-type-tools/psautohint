@@ -167,7 +167,7 @@ class FDDict:
 				for pairEntry in bluePairList:
 					bluesList.append(pairEntry[1])
 					bluesList.append(pairEntry[0])
-				bluesList = map(str, bluesList)
+				bluesList = [str(v) for v in bluesList]
 				bluesList = "[%s]"  % (" ".join(bluesList) )
 				#print(self.DictName, bluePairList)
 				#print("\t", bluesList)
@@ -365,7 +365,7 @@ def mergeFDDicts(prevDictList, privateDict):
 			if dList != None:
 				dList = dList[1:-1] # remove the braces
 				dList = dList.split()
-				dList = map(int, dList)
+				dList = [int(d) for d in dList]
 				for width in dList:
 					stemDict[width] = prefDDict.DictName
 		
