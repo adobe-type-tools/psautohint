@@ -278,34 +278,34 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName, blueF
 			 		gi += 1
 			 	
 		elif state == dictState:
-			 # "end FDDict" marks end of set, else we are adding a new glyph name.
-			 if (token == kEndToken) and tokenList[i] == kFDDictToken:
-			 	if tokenList[i+1] != dictName:
-			 		raise FontInfoParseError("End FDDict  name \"%s\" does not match begin FDDict name \"%s\"." % ( tokenList[i+1], dictName))
-			 	if fdDict.DominantH == None:
-			 		print("Warning: the FDDict '%s' in fontinfo has no DominantH value" % (dictName))
-			 	if fdDict.DominantV == None:
-			 		print("Warning: the FDDict '%s' in fontinfo has no DominantV value" % (dictName))
+			# "end FDDict" marks end of set, else we are adding a new glyph name.
+			if (token == kEndToken) and tokenList[i] == kFDDictToken:
+				if tokenList[i+1] != dictName:
+					raise FontInfoParseError("End FDDict  name \"%s\" does not match begin FDDict name \"%s\"." % ( tokenList[i+1], dictName))
+				if fdDict.DominantH == None:
+					print("Warning: the FDDict '%s' in fontinfo has no DominantH value" % (dictName))
+				if fdDict.DominantV == None:
+					print("Warning: the FDDict '%s' in fontinfo has no DominantV value" % (dictName))
 				if (fdDict.BlueFuzz == None):
 					fdDict.BlueFuzz = blueFuzz
-			 	fdDict.buildBlueLists()
-			 	if fdDict.FontName == None:
-			 		fdDict.FontName = fontName
-			 	state = baseState
-			 	i += 2
-			 	dictName = None
-			 	fdDict = None
-			 else:
-			 	if token in kFDDictKeys:
-			 		value = tokenList[i]
-			 		i +=1
+				fdDict.buildBlueLists()
+				if fdDict.FontName == None:
+					fdDict.FontName = fontName
+				state = baseState
+				i += 2
+				dictName = None
+				fdDict = None
+			else:
+				if token in kFDDictKeys:
+					value = tokenList[i]
+					i +=1
 					if (value[0] in ["[",  "("]) and (not value[-1] in ["]",  ")"]):
 						state = inDictValue
 						dictValueList = [value]
-			 			dictKeyWord = token
+						dictKeyWord = token
 					else:
 			 			exec("fdDict.%s = \"%s\"" % (token, value))
-			 	else:
+				else:
 			 		raise FontInfoParseError("FDDict key \"%s\" in fdDict named \"%s\" is not recognised." % ( token, dictName))
 			 	
 	if lenSrcFontDictList != len(fontDictList):
