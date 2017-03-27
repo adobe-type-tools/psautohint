@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 """
 BezTools.py v 1.12 April 27 2106
 
@@ -17,7 +19,7 @@ from types import FloatType, LongType
 debug = 0
 def debugMsg(*args):
 	if debug:
-		print args
+		print(args)
 kStackLimit = 46
 kStemLimit = 96
 
@@ -1028,7 +1030,7 @@ def convertBezToT2(bezString):
 			if t2Op:
 				t2List.append([argList, t2Op])
 			elif t2Op == None:
-				print "Unhandled operation", argList, token
+				print("Unhandled operation", argList, token)
 				raise KeyError
 			argList = []
 			
@@ -1091,7 +1093,7 @@ def convertBezToT2(bezString):
 			t2Program.extend(entry[0])
 			t2Program.append(entry[1])
 		except:
-			print "Failed to extend t2Program with entry", entry
+			print("Failed to extend t2Program with entry", entry)
 			raise KeyError
 
 	return t2Program
@@ -1288,9 +1290,9 @@ class CFFFontData:
 			value = blueValues[i]
 			exec("fdDict.%s = %s" % (key, value))
 	
-		#print numBlueValues
+		#print(numBlueValues)
 		#for i in range(0, len(fontinfo),2):
-		#	print fontinfo[i], fontinfo[i+1]
+		#	print(fontinfo[i], fontinfo[i+1])
 	
 		if hasattr(privateDict, "OtherBlues"):
 			# For all OtherBlues, the pairs are bottom zones, and the first value of each pair is the overshoot position.
@@ -1416,16 +1418,16 @@ def test():
 	removeHints = 0
 
 	for glyphName in glyphNames:
-		print
-		print glyphName
+		print()
+		print(glyphName)
 		t2CharString = charStrings[glyphName]
 		bezString, hasHints, t2Width = convertT2GlyphToBez(t2CharString, removeHints)
-		#print bezString
+		#print(bezString)
 		t2Program = convertBezToT2(bezString)
 		if t2Width != None:
 			t2Program.insert(0,t2Width)
 
-		#print len(t2Program),  ("t2Program",t2Program)
+		#print(len(t2Program),  ("t2Program",t2Program))
 
 def test2():
 	# Test program. Takes first argument = bez path, writes t2 string.

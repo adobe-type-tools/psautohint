@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 """
 ufoTools.py v1.29 Feb 22 2017
 
@@ -312,7 +314,7 @@ debug = 0
 
 def debugMsg(*args):
 	if debug:
-		print args
+		print(args)
 
 #UFO names
 kDefaultGlyphsLayerName = "public.default"
@@ -445,7 +447,7 @@ class UFOFontData:
 
 		for glyphName, glifXML in self.newGlyphMap.items():
 			glyphPath = self.getWriteGlyphPath(glyphName)
-			#print "Saving file", glyphPath
+			#print("Saving file", glyphPath)
 			fp = open(glyphPath, "wt")
 			et = ET.ElementTree(glifXML)
 			et.write(fp, encoding="UTF-8", xml_declaration=True)
@@ -492,10 +494,10 @@ class UFOFontData:
 			if version[0] > kAdobHashMapVersion[0]:
 				raise UFOParseError("Hash map version is newer than program. Please update the FDK")
 			elif version[0] < kAdobHashMapVersion[0]:
-				print "Updating hash map: was older version"
+				print("Updating hash map: was older version")
 				newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
 		except KeyError:
-			print "Updating hash map: was older version"
+			print("Updating hash map: was older version")
 			newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
 		self.hashMap = newMap
 		return
@@ -647,7 +649,7 @@ class UFOFontData:
 						if programName in historyList:
 							foundMatch = True
 				if foundMatch:
-					print "Error. Glyph '%s' has been edited. You must first run '%s' before running '%s'. Skipping." % (glyphName, self.requiredHistory, self.programName)
+					print("Error. Glyph '%s' has been edited. You must first run '%s' before running '%s'. Skipping." % (glyphName, self.requiredHistory, self.programName))
 					skip = True
 
 			# If the source hash has changed, we need to delete the processed layer glyph.
@@ -672,7 +674,7 @@ class UFOFontData:
 			else:
 				width = 1000
 		except UFOParseError,e:
-			print "Error. skipping glyph '%s' because of parse error: %s" % (glyphName, e.message)
+			print("Error. skipping glyph '%s' because of parse error: %s" % (glyphName, e.message))
 			return None, None, None
 		return width, glifXML, outlineXML
 
@@ -969,7 +971,7 @@ class UFOFontData:
 								except KeyError:
 									pointType = ""
 								dataList.append("%s%s%s" % (pointType, child.attrib["x"], child.attrib["y"]))
-								#print dataList[-3:]
+								#print(dataList[-3:])
 				elif childContour.tag == "component":
 					# append the component hash.
 					try:
@@ -1446,7 +1448,7 @@ def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll= 0):
 
 	if outlineXML == None:
 		if beVerbose:
-			print "Glyph '%s' has no outline data" % (glyphName)
+			print("Glyph '%s' has no outline data" % (glyphName))
 		return None, width
 
 	curX = curY = 0
@@ -1790,7 +1792,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 				lastPathOp = token
 				opIndex += 1
 			else:
-				print "Unhandled operation", argList, token
+				print("Unhandled operation", argList, token)
 				raise BezParseError("Unhandled operation: '%s' '%s'.", argList, token)
 			dx = dy = 0
 			opName = bezToUFOPoint[token]
@@ -1815,7 +1817,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 					if outlineItem != None:
 						if len(outlineItem) == 1:
 							# Just in case we see two moves in a row, delete the previous outlineItem if it has only the move-to''
-							print "Deleting moveto:", xmlToString(newOutline[-1]), "adding", xmlToString(outlineItem)
+							print("Deleting moveto:", xmlToString(newOutline[-1]), "adding", xmlToString(outlineItem))
 							del newOutline[-1]
 						else:
 							fixStartPoint(outlineItem, opList) # Fix the start/implied end path of the previous path.
@@ -1966,7 +1968,7 @@ def addWhiteSpace(parent, level):
 	child = None
 	childIndent = os.linesep + ("  "*(level +1))
 	prentIndent = os.linesep + ("  "*(level))
-	#print "parent Tag", parent.tag, repr(parent.text), repr(parent.tail)
+	#print("parent Tag", parent.tag, repr(parent.text), repr(parent.tail))
 	for child in parent:
 		child.tail = childIndent
 		addWhiteSpace(child, level +1)
@@ -1974,7 +1976,7 @@ def addWhiteSpace(parent, level):
 		if parent.text == None:
 			parent.text = childIndent
 		child.tail = prentIndent
-		#print "lastChild Tag", child.tag, repr(child.text), repr(child.tail), "parent Tag", parent.tag
+		#print("lastChild Tag", child.tag, repr(child.text), repr(child.tail), "parent Tag", parent.tag)
 
 
 def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
@@ -2001,7 +2003,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
 
 
 	newOutlineElement, hintInfoDict = convertBezToOutline(ufoFontData, glyphName, bezString )
-	#print xmlToString(stemHints)
+	#print(xmlToString(stemHints))
 
 	if not hintsOnly:
 		if outlineItem == None:

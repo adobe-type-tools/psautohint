@@ -1,4 +1,7 @@
 #!/bin/env python
+
+from __future__ import print_function
+
 __copyright__ = """Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
@@ -518,14 +521,14 @@ def logMsg(*args):
 			if msg == kProgressChar:
 				sys.stdout.write(msg) # avoid space, which is added by 'print'
 			else:
-				print msg,
+				print(msg,)
 			sys.stdout.flush()
 			if gLogFile:
 				gLogFile.write(msg)
 				gLogFile.flush()
 		else:
 			
-			print msg
+			print(msg)
 			sys.stdout.flush()
 			if gLogFile:
 				gLogFile.write(msg + os.linesep)
@@ -596,7 +599,7 @@ def parseCounterHintData(path):
 	for line in lines:
 		fields = line.split()
 		if (len(fields) != 2) or (fields[0] not in ["V", "v", "H", "h"]) :
-			print "\tError: could not process counter hint line '%s' in file %s. Doesn't look like V or H followed by a tab or space, and then a glyph name." % (line, path)
+			print("\tError: could not process counter hint line '%s' in file %s. Doesn't look like V or H followed by a tab or space, and then a glyph name." % (line, path))
 		elif  fields[0] in ["V", "v"]:
 			vCounterGlyphList.append(fields[1])
 		else:
@@ -638,27 +641,27 @@ def getOptions():
 			raise ACOptionParseError("Option Error: All options must preceed the  input font path <%s>." % arg) 
 
 		if arg == "-h":
-			print __help__
+			print(__help__)
 			try:
 				import _psautohint
-				print "Lib version:", _psautohint.version
+				print("Lib version:", _psautohint.version)
 			except ImportError:
 				command = "autohintexe -v"
 				report = FDKUtils.runShellCmd(command)
 				logMsg( report)
 			raise ACOptionParseError
 		elif arg == "-u":
-			print __usage__
+			print(__usage__)
 			try:
 				import _psautohint
-				print "Lib version:", _psautohint.version
+				print("Lib version:", _psautohint.version)
 			except ImportError:
 				command = "autohintexe -v"
 				report = FDKUtils.runShellCmd(command)
 				logMsg( report)
 			raise ACOptionParseError
 		elif arg == "-hfd":
-			print __FDDoc__
+			print(__FDDoc__)
 			raise ACOptionParseError
 		elif arg == "-pfd":
 			options.printDefaultFDDict = 1
@@ -898,7 +901,7 @@ def parseFontInfoString(fontInfoString):
 			matchingExp = item + integerPattern
 		
 		try:
-			print '\t%s' % re.search(matchingExp, fontInfoString).group()
+			print('\t%s' % re.search(matchingExp, fontInfoString).group())
 		except:
 			pass
 	
@@ -991,7 +994,7 @@ def openOpenTypeFile(path, outFilePath, options):
 	
 		else:  # It is a PS file. Convert to CFF.	
 			fontType =  2
-			print "Converting Type1 font to temp CFF font file..."
+			print("Converting Type1 font to temp CFF font file...")
 			command="tx  -cff +b -std \"%s\" \"%s\"" % (path, tempPathCFF)
 			report = FDKUtils.runShellCmd(command)
 			if "fatal" in report:
@@ -1064,7 +1067,7 @@ def hintFile(options):
 	tempBezNew = tempBez + ".new"
 	tempFI = tempBaseName + ".fi"
 	
-	#print "tempBaseName", tempBaseName
+	#print("tempBaseName", tempBaseName)
 	psName = fontData.getPSName()
 	
 	if (not options.logOnly) and options.usePlistFile:
@@ -1246,9 +1249,9 @@ def hintFile(options):
 				# and getting output with std.readline()
 
 		# 	Call auto-hint library on bez string.
-		#print "oldBezString", oldBezString
-		#print ""
-		#print "bezString", bezString
+		#print("oldBezString", oldBezString)
+		#print("")
+		#print("bezString", bezString)
 		
 		if oldBezString != "" and oldBezString == bezString:
 			newBezString = oldHintBezString
@@ -1270,7 +1273,7 @@ def hintFile(options):
 					os.remove(tempBezNew)
 				command = "autohintexe %s%s%s%s -s .new -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, tempFI, tempBez)
 				if  options.debug:
-					print command
+					print(command)
 				report = FDKUtils.runShellCmd(command)
 				if report:
 					if not options.verbose and not options.quiet:
@@ -1281,8 +1284,8 @@ def hintFile(options):
 					newBezString = bp.read()
 					bp.close()
 					if options.debug:
-						print "Wrote AC fontinfo data file to", tempFI
-						print "Wrote AC output bez file to", tempBezNew
+						print("Wrote AC fontinfo data file to", tempFI)
+						print("Wrote AC output bez file to", tempBezNew)
 					else:
 						os.remove(tempBezNew)
 			
@@ -1292,7 +1295,7 @@ def hintFile(options):
 			raise ACHintError("%s Error - failure in processing outline data." % aliasName(name))
 			
 		if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
-			print "No hints added!"
+			print("No hints added!")
 
 		if options.logOnly:
 			continue
@@ -1314,10 +1317,10 @@ def hintFile(options):
 			fontPlist[kACIDKey][name] = (ACidentifier, time.asctime(), bezString, newBezString )
 
 	if not options.verbose and not options.quiet:
-		print "" # print final new line after progress dots.
+		print("") # print final new line after progress dots.
 
 	if  options.debug:
-		print "Wrote input AC bez file to", tempBez
+		print("Wrote input AC bez file to", tempBez)
 	else:
 		tempPathCFF = options.inputPath + kTempCFFSuffix # created when a PS file is opened.
 		removeTempFiles( [tempBez, tempBezNew, tempFI, tempPathCFF] )
