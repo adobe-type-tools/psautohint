@@ -265,7 +265,7 @@ FixHs(Fixed fixy, Fixed fixdy)
                 break;
             default: {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal operator in path list in %s.\n", fileName);
+                       "Illegal operator in path list in %s.\n", glyphName);
             }
         }
         e = e->next;
@@ -318,7 +318,7 @@ FixVs(Fixed fixx, Fixed fixdx)
                 break;
             default: {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal operator in point list in %s.\n", fileName);
+                       "Illegal operator in point list in %s.\n", glyphName);
             }
         }
         e = e->next;

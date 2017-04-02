@@ -102,7 +102,7 @@ Alloc(int32_t sz)
     if (vmfree > vmlast) /* Error! need to make VMSIZE bigger */
     {
         LogMsg(LOGERROR, FATALERROR,
-               "Exceeded VM size for hints in file: %s.\n", fileName);
+               "Exceeded VM size for hints in glyph: %s.\n", glyphName);
     }
     return s;
 }
@@ -182,7 +182,7 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             ptLstArray[0] = NULL;
             numPtLsts = 1;
 
-            /*     if (fileName != NULL && fileName[0] == 'g')
+            /*     if (glyphName != NULL && glyphName[0] == 'g')
                    showClrInfo = showHs = showVs = listClrInfo = true; */
     }
 }
