@@ -936,8 +936,8 @@ AddColors(const ACFontInfo* fontinfo, const char* srcglyph, bool extracolor)
 }
 
 bool
-DoFile(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
-       bool extracolor)
+AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
+               bool extracolor)
 {
     int32_t lentop = lenTopBands, lenbot = lenBotBands;
     fileName = fname;
