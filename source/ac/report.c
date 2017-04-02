@@ -29,8 +29,10 @@ PrintMessage(char* format, ...)
         char msgBuffer[MAXMSGLEN + 1];
         va_list va;
 
+        msgBuffer[0] = '\t';
+
         va_start(va, format);
-        vsnprintf(msgBuffer, MAXMSGLEN, format, va);
+        vsnprintf(msgBuffer + 1, MAXMSGLEN - 1, format, va);
         va_end(va);
 
         libReportCB(msgBuffer);
