@@ -18,7 +18,7 @@
 
 Fixed currentx, currenty;
 bool firstFlex, wrtColorInfo;
-char S0[128];
+char S0[MAXMSGLEN + 1];
 PClrPoint bst;
 PClrPoint prv_bst;
 char bch;
@@ -66,13 +66,13 @@ WriteString(char* str)
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal p;laces. */
 #define WRTNUM(i)                                                              \
     {                                                                          \
-        sprintf(S0, "%d ", (int32_t)(i));                                      \
+        snprintf(S0, MAXMSGLEN, "%d ", (int32_t)(i));                          \
         WriteString(S0);                                                       \
     }
 
 #define WRTRNUM(i)                                                             \
     {                                                                          \
-        sprintf(S0, "%0.2f ", roundf((float)(i)*100) / 100);                   \
+        snprintf(S0, MAXMSGLEN, "%0.2f ", roundf((float)(i)*100) / 100);       \
         WriteString(S0);                                                       \
     }
 
@@ -163,8 +163,8 @@ void
 safestrcat(char* s1, char* s2)
 {
     if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
-        sprintf(S0, "ERROR: Hint information overflowing buffer: %s\n",
-                fileName);
+        snprintf(S0, MAXMSGLEN,
+                 "ERROR: Hint information overflowing buffer: %s\n", fileName);
         LogMsg(S0, LOGERROR, FATALERROR, true);
     } else {
         strcat(s1, s2);
@@ -175,13 +175,13 @@ safestrcat(char* s1, char* s2)
 
 #define SWRTNUM(i)                                                             \
     {                                                                          \
-        sprintf(S0, "%d ", (int32_t)(i));                                      \
+        snprintf(S0, MAXMSGLEN, "%d ", (int32_t)(i));                          \
         sws(S0);                                                               \
     }
 
 #define SWRTNUMA(i)                                                            \
     {                                                                          \
-        sprintf(S0, "%0.2f ", roundf((float)(i)*100) / 100);                   \
+        snprintf(S0, MAXMSGLEN, "%0.2f ", roundf((float)(i)*100) / 100);       \
         sws(S0);                                                               \
     }
 
@@ -242,7 +242,8 @@ WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst)
             sws(((lst->c == 'y') ? "ry" : "rm"));
             break;
         default: {
-            sprintf(S0, "Illegal point list data for file: %s.\n", fileName);
+            snprintf(S0, MAXMSGLEN, "Illegal point list data for file: %s.\n",
+                     fileName);
             LogMsg(S0, LOGERROR, NONFATALERROR, true);
         }
     }
@@ -589,7 +590,7 @@ SaveFile(const ACFontInfo* fontinfo)
     assert(bezoutput != NULL);
 
     /* AddSolEol(); */
-    sprintf(S0, "%% %s\n", fileName);
+    snprintf(S0, MAXMSGLEN, "%% %s\n", fileName);
     WriteString(S0);
     wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
     NumberPath();
@@ -629,7 +630,8 @@ SaveFile(const ACFontInfo* fontinfo)
                 cp(fontinfo, e);
                 break;
             default: {
-                sprintf(S0, "Illegal path list for file: %s.\n", fileName);
+                snprintf(S0, MAXMSGLEN, "Illegal path list for file: %s.\n",
+                         fileName);
                 LogMsg(S0, LOGERROR, NONFATALERROR, true);
             }
         }

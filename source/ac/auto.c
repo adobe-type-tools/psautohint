@@ -159,7 +159,8 @@ RemLnk(PPathElt e, bool hFlg, PSegLnkLst rm)
         prv = lst;
         lst = nxt;
     }
-    sprintf(globmsg, "Badly formatted segment list in file: %s.\n", fileName);
+    snprintf(globmsg, MAXMSGLEN, "Badly formatted segment list in file: %s.\n",
+             fileName);
     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 }
 
@@ -704,8 +705,8 @@ StartNewColoring(PPathElt e, PSegLnkLst hLst, PSegLnkLst vLst)
 {
     ReClrBounds(e);
     if (e->newcolors != 0) {
-        sprintf(globmsg, "Uninitialized extra hints list in file: %s.\n",
-                fileName);
+        snprintf(globmsg, MAXMSGLEN,
+                 "Uninitialized extra hints list in file: %s.\n", fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     XtraClrs(e);

@@ -73,8 +73,8 @@ FindPathBBox(void)
             case CLOSEPATH:
                 break;
             default: {
-                sprintf(globmsg, "Undefined operator in %s character.\n",
-                        fileName);
+                snprintf(globmsg, MAXMSGLEN,
+                         "Undefined operator in %s character.\n", fileName);
                 LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             }
         }
@@ -137,8 +137,8 @@ FindSubpathBBox(PPathElt e)
                 goto done;
 #endif
             default: {
-                sprintf(globmsg, "Undefined operator in %s character.\n",
-                        fileName);
+                snprintf(globmsg, MAXMSGLEN,
+                         "Undefined operator in %s character.\n", fileName);
                 LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             }
         }
