@@ -11,7 +11,7 @@
 #include "machinedep.h"
 
 extern AC_REPORTFUNCPTR libReportCB;
-static char S0[512];
+static char S0[MAXMSGLEN + 1];
 
 double
 FixToDbl(Fixed f)
@@ -24,7 +24,7 @@ FixToDbl(Fixed f)
 void
 PrintMessage(char* s)
 {
-    char msgBuffer[512];
+    char msgBuffer[MAXMSGLEN + 1];
     if ((libReportCB != NULL) && (strlen(s) > 0)) {
         sprintf(msgBuffer, "\t%s", s);
         libReportCB(msgBuffer);
