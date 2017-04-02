@@ -7,7 +7,6 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include <assert.h>
 #include <math.h>
 
 #include "ac.h"
@@ -746,7 +745,8 @@ bool
 ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
           bool forBlendData, bool readHints)
 {
-    assert(srcglyph != NULL);
+    if (!srcglyph)
+        return false;
 
     currentx = currenty = tempx = tempy = stkindex = 0;
     flex = idInFile = startchar = false;
