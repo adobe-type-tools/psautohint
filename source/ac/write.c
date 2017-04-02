@@ -589,8 +589,9 @@ SaveFile(const ACFontInfo* fontinfo)
     assert(bezoutput != NULL);
 
     /* AddSolEol(); */
-    snprintf(S0, MAXS0LEN, "%% %s\n", fileName);
-    WriteString(S0);
+    WriteString("%% ");
+    WriteString(fileName);
+    WriteString("\n");
     wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
     NumberPath();
     prevhintmaskstr[0] = '\0';
