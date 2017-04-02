@@ -136,23 +136,21 @@ ExpectedMoveTo(PPathElt e)
             s = (char*)"closepath";
             break;
         default:
-            LogMsg("Malformed path list.\n", LOGERROR, NONFATALERROR);
+            LogMsg(LOGERROR, NONFATALERROR, "Malformed path list.\n");
             return;
     }
-    snprintf(globmsg, MAXMSGLEN,
-             "Path for %s character has a %s where a moveto was "
-             "expected.\n  The file is probably truncated.",
-             fileName, s);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR);
+    LogMsg(LOGERROR, NONFATALERROR,
+           "Path for %s character has a %s where a moveto was "
+           "expected.\n  The file is probably truncated.",
+           fileName, s);
 }
 
 void
 ReportMissingClosePath(void)
 {
-    snprintf(globmsg, MAXMSGLEN, "Missing closepath in %s character.\n"
-                                 "  The file is probably truncated.",
-             fileName);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR);
+    LogMsg(LOGERROR, NONFATALERROR, "Missing closepath in %s character.\n"
+                                    "  The file is probably truncated.",
+           fileName);
 }
 
 void

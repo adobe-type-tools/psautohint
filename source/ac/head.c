@@ -64,15 +64,13 @@ retry:
         case CLOSEPATH:
             e = GetDest(e);
             if (e == NULL || e->type == CLOSEPATH) {
-                snprintf(globmsg, MAXMSGLEN,
-                         "Bad character description file: %s.\n", fileName);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR);
+                LogMsg(LOGERROR, NONFATALERROR,
+                       "Bad character description file: %s.\n", fileName);
             }
             goto retry;
         default: {
-            snprintf(globmsg, MAXMSGLEN,
-                     "Illegal operator in character file: %s.\n", fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR);
+            LogMsg(LOGERROR, NONFATALERROR,
+                   "Illegal operator in character file: %s.\n", fileName);
         }
     }
 }

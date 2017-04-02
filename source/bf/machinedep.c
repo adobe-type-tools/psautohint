@@ -17,9 +17,11 @@ Judy Lee: Wed Jul  6 17:55:30 1988
 End Edit History
 */
 
-#include "machinedep.h"
+#include <stdarg.h>
+
 #include "ac.h"
 #include "fipublic.h"
+#include "machinedep.h"
 
 static int16_t warncnt = 0;
 
@@ -68,11 +70,18 @@ FlushLogMsg(void)
 }
 
 void
-LogMsg(
-  char* str,     /* message string */
-  int16_t level, /* error, warning, info */
-  int16_t code)  /* exit value - if !OK, this proc will not return */
+LogMsg(int16_t level, /* error, warning, info */
+       int16_t code,  /* exit value - if !OK, this proc will not return */
+       char* format,  /* message string */
+       ...)
 {
+    char str[MAXMSGLEN + 1];
+    va_list va;
+
+    va_start(va, format);
+    vsnprintf(str, MAXMSGLEN, format, va);
+    va_end(va);
+
     /* changed handling of this to be more friendly (?) jvz */
     if (strlen(str) > MAXMSGLEN) {
         LogMsg1("The following message was truncated.\n", WARNING, OK);

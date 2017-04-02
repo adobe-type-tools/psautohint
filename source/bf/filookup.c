@@ -54,9 +54,8 @@ GetFntInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
     }
 
     if (!optional) {
-        snprintf(globmsg, MAXMSGLEN,
-                 "ERROR: Fontinfo: Couldn't find fontinfo for %s\n", keyword);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR);
+        LogMsg(LOGERROR, NONFATALERROR,
+               "ERROR: Fontinfo: Couldn't find fontinfo for %s\n", keyword);
     }
 
     return NULL;
@@ -119,11 +118,10 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
             initline = GetFntInfo(fontinfo, kw, optional);
         if (initline == NULL) {
             if (targetCnt > 0) {
-                snprintf(globmsg, MAXMSGLEN,
-                         "The keyword: %s does not have the same "
-                         "number of values\n  in each master design.\n",
-                         kw);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR);
+                LogMsg(LOGERROR, NONFATALERROR,
+                       "The keyword: %s does not have the same "
+                       "number of values\n  in each master design.\n",
+                       kw);
             } else
                 continue; /* optional keyword not found */
         }
@@ -153,18 +151,16 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
             if (sscanf(line, " %d", &val) < 1)
                 break;
             if (total >= maxstems) {
-                snprintf(globmsg, MAXMSGLEN,
-                         "Cannot have more than %d values in fontinfo "
-                         "file array: \n  %s\n",
-                         (int)maxstems, initline);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR);
+                LogMsg(LOGERROR, NONFATALERROR,
+                       "Cannot have more than %d values in fontinfo "
+                       "file array: \n  %s\n",
+                       (int)maxstems, initline);
             }
             if (val < 1) {
-                snprintf(
-                  globmsg, MAXMSGLEN,
+                LogMsg(
+                  LOGERROR, NONFATALERROR,
                   "Cannot have a value < 1 in fontinfo file array: \n  %s\n",
                   line);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR);
             }
             stems[total++] = val;
             cnt++;
@@ -192,11 +188,10 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
             }
         if (ix > 0 && (cnt != targetCnt)) {
             UnallocateMem(initline);
-            snprintf(globmsg, MAXMSGLEN,
-                     "The keyword: %s does not have the same number of "
-                     "values\n  in each master design.\n",
-                     kw);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR);
+            LogMsg(LOGERROR, NONFATALERROR,
+                   "The keyword: %s does not have the same number of "
+                   "values\n  in each master design.\n",
+                   kw);
         }
         targetCnt = cnt;
         *pnum += cnt;

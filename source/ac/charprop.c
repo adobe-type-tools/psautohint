@@ -109,12 +109,10 @@ AddCounterColorChars(char* charlist, char* ColorList[])
             continue;
         /* Currently, ColorList must end with a NULL pointer. */
         if (ListEntries == (COUNTERLISTSIZE - 1)) {
-            snprintf(globmsg, MAXMSGLEN,
-                     "Exceeded counter hints list size. (maximum is "
-                     "%d.)\n  Cannot add %s or subsequent "
-                     "characters.\n",
-                     (int)COUNTERLISTSIZE, token);
-            LogMsg(globmsg, WARNING, OK);
+            LogMsg(WARNING, OK, "Exceeded counter hints list size. (maximum is "
+                                "%d.)\n  Cannot add %s or subsequent "
+                                "characters.\n",
+                   (int)COUNTERLISTSIZE, token);
             break;
         }
         length = (int16_t)strlen(token);
@@ -128,7 +126,7 @@ AddCounterColorChars(char* charlist, char* ColorList[])
 int32_t
 SpecialCharType(void)
 {
-/* 1 = upper; -1 = lower; 0 = neither */
+    /* 1 = upper; -1 = lower; 0 = neither */
     if (FindNameInList(bezGlyphName, UpperSpecialChars))
         return 1;
     if (FindNameInList(bezGlyphName, LowerSpecialChars))
