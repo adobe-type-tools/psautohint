@@ -56,7 +56,6 @@ LIB_OBJS = \
 	$(OBJ_DIR)/ac/head.o \
 	$(OBJ_DIR)/ac/merge.o \
 	$(OBJ_DIR)/ac/misc.o \
-	$(OBJ_DIR)/ac/path.o \
 	$(OBJ_DIR)/ac/pick.o \
 	$(OBJ_DIR)/ac/read.o \
 	$(OBJ_DIR)/ac/report.o \
