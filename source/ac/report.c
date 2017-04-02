@@ -7,11 +7,12 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
+#include <stdarg.h>
+
 #include "ac.h"
 #include "machinedep.h"
 
 extern AC_REPORTFUNCPTR libReportCB;
-static char S0[MAXMSGLEN + 1];
 
 double
 FixToDbl(Fixed f)
@@ -22,28 +23,40 @@ FixToDbl(Fixed f)
 }
 
 void
-PrintMessage(char* s)
+PrintMessage(char* format, ...)
 {
-    char msgBuffer[MAXMSGLEN + 1];
-    if ((libReportCB != NULL) && (strlen(s) > 0)) {
-        snprintf(msgBuffer, MAXMSGLEN, "\t%s", s);
+    if ((libReportCB != NULL) && (strlen(format) > 0)) {
+        char msgBuffer[MAXMSGLEN + 1];
+        va_list va;
+
+        va_start(va, format);
+        vsnprintf(msgBuffer, MAXMSGLEN, format, va);
+        va_end(va);
+
         libReportCB(msgBuffer);
     }
 }
 
 void
-ReportError(char* s)
+ReportError(char* format, ...)
 {
-    if (reportErrors && (libReportCB != NULL))
-        PrintMessage(s);
+    if (reportErrors) {
+        char msgBuffer[MAXMSGLEN + 1];
+        va_list va;
+
+        va_start(va, format);
+        vsnprintf(msgBuffer, MAXMSGLEN, format, va);
+        va_end(va);
+
+        PrintMessage(msgBuffer);
+    }
 }
 
 void
 ReportSmoothError(Fixed x, Fixed y)
 {
-    snprintf(S0, MAXMSGLEN, "Junction at %g %g may need smoothing.",
-             FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
-    ReportError(S0);
+    ReportError("Junction at %g %g may need smoothing.", FixToDbl(itfmx(x)),
+                FixToDbl(itfmy(y)));
 }
 
 void
@@ -58,17 +71,15 @@ ReportAddFlex(void)
 void
 ReportClipSharpAngle(Fixed x, Fixed y)
 {
-    snprintf(S0, MAXMSGLEN, "FYI: Too sharp angle at %g %g has been clipped.",
-             FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
-    PrintMessage(S0);
+    PrintMessage("FYI: Too sharp angle at %g %g has been clipped.",
+                 FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
 }
 
 void
 ReportSharpAngle(Fixed x, Fixed y)
 {
-    snprintf(S0, MAXMSGLEN, "FYI: angle at %g %g is very sharp. Please check.",
-             FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
-    PrintMessage(S0);
+    PrintMessage("FYI: angle at %g %g is very sharp. Please check.",
+                 FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
 }
 
 void
@@ -78,16 +89,14 @@ ReportLinearCurve(PPathElt e, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
         e->type = LINETO;
         e->x = e->x3;
         e->y = e->y3;
-        snprintf(S0, MAXMSGLEN,
-                 "Curve from %g %g to %g %g was changed to a line.",
-                 FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-                 FixToDbl(itfmy(y1)));
-    } else
-        snprintf(S0, MAXMSGLEN,
-                 "Curve from %g %g to %g %g should be changed to a line.",
-                 FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-                 FixToDbl(itfmy(y1)));
-    PrintMessage(S0);
+        PrintMessage("Curve from %g %g to %g %g was changed to a line.",
+                     FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)),
+                     FixToDbl(itfmx(x1)), FixToDbl(itfmy(y1)));
+    } else {
+        PrintMessage("Curve from %g %g to %g %g should be changed to a line.",
+                     FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)),
+                     FixToDbl(itfmx(x1)), FixToDbl(itfmy(y1)));
+    }
 }
 
 static void
@@ -102,10 +111,8 @@ ReportNonHVError(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char* s)
     dy = y0 - y1;
     if (abs(dx) > FixInt(10) || abs(dy) > FixInt(10) ||
         FTrunc(dx * dx) + FTrunc(dy * dy) > FixInt(100)) {
-        snprintf(S0, MAXMSGLEN,
-                 "The line from %g %g to %g %g is not exactly %s.",
-                 FixToDbl(x0), FixToDbl(y0), FixToDbl(x1), FixToDbl(y1), s);
-        ReportError(S0);
+        ReportError("The line from %g %g to %g %g is not exactly %s.",
+                    FixToDbl(x0), FixToDbl(y0), FixToDbl(x1), FixToDbl(y1), s);
     }
 }
 
@@ -156,22 +163,18 @@ ReportMissingClosePath(void)
 void
 ReportTryFlexNearMiss(Fixed x0, Fixed y0, Fixed x2, Fixed y2)
 {
-    snprintf(S0, MAXMSGLEN,
-             "Curves from %g %g to %g %g near miss for adding flex.",
-             FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x2)),
-             FixToDbl(itfmy(y2)));
-    ReportError(S0);
+    ReportError("Curves from %g %g to %g %g near miss for adding flex.",
+                FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x2)),
+                FixToDbl(itfmy(y2)));
 }
 
 void
 ReportTryFlexError(bool CPflg, Fixed x, Fixed y)
 {
-    snprintf(S0, MAXMSGLEN,
-             CPflg
-               ? "Please move closepath from %g %g so can add flex."
-               : "Please remove zero length element at %g %g so can add flex.",
-             FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
-    ReportError(S0);
+    ReportError(
+      CPflg ? "Please move closepath from %g %g so can add flex."
+            : "Please remove zero length element at %g %g so can add flex.",
+      FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
 }
 
 void
@@ -179,11 +182,10 @@ ReportSplit(PPathElt e)
 {
     Fixed x0, y0, x1, y1;
     GetEndPoints(e, &x0, &y0, &x1, &y1);
-    snprintf(S0, MAXMSGLEN,
-             "FYI: the element that goes from %g %g to %g %g has been split.",
-             FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-             FixToDbl(itfmy(y1)));
-    PrintMessage(S0);
+    PrintMessage(
+      "FYI: the element that goes from %g %g to %g %g has been split.",
+      FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
+      FixToDbl(itfmy(y1)));
 }
 
 void
@@ -193,11 +195,9 @@ AskForSplit(PPathElt e)
     if (e->type == MOVETO)
         e = GetClosedBy(e);
     GetEndPoints(e, &x0, &y0, &x1, &y1);
-    snprintf(S0, MAXMSGLEN,
-             "Please split the element that goes from %g %g to %g %g.",
-             FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-             FixToDbl(itfmy(y1)));
-    ReportError(S0);
+    ReportError("Please split the element that goes from %g %g to %g %g.",
+                FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
+                FixToDbl(itfmy(y1)));
 }
 
 void
@@ -207,12 +207,10 @@ ReportPossibleLoop(PPathElt e)
     if (e->type == MOVETO)
         e = GetClosedBy(e);
     GetEndPoints(e, &x0, &y0, &x1, &y1);
-    snprintf(S0, MAXMSGLEN,
-             "Possible loop in element that goes from %g %g to %g %g."
-             " Please check.",
-             FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-             FixToDbl(itfmy(y1)));
-    ReportError(S0);
+    ReportError("Possible loop in element that goes from %g %g to %g %g."
+                " Please check.",
+                FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
+                FixToDbl(itfmy(y1)));
 }
 
 void
@@ -222,10 +220,9 @@ ReportConflictCheck(PPathElt e, PPathElt conflict, PPathElt cp)
     GetEndPoint(e, &ex, &ey);
     GetEndPoint(conflict, &cx, &cy);
     GetEndPoint(cp, &cpx, &cpy);
-    snprintf(S0, MAXMSGLEN, "Check e %g %g conflict %g %g cp %g %g.",
-             FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)), FixToDbl(itfmx(cx)),
-             FixToDbl(itfmy(cy)), FixToDbl(itfmx(cpx)), FixToDbl(itfmy(cpy)));
-    ReportError(S0);
+    ReportError("Check e %g %g conflict %g %g cp %g %g.", FixToDbl(itfmx(ex)),
+                FixToDbl(itfmy(ey)), FixToDbl(itfmx(cx)), FixToDbl(itfmy(cy)),
+                FixToDbl(itfmx(cpx)), FixToDbl(itfmy(cpy)));
 }
 
 void
@@ -233,9 +230,8 @@ ReportConflictCnt(PPathElt e, int32_t cnt)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
-    snprintf(S0, MAXMSGLEN, "%g %g conflict count = %d", FixToDbl(itfmx(ex)),
-             FixToDbl(itfmy(ey)), cnt);
-    ReportError(S0);
+    ReportError("%g %g conflict count = %d", FixToDbl(itfmx(ex)),
+                FixToDbl(itfmy(ey)), cnt);
 }
 
 void
@@ -246,11 +242,10 @@ ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i)
         return;
     GetEndPoint(e, &ex1, &ey1);
     GetEndPoint(e2, &ex2, &ey2);
-    snprintf(S0, MAXMSGLEN, "Removed %s flare at %g %g by %g %g : %d.",
-             hFlg ? "horizontal" : "vertical", FixToDbl(itfmx(ex1)),
-             FixToDbl(itfmy(ey1)), FixToDbl(itfmx(ex2)), FixToDbl(itfmy(ey2)),
-             i);
-    PrintMessage(S0);
+    PrintMessage("Removed %s flare at %g %g by %g %g : %d.",
+                 hFlg ? "horizontal" : "vertical", FixToDbl(itfmx(ex1)),
+                 FixToDbl(itfmy(ey1)), FixToDbl(itfmx(ex2)),
+                 FixToDbl(itfmy(ey2)), i);
 }
 
 void
@@ -260,9 +255,8 @@ ReportRemConflict(PPathElt e)
     if (!showClrInfo)
         return;
     GetEndPoint(e, &ex, &ey);
-    snprintf(S0, MAXMSGLEN, "Removed conflicting hints at %g %g.",
-             FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
-    ReportError(S0);
+    ReportError("Removed conflicting hints at %g %g.", FixToDbl(itfmx(ex)),
+                FixToDbl(itfmy(ey)));
 }
 
 void
@@ -272,9 +266,8 @@ ReportRotateSubpath(PPathElt e)
     if (!showClrInfo)
         return;
     GetEndPoint(e, &ex, &ey);
-    snprintf(S0, MAXMSGLEN, "FYI: changed closepath to %g %g.",
-             FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
-    PrintMessage(S0);
+    PrintMessage("FYI: changed closepath to %g %g.", FixToDbl(itfmx(ex)),
+                 FixToDbl(itfmy(ey)));
 }
 
 void
@@ -282,19 +275,17 @@ ReportRemShortColors(Fixed ex, Fixed ey)
 {
     if (!showClrInfo)
         return;
-    snprintf(S0, MAXMSGLEN, "Removed hints from short element at %g %g.",
-             FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
-    PrintMessage(S0);
+    PrintMessage("Removed hints from short element at %g %g.",
+                 FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
 }
 
 static void
 PrntVal(Fixed v)
 {
     if (v >= FixInt(100000))
-        snprintf(S0, MAXMSGLEN, "%d", FTrunc(v));
+        PrintMessage("%d", FTrunc(v));
     else
-        snprintf(S0, MAXMSGLEN, "%g", FixToDbl(v));
-    PrintMessage(S0);
+        PrintMessage("%g", FixToDbl(v));
 }
 
 static void
@@ -303,11 +294,9 @@ ShwHV(PClrVal val)
     Fixed bot, top;
     bot = itfmy(val->vLoc1);
     top = itfmy(val->vLoc2);
-    snprintf(S0, MAXMSGLEN, "b %g t %g v ", FixToDbl(bot), FixToDbl(top));
-    PrintMessage(S0);
+    PrintMessage("b %g t %g v ", FixToDbl(bot), FixToDbl(top));
     PrntVal(val->vVal);
-    snprintf(S0, MAXMSGLEN, " s %g", FixToDbl(val->vSpc));
-    PrintMessage(S0);
+    PrintMessage(" s %g", FixToDbl(val->vSpc));
     if (val->vGhst)
         PrintMessage(" G");
 }
@@ -323,13 +312,11 @@ ShowHVal(PClrVal val)
         return;
     l = itfmx(seg->sMin);
     r = itfmx(seg->sMax);
-    snprintf(S0, MAXMSGLEN, " l1 %g r1 %g ", FixToDbl(l), FixToDbl(r));
-    PrintMessage(S0);
+    PrintMessage(" l1 %g r1 %g ", FixToDbl(l), FixToDbl(r));
     seg = val->vSeg2;
     l = itfmx(seg->sMin);
     r = itfmx(seg->sMax);
-    snprintf(S0, MAXMSGLEN, " l2 %g r2 %g", FixToDbl(l), FixToDbl(r));
-    PrintMessage(S0);
+    PrintMessage(" l2 %g r2 %g", FixToDbl(l), FixToDbl(r));
 }
 
 void
@@ -353,11 +340,9 @@ ShwVV(PClrVal val)
     Fixed lft, rht;
     lft = itfmx(val->vLoc1);
     rht = itfmx(val->vLoc2);
-    snprintf(S0, MAXMSGLEN, "l %g r %g v ", FixToDbl(lft), FixToDbl(rht));
-    PrintMessage(S0);
+    PrintMessage("l %g r %g v ", FixToDbl(lft), FixToDbl(rht));
     PrntVal(val->vVal);
-    snprintf(S0, MAXMSGLEN, " s %g", FixToDbl(val->vSpc));
-    PrintMessage(S0);
+    PrintMessage(" s %g", FixToDbl(val->vSpc));
 }
 
 void
@@ -371,13 +356,11 @@ ShowVVal(PClrVal val)
         return;
     b = itfmy(seg->sMin);
     t = itfmy(seg->sMax);
-    snprintf(S0, MAXMSGLEN, " b1 %g t1 %g ", FixToDbl(b), FixToDbl(t));
-    PrintMessage(S0);
+    PrintMessage(" b1 %g t1 %g ", FixToDbl(b), FixToDbl(t));
     seg = val->vSeg2;
     b = itfmy(seg->sMin);
     t = itfmy(seg->sMax);
-    snprintf(S0, MAXMSGLEN, " b2 %g t2 %g", FixToDbl(b), FixToDbl(t));
-    PrintMessage(S0);
+    PrintMessage(" b2 %g t2 %g", FixToDbl(b), FixToDbl(t));
 }
 
 void
@@ -399,19 +382,17 @@ void
 ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg)
 {
     if (hFlg) {
-        snprintf(S0, MAXMSGLEN, "FndBstVal: sLoc %g sLft %g sRght %g ",
-                 FixToDbl(itfmy(seg->sLoc)), FixToDbl(itfmx(seg->sMin)),
-                 FixToDbl(itfmx(seg->sMax)));
-        PrintMessage(S0);
+        PrintMessage("FndBstVal: sLoc %g sLft %g sRght %g ",
+                     FixToDbl(itfmy(seg->sLoc)), FixToDbl(itfmx(seg->sMin)),
+                     FixToDbl(itfmx(seg->sMax)));
         if (val)
             ShwHV(val);
         else
             PrintMessage("NULL");
     } else {
-        snprintf(S0, MAXMSGLEN, "FndBstVal: sLoc %g sBot %g sTop %g ",
-                 FixToDbl(itfmx(seg->sLoc)), FixToDbl(itfmy(seg->sMin)),
-                 FixToDbl(itfmy(seg->sMax)));
-        PrintMessage(S0);
+        PrintMessage("FndBstVal: sLoc %g sBot %g sTop %g ",
+                     FixToDbl(itfmx(seg->sLoc)), FixToDbl(itfmy(seg->sMin)),
+                     FixToDbl(itfmy(seg->sMax)));
         if (val)
             ShwVV(val);
         else
@@ -435,9 +416,8 @@ ReportCarry(Fixed l0, Fixed l1, Fixed loc, PClrVal clrs, bool vert)
         l0 = itfmy(l0);
         l1 = itfmy(l1);
     }
-    snprintf(S0, MAXMSGLEN, " carry to %g in [%g..%g]", FixToDbl(loc),
-             FixToDbl(l0), FixToDbl(l1));
-    PrintMessage(S0);
+    PrintMessage(" carry to %g in [%g..%g]", FixToDbl(loc), FixToDbl(l0),
+                 FixToDbl(l1));
 }
 
 void
@@ -447,12 +427,13 @@ ReportBestCP(PPathElt e, PPathElt cp)
     GetEndPoint(e, &ex, &ey);
     if (cp != NULL) {
         GetEndPoint(cp, &px, &py);
-        snprintf(S0, MAXMSGLEN, "%g %g best cp at %g %g", FixToDbl(itfmx(ex)),
-                 FixToDbl(itfmy(ey)), FixToDbl(itfmx(px)), FixToDbl(itfmy(py)));
-    } else
-        snprintf(S0, MAXMSGLEN, "%g %g no best cp", FixToDbl(itfmx(ex)),
-                 FixToDbl(itfmy(ey)));
-    PrintMessage(S0);
+        PrintMessage("%g %g best cp at %g %g", FixToDbl(itfmx(ex)),
+                     FixToDbl(itfmy(ey)), FixToDbl(itfmx(px)),
+                     FixToDbl(itfmy(py)));
+    } else {
+        PrintMessage("%g %g no best cp", FixToDbl(itfmx(ex)),
+                     FixToDbl(itfmy(ey)));
+    }
 }
 
 void
@@ -463,18 +444,17 @@ LogColorInfo(PClrPoint pl)
     if (c == 'y' || c == 'm') { /* vertical lines */
         lft = pl->x0;
         rht = pl->x1;
-        snprintf(S0, MAXMSGLEN, "%4g  %-30s%5g%5g\n", FixToDbl(rht - lft),
-                 fileName, FixToDbl(lft), FixToDbl(rht));
+        PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(rht - lft), fileName,
+                     FixToDbl(lft), FixToDbl(rht));
     } else {
         bot = pl->y0;
         top = pl->y1;
         wdth = top - bot;
         if (wdth == -FixInt(21) || wdth == -FixInt(20))
             return; /* ghost pair */
-        snprintf(S0, MAXMSGLEN, "%4g  %-30s%5g%5g\n", FixToDbl(wdth), fileName,
-                 FixToDbl(bot), FixToDbl(top));
+        PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(wdth), fileName,
+                     FixToDbl(bot), FixToDbl(top));
     }
-    PrintMessage(S0);
 }
 
 static void
@@ -508,8 +488,7 @@ ListClrInfo(void)
             GetEndPoint(e, &x, &y);
             x = itfmx(x);
             y = itfmy(y);
-            snprintf(S0, MAXMSGLEN, "x %g y %g ", FixToDbl(x), FixToDbl(y));
-            PrintMessage(S0);
+            PrintMessage("x %g y %g ", FixToDbl(x), FixToDbl(y));
             while (hLst != NULL) {
                 seg = hLst->lnk->seg;
                 LstHVal(seg->sLnk);
@@ -530,10 +509,9 @@ ReportAddVSeg(Fixed from, Fixed to, Fixed loc, int32_t i)
 {
     if (!showClrInfo || !showVs)
         return;
-    snprintf(S0, MAXMSGLEN, "add vseg %g %g to %g %g %d", FixToDbl(itfmx(loc)),
-             FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)), FixToDbl(itfmy(to)),
-             i);
-    PrintMessage(S0);
+    PrintMessage("add vseg %g %g to %g %g %d", FixToDbl(itfmx(loc)),
+                 FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)),
+                 FixToDbl(itfmy(to)), i);
 }
 
 void
@@ -541,10 +519,9 @@ ReportAddHSeg(Fixed from, Fixed to, Fixed loc, int32_t i)
 {
     if (!showClrInfo || !showHs)
         return;
-    snprintf(S0, MAXMSGLEN, "add hseg %g %g to %g %g %d", FixToDbl(itfmx(from)),
-             FixToDbl(itfmy(loc)), FixToDbl(itfmx(to)), FixToDbl(itfmy(loc)),
-             i);
-    PrintMessage(S0);
+    PrintMessage("add hseg %g %g to %g %g %d", FixToDbl(itfmx(from)),
+                 FixToDbl(itfmy(loc)), FixToDbl(itfmx(to)),
+                 FixToDbl(itfmy(loc)), i);
 }
 
 void
@@ -552,9 +529,9 @@ ReportRemVSeg(Fixed from, Fixed to, Fixed loc)
 {
     if (!showClrInfo || !showVs)
         return;
-    snprintf(S0, MAXMSGLEN, "rem vseg %g %g to %g %g", FixToDbl(itfmx(loc)),
-             FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)), FixToDbl(itfmy(to)));
-    PrintMessage(S0);
+    PrintMessage("rem vseg %g %g to %g %g", FixToDbl(itfmx(loc)),
+                 FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)),
+                 FixToDbl(itfmy(to)));
 }
 
 void
@@ -562,34 +539,31 @@ ReportRemHSeg(Fixed from, Fixed to, Fixed loc)
 {
     if (!showClrInfo || !showHs)
         return;
-    snprintf(S0, MAXMSGLEN, "rem hseg %g %g to %g %g", FixToDbl(itfmx(from)),
-             FixToDbl(itfmy(loc)), FixToDbl(itfmx(to)), FixToDbl(itfmy(loc)));
-    PrintMessage(S0);
+    PrintMessage("rem hseg %g %g to %g %g", FixToDbl(itfmx(from)),
+                 FixToDbl(itfmy(loc)), FixToDbl(itfmx(to)),
+                 FixToDbl(itfmy(loc)));
 }
 
 void
 ReportBandError(char* str, Fixed loc, Fixed blu)
 {
-    snprintf(S0, MAXMSGLEN, "Near miss %s horizontal zone at %g instead of %g.",
-             str, FixToDbl(loc), FixToDbl(blu));
-    ReportError(S0);
+    ReportError("Near miss %s horizontal zone at %g instead of %g.", str,
+                FixToDbl(loc), FixToDbl(blu));
 }
 void
 ReportBandNearMiss(char* str, Fixed loc, Fixed blu)
 {
-    snprintf(S0, MAXMSGLEN, "Near miss %s horizontal zone at %g instead of %g.",
-             str, FixToDbl(loc), FixToDbl(blu));
-    ReportError(S0);
+    ReportError("Near miss %s horizontal zone at %g instead of %g.", str,
+                FixToDbl(loc), FixToDbl(blu));
 }
 
 void
 ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t, bool curve)
 {
-    snprintf(
-      S0, MAXMSGLEN, "%s %s stem near miss: %g instead of %g at %g to %g.",
-      vert ? "Vertical" : "Horizontal", curve ? "curve" : "linear", FixToDbl(w),
-      FixToDbl(minW), FixToDbl(NUMMIN(b, t)), FixToDbl(NUMMAX(b, t)));
-    ReportError(S0);
+    ReportError("%s %s stem near miss: %g instead of %g at %g to %g.",
+                vert ? "Vertical" : "Horizontal", curve ? "curve" : "linear",
+                FixToDbl(w), FixToDbl(minW), FixToDbl(NUMMIN(b, t)),
+                FixToDbl(NUMMAX(b, t)));
 }
 
 void
@@ -598,25 +572,22 @@ ReportColorConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch)
     unsigned char s[2];
     s[0] = ch;
     s[1] = 0;
-    snprintf(S0, MAXMSGLEN, "  Conflicts with current hints: %g %g %g %g %s.",
-             FixToDbl(x0), FixToDbl(y0), FixToDbl(x1), FixToDbl(y1), s);
-    ReportError(S0);
+    ReportError("  Conflicts with current hints: %g %g %g %g %s.", FixToDbl(x0),
+                FixToDbl(y0), FixToDbl(x1), FixToDbl(y1), s);
 }
 
 void
 ReportDuplicates(Fixed x, Fixed y)
 {
-    snprintf(S0, MAXMSGLEN, "Check for duplicate subpath at %g %g.",
-             FixToDbl(x), FixToDbl(y));
-    ReportError(S0);
+    ReportError("Check for duplicate subpath at %g %g.", FixToDbl(x),
+                FixToDbl(y));
 }
 
 void
 ReportBBoxBogus(Fixed llx, Fixed lly, Fixed urx, Fixed ury)
 {
-    snprintf(S0, MAXMSGLEN, "Character bounding box looks bogus: %g %g %g %g.",
-             FixToDbl(llx), FixToDbl(lly), FixToDbl(urx), FixToDbl(ury));
-    ReportError(S0);
+    ReportError("Character bounding box looks bogus: %g %g %g %g.",
+                FixToDbl(llx), FixToDbl(lly), FixToDbl(urx), FixToDbl(ury));
 }
 
 void
@@ -625,17 +596,15 @@ ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
 {
     if (!showClrInfo)
         return;
-    snprintf(S0, MAXMSGLEN,
-             "Replace H hints pair at %g %g by %g %g\n\told value ",
-             FixToDbl(itfmy(b0)), FixToDbl(itfmy(t0)), FixToDbl(itfmy(b1)),
-             FixToDbl(itfmy(t1)));
-    PrintMessage(S0);
+    PrintMessage(
+
+      "Replace H hints pair at %g %g by %g %g\n\told value ",
+      FixToDbl(itfmy(b0)), FixToDbl(itfmy(t0)), FixToDbl(itfmy(b1)),
+      FixToDbl(itfmy(t1)));
     PrntVal(v0);
-    snprintf(S0, MAXMSGLEN, " %g new value ", FixToDbl(s0));
-    PrintMessage(S0);
+    PrintMessage(" %g new value ", FixToDbl(s0));
     PrntVal(v1);
-    snprintf(S0, MAXMSGLEN, " %g", FixToDbl(s1));
-    PrintMessage(S0);
+    PrintMessage(" %g", FixToDbl(s1));
 }
 
 void
@@ -644,17 +613,13 @@ ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
 {
     if (!showClrInfo)
         return;
-    snprintf(S0, MAXMSGLEN,
-             "Replace V hints pair at %g %g by %g %g\n\told value ",
-             FixToDbl(itfmx(l0)), FixToDbl(itfmx(r0)), FixToDbl(itfmx(l1)),
-             FixToDbl(itfmx(r1)));
-    PrintMessage(S0);
+    PrintMessage("Replace V hints pair at %g %g by %g %g\n\told value ",
+                 FixToDbl(itfmx(l0)), FixToDbl(itfmx(r0)), FixToDbl(itfmx(l1)),
+                 FixToDbl(itfmx(r1)));
     PrntVal(v0);
-    snprintf(S0, MAXMSGLEN, " %g new value ", FixToDbl(s0));
-    PrintMessage(S0);
+    PrintMessage(" %g new value ", FixToDbl(s0));
     PrntVal(v1);
-    snprintf(S0, MAXMSGLEN, " %g", FixToDbl(s1));
-    PrintMessage(S0);
+    PrintMessage(" %g", FixToDbl(s1));
 }
 
 void
@@ -662,8 +627,7 @@ ReportPruneHVal(PClrVal val, PClrVal v, int32_t i)
 {
     if (!showClrInfo)
         return;
-    snprintf(S0, MAXMSGLEN, "PruneHVal: %d\n\t", i);
-    PrintMessage(S0);
+    PrintMessage("PruneHVal: %d\n\t", i);
     ShowHVal(val);
     PrintMessage("\n\t");
     ShowHVal(v);
@@ -674,8 +638,7 @@ ReportPruneVVal(PClrVal val, PClrVal v, int32_t i)
 {
     if (!showClrInfo)
         return;
-    snprintf(S0, MAXMSGLEN, "PruneVVal: %d\n\t", i);
-    PrintMessage(S0);
+    PrintMessage("PruneVVal: %d\n\t", i);
     ShowVVal(val);
     PrintMessage("\n\t");
     ShowVVal(v);
@@ -686,7 +649,6 @@ ReportMoveSubpath(PPathElt e, char* s)
 {
     Fixed x, y;
     GetEndPoint(e, &x, &y);
-    snprintf(S0, MAXMSGLEN, "FYI: Moving subpath %g %g to %s.",
-             FixToDbl(itfmx(x)), FixToDbl(itfmy(y)), s);
-    PrintMessage(S0);
+    PrintMessage("FYI: Moving subpath %g %g to %s.", FixToDbl(itfmx(x)),
+                 FixToDbl(itfmy(y)), s);
 }
