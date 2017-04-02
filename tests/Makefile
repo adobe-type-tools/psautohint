@@ -16,3 +16,4 @@ all: $(TESTS)
 	@rm -rf $@
 	@$(PYTHON) $(PYT_DIR)/autohint.py -all -qq -o $@ $<
 	@diff -Naur $< $@
+	@rm -rf $@
