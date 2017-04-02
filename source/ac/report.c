@@ -21,13 +21,6 @@ FixToDbl(Fixed f)
     return r;
 }
 
-#define VERSION "4.1"
-void
-ACGetVersion(char* name, char* str)
-{
-    sprintf(str, "%s ac library version %s.\n", name, VERSION);
-}
-
 #define EndLine()
 
 void

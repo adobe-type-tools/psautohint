@@ -284,7 +284,6 @@ void setAC_memoryManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 int AddCounterColorChars(char* charlist, char* ColorList[]);
 bool FindNameInList(char* nm, char** lst);
-void ACGetVersion(char* name, char* str);
 void PruneElementColorSegs(void);
 int TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst);
 PClrVal CopyClrs(PClrVal lst);
