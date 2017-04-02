@@ -18,8 +18,6 @@ const char* libversion = "1.6.0";
 const char* progname = "AC_C_lib";
 char editingResource = 0;
 
-char* FL_glyphname = 0;
-
 ACBuffer* bezoutput = NULL;
 
 bool scalinghints = false;

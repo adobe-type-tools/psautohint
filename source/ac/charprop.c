@@ -9,9 +9,6 @@
 
 #include "ac.h"
 #include "machinedep.h"
-#if PYTHONLIB
-extern char* FL_glyphname;
-#endif
 
 char* VColorList[] = { "m",  "M",  "T",  "ellipsis", NULL, NULL, NULL,
                        NULL, NULL, NULL, NULL,       NULL, NULL, NULL,
@@ -131,12 +128,6 @@ int32_t
 SpecialCharType(void)
 {
 /* 1 = upper; -1 = lower; 0 = neither */
-#if PYTHONLIB
-    if (FindNameInList(FL_glyphname, UpperSpecialChars))
-        return 1;
-    if (FindNameInList(FL_glyphname, LowerSpecialChars))
-        return -1;
-#endif
     if (FindNameInList(bezGlyphName, UpperSpecialChars))
         return 1;
     if (FindNameInList(bezGlyphName, LowerSpecialChars))
@@ -147,41 +138,24 @@ SpecialCharType(void)
 bool
 HColorChar(void)
 {
-#if PYTHONLIB
-    return FindNameInList(FL_glyphname, HColorList);
-#endif
     return FindNameInList(bezGlyphName, HColorList);
 }
 
 bool
 VColorChar(void)
 {
-#if PYTHONLIB
-    return FindNameInList(FL_glyphname, VColorList);
-#endif
     return FindNameInList(bezGlyphName, VColorList);
 }
 
 bool
 NoBlueChar(void)
 {
-#if PYTHONLIB
-    return FindNameInList(FL_glyphname, NoBlueList);
-#endif
     return FindNameInList(bezGlyphName, NoBlueList);
 }
 
 int32_t
 SolEolCharCode(void)
 {
-#if PYTHONLIB
-    if (FindNameInList(FL_glyphname, SolEol0List))
-        return 0;
-    if (FindNameInList(FL_glyphname, SolEol1List))
-        return 1;
-    if (FindNameInList(FL_glyphname, SolEolNeg1List))
-        return -1;
-#endif
     if (FindNameInList(bezGlyphName, SolEol0List))
         return 0;
     if (FindNameInList(bezGlyphName, SolEol1List))
@@ -303,9 +277,8 @@ AddSolEol(void)
 bool
 MoveToNewClrs(void)
 {
-#if PYTHONLIB
-    return StrEqual(FL_glyphname, "percent") ||
-           StrEqual(FL_glyphname, "perthousand");
-#endif
+    /* XXX: fileName is always empty, we probably want to use bezGlyphName here
+     * but this causes a change in the hinting of percent and perthousand
+     * glyphs and need to be verified. */
     return StrEqual(fileName, "percent") || StrEqual(fileName, "perthousand");
 }
