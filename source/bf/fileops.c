@@ -32,7 +32,7 @@ AllocateMem(unsigned int nelem, unsigned int elsize, const char* description)
         snprintf(globmsg, MAXMSGLEN,
                  "Cannot allocate %d bytes of memory for %s.\n",
                  (int)(nelem * elsize), description);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR);
     }
     return (ptr);
 }
@@ -48,7 +48,7 @@ ReallocateMem(char* ptr, unsigned int size, const char* description)
         snprintf(globmsg, MAXMSGLEN,
                  "Cannot allocate %d bytes of memory for %s.\n", (int)size,
                  description);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR);
     }
     return (newptr);
 }

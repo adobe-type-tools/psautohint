@@ -114,7 +114,7 @@ AddCounterColorChars(char* charlist, char* ColorList[])
                      "%d.)\n  Cannot add %s or subsequent "
                      "characters.\n",
                      (int)COUNTERLISTSIZE, token);
-            LogMsg(globmsg, WARNING, OK, true);
+            LogMsg(globmsg, WARNING, OK);
             break;
         }
         length = (int16_t)strlen(token);

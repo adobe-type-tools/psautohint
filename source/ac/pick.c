@@ -239,7 +239,7 @@ PrevVal(PClrVal val, PClrVal vList)
         if (vList == NULL) {
             snprintf(globmsg, MAXMSGLEN, "Malformed value list in %s.\n",
                      fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR);
         }
 
         if (vList == val)
