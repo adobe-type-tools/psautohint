@@ -340,18 +340,20 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
 
     result = AutoColor(fontinfo,     /* font info */
                        srcbezdata,   /* input glyph */
-                       false,        /*fixStems*/
+                       false,        /* fixStems */
                        debug,        /* debug */
                        allowHintSub, /* extracolor*/
-                       allowEdit,    /*editChars*/
+                       allowEdit,    /* editChars */
                        roundCoords);
     /* result == true is good */
+
     /* The following call to cleanup() always returns control to just after the
-    setjmp() function call above,,
-    but with value set to 1 if success, or -1 if not */
+     * setjmp() function call above, but with value set to 1 if success, or -1
+     * if not */
     cleanup((result == true) ? OK : NONFATALERROR);
 
-    return AC_UnknownError; /*Shouldn't get here*/
+    /* Shouldn't get here */
+    return AC_UnknownError;
 }
 
 ACLIB_API void
