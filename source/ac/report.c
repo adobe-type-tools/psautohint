@@ -462,17 +462,18 @@ LogColorInfo(PClrPoint pl)
     if (c == 'y' || c == 'm') { /* vertical lines */
         lft = pl->x0;
         rht = pl->x1;
-        (void)printf("%4g  %-30s%5g%5g\n", FixToDbl(rht - lft), fileName,
-                     FixToDbl(lft), FixToDbl(rht));
+        (void)sprintf(S0, "%4g  %-30s%5g%5g\n", FixToDbl(rht - lft), fileName,
+                      FixToDbl(lft), FixToDbl(rht));
     } else {
         bot = pl->y0;
         top = pl->y1;
         wdth = top - bot;
         if (wdth == -FixInt(21) || wdth == -FixInt(20))
             return; /* ghost pair */
-        (void)printf("%4g  %-30s%5g%5g\n", FixToDbl(wdth), fileName,
-                     FixToDbl(bot), FixToDbl(top));
+        (void)sprintf(S0, "%4g  %-30s%5g%5g\n", FixToDbl(wdth), fileName,
+                      FixToDbl(bot), FixToDbl(top));
     }
+    PrintMessage(S0);
 }
 
 static void
