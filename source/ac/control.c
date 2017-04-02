@@ -71,9 +71,8 @@ PointListCheck(PClrPoint new, PClrPoint lst)
             break;
         }
         default: {
-            snprintf(globmsg, MAXMSGLEN,
-                     "Illegal character in point list in %s.\n", fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR);
+            LogMsg(LOGERROR, NONFATALERROR,
+                   "Illegal character in point list in %s.\n", fileName);
         }
     }
     if (n1 > n2) {
@@ -869,16 +868,14 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
             reportRetryCB();
         }
         if (pathStart == NULL || pathStart == pathEnd) {
-            snprintf(globmsg, MAXMSGLEN, "No character path in %s.\n",
-                     fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR);
+            LogMsg(LOGERROR, NONFATALERROR, "No character path in %s.\n",
+                   fileName);
         }
 
         /* SaveFile(); SaveFile is always called in AddColorsCleanup, so this is
          * a duplciate */
         InitAll(fontinfo, RESTART);
-        if (writecoloredbez &&
-            !ReadGlyph(fontinfo, srcglyph, false, false)) {
+        if (writecoloredbez && !ReadGlyph(fontinfo, srcglyph, false, false)) {
             break;
         }
         AddColorsSetup();
@@ -901,11 +898,10 @@ AddColorsCleanup(const ACFontInfo* fontinfo)
     if (writecoloredbez) {
 
         if (pathStart == NULL || pathStart == pathEnd) {
-            snprintf(globmsg, MAXMSGLEN,
-                     "The %s character path vanished while adding "
-                     "hints.\n  File not written.",
-                     fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR);
+            LogMsg(LOGERROR, NONFATALERROR,
+                   "The %s character path vanished while adding "
+                   "hints.\n  File not written.",
+                   fileName);
         } else {
             SaveFile(fontinfo);
         }
@@ -944,8 +940,7 @@ AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
     int32_t lentop = lenTopBands, lenbot = lenBotBands;
     fileName = fname;
     if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
-        snprintf(globmsg, MAXMSGLEN, "Cannot open %s file.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR);
+        LogMsg(LOGERROR, NONFATALERROR, "Cannot open %s file.\n", fileName);
     }
     PrintMessage(""); /* Just print the file name. */
     AddColors(fontinfo, srcglyph, extracolor);

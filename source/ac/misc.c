@@ -102,7 +102,7 @@ PreCheckForColoring(void)
         if (chk == 0)
             break;
         if (++cnt > 10) {
-            LogMsg("Looping in PreCheckForHints!\n", WARNING, OK);
+            LogMsg(WARNING, OK, "Looping in PreCheckForHints!\n");
             break;
         }
     }
@@ -144,9 +144,8 @@ AddAutoFlexProp(PPathElt e, bool yflag)
 {
     PPathElt e0 = e, e1 = e->next;
     if (e0->type != CURVETO || e1->type != CURVETO) {
-        snprintf(globmsg, MAXMSGLEN, "Illegal input in character file: %s.\n",
-                 fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR);
+        LogMsg(LOGERROR, NONFATALERROR,
+               "Illegal input in character file: %s.\n", fileName);
     }
     /* Don't add flex to linear curves. */
     if (yflag && e0->y3 == e1->y1 && e1->y1 == e1->y2 && e1->y2 == e1->y3)

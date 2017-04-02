@@ -159,9 +159,8 @@ RemLnk(PPathElt e, bool hFlg, PSegLnkLst rm)
         prv = lst;
         lst = nxt;
     }
-    snprintf(globmsg, MAXMSGLEN, "Badly formatted segment list in file: %s.\n",
-             fileName);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR);
+    LogMsg(LOGERROR, NONFATALERROR,
+           "Badly formatted segment list in file: %s.\n", fileName);
 }
 
 static bool
@@ -233,7 +232,7 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
         clst = colorList;
         while (clst != NULL) {
             if (++cnt > 100) {
-                LogMsg("Loop in hintlist for TestHint\n\007", WARNING, OK);
+                LogMsg(WARNING, OK, "Loop in hintlist for TestHint\n\007");
                 return 0;
             }
             clst = clst->vNxt;
@@ -308,7 +307,7 @@ TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst)
             result = 1;
         lst = lst->next;
         if (++cnt > 100) {
-            LogMsg("Looping in TestHintLst\007\n", WARNING, OK);
+            LogMsg(WARNING, OK, "Looping in TestHintLst\007\n");
             return 0;
         }
     }
@@ -328,8 +327,7 @@ TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst)
     FixedMidPoint(a3, a2, b1);
 
 bool
-ResolveConflictBySplit(PPathElt e, bool Hflg, PSegLnkLst lnk1,
-                       PSegLnkLst lnk2)
+ResolveConflictBySplit(PPathElt e, bool Hflg, PSegLnkLst lnk1, PSegLnkLst lnk2)
 {
     /* insert new pathelt immediately following e */
     /* e gets first half of split; new gets second */
@@ -704,9 +702,8 @@ StartNewColoring(PPathElt e, PSegLnkLst hLst, PSegLnkLst vLst)
 {
     ReClrBounds(e);
     if (e->newcolors != 0) {
-        snprintf(globmsg, MAXMSGLEN,
-                 "Uninitialized extra hints list in file: %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR);
+        LogMsg(LOGERROR, NONFATALERROR,
+               "Uninitialized extra hints list in file: %s.\n", fileName);
     }
     XtraClrs(e);
     clrBBox = false;
@@ -777,7 +774,7 @@ CopyClrs(PClrVal lst)
         v->vNxt = vlst;
         vlst = v;
         if (++cnt > 100) {
-            LogMsg("Loop in CopyClrs\007\n", WARNING, OK);
+            LogMsg(WARNING, OK, "Loop in CopyClrs\007\n");
             return vlst;
         }
         lst = lst->vNxt;
@@ -826,8 +823,7 @@ RemFlareLnk(PPathElt e, bool hFlg, PSegLnkLst rm, PPathElt e2, int32_t i)
 }
 
 bool
-CompareValues(PClrVal val1, PClrVal val2, int32_t factor,
-              int32_t ghstshift)
+CompareValues(PClrVal val1, PClrVal val2, int32_t factor, int32_t ghstshift)
 {
     Fixed v1 = val1->vVal, v2 = val2->vVal, mx;
     mx = v1 > v2 ? v1 : v2;

@@ -279,10 +279,7 @@ RMovePoint(Fixed dx, Fixed dy, int32_t whichcp, PPathElt e)
         e->y2 += dy;
         return;
     }
-    {
-        snprintf(globmsg, MAXMSGLEN, "Malformed path list in %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR);
-    }
+    LogMsg(LOGERROR, NONFATALERROR, "Malformed path list in %s.\n", fileName);
 }
 
 void
@@ -307,8 +304,8 @@ CheckSCurve(PPathElt ee)
     FltnRec fr;
     Cd c0, c1, c2, c3;
     if (ee->type != CURVETO) {
-        snprintf(globmsg, MAXMSGLEN, "Malformed path list in %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR);
+        LogMsg(LOGERROR, NONFATALERROR, "Malformed path list in %s.\n",
+               fileName);
     }
 
     GetEndPoint(ee->prev, &c0.x, &c0.y);
@@ -466,8 +463,8 @@ CheckBBoxEdge(PPathElt e, bool vrt, Fixed lc, Fixed* pf, Fixed* pl)
     FltnRec fr;
     Cd c0, c1, c2, c3;
     if (e->type != CURVETO) {
-        snprintf(globmsg, MAXMSGLEN, "Malformed path list in %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR);
+        LogMsg(LOGERROR, NONFATALERROR, "Malformed path list in %s.\n",
+               fileName);
     }
 
     GetEndPoint(e->prev, &c0.x, &c0.y);

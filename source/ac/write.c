@@ -163,9 +163,8 @@ void
 safestrcat(char* s1, char* s2)
 {
     if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
-        snprintf(S0, MAXMSGLEN,
-                 "ERROR: Hint information overflowing buffer: %s\n", fileName);
-        LogMsg(S0, LOGERROR, FATALERROR);
+        LogMsg(LOGERROR, FATALERROR,
+               "ERROR: Hint information overflowing buffer: %s\n", fileName);
     } else {
         strcat(s1, s2);
     }
@@ -242,9 +241,8 @@ WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst)
             sws(((lst->c == 'y') ? "ry" : "rm"));
             break;
         default: {
-            snprintf(S0, MAXMSGLEN, "Illegal point list data for file: %s.\n",
-                     fileName);
-            LogMsg(S0, LOGERROR, NONFATALERROR);
+            LogMsg(LOGERROR, NONFATALERROR,
+                   "Illegal point list data for file: %s.\n", fileName);
         }
     }
     sws(" % ");
@@ -630,9 +628,8 @@ SaveFile(const ACFontInfo* fontinfo)
                 cp(fontinfo, e);
                 break;
             default: {
-                snprintf(S0, MAXMSGLEN, "Illegal path list for file: %s.\n",
-                         fileName);
-                LogMsg(S0, LOGERROR, NONFATALERROR);
+                LogMsg(LOGERROR, NONFATALERROR,
+                       "Illegal path list for file: %s.\n", fileName);
             }
         }
 #if WRTABS_COMMENT
