@@ -189,7 +189,7 @@ PPathElt
 NxtForBend(PPathElt p, Fixed* px2, Fixed* py2, Fixed* px3, Fixed* py3)
 {
     PPathElt nxt, nxtMT = NULL;
-    Fixed x, y, x2, y2;
+    Fixed x = 0, y = 0, x2 = 0, y2 = 0;
     nxt = p;
     GetEndPoint(p, &x, &y);
     while (true) {
