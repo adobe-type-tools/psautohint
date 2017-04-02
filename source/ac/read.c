@@ -621,7 +621,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
     int32_t val = 0;
     Fixed r;
     pathStart = pathEnd = NULL;
-    bezGlyphName[0] = 0;
+    bezGlyphName[0] = '\0';
 
     while (true) {
         c = *s++;
@@ -632,7 +632,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                 val = 0;
                 goto rdnum;
             case '%': /* comment */
-                if (bezGlyphName[0] == 0) {
+                if (bezGlyphName[0] == '\0') {
                     unsigned int end = 0;
                     while (*s == ' ')
                         s++;
@@ -643,9 +643,9 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
 
                     strncpy(bezGlyphName, s, end);
                     if (end < 64)
-                        bezGlyphName[end] = 0;
+                        bezGlyphName[end] = '\0';
                     else {
-                        bezGlyphName[63] = 0;
+                        bezGlyphName[63] = '\0';
                         sprintf(globmsg, "Bad input file.  Glyph name  %s is "
                                          "greater than 32 chars.\n",
                                 bezGlyphName);
