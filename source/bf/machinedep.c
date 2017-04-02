@@ -29,10 +29,9 @@ static int (*errorproc)(int16_t);
 /* used for cacheing of log messages */
 static char lastLogStr[MAXMSGLEN + 1] = "";
 static int16_t lastLogLevel = -1;
-static bool lastLogPrefix;
 static int logCount = 0;
 
-static void LogMsg1(char* str, int16_t level, int16_t code, bool prefix);
+static void LogMsg1(char* str, int16_t level, int16_t code);
 
 #define Write(s)                                                               \
     {                                                                          \
@@ -57,13 +56,13 @@ FlushLogMsg(void)
 {
     /* if message happened exactly 2 times, don't treat it specially */
     if (logCount == 1) {
-        LogMsg1(lastLogStr, lastLogLevel, OK, lastLogPrefix);
+        LogMsg1(lastLogStr, lastLogLevel, OK);
     } else if (logCount > 1) {
         char newStr[MAXMSGLEN + 1];
         snprintf(newStr, MAXMSGLEN,
                  "The last message (%.20s...) repeated %d more times.\n",
                  lastLogStr, logCount);
-        LogMsg1(newStr, lastLogLevel, OK, true);
+        LogMsg1(newStr, lastLogLevel, OK);
     }
     logCount = 0;
 }
@@ -72,12 +71,11 @@ void
 LogMsg(
   char* str,     /* message string */
   int16_t level, /* error, warning, info */
-  int16_t code,  /* exit value - if !OK, this proc will not return */
-  bool prefix /* prefix message with LOGERROR: or WARNING:, as appropriate */)
+  int16_t code)  /* exit value - if !OK, this proc will not return */
 {
     /* changed handling of this to be more friendly (?) jvz */
     if (strlen(str) > MAXMSGLEN) {
-        LogMsg1("The following message was truncated.\n", WARNING, OK, true);
+        LogMsg1("The following message was truncated.\n", WARNING, OK);
         ++warncnt;
     }
     if (level == WARNING)
@@ -87,28 +85,25 @@ LogMsg(
     } else {          /* new message */
         if (logCount) /* messages pending */
             FlushLogMsg();
-        LogMsg1(str, level, code, prefix); /* won't return if LOGERROR */
+        LogMsg1(str, level, code); /* won't return if LOGERROR */
         strncpy(lastLogStr, str, MAXMSGLEN);
         lastLogLevel = level;
-        lastLogPrefix = prefix;
     }
 }
 
 static void
-LogMsg1(char* str, int16_t level, int16_t code, bool prefix)
+LogMsg1(char* str, int16_t level, int16_t code)
 {
     switch (level) {
         case INFO:
             Write(str);
             break;
         case WARNING:
-            if (prefix)
-                WriteWarnorErr(stderr, "WARNING: ");
+            WriteWarnorErr(stderr, "WARNING: ");
             WriteWarnorErr(stderr, str);
             break;
         case LOGERROR:
-            if (prefix)
-                WriteWarnorErr(stderr, "ERROR: ");
+            WriteWarnorErr(stderr, "ERROR: ");
             WriteWarnorErr(stderr, str);
             break;
         default:

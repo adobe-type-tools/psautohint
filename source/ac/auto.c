@@ -161,7 +161,7 @@ RemLnk(PPathElt e, bool hFlg, PSegLnkLst rm)
     }
     snprintf(globmsg, MAXMSGLEN, "Badly formatted segment list in file: %s.\n",
              fileName);
-    LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+    LogMsg(globmsg, LOGERROR, NONFATALERROR);
 }
 
 static bool
@@ -233,8 +233,7 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
         clst = colorList;
         while (clst != NULL) {
             if (++cnt > 100) {
-                LogMsg("Loop in hintlist for TestHint\n\007", WARNING, OK,
-                       true);
+                LogMsg("Loop in hintlist for TestHint\n\007", WARNING, OK);
                 return 0;
             }
             clst = clst->vNxt;
@@ -309,7 +308,7 @@ TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst)
             result = 1;
         lst = lst->next;
         if (++cnt > 100) {
-            LogMsg("Looping in TestHintLst\007\n", WARNING, OK, true);
+            LogMsg("Looping in TestHintLst\007\n", WARNING, OK);
             return 0;
         }
     }
@@ -707,7 +706,7 @@ StartNewColoring(PPathElt e, PSegLnkLst hLst, PSegLnkLst vLst)
     if (e->newcolors != 0) {
         snprintf(globmsg, MAXMSGLEN,
                  "Uninitialized extra hints list in file: %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR);
     }
     XtraClrs(e);
     clrBBox = false;
@@ -778,7 +777,7 @@ CopyClrs(PClrVal lst)
         v->vNxt = vlst;
         vlst = v;
         if (++cnt > 100) {
-            LogMsg("Loop in CopyClrs\007\n", WARNING, OK, true);
+            LogMsg("Loop in CopyClrs\007\n", WARNING, OK);
             return vlst;
         }
         lst = lst->vNxt;

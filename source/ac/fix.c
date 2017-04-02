@@ -266,7 +266,7 @@ FixHs(Fixed fixy, Fixed fixdy)
             default: {
                 snprintf(globmsg, MAXMSGLEN,
                          "Illegal operator in path list in %s.\n", fileName);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR);
             }
         }
         e = e->next;
@@ -320,7 +320,7 @@ FixVs(Fixed fixx, Fixed fixdx)
             default: {
                 snprintf(globmsg, MAXMSGLEN,
                          "Illegal operator in point list in %s.\n", fileName);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR);
             }
         }
         e = e->next;

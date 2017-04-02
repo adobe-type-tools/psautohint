@@ -56,7 +56,7 @@ GetFntInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
     if (!optional) {
         snprintf(globmsg, MAXMSGLEN,
                  "ERROR: Fontinfo: Couldn't find fontinfo for %s\n", keyword);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR);
     }
 
     return NULL;
@@ -123,7 +123,7 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
                          "The keyword: %s does not have the same "
                          "number of values\n  in each master design.\n",
                          kw);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR);
             } else
                 continue; /* optional keyword not found */
         }
@@ -157,14 +157,14 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
                          "Cannot have more than %d values in fontinfo "
                          "file array: \n  %s\n",
                          (int)maxstems, initline);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR);
             }
             if (val < 1) {
                 snprintf(
                   globmsg, MAXMSGLEN,
                   "Cannot have a value < 1 in fontinfo file array: \n  %s\n",
                   line);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR);
             }
             stems[total++] = val;
             cnt++;
@@ -196,7 +196,7 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
                      "The keyword: %s does not have the same number of "
                      "values\n  in each master design.\n",
                      kw);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR);
         }
         targetCnt = cnt;
         *pnum += cnt;

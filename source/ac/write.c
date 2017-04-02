@@ -165,7 +165,7 @@ safestrcat(char* s1, char* s2)
     if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
         snprintf(S0, MAXMSGLEN,
                  "ERROR: Hint information overflowing buffer: %s\n", fileName);
-        LogMsg(S0, LOGERROR, FATALERROR, true);
+        LogMsg(S0, LOGERROR, FATALERROR);
     } else {
         strcat(s1, s2);
     }
@@ -244,7 +244,7 @@ WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst)
         default: {
             snprintf(S0, MAXMSGLEN, "Illegal point list data for file: %s.\n",
                      fileName);
-            LogMsg(S0, LOGERROR, NONFATALERROR, true);
+            LogMsg(S0, LOGERROR, NONFATALERROR);
         }
     }
     sws(" % ");
@@ -632,7 +632,7 @@ SaveFile(const ACFontInfo* fontinfo)
             default: {
                 snprintf(S0, MAXMSGLEN, "Illegal path list for file: %s.\n",
                          fileName);
-                LogMsg(S0, LOGERROR, NONFATALERROR, true);
+                LogMsg(S0, LOGERROR, NONFATALERROR);
             }
         }
 #if WRTABS_COMMENT

@@ -54,7 +54,7 @@ typedef int indx;		/* for indexes that could be either short or
 extern char globmsg[MAXMSGLEN + 1];	/* used to format the string passed to LogMsg */
 
 extern void LogMsg(
-    char *, int16_t, int16_t, bool
+    char *, int16_t, int16_t
 );
 
 #endif /*BASIC_H*/

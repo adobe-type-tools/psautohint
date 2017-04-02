@@ -103,7 +103,7 @@ Alloc(int32_t sz)
     {
         snprintf(globmsg, MAXMSGLEN,
                  "Exceeded VM size for hints in file: %s.\n", fileName);
-        LogMsg(globmsg, LOGERROR, FATALERROR, true);
+        LogMsg(globmsg, LOGERROR, FATALERROR);
     }
     return s;
 }

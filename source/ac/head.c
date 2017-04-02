@@ -66,13 +66,13 @@ retry:
             if (e == NULL || e->type == CLOSEPATH) {
                 snprintf(globmsg, MAXMSGLEN,
                          "Bad character description file: %s.\n", fileName);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR);
             }
             goto retry;
         default: {
             snprintf(globmsg, MAXMSGLEN,
                      "Illegal operator in character file: %s.\n", fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR);
         }
     }
 }

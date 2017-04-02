@@ -73,7 +73,7 @@ PointListCheck(PClrPoint new, PClrPoint lst)
         default: {
             snprintf(globmsg, MAXMSGLEN,
                      "Illegal character in point list in %s.\n", fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR);
         }
     }
     if (n1 > n2) {
@@ -871,7 +871,7 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
         if (pathStart == NULL || pathStart == pathEnd) {
             snprintf(globmsg, MAXMSGLEN, "No character path in %s.\n",
                      fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR);
         }
 
         /* SaveFile(); SaveFile is always called in AddColorsCleanup, so this is
@@ -905,7 +905,7 @@ AddColorsCleanup(const ACFontInfo* fontinfo)
                      "The %s character path vanished while adding "
                      "hints.\n  File not written.",
                      fileName);
-            LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+            LogMsg(globmsg, LOGERROR, NONFATALERROR);
         } else {
             SaveFile(fontinfo);
         }
@@ -945,7 +945,7 @@ AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
     fileName = fname;
     if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
         snprintf(globmsg, MAXMSGLEN, "Cannot open %s file.\n", fileName);
-        LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+        LogMsg(globmsg, LOGERROR, NONFATALERROR);
     }
     PrintMessage(""); /* Just print the file name. */
     AddColors(fontinfo, srcglyph, extracolor);

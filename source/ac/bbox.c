@@ -75,7 +75,7 @@ FindPathBBox(void)
             default: {
                 snprintf(globmsg, MAXMSGLEN,
                          "Undefined operator in %s character.\n", fileName);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR);
             }
         }
         e = e->next;
@@ -139,7 +139,7 @@ FindSubpathBBox(PPathElt e)
             default: {
                 snprintf(globmsg, MAXMSGLEN,
                          "Undefined operator in %s character.\n", fileName);
-                LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
+                LogMsg(globmsg, LOGERROR, NONFATALERROR);
             }
         }
         e = e->next;
