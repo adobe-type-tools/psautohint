@@ -30,8 +30,6 @@ ACGetVersion(char* name, char* str)
 
 #define EndLine()
 
-#define PrinMsg(s) PrintMessage(s)
-
 void
 PrintMessage(char* s)
 {
@@ -304,7 +302,7 @@ PrntVal(Fixed v)
         sprintf(S0, "%d", FTrunc(v));
     else
         sprintf(S0, "%g", FixToDbl(v));
-    PrinMsg(S0);
+    PrintMessage(S0);
 }
 
 static void
@@ -314,12 +312,12 @@ ShwHV(PClrVal val)
     bot = itfmy(val->vLoc1);
     top = itfmy(val->vLoc2);
     sprintf(S0, "b %g t %g v ", FixToDbl(bot), FixToDbl(top));
-    PrinMsg(S0);
+    PrintMessage(S0);
     PrntVal(val->vVal);
     sprintf(S0, " s %g", FixToDbl(val->vSpc));
-    PrinMsg(S0);
+    PrintMessage(S0);
     if (val->vGhst)
-        PrinMsg(" G");
+        PrintMessage(" G");
 }
 
 void
@@ -334,12 +332,12 @@ ShowHVal(PClrVal val)
     l = itfmx(seg->sMin);
     r = itfmx(seg->sMax);
     sprintf(S0, " l1 %g r1 %g ", FixToDbl(l), FixToDbl(r));
-    PrinMsg(S0);
+    PrintMessage(S0);
     seg = val->vSeg2;
     l = itfmx(seg->sMin);
     r = itfmx(seg->sMax);
     sprintf(S0, " l2 %g r2 %g", FixToDbl(l), FixToDbl(r));
-    PrinMsg(S0);
+    PrintMessage(S0);
 }
 
 void
@@ -366,10 +364,10 @@ ShwVV(PClrVal val)
     lft = itfmx(val->vLoc1);
     rht = itfmx(val->vLoc2);
     sprintf(S0, "l %g r %g v ", FixToDbl(lft), FixToDbl(rht));
-    PrinMsg(S0);
+    PrintMessage(S0);
     PrntVal(val->vVal);
     sprintf(S0, " s %g", FixToDbl(val->vSpc));
-    PrinMsg(S0);
+    PrintMessage(S0);
 }
 
 void
@@ -384,12 +382,12 @@ ShowVVal(PClrVal val)
     b = itfmy(seg->sMin);
     t = itfmy(seg->sMax);
     sprintf(S0, " b1 %g t1 %g ", FixToDbl(b), FixToDbl(t));
-    PrinMsg(S0);
+    PrintMessage(S0);
     seg = val->vSeg2;
     b = itfmy(seg->sMin);
     t = itfmy(seg->sMax);
     sprintf(S0, " b2 %g t2 %g", FixToDbl(b), FixToDbl(t));
-    PrinMsg(S0);
+    PrintMessage(S0);
 }
 
 void
@@ -416,20 +414,20 @@ ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg)
         sprintf(S0, "FndBstVal: sLoc %g sLft %g sRght %g ",
                 FixToDbl(itfmy(seg->sLoc)), FixToDbl(itfmx(seg->sMin)),
                 FixToDbl(itfmx(seg->sMax)));
-        PrinMsg(S0);
+        PrintMessage(S0);
         if (val)
             ShwHV(val);
         else
-            PrinMsg("NULL");
+            PrintMessage("NULL");
     } else {
         sprintf(S0, "FndBstVal: sLoc %g sBot %g sTop %g ",
                 FixToDbl(itfmx(seg->sLoc)), FixToDbl(itfmy(seg->sMin)),
                 FixToDbl(itfmy(seg->sMax)));
-        PrinMsg(S0);
+        PrintMessage(S0);
         if (val)
             ShwVV(val);
         else
-            PrinMsg("NULL");
+            PrintMessage("NULL");
     }
     EndLine();
 }
@@ -494,17 +492,17 @@ LogColorInfo(PClrPoint pl)
 static void
 LstHVal(PClrVal val)
 {
-    PrinMsg("\t");
+    PrintMessage("\t");
     ShowHVal(val);
-    PrinMsg(" ");
+    PrintMessage(" ");
 }
 
 static void
 LstVVal(PClrVal val)
 {
-    PrinMsg("\t");
+    PrintMessage("\t");
     ShowVVal(val);
-    PrinMsg(" ");
+    PrintMessage(" ");
 }
 
 void
@@ -523,7 +521,7 @@ ListClrInfo(void)
             x = itfmx(x);
             y = itfmy(y);
             sprintf(S0, "x %g y %g ", FixToDbl(x), FixToDbl(y));
-            PrinMsg(S0);
+            PrintMessage(S0);
             while (hLst != NULL) {
                 seg = hLst->lnk->seg;
                 LstHVal(seg->sLnk);
@@ -645,10 +643,10 @@ ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
     sprintf(S0, "Replace H hints pair at %g %g by %g %g\n\told value ",
             FixToDbl(itfmy(b0)), FixToDbl(itfmy(t0)), FixToDbl(itfmy(b1)),
             FixToDbl(itfmy(t1)));
-    PrinMsg(S0);
+    PrintMessage(S0);
     PrntVal(v0);
     sprintf(S0, " %g new value ", FixToDbl(s0));
-    PrinMsg(S0);
+    PrintMessage(S0);
     PrntVal(v1);
     sprintf(S0, " %g", FixToDbl(s1));
     PrintMessage(S0);
@@ -663,10 +661,10 @@ ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
     sprintf(S0, "Replace V hints pair at %g %g by %g %g\n\told value ",
             FixToDbl(itfmx(l0)), FixToDbl(itfmx(r0)), FixToDbl(itfmx(l1)),
             FixToDbl(itfmx(r1)));
-    PrinMsg(S0);
+    PrintMessage(S0);
     PrntVal(v0);
     sprintf(S0, " %g new value ", FixToDbl(s0));
-    PrinMsg(S0);
+    PrintMessage(S0);
     PrntVal(v1);
     sprintf(S0, " %g", FixToDbl(s1));
     PrintMessage(S0);
@@ -678,9 +676,9 @@ ReportPruneHVal(PClrVal val, PClrVal v, int32_t i)
     if (!showClrInfo)
         return;
     sprintf(S0, "PruneHVal: %d\n\t", i);
-    PrinMsg(S0);
+    PrintMessage(S0);
     ShowHVal(val);
-    PrinMsg("\n\t");
+    PrintMessage("\n\t");
     ShowHVal(v);
     EndLine();
 }
@@ -691,9 +689,9 @@ ReportPruneVVal(PClrVal val, PClrVal v, int32_t i)
     if (!showClrInfo)
         return;
     sprintf(S0, "PruneVVal: %d\n\t", i);
-    PrinMsg(S0);
+    PrintMessage(S0);
     ShowVVal(val);
-    PrinMsg("\n\t");
+    PrintMessage("\n\t");
     ShowVVal(v);
     EndLine();
 }
