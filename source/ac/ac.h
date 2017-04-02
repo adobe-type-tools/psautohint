@@ -312,8 +312,8 @@ void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
 void AddHPair(PClrVal v, char ch);
 void AddVPair(PClrVal v, char ch);
 void XtraClrs(PPathElt e);
-bool DoFile(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
-            bool extracolor);
+bool AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
+                    char* fname, bool extracolor);
 void EvalV(void);
 void EvalH(void);
 void GenVPts(int32_t specialCharType);

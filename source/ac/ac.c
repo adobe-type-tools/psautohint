@@ -206,5 +206,5 @@ AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
     if (debug)
         DEBUG = showClrInfo = showHs = showVs = listClrInfo = true;
 
-    return DoFile(fontinfo, srcbezdata, "", extracolor);
+    return AutoColorGlyph(fontinfo, srcbezdata, "", extracolor);
 }
