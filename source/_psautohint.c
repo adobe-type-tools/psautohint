@@ -35,7 +35,19 @@ typedef unsigned char bool;
 static void
 reportCB(char* msg)
 {
-    fprintf(stdout, "%s\n", msg);
+    PyObject* sys = PyImport_ImportModule("sys");
+    if (sys) {
+        PyObject* out = PyObject_GetAttrString(sys, "stdout");
+        if (out) {
+            PyObject* result;
+            result = PyObject_CallMethod(out, "write", "s", msg);
+            Py_XDECREF(result);
+            result = PyObject_CallMethod(out, "write", "s", "\n");
+            Py_XDECREF(result);
+        }
+        Py_XDECREF(out);
+    }
+    Py_XDECREF(sys);
 }
 
 #if PY_MAJOR_VERSION >= 3
