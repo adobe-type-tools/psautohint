@@ -237,7 +237,8 @@ PrevVal(PClrVal val, PClrVal vList)
     while (true) {
         vList = vList->vNxt;
         if (vList == NULL) {
-            sprintf(globmsg, "Malformed value list in %s.\n", fileName);
+            snprintf(globmsg, MAXMSGLEN, "Malformed value list in %s.\n",
+                     fileName);
             LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
 

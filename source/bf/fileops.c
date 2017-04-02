@@ -29,8 +29,9 @@ AllocateMem(unsigned int nelem, unsigned int elsize, const char* description)
         memset((void*)ptr, 0x0, nelem * elsize);
 
     if (ptr == NULL) {
-        sprintf(globmsg, "Cannot allocate %d bytes of memory for %s.\n",
-                (int)(nelem * elsize), description);
+        snprintf(globmsg, MAXMSGLEN,
+                 "Cannot allocate %d bytes of memory for %s.\n",
+                 (int)(nelem * elsize), description);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     return (ptr);
@@ -44,8 +45,9 @@ ReallocateMem(char* ptr, unsigned int size, const char* description)
       (char*)AC_memmanageFuncPtr(AC_memmanageCtxPtr, (void*)ptr, size);
 
     if (newptr == NULL) {
-        sprintf(globmsg, "Cannot allocate %d bytes of memory for %s.\n",
-                (int)size, description);
+        snprintf(globmsg, MAXMSGLEN,
+                 "Cannot allocate %d bytes of memory for %s.\n", (int)size,
+                 description);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     return (newptr);

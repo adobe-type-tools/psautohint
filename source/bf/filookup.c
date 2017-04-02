@@ -54,8 +54,8 @@ GetFntInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
     }
 
     if (!optional) {
-        sprintf(globmsg, "ERROR: Fontinfo: Couldn't find fontinfo for %s\n",
-                keyword);
+        snprintf(globmsg, MAXMSGLEN,
+                 "ERROR: Fontinfo: Couldn't find fontinfo for %s\n", keyword);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
 
@@ -84,7 +84,7 @@ GetHVStems(const ACFontInfo* fontinfo, char* kw, bool optional)
     end[0] = '\0';
     start = (char*)strchr(fistr2, '[');
     start[0] = ' ';
-    sprintf(newfistr, "%s%s", fistr1, fistr2);
+    snprintf(newfistr, strlen(fistr1) + strlen(fistr2), "%s%s", fistr1, fistr2);
     UnallocateMem(fistr1);
     UnallocateMem(fistr2);
     return newfistr;
@@ -119,9 +119,10 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
             initline = GetFntInfo(fontinfo, kw, optional);
         if (initline == NULL) {
             if (targetCnt > 0) {
-                sprintf(globmsg, "The keyword: %s does not have the same "
-                                 "number of values\n  in each master design.\n",
-                        kw);
+                snprintf(globmsg, MAXMSGLEN,
+                         "The keyword: %s does not have the same "
+                         "number of values\n  in each master design.\n",
+                         kw);
                 LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             } else
                 continue; /* optional keyword not found */
@@ -152,14 +153,15 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
             if (sscanf(line, " %d", &val) < 1)
                 break;
             if (total >= maxstems) {
-                sprintf(globmsg, "Cannot have more than %d values in fontinfo "
-                                 "file array: \n  %s\n",
-                        (int)maxstems, initline);
+                snprintf(globmsg, MAXMSGLEN,
+                         "Cannot have more than %d values in fontinfo "
+                         "file array: \n  %s\n",
+                         (int)maxstems, initline);
                 LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             }
             if (val < 1) {
-                sprintf(
-                  globmsg,
+                snprintf(
+                  globmsg, MAXMSGLEN,
                   "Cannot have a value < 1 in fontinfo file array: \n  %s\n",
                   line);
                 LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
@@ -190,9 +192,10 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
             }
         if (ix > 0 && (cnt != targetCnt)) {
             UnallocateMem(initline);
-            sprintf(globmsg, "The keyword: %s does not have the same number of "
-                             "values\n  in each master design.\n",
-                    kw);
+            snprintf(globmsg, MAXMSGLEN,
+                     "The keyword: %s does not have the same number of "
+                     "values\n  in each master design.\n",
+                     kw);
             LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
         targetCnt = cnt;

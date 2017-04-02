@@ -59,9 +59,10 @@ FlushLogMsg(void)
     if (logCount == 1) {
         LogMsg1(lastLogStr, lastLogLevel, OK, lastLogPrefix);
     } else if (logCount > 1) {
-        char newStr[MAXMSGLEN];
-        sprintf(newStr, "The last message (%.20s...) repeated %d more times.\n",
-                lastLogStr, logCount);
+        char newStr[MAXMSGLEN + 1];
+        snprintf(newStr, MAXMSGLEN,
+                 "The last message (%.20s...) repeated %d more times.\n",
+                 lastLogStr, logCount);
         LogMsg1(newStr, lastLogLevel, OK, true);
     }
     logCount = 0;

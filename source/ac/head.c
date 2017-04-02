@@ -64,14 +64,14 @@ retry:
         case CLOSEPATH:
             e = GetDest(e);
             if (e == NULL || e->type == CLOSEPATH) {
-                sprintf(globmsg, "Bad character description file: %s.\n",
-                        fileName);
+                snprintf(globmsg, MAXMSGLEN,
+                         "Bad character description file: %s.\n", fileName);
                 LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
             }
             goto retry;
         default: {
-            sprintf(globmsg, "Illegal operator in character file: %s.\n",
-                    fileName);
+            snprintf(globmsg, MAXMSGLEN,
+                     "Illegal operator in character file: %s.\n", fileName);
             LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
     }

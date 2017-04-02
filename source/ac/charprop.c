@@ -109,10 +109,11 @@ AddCounterColorChars(char* charlist, char* ColorList[])
             continue;
         /* Currently, ColorList must end with a NULL pointer. */
         if (ListEntries == (COUNTERLISTSIZE - 1)) {
-            sprintf(globmsg, "Exceeded counter hints list size. (maximum is "
-                             "%d.)\n  Cannot add %s or subsequent "
-                             "characters.\n",
-                    (int)COUNTERLISTSIZE, token);
+            snprintf(globmsg, MAXMSGLEN,
+                     "Exceeded counter hints list size. (maximum is "
+                     "%d.)\n  Cannot add %s or subsequent "
+                     "characters.\n",
+                     (int)COUNTERLISTSIZE, token);
             LogMsg(globmsg, WARNING, OK, true);
             break;
         }

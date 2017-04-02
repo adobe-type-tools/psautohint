@@ -144,7 +144,8 @@ AddAutoFlexProp(PPathElt e, bool yflag)
 {
     PPathElt e0 = e, e1 = e->next;
     if (e0->type != CURVETO || e1->type != CURVETO) {
-        sprintf(globmsg, "Illegal input in character file: %s.\n", fileName);
+        snprintf(globmsg, MAXMSGLEN, "Illegal input in character file: %s.\n",
+                 fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     /* Don't add flex to linear curves. */

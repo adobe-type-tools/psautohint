@@ -75,7 +75,8 @@ static Fixed
 Pop(void)
 {
     if (stkindex <= 0) {
-        sprintf(globmsg, "Stack underflow while reading %s file.\n", fileName);
+        snprintf(globmsg, MAXMSGLEN, "Stack underflow while reading %s file.\n",
+                 fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     stkindex--;
@@ -86,7 +87,8 @@ static void
 Push(Fixed r)
 {
     if (stkindex >= STKMAX) {
-        sprintf(globmsg, "Stack underflow while reading %s file.\n", fileName);
+        snprintf(globmsg, MAXMSGLEN, "Stack underflow while reading %s file.\n",
+                 fileName);
         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
     }
     stk[stkindex] = r;
@@ -386,11 +388,12 @@ ReadHintInfo(char nm, const char* str)
     c0.y += c0.x; /* make absolute */
     /* Look for comment of path elements used to determine this band. */
     if (sscanf(str, " %% %d %d", &elt1, &elt2) != 2) {
-        sprintf(globmsg, "Extra hint information required for blended fonts is "
-                         "not in\n  character file: %s.  Please re-hint using "
-                         "the latest software.\n  Hints will not be included "
-                         "in this font.\n",
-                fileName);
+        snprintf(globmsg, MAXMSGLEN,
+                 "Extra hint information required for blended fonts is "
+                 "not in\n  character file: %s.  Please re-hint using "
+                 "the latest software.\n  Hints will not be included "
+                 "in this font.\n",
+                 fileName);
         LogMsg(globmsg, WARNING, NONFATALERROR, true);
         SetNoHints();
         includeHints = false;
@@ -603,8 +606,9 @@ badFile : {
     strncpy(op, nm, len);
     op[len] = 0;
 
-    sprintf(globmsg, "Bad file format. Unknown operator: %s in %s character.\n",
-            op, fileName);
+    snprintf(globmsg, MAXMSGLEN,
+             "Bad file format. Unknown operator: %s in %s character.\n", op,
+             fileName);
     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 }
 }
@@ -646,9 +650,10 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                         bezGlyphName[end] = '\0';
                     else {
                         bezGlyphName[MAX_GLYPHNAME_LEN - 1] = '\0';
-                        sprintf(globmsg, "Bad input file. Glyph name %s is "
-                                         "greater than %d chars.\n",
-                                bezGlyphName, MAX_GLYPHNAME_LEN);
+                        snprintf(globmsg, MAXMSGLEN,
+                                 "Bad input file. Glyph name %s is "
+                                 "greater than %d chars.\n",
+                                 bezGlyphName, MAX_GLYPHNAME_LEN);
                         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                     }
                 }
@@ -666,9 +671,10 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                 continue;
             case 0: /* end of file */
                 if (stkindex != 0) {
-                    sprintf(globmsg, "Bad input file.  Numbers left on stack "
-                                     "at end of %s file.\n",
-                            fileName);
+                    snprintf(globmsg, MAXMSGLEN,
+                             "Bad input file.  Numbers left on stack "
+                             "at end of %s file.\n",
+                             fileName);
                     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                 }
                 return;
@@ -693,8 +699,8 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                         s--;
                     continue;
                 }
-                sprintf(globmsg, "Unexpected character in %s file.\n",
-                        fileName);
+                snprintf(globmsg, MAXMSGLEN,
+                         "Unexpected character in %s file.\n", fileName);
                 LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
         }
     rdnum:
@@ -722,8 +728,9 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                 }
                 /* Push(r); */
                 if (stkindex >= STKMAX) {
-                    sprintf(globmsg, "Stack overflow while reading %s file.\n",
-                            fileName);
+                    snprintf(globmsg, MAXMSGLEN,
+                             "Stack overflow while reading %s file.\n",
+                             fileName);
                     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                     return;
                 }
@@ -731,9 +738,9 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                 stkindex++;
                 goto nxtChar;
             } else {
-                sprintf(globmsg,
-                        "Illegal number terminator while reading %s file.\n",
-                        fileName);
+                snprintf(globmsg, MAXMSGLEN,
+                         "Illegal number terminator while reading %s file.\n",
+                         fileName);
                 LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                 return;
             }

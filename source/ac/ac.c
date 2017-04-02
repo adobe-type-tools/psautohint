@@ -101,7 +101,8 @@ Alloc(int32_t sz)
     vmfree += sz;
     if (vmfree > vmlast) /* Error! need to make VMSIZE bigger */
     {
-        sprintf(globmsg, "Exceeded VM size for hints in file: %s.\n", fileName);
+        snprintf(globmsg, MAXMSGLEN,
+                 "Exceeded VM size for hints in file: %s.\n", fileName);
         LogMsg(globmsg, LOGERROR, FATALERROR, true);
     }
     return s;

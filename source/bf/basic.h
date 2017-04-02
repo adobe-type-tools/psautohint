@@ -28,6 +28,10 @@ typedef unsigned char bool;
 #define false 0
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#define snprintf(buf, size, ...) _snprintf_s(buf, size, _TRUNCATE, __VA_ARGS__)
+#endif
+
 typedef int32_t               Fixed;
 typedef int indx;		/* for indexes that could be either short or
 				   long - let the compiler decide */
