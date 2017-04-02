@@ -570,8 +570,8 @@ cp(const ACFontInfo* fontinfo, PPathElt e)
 static void
 NumberPath(void)
 {
-    register int16_t cnt;
-    register PPathElt e;
+    int16_t cnt;
+    PPathElt e;
     e = pathStart;
     cnt = 1;
     while (e != NULL) {
@@ -583,7 +583,7 @@ NumberPath(void)
 void
 SaveFile(const ACFontInfo* fontinfo)
 {
-    register PPathElt e = pathStart;
+    PPathElt e = pathStart;
     Cd c1, c2, c3;
 
     assert(bezoutput != NULL);

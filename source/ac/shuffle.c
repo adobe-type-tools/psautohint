@@ -16,8 +16,8 @@ static int32_t rowcnt;
 void
 InitShuffleSubpaths(void)
 {
-    register int32_t cnt = -1;
-    register PPathElt e = pathStart;
+    int32_t cnt = -1;
+    PPathElt e = pathStart;
     while (e != NULL) { /* every element is marked with its subpath count */
         if (e->type == MOVETO)
             cnt++;
@@ -105,9 +105,9 @@ PrintOutLinks(unsigned char* outlinks)
 void
 MarkLinks(PClrVal vL, bool hFlg)
 {
-    register int32_t i, j;
-    register PClrSeg seg;
-    register PPathElt e;
+    int32_t i, j;
+    PClrSeg seg;
+    PPathElt e;
     if (links == NULL)
         return;
     for (; vL != NULL; vL = vL->vNxt) {
@@ -146,9 +146,9 @@ static void
 Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
         int32_t bst)
 {
-    register unsigned char *lnks, *outlnks;
-    register int32_t i = bst;
-    register PPathElt e = pathStart;
+    unsigned char *lnks, *outlnks;
+    int32_t i = bst;
+    PPathElt e = pathStart;
     while (e != NULL) {
         if (e->count == i)
             break;
@@ -177,8 +177,8 @@ void
 DoShuffleSubpaths(void)
 {
     unsigned char sumlinks[MAXCNT], output[MAXCNT], outlinks[MAXCNT];
-    register unsigned char* lnks;
-    register int32_t i, j, bst, bstsum, bstlnks;
+    unsigned char* lnks;
+    int32_t i, j, bst, bstsum, bstlnks;
     if (links == NULL)
         return;
     if (DEBUG)

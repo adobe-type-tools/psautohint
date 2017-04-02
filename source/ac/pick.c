@@ -111,7 +111,7 @@ PickVVals(PClrVal valList)
 static bool
 InSerifBand(Fixed y0, Fixed y1, int32_t n, Fixed* p)
 {
-    register int32_t i;
+    int32_t i;
     if (n <= 0)
         return false;
     y0 = itfmy(y0);
@@ -228,7 +228,7 @@ MembValList(PClrVal val, PClrVal vList)
 }
 
 static PClrVal
-PrevVal(register PClrVal val, register PClrVal vList)
+PrevVal(PClrVal val, PClrVal vList)
 {
     PClrVal prev;
     if (val == vList)
@@ -399,7 +399,7 @@ FindBestValForSegs(PClrSeg sList, bool seg1Flg, PClrVal cList, PClrVal rList,
 static void
 SetPruned(void)
 {
-    register PClrVal vL = valList;
+    PClrVal vL = valList;
     while (vL != NULL) {
         vL->pruned = true;
         vL = vL->vNxt;

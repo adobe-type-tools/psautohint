@@ -13,7 +13,7 @@
 int32_t
 CountSubPaths(void)
 {
-    register PPathElt e = pathStart;
+    PPathElt e = pathStart;
     int32_t cnt = 0;
     while (e != NULL) {
         if (e->type == MOVETO)
@@ -25,7 +25,7 @@ CountSubPaths(void)
 void
 RoundPathCoords(void)
 {
-    register PPathElt e;
+    PPathElt e;
     e = pathStart;
     while (e != NULL) {
         if (e->type == CURVETO) {
@@ -110,7 +110,7 @@ PreCheckForColoring(void)
 }
 
 static PPathElt
-GetSubpathNext(register PPathElt e)
+GetSubpathNext(PPathElt e)
 {
     while (true) {
         e = e->next;
@@ -125,7 +125,7 @@ GetSubpathNext(register PPathElt e)
 }
 
 static PPathElt
-GetSubpathPrev(register PPathElt e)
+GetSubpathPrev(PPathElt e)
 {
     while (true) {
         e = e->prev;

@@ -10,7 +10,7 @@
 #include "ac.h"
 
 static void
-FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, register PFltnRec pfr, bool inside)
+FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, PFltnRec pfr, bool inside)
 {
 /* Like FFltnCurve, but assumes abs(deltas) <= 127 pixels */
 /* 8 bits of fraction gives enough precision for splitting curves */
@@ -42,7 +42,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, register PFltnRec pfr, bool inside)
 #define mdpt(a, b) (((int32_t)(a) + (int32_t)(b)) >> 1)
     int32_t cds[MiniBlkSz * MiniFltnMaxDepth], dpth, eps;
     int32_t bbLLX = 0, bbLLY = 0, bbURX = 0, bbURY = 0;
-    register int32_t* p;
+    int32_t* p;
     p = cds;
     dpth = 1;
     *(p++) =
@@ -77,7 +77,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, register PFltnRec pfr, bool inside)
      * operations. The only reason these were all shorts was speed and memory
      * issues in 1986. */
     {
-        register Fixed llx, lly;
+        Fixed llx, lly;
         llx = pfr->llx;
         lly = pfr->lly;
         *(p++) = (int32_t)MFix(f0.x - llx);
@@ -90,7 +90,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, register PFltnRec pfr, bool inside)
         *(p++) = (int32_t)MFix(f3.y - lly);
     }
     if (!inrect) {
-        register Fixed c, f128;
+        Fixed c, f128;
         c = (int32_t)pfr->ll.x;
         bbLLX = (c <= 0) ? 0 : (int32_t)MFix(c);
         c = (int32_t)pfr->ll.y;
@@ -112,7 +112,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, register PFltnRec pfr, bool inside)
         if (dpth == MiniFltnMaxDepth)
             goto ReportC3;
         if (!inrect) {
-            register int32_t llx, lly, urx, ury, c;
+            int32_t llx, lly, urx, ury, c;
             llx = urx = c0x;
             if ((c = c1x) < llx)
                 llx = c;
@@ -147,7 +147,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, register PFltnRec pfr, bool inside)
                 inrect = true;
         }
         if (!inbbox) {
-            register int32_t mrgn = eps, r0, r3, ll, ur, c;
+            int32_t mrgn = eps, r0, r3, ll, ur, c;
             r0 = c0x;
             r3 = c3x;
             if (r0 < r3) {
@@ -184,8 +184,8 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, register PFltnRec pfr, bool inside)
             }
         }
         if (inbbox) {
-            register int32_t eqa, eqb, x, y;
-            register Fixed EPS, d;
+            int32_t eqa, eqb, x, y;
+            Fixed EPS, d;
             x = c0x;
             y = c0y;
             eqa = c3y - y;
@@ -206,7 +206,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, register PFltnRec pfr, bool inside)
             }
         }
         { /* Bezier divide */
-            register int32_t c0, c1, c2, d1, d2, d3;
+            int32_t c0, c1, c2, d1, d2, d3;
             d0x = c0 = c0x;
             c1 = c1x;
             c2 = c2x;
@@ -295,14 +295,14 @@ static void
 FFltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr, bool inrect)
 {
     Cd d0, d1, d2, d3;
-    register Fixed llx, lly, urx, ury;
+    Fixed llx, lly, urx, ury;
     if (c0.x == c1.x && c0.y == c1.y && c2.x == c3.x && c2.y == c3.y)
         goto ReportC3; /* it is a flat curve - do not need to flatten. */
     if (pfr->limit <= 0)
         goto ReportC3;
     { /* set initial bbox of llx,lly, urx, ury from bez control and end points
          */
-        register Fixed c;
+        Fixed c;
         llx = urx = c0.x;
         if ((c = c1.x) < llx)
             llx = c;
@@ -341,7 +341,7 @@ FFltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr, bool inrect)
     }
     { /* if the height or width of the initial bbox is > 256, split it, and this
          function on the two parts. */
-        register Fixed th;
+        Fixed th;
         th = FixInt(256); /* DEBUG 8 Bit */ /* delta threshhold of 127 pixels */
         /* The reason we split this is that the FMiniFltn function uses and 8.8
          Fixed to hold coordindate data - so the max

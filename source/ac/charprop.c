@@ -57,9 +57,9 @@ static char* SolEol1List[] = { "i", "j", "questiondown", "semicolon", NULL };
 static char* SolEolNeg1List[] = { "question", NULL };
 
 static bool
-StrEqual(register char* s1, register char* s2)
+StrEqual(char* s1, char* s2)
 {
-    register unsigned char c1, c2;
+    unsigned char c1, c2;
     while (true) {
         c1 = *s1++;
         c2 = *s2++;

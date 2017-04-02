@@ -149,7 +149,7 @@ SameColors(int32_t cn1, int32_t cn2)
 void
 MergeFromMainColors(char ch)
 {
-    register PClrPoint lst;
+    PClrPoint lst;
     for (lst = ptLstArray[0]; lst != NULL; lst = lst->next) {
         if (lst->c != ch) {
             continue;
@@ -168,7 +168,7 @@ void
 AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
               PPathElt p1)
 {
-    register PClrPoint pt;
+    PClrPoint pt;
     int32_t chk;
     pt = (PClrPoint)Alloc(sizeof(ClrPoint));
     pt->x0 = x0;
@@ -194,7 +194,7 @@ AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
 }
 
 static void
-CopyClrFromLst(char clr, register PClrPoint lst)
+CopyClrFromLst(char clr, PClrPoint lst)
 {
     bool bvflg = (clr == 'b' || clr == 'v');
     while (lst != NULL) {
@@ -762,7 +762,7 @@ DoVStems(PClrVal sLst)
 static void
 RemoveRedundantFirstColors(void)
 {
-    register PPathElt e;
+    PPathElt e;
     if (numPtLsts < 2 || !SameColors(0, 1)) {
         return;
     }
