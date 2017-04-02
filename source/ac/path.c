@@ -14,7 +14,7 @@
 #define GetSubpathPrev(e) ((e)->type == MOVETO) ? GetClosedBy(e) : (e)->prev
 
 static void 
-NumberSubpath (register PPathElt e) {
+NumberSubpath (PPathElt e) {
   /* number the elements of the subpath starting at e */
   PPathElt first;
   int32_t cnt;

@@ -17,12 +17,11 @@
  * band is expanded by CLSMRG in each direction
  */
 static bool
-CloseElements(register PPathElt e1, register PPathElt e2, register Fixed loc1,
-              register Fixed loc2, register bool vert)
+CloseElements(PPathElt e1, PPathElt e2, Fixed loc1, Fixed loc2, bool vert)
 {
-    register Fixed tmp;
+    Fixed tmp;
     Fixed x, y;
-    register PPathElt e;
+    PPathElt e;
     if (e1 == e2)
         return true;
     if (loc1 < loc2) {
@@ -346,11 +345,11 @@ PruneHVals(void)
 }
 
 static void
-FindBestVals(register PClrVal vL)
+FindBestVals(PClrVal vL)
 {
-    register Fixed bV, bS;
-    register Fixed t, b;
-    register PClrVal vL2, vPrv, bstV;
+    Fixed bV, bS;
+    Fixed t, b;
+    PClrVal vL2, vPrv, bstV;
     for (; vL != NULL; vL = vL->vNxt) {
         if (vL->vBst != NULL)
             continue; /* already assigned */
@@ -384,10 +383,10 @@ FindBestVals(register PClrVal vL)
  possibly other fonts as well.  The old version causes bogus coloring
  and extra newcolors. */
 static void
-ReplaceVals(register Fixed oldB, register Fixed oldT, register Fixed newB,
-            register Fixed newT, register PClrVal newBst, bool vert)
+ReplaceVals(Fixed oldB, Fixed oldT, Fixed newB, Fixed newT, PClrVal newBst,
+            bool vert)
 {
-    register PClrVal vL;
+    PClrVal vL;
     for (vL = valList; vL != NULL; vL = vL->vNxt) {
         if (vL->vLoc1 != oldB || vL->vLoc2 != oldT || vL->merge)
             continue;
@@ -411,7 +410,7 @@ ReplaceVals(register Fixed oldB, register Fixed oldT, register Fixed newB,
 void
 MergeVals(bool vert)
 {
-    register PClrVal vLst, vL;
+    PClrVal vLst, vL;
     PClrVal bstV, bV;
     PClrSeg seg1, seg2, sg1, sg2;
     Fixed bot, top, b, t;

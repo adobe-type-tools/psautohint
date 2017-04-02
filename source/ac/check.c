@@ -575,8 +575,8 @@ CheckSmoothness(Fixed x0, Fixed cy0, Fixed x1, Fixed cy1, Fixed x2, Fixed y2,
 void
 CheckForDups(void)
 {
-    register PPathElt ob, nxt;
-    register Fixed x, y;
+    PPathElt ob, nxt;
+    Fixed x, y;
     ob = pathStart;
     while (ob != NULL) {
         nxt = ob->next;

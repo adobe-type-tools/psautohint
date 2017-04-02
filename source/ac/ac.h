@@ -324,12 +324,12 @@ bool DoFixes(void);
 bool FindLineSeg(Fixed loc, PClrSeg sL);
 void FltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr);
 bool ReadFontInfo(const ACFontInfo* fontinfo);
-bool InBlueBand(Fixed loc, int32_t n, register Fixed* p);
+bool InBlueBand(Fixed loc, int32_t n, Fixed* p);
 void GenHPts(void);
 void PreGenPts(void);
-PPathElt GetDest(register PPathElt cldest);
-PPathElt GetClosedBy(register PPathElt clsdby);
-void GetEndPoint(register PPathElt e, Fixed* x1p, Fixed* y1p);
+PPathElt GetDest(PPathElt cldest);
+PPathElt GetClosedBy(PPathElt clsdby);
+void GetEndPoint(PPathElt e, Fixed* x1p, Fixed* y1p);
 void GetEndPoints(PPathElt p, Fixed* px0, Fixed* py0, Fixed* px1, Fixed* py1);
 Fixed VertQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl);
 Fixed HorzQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl);
@@ -384,7 +384,7 @@ void ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i);
 void ReportRemConflict(PPathElt e);
 void ReportRotateSubpath(PPathElt e);
 void ReportRemShortColors(Fixed ex, Fixed ey);
-bool ResolveConflictBySplit(register PPathElt e, bool Hflg, PSegLnkLst lnk1,
+bool ResolveConflictBySplit(PPathElt e, bool Hflg, PSegLnkLst lnk1,
                             PSegLnkLst lnk2);
 void ReportPossibleLoop(PPathElt e);
 void ShowHVal(PClrVal val);
@@ -431,7 +431,7 @@ void Delete(PPathElt e);
 bool ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
                bool forBlendData, bool readHints);
 double FixToDbl(Fixed f);
-bool CompareValues(register PClrVal val1, register PClrVal val2, int32_t factor,
+bool CompareValues(PClrVal val1, PClrVal val2, int32_t factor,
                    int32_t ghstshift);
 void SaveFile(const ACFontInfo* fontinfo);
 void CheckForMultiMoveTo(void);

@@ -110,7 +110,7 @@ Alloc(int32_t sz)
 void
 InitData(const ACFontInfo* fontinfo, int32_t reason)
 {
-    register char* s;
+    char* s;
     float tmp, origEmSquare;
 
     switch (reason) {

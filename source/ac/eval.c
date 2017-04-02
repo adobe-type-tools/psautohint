@@ -326,7 +326,7 @@ static void
 InsertVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PClrSeg lSeg,
              PClrSeg rSeg)
 {
-    register PClrVal item, vlist, vprev;
+    PClrVal item, vlist, vprev;
     item = (PClrVal)Alloc(sizeof(ClrVal));
     item->vVal = val;
     item->initVal = val;
@@ -458,9 +458,9 @@ mfabs(float in)
 static Fixed
 CombVals(Fixed v1, Fixed v2)
 {
-    register int32_t i;
+    int32_t i;
     float r1, r2;
-    register float x, a, xx;
+    float x, a, xx;
     acfixtopflt(v1, &r1);
     acfixtopflt(v2, &r2);
     /* home brew sqrt */

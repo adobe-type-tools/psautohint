@@ -127,7 +127,7 @@ PruneColorSegs(PPathElt e, bool hFlg)
 void
 PruneElementColorSegs(void)
 {
-    register PPathElt e;
+    PPathElt e;
     e = pathStart;
     while (e != NULL) {
         PruneColorSegs(e, true);
@@ -164,7 +164,7 @@ RemLnk(PPathElt e, bool hFlg, PSegLnkLst rm)
 }
 
 static bool
-AlreadyOnList(register PClrVal v, register PClrVal lst)
+AlreadyOnList(PClrVal v, PClrVal lst)
 {
     while (lst != NULL) {
         if (v == lst)
@@ -328,13 +328,13 @@ TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst)
     FixedMidPoint(a3, a2, b1);
 
 bool
-ResolveConflictBySplit(register PPathElt e, bool Hflg, PSegLnkLst lnk1,
+ResolveConflictBySplit(PPathElt e, bool Hflg, PSegLnkLst lnk1,
                        PSegLnkLst lnk2)
 {
     /* insert new pathelt immediately following e */
     /* e gets first half of split; new gets second */
     /* e gets lnk1 in Hs or Vs; new gets lnk2 */
-    register PPathElt new;
+    PPathElt new;
     Cd d0, d1, d2, d3, d4, d5, d6, d7;
     if (e->type != CURVETO || e->isFlex)
         return false;
@@ -826,10 +826,10 @@ RemFlareLnk(PPathElt e, bool hFlg, PSegLnkLst rm, PPathElt e2, int32_t i)
 }
 
 bool
-CompareValues(register PClrVal val1, register PClrVal val2, int32_t factor,
+CompareValues(PClrVal val1, PClrVal val2, int32_t factor,
               int32_t ghstshift)
 {
-    register Fixed v1 = val1->vVal, v2 = val2->vVal, mx;
+    Fixed v1 = val1->vVal, v2 = val2->vVal, mx;
     mx = v1 > v2 ? v1 : v2;
     mx <<= 1;
     while (mx > 0) {

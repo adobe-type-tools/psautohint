@@ -39,7 +39,7 @@ static void
 FindPathBBox(void)
 {
     FltnRec fr;
-    register PPathElt e;
+    PPathElt e;
     Cd c0, c1, c2, c3;
     if (pathStart == NULL) {
         xmin = ymin = xmax = ymax = 0;

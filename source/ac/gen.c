@@ -404,9 +404,9 @@ ReportRemSeg(int32_t l, PClrSeg lst)
 static void
 RemExtraBends(int32_t l0, int32_t l1)
 {
-    register PClrSeg lst0, lst, n, p;
+    PClrSeg lst0, lst, n, p;
     PClrSeg nxt, prv;
-    register Fixed loc0, loc;
+    Fixed loc0, loc;
     lst0 = segLists[l0];
     prv = NULL;
     while (lst0 != NULL) {
@@ -513,7 +513,7 @@ static Fixed
 PickVSpot(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed px1, Fixed py1,
           Fixed px2, Fixed py2, Fixed prvx, Fixed prvy, Fixed nxtx, Fixed nxty)
 {
-    register Fixed a1, a2;
+    Fixed a1, a2;
     if (x0 == px1 && x1 != px2)
         return x0;
     if (x0 != px1 && x1 == px2)
@@ -798,10 +798,10 @@ GenVPts(int32_t specialCharType)
 }
 
 bool
-InBlueBand(Fixed loc, int32_t n, register Fixed* p)
+InBlueBand(Fixed loc, int32_t n, Fixed* p)
 {
-    register int i;
-    register Fixed y;
+    int i;
+    Fixed y;
     if (n <= 0)
         return false;
     y = itfmy(loc);

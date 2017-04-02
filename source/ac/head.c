@@ -11,7 +11,7 @@
 #include "machinedep.h"
 
 PPathElt
-GetDest(register PPathElt cldest)
+GetDest(PPathElt cldest)
 {
     if (cldest == NULL)
         return NULL;
@@ -25,7 +25,7 @@ GetDest(register PPathElt cldest)
 }
 
 PPathElt
-GetClosedBy(register PPathElt clsdby)
+GetClosedBy(PPathElt clsdby)
 {
     if (clsdby == NULL)
         return NULL;
@@ -43,7 +43,7 @@ GetClosedBy(register PPathElt clsdby)
 }
 
 void
-GetEndPoint(register PPathElt e, Fixed* x1p, Fixed* y1p)
+GetEndPoint(PPathElt e, Fixed* x1p, Fixed* y1p)
 {
     if (e == NULL) {
         *x1p = 0;
@@ -88,7 +88,7 @@ GetEndPoints(PPathElt p, Fixed* px0, Fixed* py0, Fixed* px1, Fixed* py1)
 static Fixed
 HVness(float* pq)
 {
-    register float q;
+    float q;
     float result;
     /* approximately == 2 q neg exp */
     /* as q -> 0, result goes to 1.0 */
@@ -114,7 +114,7 @@ VertQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl)
 {
     /* FixOne means exactly vertical. 0 means not vertical */
     /* intermediate values mean almost vertical */
-    register Fixed xabs, yabs;
+    Fixed xabs, yabs;
     float rx, ry, q;
     xabs = xk - xl;
     if (xabs < 0)
@@ -138,7 +138,7 @@ VertQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl)
 Fixed
 HorzQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl)
 {
-    register Fixed xabs, yabs;
+    Fixed xabs, yabs;
     float rx, ry, q;
     yabs = yk - yl;
     if (yabs < 0)
