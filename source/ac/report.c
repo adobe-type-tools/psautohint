@@ -147,10 +147,9 @@ ExpectedMoveTo(PPathElt e)
 void
 ReportMissingClosePath(void)
 {
-    (void)sprintf(
-      globmsg,
-      "Missing closepath in %s character.\n  The file is probably truncated.",
-      fileName);
+    (void)sprintf(globmsg, "Missing closepath in %s character.\n"
+                           "  The file is probably truncated.",
+                  fileName);
     LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
 }
 
@@ -205,11 +204,10 @@ ReportPossibleLoop(PPathElt e)
     if (e->type == MOVETO)
         e = GetClosedBy(e);
     GetEndPoints(e, &x0, &y0, &x1, &y1);
-    (void)sprintf(
-      S0,
-      "Possible loop in element that goes from %g %g to %g %g. Please check.",
-      FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-      FixToDbl(itfmy(y1)));
+    (void)sprintf(S0, "Possible loop in element that goes from %g %g to %g %g."
+                      " Please check.",
+                  FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
+                  FixToDbl(itfmy(y1)));
     ReportError(S0);
 }
 
