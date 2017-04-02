@@ -21,8 +21,6 @@ FixToDbl(Fixed f)
     return r;
 }
 
-#define EndLine()
-
 void
 PrintMessage(char* s)
 {
@@ -338,7 +336,6 @@ ShowHVals(PClrVal lst)
 {
     while (lst != NULL) {
         ShowHVal(lst);
-        EndLine();
         lst = lst->vNxt;
     }
 }
@@ -347,7 +344,6 @@ void
 ReportAddHVal(PClrVal val)
 {
     ShowHVal(val);
-    EndLine();
 }
 
 static void
@@ -388,7 +384,6 @@ ShowVVals(PClrVal lst)
 {
     while (lst != NULL) {
         ShowVVal(lst);
-        EndLine();
         lst = lst->vNxt;
     }
 }
@@ -397,7 +392,6 @@ void
 ReportAddVVal(PClrVal val)
 {
     ShowVVal(val);
-    EndLine();
 }
 
 void
@@ -422,7 +416,6 @@ ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg)
         else
             PrintMessage("NULL");
     }
-    EndLine();
 }
 
 void
@@ -525,7 +518,6 @@ ListClrInfo(void)
                 LstVVal(seg->sLnk);
                 vLst = vLst->next;
             }
-            EndLine();
         }
         e = e->next;
     }
@@ -673,7 +665,6 @@ ReportPruneHVal(PClrVal val, PClrVal v, int32_t i)
     ShowHVal(val);
     PrintMessage("\n\t");
     ShowHVal(v);
-    EndLine();
 }
 
 void
@@ -686,7 +677,6 @@ ReportPruneVVal(PClrVal val, PClrVal v, int32_t i)
     ShowVVal(val);
     PrintMessage("\n\t");
     ShowVVal(v);
-    EndLine();
 }
 
 void
