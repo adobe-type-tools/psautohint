@@ -18,7 +18,7 @@
 #define PRINT_READ (0)
 #define ESCVAL 100
 
-char bezGlyphName[MAX_GLYPHNAME_LEN];
+char glyphName[MAX_GLYPHNAME_LEN];
 
 static Fixed currentx, currenty; /* used to calculate absolute coordinates */
 static Fixed tempx, tempy;       /* used to calculate relative coordinates */
@@ -621,7 +621,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
     int32_t val = 0;
     Fixed r;
     pathStart = pathEnd = NULL;
-    bezGlyphName[0] = '\0';
+    glyphName[0] = '\0';
 
     while (true) {
         c = *s++;
@@ -632,7 +632,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                 val = 0;
                 goto rdnum;
             case '%': /* comment */
-                if (bezGlyphName[0] == '\0') {
+                if (glyphName[0] == '\0') {
                     unsigned int end = 0;
                     while (*s == ' ')
                         s++;
@@ -641,15 +641,15 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                            (s[end] != '\n'))
                         end++;
 
-                    strncpy(bezGlyphName, s, end);
+                    strncpy(glyphName, s, end);
                     if (end < MAX_GLYPHNAME_LEN)
-                        bezGlyphName[end] = '\0';
+                        glyphName[end] = '\0';
                     else {
-                        bezGlyphName[MAX_GLYPHNAME_LEN - 1] = '\0';
+                        glyphName[MAX_GLYPHNAME_LEN - 1] = '\0';
                         LogMsg(LOGERROR, NONFATALERROR,
                                "Bad input file. Glyph name %s is "
                                "greater than %d chars.\n",
-                               bezGlyphName, MAX_GLYPHNAME_LEN);
+                               glyphName, MAX_GLYPHNAME_LEN);
                     }
                 }
                 while ((*s != '\n') && (*s != '\r')) {
