@@ -589,7 +589,7 @@ SaveFile(const ACFontInfo* fontinfo)
     assert(bezoutput != NULL);
 
     /* AddSolEol(); */
-    WriteString("%% ");
+    WriteString("% ");
     WriteString(fileName);
     WriteString("\n");
     wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
