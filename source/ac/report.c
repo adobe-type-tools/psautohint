@@ -150,16 +150,16 @@ ExpectedMoveTo(PPathElt e)
     }
     LogMsg(LOGERROR, NONFATALERROR,
            "Path for %s character has a %s where a moveto was "
-           "expected.\n  The file is probably truncated.",
-           fileName, s);
+           "expected.\n  The data are probably truncated.",
+           glyphName, s);
 }
 
 void
 ReportMissingClosePath(void)
 {
     LogMsg(LOGERROR, NONFATALERROR, "Missing closepath in %s character.\n"
-                                    "  The file is probably truncated.",
-           fileName);
+                                    "  The data are probably truncated.",
+           glyphName);
 }
 
 void
@@ -446,7 +446,7 @@ LogColorInfo(PClrPoint pl)
     if (c == 'y' || c == 'm') { /* vertical lines */
         lft = pl->x0;
         rht = pl->x1;
-        PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(rht - lft), fileName,
+        PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(rht - lft), glyphName,
                      FixToDbl(lft), FixToDbl(rht));
     } else {
         bot = pl->y0;
@@ -454,7 +454,7 @@ LogColorInfo(PClrPoint pl)
         wdth = top - bot;
         if (wdth == -FixInt(21) || wdth == -FixInt(20))
             return; /* ghost pair */
-        PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(wdth), fileName,
+        PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(wdth), glyphName,
                      FixToDbl(bot), FixToDbl(top));
     }
 }

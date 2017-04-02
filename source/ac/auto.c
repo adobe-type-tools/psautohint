@@ -160,7 +160,7 @@ RemLnk(PPathElt e, bool hFlg, PSegLnkLst rm)
         lst = nxt;
     }
     LogMsg(LOGERROR, NONFATALERROR,
-           "Badly formatted segment list in file: %s.\n", fileName);
+           "Badly formatted segment list in glyph: %s.\n", glyphName);
 }
 
 static bool
@@ -703,7 +703,7 @@ StartNewColoring(PPathElt e, PSegLnkLst hLst, PSegLnkLst vLst)
     ReClrBounds(e);
     if (e->newcolors != 0) {
         LogMsg(LOGERROR, NONFATALERROR,
-               "Uninitialized extra hints list in file: %s.\n", fileName);
+               "Uninitialized extra hints list in glyph: %s.\n", glyphName);
     }
     XtraClrs(e);
     clrBBox = false;

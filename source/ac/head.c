@@ -65,12 +65,12 @@ retry:
             e = GetDest(e);
             if (e == NULL || e->type == CLOSEPATH) {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Bad character description file: %s.\n", fileName);
+                       "Bad character description file: %s.\n", glyphName);
             }
             goto retry;
         default: {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal operator in character file: %s.\n", fileName);
+                   "Illegal operator in character file: %s.\n", glyphName);
         }
     }
 }

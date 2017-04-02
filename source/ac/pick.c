@@ -238,7 +238,7 @@ PrevVal(PClrVal val, PClrVal vList)
         vList = vList->vNxt;
         if (vList == NULL) {
             LogMsg(LOGERROR, NONFATALERROR, "Malformed value list in %s.\n",
-                   fileName);
+                   glyphName);
         }
 
         if (vList == val)

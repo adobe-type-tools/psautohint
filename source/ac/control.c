@@ -72,7 +72,7 @@ PointListCheck(PClrPoint new, PClrPoint lst)
         }
         default: {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal character in point list in %s.\n", fileName);
+                   "Illegal character in point list in %s.\n", glyphName);
         }
     }
     if (n1 > n2) {
@@ -868,8 +868,8 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
             reportRetryCB();
         }
         if (pathStart == NULL || pathStart == pathEnd) {
-            LogMsg(LOGERROR, NONFATALERROR, "No character path in %s.\n",
-                   fileName);
+            LogMsg(LOGERROR, NONFATALERROR, "No glyph path in %s.\n",
+                   glyphName);
         }
 
         /* SaveFile(); SaveFile is always called in AddColorsCleanup, so this is
@@ -899,9 +899,9 @@ AddColorsCleanup(const ACFontInfo* fontinfo)
 
         if (pathStart == NULL || pathStart == pathEnd) {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "The %s character path vanished while adding "
-                   "hints.\n  File not written.",
-                   fileName);
+                   "The %s glyph path vanished while adding "
+                   "hints.\n",
+                   glyphName);
         } else {
             SaveFile(fontinfo);
         }
@@ -940,7 +940,7 @@ AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
     int32_t lentop = lenTopBands, lenbot = lenBotBands;
     fileName = fname;
     if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
-        LogMsg(LOGERROR, NONFATALERROR, "Cannot open %s file.\n", fileName);
+        LogMsg(LOGERROR, NONFATALERROR, "Cannot prase %s glyph.\n", glyphName);
     }
     PrintMessage(""); /* Just print the file name. */
     AddColors(fontinfo, srcglyph, extracolor);

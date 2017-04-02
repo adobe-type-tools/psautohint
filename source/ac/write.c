@@ -165,7 +165,7 @@ safestrcat(char* s1, char* s2)
 {
     if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
         LogMsg(LOGERROR, FATALERROR,
-               "ERROR: Hint information overflowing buffer: %s\n", fileName);
+               "ERROR: Hint information overflowing buffer: %s\n", glyphName);
     } else {
         strcat(s1, s2);
     }
@@ -243,7 +243,7 @@ WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst)
             break;
         default: {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal point list data for file: %s.\n", fileName);
+                   "Illegal point list data for glyph: %s.\n", glyphName);
         }
     }
     sws(" % ");
@@ -590,7 +590,7 @@ SaveFile(const ACFontInfo* fontinfo)
 
     /* AddSolEol(); */
     WriteString("% ");
-    WriteString(fileName);
+    WriteString(glyphName);
     WriteString("\n");
     wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
     NumberPath();
@@ -631,7 +631,7 @@ SaveFile(const ACFontInfo* fontinfo)
                 break;
             default: {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal path list for file: %s.\n", fileName);
+                       "Illegal path list for glyph: %s.\n", glyphName);
             }
         }
 #if WRTABS_COMMENT
