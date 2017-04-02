@@ -18,7 +18,8 @@
 
 Fixed currentx, currenty;
 bool firstFlex, wrtColorInfo;
-char S0[MAXMSGLEN + 1];
+#define MAXS0LEN 127
+char S0[MAXS0LEN + 1];
 PClrPoint bst;
 PClrPoint prv_bst;
 char bch;
@@ -66,13 +67,13 @@ WriteString(char* str)
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal p;laces. */
 #define WRTNUM(i)                                                              \
     {                                                                          \
-        snprintf(S0, MAXMSGLEN, "%d ", (int32_t)(i));                          \
+        snprintf(S0, MAXS0LEN, "%d ", (int32_t)(i));                           \
         WriteString(S0);                                                       \
     }
 
 #define WRTRNUM(i)                                                             \
     {                                                                          \
-        snprintf(S0, MAXMSGLEN, "%0.2f ", roundf((float)(i)*100) / 100);       \
+        snprintf(S0, MAXS0LEN, "%0.2f ", roundf((float)(i)*100) / 100);        \
         WriteString(S0);                                                       \
     }
 
@@ -174,13 +175,13 @@ safestrcat(char* s1, char* s2)
 
 #define SWRTNUM(i)                                                             \
     {                                                                          \
-        snprintf(S0, MAXMSGLEN, "%d ", (int32_t)(i));                          \
+        snprintf(S0, MAXS0LEN, "%d ", (int32_t)(i));                           \
         sws(S0);                                                               \
     }
 
 #define SWRTNUMA(i)                                                            \
     {                                                                          \
-        snprintf(S0, MAXMSGLEN, "%0.2f ", roundf((float)(i)*100) / 100);       \
+        snprintf(S0, MAXS0LEN, "%0.2f ", roundf((float)(i)*100) / 100);        \
         sws(S0);                                                               \
     }
 
@@ -588,7 +589,7 @@ SaveFile(const ACFontInfo* fontinfo)
     assert(bezoutput != NULL);
 
     /* AddSolEol(); */
-    snprintf(S0, MAXMSGLEN, "%% %s\n", fileName);
+    snprintf(S0, MAXS0LEN, "%% %s\n", fileName);
     WriteString(S0);
     wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
     NumberPath();
