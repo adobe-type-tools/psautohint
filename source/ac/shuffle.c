@@ -23,9 +23,8 @@ InitShuffleSubpaths(void)
             cnt++;
         if (DEBUG) {
             if (e->type == MOVETO) { /* DEBUG */
-                snprintf(globmsg, MAXMSGLEN, "subpath %d starts at %g %g\n",
-                         cnt, FixToDbl(itfmx(e->x)), FixToDbl(itfmy(e->y)));
-                PrintMessage(globmsg);
+                PrintMessage("subpath %d starts at %g %g\n", cnt,
+                             FixToDbl(itfmx(e->x)), FixToDbl(itfmy(e->y)));
             }
         }
         e->count = (int16_t)cnt;
@@ -43,20 +42,17 @@ PrintLinks(void)
     int32_t i, j;
     PrintMessage("Links ");
     for (i = 0; i < rowcnt; i++) {
-        snprintf(globmsg, MAXMSGLEN, "%d  ", i);
-        PrintMessage(globmsg);
+        PrintMessage("%d  ", i);
         if (i < 10)
             PrintMessage(" ");
     }
     PrintMessage("\n");
     for (i = 0; i < rowcnt; i++) {
-        snprintf(globmsg, MAXMSGLEN, " %d   ", i);
-        PrintMessage(globmsg);
+        PrintMessage(" %d   ", i);
         if (i < 10)
             PrintMessage(" ");
         for (j = 0; j < rowcnt; j++) {
-            snprintf(globmsg, MAXMSGLEN, "%d   ", links[rowcnt * i + j]);
-            PrintMessage(globmsg);
+            PrintMessage("%d   ", links[rowcnt * i + j]);
         }
         PrintMessage("\n");
     }
@@ -68,16 +64,14 @@ PrintSumLinks(char* sumlinks)
     int32_t i;
     PrintMessage("Sumlinks ");
     for (i = 0; i < rowcnt; i++) {
-        snprintf(globmsg, MAXMSGLEN, "%d  ", i);
-        PrintMessage(globmsg);
+        PrintMessage("%d  ", i);
         if (i < 10)
             PrintMessage(" ");
     }
     PrintMessage("\n");
     PrintMessage("         ");
     for (i = 0; i < rowcnt; i++) {
-        snprintf(globmsg, MAXMSGLEN, "%d   ", sumlinks[i]);
-        PrintMessage(globmsg);
+        PrintMessage("%d   ", sumlinks[i]);
     }
     PrintMessage("\n");
 }
@@ -88,16 +82,14 @@ PrintOutLinks(unsigned char* outlinks)
     int32_t i;
     PrintMessage("Outlinks ");
     for (i = 0; i < rowcnt; i++) {
-        snprintf(globmsg, MAXMSGLEN, "%d  ", i);
-        PrintMessage(globmsg);
+        PrintMessage("%d  ", i);
         if (i < 10)
             PrintMessage(" ");
     }
     PrintMessage("\n");
     PrintMessage("         ");
     for (i = 0; i < rowcnt; i++) {
-        snprintf(globmsg, MAXMSGLEN, "%d   ", outlinks[i]);
-        PrintMessage(globmsg);
+        PrintMessage("%d   ", outlinks[i]);
     }
     PrintMessage("\n");
 }
@@ -134,8 +126,7 @@ MarkLinks(PClrVal vL, bool hFlg)
                 ShowHVal(vL);
             else
                 ShowVVal(vL);
-            snprintf(globmsg, MAXMSGLEN, " : %d <-> %d\n", i, j);
-            PrintMessage(globmsg);
+            PrintMessage(" : %d <-> %d\n", i, j);
         }
         links[rowcnt * i + j] = 1;
         links[rowcnt * j + i] = 1;
@@ -156,9 +147,7 @@ Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
     }
     MoveSubpathToEnd(e);
     if (DEBUG) {
-        snprintf(globmsg, MAXMSGLEN, "move subpath %d to end\n",
-                 bst); /* DEBUG */
-        PrintMessage(globmsg);
+        PrintMessage("move subpath %d to end\n", bst); /* DEBUG */
     }
     output[bst] = 1;
     lnks = &links[bst * rowcnt];

@@ -13,7 +13,6 @@
 #include "machinedep.h"
 
 static int16_t total_inputdirs = 1; /* number of input directories           */
-char globmsg[MAXMSGLEN + 1];        /* used to format messages               */
 
 typedef void* (*AC_MEMMANAGEFUNCPTR)(void* ctxptr, void* old, uint32_t size);
 extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;

@@ -51,7 +51,6 @@ typedef int indx;		/* for indexes that could be either short or
 #define LOGERROR 2
 
 #define MAXMSGLEN 500		/* maximum message length */
-extern char globmsg[MAXMSGLEN + 1];	/* used to format the string passed to LogMsg */
 
 extern void LogMsg(int16_t, int16_t, char *, ...);
 
