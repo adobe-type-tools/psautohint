@@ -18,7 +18,7 @@
 #define PRINT_READ (0)
 #define ESCVAL 100
 
-char bezGlyphName[64];
+char bezGlyphName[MAX_GLYPHNAME_LEN];
 
 static Fixed currentx, currenty; /* used to calculate absolute coordinates */
 static Fixed tempx, tempy;       /* used to calculate relative coordinates */
@@ -642,13 +642,13 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                         end++;
 
                     strncpy(bezGlyphName, s, end);
-                    if (end < 64)
+                    if (end < MAX_GLYPHNAME_LEN)
                         bezGlyphName[end] = '\0';
                     else {
-                        bezGlyphName[63] = '\0';
-                        sprintf(globmsg, "Bad input file.  Glyph name  %s is "
-                                         "greater than 32 chars.\n",
-                                bezGlyphName);
+                        bezGlyphName[MAX_GLYPHNAME_LEN - 1] = '\0';
+                        sprintf(globmsg, "Bad input file. Glyph name %s is "
+                                         "greater than %d chars.\n",
+                                bezGlyphName, MAX_GLYPHNAME_LEN);
                         LogMsg(globmsg, LOGERROR, NONFATALERROR, true);
                     }
                 }

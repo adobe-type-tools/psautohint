@@ -217,7 +217,10 @@ extern Fixed bluefuzz;
 extern bool doAligns, doStems;
 extern bool idInFile;
 extern bool roundToInt;
-extern char bezGlyphName[64]; /* defined in read.c; set from the glyph name at the start of the bex file. */
+
+#define MAX_GLYPHNAME_LEN 64
+/* defined in read.c; set from the glyph name at the start of the bex file. */
+extern char bezGlyphName[MAX_GLYPHNAME_LEN];
 
 /* macros */
 
