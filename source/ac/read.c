@@ -743,8 +743,8 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
 }
 
 bool
-ReadCharFile(const ACFontInfo* fontinfo, const char* srcglyph,
-             bool forBlendData, bool readHints)
+ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
+          bool forBlendData, bool readHints)
 {
     assert(srcglyph != NULL);
 

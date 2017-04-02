@@ -430,8 +430,8 @@ void AddHSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
                  int32_t typ, int32_t i);
 void Delete(PPathElt e);
 bool StrEqual(register char* s1, register char* s2);
-bool ReadCharFile(const ACFontInfo* fontinfo, const char* srcglyph,
-                  bool forBlendData, bool readHints);
+bool ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
+               bool forBlendData, bool readHints);
 double FixToDbl(Fixed f);
 bool CompareValues(register PClrVal val1, register PClrVal val2, int32_t factor,
                    int32_t ghstshift);
