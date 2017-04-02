@@ -127,9 +127,9 @@ int32_t
 SpecialCharType(void)
 {
     /* 1 = upper; -1 = lower; 0 = neither */
-    if (FindNameInList(bezGlyphName, UpperSpecialChars))
+    if (FindNameInList(glyphName, UpperSpecialChars))
         return 1;
-    if (FindNameInList(bezGlyphName, LowerSpecialChars))
+    if (FindNameInList(glyphName, LowerSpecialChars))
         return -1;
     return 0;
 }
@@ -137,29 +137,29 @@ SpecialCharType(void)
 bool
 HColorChar(void)
 {
-    return FindNameInList(bezGlyphName, HColorList);
+    return FindNameInList(glyphName, HColorList);
 }
 
 bool
 VColorChar(void)
 {
-    return FindNameInList(bezGlyphName, VColorList);
+    return FindNameInList(glyphName, VColorList);
 }
 
 bool
 NoBlueChar(void)
 {
-    return FindNameInList(bezGlyphName, NoBlueList);
+    return FindNameInList(glyphName, NoBlueList);
 }
 
 int32_t
 SolEolCharCode(void)
 {
-    if (FindNameInList(bezGlyphName, SolEol0List))
+    if (FindNameInList(glyphName, SolEol0List))
         return 0;
-    if (FindNameInList(bezGlyphName, SolEol1List))
+    if (FindNameInList(glyphName, SolEol1List))
         return 1;
-    if (FindNameInList(bezGlyphName, SolEolNeg1List))
+    if (FindNameInList(glyphName, SolEolNeg1List))
         return -1;
     return 2;
 }
@@ -276,7 +276,7 @@ AddSolEol(void)
 bool
 MoveToNewClrs(void)
 {
-    /* XXX: fileName is always empty, we probably want to use bezGlyphName here
+    /* XXX: fileName is always empty, we probably want to use glyphName here
      * but this causes a change in the hinting of percent and perthousand
      * glyphs and need to be verified. */
     return StrEqual(fileName, "percent") || StrEqual(fileName, "perthousand");

@@ -220,7 +220,7 @@ extern bool roundToInt;
 
 #define MAX_GLYPHNAME_LEN 64
 /* defined in read.c; set from the glyph name at the start of the bex file. */
-extern char bezGlyphName[MAX_GLYPHNAME_LEN];
+extern char glyphName[MAX_GLYPHNAME_LEN];
 
 /* macros */
 

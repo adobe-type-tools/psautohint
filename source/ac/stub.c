@@ -18,7 +18,7 @@ AddVStem(Fixed top, Fixed bottom, bool curved)
         return;
 
     if (addVStemCB != NULL) {
-        addVStemCB(top, bottom, bezGlyphName);
+        addVStemCB(top, bottom, glyphName);
     }
 }
 
@@ -29,7 +29,7 @@ AddHStem(Fixed right, Fixed left, bool curved)
         return;
 
     if (addHStemCB != NULL) {
-        addHStemCB(right, left, bezGlyphName);
+        addHStemCB(right, left, glyphName);
     }
 }
 
@@ -37,7 +37,7 @@ void
 AddCharExtremes(Fixed bot, Fixed top)
 {
     if (addCharExtremesCB != NULL) {
-        addCharExtremesCB(top, bot, bezGlyphName);
+        addCharExtremesCB(top, bot, glyphName);
     }
 }
 
@@ -45,6 +45,6 @@ void
 AddStemExtremes(Fixed bot, Fixed top)
 {
     if (addStemExtremesCB != NULL) {
-        addStemExtremesCB(top, bot, bezGlyphName);
+        addStemExtremesCB(top, bot, glyphName);
     }
 }
