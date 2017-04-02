@@ -82,11 +82,6 @@ LogMsg(int16_t level, /* error, warning, info */
     vsnprintf(str, MAXMSGLEN, format, va);
     va_end(va);
 
-    /* changed handling of this to be more friendly (?) jvz */
-    if (strlen(str) > MAXMSGLEN) {
-        LogMsg1("The following message was truncated.\n", WARNING, OK);
-        ++warncnt;
-    }
     if (level == WARNING)
         ++warncnt;
     if (!strcmp(str, lastLogStr) && level == lastLogLevel) {
