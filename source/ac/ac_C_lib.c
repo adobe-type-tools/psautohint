@@ -62,6 +62,9 @@ FreeFontInfo(ACFontInfo* fontinfo)
 {
     int i;
 
+    if (!fontinfo)
+        return;
+
     for (i = 0; i < fontinfo->length; i++) {
         if (fontinfo->entries[i].value[0]) {
             ACFREEMEM(fontinfo->entries[i].value);
@@ -122,6 +125,9 @@ NewBuffer(int size)
 static void
 FreeBuffer(ACBuffer* buffer)
 {
+    if (!buffer)
+        return;
+
     ACFREEMEM(buffer->data);
     ACFREEMEM(buffer);
 }
