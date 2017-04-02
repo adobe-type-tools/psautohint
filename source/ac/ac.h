@@ -355,7 +355,6 @@ void InitFix(int32_t reason);
 void InitGen(int32_t reason);
 void InitPick(int32_t reason);
 void AutoAddFlex(void);
-int32_t PointListCheck(PClrPoint new, PClrPoint lst);
 bool SameColors(int32_t cn1, int32_t cn2);
 bool PreCheckForColoring(void);
 int32_t CountSubPaths(void);

@@ -38,7 +38,7 @@ PtLstLen(PClrPoint lst)
     return cnt;
 }
 
-int32_t
+static int32_t
 PointListCheck(PClrPoint new, PClrPoint lst)
 {
     /* -1 means not a member, 1 means already a member, 0 means conflicts */
