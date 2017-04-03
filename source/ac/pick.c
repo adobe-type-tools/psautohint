@@ -8,6 +8,7 @@
  */
 
 #include "ac.h"
+#include "bbox.h"
 #include "machinedep.h"
 
 static PClrVal Vrejects, Hrejects;

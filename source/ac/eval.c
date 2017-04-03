@@ -8,6 +8,7 @@
  */
 
 #include "ac.h"
+#include "bbox.h"
 
 #define MAXF (1 << 15)
 static void

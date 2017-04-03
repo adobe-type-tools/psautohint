@@ -10,7 +10,6 @@
 #include <math.h>
 
 #include "ac.h"
-#include "bftoac.h"
 #include "charpath.h"
 #include "fipublic.h"
 #include "machinedep.h"

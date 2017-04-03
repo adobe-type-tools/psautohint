@@ -8,7 +8,7 @@
  */
 
 #include "ac.h"
-#include "bftoac.h"
+#include "bbox.h"
 #include "machinedep.h"
 
 static Fixed xmin, ymin, xmax, ymax, vMn, vMx, hMn, hMx;
@@ -417,7 +417,7 @@ CheckPathBBox(void)
         ReportBBoxBogus(llx, lly, urx, ury);
 }
 
-Fixed
+static Fixed
 GetPathLSB(void)
 {
     Fixed llx, urx, tmp;

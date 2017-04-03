@@ -11,7 +11,6 @@
 
 #include "ac.h"
 #include "ac_C_lib.h"
-#include "bftoac.h"
 #include "machinedep.h"
 
 const char* libversion = "1.6.0";

@@ -10,7 +10,6 @@
 #include <math.h>
 
 #include "ac.h"
-#include "bftoac.h"
 #include "machinedep.h"
 
 static bool xflat, yflat, xdone, ydone, bbquit;

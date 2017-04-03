@@ -8,7 +8,6 @@
  */
 
 #include "ac.h"
-#include "bftoac.h"
 #include "fipublic.h"
 #include "machinedep.h"
 

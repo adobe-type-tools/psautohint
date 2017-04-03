@@ -8,6 +8,7 @@
  */
 
 #include "ac.h"
+#include "bbox.h"
 #include "machinedep.h"
 
 static bool clrBBox, clrHBounds, clrVBounds, haveHBnds, haveVBnds, mergeMain;
