@@ -34,7 +34,6 @@ CFLAGS = \
 
 ifeq ($(OS),Windows_NT)
 EXE = .exe
-CFLAGS += -I$(SRC_DIR)/include/winextras
 else
 PRG_LIBS += -lm
 endif
