@@ -9,4 +9,4 @@ os:
 
 script:
   - python setup.py install
-  - make -j check
+  - make check
