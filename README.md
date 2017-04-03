@@ -22,7 +22,7 @@ running:
 
     python python/autohint.py
 
-The old `authintexe` binary can be also built by running:
+The old `autohintexe` binary can be also built by running:
 
     make
 
