@@ -28,9 +28,15 @@ typedef unsigned char bool;
 #define false 0
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1900
+#ifdef _MSC_VER
+#if _MSC_VER < 1900
 #define snprintf(buf, size, ...) _snprintf_s(buf, size, _TRUNCATE, __VA_ARGS__)
-#endif
+#endif /* _MSC_VER < 1900 */
+
+#if _MSC_VER < 1800
+#define roundf(x) (float)((x < 0) ? (ceil((x)-0.5)) : (floor((x) + 0.5)));
+#endif /* _MSC_VER < 1800 */
+#endif /* _MSC_VER */
 
 typedef int32_t               Fixed;
 typedef int indx;		/* for indexes that could be either short or
