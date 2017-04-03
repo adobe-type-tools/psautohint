@@ -7,10 +7,8 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-/* stub.c - to resolve otherwise unresolved external references. */
 #include "ac.h"
 
-/* Procedures defined in stems/stemreport.c - StemHist */
 void
 AddVStem(Fixed top, Fixed bottom, bool curved)
 {
