@@ -34,7 +34,10 @@ typedef unsigned char bool;
 #endif /* _MSC_VER < 1900 */
 
 #if _MSC_VER < 1800
-#define roundf(x) (float)((x < 0) ? (ceil((x)-0.5)) : (floor((x) + 0.5)));
+float roundf(x)
+{
+    return (float)((x < 0) ? (ceil((x)-0.5)) : (floor((x) + 0.5)));
+}
 #endif /* _MSC_VER < 1800 */
 #endif /* _MSC_VER */
 
