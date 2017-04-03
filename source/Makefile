@@ -84,9 +84,6 @@ ARCHIVE = $(if $(filter $V,1),,@echo "  AR $@ ";)$(AR)
 $(PRG_TARGET): $(PRG_OBJS) $(PRG_SRCS) $(LIB_TARGET)
 	$(LINK) $(CFLAGS) -o $@ $(PRG_OBJS) $(PRG_LIBS)
 
-$(OBJ_DIR)/main.o: $(SRC_DIR)/main.c
-	$(COMPILE) $(CFLAGS) -DEXECUTABLE=1 -c $< -o $@
-
 # Library
 $(LIB_TARGET): $(LIB_OBJS)
 	$(ARCHIVE) -rs $@ $?
