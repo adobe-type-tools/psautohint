@@ -2,29 +2,29 @@
 
 ## Background
 
-AC was written by Bill Paxton over eight years ago. Originally, it
+AC was written by Bill Paxton. Originally, it
 was integrated with the font editor, FE, but Bill extracted the
 hinting code so it could run independently and would be easier to
 maintain.
 
 ## Input
 
-AC reads a character outline in encrypted bez file format. The fontinfo
-file is also read to get alignment zone information, the list of H,V counter
-characters, the list of auxiliary H,V stem values, and whether or not flex
-can be added to a character.
+AC reads a glyph outline in bez format. The fontinfo
+data is also read to get alignment zone information, the list of H,V counter
+glyphs, the list of auxiliary H,V stem values, and whether or not flex
+can be added to a glyph.
 
-As the bez file is read a doubly linked-list is created that contains the
+As the bez data is read a doubly linked-list is created that contains the
 path element information, e.g. coordinates, path type (moveto, curveto...),
 etc.
 
 ## Setup
 
-The following initial setup and error checking is done after a character
+The following initial setup and error checking is done after a glyph
 is read:
 
-1. Calculate the character bounding box to find the minimum and maximum
-   x, y values. Supposedly, the very minimum hinting a character will get
+1. Calculate the glyph bounding box to find the minimum and maximum
+   x, y values. Supposedly, the very minimum hinting a glyph will get
    is its bounding box values.
 
 2. Check for duplicate subpaths.
@@ -40,7 +40,7 @@ is read:
    horizontal stem value is the larger of 86.25 and the largest value in
    the auxiliary H stem array.
 
-6. If flex is allowed add flex to the character. The current flex
+6. If flex is allowed add flex to the glyph. The current flex
    algorithm is very lax and flex can occur where you least expect it.
    Almost anything that conforms to page 72 of the black book is flexed.
    However, the last line on page 72 says the flex height must be 20 units
@@ -50,7 +50,7 @@ is read:
    is between 0 and 30 degrees the points are forced to be colinear.
 
 8. If there is a sharp angle, greater than 140 degrees, the angle will
-   be blunted by adding another point. There's a comment that says as of
+   be blunted by adding another point. There’s a comment that says as of
    version 2.21 this blunting will not occur.
 
 9. Count and save number of subpaths for each path element.
@@ -60,7 +60,7 @@ is read:
 Generate possible hstem and vstem values. These values are saved as a
 linked list (the coloring segment list) in the path element data structure.
 There are four segment lists, one for top, bottom, left, and right segments.
-The basic progression is: path -> segments -> values -> hints, where a
+The basic progression is: path → segments → values → hints, where a
 segment is a horizontal or vertical feature, a value is a pair of
 segments (top and bottom or left and right) that is assigned a priority
 based on the length and width of a stem, and hints are non-overlapping
@@ -69,12 +69,12 @@ pairs with the highest priority.
 ### Generating {H,V}Stems
 
 The path element is traversed and possible coordinates are added to the
-segment list. The x or y coordinate is saved depending on if it's a
+segment list. The x or y coordinate is saved depending on if it’s a
 top/bottom or left/right segment and the minimum and maximum extent for a
 vertical or horizontal segment. These coordinates are included in the list:
-a) the coords of horizontal/vertical lines, b) if this is a curve find the
+a) the coordinates of horizontal/vertical lines, b) if this is a curve find the
 bends (bend angle must be 135 degrees or less to be included);
-don't add a curve's coordinate if the point is not at an extreme and is
+don’t add a curve’s coordinate if the point is not at an extreme and is
 going in the same direction as the previous path, c) add points at
 extremes, d) add bands for s-curves or where an inflection point occurs,
 e) checks are made to see if the curve is in a blue zone and a coordinate
@@ -107,19 +107,19 @@ This is done by looking at the priority values.
 
 After pruning, the best pair is found for each top, bottom or left, right
 segment using the priority values. Pairs that are at the same location
-and are "similar" enough are merged by replacing the lower priority pair
+and are “similar” enough are merged by replacing the lower priority pair
 with the higher priority pair.
 
 The pairs are again checked for near misses (1 or 2 units) to the
 values in the H or V stems array, but this time the information is
 saved in an array. If fixing these pairs is allowed the pairs saved
-in the array are changed to match the value it was "close" to in the
+in the array are changed to match the value it was “close” to in the
 H or V stem array.
 
 Check to see if H or V counter hints (hstem3, vstem3) should be used
 instead of hstem or vstem.
 
-Create the main hints that are included at the beginning of a character.
+Create the main hints that are included at the beginning of a glyph.
 These are created by picking, in order of priority, from the segment
 lists.
 
@@ -127,15 +127,15 @@ If no good hints are found use bounding box hints.
 
 ## Shuffling Subpaths
 
-The character's subpaths are reordered so that the hints will not need
+The glyph’s subpaths are reordered so that the hints will not need
 to change constantly because it is jumping from one subpath to another.
-Kanji characters had the most problems with this which caused huge
+Kanji glyphs had the most problems with this which caused huge
 files to be created.
 
 ## Hint Substitution
 
-Remove "flares" from the segment list. Flares usually occur at the top
-of a serif where a hint is added at an endpoint, but it's not at the
+Remove “flares” from the segment list. Flares usually occur at the top
+of a serif where a hint is added at an endpoint, but it’s not at the
 extreme and there is another endpoint very nearby. This causes a blip
 at the top of the serif at low resolutions. Flares are not removed if
 they are in an overshoot band.
@@ -143,7 +143,7 @@ they are in an overshoot band.
 Copy hints to earlier elements in the path, if possible, so hint
 substitution can start sooner.
 
-Don't allow hint substitution at short elements, so remove any if
+Don’t allow hint substitution at short elements, so remove any if
 they exist. Short is considered less than 6 units.
 
 Go through path element looking for pairs. If this pair is compatible
@@ -156,31 +156,31 @@ When generating stems a procedure is called to allow lines that are not
 completely horizontal or vertical to be included in the coloring
 segment list. This was specifically included because the serifs of
 ITCGaramond Ultra have points that are not quite horizontal according
-to the comment int he program. When generating hstem values the threshold
-is <= 2 for delta y and >= 25 for delta x. The reverse is true when
+to the comment int the program. When generating hstem values the threshold
+is ≤ 2 for delta y and ≥ 25 for delta x. The reverse is true when
 generating vstem values.
 
 There are many thresholds used when evaluating stems, pruning, and
 finding the best values. The thresholds used throughout the program are
-just "best guesses" according to Bill Paxton. There are various comments
+just “best guesses” according to Bill Paxton. There are various comments
 in the code explaining why some of these thresholds were changed and
 specifically for which fonts.
 
-The following characters attempt to have H counter hints added.
+The following glyphs attempt to have H counter hints added.
 
 > "element", "equivalence", "notelement", "divide"
 
-in addition to any characters listed in the HCounterChars keyword of
+in addition to any glyphs listed in the HCounterChars keyword of
 the fontinfo file.
 
-The following characters attempt to have V counter hints added.
+The following glyphs attempt to have V counter hints added.
 
 > "m", "M", "T", "ellipsis"
 
-in addition to any characters listed in the VCounterChars keyword of
+in addition to any glyphs listed in the VCounterChars keyword of
 the fontinfo file.
 
-There used to be a special set of characters that received dotsection
+There used to be a special set of glyphs that received dotsection
 hints. This was to handle hinting on older PS interpreters that could
 not perform hint replacement. This feature has been commented out of
 the current version of AC.
@@ -189,7 +189,7 @@ AC uses a 24.8 Fixed type number rather than the more widely used 16.16.
 
 ## Output
 
-AC writes out a file in encrypted bez file format that includes
+AC writes out glyphs bez format that includes
 the hinting information. Along with each hint it writes a comment
 that specifies which path element was used to create this hint.
 This comment is used by BuildFont for hinting multiple master
@@ -197,15 +197,7 @@ fonts.
 
 ## Platforms
 
-AC currently runs on a sun3, a sun4 running SunOS 4.1.x, and a
-sun4 running SunOS 5.x in compatibility mode. It has been ported
-to the Mac by Jon von who at the time had to add prototyping and
-convert int to long int because he was using LightSpeed C. This
-latter case shouldn't be an issue if the Metrowerks development
-environment is used. To my knowledge AC has never been ported to
-a PC.
+AC should run on Unix and Unix-like operating systems, Mac OS X and Microsoft
+Windows, both 32-bit and 64-bit. The code is written in portable C.
 
-AC consists of one header file and about 28 C files. The sun3 version
-contains one assembler file that converts a floating point value to
-fixed. I don't think the assembly code is necessary because there is
-also a C version of the procedure.
+AC consists of one header file and about 28 C files.
