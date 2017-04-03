@@ -283,7 +283,7 @@ AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB)
     doStems = false;
 }
 
-int
+static int
 cleanup(int16_t code)
 {
     if (code == FATALERROR || code == NONFATALERROR)
