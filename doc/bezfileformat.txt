@@ -1,6 +1,6 @@
 PROPOSAL FOR BEZIER FILE FORMATS (revised)
 
-The Standard Bezier format is an encrypted file consisting of the following
+The Standard Bezier format is an file consisting of the following
 operators:
   (width) -- character width (* this may be added at a later date)
    sc 	-- start of character outline
