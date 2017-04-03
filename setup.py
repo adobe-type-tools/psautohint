@@ -38,9 +38,6 @@ module1 = Extension("_psautohint",
                     ]
         )
 
-if platform.system() == "Windows":
-    module1.include_dirs.append("source/include/winextras")
-
 setup (name = "PsAutoHint",
        version = "1.0",
        description = "Python wrapper for Adobe's PostScrupt autohinter",
