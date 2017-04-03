@@ -119,12 +119,3 @@ LogMsg1(char* str, int16_t level, int16_t code)
         (*errorproc)(code);
     }
 }
-
-#if defined(_MSC_VER) && (_MSC_VER < 1800)
-float
-roundf(float x)
-{
-    float val = (float)((x < 0) ? (ceil((x)-0.5)) : (floor((x) + 0.5)));
-    return val;
-}
-#endif
