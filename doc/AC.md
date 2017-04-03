@@ -1,15 +1,13 @@
 # AC - Automatic Coloring (Hinting)
 
-Background
-----------
+## Background
 
 AC was written by Bill Paxton over eight years ago. Originally, it
 was integrated with the font editor, FE, but Bill extracted the
 hinting code so it could run independently and would be easier to
 maintain.
 
-Input
------
+## Input
 
 AC reads a character outline in encrypted bez file format. The fontinfo
 file is also read to get alignment zone information, the list of H,V counter
@@ -20,46 +18,44 @@ As the bez file is read a doubly linked-list is created that contains the
 path element information, e.g. coordinates, path type (moveto, curveto...),
 etc.
 
-Setup
------
+## Setup
 
 The following initial setup and error checking is done after a character
 is read:
 
-a. Calculate the character bounding box to find the minimum and maximum
-x, y values. Supposedly, the very minimum hinting a character will get
-is its bounding box values.
+1. Calculate the character bounding box to find the minimum and maximum
+   x, y values. Supposedly, the very minimum hinting a character will get
+   is its bounding box values.
 
-b. Check for duplicate subpaths.
+2. Check for duplicate subpaths.
 
-c. Check for consecutive movetos and only keep the last one.
+3. Check for consecutive movetos and only keep the last one.
 
-d. Check that the path ends with a single closepath and that there are
-matching movetos and closepaths.
+4. Check that the path ends with a single closepath and that there are
+   matching movetos and closepaths.
 
-e. Initialize the value of the largest vertical and horizontal stem
-value allowed. The largest vertical stem value is the larger of 86.25
-and the largest value in the auxiliary V stem array. The largest
-horizontal stem value is the larger of 86.25 and the largest value in
-the auxiliary H stem array.
+5. Initialize the value of the largest vertical and horizontal stem
+   value allowed. The largest vertical stem value is the larger of 86.25
+   and the largest value in the auxiliary V stem array. The largest
+   horizontal stem value is the larger of 86.25 and the largest value in
+   the auxiliary H stem array.
 
-f. If flex is allowed add flex to the character. The current flex
-algorithm is very lax and flex can occur where you least expect it.
-Almost anything that conforms to page 72 of the black book is flexed.
-However, the last line on page 72 says the flex height must be 20 units
-or less and this should really say 10 units or less.
+6. If flex is allowed add flex to the character. The current flex
+   algorithm is very lax and flex can occur where you least expect it.
+   Almost anything that conforms to page 72 of the black book is flexed.
+   However, the last line on page 72 says the flex height must be 20 units
+   or less and this should really say 10 units or less.
 
-g. Check for smooth curves. If the direction arms tangent to the curve
-is between 0 and 30 degrees the points are forced to be colinear.
+7. Check for smooth curves. If the direction arms tangent to the curve
+   is between 0 and 30 degrees the points are forced to be colinear.
 
-h. If there is a sharp angle, greater than 140 degrees, the angle will
-be blunted by adding another point. There's a comment that says as of
-version 2.21 this blunting will not occur.
+8. If there is a sharp angle, greater than 140 degrees, the angle will
+   be blunted by adding another point. There's a comment that says as of
+   version 2.21 this blunting will not occur.
 
-i. Count and save number of subpaths for each path element.
+9. Count and save number of subpaths for each path element.
 
-Hinting
--------
+## Hinting
 
 Generate possible hstem and vstem values. These values are saved as a
 linked list (the coloring segment list) in the path element data structure.
@@ -70,7 +66,7 @@ segments (top and bottom or left and right) that is assigned a priority
 based on the length and width of a stem, and hints are non-overlapping
 pairs with the highest priority.
 
-Generating {H,V}Stems
+### Generating {H,V}Stems
 
 The path element is traversed and possible coordinates are added to the
 segment list. The x or y coordinate is saved depending on if it's a
@@ -88,7 +84,7 @@ Compact the coloring segment lists by removing any pairs that are
 completely contained in another. Filter out bogus bend segments and
 report any near misses to the horizontal alignment zones.
 
-Evaluating Stems
+### Evaluating Stems
 
 Form all top and bottom, left and right pairs from segment list and
 generate ghost pairs for horizontal segments in alignment zones.
@@ -102,12 +98,12 @@ together, longer in length, and have a clean overlap. All pairs with
 Report any near misses (1 or 2 units) to the values in the H or V stems
 array.
 
-Pruning Values
+### Pruning Values
 
 Prune non-relevant stem pairs and keep the best of any overlapping pairs.
 This is done by looking at the priority values.
 
-Finding the Best Values
+### Finding the Best Values
 
 After pruning, the best pair is found for each top, bottom or left, right
 segment using the priority values. Pairs that are at the same location
@@ -129,16 +125,14 @@ lists.
 
 If no good hints are found use bounding box hints.
 
-Shuffling Subpaths
-------------------
+## Shuffling Subpaths
 
 The character's subpaths are reordered so that the hints will not need
 to change constantly because it is jumping from one subpath to another.
 Kanji characters had the most problems with this which caused huge
 files to be created.
 
-Hint Substitution
------------------
+## Hint Substitution
 
 Remove "flares" from the segment list. Flares usually occur at the top
 of a serif where a hint is added at an endpoint, but it's not at the
@@ -156,8 +150,7 @@ Go through path element looking for pairs. If this pair is compatible
 with the currently active hints then add it otherwise start hint
 substitution.
 
-Special Cases
--------------
+## Special Cases
 
 When generating stems a procedure is called to allow lines that are not
 completely horizontal or vertical to be included in the coloring
@@ -175,14 +168,14 @@ specifically for which fonts.
 
 The following characters attempt to have H counter hints added.
 
- "element", "equivalence", "notelement", "divide"
+> "element", "equivalence", "notelement", "divide"
 
 in addition to any characters listed in the HCounterChars keyword of
 the fontinfo file.
 
 The following characters attempt to have V counter hints added.
 
-  "m", "M", "T", "ellipsis"
+> "m", "M", "T", "ellipsis"
 
 in addition to any characters listed in the VCounterChars keyword of
 the fontinfo file.
@@ -194,8 +187,7 @@ the current version of AC.
 
 AC uses a 24.8 Fixed type number rather than the more widely used 16.16.
 
-Output
-------
+## Output
 
 AC writes out a file in encrypted bez file format that includes
 the hinting information. Along with each hint it writes a comment
@@ -203,8 +195,7 @@ that specifies which path element was used to create this hint.
 This comment is used by BuildFont for hinting multiple master
 fonts.
 
-Platforms
----------
+## Platforms
 
 AC currently runs on a sun3, a sun4 running SunOS 4.1.x, and a
 sun4 running SunOS 5.x in compatibility mode. It has been ported
