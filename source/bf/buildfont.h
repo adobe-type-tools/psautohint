@@ -45,12 +45,6 @@ typedef struct
 
 extern bool scalinghints;
 
-/*****************************************************************************/
-/* Deallocates memory and deletes temporary files.                           */
-/*****************************************************************************/
-extern int
-cleanup(int16_t);
-
 extern char *
 AllocateMem(unsigned int, unsigned int, const char *);
 
