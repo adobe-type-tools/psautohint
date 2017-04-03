@@ -196,6 +196,7 @@ extern char * fileName;
 extern PClrSeg segLists[4]; /* left, right, top, bot */
 extern PClrPoint pointList, *ptLstArray;
 extern int32_t ptLstIndex, numPtLsts, maxPtLsts;
+extern bool scalinghints;
 
 /* global callbacks */
 

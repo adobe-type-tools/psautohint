@@ -43,8 +43,6 @@ typedef struct
    } Cd, *CdPtr;
 
 
-extern bool scalinghints;
-
 extern char *
 AllocateMem(unsigned int, unsigned int, const char *);
 
