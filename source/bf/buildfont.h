@@ -12,12 +12,6 @@
 #ifndef BUILDFONT_H
 #define BUILDFONT_H
 
-#ifdef EXECUTABLE
-#define OUTPUTBUFF stdout
-#else
-#define OUTPUTBUFF stderr
-#endif
-
 /*****************************************************************************/
 /* the following are for scanning "PostScript format" input file lines       */
 /*****************************************************************************/

@@ -13,7 +13,6 @@
 #include "charpath.h"
 #include "fipublic.h"
 #include "opcodes.h"
-#define PRINT_READ (0)
 #define ESCVAL 100
 
 char glyphName[MAX_GLYPHNAME_LEN];
@@ -748,10 +747,6 @@ ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph, bool forBlendData,
     flex = idInFile = startchar = false;
     forMultiMaster = forBlendData;
     includeHints = readHints;
-
-#if PRINT_READ
-    fprintf(OUTPUTBUFF, "%s", srcglyph);
-#endif
 
     ParseString(fontinfo, srcglyph);
 

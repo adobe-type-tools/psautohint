@@ -27,17 +27,17 @@ static void openReportFile(char* name, char* fSuffix);
 static void
 printVersions(void)
 {
-    fprintf(OUTPUTBUFF, "C program version %s. lib version %s.\n",
-            C_ProgramVersion, AC_getVersion());
+    fprintf(stdout, "C program version %s. lib version %s.\n", C_ProgramVersion,
+            AC_getVersion());
 }
 
 static void
 printUsage(void)
 {
-    fprintf(OUTPUTBUFF, "Usage: autohintexe [-u] [-h]\n");
-    fprintf(OUTPUTBUFF, "       autohintexe  -f <font info name> [-e] [-n] "
-                        "[-q] [-s <suffix>] [-ra] [-rs] -a] [<file1> <file2> "
-                        "... <filen>]\n");
+    fprintf(stdout, "Usage: autohintexe [-u] [-h]\n");
+    fprintf(stdout, "       autohintexe  -f <font info name> [-e] [-n] "
+                    "[-q] [-s <suffix>] [-ra] [-rs] -a] [<file1> <file2> "
+                    "... <filen>]\n");
     printVersions();
 }
 
@@ -45,31 +45,30 @@ static void
 printHelp(void)
 {
     printUsage();
-    fprintf(OUTPUTBUFF, "   -u usage\n");
-    fprintf(OUTPUTBUFF, "   -h help message\n");
-    fprintf(OUTPUTBUFF, "   -e do not edit (change) the paths when hinting\n");
-    fprintf(OUTPUTBUFF, "   -n no multiple layers of coloring\n");
-    fprintf(OUTPUTBUFF, "   -q quiet\n");
-    fprintf(OUTPUTBUFF, "   -f <name> path to font info file\n");
-    fprintf(OUTPUTBUFF, "   -i <font info string> This can be used instead of "
-                        "the -f parameter for data input \n");
-    fprintf(OUTPUTBUFF,
-            "   <name1> [name2]..[nameN]  paths to glyph bez files\n");
-    fprintf(OUTPUTBUFF, "   -b the last argument is bez data instead of a file "
-                        "name and the result will go to stdOut\n");
+    fprintf(stdout, "   -u usage\n");
+    fprintf(stdout, "   -h help message\n");
+    fprintf(stdout, "   -e do not edit (change) the paths when hinting\n");
+    fprintf(stdout, "   -n no multiple layers of coloring\n");
+    fprintf(stdout, "   -q quiet\n");
+    fprintf(stdout, "   -f <name> path to font info file\n");
+    fprintf(stdout, "   -i <font info string> This can be used instead of "
+                    "the -f parameter for data input \n");
+    fprintf(stdout, "   <name1> [name2]..[nameN]  paths to glyph bez files\n");
+    fprintf(stdout, "   -b the last argument is bez data instead of a file "
+                    "name and the result will go to stdOut\n");
     fprintf(
-      OUTPUTBUFF,
+      stdout,
       "   -s <suffix> Write output data to 'file name' + 'suffix', rather\n");
     fprintf(
-      OUTPUTBUFF,
+      stdout,
       "       than writing it to the same file name as the input file.\n");
-    fprintf(OUTPUTBUFF, "   -ra Write alignment zones data. Does not hint or "
-                        "change glyph. Default extension is '.rpt'\n");
-    fprintf(OUTPUTBUFF, "   -rs Write stem widths data. Does not hint or "
-                        "change glyph. Default extension is '.rpt'\n");
-    fprintf(OUTPUTBUFF, "   -a Modifies -ra and -rs: Includes stems between "
-                        "curved lines: default is to omit these.\n");
-    fprintf(OUTPUTBUFF, "   -v print versions.\n");
+    fprintf(stdout, "   -ra Write alignment zones data. Does not hint or "
+                    "change glyph. Default extension is '.rpt'\n");
+    fprintf(stdout, "   -rs Write stem widths data. Does not hint or "
+                    "change glyph. Default extension is '.rpt'\n");
+    fprintf(stdout, "   -a Modifies -ra and -rs: Includes stems between "
+                    "curved lines: default is to omit these.\n");
+    fprintf(stdout, "   -v print versions.\n");
 }
 
 static int
@@ -116,8 +115,8 @@ vstemCB(Fixed right, Fixed left, char* glyphName)
 static void
 reportCB(char* msg)
 {
-    fprintf(OUTPUTBUFF, "%s", msg);
-    fprintf(OUTPUTBUFF, "\n");
+    fprintf(stdout, "%s", msg);
+    fprintf(stdout, "\n");
 }
 
 static void
@@ -136,20 +135,20 @@ getFileData(char* name)
 
     struct stat filestat;
     if ((stat(name, &filestat)) < 0) {
-        fprintf(OUTPUTBUFF, "Error. Could not open file '%s'. Please check "
-                            "that it exists and is not write-protected.\n",
+        fprintf(stdout, "Error. Could not open file '%s'. Please check "
+                        "that it exists and is not write-protected.\n",
                 name);
         main_cleanup(FATALERROR);
     }
 
     if (filestat.st_size == 0) {
-        fprintf(OUTPUTBUFF, "Error. File '%s' has zero size.\n", name);
+        fprintf(stdout, "Error. File '%s' has zero size.\n", name);
         main_cleanup(FATALERROR);
     }
 
     data = malloc(filestat.st_size + 1);
     if (data == NULL) {
-        fprintf(OUTPUTBUFF,
+        fprintf(stdout,
                 "Error. Could not allcoate memory for contents of file %s.\n",
                 name);
         main_cleanup(FATALERROR);
@@ -157,8 +156,8 @@ getFileData(char* name)
         size_t fileSize = 0;
         FILE* fp = fopen(name, "r");
         if (fp == NULL) {
-            fprintf(OUTPUTBUFF, "Error. Could not open file '%s'. Please check "
-                                "that it exists and is not write-protected.\n",
+            fprintf(stdout, "Error. Could not open file '%s'. Please check "
+                            "that it exists and is not write-protected.\n",
                     name);
             main_cleanup(FATALERROR);
         }
@@ -268,8 +267,8 @@ main(int argc, char* argv[])
             total_files++;
             continue;
         } else if (firstFileNameIndex != -1) {
-            fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-\" option "
-                                "found after first file name.\n");
+            fprintf(stdout, "Error. Illegal command line. \"-\" option "
+                            "found after first file name.\n");
             exit(1);
         }
 
@@ -295,43 +294,43 @@ main(int argc, char* argv[])
                 break;
             case 'f':
                 if (fontinfo != NULL) {
-                    fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-f\" "
-                                        "can’t be used together with the "
-                                        "\"-i\" command.\n");
+                    fprintf(stdout, "Error. Illegal command line. \"-f\" "
+                                    "can’t be used together with the "
+                                    "\"-i\" command.\n");
                     exit(1);
                 }
                 fontInfoFileName = argv[++argi];
                 if ((fontInfoFileName[0] == '\0') ||
                     (fontInfoFileName[0] == '-')) {
-                    fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-f\" "
-                                        "option must be followed by a file "
-                                        "name.\n");
+                    fprintf(stdout, "Error. Illegal command line. \"-f\" "
+                                    "option must be followed by a file "
+                                    "name.\n");
                     exit(1);
                 }
                 fontinfo = getFileData(fontInfoFileName);
                 break;
             case 'i':
                 if (fontinfo != NULL) {
-                    fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-i\" "
-                                        "can’t be used together with the "
-                                        "\"-f\" command.\n");
+                    fprintf(stdout, "Error. Illegal command line. \"-i\" "
+                                    "can’t be used together with the "
+                                    "\"-f\" command.\n");
                     exit(1);
                 }
                 fontinfo = argv[++argi];
                 if ((fontinfo[0] == '\0') || (fontinfo[0] == '-')) {
-                    fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-i\" "
-                                        "option must be followed by a font "
-                                        "info string.\n");
+                    fprintf(stdout, "Error. Illegal command line. \"-i\" "
+                                    "option must be followed by a font "
+                                    "info string.\n");
                     exit(1);
                 }
                 break;
             case 's':
                 fileSuffix = argv[++argi];
                 if ((fileSuffix[0] == '\0') || (fileSuffix[0] == '-')) {
-                    fprintf(OUTPUTBUFF, "Error. Illegal command line. \"-s\" "
-                                        "option must be followed by a string, "
-                                        "and the string must not begin with "
-                                        "'-'.\n");
+                    fprintf(stdout, "Error. Illegal command line. \"-s\" "
+                                    "option must be followed by a string, "
+                                    "and the string must not begin with "
+                                    "'-'.\n");
                     exit(1);
                 }
                 break;
@@ -361,8 +360,7 @@ main(int argc, char* argv[])
                         AC_SetReportStemsCB(hstemCB, vstemCB, allStems);
                         break;
                     default:
-                        fprintf(OUTPUTBUFF,
-                                "Error. %s is an invalid parameter.\n",
+                        fprintf(stdout, "Error. %s is an invalid parameter.\n",
                                 current_arg);
                         badParam = true;
                         break;
@@ -374,7 +372,7 @@ main(int argc, char* argv[])
                 break;
                 break;
             default:
-                fprintf(OUTPUTBUFF, "Error. %s is an invalid parameter.\n",
+                fprintf(stdout, "Error. %s is an invalid parameter.\n",
                         current_arg);
                 badParam = true;
                 break;
@@ -382,13 +380,13 @@ main(int argc, char* argv[])
     }
 
     if (firstFileNameIndex == -1) {
-        fprintf(OUTPUTBUFF,
+        fprintf(stdout,
                 "Error. Illegal command line. Must provide bez file name.\n");
         badParam = true;
     }
     if (fontInfoFileName == NULL) {
         fprintf(
-          OUTPUTBUFF,
+          stdout,
           "Error. Illegal command line. Must provide font info file name.\n");
         badParam = true;
     }
