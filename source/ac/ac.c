@@ -36,15 +36,15 @@ PClrPoint pointList, *ptLstArray;
 int32_t ptLstIndex, numPtLsts, maxPtLsts;
 bool writecoloredbez = true;
 Fixed bluefuzz;
-bool doAligns, doStems;
+bool doAligns = false, doStems = false;
 bool idInFile;
 bool roundToInt;
 static int maxStemDist = MAXSTEMDIST;
 
 AC_REPORTFUNCPTR libReportCB = NULL;
 AC_REPORTFUNCPTR libErrorReportCB = NULL;
-unsigned int allstems; /* if false, then stems defined by curves are excluded
-                          from the reporting */
+/* if false, then stems defined by curves are excluded from the reporting */
+unsigned int allstems = false;
 AC_REPORTSTEMPTR addHStemCB = NULL;
 AC_REPORTSTEMPTR addVStemCB = NULL;
 AC_REPORTZONEPTR addCharExtremesCB = NULL;
