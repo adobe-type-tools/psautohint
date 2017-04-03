@@ -79,11 +79,8 @@ ACLIB_API void  AC_SetMemManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
  * If verbose is set false, then only error messages are written.
  */
 typedef void (*AC_REPORTFUNCPTR)(char *msg);
-extern AC_REPORTFUNCPTR libReportCB; /* global log function which is supplied by the following */
-extern AC_REPORTFUNCPTR libErrorReportCB; /* global error log function which is supplied by the following */
 
 ACLIB_API void  AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose);
-
 
 /*
  * Function: AC_SetReportStemsCB
@@ -91,16 +88,15 @@ ACLIB_API void  AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose);
  * If this is called, then the AC lib will write all the stem widths it
  * encounters.
  *
+ * If allStems is false, then stems defined by curves are excluded from the
+ * reporting.
+ *
  * Note that the callbacks should not dispose of the glyphName memory; that
  * belongs to the AC lib. It should be copied immediately - it may may last
  * past the return of the callback.
  */
-
-extern unsigned int allstems; /* if false, then stems defined by curves are excluded from the reporting */
 typedef void (*AC_REPORTSTEMPTR)(int32_t top, int32_t bottom, char* glyphName);
 
-extern AC_REPORTSTEMPTR addHStemCB;
-extern AC_REPORTSTEMPTR addVStemCB;
 ACLIB_API void  AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB, unsigned int allStems);
 
 /*
@@ -114,12 +110,10 @@ ACLIB_API void  AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR v
  * past the return of the callback.
  */
 typedef void (*AC_REPORTZONEPTR)(int32_t top, int32_t bottom, char* glyphName);
-extern AC_REPORTZONEPTR addCharExtremesCB;
-extern AC_REPORTZONEPTR addStemExtremesCB;
+
 ACLIB_API void  AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB);
 
 typedef void (*AC_RETRYPTR)(void);
-extern AC_RETRYPTR reportRetryCB;
 
 /*
  * Function: AutoColorString

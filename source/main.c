@@ -234,7 +234,7 @@ main(int argc, char* argv[])
      static void Blues()
      */
 
-    int allowEdit, roundCoords, allowHintSub, debug, badParam;
+    int allowEdit, roundCoords, allowHintSub, debug, badParam, allStems;
     bool argumentIsBezData = false;
     char* fontInfoFileName =
       NULL; /* font info file name, or suffix of environment variable holding
@@ -250,9 +250,8 @@ main(int argc, char* argv[])
 
     badParam = false;
     debug = false;
-    doAligns = false;
-    doStems = false;
-    allstems = false;
+    allStems = false;
+
     allowEdit = allowHintSub = roundCoords = true;
     fileSuffix = (char*)dfltExt;
 
@@ -347,7 +346,7 @@ main(int argc, char* argv[])
                 debug = true;
                 break;
             case 'a':
-                allstems = 1;
+                allStems = true;
                 break;
 
             case 'r':
@@ -356,23 +355,11 @@ main(int argc, char* argv[])
                 switch (current_arg[2]) {
                     case 'a':
                         reportRetryCB = reportRetry;
-                        addCharExtremesCB = charZoneCB;
-                        addStemExtremesCB = stemZoneCB;
-                        doAligns = 1;
-
-                        addHStemCB = NULL;
-                        addVStemCB = NULL;
-                        doStems = 0;
+                        AC_SetReportZonesCB(charZoneCB, stemZoneCB);
                         break;
                     case 's':
                         reportRetryCB = reportRetry;
-                        addHStemCB = hstemCB;
-                        addVStemCB = vstemCB;
-                        doStems = 1;
-
-                        addCharExtremesCB = NULL;
-                        addStemExtremesCB = NULL;
-                        doAligns = 0;
+                        AC_SetReportStemsCB(hstemCB, vstemCB, allStems);
                         break;
                     default:
                         fprintf(OUTPUTBUFF,

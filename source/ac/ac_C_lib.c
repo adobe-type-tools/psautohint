@@ -265,11 +265,11 @@ AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB,
     allstems = allStems;
     addHStemCB = hstemCB;
     addVStemCB = vstemCB;
-    doStems = 1;
+    doStems = true;
 
     addCharExtremesCB = NULL;
     addStemExtremesCB = NULL;
-    doAligns = 0;
+    doAligns = false;
 }
 
 ACLIB_API void
@@ -277,11 +277,11 @@ AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB)
 {
     addCharExtremesCB = charCB;
     addStemExtremesCB = stemCB;
-    doAligns = 1;
+    doAligns = true;
 
     addHStemCB = NULL;
     addVStemCB = NULL;
-    doStems = 0;
+    doStems = false;
 }
 
 int
@@ -362,10 +362,10 @@ AC_initCallGlobals(void)
     libErrorReportCB = NULL;
     addCharExtremesCB = NULL;
     addStemExtremesCB = NULL;
-    doAligns = 0;
+    doAligns = false;
     addHStemCB = NULL;
     addVStemCB = NULL;
-    doStems = 0;
+    doStems = false;
 }
 
 ACLIB_API const char*

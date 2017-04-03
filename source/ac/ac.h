@@ -195,7 +195,26 @@ extern char * fileName;
 extern PClrSeg segLists[4]; /* left, right, top, bot */
 extern PClrPoint pointList, *ptLstArray;
 extern int32_t ptLstIndex, numPtLsts, maxPtLsts;
+
+/* global callbacks */
+
+/* global log function which is supplied by the following */
+extern AC_REPORTFUNCPTR libReportCB;
+/* global error log function which is supplied by the following */
+extern AC_REPORTFUNCPTR libErrorReportCB;
+
+/* if false, then stems defined by curves are excluded from the reporting */
+extern unsigned int allstems;
+
+extern AC_REPORTSTEMPTR addHStemCB;
+extern AC_REPORTSTEMPTR addVStemCB;
+
+extern AC_REPORTZONEPTR addCharExtremesCB;
+extern AC_REPORTZONEPTR addStemExtremesCB;
+
 void AddStemExtremes(Fixed bot, Fixed top);
+
+extern AC_RETRYPTR reportRetryCB;
 
 #define leftList (segLists[0])
 #define rightList (segLists[1])
