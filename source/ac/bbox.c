@@ -417,21 +417,6 @@ CheckPathBBox(void)
         ReportBBoxBogus(llx, lly, urx, ury);
 }
 
-static Fixed
-GetPathLSB(void)
-{
-    Fixed llx, urx, tmp;
-    FindPathBBox();
-    llx = itfmx(xmin);
-    urx = itfmx(xmax);
-    if (llx > urx) {
-        tmp = llx;
-        llx = urx;
-        urx = tmp;
-    }
-    return (llx);
-}
-
 bool
 CheckBBoxes(PPathElt e1, PPathElt e2)
 {
