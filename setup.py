@@ -3,7 +3,7 @@ from distutils.core import setup, Extension
 
 module1 = Extension("_psautohint",
                     include_dirs = [
-                        "source/include/ac",
+                        "source/include",
                         "source/ac",
                         "source/bf",
                     ],

@@ -21,7 +21,7 @@ PRG_LIBS = $(LIB_TARGET)
 LIB_TARGET = $(OBJ_DIR)/autohintlib.a
 
 CFLAGS = \
-	-I$(SRC_DIR)/include/ac \
+	-I$(SRC_DIR)/include \
 	-I$(SRC_DIR)/ac \
 	-I$(SRC_DIR)/bf \
 	-Wall \
