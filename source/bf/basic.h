@@ -17,6 +17,7 @@
 #include <string.h>
 #include <setjmp.h>
 #include <sys/types.h>
+#include <math.h>
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1800
 #include <stdint.h>
