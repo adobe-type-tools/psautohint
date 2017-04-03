@@ -15,7 +15,6 @@
 #include "buildfont.h"
 #include "filookup.h"
 #include "fipublic.h"
-#include "machinedep.h"
 
 static int
 misspace(int c)

@@ -17,6 +17,7 @@
 
 #include "ac_C_lib.h"
 #include "buildfont.h"
+#include "logging.h"
 
 
 /* widely used definitions */

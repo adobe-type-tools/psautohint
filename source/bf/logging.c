@@ -7,21 +7,10 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-/*
-
-history:
-
-JLee	April 8, 1988
-
-Judy Lee: Wed Jul  6 17:55:30 1988
-End Edit History
-*/
-
 #include <stdarg.h>
 
 #include "ac.h"
 #include "fipublic.h"
-#include "machinedep.h"
 
 static int16_t warncnt = 0;
 

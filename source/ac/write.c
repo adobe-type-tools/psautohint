@@ -11,7 +11,6 @@
 
 #include "ac.h"
 #include "fipublic.h"
-#include "machinedep.h"
 #include <math.h>
 
 #define WRTABS_COMMENT (0)

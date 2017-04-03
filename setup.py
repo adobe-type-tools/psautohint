@@ -33,7 +33,7 @@ module1 = Extension("_psautohint",
                         "source/ac/write.c",
                         "source/bf/charpathpriv.c",
                         "source/bf/filookup.c",
-                        "source/bf/machinedep.c",
+                        "source/bf/logging.c",
                         "source/bf/memory.c",
                     ]
         )

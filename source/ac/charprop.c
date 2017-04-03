@@ -8,7 +8,6 @@
  */
 
 #include "ac.h"
-#include "machinedep.h"
 
 char* VColorList[] = { "m",  "M",  "T",  "ellipsis", NULL, NULL, NULL,
                        NULL, NULL, NULL, NULL,       NULL, NULL, NULL,

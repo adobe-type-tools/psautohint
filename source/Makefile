@@ -64,7 +64,7 @@ LIB_OBJS = \
 	$(OBJ_DIR)/ac/write.o \
 	$(OBJ_DIR)/bf/charpathpriv.o \
 	$(OBJ_DIR)/bf/filookup.o \
-	$(OBJ_DIR)/bf/machinedep.o \
+	$(OBJ_DIR)/bf/logging.o \
 	$(OBJ_DIR)/bf/memory.o \
 	$(NULL)
 

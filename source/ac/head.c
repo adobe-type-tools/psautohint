@@ -8,7 +8,6 @@
  */
 
 #include "ac.h"
-#include "machinedep.h"
 
 PPathElt
 GetDest(PPathElt cldest)

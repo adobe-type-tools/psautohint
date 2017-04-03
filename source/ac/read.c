@@ -12,7 +12,6 @@
 #include "ac.h"
 #include "charpath.h"
 #include "fipublic.h"
-#include "machinedep.h"
 #include "opcodes.h"
 #define PRINT_READ (0)
 #define ESCVAL 100

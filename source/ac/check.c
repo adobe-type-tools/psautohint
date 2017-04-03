@@ -10,7 +10,6 @@
 #include <math.h>
 
 #include "ac.h"
-#include "machinedep.h"
 
 static bool xflat, yflat, xdone, ydone, bbquit;
 static int32_t xstate, ystate, xstart, ystart;
