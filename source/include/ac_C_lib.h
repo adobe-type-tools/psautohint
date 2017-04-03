@@ -53,24 +53,31 @@ enum
 	AC_InvalidParameterError
 };
 
+/*
+ * Function: AC_getVersion
+ *
+ * Returns AC library version.
+ */
 ACLIB_API const char * AC_getVersion(void);
-
-typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, uint32_t size);
 
 /*
  * Function: AC_SetMemManager
- ****************************
-If this is supplied, then the AC lib will call this function foor all memory allocations.
-Else is it will use the std C lib alloc/malloc/free.
-*/
+ *
+ * If this is supplied, then the AC lib will call this function for all memory
+ * allocations. Otherwise it will use alloc/malloc/free.
+ */
+typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, uint32_t size);
+
 ACLIB_API void  AC_SetMemManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 /*
  * Function: AC_SetReportCB
- ****************************
-If this is supplied and verbose is set to true, then the AC lib will write (many!) text status messages to this file.
-If verbose is set false, then only error messages are written.
-*/
+ *
+ * If this is supplied and verbose is set to true, then the AC lib will write
+ * (many!) text status messages to this file.
+ *
+ * If verbose is set false, then only error messages are written.
+ */
 typedef void (*AC_REPORTFUNCPTR)(char *msg);
 extern AC_REPORTFUNCPTR libReportCB; /* global log function which is supplied by the following */
 extern AC_REPORTFUNCPTR libErrorReportCB; /* global error log function which is supplied by the following */
@@ -78,18 +85,18 @@ extern AC_REPORTFUNCPTR libErrorReportCB; /* global error log function which is 
 ACLIB_API void  AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose);
 
 
-/* Global for reporting log messages. */
-
-
 /*
  * Function: AC_SetReportStemsCB
- ****************************
-If this is called , then the AC lib will write all the stem widths it encounters.
-Note that the callabcks should not dispose of the glyphName memory; that belongs to the AC lib.
-It should be copied immediately - it may may last past the return of the calback.
-*/
+ *
+ * If this is called, then the AC lib will write all the stem widths it
+ * encounters.
+ *
+ * Note that the callbacks should not dispose of the glyphName memory; that
+ * belongs to the AC lib. It should be copied immediately - it may may last
+ * past the return of the callback.
+ */
 
-extern unsigned int allstems; /* if false, then stems defined by curves are xcluded from the reporting */
+extern unsigned int allstems; /* if false, then stems defined by curves are excluded from the reporting */
 typedef void (*AC_REPORTSTEMPTR)(int32_t top, int32_t bottom, char* glyphName);
 
 extern AC_REPORTSTEMPTR addHStemCB;
@@ -98,11 +105,14 @@ ACLIB_API void  AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR v
 
 /*
  * Function: AC_SetReportZonesCB
- ****************************
-If this is called , then the AC lib will write all the aligment zones it encounters.
-Note that the callabcks should not dispose of the glyphName memory; that belongs to the AC lib.
-It should be copied immediately - it may may last past the return of the calback.
-*/
+ *
+ * If this is called , then the AC lib will write all the alignment zones it
+ * encounters.
+ *
+ * Note that the callbacks should not dispose of the glyphName memory; that
+ * belongs to the AC lib. It should be copied immediately - it may may last
+ * past the return of the callback.
+ */
 typedef void (*AC_REPORTZONEPTR)(int32_t top, int32_t bottom, char* glyphName);
 extern AC_REPORTZONEPTR addCharExtremesCB;
 extern AC_REPORTZONEPTR addStemExtremesCB;
@@ -113,24 +123,25 @@ extern AC_RETRYPTR reportRetryCB;
 
 /*
  * Function: AutoColorString
- ****************************
- * This function takes srcbezdata, a pointer to null terminated C-string containing data in the bez
- * format (see bez spec) and fontinfo, a pointer to null terminated C-string containing fontinfo
- * for the bez glyph. Hint information is added to the bez data and returned to the caller through the
- * buffer dstbezdata. dstbezdata must be allocated before the call and a pointer to its length passed
- * as *length. If the space allocated is insufficient for the target bezdata, an error will be returned
- * and *length will be set to the desired size.
+ *
+ * This function takes srcbezdata, a pointer to null terminated C string
+ * containing glyph data in the bez format (see bez spec) and fontinfo, a
+ * pointer to null terminated C string containing fontinfo for the bez glyph.
+ *
+ * Hint information is added to the bez data and returned to the caller through
+ * the buffer dstbezdata. dstbezdata must be allocated before the call and a
+ * pointer to its length passed as *length. If the space allocated is
+ * insufficient for the target bezdata, an error will be returned and *length
+ * will be set to the desired size.
  */
 ACLIB_API int AutoColorString(const char *srcbezdata, const char *fontinfo, char *dstbezdata, int *length, int allowEdit, int allowHintSub, int roundCoords, int debug);
 
 /*
  * Function: AC_initCallGlobals
- ****************************
- * This function must be called before calling AC_initCallGlobals in the case where
- * the program is switching between any of the auto-hinting and stem reportign modes
- * while running.
+ *
+ * This function must be called in the case where the program is switching
+ * between any of the auto-hinting and stem reporting modes while running.
  */
-
 ACLIB_API void AC_initCallGlobals(void);
 
 #ifdef __cplusplus
