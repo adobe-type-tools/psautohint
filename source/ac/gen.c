@@ -10,7 +10,7 @@
 #include <math.h>
 
 #include "ac.h"
-#include "bftoac.h"
+#include "bbox.h"
 
 extern void ReportRemVSeg(Fixed from, Fixed to, Fixed loc);
 extern void ReportRemHSeg(Fixed from, Fixed to, Fixed loc);
