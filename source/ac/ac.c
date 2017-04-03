@@ -206,3 +206,10 @@ AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
 
     return AutoColorGlyph(fontinfo, srcbezdata, "", extracolor);
 }
+
+#if defined(_MSC_VER) && _MSC_VER < 1800
+float roundf(float x)
+{
+    return (float)((x < 0) ? (ceil((x)-0.5)) : (floor((x) + 0.5)));
+}
+#endif
