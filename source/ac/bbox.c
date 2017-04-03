@@ -9,7 +9,6 @@
 
 #include "ac.h"
 #include "bbox.h"
-#include "machinedep.h"
 
 static Fixed xmin, ymin, xmax, ymax, vMn, vMx, hMn, hMx;
 static PPathElt pxmn, pxmx, pymn, pymx, pe, pvMn, pvMx, phMn, phMx;

@@ -8,7 +8,6 @@
  */
 
 #include "ac.h"
-#include "machinedep.h"
 #include <stdlib.h>
 
 #include <sys/stat.h>

@@ -8,7 +8,6 @@
  */
 
 #include "ac.h"
-#include "machinedep.h"
 
 #define maxFixes (100)
 static Fixed HFixYs[maxFixes], HFixDYs[maxFixes];

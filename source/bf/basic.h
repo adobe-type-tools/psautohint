@@ -46,18 +46,4 @@ typedef int indx;		/* for indexes that could be either short or
 #define NUMMIN(a, b) ((a) <= (b) ? (a) : (b))
 #define NUMMAX(a, b) ((a) >= (b) ? (a) : (b))
 
-/* defines for LogMsg code param */
-#define OK 0
-#define NONFATALERROR 1
-#define FATALERROR 2
-
-/* defines for LogMsg level param */
-#define INFO 0
-#define WARNING 1
-#define LOGERROR 2
-
-#define MAXMSGLEN 500		/* maximum message length */
-
-extern void LogMsg(int16_t, int16_t, char *, ...);
-
 #endif /*BASIC_H*/

@@ -8,6 +8,7 @@
  */
 
 #include "buildfont.h"
+#include "logging.h"
 
 typedef void* (*AC_MEMMANAGEFUNCPTR)(void* ctxptr, void* old, uint32_t size);
 extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;

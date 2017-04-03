@@ -10,7 +10,6 @@
 #include <stdarg.h>
 
 #include "ac.h"
-#include "machinedep.h"
 
 extern AC_REPORTFUNCPTR libReportCB;
 

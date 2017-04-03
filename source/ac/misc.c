@@ -8,7 +8,6 @@
  */
 
 #include "ac.h"
-#include "machinedep.h"
 
 int32_t
 CountSubPaths(void)
