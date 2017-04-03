@@ -18,15 +18,6 @@
 #define OUTPUTBUFF stderr
 #endif
 
-#define FONTSTKLIMIT             22
-                                    /*****************************************/
-                                    /* font interpreter stack limit - Note   */
-                                    /* that the actual limit is 24, but      */
-                                    /* because the # of parameters and       */
-                                    /* callothersubr # are also pushed on    */
-                                    /* the stack, the effective value is 22. */
-                                    /*****************************************/
-
 /*****************************************************************************/
 /* the following are for scanning "PostScript format" input file lines       */
 /*****************************************************************************/
