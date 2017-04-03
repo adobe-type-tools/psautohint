@@ -32,9 +32,7 @@ extern char *GetFntInfo(
     char *, bool
 );
 
-extern void ParseIntStems(
-    const ACFontInfo* fontinfo,
-char *, bool, int32_t, int *, int32_t*, char *
-);
+extern void ParseIntStems(const ACFontInfo* fontinfo, char*, bool, int32_t,
+                          int*, int32_t*);
 
 #endif /*FIPUBLIC_H*/

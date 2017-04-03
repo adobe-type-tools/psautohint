@@ -8,11 +8,6 @@
  */
 
 #include "buildfont.h"
-#include "charpath.h"
-#include "fipublic.h"
-#include "machinedep.h"
-
-static int16_t total_inputdirs = 1; /* number of input directories           */
 
 typedef void* (*AC_MEMMANAGEFUNCPTR)(void* ctxptr, void* old, uint32_t size);
 extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;
@@ -55,10 +50,4 @@ UnallocateMem(void* ptr)
 {
     /* free(ptr) */
     AC_memmanageFuncPtr(AC_memmanageCtxPtr, (void*)ptr, 0);
-}
-
-extern int16_t
-GetTotalInputDirs(void)
-{
-    return total_inputdirs;
 }

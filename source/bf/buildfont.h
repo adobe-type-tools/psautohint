@@ -46,12 +46,6 @@ typedef struct
 extern bool scalinghints;
 
 /*****************************************************************************/
-/* Returns the total number of input directories.                            */
-/*****************************************************************************/
-extern int16_t
-GetTotalInputDirs(void);
-
-/*****************************************************************************/
 /* Deallocates memory and deletes temporary files.                           */
 /*****************************************************************************/
 extern int

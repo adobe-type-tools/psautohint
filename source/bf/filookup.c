@@ -94,19 +94,16 @@ GetHVStems(const ACFontInfo* fontinfo, char* kw, bool optional)
    is specified then the StemSnap{H,V} values are automatically
    added to the stem array.  ParseIntStems guarantees that stem values
    are unique and in ascending order.
-   If blendstr is NULL it means we just want the values from the
-   current font directory and not for all input directories
-   (e.g., for a multi-master font).
  */
 extern void
 ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
-              int32_t maxstems, int* stems, int32_t* pnum, char* blendstr)
+              int32_t maxstems, int* stems, int32_t* pnum)
 {
     char c;
     char* line;
     int val, cnt, i, ix, j, temp, targetCnt = -1, total = 0;
     bool singleint = false;
-    int16_t dirCount = (blendstr == NULL ? 1 : GetTotalInputDirs());
+    int16_t dirCount = 1;
     char* initline;
 
     *pnum = 0;
@@ -197,9 +194,4 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
         *pnum += cnt;
         UnallocateMem(initline);
     } /* end of for loop */
-    if (blendstr == NULL || total == 0)
-        return;
-    /* Reset pnum so just the first set of snap values is written
-       in the top level Private dictionary. */
-    *pnum = cnt;
 }
