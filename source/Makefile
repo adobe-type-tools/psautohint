@@ -60,7 +60,7 @@ LIB_OBJS = \
 	$(OBJ_DIR)/ac/read.o \
 	$(OBJ_DIR)/ac/report.o \
 	$(OBJ_DIR)/ac/shuffle.o \
-	$(OBJ_DIR)/ac/stub.o \
+	$(OBJ_DIR)/ac/stemreport.o \
 	$(OBJ_DIR)/ac/write.o \
 	$(OBJ_DIR)/bf/charpathpriv.o \
 	$(OBJ_DIR)/bf/filookup.o \
