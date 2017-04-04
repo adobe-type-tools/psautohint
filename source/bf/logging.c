@@ -10,7 +10,6 @@
 #include <stdarg.h>
 
 #include "ac.h"
-#include "fipublic.h"
 
 static int16_t warncnt = 0;
 

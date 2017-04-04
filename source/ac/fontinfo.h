@@ -11,8 +11,8 @@
  * proc.  The caller of filookup is responsible for also calling
  * fiptrfree to get rid of the storage returned. */
 
-#ifndef FIPUBLIC_H
-#define FIPUBLIC_H
+#ifndef AC_FONTINFO_H_
+#define AC_FONTINFO_H_
 
 #include "ac.h"
 #include "basic.h"
@@ -20,9 +20,11 @@
 #define		ACOPTIONAL		1
 #define		MANDATORY		0
 
+/* Default value used by PS interpreter and Adobe's fonts to extend the range
+ * of alignment zones. */
+#define DEFAULTBLUEFUZZ FixOne
 
-#define DEFAULTBLUEFUZZ FixOne	/* Default value used by PS interpreter and Adobe's fonts
-			   to extend the range of alignment zones. */
+bool ReadFontInfo(const ACFontInfo* fontinfo);
 
 /* Looks up the value of the specified keyword in the fontinfo
    file.  If the keyword doesn't exist and this is an optional
@@ -32,4 +34,4 @@ char* GetFntInfo(const ACFontInfo*, char*, bool);
 void ParseIntStems(const ACFontInfo* fontinfo, char*, bool, int32_t, int*,
                    int32_t*);
 
-#endif /*FIPUBLIC_H*/
+#endif /* AC_FONTINFO_H_ */

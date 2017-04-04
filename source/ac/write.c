@@ -8,10 +8,9 @@
  */
 
 #include <assert.h>
+#include <math.h>
 
 #include "ac.h"
-#include "fipublic.h"
-#include <math.h>
 
 #define WRTABS_COMMENT (0)
 
