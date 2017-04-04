@@ -11,7 +11,6 @@
    from AC.  It should not contain calls to procedures implemented
    in object files that are not bound into AC. */
 
-#include "buildfont.h"
 #include "charpath.h"
 #include "memory.h"
 
