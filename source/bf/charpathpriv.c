@@ -51,7 +51,7 @@ CheckPath(void)
     }
 }
 
-extern PCharPathElt
+PCharPathElt
 AppendCharPathElement(int pathtype)
 {
 
@@ -61,7 +61,7 @@ AppendCharPathElement(int pathtype)
     return (&currPathList->path[path_entries - 1]);
 }
 
-extern void
+void
 SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2,
             bool mainhints)
 {
@@ -93,7 +93,7 @@ SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2,
 /* Called when character file contains hinting operators, but
    not the path element information needed for making blended
    fonts. */
-extern void
+void
 SetNoHints(void)
 {
     addHints = false;
@@ -104,7 +104,7 @@ SetNoHints(void)
    use for blended fonts.  This means characters that should
    have these commands may not look as good on Classic LW's. */
 /*
-extern void SetOffsetLocking(locktype)
+void SetOffsetLocking(locktype)
 char *locktype;
 {
   if (STREQ(locktype, "sol"))
