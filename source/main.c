@@ -7,11 +7,23 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include "ac.h"
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1800
+#include <stdbool.h>
+#else
+typedef unsigned char bool;
+#define true 1
+#define false 0
+#endif
+
+/*#include "ac_C_lib.h"*/
+#include "ac.h"
 
 const char* C_ProgramVersion = "1.65240";
 const char* reportExt = ".rpt";
@@ -81,7 +93,7 @@ main_cleanup(int16_t code)
 }
 
 static void
-charZoneCB(Fixed top, Fixed bottom, char* glyphName)
+charZoneCB(int32_t top, int32_t bottom, char* glyphName)
 {
     if (reportFile)
         fprintf(reportFile, "charZone %s top %f bottom %f\n", glyphName,
@@ -89,7 +101,7 @@ charZoneCB(Fixed top, Fixed bottom, char* glyphName)
 }
 
 static void
-stemZoneCB(Fixed top, Fixed bottom, char* glyphName)
+stemZoneCB(int32_t top, int32_t bottom, char* glyphName)
 {
     if (reportFile)
         fprintf(reportFile, "stemZone %s top %f bottom %f\n", glyphName,
@@ -97,7 +109,7 @@ stemZoneCB(Fixed top, Fixed bottom, char* glyphName)
 }
 
 static void
-hstemCB(Fixed top, Fixed bottom, char* glyphName)
+hstemCB(int32_t top, int32_t bottom, char* glyphName)
 {
     if (reportFile)
         fprintf(reportFile, "HStem %s top %f bottom %f\n", glyphName,
@@ -105,7 +117,7 @@ hstemCB(Fixed top, Fixed bottom, char* glyphName)
 }
 
 static void
-vstemCB(Fixed right, Fixed left, char* glyphName)
+vstemCB(int32_t right, int32_t left, char* glyphName)
 {
     if (reportFile)
         fprintf(reportFile, "VStem %s right %f left %f\n", glyphName,
@@ -138,12 +150,12 @@ getFileData(char* name)
         fprintf(stdout, "Error. Could not open file '%s'. Please check "
                         "that it exists and is not write-protected.\n",
                 name);
-        main_cleanup(FATALERROR);
+        main_cleanup(AC_FatalError);
     }
 
     if (filestat.st_size == 0) {
         fprintf(stdout, "Error. File '%s' has zero size.\n", name);
-        main_cleanup(FATALERROR);
+        main_cleanup(AC_FatalError);
     }
 
     data = malloc(filestat.st_size + 1);
@@ -151,7 +163,7 @@ getFileData(char* name)
         fprintf(stdout,
                 "Error. Could not allcoate memory for contents of file %s.\n",
                 name);
-        main_cleanup(FATALERROR);
+        main_cleanup(AC_FatalError);
     } else {
         size_t fileSize = 0;
         FILE* fp = fopen(name, "r");
@@ -159,7 +171,7 @@ getFileData(char* name)
             fprintf(stdout, "Error. Could not open file '%s'. Please check "
                             "that it exists and is not write-protected.\n",
                     name);
-            main_cleanup(FATALERROR);
+            main_cleanup(AC_FatalError);
         }
         fileSize = fread(data, 1, filestat.st_size, fp);
         data[fileSize] = 0;
@@ -234,6 +246,7 @@ main(int argc, char* argv[])
 
     int allowEdit, roundCoords, allowHintSub, debug, badParam, allStems;
     bool argumentIsBezData = false;
+    bool report = false;
     char* fontInfoFileName =
       NULL; /* font info file name, or suffix of environment variable holding
                the fontfino string. */
@@ -354,10 +367,12 @@ main(int argc, char* argv[])
                     case 'a':
                         reportRetryCB = reportRetry;
                         AC_SetReportZonesCB(charZoneCB, stemZoneCB);
+                        report = true;
                         break;
                     case 's':
                         reportRetryCB = reportRetry;
                         AC_SetReportStemsCB(hstemCB, vstemCB, allStems);
+                        report = true;
                         break;
                     default:
                         fprintf(stdout, "Error. %s is an invalid parameter.\n",
@@ -392,7 +407,7 @@ main(int argc, char* argv[])
     }
 
     if (badParam)
-        exit(NONFATALERROR);
+        exit(AC_InvalidParameterError);
 
     AC_SetReportCB(reportCB, verbose);
     argi = firstFileNameIndex - 1;
@@ -409,7 +424,7 @@ main(int argc, char* argv[])
         outputsize = 4 * strlen(bezdata);
         output = malloc(outputsize);
 
-        if (!argumentIsBezData && (doAligns || doStems)) {
+        if (!argumentIsBezData && report) {
             openReportFile(bezName, fileSuffix);
         }
 
@@ -418,7 +433,7 @@ main(int argc, char* argv[])
         if (result == AC_DestBuffOfloError) {
             if (reportFile != NULL) {
                 closeReportFile();
-                if (!argumentIsBezData && (doAligns || doStems)) {
+                if (!argumentIsBezData && report) {
                     openReportFile(bezName, fileSuffix);
                 }
             }
@@ -446,7 +461,7 @@ main(int argc, char* argv[])
         }
 
         free(output);
-        main_cleanup((result == AC_Success) ? OK : FATALERROR);
+        main_cleanup(result);
     }
 
     return 0;
