@@ -29,7 +29,7 @@ bool ReadFontInfo(const ACFontInfo* fontinfo);
 /* Looks up the value of the specified keyword in the fontinfo
    file.  If the keyword doesn't exist and this is an optional
    key, returns a NULL.	 Otherwise, returns the value string. */
-char* GetFntInfo(const ACFontInfo*, char*, bool);
+char* GetFontInfo(const ACFontInfo*, char*, bool);
 
 void ParseIntStems(const ACFontInfo* fontinfo, char*, bool, int32_t, int*,
                    int32_t*);

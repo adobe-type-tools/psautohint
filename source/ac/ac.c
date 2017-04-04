@@ -159,7 +159,7 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             showHs = showVs = DEBUG;
             listClrInfo = DEBUG;
             if (scalinghints) {
-                s = GetFntInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
+                s = GetFontInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
                 sscanf(s, "%g", &origEmSquare);
                 ACFREEMEM(s);
                 bluefuzz = (Fixed)(origEmSquare / 2000.0); /* .5 pixel */

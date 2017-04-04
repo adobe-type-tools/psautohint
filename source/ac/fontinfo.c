@@ -31,7 +31,7 @@ GetKeyValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
 {
     char* fontinfostr;
 
-    fontinfostr = GetFntInfo(fontinfo, keyword, optional);
+    fontinfostr = GetFontInfo(fontinfo, keyword, optional);
 
     if ((fontinfostr != NULL) && (fontinfostr[0] != 0)) {
         *value = atol(fontinfostr);
@@ -47,7 +47,7 @@ GetKeyFixedValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
     char* fontinfostr;
     float tempValue;
 
-    fontinfostr = GetFntInfo(fontinfo, keyword, optional);
+    fontinfostr = GetFontInfo(fontinfo, keyword, optional);
 
     if ((fontinfostr != NULL) && (fontinfostr[0] != 0)) {
         sscanf(fontinfostr, "%g", &tempValue);
@@ -91,12 +91,12 @@ ReadFontInfo(const ACFontInfo* fontinfo)
             ParseStems(fontinfo, "DominantV", VStems, &NumVStems);
         }
     }
-    fontinfostr = GetFntInfo(fontinfo, "FlexOK", !ORDINARYCOLORING);
+    fontinfostr = GetFontInfo(fontinfo, "FlexOK", !ORDINARYCOLORING);
     flexOK = (fontinfostr != NULL) && (fontinfostr[0] != '\0') &&
              strcmp(fontinfostr, "false");
 
     ACFREEMEM(fontinfostr);
-    fontinfostr = GetFntInfo(fontinfo, "FlexStrict", true);
+    fontinfostr = GetFontInfo(fontinfo, "FlexStrict", true);
     if (fontinfostr != NULL)
         flexStrict = strcmp(fontinfostr, "false");
     ACFREEMEM(fontinfostr);
@@ -107,12 +107,12 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     GetKeyFixedValue(fontinfo, "BlueFuzz", ACOPTIONAL, &bluefuzz);
 
     /* Check for counter coloring characters. */
-    if ((fontinfostr = GetFntInfo(fontinfo, "VCounterChars", ACOPTIONAL)) !=
+    if ((fontinfostr = GetFontInfo(fontinfo, "VCounterChars", ACOPTIONAL)) !=
         NULL) {
         NumVColors = AddCounterColorChars(fontinfostr, VColorList);
         ACFREEMEM(fontinfostr);
     };
-    if ((fontinfostr = GetFntInfo(fontinfo, "HCounterChars", ACOPTIONAL)) !=
+    if ((fontinfostr = GetFontInfo(fontinfo, "HCounterChars", ACOPTIONAL)) !=
         NULL) {
         NumHColors = AddCounterColorChars(fontinfostr, HColorList);
         ACFREEMEM(fontinfostr);
@@ -228,7 +228,7 @@ misdigit(int c)
    file.  If the keyword doesn't exist and this is an optional
    key, returns a NULL.  Otherwise, returns the value string. */
 char*
-GetFntInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
+GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
 {
     char* returnstring = NULL;
     int i;
@@ -240,7 +240,7 @@ GetFntInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
             !strcmp(fontinfo->entries[i].key, keyword)) {
             returnstring = (char*)AllocateMem(
               (unsigned)strlen(fontinfo->entries[i].value) + 1, sizeof(char),
-              "GetFntInfo return str");
+              "GetFontInfo return str");
             strcpy(returnstring, fontinfo->entries[i].value);
             return returnstring;
         }
@@ -261,10 +261,10 @@ GetHVStems(const ACFontInfo* fontinfo, char* kw, bool optional)
     char *fistr1, *fistr2, *newfistr;
     char *end, *start;
 
-    fistr1 = GetFntInfo(fontinfo,
-                        ((STREQ(kw, "AuxHStems")) ? "StemSnapH" : "StemSnapV"),
-                        optional);
-    fistr2 = GetFntInfo(fontinfo, kw, ACOPTIONAL);
+    fistr1 = GetFontInfo(fontinfo,
+                         ((STREQ(kw, "AuxHStems")) ? "StemSnapH" : "StemSnapV"),
+                         optional);
+    fistr2 = GetFontInfo(fontinfo, kw, ACOPTIONAL);
     if (fistr2 == NULL)
         return fistr1;
     if (fistr1 == NULL)
@@ -305,7 +305,7 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
         if (STREQ(kw, "AuxHStems") || STREQ(kw, "AuxVStems"))
             initline = GetHVStems(fontinfo, kw, optional);
         else
-            initline = GetFntInfo(fontinfo, kw, optional);
+            initline = GetFontInfo(fontinfo, kw, optional);
         if (initline == NULL) {
             if (targetCnt > 0) {
                 LogMsg(LOGERROR, NONFATALERROR,
