@@ -10,8 +10,6 @@
 #include "ac.h"
 #include "bbox.h"
 
-extern void CSWrite(void);
-
 static void DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1);
 static void DoVStems(PClrVal sLst);
 
