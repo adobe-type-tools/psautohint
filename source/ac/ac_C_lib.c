@@ -13,15 +13,10 @@
 #include "ac_C_lib.h"
 
 const char* libversion = "1.6.0";
-const char* progname = "AC_C_lib";
-char editingResource = 0;
 
 ACBuffer* bezoutput = NULL;
 
 bool scalinghints = false;
-
-extern int
-  compatiblemode; /*forces the definition of colors even before a color sub*/
 
 jmp_buf aclibmark; /* to handle exit() calls in the library version*/
 
