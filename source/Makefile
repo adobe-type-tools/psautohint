@@ -23,7 +23,6 @@ LIB_TARGET = $(OBJ_DIR)/autohintlib.a
 CFLAGS = \
 	-I$(SRC_DIR)/include \
 	-I$(SRC_DIR)/ac \
-	-I$(SRC_DIR)/bf \
 	-Wall \
 	-Wdeclaration-after-statement \
 	-Wstrict-prototypes \
@@ -39,11 +38,12 @@ PRG_LIBS += -lm
 endif
 					 
 LIB_OBJS = \
-	$(OBJ_DIR)/ac/ac.o \
 	$(OBJ_DIR)/ac/ac_C_lib.o \
 	$(OBJ_DIR)/ac/acfixed.o \
+	$(OBJ_DIR)/ac/ac.o \
 	$(OBJ_DIR)/ac/auto.o \
 	$(OBJ_DIR)/ac/bbox.o \
+	$(OBJ_DIR)/ac/charpath.o \
 	$(OBJ_DIR)/ac/charprop.o \
 	$(OBJ_DIR)/ac/check.o \
 	$(OBJ_DIR)/ac/control.o \
@@ -53,6 +53,8 @@ LIB_OBJS = \
 	$(OBJ_DIR)/ac/fontinfo.o \
 	$(OBJ_DIR)/ac/gen.o \
 	$(OBJ_DIR)/ac/head.o \
+	$(OBJ_DIR)/ac/logging.o \
+	$(OBJ_DIR)/ac/memory.o \
 	$(OBJ_DIR)/ac/merge.o \
 	$(OBJ_DIR)/ac/misc.o \
 	$(OBJ_DIR)/ac/pick.o \
@@ -61,9 +63,6 @@ LIB_OBJS = \
 	$(OBJ_DIR)/ac/shuffle.o \
 	$(OBJ_DIR)/ac/stemreport.o \
 	$(OBJ_DIR)/ac/write.o \
-	$(OBJ_DIR)/bf/charpath.o \
-	$(OBJ_DIR)/bf/logging.o \
-	$(OBJ_DIR)/bf/memory.o \
 	$(NULL)
 
 default: $(PRG_TARGET)
