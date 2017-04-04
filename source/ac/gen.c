@@ -12,9 +12,6 @@
 #include "ac.h"
 #include "bbox.h"
 
-extern void ReportRemVSeg(Fixed from, Fixed to, Fixed loc);
-extern void ReportRemHSeg(Fixed from, Fixed to, Fixed loc);
-
 static PSegLnkLst Hlnks, Vlnks;
 static int32_t cpFrom, cpTo;
 

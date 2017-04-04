@@ -428,6 +428,8 @@ void ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
 void ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
                      Fixed v1, Fixed s1);
 void ReportPruneHVal(PClrVal val, PClrVal v, int32_t i);
+void ReportRemVSeg(Fixed from, Fixed to, Fixed loc);
+void ReportRemHSeg(Fixed from, Fixed to, Fixed loc);
 void ReportPruneVVal(PClrVal val, PClrVal v, int32_t i);
 Fixed ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled);
 Fixed UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled);
