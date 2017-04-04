@@ -10,6 +10,8 @@
 #ifndef CHARPATH_H
 #define CHARPATH_H
 
+#include "ac.h"
+
 typedef struct _t_hintelt {
   struct _t_hintelt *next;
   int16_t type; /* RB, RY, RM, RV */

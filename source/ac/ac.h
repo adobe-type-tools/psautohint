@@ -16,7 +16,6 @@
 #define AC_AC_H_
 
 #include "ac_C_lib.h"
-#include "buildfont.h"
 #include "logging.h"
 #include "memory.h"
 
@@ -50,6 +49,12 @@
 #define topGhst (-20)
 
 /* structures */
+
+/* character point coordinates */
+typedef struct
+   {
+   int32_t x, y;
+   } Cd, *CdPtr;
 
 typedef struct {
   int16_t limit;
