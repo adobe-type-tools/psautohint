@@ -7,8 +7,8 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include "ac.h"
 #include "bbox.h"
+#include "ac.h"
 
 static Fixed xmin, ymin, xmax, ymax, vMn, vMx, hMn, hMx;
 static PPathElt pxmn, pxmx, pymn, pymx, pe, pvMn, pvMx, phMn, phMx;
