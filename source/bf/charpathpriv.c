@@ -13,6 +13,7 @@
 
 #include "buildfont.h"
 #include "charpath.h"
+#include "memory.h"
 
 #define MAXPATHELT 100 /* initial maximum number of path elements */
 
