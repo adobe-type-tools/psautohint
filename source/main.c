@@ -83,15 +83,6 @@ printHelp(void)
     fprintf(stdout, "   -v print versions.\n");
 }
 
-static int
-main_cleanup(int16_t code)
-{
-    if (code != AC_Success)
-        exit(code);
-
-    return 0;
-}
-
 static void
 charZoneCB(int32_t top, int32_t bottom, char* glyphName)
 {
@@ -150,12 +141,12 @@ getFileData(char* name)
         fprintf(stdout, "Error. Could not open file '%s'. Please check "
                         "that it exists and is not write-protected.\n",
                 name);
-        main_cleanup(AC_FatalError);
+        exit(AC_FatalError);
     }
 
     if (filestat.st_size == 0) {
         fprintf(stdout, "Error. File '%s' has zero size.\n", name);
-        main_cleanup(AC_FatalError);
+        exit(AC_FatalError);
     }
 
     data = malloc(filestat.st_size + 1);
@@ -163,7 +154,7 @@ getFileData(char* name)
         fprintf(stdout,
                 "Error. Could not allcoate memory for contents of file %s.\n",
                 name);
-        main_cleanup(AC_FatalError);
+        exit(AC_FatalError);
     } else {
         size_t fileSize = 0;
         FILE* fp = fopen(name, "r");
@@ -171,7 +162,7 @@ getFileData(char* name)
             fprintf(stdout, "Error. Could not open file '%s'. Please check "
                             "that it exists and is not write-protected.\n",
                     name);
-            main_cleanup(AC_FatalError);
+            exit(AC_FatalError);
         }
         fileSize = fread(data, 1, filestat.st_size, fp);
         data[fileSize] = 0;
@@ -461,7 +452,8 @@ main(int argc, char* argv[])
         }
 
         free(output);
-        main_cleanup(result);
+        if (result != AC_Success)
+            exit(result);
     }
 
     return 0;
