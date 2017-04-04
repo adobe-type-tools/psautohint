@@ -37,11 +37,11 @@ typedef struct _t_pathlist {
 extern int32_t path_entries;  /* number of elements in a character path */
 extern bool addHints;  /* whether to include hints in the font */
 
-extern PCharPathElt AppendCharPathElement(int);
+PCharPathElt AppendCharPathElement(int);
 
-extern void SetHintsElt(int16_t, CdPtr, int32_t, int32_t, bool);
+void SetHintsElt(int16_t, CdPtr, int32_t, int32_t, bool);
 
-extern void SetNoHints(void);
+void SetNoHints(void);
 
 #endif /*CHARPATH_H*/
 

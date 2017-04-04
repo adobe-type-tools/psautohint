@@ -27,12 +27,9 @@
 /* Looks up the value of the specified keyword in the fontinfo
    file.  If the keyword doesn't exist and this is an optional
    key, returns a NULL.	 Otherwise, returns the value string. */
-extern char *GetFntInfo(
-    const ACFontInfo*,
-    char *, bool
-);
+char* GetFntInfo(const ACFontInfo*, char*, bool);
 
-extern void ParseIntStems(const ACFontInfo* fontinfo, char*, bool, int32_t,
-                          int*, int32_t*);
+void ParseIntStems(const ACFontInfo* fontinfo, char*, bool, int32_t, int*,
+                   int32_t*);
 
 #endif /*FIPUBLIC_H*/

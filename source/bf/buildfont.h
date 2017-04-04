@@ -28,13 +28,13 @@ typedef struct
    } Cd, *CdPtr;
 
 
-extern char *
+char *
 AllocateMem(unsigned int, unsigned int, const char *);
 
-extern char *
+char *
 ReallocateMem(char *, unsigned int, const char *);
 
-extern void
+void
 UnallocateMem(void *ptr);
 
 #endif /*BUILDFONT_H*/

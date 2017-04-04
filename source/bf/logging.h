@@ -25,8 +25,8 @@
 /* maximum message length */
 #define MAXMSGLEN 500
 
-extern void LogMsg(int16_t, int16_t, char *, ...);
+void LogMsg(int16_t, int16_t, char *, ...);
 
-extern void set_errorproc( int (*)(int16_t) );
+void set_errorproc( int (*)(int16_t) );
 
 #endif /* BF_LOGGING_H_ */

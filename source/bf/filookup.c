@@ -32,7 +32,7 @@ misdigit(int c)
 /* Looks up the value of the specified keyword in the fontinfo
    file.  If the keyword doesn't exist and this is an optional
    key, returns a NULL.  Otherwise, returns the value string. */
-extern char*
+char*
 GetFntInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
 {
     char* returnstring = NULL;
@@ -93,7 +93,7 @@ GetHVStems(const ACFontInfo* fontinfo, char* kw, bool optional)
    added to the stem array.  ParseIntStems guarantees that stem values
    are unique and in ascending order.
  */
-extern void
+void
 ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
               int32_t maxstems, int* stems, int32_t* pnum)
 {

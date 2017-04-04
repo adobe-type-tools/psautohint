@@ -71,7 +71,7 @@ StrEqual(char* s1, char* s2)
     }
 }
 
-extern bool
+bool
 FindNameInList(char* nm, char** lst)
 {
     char **l, *lnm;
@@ -87,7 +87,7 @@ FindNameInList(char* nm, char** lst)
 }
 
 /* Adds specified characters to CounterColorList array. */
-extern int
+int
 AddCounterColorChars(char* charlist, char* ColorList[])
 {
     const char* setList = "(), \t\n\r";
