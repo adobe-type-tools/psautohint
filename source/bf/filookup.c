@@ -13,7 +13,6 @@
 
 #include "ac.h"
 #include "buildfont.h"
-#include "filookup.h"
 #include "fipublic.h"
 
 static int
