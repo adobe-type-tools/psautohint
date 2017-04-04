@@ -108,7 +108,7 @@ SetNoHints(void)
 void SetOffsetLocking(locktype)
 char *locktype;
 {
-  if (STREQ(locktype, "sol"))
+  if (strcmp(locktype, "sol") == 0)
     currPathList[path_entries-1].sol = true;
   else
     currPathList[path_entries-1].eol = true;
