@@ -8,7 +8,7 @@
  */
 
 #include "ac.h"
-#include "fipublic.h"
+#include "fontinfo.h"
 
 #define MAXSTEMDIST 150 /* initial maximum stem width allowed for hints */
 

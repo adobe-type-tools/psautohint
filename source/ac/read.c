@@ -11,7 +11,7 @@
 
 #include "ac.h"
 #include "charpath.h"
-#include "fipublic.h"
+#include "fontinfo.h"
 #include "opcodes.h"
 #define ESCVAL 100
 

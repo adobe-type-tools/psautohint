@@ -337,7 +337,6 @@ void CheckVals(PClrVal vlst, bool vert);
 bool DoFixes(void);
 bool FindLineSeg(Fixed loc, PClrSeg sL);
 void FltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr);
-bool ReadFontInfo(const ACFontInfo* fontinfo);
 bool InBlueBand(Fixed loc, int32_t n, Fixed* p);
 void GenHPts(void);
 void PreGenPts(void);
