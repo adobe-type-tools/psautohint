@@ -7,7 +7,7 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include "buildfont.h"
+#include "memory.h"
 #include "logging.h"
 
 typedef void* (*AC_MEMMANAGEFUNCPTR)(void* ctxptr, void* old, uint32_t size);

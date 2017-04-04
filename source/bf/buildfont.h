@@ -27,14 +27,4 @@ typedef struct
    int32_t x, y;
    } Cd, *CdPtr;
 
-
-char *
-AllocateMem(unsigned int, unsigned int, const char *);
-
-char *
-ReallocateMem(char *, unsigned int, const char *);
-
-void
-UnallocateMem(void *ptr);
-
 #endif /*BUILDFONT_H*/

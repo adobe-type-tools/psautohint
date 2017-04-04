@@ -18,6 +18,7 @@
 #include "ac_C_lib.h"
 #include "buildfont.h"
 #include "logging.h"
+#include "memory.h"
 
 
 /* widely used definitions */
