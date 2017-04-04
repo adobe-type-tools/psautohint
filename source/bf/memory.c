@@ -10,9 +10,35 @@
 #include "memory.h"
 #include "logging.h"
 
-typedef void* (*AC_MEMMANAGEFUNCPTR)(void* ctxptr, void* old, uint32_t size);
-extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;
-extern void* AC_memmanageCtxPtr;
+static void*
+defaultAC_memmanage(void* ctxptr, void* old, uint32_t size)
+{
+    (void)ctxptr;
+    if (size > 0) {
+        if (NULL == old) {
+            return malloc((size_t)size);
+        } else {
+            return realloc(old, (size_t)size);
+        }
+    } else {
+        if (NULL == old)
+            return NULL;
+        else {
+            free(old);
+            return NULL;
+        }
+    }
+}
+
+AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr = defaultAC_memmanage;
+void* AC_memmanageCtxPtr = NULL;
+
+void
+setAC_memoryManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func)
+{
+    AC_memmanageFuncPtr = func;
+    AC_memmanageCtxPtr = ctxptr;
+}
 
 char*
 AllocateMem(unsigned int nelem, unsigned int elsize, const char* description)

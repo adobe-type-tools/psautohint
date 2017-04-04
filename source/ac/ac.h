@@ -291,13 +291,7 @@ int32_t FRnd(int32_t x);
 void acfixtopflt(Fixed x, float* pf);
 Fixed acpflttofix(float* pf);
 
-
 unsigned char* Alloc(int32_t sz); /* Sub-allocator */
-
-
-extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;
-extern void *AC_memmanageCtxPtr;
-void setAC_memoryManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 int AddCounterColorChars(char* charlist, char* ColorList[]);
 bool FindNameInList(char* nm, char** lst);
