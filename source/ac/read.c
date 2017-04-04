@@ -36,13 +36,12 @@ ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled)
     if (!scalinghints)
         return unscaled;
     if (origEmSquare == 0.0) {
-        char* fistr;
-        if ((fistr = GetFontInfo(fontinfo, "OrigEmSqUnits", ACOPTIONAL)) ==
-            NULL)
-            origEmSquare = 1000.0;
-        else {
+        char* fistr = GetFontInfo(fontinfo, "OrigEmSqUnits", ACOPTIONAL);
+        if (fistr) {
             sscanf(fistr, "%g", &origEmSquare);
             ACFREEMEM(fistr);
+        } else {
+            origEmSquare = 1000.0;
         }
     }
     temp1 = (Fixed)(1000.0 / origEmSquare * ((float)unscaled));
@@ -56,13 +55,12 @@ UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled)
     if (!scalinghints)
         return scaled;
     if (origEmSquare == 0.0) {
-        char* fistr;
-        if ((fistr = GetFontInfo(fontinfo, "OrigEmSqUnits", ACOPTIONAL)) ==
-            NULL)
-            origEmSquare = 1000.0;
-        else {
+        char* fistr = GetFontInfo(fontinfo, "OrigEmSqUnits", ACOPTIONAL);
+        if (fistr) {
             sscanf(fistr, "%g", &origEmSquare);
             ACFREEMEM(fistr);
+        } else {
+            origEmSquare = 1000.0;
         }
     }
     temp1 = (Fixed)(origEmSquare / 1000.0 * ((float)scaled));
