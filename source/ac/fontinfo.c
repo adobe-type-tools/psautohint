@@ -261,9 +261,8 @@ GetHVStems(const ACFontInfo* fontinfo, char* kw, bool optional)
     char *fistr1, *fistr2, *newfistr;
     char *end, *start;
 
-    fistr1 = GetFontInfo(fontinfo,
-                         ((STREQ(kw, "AuxHStems")) ? "StemSnapH" : "StemSnapV"),
-                         optional);
+    fistr1 = GetFontInfo(
+      fontinfo, strcmp(kw, "AuxHStems") ? "StemSnapV" : "StemSnapH", optional);
     fistr2 = GetFontInfo(fontinfo, kw, ACOPTIONAL);
     if (fistr2 == NULL)
         return fistr1;
@@ -302,7 +301,7 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
     *pnum = 0;
     for (ix = 0; ix < dirCount; ix++) {
         cnt = 0;
-        if (STREQ(kw, "AuxHStems") || STREQ(kw, "AuxVStems"))
+        if (strcmp(kw, "AuxHStems") == 0 || strcmp(kw, "AuxVStems") == 0)
             initline = GetHVStems(fontinfo, kw, optional);
         else
             initline = GetFontInfo(fontinfo, kw, optional);
