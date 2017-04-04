@@ -70,12 +70,6 @@ defaultAC_memmanage(void* ctxptr, void* old, uint32_t size)
     }
 }
 
-/* SEE MACROS in ac.h:
-ACNEWMEM(size)
-ACREALLOCMEM(oldptr, newsize)
-ACFREEMEM(ptr)
-*/
-
 AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr = defaultAC_memmanage;
 void* AC_memmanageCtxPtr = NULL;
 
@@ -161,7 +155,7 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             if (scalinghints) {
                 s = GetFontInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
                 sscanf(s, "%g", &origEmSquare);
-                ACFREEMEM(s);
+                UnallocateMem(s);
                 bluefuzz = (Fixed)(origEmSquare / 2000.0); /* .5 pixel */
             } else {
                 bluefuzz = DEFAULTBLUEFUZZ;

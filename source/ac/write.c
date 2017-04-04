@@ -50,7 +50,8 @@ WriteString(char* str)
     if ((bezoutput->length + (int)strlen(str)) >= bezoutput->capacity) {
         int desiredsize = NUMMAX(bezoutput->capacity * 2,
                                  (bezoutput->capacity + (int)strlen(str)));
-        bezoutput->data = (char*)ACREALLOCMEM(bezoutput->data, desiredsize);
+        bezoutput->data =
+          ReallocateMem(bezoutput->data, desiredsize, "output bez data");
         if (bezoutput->data) {
             bezoutput->capacity = desiredsize;
         } else {

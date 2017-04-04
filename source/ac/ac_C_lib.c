@@ -60,11 +60,11 @@ FreeFontInfo(ACFontInfo* fontinfo)
 
     for (i = 0; i < fontinfo->length; i++) {
         if (fontinfo->entries[i].value[0]) {
-            ACFREEMEM(fontinfo->entries[i].value);
+            UnallocateMem(fontinfo->entries[i].value);
         }
     }
-    ACFREEMEM(fontinfo->entries);
-    ACFREEMEM(fontinfo);
+    UnallocateMem(fontinfo->entries);
+    UnallocateMem(fontinfo);
 }
 
 static ACFontInfo*
@@ -75,13 +75,14 @@ NewFontInfo(int length)
     if (length <= 0)
         return NULL;
 
-    fontinfo = (ACFontInfo*)ACNEWMEM(sizeof(ACFontInfo));
+    fontinfo = (ACFontInfo*)AllocateMem(1, sizeof(ACFontInfo), "fontinfo");
     if (!fontinfo)
         return NULL;
 
-    fontinfo->entries = (FFEntry*)ACNEWMEM(length * sizeof(FFEntry));
+    fontinfo->entries =
+      (FFEntry*)AllocateMem(length, sizeof(FFEntry), "fontinfo entry");
     if (!fontinfo->entries) {
-        ACFREEMEM(fontinfo);
+        UnallocateMem(fontinfo);
         return NULL;
     }
 
@@ -98,13 +99,13 @@ NewBuffer(int size)
     if (size <= 0)
         return NULL;
 
-    buffer = (ACBuffer*)ACNEWMEM(sizeof(ACBuffer));
+    buffer = (ACBuffer*)AllocateMem(1, sizeof(ACBuffer), "out buffer");
     if (!buffer)
         return NULL;
 
-    buffer->data = (char*)ACNEWMEM(size);
+    buffer->data = AllocateMem(size, 1, "out buffer data");
     if (!buffer->data) {
-        ACFREEMEM(buffer);
+        UnallocateMem(buffer);
         return NULL;
     }
 
@@ -121,8 +122,8 @@ FreeBuffer(ACBuffer* buffer)
     if (!buffer)
         return;
 
-    ACFREEMEM(buffer->data);
-    ACFREEMEM(buffer);
+    UnallocateMem(buffer->data);
+    UnallocateMem(buffer);
 }
 
 static int
@@ -206,7 +207,8 @@ ParseFontInfo(const char* data, ACFontInfo** fontinfo)
         for (i = 0; i < info->length; i++) {
             size_t matchLen = NUMMAX(kwLen, strlen(info->entries[i].key));
             if (!strncmp(info->entries[i].key, kwstart, matchLen)) {
-                info->entries[i].value = (char*)ACNEWMEM(current - tkstart + 1);
+                info->entries[i].value =
+                  AllocateMem(current - tkstart + 1, 1, "fontinfo entry value");
                 if (!info->entries[i].value) {
                     FreeFontInfo(info);
                     return AC_MemoryError;
@@ -219,7 +221,7 @@ ParseFontInfo(const char* data, ACFontInfo** fontinfo)
 
         if (i == info->length) {
             char* temp;
-            temp = (char*)ACNEWMEM(tkstart - kwstart + 1);
+            temp = AllocateMem(tkstart - kwstart + 1, 1, "no idea!");
             if (!temp) {
                 FreeFontInfo(info);
                 return AC_MemoryError;
@@ -227,7 +229,7 @@ ParseFontInfo(const char* data, ACFontInfo** fontinfo)
             strncpy(temp, kwstart, tkstart - kwstart);
             temp[tkstart - kwstart] = '\0';
             /*fprintf(stderr, "Ignoring fileinfo %s...\n", temp);*/
-            ACFREEMEM(temp);
+            UnallocateMem(temp);
         }
         skipblanks();
     }

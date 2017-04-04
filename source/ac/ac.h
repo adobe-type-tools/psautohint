@@ -299,11 +299,6 @@ extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;
 extern void *AC_memmanageCtxPtr;
 void setAC_memoryManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func);
 
-#define ACNEWMEM(size) AC_memmanageFuncPtr(AC_memmanageCtxPtr, NULL, (uint32_t)(size))
-#define ACREALLOCMEM(oldptr, newsize) AC_memmanageFuncPtr(AC_memmanageCtxPtr, (oldptr), (newsize))
-#define ACFREEMEM(ptr) AC_memmanageFuncPtr(AC_memmanageCtxPtr, (ptr), 0)
-
-
 int AddCounterColorChars(char* charlist, char* ColorList[]);
 bool FindNameInList(char* nm, char** lst);
 void PruneElementColorSegs(void);
