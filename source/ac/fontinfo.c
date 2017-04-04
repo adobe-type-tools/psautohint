@@ -35,7 +35,7 @@ GetKeyValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
 
     if ((fontinfostr != NULL) && (fontinfostr[0] != 0)) {
         *value = atol(fontinfostr);
-        ACFREEMEM(fontinfostr);
+        UnallocateMem(fontinfostr);
     }
     return;
 }
@@ -52,7 +52,7 @@ GetKeyFixedValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
     if ((fontinfostr != NULL) && (fontinfostr[0] != 0)) {
         sscanf(fontinfostr, "%g", &tempValue);
         *value = (Fixed)tempValue * (1 << FixShift);
-        ACFREEMEM(fontinfostr);
+        UnallocateMem(fontinfostr);
     }
     return;
 }
@@ -95,11 +95,11 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     flexOK = (fontinfostr != NULL) && (fontinfostr[0] != '\0') &&
              strcmp(fontinfostr, "false");
 
-    ACFREEMEM(fontinfostr);
+    UnallocateMem(fontinfostr);
     fontinfostr = GetFontInfo(fontinfo, "FlexStrict", true);
     if (fontinfostr != NULL)
         flexStrict = strcmp(fontinfostr, "false");
-    ACFREEMEM(fontinfostr);
+    UnallocateMem(fontinfostr);
 
     /* get bluefuzz. It is already set to its default value in ac.c::InitData().
     GetKeyFixedValue does nto change the value if it is not present in fontinfo.
@@ -110,12 +110,12 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     if ((fontinfostr = GetFontInfo(fontinfo, "VCounterChars", ACOPTIONAL)) !=
         NULL) {
         NumVColors = AddCounterColorChars(fontinfostr, VColorList);
-        ACFREEMEM(fontinfostr);
+        UnallocateMem(fontinfostr);
     };
     if ((fontinfostr = GetFontInfo(fontinfo, "HCounterChars", ACOPTIONAL)) !=
         NULL) {
         NumHColors = AddCounterColorChars(fontinfostr, HColorList);
-        ACFREEMEM(fontinfostr);
+        UnallocateMem(fontinfostr);
     };
     GetKeyValue(fontinfo, "AscenderHeight", ACOPTIONAL, &AscenderHeight);
     GetKeyValue(fontinfo, "AscenderOvershoot", ACOPTIONAL, &AscenderOvershoot);
