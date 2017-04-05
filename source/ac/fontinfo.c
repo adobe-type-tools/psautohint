@@ -293,97 +293,79 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
 {
     char c;
     char* line;
-    int val, cnt, i, ix, j, temp, targetCnt = -1, total = 0;
+    int val, cnt = 0, i, j, temp, total = 0;
     bool singleint = false;
-    int16_t dirCount = 1;
     char* initline;
 
     *pnum = 0;
-    for (ix = 0; ix < dirCount; ix++) {
-        cnt = 0;
-        if (strcmp(kw, "AuxHStems") == 0 || strcmp(kw, "AuxVStems") == 0)
-            initline = GetHVStems(fontinfo, kw, optional);
-        else
-            initline = GetFontInfo(fontinfo, kw, optional);
-        if (initline == NULL) {
-            if (targetCnt > 0) {
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "The keyword: %s does not have the same "
-                       "number of values\n  in each master design.\n",
-                       kw);
-            } else
-                continue; /* optional keyword not found */
-        }
-        line = initline;
-        /* Check for single integer instead of matrix. */
-        if ((strlen(line) != 0) && (strchr(line, '[') == 0)) {
-            singleint = true;
-            goto numlst;
-        }
-        while (true) {
-            c = *line++;
-            switch (c) {
-                case 0:
-                    *pnum = 0;
-                    UnallocateMem(initline);
-                    return;
-                case '[':
-                    goto numlst;
-                default:
-                    break;
-            }
-        }
-    numlst:
-        while (*line != ']') {
-            while (misspace(*line))
-                line++; /* skip past any blanks */
-            if (sscanf(line, " %d", &val) < 1)
+
+    if (strcmp(kw, "AuxHStems") == 0 || strcmp(kw, "AuxVStems") == 0)
+        initline = GetHVStems(fontinfo, kw, optional);
+    else
+        initline = GetFontInfo(fontinfo, kw, optional);
+    if (initline == NULL)
+        return; /* optional keyword not found */
+
+    line = initline;
+    /* Check for single integer instead of matrix. */
+    if ((strlen(line) != 0) && (strchr(line, '[') == 0)) {
+        singleint = true;
+        goto numlst;
+    }
+    while (true) {
+        c = *line++;
+        switch (c) {
+            case 0:
+                *pnum = 0;
+                UnallocateMem(initline);
+                return;
+            case '[':
+                goto numlst;
+            default:
                 break;
-            if (total >= maxstems) {
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Cannot have more than %d values in fontinfo "
-                       "file array: \n  %s\n",
-                       (int)maxstems, initline);
-            }
-            if (val < 1) {
-                LogMsg(
-                  LOGERROR, NONFATALERROR,
-                  "Cannot have a value < 1 in fontinfo file array: \n  %s\n",
-                  line);
-            }
-            stems[total++] = val;
-            cnt++;
-            if (singleint)
-                break;
-            while (misdigit(*line))
-                line++; /* skip past the number */
         }
-        /* insure they are in order */
-        for (i = *pnum; i < total; i++)
-            for (j = i + 1; j < total; j++)
-                if (stems[i] > stems[j]) {
-                    temp = stems[i];
-                    stems[i] = stems[j];
-                    stems[j] = temp;
-                }
-        /* insure they are unique - note: complaint for too many might precede
-           guarantee of uniqueness */
-        for (i = *pnum; i < total - 1; i++)
-            if (stems[i] == stems[i + 1]) {
-                for (j = (i + 2); j < total; j++)
-                    stems[j - 1] = stems[j];
-                total--;
-                cnt--;
-            }
-        if (ix > 0 && (cnt != targetCnt)) {
-            UnallocateMem(initline);
+    }
+numlst:
+    while (*line != ']') {
+        while (misspace(*line))
+            line++; /* skip past any blanks */
+        if (sscanf(line, " %d", &val) < 1)
+            break;
+        if (total >= maxstems) {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "The keyword: %s does not have the same number of "
-                   "values\n  in each master design.\n",
-                   kw);
+                   "Cannot have more than %d values in fontinfo file array:\n"
+                   "  %s\n",
+                   (int)maxstems, initline);
         }
-        targetCnt = cnt;
-        *pnum += cnt;
-        UnallocateMem(initline);
-    } /* end of for loop */
+        if (val < 1) {
+            LogMsg(LOGERROR, NONFATALERROR,
+                   "Cannot have a value < 1 in fontinfo file array: \n  %s\n",
+                   line);
+        }
+        stems[total++] = val;
+        cnt++;
+        if (singleint)
+            break;
+        while (misdigit(*line))
+            line++; /* skip past the number */
+    }
+    /* insure they are in order */
+    for (i = *pnum; i < total; i++)
+        for (j = i + 1; j < total; j++)
+            if (stems[i] > stems[j]) {
+                temp = stems[i];
+                stems[i] = stems[j];
+                stems[j] = temp;
+            }
+    /* insure they are unique - note: complaint for too many might precede
+       guarantee of uniqueness */
+    for (i = *pnum; i < total - 1; i++)
+        if (stems[i] == stems[i + 1]) {
+            for (j = (i + 2); j < total; j++)
+                stems[j - 1] = stems[j];
+            total--;
+            cnt--;
+        }
+    *pnum += cnt;
+    UnallocateMem(initline);
 }
