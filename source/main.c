@@ -419,7 +419,7 @@ main(int argc, char* argv[])
             openReportFile(bezName, fileSuffix);
         }
 
-        result = AutoColorString(bezdata, fontinfo, output, (int*)&outputsize,
+        result = AutoColorString(bezdata, fontinfo, output, &outputsize,
                                  allowEdit, allowHintSub, roundCoords, debug);
         if (result == AC_DestBuffOfloError) {
             if (reportFile != NULL) {
@@ -434,8 +434,8 @@ main(int argc, char* argv[])
              * strlen(bezdata), outputsize); */
             AC_SetReportCB(reportCB, false);
             result =
-              AutoColorString(bezdata, fontinfo, output, (int*)&outputsize,
-                              allowEdit, allowHintSub, roundCoords, debug);
+              AutoColorString(bezdata, fontinfo, output, &outputsize, allowEdit,
+                              allowHintSub, roundCoords, debug);
             AC_SetReportCB(reportCB, verbose);
         }
 

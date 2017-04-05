@@ -53,7 +53,7 @@ skippsstring(const char** current)
 static void
 FreeFontInfo(ACFontInfo* fontinfo)
 {
-    int i;
+    size_t i;
 
     if (!fontinfo)
         return;
@@ -68,7 +68,7 @@ FreeFontInfo(ACFontInfo* fontinfo)
 }
 
 static ACFontInfo*
-NewFontInfo(int length)
+NewFontInfo(size_t length)
 {
     ACFontInfo* fontinfo;
 
@@ -92,7 +92,7 @@ NewFontInfo(int length)
 }
 
 static ACBuffer*
-NewBuffer(int size)
+NewBuffer(size_t size)
 {
     ACBuffer* buffer;
 
@@ -130,7 +130,7 @@ static int
 ParseFontInfo(const char* data, ACFontInfo** fontinfo)
 {
     const char *kwstart, *kwend, *tkstart, *current;
-    int i;
+    size_t i;
 
     ACFontInfo* info = *fontinfo = NewFontInfo(34);
     if (!info)
@@ -203,7 +203,7 @@ ParseFontInfo(const char* data, ACFontInfo** fontinfo)
         } else
             skipnonblanks();
 
-        kwLen = (int)(kwend - kwstart);
+        kwLen = (size_t)(kwend - kwstart);
         for (i = 0; i < info->length; i++) {
             size_t matchLen = NUMMAX(kwLen, strlen(info->entries[i].key));
             if (!strncmp(info->entries[i].key, kwstart, matchLen)) {
@@ -293,8 +293,8 @@ cleanup(int16_t code)
 
 ACLIB_API int
 AutoColorString(const char* srcbezdata, const char* fontinfodata,
-                char* dstbezdata, int* length, int allowEdit, int allowHintSub,
-                int roundCoords, int debug)
+                char* dstbezdata, size_t* length, int allowEdit,
+                int allowHintSub, int roundCoords, int debug)
 {
     int value, result;
     ACFontInfo* fontinfo = NULL;
