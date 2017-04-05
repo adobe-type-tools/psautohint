@@ -11,8 +11,6 @@
 
 #include "ac.h"
 
-static int16_t warncnt = 0;
-
 /* proc to be called from LogMsg if error occurs */
 static int (*errorproc)(int16_t);
 
@@ -70,8 +68,6 @@ LogMsg(int16_t level, /* error, warning, info */
     vsnprintf(str, MAXMSGLEN, format, va);
     va_end(va);
 
-    if (level == WARNING)
-        ++warncnt;
     if (!strcmp(str, lastLogStr) && level == lastLogLevel) {
         ++logCount;   /* same message */
     } else {          /* new message */
