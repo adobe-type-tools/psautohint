@@ -7,8 +7,6 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include <assert.h>
-
 #include "ac.h"
 #include "fontinfo.h"
 
@@ -233,7 +231,10 @@ GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
     char* returnstring = NULL;
     int i;
 
-    assert(fontinfo != NULL);
+    if (!fontinfo) {
+        LogMsg(LOGERROR, NONFATALERROR, "Fontinfo is NULL");
+        return NULL;
+    }
 
     for (i = 0; i < fontinfo->length; i++) {
         if (fontinfo->entries[i].key &&
