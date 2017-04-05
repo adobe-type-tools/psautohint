@@ -228,6 +228,7 @@ static struct PyModuleDef psautohint_module = {
   psautohint_methods,
   NULL,
   NULL,
+  NULL,
   NULL
 };
 /* clang-format on */
