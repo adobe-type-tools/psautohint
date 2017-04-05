@@ -38,7 +38,7 @@ ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled)
     if (origEmSquare == 0.0) {
         char* fistr = GetFontInfo(fontinfo, "OrigEmSqUnits", ACOPTIONAL);
         if (fistr) {
-            origEmSquare = strtod(fistr, NULL);
+            sscanf(fistr, "%g", &origEmSquare);
             UnallocateMem(fistr);
         } else {
             origEmSquare = 1000.0;
@@ -57,7 +57,7 @@ UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled)
     if (origEmSquare == 0.0) {
         char* fistr = GetFontInfo(fontinfo, "OrigEmSqUnits", ACOPTIONAL);
         if (fistr) {
-            origEmSquare = strtod(fistr, NULL);
+            sscanf(fistr, "%g", &origEmSquare);
             UnallocateMem(fistr);
         } else {
             origEmSquare = 1000.0;
