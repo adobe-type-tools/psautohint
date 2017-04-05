@@ -3,15 +3,15 @@
 
 # PSAutoHint
 
-A standalone version of [AFDKO](https://github.com/adobe-type-tools/afdko)
+A standalone version of [AFDKO](https://github.com/adobe-type-tools/afdko)'s
 autohinter.
 
-Still work on progress, use at your own risk.
+Still a work in progress. Use at your own risk!
 
 ## Building and running
 
-This repository currently consists of core autohinter written in C, a Python C
-extension providing an interface to it and helper Python code.
+This repository currently consists of a core autohinter written in C, a Python C
+extension providing an interface to it, and helper Python code.
 
 To build and install the C extension:
 
@@ -22,7 +22,7 @@ running:
 
     python python/autohint.py
 
-The old `autohintexe` binary can be also built by running:
+The old `autohintexe` binary can also be built by running:
 
     make
 
