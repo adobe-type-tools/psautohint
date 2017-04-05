@@ -15,5 +15,5 @@ all: $(TESTS)
 	@echo "	Testing $<"
 	@rm -rf $@
 	@$(PYTHON) $(PYT_DIR)/autohint.py -all -qq -o $@ $<
-	@diff -Naur $< $@
+	@diff -Naur -x '.DS_Store' $< $@
 	@rm -rf $@
