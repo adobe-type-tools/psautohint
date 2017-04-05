@@ -17,3 +17,6 @@ clean:
 
 check:
 	make -C $(TST_DIR)
+
+format:
+	clang-format -i `find $(SRC_DIR) -name '*.c'`
