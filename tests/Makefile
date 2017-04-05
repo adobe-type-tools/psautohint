@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: all FORCE
 
 ROOT_DIR = ..
 SRC_DIR = $(ROOT_DIR)/source
@@ -20,10 +20,12 @@ all: $(TESTS)
 # -x When comparing directories, ignore files and subdirectories whose basenames
 #    match the pattern
 
-%.tst: %.ufo
+%.tst: %.ufo FORCE
 	@echo "	Testing $<"
 	@rm -rf $@
 	@$(PYTHON) $(PYT_DIR)/autohint.py -all -qq -o $@ $<
 	@diff -Naur -x '.DS_Store' $< $@
 	@rm -f $@/.DS_Store
 	@rm -rf $@
+
+FORCE:
