@@ -11,7 +11,7 @@
 #include "logging.h"
 
 static void*
-defaultAC_memmanage(void* ctxptr, void* old, uint32_t size)
+defaultAC_memmanage(void* ctxptr, void* old, size_t size)
 {
     (void)ctxptr;
     if (size > 0) {
