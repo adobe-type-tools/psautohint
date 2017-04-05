@@ -7,7 +7,6 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include <assert.h>
 #include <math.h>
 
 #include "ac.h"
@@ -45,7 +44,12 @@ FRnd(int32_t x)
 static void
 WriteString(char* str)
 {
-    assert(bezoutput != NULL);
+    if (!bezoutput) {
+        LogMsg(LOGERROR, FATALERROR,
+               "NULL output buffer while writing glyph: %s", glyphName);
+        return;
+    }
+
     if ((bezoutput->length + strlen(str)) >= bezoutput->capacity) {
         size_t desiredsize =
           NUMMAX(bezoutput->capacity * 2, bezoutput->capacity + strlen(str));
@@ -581,8 +585,6 @@ SaveFile(const ACFontInfo* fontinfo)
 {
     PPathElt e = pathStart;
     Cd c1, c2, c3;
-
-    assert(bezoutput != NULL);
 
     /* AddSolEol(); */
     WriteString("% ");
