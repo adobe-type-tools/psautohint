@@ -291,11 +291,10 @@ void
 ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
               int32_t maxstems, int* stems, int32_t* pnum)
 {
-    char c;
-    char* line;
-    int val, cnt = 0, i, j, temp, total = 0;
+    int i, j, count = 0;
     bool singleint = false;
     char* initline;
+    char* line;
 
     *pnum = 0;
 
@@ -303,69 +302,68 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
         initline = GetHVStems(fontinfo, kw, optional);
     else
         initline = GetFontInfo(fontinfo, kw, optional);
-    if (initline == NULL)
+
+    if (initline == NULL || strlen(initline) == 0)
         return; /* optional keyword not found */
 
     line = initline;
-    /* Check for single integer instead of matrix. */
-    if ((strlen(line) != 0) && (strchr(line, '[') == 0)) {
-        singleint = true;
-        goto numlst;
-    }
-    while (true) {
-        c = *line++;
-        switch (c) {
-            case 0:
-                *pnum = 0;
-                UnallocateMem(initline);
-                return;
-            case '[':
-                goto numlst;
-            default:
-                break;
-        }
-    }
-numlst:
+
+    if (strchr(line, '[') == NULL)
+        singleint = true; /* A single integer instead of a matrix. */
+    else
+        line = strchr(line, '[') + 1; /* A matrix, skip past first "[". */
+
     while (*line != ']') {
+        int val;
+
         while (misspace(*line))
             line++; /* skip past any blanks */
+
         if (sscanf(line, " %d", &val) < 1)
             break;
-        if (total >= maxstems) {
+
+        if (count >= maxstems) {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "Cannot have more than %d values in fontinfo file array:\n"
-                   "  %s\n",
+                   "Cannot have more than %d values in fontinfo array:\n  %s\n",
                    (int)maxstems, initline);
         }
+
         if (val < 1) {
             LogMsg(LOGERROR, NONFATALERROR,
                    "Cannot have a value < 1 in fontinfo file array: \n  %s\n",
                    line);
         }
-        stems[total++] = val;
-        cnt++;
+
+        stems[count++] = val;
+
         if (singleint)
             break;
+
         while (misdigit(*line))
             line++; /* skip past the number */
     }
+
     /* insure they are in order */
-    for (i = *pnum; i < total; i++)
-        for (j = i + 1; j < total; j++)
+    for (i = 0; i < count; i++) {
+        for (j = i + 1; j < count; j++) {
             if (stems[i] > stems[j]) {
-                temp = stems[i];
+                int temp = stems[i];
                 stems[i] = stems[j];
                 stems[j] = temp;
             }
+        }
+    }
+
     /* insure they are unique - note: complaint for too many might precede
        guarantee of uniqueness */
-    for (i = *pnum; i < total - 1; i++)
+    for (i = 0; i < count - 1; i++) {
         if (stems[i] == stems[i + 1]) {
-            for (j = (i + 2); j < total; j++)
+            for (j = (i + 2); j < count; j++)
                 stems[j - 1] = stems[j];
-            total--;
-            cnt--;
+            count--;
         }
-    *pnum += cnt;
+    }
+
+    *pnum = count;
     UnallocateMem(initline);
 }
