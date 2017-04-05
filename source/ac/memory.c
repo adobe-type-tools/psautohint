@@ -16,9 +16,9 @@ defaultAC_memmanage(void* ctxptr, void* old, size_t size)
     (void)ctxptr;
     if (size > 0) {
         if (NULL == old) {
-            return malloc((size_t)size);
+            return malloc(size);
         } else {
-            return realloc(old, (size_t)size);
+            return realloc(old, size);
         }
     } else {
         if (NULL == old)
@@ -41,7 +41,7 @@ setAC_memoryManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func)
 }
 
 char*
-AllocateMem(unsigned int nelem, unsigned int elsize, const char* description)
+AllocateMem(size_t nelem, size_t elsize, const char* description)
 {
     /* calloc(nelem, elsize) */
     char* ptr =
@@ -58,7 +58,7 @@ AllocateMem(unsigned int nelem, unsigned int elsize, const char* description)
 }
 
 char*
-ReallocateMem(char* ptr, unsigned int size, const char* description)
+ReallocateMem(char* ptr, size_t size, const char* description)
 {
     /* realloc(ptr, size) */
     char* newptr =

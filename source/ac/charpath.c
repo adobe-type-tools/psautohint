@@ -28,9 +28,8 @@ CheckPath(void)
 {
 
     if (currPathList->path == NULL) {
-        currPathList->path =
-          (CharPathElt*)AllocateMem((unsigned int)maxPathEntries,
-                                    sizeof(CharPathElt), "path element array");
+        currPathList->path = (CharPathElt*)AllocateMem(
+          maxPathEntries, sizeof(CharPathElt), "path element array");
     }
     if (path_entries >= maxPathEntries) {
         int i;
