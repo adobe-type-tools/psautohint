@@ -11,8 +11,6 @@
 
 #include "ac.h"
 
-extern AC_REPORTFUNCPTR libReportCB;
-
 double
 FixToDbl(Fixed f)
 {
