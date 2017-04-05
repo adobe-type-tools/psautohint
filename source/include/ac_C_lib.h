@@ -18,13 +18,6 @@
 
 #include <stddef.h>
 
-#if !defined(_MSC_VER) || _MSC_VER >= 1600
-#include <stdint.h>
-#else
-/* Python 2.7 on Windows requires MSVC++ 9.0 */
-typedef signed __int32    int32_t;
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -98,7 +91,7 @@ ACLIB_API void  AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose);
  * belongs to the AC lib. It should be copied immediately - it may may last
  * past the return of the callback.
  */
-typedef void (*AC_REPORTSTEMPTR)(int32_t top, int32_t bottom, char* glyphName);
+typedef void (*AC_REPORTSTEMPTR)(int top, int bottom, char* glyphName);
 
 ACLIB_API void  AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB, unsigned int allStems);
 
@@ -112,7 +105,7 @@ ACLIB_API void  AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR v
  * belongs to the AC lib. It should be copied immediately - it may may last
  * past the return of the callback.
  */
-typedef void (*AC_REPORTZONEPTR)(int32_t top, int32_t bottom, char* glyphName);
+typedef void (*AC_REPORTZONEPTR)(int top, int bottom, char* glyphName);
 
 ACLIB_API void  AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB);
 

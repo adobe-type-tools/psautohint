@@ -84,7 +84,7 @@ printHelp(void)
 }
 
 static void
-charZoneCB(int32_t top, int32_t bottom, char* glyphName)
+charZoneCB(int top, int bottom, char* glyphName)
 {
     if (reportFile)
         fprintf(reportFile, "charZone %s top %f bottom %f\n", glyphName,
@@ -92,7 +92,7 @@ charZoneCB(int32_t top, int32_t bottom, char* glyphName)
 }
 
 static void
-stemZoneCB(int32_t top, int32_t bottom, char* glyphName)
+stemZoneCB(int top, int bottom, char* glyphName)
 {
     if (reportFile)
         fprintf(reportFile, "stemZone %s top %f bottom %f\n", glyphName,
@@ -100,7 +100,7 @@ stemZoneCB(int32_t top, int32_t bottom, char* glyphName)
 }
 
 static void
-hstemCB(int32_t top, int32_t bottom, char* glyphName)
+hstemCB(int top, int bottom, char* glyphName)
 {
     if (reportFile)
         fprintf(reportFile, "HStem %s top %f bottom %f\n", glyphName,
@@ -108,7 +108,7 @@ hstemCB(int32_t top, int32_t bottom, char* glyphName)
 }
 
 static void
-vstemCB(int32_t right, int32_t left, char* glyphName)
+vstemCB(int right, int left, char* glyphName)
 {
     if (reportFile)
         fprintf(reportFile, "VStem %s right %f left %f\n", glyphName,
