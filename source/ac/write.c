@@ -42,8 +42,7 @@ FRnd(int32_t x)
     return r;
 }
 
-/* returns the number of characters written and possibly encrypted*/
-static int32_t
+static void
 WriteString(char* str)
 {
     assert(bezoutput != NULL);
@@ -52,15 +51,13 @@ WriteString(char* str)
           NUMMAX(bezoutput->capacity * 2, bezoutput->capacity + strlen(str));
         bezoutput->data =
           ReallocateMem(bezoutput->data, desiredsize, "output bez data");
-        if (bezoutput->data) {
+        if (bezoutput->data)
             bezoutput->capacity = desiredsize;
-        } else {
-            return (-1); /*FATAL ERROR*/
-        }
+        else
+            return; /*FATAL ERROR*/
     }
     strcat(bezoutput->data, str);
     bezoutput->length += strlen(str);
-    return (int32_t)strlen(str);
 }
 
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal p;laces. */
