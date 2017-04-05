@@ -280,6 +280,13 @@ AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB)
     doStems = false;
 }
 
+/*
+ * This is our error handler, it gets called by LogMsg() whenever the log level
+ * is LOGERROR (see logging.c for the exact condition). The call to longjmp()
+ * will transfer the control to the point where setjmp() is called below. So
+ * effectively whenever LogMsg() is called for an error the execution of the
+ * calling function will end and we will return back to AutoColorString().
+ */
 static int
 error_handler(int16_t code)
 {
@@ -307,6 +314,10 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
 
     set_errorproc(error_handler);
     value = setjmp(aclibmark);
+
+    /* We will return here whenever an error occurs during the execution of
+     * AutoColor(), or after it finishes execution. See the error_handler
+     * comments above and below. */
 
     if (value == -1) {
         /* a fatal error occurred somewhere. */
