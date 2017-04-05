@@ -4,7 +4,6 @@ from distutils.core import setup, Extension
 module1 = Extension("_psautohint",
                     include_dirs = [
                         "source/include",
-                        "source/ac",
                     ],
                     sources = [
                         "source/_psautohint.c",

@@ -19,7 +19,9 @@
 #if !defined(_MSC_VER) || _MSC_VER >= 1600
 #include <stdint.h>
 #else
-#include "winstdint.h"
+/* Python 2.7 on Windows requires MSVC++ 9.0 */
+typedef signed __int32    int32_t;
+typedef unsigned __int32  uint32_t;
 #endif
 
 #ifdef __cplusplus
