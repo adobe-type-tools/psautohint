@@ -11,6 +11,15 @@ TESTS:=$(FONTS:%.ufo=%.tst)
 
 all: $(TESTS)
 
+# diff options
+# http://www.gnu.org/software/diffutils/manual/html_node/diff-Options.html
+# -N If one file is missing, treat it as present but empty
+# -a Treat all files as text and compare them line-by-line
+# -u Use the unified output format, showing three lines of context
+# -r When comparing directories, recursively compare any subdirectories found
+# -x When comparing directories, ignore files and subdirectories whose basenames
+#    match the pattern
+
 %.tst: %.ufo
 	@echo "	Testing $<"
 	@rm -rf $@
