@@ -936,7 +936,6 @@ AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
                bool extracolor)
 {
     int32_t lentop = lenTopBands, lenbot = lenBotBands;
-    fileName = fname;
     if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
         LogMsg(LOGERROR, NONFATALERROR, "Cannot prase %s glyph.\n", glyphName);
     }
