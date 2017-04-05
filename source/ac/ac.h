@@ -171,13 +171,13 @@ typedef struct {
 
 typedef struct {
   FFEntry *entries; /* font information entries */
-  int length;       /* number of the entries */
+  size_t length;    /* number of the entries */
 } ACFontInfo;
 
 typedef struct {
-  char* data;   /* character data held in the buffer */
-  int length;   /* actual length of the data */
-  int capacity; /* allocated memory size */
+  char* data;       /* character data held in the buffer */
+  size_t length;    /* actual length of the data */
+  size_t capacity;  /* allocated memory size */
 } ACBuffer;
 
 /* global data */

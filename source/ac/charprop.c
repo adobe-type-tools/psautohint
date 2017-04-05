@@ -92,7 +92,6 @@ AddCounterColorChars(char* charlist, char* ColorList[])
 {
     const char* setList = "(), \t\n\r";
     char* token;
-    int16_t length;
     bool firstTime = true;
     int16_t ListEntries = COUNTERDEFAULTENTRIES;
 
@@ -114,9 +113,8 @@ AddCounterColorChars(char* charlist, char* ColorList[])
                    (int)COUNTERLISTSIZE, token);
             break;
         }
-        length = (int16_t)strlen(token);
         ColorList[ListEntries] =
-          AllocateMem(1, length + 1, "counter hints list");
+          AllocateMem(1, strlen(token) + 1, "counter hints list");
         strcpy(ColorList[ListEntries++], token);
     }
     return (ListEntries - COUNTERDEFAULTENTRIES);

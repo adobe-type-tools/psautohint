@@ -47,9 +47,9 @@ static int32_t
 WriteString(char* str)
 {
     assert(bezoutput != NULL);
-    if ((bezoutput->length + (int)strlen(str)) >= bezoutput->capacity) {
-        int desiredsize = NUMMAX(bezoutput->capacity * 2,
-                                 (bezoutput->capacity + (int)strlen(str)));
+    if ((bezoutput->length + strlen(str)) >= bezoutput->capacity) {
+        size_t desiredsize =
+          NUMMAX(bezoutput->capacity * 2, bezoutput->capacity + strlen(str));
         bezoutput->data =
           ReallocateMem(bezoutput->data, desiredsize, "output bez data");
         if (bezoutput->data) {
@@ -59,7 +59,7 @@ WriteString(char* str)
         }
     }
     strcat(bezoutput->data, str);
-    bezoutput->length += (int)strlen(str);
+    bezoutput->length += strlen(str);
     return (int32_t)strlen(str);
 }
 

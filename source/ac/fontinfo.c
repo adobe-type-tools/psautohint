@@ -7,8 +7,8 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include "ac.h"
 #include "fontinfo.h"
+#include "ac.h"
 
 #define UNDEFINED (INT32_MAX)
 
@@ -229,7 +229,7 @@ char*
 GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
 {
     char* returnstring = NULL;
-    int i;
+    size_t i;
 
     if (!fontinfo) {
         LogMsg(LOGERROR, NONFATALERROR, "Fontinfo is NULL");

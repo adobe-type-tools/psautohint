@@ -130,7 +130,7 @@ autohint(PyObject* self, PyObject* args)
         for (i = 0; i < bezLen; i++) {
             char* bezData = NULL;
             char* output = NULL;
-            int outputSize = 0;
+            size_t outputSize = 0;
             int result;
 
             PyObject* itemObj = PySequence_Fast_GET_ITEM(inSeq, i);
