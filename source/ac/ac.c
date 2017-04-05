@@ -167,7 +167,7 @@ AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
     if (debug)
         DEBUG = showClrInfo = showHs = showVs = listClrInfo = true;
 
-    return AutoColorGlyph(fontinfo, srcbezdata, "", extracolor);
+    return AutoColorGlyph(fontinfo, srcbezdata, extracolor);
 }
 
 #if defined(_MSC_VER) && _MSC_VER < 1800

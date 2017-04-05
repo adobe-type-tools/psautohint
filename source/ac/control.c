@@ -932,7 +932,7 @@ AddColors(const ACFontInfo* fontinfo, const char* srcglyph, bool extracolor)
 }
 
 bool
-AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph, char* fname,
+AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
                bool extracolor)
 {
     int32_t lentop = lenTopBands, lenbot = lenBotBands;
