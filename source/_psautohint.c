@@ -55,7 +55,7 @@ reportCB(char* msg)
 #endif
 
 static void*
-memoryManager(void* ctx, void* ptr, uint32_t size)
+memoryManager(void* ctx, void* ptr, size_t size)
 {
     if (!ptr && !size)
         return NULL;

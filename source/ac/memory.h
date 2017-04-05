@@ -7,12 +7,12 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
+#include "ac_C_lib.h"
 #include "basic.h"
 
 #ifndef AC_MEMORY_H_
 #define AC_MEMORY_H_
 
-typedef void* (*AC_MEMMANAGEFUNCPTR)(void* ctxptr, void* old, uint32_t size);
 extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;
 extern void* AC_memmanageCtxPtr;
 

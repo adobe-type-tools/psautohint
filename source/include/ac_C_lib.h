@@ -16,12 +16,13 @@
 #ifndef AC_C_LIB_H_
 #define AC_C_LIB_H_
 
+#include <stddef.h>
+
 #if !defined(_MSC_VER) || _MSC_VER >= 1600
 #include <stdint.h>
 #else
 /* Python 2.7 on Windows requires MSVC++ 9.0 */
 typedef signed __int32    int32_t;
-typedef unsigned __int32  uint32_t;
 #endif
 
 #ifdef __cplusplus
@@ -68,7 +69,7 @@ ACLIB_API const char * AC_getVersion(void);
  * If this is supplied, then the AC lib will call this function for all memory
  * allocations. Otherwise it will use alloc/malloc/free.
  */
-typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, uint32_t size);
+typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, size_t size);
 
 ACLIB_API void  AC_SetMemManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
 
