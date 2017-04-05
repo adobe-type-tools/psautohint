@@ -238,9 +238,8 @@ GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
     for (i = 0; i < fontinfo->length; i++) {
         if (fontinfo->entries[i].key &&
             !strcmp(fontinfo->entries[i].key, keyword)) {
-            returnstring = (char*)AllocateMem(
-              (unsigned)strlen(fontinfo->entries[i].value) + 1, sizeof(char),
-              "GetFontInfo return str");
+            returnstring = AllocateMem(strlen(fontinfo->entries[i].value) + 1,
+                                       sizeof(char), "GetFontInfo return str");
             strcpy(returnstring, fontinfo->entries[i].value);
             return returnstring;
         }
@@ -269,8 +268,8 @@ GetHVStems(const ACFontInfo* fontinfo, char* kw, bool optional)
     if (fistr1 == NULL)
         return fistr2;
     /* Merge two arrays. */
-    newfistr = AllocateMem((unsigned)(strlen(fistr1) + strlen(fistr2) + 1),
-                           sizeof(char), "Aux stem value");
+    newfistr = AllocateMem(strlen(fistr1) + strlen(fistr2) + 1, sizeof(char),
+                           "Aux stem value");
     end = (char*)strrchr(fistr1, ']');
     end[0] = '\0';
     start = (char*)strchr(fistr2, '[');
