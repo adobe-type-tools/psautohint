@@ -18,8 +18,8 @@ extern void* AC_memmanageCtxPtr;
 
 void setAC_memoryManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func);
 
-char* AllocateMem(size_t, size_t, const char*);
-char* ReallocateMem(char*, size_t, const char*);
+void* AllocateMem(size_t, size_t, const char*);
+void* ReallocateMem(void*, size_t, const char*);
 void UnallocateMem(void* ptr);
 
 #endif /* AC_MEMORY_H_ */

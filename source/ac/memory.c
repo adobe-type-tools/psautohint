@@ -40,14 +40,13 @@ setAC_memoryManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func)
     AC_memmanageCtxPtr = ctxptr;
 }
 
-char*
+void*
 AllocateMem(size_t nelem, size_t elsize, const char* description)
 {
     /* calloc(nelem, elsize) */
-    char* ptr =
-      (char*)AC_memmanageFuncPtr(AC_memmanageCtxPtr, NULL, nelem * elsize);
+    void* ptr = AC_memmanageFuncPtr(AC_memmanageCtxPtr, NULL, nelem * elsize);
     if (NULL != ptr)
-        memset((void*)ptr, 0x0, nelem * elsize);
+        memset(ptr, 0x0, nelem * elsize);
 
     if (ptr == NULL) {
         LogMsg(LOGERROR, NONFATALERROR,
@@ -57,12 +56,11 @@ AllocateMem(size_t nelem, size_t elsize, const char* description)
     return (ptr);
 }
 
-char*
-ReallocateMem(char* ptr, size_t size, const char* description)
+void*
+ReallocateMem(void* ptr, size_t size, const char* description)
 {
     /* realloc(ptr, size) */
-    char* newptr =
-      (char*)AC_memmanageFuncPtr(AC_memmanageCtxPtr, (void*)ptr, size);
+    void* newptr = AC_memmanageFuncPtr(AC_memmanageCtxPtr, ptr, size);
 
     if (newptr == NULL) {
         LogMsg(LOGERROR, NONFATALERROR,
@@ -76,5 +74,5 @@ void
 UnallocateMem(void* ptr)
 {
     /* free(ptr) */
-    AC_memmanageFuncPtr(AC_memmanageCtxPtr, (void*)ptr, 0);
+    AC_memmanageFuncPtr(AC_memmanageCtxPtr, ptr, 0);
 }
