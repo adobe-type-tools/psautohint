@@ -275,8 +275,5 @@ AddSolEol(void)
 bool
 MoveToNewClrs(void)
 {
-    /* XXX: fileName is always empty, we probably want to use glyphName here
-     * but this causes a change in the hinting of percent and perthousand
-     * glyphs and need to be verified. */
-    return StrEqual(fileName, "percent") || StrEqual(fileName, "perthousand");
+    return StrEqual(glyphName, "percent") || StrEqual(glyphName, "perthousand");
 }

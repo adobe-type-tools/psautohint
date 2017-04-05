@@ -26,7 +26,6 @@ float theta, hBigDistR, vBigDistR, maxVal, minVal;
 int32_t lenTopBands, lenBotBands, numSerifs, DMIN, DELTA, CPpercent;
 int32_t bendTan, sCurveTan;
 PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
-char* fileName;
 PClrSeg segLists[4];
 Fixed VStems[MAXSTEMS], HStems[MAXSTEMS];
 int32_t NumVStems, NumHStems;
