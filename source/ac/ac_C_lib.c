@@ -288,7 +288,7 @@ cleanup(int16_t code)
     else
         longjmp(aclibmark, 1);
 
-    return 0; /* we dont actually ever get here */
+    return 0; /* we don't actually ever get here */
 }
 
 ACLIB_API int
@@ -309,11 +309,11 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     value = setjmp(aclibmark);
 
     if (value == -1) {
-        /* a fatal error occurred soemwhere. */
+        /* a fatal error occurred somewhere. */
         FreeFontInfo(fontinfo);
         return AC_FatalError;
     } else if (value == 1) {
-        /* AutoColor was called succesfully */
+        /* AutoColor was called successfully */
         FreeFontInfo(fontinfo);
         if (bezoutput->length < *length) {
             *length = bezoutput->length + 1;
