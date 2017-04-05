@@ -281,7 +281,7 @@ AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB)
 }
 
 static int
-cleanup(int16_t code)
+error_handler(int16_t code)
 {
     if (code == FATALERROR || code == NONFATALERROR)
         longjmp(aclibmark, -1);
@@ -305,7 +305,7 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     if (ParseFontInfo(fontinfodata, &fontinfo))
         return AC_FontinfoParseFail;
 
-    set_errorproc(cleanup);
+    set_errorproc(error_handler);
     value = setjmp(aclibmark);
 
     if (value == -1) {
@@ -342,10 +342,10 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
                        roundCoords);
     /* result == true is good */
 
-    /* The following call to cleanup() always returns control to just after the
-     * setjmp() function call above, but with value set to 1 if success, or -1
-     * if not */
-    cleanup((result == true) ? OK : NONFATALERROR);
+    /* The following call to error_handler() always returns control to just
+     * after the setjmp() function call above, but with value set to 1 if
+     * success, or -1 if not */
+    error_handler((result == true) ? OK : NONFATALERROR);
 
     /* Shouldn't get here */
     return AC_UnknownError;
