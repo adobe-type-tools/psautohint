@@ -321,7 +321,7 @@ void AddHPair(PClrVal v, char ch);
 void AddVPair(PClrVal v, char ch);
 void XtraClrs(PPathElt e);
 bool AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
-                    char* fname, bool extracolor);
+                    bool extracolor);
 void EvalV(void);
 void EvalH(void);
 void GenVPts(int32_t specialCharType);
