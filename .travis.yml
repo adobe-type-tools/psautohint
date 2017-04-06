@@ -8,5 +8,4 @@ os:
   - osx
 
 script:
-  - python setup.py install
-  - make check
+  - make PYTHON=/usr/bin/python check
