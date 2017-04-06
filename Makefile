@@ -5,17 +5,26 @@
 #                                                                       #
 #########################################################################
 
+.PHONY: build install check clean format
+
 ROOT_DIR = .
 SRC_DIR = $(ROOT_DIR)/source
 TST_DIR = $(ROOT_DIR)/tests
 
-default:
+build:
+	@python setup.py build
+
+install:
+	@python setup.py install --user
+
+autohintexe:
 	make -C $(SRC_DIR)
 
 clean:
+	python setup.py clean --all
 	make -C $(SRC_DIR) clean
 
-check:
+check: install
 	make -C $(TST_DIR)
 
 format:
