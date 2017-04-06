@@ -1,10 +1,3 @@
-#########################################################################
-#                                                                       #
-# Copyright 1997-2014 Adobe Systems Incorporated.                       #
-# All rights reserved.                                                  #
-#                                                                       #
-#########################################################################
-
 .PHONY: build install check clean format
 
 ROOT_DIR = .
