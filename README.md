@@ -24,7 +24,7 @@ running:
 
 The old `autohintexe` binary can also be built by running:
 
-    make
+    make autohintexe
 
 ## Testing
 
