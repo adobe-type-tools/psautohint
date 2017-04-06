@@ -11,17 +11,19 @@ ROOT_DIR = .
 SRC_DIR = $(ROOT_DIR)/source
 TST_DIR = $(ROOT_DIR)/tests
 
+PYTHON ?= python
+
 build:
-	@python setup.py build
+	$(PYTHON) setup.py build
 
 install:
-	@python setup.py install --user
+	$(PYTHON) setup.py install --user
 
 autohintexe:
 	make -C $(SRC_DIR)
 
 clean:
-	python setup.py clean --all
+	$(PYTHON) setup.py clean --all
 	make -C $(SRC_DIR) clean
 
 check: install
