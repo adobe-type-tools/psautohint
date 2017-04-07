@@ -64,7 +64,7 @@ WriteString(char* str)
     bezoutput->length += strlen(str);
 }
 
-/* Note: The 8 bit fixed fraction cannot support more than 2 decimal p;laces. */
+/* Note: The 8 bit fixed fraction cannot support more than 2 decimal places. */
 #define WRTNUM(i)                                                              \
     {                                                                          \
         snprintf(S0, MAXS0LEN, "%d ", (int32_t)(i));                           \
