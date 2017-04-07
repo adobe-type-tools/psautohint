@@ -100,7 +100,7 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     UnallocateMem(fontinfostr);
 
     /* get bluefuzz. It is already set to its default value in ac.c::InitData().
-    GetKeyFixedValue does nto change the value if it is not present in fontinfo.
+    GetKeyFixedValue does not change the value if it's not present in fontinfo.
     */
     GetKeyFixedValue(fontinfo, "BlueFuzz", ACOPTIONAL, &bluefuzz);
 
@@ -343,7 +343,7 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
             line++; /* skip past the number */
     }
 
-    /* insure they are in order */
+    /* ensure they are in order */
     for (i = 0; i < count; i++) {
         for (j = i + 1; j < count; j++) {
             if (stems[i] > stems[j]) {
@@ -354,7 +354,7 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
         }
     }
 
-    /* insure they are unique - note: complaint for too many might precede
+    /* ensure they are unique - note: complaint for too many might precede
        guarantee of uniqueness */
     for (i = 0; i < count - 1; i++) {
         if (stems[i] == stems[i + 1]) {
