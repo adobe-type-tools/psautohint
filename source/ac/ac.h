@@ -187,13 +187,11 @@ extern bool gYgoesUp;
 extern bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix;
 extern bool gAutoExtraDebug, gDebugColorPath, gDebug, gLogging;
 extern bool gEditChar; /* whether character can be modified when adding hints */
-extern bool gScaleHints;
 extern bool gShowHs, gShowVs, gBandError, gListClrInfo;
 extern bool gReportErrors, gHasFlex, gFlexOK, gFlexStrict, gShowClrInfo;
-extern Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gMinMidPt, gGhostWidth,
+extern Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth,
   gGhostLength, gBendLength, gBandMargin, gMaxFlare,
-  gMaxBendMerge, gMaxMerge, gMinColorElementLength, gFlexCand,
-  gPruneMargin;
+  gMaxBendMerge, gMaxMerge, gMinColorElementLength, gFlexCand;
 extern Fixed gPruneA, gPruneB, gPruneC, gPruneD, gPruneValue, gBonus;
 extern float gTheta, gHBigDistR, gVBigDistR, gMaxVal, gMinVal;
 extern int32_t gDMin, gDelta, gCPpercent, gBendTan, gSCurveTan;
