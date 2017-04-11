@@ -53,7 +53,7 @@ RecordForFix(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t)
         mn = t;
         mx = b;
     }
-    if (!vert && HFixCount + 4 < maxFixes && autoHFix) {
+    if (!vert && HFixCount + 4 < maxFixes && gAutoHFix) {
         Fixed fixdy = w - minW;
         if (abs(fixdy) <= FixOne) {
             RecordHFix(mn, fixdy);
@@ -65,7 +65,7 @@ RecordForFix(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t)
             RecordHFix(mx, -delta);
             RecordHFix(mx - fixdy, delta);
         }
-    } else if (vert && VFixCount + 4 < maxFixes && autoVFix) {
+    } else if (vert && VFixCount + 4 < maxFixes && gAutoVFix) {
         Fixed fixdx = w - minW;
         if (abs(fixdx) <= FixOne) {
             RecordVFix(mn, fixdx);
@@ -136,7 +136,7 @@ CheckTfmVal(PClrSeg hSegList, Fixed* bandList, int32_t length)
 
     while (sList != NULL) {
         tfmval = itfmy(sList->sLoc);
-        if ((length >= 2) && !bandError &&
+        if ((length >= 2) && !gBandError &&
             !CheckForInsideBands(tfmval, bandList, length))
             CheckForNearBands(tfmval, bandList, length);
         sList = sList->sNxt;
@@ -169,13 +169,13 @@ CheckVal(PClrVal val, bool vert)
     Fixed wd, diff, minDiff, minW, b, t, w;
     bool curve = false;
     if (vert) {
-        stems = VStems;
-        numstems = NumVStems;
+        stems = gVStems;
+        numstems = gNumVStems;
         b = itfmx(val->vLoc1);
         t = itfmx(val->vLoc2);
     } else {
-        stems = HStems;
-        numstems = NumHStems;
+        stems = gHStems;
+        numstems = gNumHStems;
         b = itfmy(val->vLoc1);
         t = itfmy(val->vLoc2);
     }
@@ -205,7 +205,7 @@ CheckVal(PClrVal val, bool vert)
     }
     bPrev = b;
     tPrev = t;
-    if ((vert && autoVFix) || (!vert && autoHFix))
+    if ((vert && gAutoVFix) || (!vert && gAutoHFix))
         RecordForFix(vert, w, minW, b, t);
 }
 
@@ -241,7 +241,7 @@ FixHs(Fixed fixy, Fixed fixdy)
     Fixed xlst = 0, ylst = 0, xinit = 0, yinit = 0;
     fixy = tfmy(fixy);
     fixdy = dtfmy(fixdy);
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) {
         switch (e->type) {
             case MOVETO:
@@ -264,7 +264,7 @@ FixHs(Fixed fixy, Fixed fixdy)
                 break;
             default: {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal operator in path list in %s.\n", glyphName);
+                       "Illegal operator in path list in %s.\n", gGlyphName);
             }
         }
         e = e->next;
@@ -294,7 +294,7 @@ FixVs(Fixed fixx, Fixed fixdx)
     Fixed xlst = 0, ylst = 0, xinit = 0, yinit = 0;
     fixx = tfmx(fixx);
     fixdx = dtfmx(fixdx);
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) {
         switch (e->type) {
             case MOVETO:
@@ -317,7 +317,7 @@ FixVs(Fixed fixx, Fixed fixdx)
                 break;
             default: {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal operator in point list in %s.\n", glyphName);
+                       "Illegal operator in point list in %s.\n", gGlyphName);
             }
         }
         e = e->next;
@@ -329,13 +329,13 @@ DoFixes(void)
 {
     bool didfixes = false;
     int32_t i;
-    if (HFixCount > 0 && autoHFix) {
+    if (HFixCount > 0 && gAutoHFix) {
         PrintMessage("Fixing horizontal near misses.");
         didfixes = true;
         for (i = 0; i < HFixCount; i++)
             FixHs(HFixYs[i], HFixDYs[i]);
     }
-    if (VFixCount > 0 && autoVFix) {
+    if (VFixCount > 0 && gAutoVFix) {
         PrintMessage("Fixing vertical near misses.");
         didfixes = true;
         for (i = 0; i < VFixCount; i++)

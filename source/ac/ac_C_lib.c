@@ -16,7 +16,7 @@ const char* libversion = "1.6.0";
 
 ACBuffer* bezoutput = NULL;
 
-bool scalinghints = false;
+bool gScalingHints = false;
 
 jmp_buf aclibmark; /* to handle exit() calls in the library version*/
 
@@ -247,11 +247,11 @@ ACLIB_API void
 AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose)
 {
     if (verbose)
-        libReportCB = reportCB;
+        gLibReportCB = reportCB;
     else
-        libReportCB = NULL;
+        gLibReportCB = NULL;
 
-    libErrorReportCB = reportCB;
+    gLibErrorReportCB = reportCB;
 }
 
 ACLIB_API void
@@ -259,25 +259,25 @@ AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB,
                     unsigned int allStems)
 {
     allstems = allStems;
-    addHStemCB = hstemCB;
-    addVStemCB = vstemCB;
-    doStems = true;
+    gAddHStemCB = hstemCB;
+    gAddVStemCB = vstemCB;
+    gDoStems = true;
 
-    addCharExtremesCB = NULL;
-    addStemExtremesCB = NULL;
-    doAligns = false;
+    gAddCharExtremesCB = NULL;
+    gAddStemExtremesCB = NULL;
+    gDoAligns = false;
 }
 
 ACLIB_API void
 AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB)
 {
-    addCharExtremesCB = charCB;
-    addStemExtremesCB = stemCB;
-    doAligns = true;
+    gAddCharExtremesCB = charCB;
+    gAddStemExtremesCB = stemCB;
+    gDoAligns = true;
 
-    addHStemCB = NULL;
-    addVStemCB = NULL;
-    doStems = false;
+    gAddHStemCB = NULL;
+    gAddVStemCB = NULL;
+    gDoStems = false;
 }
 
 /*
@@ -365,14 +365,14 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
 ACLIB_API void
 AC_initCallGlobals(void)
 {
-    libReportCB = NULL;
-    libErrorReportCB = NULL;
-    addCharExtremesCB = NULL;
-    addStemExtremesCB = NULL;
-    doAligns = false;
-    addHStemCB = NULL;
-    addVStemCB = NULL;
-    doStems = false;
+    gLibReportCB = NULL;
+    gLibErrorReportCB = NULL;
+    gAddCharExtremesCB = NULL;
+    gAddStemExtremesCB = NULL;
+    gDoAligns = false;
+    gAddHStemCB = NULL;
+    gAddVStemCB = NULL;
+    gDoStems = false;
 }
 
 ACLIB_API const char*

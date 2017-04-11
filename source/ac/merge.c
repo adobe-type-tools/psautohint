@@ -81,10 +81,10 @@ DoPrune(void)
     that to be the head of the list. Then remove from the list
     any subsequent element for which 'pruned' is true.
     */
-    PClrVal vL = valList, vPrv;
+    PClrVal vL = gValList, vPrv;
     while (vL != NULL && vL->pruned)
         vL = vL->vNxt;
-    valList = vL;
+    gValList = vL;
     if (vL == NULL)
         return;
     vPrv = vL;
@@ -143,7 +143,7 @@ PruneVVals(void)
     Fixed lft, rht, l, r, prndist;
     Fixed val, v;
     bool flg, otherLft, otherRht;
-    sLst = valList;
+    sLst = gValList;
     prndist = PRNDIST;
     while (sLst != NULL) {
         flg = true;
@@ -153,7 +153,7 @@ PruneVVals(void)
         rht = sLst->vLoc2;
         seg1 = sLst->vSeg1;
         seg2 = sLst->vSeg2;
-        sL = valList;
+        sL = gValList;
         while (sL != NULL) {
             v = sL->vVal;
             sg1 = sL->vSeg1;
@@ -219,7 +219,7 @@ PruneHVals(void)
     Fixed bot, top, t, b;
     Fixed val, v, prndist;
     bool flg, otherTop, otherBot, topInBlue, botInBlue, ghst;
-    sLst = valList;
+    sLst = gValList;
     prndist = PRNDIST;
     while (sLst != NULL) {
         flg = true;
@@ -230,11 +230,11 @@ PruneHVals(void)
         val = sLst->vVal;
         bot = sLst->vLoc1;
         top = sLst->vLoc2;
-        topInBlue = InBlueBand(top, lenTopBands, topBands);
-        botInBlue = InBlueBand(bot, lenBotBands, botBands);
-        sL = valList;
+        topInBlue = InBlueBand(top, gLenTopBands, gTopBands);
+        botInBlue = InBlueBand(bot, gLenBotBands, gBotBands);
+        sL = gValList;
         while (sL != NULL) {
-            if ((sL->pruned) && (doAligns || !doStems))
+            if ((sL->pruned) && (gDoAligns || !gDoStems))
                 goto NxtSL;
 
             sg1 = sL->vSeg1;
@@ -256,8 +256,8 @@ PruneHVals(void)
             if (/* Prune sLst if the following are all true */
                 PruneGt(val, v) && /*  v is more than 3* val */
 
-                ((YgoesUp && top + prndist >= t && bot - prndist <= b) ||
-                 (!YgoesUp && top - prndist <= t &&
+                ((gYgoesUp && top + prndist >= t && bot - prndist <= b) ||
+                 (!gYgoesUp && top - prndist <= t &&
                   bot + prndist >=
                     b)) && /* The sL hint is within the sLst hint */
 
@@ -387,10 +387,10 @@ ReplaceVals(Fixed oldB, Fixed oldT, Fixed newB, Fixed newT, PClrVal newBst,
             bool vert)
 {
     PClrVal vL;
-    for (vL = valList; vL != NULL; vL = vL->vNxt) {
+    for (vL = gValList; vL != NULL; vL = vL->vNxt) {
         if (vL->vLoc1 != oldB || vL->vLoc2 != oldT || vL->merge)
             continue;
-        if (showClrInfo) {
+        if (gShowClrInfo) {
             if (vert)
                 ReportMergeVVal(oldB, oldT, newB, newT, vL->vVal, vL->vSpc,
                                 newBst->vVal, newBst->vSpc);
@@ -416,17 +416,17 @@ MergeVals(bool vert)
     Fixed bot, top, b, t;
     Fixed val, v, spc, s;
     bool ghst;
-    FindBestVals(valList);
+    FindBestVals(gValList);
     /* We want to get rid of wider hstems in favor or overlapping smaller hstems
      * only if we are NOT reporting all possible alignment zones. */
-    if (addStemExtremesCB == NULL)
+    if (gAddStemExtremesCB == NULL)
         return;
 
-    for (vL = valList; vL != NULL; vL = vL->vNxt)
+    for (vL = gValList; vL != NULL; vL = vL->vNxt)
         vL->merge = false;
     while (true) {
         /* pick best from valList with merge field still set to false */
-        vLst = valList;
+        vLst = gValList;
         vL = NULL;
         while (vLst != NULL) {
             if (vLst->merge) {
@@ -443,7 +443,7 @@ MergeVals(bool vert)
         t = vL->vLoc2;
         sg1 = vL->vSeg1; /* left or bottom */
         sg2 = vL->vSeg2; /* right or top */
-        vLst = valList;
+        vLst = gValList;
         bV = vL->vBst;
         v = bV->vVal;
         s = bV->vSpc;
@@ -458,24 +458,24 @@ MergeVals(bool vert)
             val = bstV->vVal;
             spc = bstV->vSpc;
             if ((top == t && CloseSegs(sg2, vLst->vSeg2, vert) &&
-                 (vert || (!InBlueBand(t, lenTopBands, topBands) &&
-                           !InBlueBand(bot, lenBotBands, botBands) &&
-                           !InBlueBand(b, lenBotBands, botBands)))) ||
+                 (vert || (!InBlueBand(t, gLenTopBands, gTopBands) &&
+                           !InBlueBand(bot, gLenBotBands, gBotBands) &&
+                           !InBlueBand(b, gLenBotBands, gBotBands)))) ||
                 (bot == b && CloseSegs(sg1, vLst->vSeg1, vert) &&
-                 (vert || (!InBlueBand(b, lenBotBands, botBands) &&
-                           !InBlueBand(t, lenTopBands, topBands) &&
-                           !InBlueBand(top, lenTopBands, topBands)))) ||
-                (abs(top - t) <= maxMerge && abs(bot - b) <= maxMerge &&
+                 (vert || (!InBlueBand(b, gLenBotBands, gBotBands) &&
+                           !InBlueBand(t, gLenTopBands, gTopBands) &&
+                           !InBlueBand(top, gLenTopBands, gTopBands)))) ||
+                (abs(top - t) <= gMaxMerge && abs(bot - b) <= gMaxMerge &&
                  (vert ||
-                  (t == top || !InBlueBand(top, lenTopBands, topBands))) &&
+                  (t == top || !InBlueBand(top, gLenTopBands, gTopBands))) &&
                  (vert ||
-                  (b == bot || !InBlueBand(bot, lenBotBands, botBands))))) {
+                  (b == bot || !InBlueBand(bot, gLenBotBands, gBotBands))))) {
                 if (s == spc && val == v && !vert) {
-                    if (InBlueBand(t, lenTopBands, topBands)) {
-                        if ((YgoesUp && t > top) || (!YgoesUp && t < top))
+                    if (InBlueBand(t, gLenTopBands, gTopBands)) {
+                        if ((gYgoesUp && t > top) || (!gYgoesUp && t < top))
                             goto replace;
-                    } else if (InBlueBand(b, lenBotBands, botBands)) {
-                        if ((YgoesUp && b < bot) || (!YgoesUp && b > bot))
+                    } else if (InBlueBand(b, gLenBotBands, gBotBands)) {
+                        if ((gYgoesUp && b < bot) || (!gYgoesUp && b > bot))
                             goto replace;
                     }
                 } else
@@ -485,14 +485,14 @@ MergeVals(bool vert)
                 seg2 = vLst->vSeg2;
                 if (seg1 != NULL && seg2 != NULL) {
                     if (abs(bot - b) <= FixOne &&
-                        abs(top - t) <= maxBendMerge) {
+                        abs(top - t) <= gMaxBendMerge) {
                         if (seg2->sType == sBEND &&
-                            (vert || !InBlueBand(top, lenTopBands, topBands)))
+                            (vert || !InBlueBand(top, gLenTopBands, gTopBands)))
                             goto replace;
                     } else if (abs(top - t) <= FixOne &&
-                               abs(bot - b) <= maxBendMerge) {
+                               abs(bot - b) <= gMaxBendMerge) {
                         if (v > val && seg1->sType == sBEND &&
-                            (vert || !InBlueBand(bot, lenBotBands, botBands)))
+                            (vert || !InBlueBand(bot, gLenBotBands, gBotBands)))
                             goto replace;
                     }
                 }

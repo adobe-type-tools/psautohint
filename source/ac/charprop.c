@@ -9,13 +9,14 @@
 
 #include "ac.h"
 
-char* VColorList[] = { "m",  "M",  "T",  "ellipsis", NULL, NULL, NULL,
-                       NULL, NULL, NULL, NULL,       NULL, NULL, NULL,
-                       NULL, NULL, NULL, NULL,       NULL, NULL };
-char* HColorList[] = { "element", "equivalence", "notelement", "divide", NULL,
-                       NULL,      NULL,          NULL,         NULL,     NULL,
-                       NULL,      NULL,          NULL,         NULL,     NULL,
-                       NULL,      NULL,          NULL,         NULL,     NULL };
+char* gVColorList[] = { "m",  "M",  "T",  "ellipsis", NULL, NULL, NULL,
+                        NULL, NULL, NULL, NULL,       NULL, NULL, NULL,
+                        NULL, NULL, NULL, NULL,       NULL, NULL };
+char* gHColorList[] = {
+    "element", "equivalence", "notelement", "divide", NULL, NULL, NULL,
+    NULL,      NULL,          NULL,         NULL,     NULL, NULL, NULL,
+    NULL,      NULL,          NULL,         NULL,     NULL, NULL
+};
 
 static char* UpperSpecialChars[] = { "questiondown", "exclamdown", "semicolon",
                                      NULL };
@@ -124,9 +125,9 @@ int32_t
 SpecialCharType(void)
 {
     /* 1 = upper; -1 = lower; 0 = neither */
-    if (FindNameInList(glyphName, UpperSpecialChars))
+    if (FindNameInList(gGlyphName, UpperSpecialChars))
         return 1;
-    if (FindNameInList(glyphName, LowerSpecialChars))
+    if (FindNameInList(gGlyphName, LowerSpecialChars))
         return -1;
     return 0;
 }
@@ -134,29 +135,29 @@ SpecialCharType(void)
 bool
 HColorChar(void)
 {
-    return FindNameInList(glyphName, HColorList);
+    return FindNameInList(gGlyphName, gHColorList);
 }
 
 bool
 VColorChar(void)
 {
-    return FindNameInList(glyphName, VColorList);
+    return FindNameInList(gGlyphName, gVColorList);
 }
 
 bool
 NoBlueChar(void)
 {
-    return FindNameInList(glyphName, NoBlueList);
+    return FindNameInList(gGlyphName, NoBlueList);
 }
 
 int32_t
 SolEolCharCode(void)
 {
-    if (FindNameInList(glyphName, SolEol0List))
+    if (FindNameInList(gGlyphName, SolEol0List))
         return 0;
-    if (FindNameInList(glyphName, SolEol1List))
+    if (FindNameInList(gGlyphName, SolEol1List))
         return 1;
-    if (FindNameInList(glyphName, SolEolNeg1List))
+    if (FindNameInList(gGlyphName, SolEolNeg1List))
         return -1;
     return 2;
 }
@@ -184,7 +185,7 @@ SubpathEnd(PPathElt e)
     while (true) {
         e = e->next;
         if (e == NULL)
-            return pathEnd;
+            return gPathEnd;
         if (e->type == MOVETO)
             return e->prev;
     }
@@ -193,7 +194,7 @@ SubpathEnd(PPathElt e)
 static PPathElt
 SubpathStart(PPathElt e)
 {
-    while (e != pathStart) {
+    while (e != gPathStart) {
         if (e->type == MOVETO)
             break;
         e = e->prev;
@@ -215,7 +216,7 @@ static void
 SolEolAll(void)
 {
     PPathElt e;
-    e = pathStart->next;
+    e = gPathStart->next;
     while (e != NULL) {
         e = SolEol(e);
         e = e->next;
@@ -228,9 +229,9 @@ SolEolUpperOrLower(bool upper)
     PPathElt e, s1, s2;
     Fixed x1, y1, s1y, s2y;
     bool s1Upper;
-    if (pathStart == NULL)
+    if (gPathStart == NULL)
         return;
-    e = s1 = pathStart->next;
+    e = s1 = gPathStart->next;
     GetEndPoint(e, &x1, &y1);
     s1y = itfmy(y1);
     e = SubpathEnd(e);
@@ -252,7 +253,7 @@ SolEolUpperOrLower(bool upper)
 void
 AddSolEol(void)
 {
-    if (pathStart == NULL)
+    if (gPathStart == NULL)
         return;
     if (!SpecialSolEol())
         return;
@@ -273,5 +274,6 @@ AddSolEol(void)
 bool
 MoveToNewClrs(void)
 {
-    return StrEqual(glyphName, "percent") || StrEqual(glyphName, "perthousand");
+    return StrEqual(gGlyphName, "percent") ||
+           StrEqual(gGlyphName, "perthousand");
 }

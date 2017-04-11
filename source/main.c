@@ -356,12 +356,12 @@ main(int argc, char* argv[])
                 fileSuffix = (char*)reportExt;
                 switch (current_arg[2]) {
                     case 'a':
-                        reportRetryCB = reportRetry;
+                        gReportRetryCB = reportRetry;
                         AC_SetReportZonesCB(charZoneCB, stemZoneCB);
                         report = true;
                         break;
                     case 's':
-                        reportRetryCB = reportRetry;
+                        gReportRetryCB = reportRetry;
                         AC_SetReportStemsCB(hstemCB, vstemCB, allStems);
                         report = true;
                         break;

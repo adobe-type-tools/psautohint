@@ -46,10 +46,10 @@ AdjustVal(Fixed* pv, Fixed l1, Fixed l2, Fixed dist, Fixed d, bool hFlg)
         q = q * q;
     }
     v = (float)((1000.0 * r1 * r2) / (q * q));
-    if (d <= (hFlg ? hBigDist : vBigDist))
+    if (d <= (hFlg ? gHBigDist : gVBigDist))
         goto done;
     acfixtopflt(d, &rd);
-    q = (hFlg ? hBigDistR : vBigDistR) / rd; /* 0 < q < 1.0 */
+    q = (hFlg ? gHBigDistR : gVBigDistR) / rd; /* 0 < q < 1.0 */
     if (q <= 0.5) {
         v = 0.0;
         goto done;
@@ -59,10 +59,10 @@ AdjustVal(Fixed* pv, Fixed l1, Fixed l2, Fixed dist, Fixed d, bool hFlg)
     q *= q;    /* raise q to 8th power */
     v = v * q; /* if d is twice bigDist, value goes down by factor of 256 */
 done:
-    if (v > maxVal)
-        v = maxVal;
-    else if (v > 0.0 && v < minVal)
-        v = minVal;
+    if (v > gMaxVal)
+        v = gMaxVal;
+    else if (v > 0.0 && v < gMinVal)
+        v = gMinVal;
     *pv = acpflttofix(&v);
 }
 
@@ -108,12 +108,12 @@ EvalHPair(PClrSeg botSeg, PClrSeg topSeg, Fixed* pspc, Fixed* pv)
     bloc = botSeg->sLoc;
     tloc = topSeg->sLoc;
     dy = abs(bloc - tloc);
-    if (dy < minDist) {
+    if (dy < gMinDist) {
         *pv = 0;
         return;
     }
-    inBotBand = InBlueBand(bloc, lenBotBands, botBands);
-    inTopBand = InBlueBand(tloc, lenTopBands, topBands);
+    inBotBand = InBlueBand(bloc, gLenBotBands, gBotBands);
+    inTopBand = InBlueBand(tloc, gLenTopBands, gTopBands);
     if (inBotBand && inTopBand) { /* delete these */
         *pv = 0;
         return;
@@ -148,13 +148,13 @@ EvalHPair(PClrSeg botSeg, PClrSeg topSeg, Fixed* pspc, Fixed* pv)
         if (dx > dy)
             dist *= dx / dy;
     }
-    mndist = FixTwoMul(minDist);
+    mndist = FixTwoMul(gMinDist);
     dist = NUMMAX(dist, mndist);
-    if (NumHStems > 0) {
+    if (gNumHStems > 0) {
         Fixed w = idtfmy(dy);
         w = abs(w);
-        for (i = 0; i < NumHStems; i++)
-            if (w == HStems[i]) {
+        for (i = 0; i < gNumHStems; i++)
+            if (w == gHStems[i]) {
                 *pspc += FixOne;
                 break;
             }
@@ -169,7 +169,7 @@ HStemMiss(PClrSeg botSeg, PClrSeg topSeg)
     Fixed mndist, dist, dy, minlen, overlaplen;
     Fixed b, t, diff, minDiff, minW, w, sw;
     int i;
-    if (NumHStems == 0)
+    if (gNumHStems == 0)
         return;
     brght = botSeg->sMax;
     blft = botSeg->sMin;
@@ -178,7 +178,7 @@ HStemMiss(PClrSeg botSeg, PClrSeg topSeg)
     bloc = botSeg->sLoc;
     tloc = topSeg->sLoc;
     dy = abs(bloc - tloc);
-    if (dy < minDist)
+    if (dy < gMinDist)
         return;
     /* left is always < right */
     if ((tlft <= brght) && (trght >= blft)) { /* overlap */
@@ -190,7 +190,7 @@ HStemMiss(PClrSeg botSeg, PClrSeg topSeg)
             dist = CalcOverlapDist(dy, overlaplen, minlen);
     } else
         return;
-    mndist = FixTwoMul(minDist);
+    mndist = FixTwoMul(gMinDist);
     if (dist < mndist)
         return;
     minDiff = FixInt(1000);
@@ -202,8 +202,8 @@ HStemMiss(PClrSeg botSeg, PClrSeg topSeg)
     if (((w = t - b) == botGhst) || (w == topGhst))
         return;
     w = abs(w);
-    for (i = 0; i < NumHStems; i++) {
-        sw = HStems[i];
+    for (i = 0; i < gNumHStems; i++) {
+        sw = gHStems[i];
         diff = abs(sw - w);
         if (diff == 0)
             return;
@@ -233,7 +233,7 @@ EvalVPair(PClrSeg leftSeg, PClrSeg rightSeg, Fixed* pspc, Fixed* pv)
     lloc = leftSeg->sLoc;
     rloc = rightSeg->sLoc;
     dx = abs(lloc - rloc);
-    if (dx < minDist) {
+    if (dx < gMinDist) {
         *pv = 0;
         return;
     }
@@ -254,17 +254,17 @@ EvalVPair(PClrSeg leftSeg, PClrSeg rightSeg, Fixed* pspc, Fixed* pv)
         if (dy > dx)
             dist *= dy / dx;
     }
-    mndist = FixTwoMul(minDist);
+    mndist = FixTwoMul(gMinDist);
     dist = NUMMAX(dist, mndist);
     lbonus = leftSeg->sBonus;
     rbonus = rightSeg->sBonus;
     bonus = NUMMIN(lbonus, rbonus);
     *pspc = (bonus > 0) ? FixInt(2) : 0; /* this is for sol-eol characters */
-    if (NumVStems > 0) {
+    if (gNumVStems > 0) {
         Fixed w = idtfmx(dx);
         w = abs(w);
-        for (i = 0; i < NumVStems; i++)
-            if (w == VStems[i]) {
+        for (i = 0; i < gNumVStems; i++)
+            if (w == gVStems[i]) {
                 *pspc = *pspc + FixOne;
                 break;
             }
@@ -279,7 +279,7 @@ VStemMiss(PClrSeg leftSeg, PClrSeg rightSeg)
     Fixed mndist, dx, dist, overlaplen, minlen;
     Fixed l, r, diff, minDiff, minW, w, sw;
     int i;
-    if (NumVStems == 0)
+    if (gNumVStems == 0)
         return;
     ltop = leftSeg->sMax;
     lbot = leftSeg->sMin;
@@ -288,7 +288,7 @@ VStemMiss(PClrSeg leftSeg, PClrSeg rightSeg)
     lloc = leftSeg->sLoc;
     rloc = rightSeg->sLoc;
     dx = abs(lloc - rloc);
-    if (dx < minDist)
+    if (dx < gMinDist)
         return;
     /* top is always > bot, independent of YgoesUp */
     if ((ltop >= rbot) && (lbot <= rtop)) { /* overlap */
@@ -300,15 +300,15 @@ VStemMiss(PClrSeg leftSeg, PClrSeg rightSeg)
             dist = CalcOverlapDist(dx, overlaplen, minlen);
     } else
         return;
-    mndist = FixTwoMul(minDist);
+    mndist = FixTwoMul(gMinDist);
     dist = NUMMAX(dist, mndist);
     l = itfmx(lloc);
     r = itfmx(rloc);
     w = abs(r - l);
     minDiff = FixInt(1000);
     minW = 0;
-    for (i = 0; i < NumVStems; i++) {
-        sw = VStems[i];
+    for (i = 0; i < gNumVStems; i++) {
+        sw = gVStems[i];
         diff = abs(sw - w);
         if (diff < minDiff) {
             minDiff = diff;
@@ -337,7 +337,7 @@ InsertVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PClrSeg lSeg,
     item->vSeg1 = lSeg;
     item->vSeg2 = rSeg;
     item->vGhst = false;
-    vlist = valList;
+    vlist = gValList;
     vprev = NULL;
     while (vlist != NULL) {
         if (vlist->vLoc1 >= lft)
@@ -352,15 +352,15 @@ InsertVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PClrSeg lSeg,
         vlist = vlist->vNxt;
     }
     if (vprev == NULL)
-        valList = item;
+        gValList = item;
     else
         vprev->vNxt = item;
     item->vNxt = vlist;
-    if (showClrInfo && showVs)
+    if (gShowClrInfo && gShowVs)
         ReportAddVVal(item);
 }
 
-#define LePruneValue(val) ((val) < FixOne && ((val) << 10) <= pruneValue)
+#define LePruneValue(val) ((val) < FixOne && ((val) << 10) <= gPruneValue)
 
 static void
 AddVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PClrSeg lSeg,
@@ -373,7 +373,7 @@ AddVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PClrSeg lSeg,
     if (lSeg != NULL && lSeg->sType == sBEND && rSeg != NULL &&
         rSeg->sType == sBEND)
         return;
-    if (val <= pruneD && spc <= 0 && lSeg != NULL && rSeg != NULL) {
+    if (val <= gPruneD && spc <= 0 && lSeg != NULL && rSeg != NULL) {
         if (lSeg->sType == sBEND || rSeg->sType == sBEND ||
             !CheckBBoxes(lSeg->sElt, rSeg->sElt))
             return;
@@ -386,7 +386,7 @@ InsertHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, PClrSeg bSeg,
              PClrSeg tSeg, bool ghst)
 {
     PClrVal item, vlist, vprev, vl;
-    vlist = valList;
+    vlist = gValList;
     vprev = NULL;
     while (vlist != NULL) {
         if (vlist->vLoc2 >= top)
@@ -420,11 +420,11 @@ InsertHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, PClrSeg bSeg,
     item->vSeg2 = tSeg;
     item->vGhst = ghst;
     if (vprev == NULL)
-        valList = item;
+        gValList = item;
     else
         vprev->vNxt = item;
     item->vNxt = vlist;
-    if (showClrInfo && showHs)
+    if (gShowClrInfo && gShowHs)
         ReportAddHVal(item);
 }
 
@@ -440,7 +440,7 @@ AddHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, PClrSeg bSeg,
     if (bSeg->sType == sBEND && tSeg->sType == sBEND)
         return;
     ghst = bSeg->sType == sGHOST || tSeg->sType == sGHOST;
-    if (!ghst && val <= pruneD && spc <= 0) {
+    if (!ghst && val <= gPruneD && spc <= 0) {
         if (bSeg->sType == sBEND || tSeg->sType == sBEND ||
             !CheckBBoxes(bSeg->sElt, tSeg->sElt))
             return;
@@ -474,10 +474,10 @@ CombVals(Fixed v1, Fixed v2)
         x = xx;
     }
     r1 += r2 + ((float)2.0) * xx;
-    if (r1 > maxVal)
-        r1 = maxVal;
-    else if (r1 > 0 && r1 < minVal)
-        r1 = minVal;
+    if (r1 > gMaxVal)
+        r1 = gMaxVal;
+    else if (r1 > 0 && r1 < gMinVal)
+        r1 = gMinVal;
     return acpflttofix(&r1);
 }
 
@@ -488,7 +488,7 @@ CombineValues(void)
     Fixed loc1, loc2;
     Fixed val;
     bool match;
-    vlist = valList;
+    vlist = gValList;
     while (vlist != NULL) {
         v1 = vlist->vNxt;
         loc1 = vlist->vLoc1;
@@ -520,7 +520,7 @@ EvalV(void)
     PClrSeg lList, rList;
     Fixed lft, rght;
     Fixed val, spc;
-    valList = NULL;
+    gValList = NULL;
     lList = leftList;
     while (lList != NULL) {
         rList = rightList;
@@ -545,7 +545,7 @@ EvalH(void)
     PClrSeg bList, tList, lst, ghostSeg;
     Fixed lstLoc, tempLoc, cntr;
     Fixed val, spc;
-    valList = NULL;
+    gValList = NULL;
     bList = botList;
     while (bList != NULL) {
         tList = topList;
@@ -553,7 +553,7 @@ EvalH(void)
             Fixed bot, top;
             bot = bList->sLoc;
             top = tList->sLoc;
-            if ((bot < top && YgoesUp) || (bot > top && !YgoesUp)) {
+            if ((bot < top && gYgoesUp) || (bot > top && !gYgoesUp)) {
                 EvalHPair(bList, tList, &spc, &val);
                 HStemMiss(bList, tList);
                 AddHValue(bot, top, val, spc, bList, tList);
@@ -565,21 +565,21 @@ EvalH(void)
     ghostSeg = (PClrSeg)Alloc(sizeof(ClrSeg));
     ghostSeg->sType = sGHOST;
     ghostSeg->sElt = NULL;
-    if (lenBotBands < 2 && lenTopBands < 2)
+    if (gLenBotBands < 2 && gLenTopBands < 2)
         goto done;
     lst = botList;
     while (lst != NULL) {
         lstLoc = lst->sLoc;
-        if (InBlueBand(lstLoc, lenBotBands, botBands)) {
+        if (InBlueBand(lstLoc, gLenBotBands, gBotBands)) {
             tempLoc = lstLoc;
-            if (YgoesUp)
-                tempLoc += ghostWidth;
+            if (gYgoesUp)
+                tempLoc += gGhostWidth;
             else
-                tempLoc -= ghostWidth;
+                tempLoc -= gGhostWidth;
             ghostSeg->sLoc = tempLoc;
             cntr = (lst->sMax + lst->sMin) / 2;
-            ghostSeg->sMax = cntr + ghostLength / 2;
-            ghostSeg->sMin = cntr - ghostLength / 2;
+            ghostSeg->sMax = cntr + gGhostLength / 2;
+            ghostSeg->sMin = cntr - gGhostLength / 2;
             DEBUG_ROUND(ghostSeg->sMax) /* DEBUG 8 BIT */
             DEBUG_ROUND(ghostSeg->sMin) /* DEBUG 8 BIT */
             spc = FixInt(2);
@@ -591,16 +591,16 @@ EvalH(void)
     lst = topList;
     while (lst != NULL) {
         lstLoc = lst->sLoc;
-        if (InBlueBand(lstLoc, lenTopBands, topBands)) {
+        if (InBlueBand(lstLoc, gLenTopBands, gTopBands)) {
             tempLoc = lstLoc;
-            if (!YgoesUp)
-                tempLoc += ghostWidth;
+            if (!gYgoesUp)
+                tempLoc += gGhostWidth;
             else
-                tempLoc -= ghostWidth;
+                tempLoc -= gGhostWidth;
             ghostSeg->sLoc = tempLoc;
             cntr = (lst->sMin + lst->sMax) / 2;
-            ghostSeg->sMax = cntr + ghostLength / 2;
-            ghostSeg->sMin = cntr - ghostLength / 2;
+            ghostSeg->sMax = cntr + gGhostLength / 2;
+            ghostSeg->sMin = cntr - gGhostLength / 2;
             spc = FixInt(2);
             val = FixInt(20);
             AddHValue(tempLoc, lstLoc, val, spc, ghostSeg, lst);

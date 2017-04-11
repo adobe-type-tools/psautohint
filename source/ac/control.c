@@ -42,7 +42,7 @@ PointListCheck(PClrPoint new, PClrPoint lst)
     /* -1 means not a member, 1 means already a member, 0 means conflicts */
     Fixed l1 = 0, l2 = 0, n1 = 0, n2 = 0, tmp, halfMargin;
     char ch = new->c;
-    halfMargin = FixHalfMul(bandMargin);
+    halfMargin = FixHalfMul(gBandMargin);
     halfMargin = FixHalfMul(halfMargin);
     /* DEBUG 8 BIT. In the previous version, with 7 bit fraction coordinates
     instead of the current
@@ -70,7 +70,7 @@ PointListCheck(PClrPoint new, PClrPoint lst)
         }
         default: {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal character in point list in %s.\n", glyphName);
+                   "Illegal character in point list in %s.\n", gGlyphName);
         }
     }
     if (n1 > n2) {
@@ -140,18 +140,18 @@ SameColors(int32_t cn1, int32_t cn2)
     if (cn1 == cn2) {
         return true;
     }
-    return SameColorLists(ptLstArray[cn1], ptLstArray[cn2]);
+    return SameColorLists(gPtLstArray[cn1], gPtLstArray[cn2]);
 }
 
 void
 MergeFromMainColors(char ch)
 {
     PClrPoint lst;
-    for (lst = ptLstArray[0]; lst != NULL; lst = lst->next) {
+    for (lst = gPtLstArray[0]; lst != NULL; lst = lst->next) {
         if (lst->c != ch) {
             continue;
         }
-        if (PointListCheck(lst, pointList) == -1) {
+        if (PointListCheck(lst, gPointList) == -1) {
             if (ch == 'b') {
                 AddColorPoint(0, lst->y0, 0, lst->y1, ch, lst->p0, lst->p1);
             } else {
@@ -177,15 +177,15 @@ AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
     pt->next = NULL;
     pt->p0 = p0;
     pt->p1 = p1;
-    chk = PointListCheck(pt, pointList);
-    if (chk == 0 && showClrInfo) {
+    chk = PointListCheck(pt, gPointList);
+    if (chk == 0 && gShowClrInfo) {
         ReportColorConflict(x0, y0, x1, y1, ch);
     }
     if (chk == -1) {
-        pt->next = pointList;
-        pointList = pt;
-        if (logging) {
-            LogColorInfo(pointList);
+        pt->next = gPointList;
+        gPointList = pt;
+        if (gLogging) {
+            LogColorInfo(gPointList);
         }
     }
 }
@@ -209,13 +209,13 @@ CopyClrFromLst(char clr, PClrPoint lst)
 void
 CopyMainV(void)
 {
-    CopyClrFromLst('m', ptLstArray[0]);
+    CopyClrFromLst('m', gPtLstArray[0]);
 }
 
 void
 CopyMainH(void)
 {
-    CopyClrFromLst('v', ptLstArray[0]);
+    CopyClrFromLst('v', gPtLstArray[0]);
 }
 
 void
@@ -328,9 +328,9 @@ UseCounter(PClrVal sLst, bool mclr)
     if (abs(minDelta - maxDelta) < th &&
         abs((maxLoc - midLoc) - (midLoc - minLoc)) < th) {
         if (mclr) {
-            Vcoloring = newLst;
+            gVColoring = newLst;
         } else {
-            Hcoloring = newLst;
+            gHColoring = newLst;
         }
         return true;
     }
@@ -345,33 +345,33 @@ UseCounter(PClrVal sLst, bool mclr)
 static void
 GetNewPtLst(void)
 {
-    if (numPtLsts >= maxPtLsts) { /* increase size */
+    if (gNumPtLsts >= gMaxPtLsts) { /* increase size */
         PClrPoint* newArray;
         int32_t i;
-        maxPtLsts += 5;
-        newArray = (PClrPoint*)Alloc(maxPtLsts * sizeof(PClrPoint));
-        for (i = 0; i < maxPtLsts - 5; i++) {
-            newArray[i] = ptLstArray[i];
+        gMaxPtLsts += 5;
+        newArray = (PClrPoint*)Alloc(gMaxPtLsts * sizeof(PClrPoint));
+        for (i = 0; i < gMaxPtLsts - 5; i++) {
+            newArray[i] = gPtLstArray[i];
         }
-        ptLstArray = newArray;
+        gPtLstArray = newArray;
     }
-    ptLstIndex = numPtLsts;
-    numPtLsts++;
-    pointList = NULL;
-    ptLstArray[ptLstIndex] = NULL;
+    gPtLstIndex = gNumPtLsts;
+    gNumPtLsts++;
+    gPointList = NULL;
+    gPtLstArray[gPtLstIndex] = NULL;
 }
 
 void
 XtraClrs(PPathElt e)
 {
     /* this can be simplified for standalone coloring */
-    ptLstArray[ptLstIndex] = pointList;
+    gPtLstArray[gPtLstIndex] = gPointList;
     if (e->newcolors == 0) {
         GetNewPtLst();
-        e->newcolors = (int16_t)ptLstIndex;
+        e->newcolors = (int16_t)gPtLstIndex;
     }
-    ptLstIndex = e->newcolors;
-    pointList = ptLstArray[ptLstIndex];
+    gPtLstIndex = e->newcolors;
+    gPointList = gPtLstArray[gPtLstIndex];
 }
 
 static void
@@ -542,77 +542,77 @@ Blues(const ACFontInfo* fontinfo)
      4) pick.c:FindBestHVals();
      When a hint segment    */
 
-    if (showClrInfo) {
+    if (gShowClrInfo) {
         PrintMessage("generate blues");
     }
     if (NoBlueChar()) {
-        lenTopBands = lenBotBands = 0;
+        gLenTopBands = gLenBotBands = 0;
     }
     GenHPts();
-    if (showClrInfo) {
+    if (gShowClrInfo) {
         PrintMessage("evaluate");
     }
     if (!CounterFailed && HColorChar()) {
-        pv = pruneValue;
-        pruneValue = (Fixed)minVal;
-        pa = pruneA;
-        pruneA = (Fixed)minVal;
-        pd = pruneD;
-        pruneD = (Fixed)minVal;
-        pc = pruneC;
-        pruneC = (Fixed)maxVal;
-        pb = pruneB;
-        pruneB = (Fixed)minVal;
+        pv = gPruneValue;
+        gPruneValue = (Fixed)gMinVal;
+        pa = gPruneA;
+        gPruneA = (Fixed)gMinVal;
+        pd = gPruneD;
+        gPruneD = (Fixed)gMinVal;
+        pc = gPruneC;
+        gPruneC = (Fixed)gMaxVal;
+        pb = gPruneB;
+        gPruneB = (Fixed)gMinVal;
     }
     EvalH();
     PruneHVals();
     FindBestHVals();
     MergeVals(false);
 
-    if (showClrInfo) {
-        ShowHVals(valList);
+    if (gShowClrInfo) {
+        ShowHVals(gValList);
         PrintMessage("pick best");
     }
-    MarkLinks(valList, true);
-    CheckVals(valList, false);
-    DoHStems(fontinfo, valList); /* Report stems and alignment zones, if this
+    MarkLinks(gValList, true);
+    CheckVals(gValList, false);
+    DoHStems(fontinfo, gValList); /* Report stems and alignment zones, if this
                                     has been requested. */
-    PickHVals(valList); /* Moves best ClrVal items from valList to Hcoloring
+    PickHVals(gValList); /* Moves best ClrVal items from valList to Hcoloring
                            list. (? Choose from set of ClrVals for the samte
                            stem values.) */
     if (!CounterFailed && HColorChar()) {
-        pruneValue = pv;
-        pruneD = pd;
-        pruneC = pc;
-        pruneB = pb;
-        pruneA = pa;
-        useH = UseCounter(Hcoloring, false);
-        if (!useH) { /* try to fix */
+        gPruneValue = pv;
+        gPruneD = pd;
+        gPruneC = pc;
+        gPruneB = pb;
+        gPruneA = pa;
+        gUseH = UseCounter(gHColoring, false);
+        if (!gUseH) { /* try to fix */
             AddBBoxHV(true, true);
-            useH = UseCounter(Hcoloring, false);
-            if (!useH) { /* still bad news */
+            gUseH = UseCounter(gHColoring, false);
+            if (!gUseH) { /* still bad news */
                 ReportError("Note: Glyph is in list for using H counter hints, "
                             "but didn't find any candidates.");
                 CounterFailed = true;
             }
         }
     } else {
-        useH = false;
+        gUseH = false;
     }
-    if (Hcoloring == NULL) {
+    if (gHColoring == NULL) {
         AddBBoxHV(true, false);
     }
-    if (showClrInfo) {
+    if (gShowClrInfo) {
         PrintMessage("results");
-        PrintMessage(useH ? "rv" : "rb");
-        ShowHVals(Hcoloring);
+        PrintMessage(gUseH ? "rv" : "rb");
+        ShowHVals(gHColoring);
     }
-    if (useH) {
+    if (gUseH) {
         PrintMessage("Using H counter hints.");
     }
-    sLst = Hcoloring;
+    sLst = gHColoring;
     while (sLst != NULL) {
-        AddHPair(sLst, useH ? 'v' : 'b'); /* actually adds hint */
+        AddHPair(sLst, gUseH ? 'v' : 'b'); /* actually adds hint */
         sLst = sLst->vNxt;
     }
 }
@@ -623,7 +623,7 @@ DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1)
     Fixed bot, top;
     Fixed charTop = INT32_MIN, charBot = INT32_MAX;
     bool curved;
-    if (!doAligns && !doStems) {
+    if (!gDoAligns && !gDoStems) {
         return;
     }
     while (sLst1 != NULL) {
@@ -665,70 +665,70 @@ Yellows(void)
 {
     Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
     PClrVal sLst;
-    if (showClrInfo) {
+    if (gShowClrInfo) {
         PrintMessage("generate yellows");
     }
     GenVPts(SpecialCharType());
-    if (showClrInfo) {
+    if (gShowClrInfo) {
         PrintMessage("evaluate");
     }
     if (!CounterFailed && VColorChar()) {
-        pv = pruneValue;
-        pruneValue = (Fixed)minVal;
-        pa = pruneA;
-        pruneA = (Fixed)minVal;
-        pd = pruneD;
-        pruneD = (Fixed)minVal;
-        pc = pruneC;
-        pruneC = (Fixed)maxVal;
-        pb = pruneB;
-        pruneB = (Fixed)minVal;
+        pv = gPruneValue;
+        gPruneValue = (Fixed)gMinVal;
+        pa = gPruneA;
+        gPruneA = (Fixed)gMinVal;
+        pd = gPruneD;
+        gPruneD = (Fixed)gMinVal;
+        pc = gPruneC;
+        gPruneC = (Fixed)gMaxVal;
+        pb = gPruneB;
+        gPruneB = (Fixed)gMinVal;
     }
     EvalV();
     PruneVVals();
     FindBestVVals();
     MergeVals(true);
-    if (showClrInfo) {
-        ShowVVals(valList);
+    if (gShowClrInfo) {
+        ShowVVals(gValList);
         PrintMessage("pick best");
     }
-    MarkLinks(valList, false);
-    CheckVals(valList, true);
-    DoVStems(valList);
-    PickVVals(valList);
+    MarkLinks(gValList, false);
+    CheckVals(gValList, true);
+    DoVStems(gValList);
+    PickVVals(gValList);
     if (!CounterFailed && VColorChar()) {
-        pruneValue = pv;
-        pruneD = pd;
-        pruneC = pc;
-        pruneB = pb;
-        pruneA = pa;
-        useV = UseCounter(Vcoloring, true);
-        if (!useV) { /* try to fix */
+        gPruneValue = pv;
+        gPruneD = pd;
+        gPruneC = pc;
+        gPruneB = pb;
+        gPruneA = pa;
+        gUseV = UseCounter(gVColoring, true);
+        if (!gUseV) { /* try to fix */
             AddBBoxHV(false, true);
-            useV = UseCounter(Vcoloring, true);
-            if (!useV) { /* still bad news */
+            gUseV = UseCounter(gVColoring, true);
+            if (!gUseV) { /* still bad news */
                 ReportError("Note: Glyph is in list for using V counter hints, "
                             "but didn't find any candidates.");
                 CounterFailed = true;
             }
         }
     } else {
-        useV = false;
+        gUseV = false;
     }
-    if (Vcoloring == NULL) {
+    if (gVColoring == NULL) {
         AddBBoxHV(false, false);
     }
-    if (showClrInfo) {
+    if (gShowClrInfo) {
         PrintMessage("results");
-        PrintMessage(useV ? "rm" : "ry");
-        ShowVVals(Vcoloring);
+        PrintMessage(gUseV ? "rm" : "ry");
+        ShowVVals(gVColoring);
     }
-    if (useV) {
+    if (gUseV) {
         PrintMessage("Using V counter hints.");
     }
-    sLst = Vcoloring;
+    sLst = gVColoring;
     while (sLst != NULL) {
-        AddVPair(sLst, useV ? 'm' : 'y');
+        AddVPair(sLst, gUseV ? 'm' : 'y');
         sLst = sLst->vNxt;
     }
 }
@@ -738,7 +738,7 @@ DoVStems(PClrVal sLst)
 {
     Fixed lft, rght;
     bool curved;
-    if (!doAligns && !doStems) {
+    if (!gDoAligns && !gDoStems) {
         return;
     }
     while (sLst != NULL) {
@@ -760,10 +760,10 @@ static void
 RemoveRedundantFirstColors(void)
 {
     PPathElt e;
-    if (numPtLsts < 2 || !SameColors(0, 1)) {
+    if (gNumPtLsts < 2 || !SameColors(0, 1)) {
         return;
     }
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) {
         if (e->newcolors == 1) {
             e->newcolors = 0;
@@ -777,31 +777,31 @@ static void
 AddColorsSetup(void)
 {
     int i;
-    vBigDist = 0;
-    for (i = 0; i < NumVStems; i++) {
-        if (VStems[i] > vBigDist) {
-            vBigDist = VStems[i];
+    gVBigDist = 0;
+    for (i = 0; i < gNumVStems; i++) {
+        if (gVStems[i] > gVBigDist) {
+            gVBigDist = gVStems[i];
         }
     }
-    vBigDist = dtfmx(vBigDist);
-    if (vBigDist < initBigDist) {
-        vBigDist = initBigDist;
+    gVBigDist = dtfmx(gVBigDist);
+    if (gVBigDist < gInitBigDist) {
+        gVBigDist = gInitBigDist;
     }
-    vBigDist = (vBigDist * 23) / 20;
-    acfixtopflt(vBigDist, &vBigDistR);
-    hBigDist = 0;
-    for (i = 0; i < NumHStems; i++) {
-        if (HStems[i] > hBigDist) {
-            hBigDist = HStems[i];
+    gVBigDist = (gVBigDist * 23) / 20;
+    acfixtopflt(gVBigDist, &gVBigDistR);
+    gHBigDist = 0;
+    for (i = 0; i < gNumHStems; i++) {
+        if (gHStems[i] > gHBigDist) {
+            gHBigDist = gHStems[i];
         }
     }
-    hBigDist = abs(dtfmy(hBigDist));
-    if (hBigDist < initBigDist) {
-        hBigDist = initBigDist;
+    gHBigDist = abs(dtfmy(gHBigDist));
+    if (gHBigDist < gInitBigDist) {
+        gHBigDist = gInitBigDist;
     }
-    hBigDist = (hBigDist * 23) / 20;
-    acfixtopflt(hBigDist, &hBigDistR);
-    if ((!scalinghints) && (roundToInt)) {
+    gHBigDist = (gHBigDist * 23) / 20;
+    acfixtopflt(gHBigDist, &gHBigDistR);
+    if ((!gScalingHints) && (gRoundToInt)) {
         RoundPathCoords();
     }
     CheckForMultiMoveTo();
@@ -821,26 +821,26 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
         CheckSmooth();
         InitShuffleSubpaths();
         Blues(fontinfo);
-        if (!doAligns) {
+        if (!gDoAligns) {
             Yellows();
         }
-        if (editChar) {
+        if (gEditChar) {
             DoShuffleSubpaths();
         }
-        Hprimary = CopyClrs(Hcoloring);
-        Vprimary = CopyClrs(Vcoloring);
+        gHPrimary = CopyClrs(gHColoring);
+        gVPrimary = CopyClrs(gVColoring);
         /*
          isSolEol = SpecialSolEol() && !useV && !useH;
          solEolCode = isSolEol? SolEolCharCode() : 2;
          */
         PruneElementColorSegs();
-        if (listClrInfo) {
+        if (gListClrInfo) {
             ListClrInfo();
         }
         if (extracolor) {
             AutoExtraColors(MoveToNewClrs(), isSolEol, solEolCode);
         }
-        ptLstArray[ptLstIndex] = pointList;
+        gPtLstArray[gPtLstIndex] = gPointList;
         if (isSolEol) {
             break;
         }
@@ -862,29 +862,29 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
     retry:
         /* if we are doing the stem and zones reporting, we need to discard the
          * reported. */
-        if (reportRetryCB != NULL) {
-            reportRetryCB();
+        if (gReportRetryCB != NULL) {
+            gReportRetryCB();
         }
-        if (pathStart == NULL || pathStart == pathEnd) {
+        if (gPathStart == NULL || gPathStart == gPathEnd) {
             LogMsg(LOGERROR, NONFATALERROR, "No glyph path in %s.\n",
-                   glyphName);
+                   gGlyphName);
         }
 
         /* SaveFile(); SaveFile is always called in AddColorsCleanup, so this is
          * a duplciate */
         InitAll(fontinfo, RESTART);
-        if (writecoloredbez && !ReadGlyph(fontinfo, srcglyph, false, false)) {
+        if (gWriteColoredBez && !ReadGlyph(fontinfo, srcglyph, false, false)) {
             break;
         }
         AddColorsSetup();
         if (!PreCheckForColoring()) {
             break;
         }
-        if (flexOK) {
-            hasFlex = false;
+        if (gFlexOK) {
+            gHasFlex = false;
             AutoAddFlex();
         }
-        reportErrors = false;
+        gReportErrors = false;
     }
 }
 
@@ -892,14 +892,14 @@ static void
 AddColorsCleanup(const ACFontInfo* fontinfo)
 {
     RemoveRedundantFirstColors();
-    reportErrors = true;
-    if (writecoloredbez) {
+    gReportErrors = true;
+    if (gWriteColoredBez) {
 
-        if (pathStart == NULL || pathStart == pathEnd) {
+        if (gPathStart == NULL || gPathStart == gPathEnd) {
             LogMsg(LOGERROR, NONFATALERROR,
                    "The %s glyph path vanished while adding "
                    "hints.\n",
-                   glyphName);
+                   gGlyphName);
         } else {
             SaveFile(fontinfo);
         }
@@ -910,21 +910,21 @@ AddColorsCleanup(const ACFontInfo* fontinfo)
 static void
 AddColors(const ACFontInfo* fontinfo, const char* srcglyph, bool extracolor)
 {
-    if (pathStart == NULL || pathStart == pathEnd) {
+    if (gPathStart == NULL || gPathStart == gPathEnd) {
         PrintMessage("No character path, so no hints.");
         SaveFile(fontinfo); /* make sure it gets saved with no coloring */
         return;
     }
-    reportErrors = true;
-    CounterFailed = bandError = false;
+    gReportErrors = true;
+    CounterFailed = gBandError = false;
     CheckPathBBox();
     CheckForDups();
     AddColorsSetup();
     if (!PreCheckForColoring()) {
         return;
     }
-    if (flexOK) {
-        hasFlex = false;
+    if (gFlexOK) {
+        gHasFlex = false;
         AutoAddFlex();
     }
     AddColorsInnerLoop(fontinfo, srcglyph, extracolor);
@@ -935,13 +935,13 @@ bool
 AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
                bool extracolor)
 {
-    int32_t lentop = lenTopBands, lenbot = lenBotBands;
+    int32_t lentop = gLenTopBands, lenbot = gLenBotBands;
     if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
-        LogMsg(LOGERROR, NONFATALERROR, "Cannot prase %s glyph.\n", glyphName);
+        LogMsg(LOGERROR, NONFATALERROR, "Cannot prase %s glyph.\n", gGlyphName);
     }
     PrintMessage(""); /* Just print the file name. */
     AddColors(fontinfo, srcglyph, extracolor);
-    lenTopBands = lentop;
-    lenBotBands = lenbot;
+    gLenTopBands = lentop;
+    gLenBotBands = lenbot;
     return true;
 }

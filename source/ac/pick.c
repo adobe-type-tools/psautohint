@@ -22,7 +22,7 @@ InitPick(int32_t reason)
     }
 }
 
-#define LtPruneB(val) ((val) < FixOne && ((val) << 10) < pruneB)
+#define LtPruneB(val) ((val) < FixOne && ((val) << 10) < gPruneB)
 
 static bool
 ConsiderPicking(Fixed bestSpc, Fixed bestVal, PClrVal colorList,
@@ -31,13 +31,14 @@ ConsiderPicking(Fixed bestSpc, Fixed bestVal, PClrVal colorList,
     if (bestSpc > 0)
         return true;
     if (colorList == NULL)
-        return bestVal >= pruneD;
-    if (bestVal > pruneA)
+        return bestVal >= gPruneD;
+    if (bestVal > gPruneA)
         return true;
     if (LtPruneB(bestVal))
         return false;
-    return (bestVal < FixedPosInf / pruneC) ? (prevBestVal <= bestVal * pruneC)
-                                            : (prevBestVal / pruneC <= bestVal);
+    return (bestVal < FixedPosInf / gPruneC)
+             ? (prevBestVal <= bestVal * gPruneC)
+             : (prevBestVal / gPruneC <= bestVal);
 }
 
 void
@@ -72,8 +73,8 @@ PickVVals(PClrVal valList)
         best->vNxt = colorList; /* add best to front of list */
         colorList = best;
         prevBestVal = bestVal;
-        lft = best->vLoc1 - bandMargin;
-        rght = best->vLoc2 + bandMargin;
+        lft = best->vLoc1 - gBandMargin;
+        rght = best->vLoc2 + gBandMargin;
         /* remove segments from valList that overlap lft..rght */
         vlist = valList;
         prev = NULL;
@@ -104,7 +105,7 @@ PickVVals(PClrVal valList)
     }
     if (colorList == NULL)
         ClrVBnds();
-    Vcoloring = colorList;
+    gVColoring = colorList;
     Vrejects = rejectList;
 }
 
@@ -162,7 +163,7 @@ FndBstVal(PClrSeg seg, bool seg1Flg, PClrVal cList, PClrVal rList, int32_t nb,
                 vseg = vList->vSeg2;
                 vloc = vList->vLoc2;
             }
-            if (abs(loc - vloc) <= maxMerge &&
+            if (abs(loc - vloc) <= gMaxMerge &&
                 (locFlg ? !vList->vGhst
                         : (vseg == seg || CloseSegs(seg, vseg, !hFlg))) &&
                 (best == NULL ||
@@ -181,7 +182,7 @@ FndBstVal(PClrSeg seg, bool seg1Flg, PClrVal cList, PClrVal rList, int32_t nb,
             break;
         vList = rList;
     }
-    if (showClrInfo)
+    if (gShowClrInfo)
         ReportFndBstVal(seg, best, hFlg);
     return best;
 }
@@ -238,7 +239,7 @@ PrevVal(PClrVal val, PClrVal vList)
         vList = vList->vNxt;
         if (vList == NULL) {
             LogMsg(LOGERROR, NONFATALERROR, "Malformed value list in %s.\n",
-                   glyphName);
+                   gGlyphName);
         }
 
         if (vList == val)
@@ -331,12 +332,12 @@ PickHVals(PClrVal valList)
             else
                 top = bot;
         }
-        if (YgoesUp) {
-            bot -= bandMargin;
-            top += bandMargin;
+        if (gYgoesUp) {
+            bot -= gBandMargin;
+            top += gBandMargin;
         } else {
-            bot += bandMargin;
-            top -= bandMargin;
+            bot += gBandMargin;
+            top -= gBandMargin;
         }
         /* remove segments from valList that overlap bot..top */
         vlist = valList;
@@ -353,8 +354,8 @@ PickHVals(PClrVal valList)
                 else
                     vtop = vbot;
             }
-            if ((YgoesUp && (vbot <= top) && (vtop >= bot)) ||
-                ((!YgoesUp && (vbot >= top) && (vtop <= bot)))) {
+            if ((gYgoesUp && (vbot <= top) && (vtop >= bot)) ||
+                ((!gYgoesUp && (vbot >= top) && (vtop <= bot)))) {
                 nxt = vlist->vNxt;
                 vlist->vNxt = rejectList;
                 rejectList = vlist;
@@ -379,7 +380,7 @@ noMore:
     }
     if (colorList == NULL)
         ClrHBnds();
-    Hcoloring = colorList;
+    gHColoring = colorList;
     Hrejects = rejectList;
 }
 
@@ -399,7 +400,7 @@ FindBestValForSegs(PClrSeg sList, bool seg1Flg, PClrVal cList, PClrVal rList,
 static void
 SetPruned(void)
 {
-    PClrVal vL = valList;
+    PClrVal vL = gValList;
     while (vL != NULL) {
         vL->pruned = true;
         vL = vL->vNxt;
@@ -410,10 +411,10 @@ void
 FindBestHVals(void)
 {
     SetPruned();
-    FindBestValForSegs(topList, false, valList, NULL, lenTopBands, topBands, 0,
-                       (Fixed*)NULL, true);
-    FindBestValForSegs(botList, true, valList, NULL, lenBotBands, botBands, 0,
-                       (Fixed*)NULL, true);
+    FindBestValForSegs(topList, false, gValList, NULL, gLenTopBands, gTopBands,
+                       0, (Fixed*)NULL, true);
+    FindBestValForSegs(botList, true, gValList, NULL, gLenBotBands, gBotBands,
+                       0, (Fixed*)NULL, true);
     DoPrune();
 }
 
@@ -421,9 +422,9 @@ void
 FindBestVVals(void)
 {
     SetPruned();
-    FindBestValForSegs(leftList, true, valList, NULL, 0, (Fixed*)NULL,
-                       numSerifs, serifs, false);
-    FindBestValForSegs(rightList, false, valList, NULL, 0, (Fixed*)NULL,
-                       numSerifs, serifs, false);
+    FindBestValForSegs(leftList, true, gValList, NULL, 0, (Fixed*)NULL,
+                       gNumSerifs, gSerifs, false);
+    FindBestValForSegs(rightList, false, gValList, NULL, 0, (Fixed*)NULL,
+                       gNumSerifs, gSerifs, false);
     DoPrune();
 }

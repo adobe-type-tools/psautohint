@@ -40,7 +40,7 @@ FindPathBBox(void)
     FltnRec fr;
     PPathElt e;
     Cd c0, c1, c2, c3;
-    if (pathStart == NULL) {
+    if (gPathStart == NULL) {
         xmin = ymin = xmax = ymax = 0;
         pxmn = pxmx = pymn = pymx = NULL;
         return;
@@ -48,7 +48,7 @@ FindPathBBox(void)
     fr.report = FPBBoxPt;
     xmin = ymin = FixInt(10000);
     xmax = ymax = -xmin;
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) {
         switch (e->type) {
             case MOVETO:
@@ -73,7 +73,7 @@ FindPathBBox(void)
                 break;
             default: {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Undefined operator in %s glyph.\n", glyphName);
+                       "Undefined operator in %s glyph.\n", gGlyphName);
             }
         }
         e = e->next;
@@ -136,7 +136,7 @@ FindSubpathBBox(PPathElt e)
 #endif
             default: {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Undefined operator in %s glyph.\n", glyphName);
+                       "Undefined operator in %s glyph.\n", gGlyphName);
             }
         }
         e = e->next;
@@ -182,7 +182,7 @@ ClrVBnds(void)
 {
     Fixed tmp;
     PPathElt p;
-    if (pathStart == NULL || VColorChar())
+    if (gPathStart == NULL || VColorChar())
         return;
     FindPathBBox();
     vMn = itfmx(xmin);
@@ -211,7 +211,7 @@ ClrHBnds(void)
 {
     Fixed tmp;
     PPathElt p;
-    if (pathStart == NULL || HColorChar())
+    if (gPathStart == NULL || HColorChar())
         return;
     FindPathBBox();
     hMn = itfmy(ymin);
@@ -279,7 +279,7 @@ AddBBoxHV(bool Hflg, bool subs)
     PPathElt e;
     PClrVal val;
     PClrSeg seg1, seg2;
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) {
         if (subs)
             e = FindSubpathBBox(e);
@@ -288,7 +288,7 @@ AddBBoxHV(bool Hflg, bool subs)
             e = NULL;
         }
         if (!Hflg) {
-            if (!CheckValOverlaps(xmin, xmax, Vcoloring, true)) {
+            if (!CheckValOverlaps(xmin, xmax, gVColoring, true)) {
                 val = (PClrVal)Alloc(sizeof(ClrVal));
                 seg1 = (PClrSeg)Alloc(sizeof(ClrSeg));
                 seg1->sLoc = xmin;
@@ -315,12 +315,12 @@ AddBBoxHV(bool Hflg, bool subs)
                 val->vSeg1 = seg1;
                 val->vSeg2 = seg2;
                 val->vGhst = false;
-                val->vNxt = Vcoloring;
+                val->vNxt = gVColoring;
                 val->vBst = val;
-                Vcoloring = val;
+                gVColoring = val;
             }
         } else {
-            if (!CheckValOverlaps(ymin, ymax, Hcoloring, false)) {
+            if (!CheckValOverlaps(ymin, ymax, gHColoring, false)) {
                 val = (PClrVal)Alloc(sizeof(ClrVal));
                 seg1 = (PClrSeg)Alloc(sizeof(ClrSeg));
                 seg1->sLoc = ymax;
@@ -347,9 +347,9 @@ AddBBoxHV(bool Hflg, bool subs)
                 val->vSeg1 = seg1;
                 val->vSeg2 = seg2;
                 val->vGhst = false;
-                val->vNxt = Hcoloring;
+                val->vNxt = gHColoring;
                 val->vBst = val;
-                Hcoloring = val;
+                gHColoring = val;
             }
         }
     }
@@ -360,7 +360,7 @@ ClrBBox(void)
 {
     Fixed llx, lly, urx, ury, tmp;
     PPathElt p, p0, p1;
-    if (!useV) {
+    if (!gUseV) {
         llx = itfmx(xmin);
         urx = itfmx(xmax);
         p0 = pxmn;
@@ -375,7 +375,7 @@ ClrBBox(void)
         }
         AddColorPoint(llx, 0, urx, 0, 'y', p0, p1);
     }
-    if (!useH) {
+    if (!gUseH) {
         lly = itfmy(ymax);
         ury = itfmy(ymin);
         p0 = pymx;

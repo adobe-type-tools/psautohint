@@ -17,11 +17,11 @@ void
 InitShuffleSubpaths(void)
 {
     int32_t cnt = -1;
-    PPathElt e = pathStart;
+    PPathElt e = gPathStart;
     while (e != NULL) { /* every element is marked with its subpath count */
         if (e->type == MOVETO)
             cnt++;
-        if (DEBUG) {
+        if (gDebug) {
             if (e->type == MOVETO) { /* DEBUG */
                 PrintMessage("subpath %d starts at %g %g\n", cnt,
                              FixToDbl(itfmx(e->x)), FixToDbl(itfmy(e->y)));
@@ -121,7 +121,7 @@ MarkLinks(PClrVal vL, bool hFlg)
         j = e->count;
         if (i == j)
             continue;
-        if (DEBUG) {
+        if (gDebug) {
             if (hFlg)
                 ShowHVal(vL);
             else
@@ -139,14 +139,14 @@ Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
 {
     unsigned char *lnks, *outlnks;
     int32_t i = bst;
-    PPathElt e = pathStart;
+    PPathElt e = gPathStart;
     while (e != NULL) {
         if (e->count == i)
             break;
         e = e->next;
     }
     MoveSubpathToEnd(e);
-    if (DEBUG) {
+    if (gDebug) {
         PrintMessage("move subpath %d to end\n", bst); /* DEBUG */
     }
     output[bst] = 1;
@@ -154,7 +154,7 @@ Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
     outlnks = outlinks;
     for (i = 0; i < rowcnt; i++)
         *outlnks++ += *lnks++;
-    if (DEBUG)
+    if (gDebug)
         PrintOutLinks(outlinks);
 }
 
@@ -171,7 +171,7 @@ DoShuffleSubpaths(void)
     int32_t i, j, bst, bstsum, bstlnks;
     if (links == NULL)
         return;
-    if (DEBUG)
+    if (gDebug)
         PrintLinks();
     for (i = 0; i < rowcnt; i++)
         output[i] = sumlinks[i] = outlinks[i] = 0;
@@ -182,7 +182,7 @@ DoShuffleSubpaths(void)
                 sumlinks[i]++;
         }
     }
-    if (DEBUG)
+    if (gDebug)
         PrintSumLinks((char*)sumlinks);
     while (true) {
         bst = -1;

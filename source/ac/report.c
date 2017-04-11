@@ -22,7 +22,7 @@ FixToDbl(Fixed f)
 void
 PrintMessage(char* format, ...)
 {
-    if ((libReportCB != NULL) && (strlen(format) > 0)) {
+    if ((gLibReportCB != NULL) && (strlen(format) > 0)) {
         char msgBuffer[MAXMSGLEN + 1];
         va_list va;
 
@@ -32,14 +32,14 @@ PrintMessage(char* format, ...)
         vsnprintf(msgBuffer + 1, MAXMSGLEN - 1, format, va);
         va_end(va);
 
-        libReportCB(msgBuffer);
+        gLibReportCB(msgBuffer);
     }
 }
 
 void
 ReportError(char* format, ...)
 {
-    if (reportErrors) {
+    if (gReportErrors) {
         char msgBuffer[MAXMSGLEN + 1];
         va_list va;
 
@@ -61,9 +61,9 @@ ReportSmoothError(Fixed x, Fixed y)
 void
 ReportAddFlex(void)
 {
-    if (hasFlex)
+    if (gHasFlex)
         return;
-    hasFlex = true;
+    gHasFlex = true;
     PrintMessage("FYI: added flex operators to this character.");
 }
 
@@ -84,7 +84,7 @@ ReportSharpAngle(Fixed x, Fixed y)
 void
 ReportLinearCurve(PPathElt e, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
-    if (autoLinearCurveFix) {
+    if (gAutoLinearCurveFix) {
         e->type = LINETO;
         e->x = e->x3;
         e->y = e->y3;
@@ -148,7 +148,7 @@ ExpectedMoveTo(PPathElt e)
     LogMsg(LOGERROR, NONFATALERROR,
            "Path for %s character has a %s where a moveto was "
            "expected.\n  The data are probably truncated.",
-           glyphName, s);
+           gGlyphName, s);
 }
 
 void
@@ -156,7 +156,7 @@ ReportMissingClosePath(void)
 {
     LogMsg(LOGERROR, NONFATALERROR, "Missing closepath in %s character.\n"
                                     "  The data are probably truncated.",
-           glyphName);
+           gGlyphName);
 }
 
 void
@@ -237,7 +237,7 @@ void
 ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i)
 {
     Fixed ex1, ey1, ex2, ey2;
-    if (!showClrInfo)
+    if (!gShowClrInfo)
         return;
     GetEndPoint(e, &ex1, &ey1);
     GetEndPoint(e2, &ex2, &ey2);
@@ -251,7 +251,7 @@ void
 ReportRemConflict(PPathElt e)
 {
     Fixed ex, ey;
-    if (!showClrInfo)
+    if (!gShowClrInfo)
         return;
     GetEndPoint(e, &ex, &ey);
     ReportError("Removed conflicting hints at %g %g.", FixToDbl(itfmx(ex)),
@@ -262,7 +262,7 @@ void
 ReportRotateSubpath(PPathElt e)
 {
     Fixed ex, ey;
-    if (!showClrInfo)
+    if (!gShowClrInfo)
         return;
     GetEndPoint(e, &ex, &ey);
     PrintMessage("FYI: changed closepath to %g %g.", FixToDbl(itfmx(ex)),
@@ -272,7 +272,7 @@ ReportRotateSubpath(PPathElt e)
 void
 ReportRemShortColors(Fixed ex, Fixed ey)
 {
-    if (!showClrInfo)
+    if (!gShowClrInfo)
         return;
     PrintMessage("Removed hints from short element at %g %g.",
                  FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
@@ -402,7 +402,7 @@ ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg)
 void
 ReportCarry(Fixed l0, Fixed l1, Fixed loc, PClrVal clrs, bool vert)
 {
-    if (!showClrInfo)
+    if (!gShowClrInfo)
         return;
     if (vert) {
         ShowVVal(clrs);
@@ -443,7 +443,7 @@ LogColorInfo(PClrPoint pl)
     if (c == 'y' || c == 'm') { /* vertical lines */
         lft = pl->x0;
         rht = pl->x1;
-        PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(rht - lft), glyphName,
+        PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(rht - lft), gGlyphName,
                      FixToDbl(lft), FixToDbl(rht));
     } else {
         bot = pl->y0;
@@ -451,7 +451,7 @@ LogColorInfo(PClrPoint pl)
         wdth = top - bot;
         if (wdth == -FixInt(21) || wdth == -FixInt(20))
             return; /* ghost pair */
-        PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(wdth), glyphName,
+        PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(wdth), gGlyphName,
                      FixToDbl(bot), FixToDbl(top));
     }
 }
@@ -479,7 +479,7 @@ ListClrInfo(void)
     PSegLnkLst hLst, vLst;
     PClrSeg seg;
     Fixed x, y;
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) {
         hLst = e->Hs;
         vLst = e->Vs;
@@ -506,7 +506,7 @@ ListClrInfo(void)
 void
 ReportAddVSeg(Fixed from, Fixed to, Fixed loc, int32_t i)
 {
-    if (!showClrInfo || !showVs)
+    if (!gShowClrInfo || !gShowVs)
         return;
     PrintMessage("add vseg %g %g to %g %g %d", FixToDbl(itfmx(loc)),
                  FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)),
@@ -516,7 +516,7 @@ ReportAddVSeg(Fixed from, Fixed to, Fixed loc, int32_t i)
 void
 ReportAddHSeg(Fixed from, Fixed to, Fixed loc, int32_t i)
 {
-    if (!showClrInfo || !showHs)
+    if (!gShowClrInfo || !gShowHs)
         return;
     PrintMessage("add hseg %g %g to %g %g %d", FixToDbl(itfmx(from)),
                  FixToDbl(itfmy(loc)), FixToDbl(itfmx(to)),
@@ -526,7 +526,7 @@ ReportAddHSeg(Fixed from, Fixed to, Fixed loc, int32_t i)
 void
 ReportRemVSeg(Fixed from, Fixed to, Fixed loc)
 {
-    if (!showClrInfo || !showVs)
+    if (!gShowClrInfo || !gShowVs)
         return;
     PrintMessage("rem vseg %g %g to %g %g", FixToDbl(itfmx(loc)),
                  FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)),
@@ -536,7 +536,7 @@ ReportRemVSeg(Fixed from, Fixed to, Fixed loc)
 void
 ReportRemHSeg(Fixed from, Fixed to, Fixed loc)
 {
-    if (!showClrInfo || !showHs)
+    if (!gShowClrInfo || !gShowHs)
         return;
     PrintMessage("rem hseg %g %g to %g %g", FixToDbl(itfmx(from)),
                  FixToDbl(itfmy(loc)), FixToDbl(itfmx(to)),
@@ -593,7 +593,7 @@ void
 ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
                 Fixed v1, Fixed s1)
 {
-    if (!showClrInfo)
+    if (!gShowClrInfo)
         return;
     PrintMessage(
 
@@ -610,7 +610,7 @@ void
 ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
                 Fixed v1, Fixed s1)
 {
-    if (!showClrInfo)
+    if (!gShowClrInfo)
         return;
     PrintMessage("Replace V hints pair at %g %g by %g %g\n\told value ",
                  FixToDbl(itfmx(l0)), FixToDbl(itfmx(r0)), FixToDbl(itfmx(l1)),
@@ -624,7 +624,7 @@ ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
 void
 ReportPruneHVal(PClrVal val, PClrVal v, int32_t i)
 {
-    if (!showClrInfo)
+    if (!gShowClrInfo)
         return;
     PrintMessage("PruneHVal: %d\n\t", i);
     ShowHVal(val);
@@ -635,7 +635,7 @@ ReportPruneHVal(PClrVal val, PClrVal v, int32_t i)
 void
 ReportPruneVVal(PClrVal val, PClrVal v, int32_t i)
 {
-    if (!showClrInfo)
+    if (!gShowClrInfo)
         return;
     PrintMessage("PruneVVal: %d\n\t", i);
     ShowVVal(val);

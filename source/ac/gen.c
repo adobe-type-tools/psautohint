@@ -23,7 +23,7 @@ InitGen(int32_t reason)
         case STARTUP:
         case RESTART:
             for (i = 0; i < 4; i++)
-                segLists[i] = NULL;
+                gSegLists[i] = NULL;
             Hlnks = Vlnks = NULL;
     }
 }
@@ -84,7 +84,7 @@ AddSegment(Fixed from, Fixed to, Fixed loc, int32_t lftLstNm, int32_t rghtLstNm,
         seg->sMax = to;
         seg->sMin = from;
     }
-    seg->sBonus = bonus;
+    seg->sBonus = gBonus;
     seg->sType = (int16_t)typ;
     if (e1 != NULL) {
         if (e1->type == CLOSEPATH)
@@ -100,12 +100,12 @@ AddSegment(Fixed from, Fixed to, Fixed loc, int32_t lftLstNm, int32_t rghtLstNm,
             seg->sElt = e2;
     }
     segNm = (from > to) ? lftLstNm : rghtLstNm;
-    segList = segLists[segNm];
+    segList = gSegLists[segNm];
     prevSeg = NULL;
     while (true) {             /* keep list in increasing order by sLoc */
         if (segList == NULL) { /* at end of list */
             if (prevSeg == NULL) {
-                segLists[segNm] = seg;
+                gSegLists[segNm] = seg;
                 break;
             }
             prevSeg->sNxt = seg;
@@ -113,7 +113,7 @@ AddSegment(Fixed from, Fixed to, Fixed loc, int32_t lftLstNm, int32_t rghtLstNm,
         }
         if (segList->sLoc >= loc) { /* insert before this one */
             if (prevSeg == NULL)
-                segLists[segNm] = seg;
+                gSegLists[segNm] = seg;
             else
                 prevSeg->sNxt = seg;
             seg->sNxt = segList;
@@ -128,9 +128,9 @@ void
 AddVSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
             int32_t typ, int32_t i)
 {
-    if (DEBUG)
+    if (gDebug)
         ReportAddVSeg(from, to, loc, i);
-    if (YgoesUp)
+    if (gYgoesUp)
         AddSegment(from, to, loc, 0, 1, p1, p2, false, typ);
     else
         AddSegment(from, to, loc, 1, 0, p1, p2, false, typ);
@@ -140,7 +140,7 @@ void
 AddHSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
             int32_t typ, int32_t i)
 {
-    if (DEBUG)
+    if (gDebug)
         ReportAddHSeg(from, to, loc, i);
     AddSegment(from, to, loc, 2, 3, p1, p2, true, typ);
 }
@@ -182,7 +182,7 @@ TestBend(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed x2, Fixed y2)
     return roundf((dotprod * dotprod / lensqprod) * 1000) / 1000 <= .5f;
 }
 
-#define TestTan(d1, d2) (abs(d1) > (abs(d2) * bendTan) / 1000)
+#define TestTan(d1, d2) (abs(d1) > (abs(d2) * gBendTan) / 1000)
 #define FRound(x) FTrunc(FRnd(x))
 
 static bool
@@ -196,7 +196,7 @@ IsCCW(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed x2, Fixed y2)
     dy0 = FRound(y1 - y0);
     dx1 = FRound(x2 - x1);
     dy1 = FRound(y2 - y1);
-    if (!YgoesUp) {
+    if (!gYgoesUp) {
         dy0 = -dy0;
         dy1 = -dy1;
     }
@@ -217,14 +217,14 @@ DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
         (TestTan(x1 - x2, y1 - y2) &&
          (ProdLt0(x2 - x1, x1 - x0) ||
           (IsVertical(x0, y0, x1, y1) && TestBend(x0, y0, x1, y1, x2, y2))))) {
-        delta = FixHalfMul(bendLength);
+        delta = FixHalfMul(gBendLength);
         doboth = false;
         if ((x0 <= x1 && x1 < x2) || (x0 < x1 && x1 <= x2)) {
         } else if ((x2 < x1 && x1 <= x0) || (x2 <= x1 && x1 < x0))
             delta = -delta;
         else if (ysame) {
             above = y0 > y1;
-            if (!YgoesUp)
+            if (!gYgoesUp)
                 above = !above;
             ccw = IsCCW(x0, y0, x1, y1, x2, y2);
             if (above != ccw)
@@ -252,14 +252,14 @@ DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
         (TestTan(x0 - x2, y0 - y2) &&
          (ProdLt0(x2 - x0, x0 - x1) ||
           (IsVertical(x0, y0, x1, y1) && TestBend(x2, y2, x0, y0, x1, y1))))) {
-        delta = FixHalfMul(bendLength);
+        delta = FixHalfMul(gBendLength);
         doboth = false;
         if ((x2 < x0 && x0 <= x1) || (x2 <= x0 && x0 < x1)) {
         } else if ((x1 < x0 && x0 <= x2) || (x1 <= x0 && x0 < x2))
             delta = -delta;
         else if (ysame) {
             above = (y2 > y0);
-            if (!YgoesUp)
+            if (!gYgoesUp)
                 above = !above;
             ccw = IsCCW(x2, y2, x0, y0, x1, y1);
             if (above != ccw)
@@ -286,7 +286,7 @@ DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
         (TestTan(y1 - y2, x1 - x2) &&
          (ProdLt0(y2 - y1, y1 - y0) || (IsHorizontal(x0, y0, x1, y1) &&
                                         TestBend(x0, y0, x1, y1, x2, y2))))) {
-        delta = FixHalfMul(bendLength);
+        delta = FixHalfMul(gBendLength);
         doboth = false;
         if ((y0 <= y1 && y1 < y2) || (y0 < y1 && y1 <= y2)) {
         } else if ((y2 < y1 && y1 <= y0) || (y2 <= y1 && y1 < y0))
@@ -296,7 +296,7 @@ DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
             ccw = IsCCW(x0, y0, x1, y1, x2, y2);
             if (right != ccw)
                 delta = -delta;
-            if (!YgoesUp)
+            if (!gYgoesUp)
                 delta = -delta;
         } else
             doboth = true;
@@ -321,7 +321,7 @@ DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
         (TestTan(y0 - y2, x0 - x2) &&
          (ProdLt0(y2 - y0, y0 - y1) || (IsHorizontal(x0, y0, x1, y1) &&
                                         TestBend(x2, y2, x0, y0, x1, y1))))) {
-        delta = FixHalfMul(bendLength);
+        delta = FixHalfMul(gBendLength);
         doboth = false;
         if ((y2 < y0 && y0 <= y1) || (y2 <= y0 && y0 < y1)) {
         } else if ((y1 < y0 && y0 <= y2) || (y1 <= y0 && y0 < y2))
@@ -331,7 +331,7 @@ DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
             ccw = IsCCW(x2, y2, x0, y0, x1, y1);
             if (right != ccw)
                 delta = -delta;
-            if (!YgoesUp)
+            if (!gYgoesUp)
                 delta = -delta;
         }
         strt = y0 - delta;
@@ -404,12 +404,12 @@ RemExtraBends(int32_t l0, int32_t l1)
     PClrSeg lst0, lst, n, p;
     PClrSeg nxt, prv;
     Fixed loc0, loc;
-    lst0 = segLists[l0];
+    lst0 = gSegLists[l0];
     prv = NULL;
     while (lst0 != NULL) {
         nxt = lst0->sNxt;
         loc0 = lst0->sLoc;
-        lst = segLists[l1];
+        lst = gSegLists[l1];
         p = NULL;
         while (lst != NULL) {
             n = lst->sNxt;
@@ -423,10 +423,10 @@ RemExtraBends(int32_t l0, int32_t l1)
                     (lst->sMax - lst->sMin) > (lst0->sMax - lst0->sMin) * 3) {
                     /* delete lst0 */
                     if (prv == NULL)
-                        segLists[l0] = nxt;
+                        gSegLists[l0] = nxt;
                     else
                         prv->sNxt = nxt;
-                    if (DEBUG)
+                    if (gDebug)
                         ReportRemSeg(l0, lst0);
                     lst0 = prv;
                     break;
@@ -436,10 +436,10 @@ RemExtraBends(int32_t l0, int32_t l1)
                     (lst0->sMax - lst0->sMin) > (lst->sMax - lst->sMin) * 3) {
                     /* delete lst */
                     if (p == NULL)
-                        segLists[l1] = n;
+                        gSegLists[l1] = n;
                     else
                         p->sNxt = n;
-                    if (DEBUG)
+                    if (gDebug)
                         ReportRemSeg(l1, lst);
                     lst = p;
                 }
@@ -458,7 +458,7 @@ CompactList(int32_t i, void (*nm)(PClrSeg, PClrSeg))
     PClrSeg lst, prv, nxtprv, nxt;
     Fixed lstmin, lstmax, nxtmin, nxtmax;
     bool flg;
-    lst = segLists[i];
+    lst = gSegLists[i];
     prv = NULL;
     while (lst != NULL) {
         nxt = lst->sNxt;
@@ -489,7 +489,7 @@ CompactList(int32_t i, void (*nm)(PClrSeg, PClrSeg))
                     nxt->sBonus = NUMMAX(lst->sBonus, nxt->sBonus);
                     lst = lst->sNxt;
                     if (prv == NULL)
-                        segLists[i] = lst;
+                        gSegLists[i] = lst;
                     else
                         prv->sNxt = lst;
                 }
@@ -636,9 +636,9 @@ GenVPts(int32_t specialCharType)
     bool isVert, flex1, flex2;
     Fixed flx0, fly0, llx, lly, urx, ury, yavg, yend, ydist, q, q2;
     Fixed prvx, prvy, nxtx, nxty, xx, yy, yd2;
-    p = pathStart;
+    p = gPathStart;
     flex1 = flex2 = false;
-    cpTo = CPpercent;
+    cpTo = gCPpercent;
     cpFrom = 100 - cpTo;
     flx0 = fly0 = 0;
     fl = NULL;
@@ -745,22 +745,22 @@ GenVPts(int32_t specialCharType)
                         yavg = FixHalfMul(frst + lst);
                         ydist = (frst == lst) ? (y1 - y0) / 10
                                               : FixHalfMul(lst - frst);
-                        if (abs(ydist) < bendLength)
-                            ydist = (ydist > 0) ? FixHalfMul(bendLength)
-                                                : FixHalfMul(-bendLength);
+                        if (abs(ydist) < gBendLength)
+                            ydist = (ydist > 0) ? FixHalfMul(gBendLength)
+                                                : FixHalfMul(-gBendLength);
                         AddVSegment(yavg - ydist, yavg + ydist, loc, p,
                                     (PPathElt)NULL, sCURVE, 10);
                     }
                 }
             }
         } else if (p->type == MOVETO) {
-            bonus = 0;
+            gBonus = 0;
             if (specialCharType == -1) {
                 if (IsLower(p))
-                    bonus = FixInt(200);
+                    gBonus = FixInt(200);
             } else if (specialCharType == 1) {
                 if (IsUpper(p))
-                    bonus = FixInt(200);
+                    gBonus = FixInt(200);
             }
         } else if (!IsTiny(p)) {
             if ((q = VertQuo(x0, y0, x1, y1)) > 0) {
@@ -790,8 +790,8 @@ GenVPts(int32_t specialCharType)
     CompactList(0, MergeVSegs);
     CompactList(1, MergeVSegs);
     RemExtraBends(0, 1);
-    leftList = segLists[0];
-    rightList = segLists[1];
+    leftList = gSegLists[0];
+    rightList = gSegLists[1];
 }
 
 bool
@@ -806,7 +806,7 @@ InBlueBand(Fixed loc, int32_t n, Fixed* p)
  result in "near misses" being colored and so adjusted by the
  PS interpreter. */
     for (i = 0; i < n; i += 2)
-        if ((p[i] - bluefuzz) <= y && (p[i + 1] + bluefuzz) >= y)
+        if ((p[i] - gBlueFuzz) <= y && (p[i + 1] + gBlueFuzz) >= y)
             return true;
     return false;
 }
@@ -820,11 +820,11 @@ PickHSpot(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed xdist, Fixed px1,
     Fixed upper, lower;
     bool inBlue0, inBlue1;
     if (topSeg) {
-        inBlue0 = InBlueBand(y0, lenTopBands, topBands);
-        inBlue1 = InBlueBand(y1, lenTopBands, topBands);
+        inBlue0 = InBlueBand(y0, gLenTopBands, gTopBands);
+        inBlue1 = InBlueBand(y1, gLenTopBands, gTopBands);
     } else {
-        inBlue0 = InBlueBand(y0, lenBotBands, botBands);
-        inBlue1 = InBlueBand(y1, lenBotBands, botBands);
+        inBlue0 = InBlueBand(y0, gLenBotBands, gBotBands);
+        inBlue1 = InBlueBand(y1, gLenBotBands, gBotBands);
     }
     if (inBlue0 && !inBlue1)
         return y0;
@@ -846,7 +846,7 @@ PickHSpot(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed xdist, Fixed px1,
             upper = y1;
             lower = y0;
         }
-        if (!YgoesUp) {
+        if (!gYgoesUp) {
             Fixed tmp = lower;
             lower = upper;
             upper = tmp;
@@ -872,12 +872,12 @@ GenHPts(void)
     bool isHoriz, flex1, flex2;
     Fixed flx0, fly0, llx, lly, urx, ury, xavg, xend, xdist, q, q2;
     Fixed prvx, prvy, nxtx, nxty, xx, yy, xd2;
-    p = pathStart;
-    bonus = 0;
+    p = gPathStart;
+    gBonus = 0;
     flx0 = fly0 = 0;
     fl = NULL;
     flex1 = flex2 = false;
-    cpTo = CPpercent;
+    cpTo = gCPpercent;
     cpFrom = 100 - cpTo;
     while (p != NULL) {
         Fixed x0, y0, x1, y1;
@@ -981,9 +981,9 @@ GenHPts(void)
                         xavg = FixHalfMul(frst + lst);
                         xdist = (frst == lst) ? (x1 - x0) / 10
                                               : FixHalfMul(lst - frst);
-                        if (abs(xdist) < bendLength)
-                            xdist = (xdist > 0.0) ? FixHalfMul(bendLength)
-                                                  : FixHalfMul(-bendLength);
+                        if (abs(xdist) < gBendLength)
+                            xdist = (xdist > 0.0) ? FixHalfMul(gBendLength)
+                                                  : FixHalfMul(-gBendLength);
                         AddHSegment(xavg - xdist, xavg + xdist, loc, p,
                                     (PPathElt)NULL, sCURVE, 10);
                     }
@@ -1017,18 +1017,18 @@ GenHPts(void)
     CompactList(2, MergeHSegs);
     CompactList(3, MergeHSegs);
     RemExtraBends(2, 3);
-    topList = segLists[2]; /* this is probably unnecessary */
-    botList = segLists[3];
-    CheckTfmVal(topList, topBands, lenTopBands);
-    CheckTfmVal(botList, botBands, lenBotBands);
+    topList = gSegLists[2]; /* this is probably unnecessary */
+    botList = gSegLists[3];
+    CheckTfmVal(topList, gTopBands, gLenTopBands);
+    CheckTfmVal(botList, gBotBands, gLenBotBands);
 }
 
 void
 PreGenPts(void)
 {
     Hlnks = Vlnks = NULL;
-    segLists[0] = NULL;
-    segLists[1] = NULL;
-    segLists[2] = NULL;
-    segLists[3] = NULL;
+    gSegLists[0] = NULL;
+    gSegLists[1] = NULL;
+    gSegLists[2] = NULL;
+    gSegLists[3] = NULL;
 }
