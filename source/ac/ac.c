@@ -18,9 +18,9 @@ bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix, gEditChar;
 bool gAutoExtraDebug, gDebugColorPath, gDebug, gLogging;
 bool gShowVs, gShowHs, gListClrInfo;
 bool gReportErrors, gHasFlex, gFlexOK, gFlexStrict, gShowClrInfo, gBandError;
-Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gMinMidPt, gGhostWidth,
-  gGhostLength, gBendLength, gBandMargin, gMaxFlare, gMaxBendMerge, gMaxMerge,
-  gMinColorElementLength, gFlexCand, gPruneMargin;
+Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth, gGhostLength,
+  gBendLength, gBandMargin, gMaxFlare, gMaxBendMerge, gMaxMerge,
+  gMinColorElementLength, gFlexCand;
 Fixed gPruneA, gPruneB, gPruneC, gPruneD, gPruneValue, gBonus;
 float gTheta, gHBigDistR, gVBigDistR, gMaxVal, gMinVal;
 int32_t gLenTopBands, gLenBotBands, gNumSerifs, gDMin, gDelta, gCPpercent;
@@ -99,7 +99,6 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             /* must be < 46 for Americana-Bold d bowl vs stem coloring */
             gBandMargin = PSDist(30);
             gMaxFlare = PSDist(10);
-            gPruneMargin = PSDist(10);
             gMaxBendMerge = PSDist(6);
             gMaxMerge = PSDist(2); /* must be < 3 for Cushing-BookItalic z */
             gMinColorElementLength = PSDist(12);
