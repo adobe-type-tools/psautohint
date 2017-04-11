@@ -15,7 +15,7 @@
 #include "opcodes.h"
 #define ESCVAL 100
 
-char glyphName[MAX_GLYPHNAME_LEN];
+char gGlyphName[MAX_GLYPHNAME_LEN];
 
 static Fixed currentx, currenty; /* used to calculate absolute coordinates */
 static Fixed tempx, tempy;       /* used to calculate relative coordinates */
@@ -33,7 +33,7 @@ Fixed
 ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled)
 {
     Fixed temp1;
-    if (!scalinghints)
+    if (!gScalingHints)
         return unscaled;
     if (origEmSquare == 0.0) {
         char* fistr = GetFontInfo(fontinfo, "OrigEmSqUnits", ACOPTIONAL);
@@ -52,7 +52,7 @@ Fixed
 UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled)
 {
     Fixed temp1;
-    if (!scalinghints)
+    if (!gScalingHints)
         return scaled;
     if (origEmSquare == 0.0) {
         char* fistr = GetFontInfo(fontinfo, "OrigEmSqUnits", ACOPTIONAL);
@@ -73,7 +73,7 @@ Pop(void)
 {
     if (stkindex <= 0) {
         LogMsg(LOGERROR, NONFATALERROR,
-               "Stack underflow while reading %s glyph.\n", glyphName);
+               "Stack underflow while reading %s glyph.\n", gGlyphName);
     }
     stkindex--;
     return stk[stkindex];
@@ -84,7 +84,7 @@ Push(Fixed r)
 {
     if (stkindex >= STKMAX) {
         LogMsg(LOGERROR, NONFATALERROR,
-               "Stack underflow while reading %s glyph.\n", glyphName);
+               "Stack underflow while reading %s glyph.\n", gGlyphName);
     }
     stk[stkindex] = r;
     stkindex++;
@@ -114,12 +114,12 @@ AppendElement(int32_t etype)
     PPathElt e;
     e = (PPathElt)Alloc(sizeof(PathElt));
     e->type = (int16_t)etype;
-    if (pathEnd != NULL) {
-        pathEnd->next = e;
-        e->prev = pathEnd;
+    if (gPathEnd != NULL) {
+        gPathEnd->next = e;
+        e->prev = gPathEnd;
     } else
-        pathStart = e;
-    pathEnd = e;
+        gPathStart = e;
+    gPathEnd = e;
     return e;
 }
 
@@ -388,7 +388,7 @@ ReadHintInfo(char nm, const char* str)
                "not in\n  glyph: %s.  Please re-hint using "
                "the latest software.\n  Hints will not be included "
                "in this font.\n",
-               glyphName);
+               gGlyphName);
         SetNoHints();
         includeHints = false;
     } else
@@ -456,7 +456,7 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                     if (nm[1] != 'd')
                         goto badFile;
                     Pop();
-                    idInFile = true;
+                    gIdInFile = true;
                     break;
                 default:
                     goto badFile;
@@ -602,7 +602,7 @@ badFile : {
 
     LogMsg(LOGERROR, NONFATALERROR,
            "Bad file format. Unknown operator: %s in %s character.\n", op,
-           glyphName);
+           gGlyphName);
 }
 }
 
@@ -617,8 +617,8 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
     float rval;
     int32_t val = 0;
     Fixed r;
-    pathStart = pathEnd = NULL;
-    glyphName[0] = '\0';
+    gPathStart = gPathEnd = NULL;
+    gGlyphName[0] = '\0';
 
     while (true) {
         c = *s++;
@@ -629,7 +629,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                 val = 0;
                 goto rdnum;
             case '%': /* comment */
-                if (glyphName[0] == '\0') {
+                if (gGlyphName[0] == '\0') {
                     unsigned int end = 0;
                     while (*s == ' ')
                         s++;
@@ -638,15 +638,15 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                            (s[end] != '\n'))
                         end++;
 
-                    strncpy(glyphName, s, end);
+                    strncpy(gGlyphName, s, end);
                     if (end < MAX_GLYPHNAME_LEN)
-                        glyphName[end] = '\0';
+                        gGlyphName[end] = '\0';
                     else {
-                        glyphName[MAX_GLYPHNAME_LEN - 1] = '\0';
+                        gGlyphName[MAX_GLYPHNAME_LEN - 1] = '\0';
                         LogMsg(LOGERROR, NONFATALERROR,
                                "Bad input data. Glyph name %s is "
                                "greater than %d chars.\n",
-                               glyphName, MAX_GLYPHNAME_LEN);
+                               gGlyphName, MAX_GLYPHNAME_LEN);
                     }
                 }
                 while ((*s != '\n') && (*s != '\r')) {
@@ -666,7 +666,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                     LogMsg(LOGERROR, NONFATALERROR,
                            "Bad input data.  Numbers left on stack "
                            "at end of %s file.\n",
-                           glyphName);
+                           gGlyphName);
                 }
                 return;
             default:
@@ -691,7 +691,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                     continue;
                 }
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Unexpected character in %s glyph.\n", glyphName);
+                       "Unexpected character in %s glyph.\n", gGlyphName);
         }
     rdnum:
         isReal = false;
@@ -720,7 +720,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                 if (stkindex >= STKMAX) {
                     LogMsg(LOGERROR, NONFATALERROR,
                            "Stack overflow while reading %s glyph.\n",
-                           glyphName);
+                           gGlyphName);
                     return;
                 }
                 stk[stkindex] = r;
@@ -729,7 +729,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
             } else {
                 LogMsg(LOGERROR, NONFATALERROR,
                        "Illegal number terminator while reading %s glyph.\n",
-                       glyphName);
+                       gGlyphName);
                 return;
             }
         } /*end while true */
@@ -744,7 +744,7 @@ ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph, bool forBlendData,
         return false;
 
     currentx = currenty = tempx = tempy = stkindex = 0;
-    flex = idInFile = startchar = false;
+    flex = gIdInFile = startchar = false;
     forMultiMaster = forBlendData;
     includeHints = readHints;
 

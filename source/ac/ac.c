@@ -12,42 +12,42 @@
 
 #define MAXSTEMDIST 150 /* initial maximum stem width allowed for hints */
 
-PPathElt pathStart, pathEnd;
-bool YgoesUp;
-bool useV, useH, autoVFix, autoHFix, autoLinearCurveFix, editChar;
-bool AutoExtraDEBUG, debugColorPath, DEBUG, logging;
-bool showVs, showHs, listClrInfo;
-bool reportErrors, hasFlex, flexOK, flexStrict, showClrInfo, bandError;
-Fixed hBigDist, vBigDist, initBigDist, minDist, minMidPt, ghostWidth,
-  ghostLength, bendLength, bandMargin, maxFlare, maxBendMerge, maxMerge,
-  minColorElementLength, flexCand, pruneMargin;
-Fixed pruneA, pruneB, pruneC, pruneD, pruneValue, bonus;
-float theta, hBigDistR, vBigDistR, maxVal, minVal;
-int32_t lenTopBands, lenBotBands, numSerifs, DMIN, DELTA, CPpercent;
-int32_t bendTan, sCurveTan;
-PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
-PClrSeg segLists[4];
-Fixed VStems[MAXSTEMS], HStems[MAXSTEMS];
-int32_t NumVStems, NumHStems;
-Fixed topBands[MAXBLUES], botBands[MAXBLUES], serifs[MAXSERIFS];
-PClrPoint pointList, *ptLstArray;
-int32_t ptLstIndex, numPtLsts, maxPtLsts;
-bool writecoloredbez = true;
-Fixed bluefuzz;
-bool doAligns = false, doStems = false;
-bool idInFile;
-bool roundToInt;
+PPathElt gPathStart, gPathEnd;
+bool gYgoesUp;
+bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix, gEditChar;
+bool gAutoExtraDebug, gDebugColorPath, gDebug, gLogging;
+bool gShowVs, gShowHs, gListClrInfo;
+bool gReportErrors, gHasFlex, gFlexOK, gFlexStrict, gShowClrInfo, gBandError;
+Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gMinMidPt, gGhostWidth,
+  gGhostLength, gBendLength, gBandMargin, gMaxFlare, gMaxBendMerge, gMaxMerge,
+  gMinColorElementLength, gFlexCand, gPruneMargin;
+Fixed gPruneA, gPruneB, gPruneC, gPruneD, gPruneValue, gBonus;
+float gTheta, gHBigDistR, gVBigDistR, gMaxVal, gMinVal;
+int32_t gLenTopBands, gLenBotBands, gNumSerifs, gDMin, gDelta, gCPpercent;
+int32_t gBendTan, gSCurveTan;
+PClrVal gVColoring, gHColoring, gVPrimary, gHPrimary, gValList;
+PClrSeg gSegLists[4];
+Fixed gVStems[MAXSTEMS], gHStems[MAXSTEMS];
+int32_t gNumVStems, gNumHStems;
+Fixed gTopBands[MAXBLUES], gBotBands[MAXBLUES], gSerifs[MAXSERIFS];
+PClrPoint gPointList, *gPtLstArray;
+int32_t gPtLstIndex, gNumPtLsts, gMaxPtLsts;
+bool gWriteColoredBez = true;
+Fixed gBlueFuzz;
+bool gDoAligns = false, gDoStems = false;
+bool gIdInFile;
+bool gRoundToInt;
 static int maxStemDist = MAXSTEMDIST;
 
-AC_REPORTFUNCPTR libReportCB = NULL;
-AC_REPORTFUNCPTR libErrorReportCB = NULL;
+AC_REPORTFUNCPTR gLibReportCB = NULL;
+AC_REPORTFUNCPTR gLibErrorReportCB = NULL;
 /* if false, then stems defined by curves are excluded from the reporting */
 unsigned int allstems = false;
-AC_REPORTSTEMPTR addHStemCB = NULL;
-AC_REPORTSTEMPTR addVStemCB = NULL;
-AC_REPORTZONEPTR addCharExtremesCB = NULL;
-AC_REPORTZONEPTR addStemExtremesCB = NULL;
-AC_RETRYPTR reportRetryCB = NULL;
+AC_REPORTSTEMPTR gAddHStemCB = NULL;
+AC_REPORTSTEMPTR gAddVStemCB = NULL;
+AC_REPORTZONEPTR gAddCharExtremesCB = NULL;
+AC_REPORTZONEPTR gAddStemExtremesCB = NULL;
+AC_RETRYPTR gReportRetryCB = NULL;
 
 #define VMSIZE (1000000)
 static unsigned char *vmfree, *vmlast, vm[VMSIZE];
@@ -63,7 +63,7 @@ Alloc(int32_t sz)
     if (vmfree > vmlast) /* Error! need to make VMSIZE bigger */
     {
         LogMsg(LOGERROR, FATALERROR,
-               "Exceeded VM size for hints in glyph: %s.\n", glyphName);
+               "Exceeded VM size for hints in glyph: %s.\n", gGlyphName);
     }
     return s;
 }
@@ -76,58 +76,58 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
 
     switch (reason) {
         case STARTUP:
-            DEBUG = false;
-            DMIN = 50;
-            DELTA = 0;
-            YgoesUp = (dtfmy(FixOne) > 0) ? true : false;
-            initBigDist = PSDist(maxStemDist);
+            gDebug = false;
+            gDMin = 50;
+            gDelta = 0;
+            gYgoesUp = (dtfmy(FixOne) > 0) ? true : false;
+            gInitBigDist = PSDist(maxStemDist);
             /* must be <= 168 for ITC Garamond Book Italic p, q, thorn */
-            minDist = PSDist(7);
-            ghostWidth = PSDist(20);
-            ghostLength = PSDist(4);
-            bendLength = PSDist(2);
-            bendTan = 577;      /* 30 sin 30 cos div abs == .57735 */
-            theta = (float).38; /* must be <= .38 for Ryumin-Light-32 c49*/
-            pruneA = FixInt(50);
-            pruneC = 100;
-            pruneD = FixOne;
+            gMinDist = PSDist(7);
+            gGhostWidth = PSDist(20);
+            gGhostLength = PSDist(4);
+            gBendLength = PSDist(2);
+            gBendTan = 577;      /* 30 sin 30 cos div abs == .57735 */
+            gTheta = (float).38; /* must be <= .38 for Ryumin-Light-32 c49*/
+            gPruneA = FixInt(50);
+            gPruneC = 100;
+            gPruneD = FixOne;
             tmp = (float)10.24; /* set to 1024 times the threshold value */
-            pruneValue = pruneB = acpflttofix(&tmp);
+            gPruneValue = gPruneB = acpflttofix(&tmp);
             /* pruneB must be <= .01 for Yakout/Light/heM */
             /* pruneValue must be <= .01 for Yakout/Light/heM */
-            CPpercent = 40;
+            gCPpercent = 40;
             /* must be < 46 for Americana-Bold d bowl vs stem coloring */
-            bandMargin = PSDist(30);
-            maxFlare = PSDist(10);
-            pruneMargin = PSDist(10);
-            maxBendMerge = PSDist(6);
-            maxMerge = PSDist(2); /* must be < 3 for Cushing-BookItalic z */
-            minColorElementLength = PSDist(12);
-            flexCand = PSDist(4);
-            sCurveTan = 25;
-            maxVal = 8000000.0;
-            minVal = 1.0 / (float)(FixOne);
-            autoHFix = autoVFix = false;
-            editChar = true;
-            roundToInt = true;
+            gBandMargin = PSDist(30);
+            gMaxFlare = PSDist(10);
+            gPruneMargin = PSDist(10);
+            gMaxBendMerge = PSDist(6);
+            gMaxMerge = PSDist(2); /* must be < 3 for Cushing-BookItalic z */
+            gMinColorElementLength = PSDist(12);
+            gFlexCand = PSDist(4);
+            gSCurveTan = 25;
+            gMaxVal = 8000000.0;
+            gMinVal = 1.0 / (float)(FixOne);
+            gAutoHFix = gAutoVFix = false;
+            gEditChar = true;
+            gRoundToInt = true;
             /* Default is to change a curve with collinear points into a line.
              */
-            autoLinearCurveFix = true;
-            flexOK = false;
-            flexStrict = true;
-            AutoExtraDEBUG = DEBUG;
-            logging = DEBUG;
-            debugColorPath = false;
-            showClrInfo = DEBUG;
-            showHs = showVs = DEBUG;
-            listClrInfo = DEBUG;
-            if (scalinghints) {
+            gAutoLinearCurveFix = true;
+            gFlexOK = false;
+            gFlexStrict = true;
+            gAutoExtraDebug = gDebug;
+            gLogging = gDebug;
+            gDebugColorPath = false;
+            gShowClrInfo = gDebug;
+            gShowHs = gShowVs = gDebug;
+            gListClrInfo = gDebug;
+            if (gScalingHints) {
                 s = GetFontInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
                 sscanf(s, "%g", &origEmSquare);
                 UnallocateMem(s);
-                bluefuzz = (Fixed)(origEmSquare / 2000.0); /* .5 pixel */
+                gBlueFuzz = (Fixed)(origEmSquare / 2000.0); /* .5 pixel */
             } else {
-                bluefuzz = DEFAULTBLUEFUZZ;
+                gBlueFuzz = DEFAULTBLUEFUZZ;
             }
         /* fall through */
         case RESTART:
@@ -136,12 +136,12 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             vmlast = vm + VMSIZE;
 
             /* ?? Does this cause a leak ?? */
-            pointList = NULL;
-            maxPtLsts = 5;
-            ptLstArray = (PClrPoint*)Alloc(maxPtLsts * sizeof(PClrPoint));
-            ptLstIndex = 0;
-            ptLstArray[0] = NULL;
-            numPtLsts = 1;
+            gPointList = NULL;
+            gMaxPtLsts = 5;
+            gPtLstArray = (PClrPoint*)Alloc(gMaxPtLsts * sizeof(PClrPoint));
+            gPtLstIndex = 0;
+            gPtLstArray[0] = NULL;
+            gNumPtLsts = 1;
 
             /*     if (glyphName != NULL && glyphName[0] == 'g')
                    showClrInfo = showHs = showVs = listClrInfo = true; */
@@ -158,14 +158,14 @@ AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
     if (!ReadFontInfo(fontinfo))
         return false;
 
-    editChar = changeChar;
-    roundToInt = roundCoords;
-    autoLinearCurveFix = editChar;
-    if (editChar && fixStems)
-        autoVFix = autoHFix = fixStems;
+    gEditChar = changeChar;
+    gRoundToInt = roundCoords;
+    gAutoLinearCurveFix = gEditChar;
+    if (gEditChar && fixStems)
+        gAutoVFix = gAutoHFix = fixStems;
 
     if (debug)
-        DEBUG = showClrInfo = showHs = showVs = listClrInfo = true;
+        gDebug = gShowClrInfo = gShowHs = gShowVs = gListClrInfo = true;
 
     return AutoColorGlyph(fontinfo, srcbezdata, extracolor);
 }

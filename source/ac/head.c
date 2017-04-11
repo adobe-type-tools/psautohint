@@ -17,7 +17,7 @@ GetDest(PPathElt cldest)
     while (true) {
         cldest = cldest->prev;
         if (cldest == NULL)
-            return pathStart;
+            return gPathStart;
         if (cldest->type == MOVETO)
             return cldest;
     }
@@ -64,12 +64,12 @@ retry:
             e = GetDest(e);
             if (e == NULL || e->type == CLOSEPATH) {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Bad character description file: %s.\n", glyphName);
+                       "Bad character description file: %s.\n", gGlyphName);
             }
             goto retry;
         default: {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal operator in character file: %s.\n", glyphName);
+                   "Illegal operator in character file: %s.\n", gGlyphName);
         }
     }
 }
@@ -125,7 +125,7 @@ VertQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl)
         return 0;
     acfixtopflt(xabs, &rx);
     acfixtopflt(yabs, &ry);
-    q = (float)(rx * rx) / (theta * ry); /* DEBUG 8 BIT. Used to by
+    q = (float)(rx * rx) / (gTheta * ry); /* DEBUG 8 BIT. Used to by
                                             2*(rx*rx)/(theta*ry). Don't need
                                             thsi with the 8 bits of Fixed
                                             fraction. */
@@ -149,7 +149,7 @@ HorzQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl)
         return 0;
     acfixtopflt(xabs, &rx);
     acfixtopflt(yabs, &ry);
-    q = (float)(ry * ry) / (theta * rx); /* DEBUG 8 BIT. Used to by
+    q = (float)(ry * ry) / (gTheta * rx); /* DEBUG 8 BIT. Used to by
                                             2*(ry*ry)/(theta*ry). Don't need
                                             thsi with the 8 bits of Fixed
                                             fraction. */
@@ -272,7 +272,7 @@ CheckHeight(bool upperFlag, PPathElt p)
 {
     PPathElt ee;
     Fixed y, yy;
-    ee = pathStart;
+    ee = gPathStart;
     y = itfmy(p->y);
     while (ee != NULL) {
         if (ee->type == MOVETO && ee != p) {

@@ -39,8 +39,8 @@ chkBad(void)
     ;
 }
 
-#define GrTan(n, d) (abs(n) * 100 > abs(d) * sCurveTan)
-#define LsTan(n, d) (abs(n) * 100 < abs(d) * sCurveTan)
+#define GrTan(n, d) (abs(n) * 100 > abs(d) * gSCurveTan)
+#define LsTan(n, d) (abs(n) * 100 < abs(d) * gSCurveTan)
 
 static void
 chkYDIR(void)
@@ -173,7 +173,7 @@ chkDT(Cd c)
             abs(cy1 - yflatendy) > SDELTA) {
             if ((ystart == goingUP && yflatstarty - yflatendy > SDELTA) ||
                 (ystart == goingDOWN && yflatendy - yflatstarty > SDELTA)) {
-                if (editChar && !forMultiMaster)
+                if (gEditChar && !forMultiMaster)
                     chkBad();
                 return;
             }
@@ -203,7 +203,7 @@ chkDT(Cd c)
             abs(x1 - xflatendx) > SDELTA) {
             if ((xstart == goingUP && xflatstartx - xflatendx > SDELTA) ||
                 (xstart == goingDOWN && xflatendx - xflatstartx > SDELTA)) {
-                if (editChar && !forMultiMaster)
+                if (gEditChar && !forMultiMaster)
                     chkBad();
                 return;
             }
@@ -277,7 +277,7 @@ RMovePoint(Fixed dx, Fixed dy, int32_t whichcp, PPathElt e)
         e->y2 += dy;
         return;
     }
-    LogMsg(LOGERROR, NONFATALERROR, "Malformed path list in %s.\n", glyphName);
+    LogMsg(LOGERROR, NONFATALERROR, "Malformed path list in %s.\n", gGlyphName);
 }
 
 void
@@ -289,11 +289,11 @@ Delete(PPathElt e)
     if (nxt != NULL)
         nxt->prev = prv;
     else
-        pathEnd = prv;
+        gPathEnd = prv;
     if (prv != NULL)
         prv->next = nxt;
     else
-        pathStart = nxt;
+        gPathStart = nxt;
 }
 
 static void
@@ -303,7 +303,7 @@ CheckSCurve(PPathElt ee)
     Cd c0, c1, c2, c3;
     if (ee->type != CURVETO) {
         LogMsg(LOGERROR, NONFATALERROR, "Malformed path list in %s.\n",
-               glyphName);
+               gGlyphName);
     }
 
     GetEndPoint(ee->prev, &c0.x, &c0.y);
@@ -332,7 +332,7 @@ CheckZeroLength(void)
 {
     PPathElt e, NxtE;
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3;
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) { /* delete zero length elements */
         NxtE = e->next;
         GetEndPoints(e, &x0, &cy0, &x1, &cy1);
@@ -366,7 +366,7 @@ CheckSmooth(void)
 restart:
     reCheckSmooth = false;
     recheck = false;
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) {
         NxtE = e->next;
         if (e->type == MOVETO || IsTiny(e) || e->isFlex)
@@ -441,7 +441,7 @@ chkBBDT(Cd c)
 void
 CheckForMultiMoveTo(void)
 {
-    PPathElt e = pathStart;
+    PPathElt e = gPathStart;
     bool moveto;
     moveto = false;
     while (e != NULL) {
@@ -462,7 +462,7 @@ CheckBBoxEdge(PPathElt e, bool vrt, Fixed lc, Fixed* pf, Fixed* pl)
     Cd c0, c1, c2, c3;
     if (e->type != CURVETO) {
         LogMsg(LOGERROR, NONFATALERROR, "Malformed path list in %s.\n",
-               glyphName);
+               gGlyphName);
     }
 
     GetEndPoint(e->prev, &c0.x, &c0.y);
@@ -572,7 +572,7 @@ CheckForDups(void)
 {
     PPathElt ob, nxt;
     Fixed x, y;
-    ob = pathStart;
+    ob = gPathStart;
     while (ob != NULL) {
         nxt = ob->next;
         if (ob->type == MOVETO) {
@@ -600,19 +600,19 @@ MoveSubpathToEnd(PPathElt e)
     PPathElt subEnd, subStart, subNext, subPrev;
     subEnd = (e->type == CLOSEPATH) ? e : GetClosedBy(e);
     subStart = GetDest(subEnd);
-    if (subEnd == pathEnd)
+    if (subEnd == gPathEnd)
         return; /* already at end */
     subNext = subEnd->next;
-    if (subStart == pathStart) {
-        pathStart = subNext;
+    if (subStart == gPathStart) {
+        gPathStart = subNext;
         subNext->prev = NULL;
     } else {
         subPrev = subStart->prev;
         subPrev->next = subNext;
         subNext->prev = subPrev;
     }
-    pathEnd->next = subStart;
-    subStart->prev = pathEnd;
+    gPathEnd->next = subStart;
+    subStart->prev = gPathEnd;
     subEnd->next = NULL;
-    pathEnd = subEnd;
+    gPathEnd = subEnd;
 }

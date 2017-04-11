@@ -34,7 +34,7 @@ FRnd(int32_t x)
      * are 25.7 */
     int32_t r;
     r = x;
-    if (roundToInt) {
+    if (gRoundToInt) {
         r = r + (1 << 7);
         r = r & ~0xFF;
     }
@@ -46,7 +46,7 @@ WriteString(char* str)
 {
     if (!bezoutput) {
         LogMsg(LOGERROR, FATALERROR,
-               "NULL output buffer while writing glyph: %s", glyphName);
+               "NULL output buffer while writing glyph: %s", gGlyphName);
         return;
     }
 
@@ -82,7 +82,7 @@ wrtx(Fixed x)
 {
     Fixed i;
     Fixed dx;
-    if ((roundToInt) || (FracPart(x) == 0)) {
+    if ((gRoundToInt) || (FracPart(x) == 0)) {
         i = FRnd(x);
         dx = i - currentx;
         WRTNUM(FTrunc(dx));
@@ -100,7 +100,7 @@ static void
 wrtxa(Fixed x)
 {
     Fixed i;
-    if ((roundToInt) || (FracPart(x) == 0)) {
+    if ((gRoundToInt) || (FracPart(x) == 0)) {
         i = FRnd(x);
         WRTNUM(FTrunc(i));
         currentx = i;
@@ -117,7 +117,7 @@ wrty(Fixed y)
 {
     Fixed i;
     Fixed dy;
-    if ((roundToInt) || (FracPart(y) == 0)) {
+    if ((gRoundToInt) || (FracPart(y) == 0)) {
         i = FRnd(y);
         dy = i - currenty;
         WRTNUM(FTrunc(dy));
@@ -135,7 +135,7 @@ static void
 wrtya(Fixed y)
 {
     Fixed i;
-    if ((roundToInt) || (FracPart(y) == 0)) {
+    if ((gRoundToInt) || (FracPart(y) == 0)) {
         i = FRnd(y);
         WRTNUM(FTrunc(i));
         currenty = i;
@@ -165,7 +165,7 @@ safestrcat(char* s1, char* s2)
 {
     if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
         LogMsg(LOGERROR, FATALERROR,
-               "ERROR: Hint information overflowing buffer: %s\n", glyphName);
+               "ERROR: Hint information overflowing buffer: %s\n", gGlyphName);
     } else {
         strcat(s1, s2);
     }
@@ -208,7 +208,7 @@ static void
 WriteOne(const ACFontInfo* fontinfo, Fixed s)
 { /* write s to output file */
     Fixed r = UnScaleAbs(fontinfo, s);
-    if (scalinghints) {
+    if (gScalingHints) {
         r = FRnd(r);
     }
     if (FracPart(r) == 0) {
@@ -243,7 +243,7 @@ WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst)
             break;
         default: {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal point list data for glyph: %s.\n", glyphName);
+                   "Illegal point list data for glyph: %s.\n", gGlyphName);
         }
     }
     sws(" % ");
@@ -313,7 +313,7 @@ wrtnewclrs(const ACFontInfo* fontinfo, PPathElt e)
         return;
     }
     hintmaskstr[0] = '\0';
-    WrtPntLst(fontinfo, ptLstArray[e->newcolors]);
+    WrtPntLst(fontinfo, gPtLstArray[e->newcolors]);
     if (strcmp(prevhintmaskstr, hintmaskstr)) {
         WriteString("beginsubr snc\n");
         WriteString(hintmaskstr);
@@ -423,8 +423,8 @@ wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e)
         return;
     }
     yflag = e->yFlex;
-    dmin = DMIN;
-    delta = DELTA;
+    dmin = gDMin;
+    delta = gDelta;
     WriteString("preflx1\n");
     if (yflag) {
         if (fc3.y == c3.y) {
@@ -554,7 +554,7 @@ cp(const ACFontInfo* fontinfo, PPathElt e)
     if (e->newcolors != 0) {
         wrtnewclrs(fontinfo, e);
     }
-    if (idInFile) {
+    if (gIdInFile) {
         WRTNUM(subpathcount++);
         WriteString("id\n");
     }
@@ -572,7 +572,7 @@ NumberPath(void)
 {
     int16_t cnt;
     PPathElt e;
-    e = pathStart;
+    e = gPathStart;
     cnt = 1;
     while (e != NULL) {
         e->count = cnt++;
@@ -583,19 +583,19 @@ NumberPath(void)
 void
 SaveFile(const ACFontInfo* fontinfo)
 {
-    PPathElt e = pathStart;
+    PPathElt e = gPathStart;
     Cd c1, c2, c3;
 
     /* AddSolEol(); */
     WriteString("% ");
-    WriteString(glyphName);
+    WriteString(gGlyphName);
     WriteString("\n");
-    wrtColorInfo = (pathStart != NULL && pathStart != pathEnd);
+    wrtColorInfo = (gPathStart != NULL && gPathStart != gPathEnd);
     NumberPath();
     prevhintmaskstr[0] = '\0';
     if (wrtColorInfo && (!e->newcolors)) {
         hintmaskstr[0] = '\0';
-        WrtPntLst(fontinfo, ptLstArray[0]);
+        WrtPntLst(fontinfo, gPtLstArray[0]);
         WriteString(hintmaskstr);
         strcpy(prevhintmaskstr, hintmaskstr);
     }
@@ -629,7 +629,7 @@ SaveFile(const ACFontInfo* fontinfo)
                 break;
             default: {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal path list for glyph: %s.\n", glyphName);
+                       "Illegal path list for glyph: %s.\n", gGlyphName);
             }
         }
 #if WRTABS_COMMENT

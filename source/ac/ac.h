@@ -182,71 +182,71 @@ typedef struct {
 
 /* global data */
 
-extern PPathElt pathStart, pathEnd;
-extern bool YgoesUp;
-extern bool useV, useH, autoVFix, autoHFix, autoLinearCurveFix;
-extern bool AutoExtraDEBUG, debugColorPath, DEBUG, logging;
-extern bool editChar; /* whether character can be modified when adding hints */
-extern bool scalehints;
-extern bool showHs, showVs, bandError, listClrInfo;
-extern bool reportErrors, hasFlex, flexOK, flexStrict, showClrInfo;
-extern Fixed hBigDist, vBigDist, initBigDist, minDist, minMidPt, ghostWidth,
-  ghostLength, bendLength, bandMargin, maxFlare,
-  maxBendMerge, maxMerge, minColorElementLength, flexCand,
-  pruneMargin;
-extern Fixed pruneA, pruneB, pruneC, pruneD, pruneValue, bonus;
-extern float theta, hBigDistR, vBigDistR, maxVal, minVal;
-extern int32_t DMIN, DELTA, CPpercent, bendTan, sCurveTan;
-extern PClrVal Vcoloring, Hcoloring, Vprimary, Hprimary, valList;
-extern PClrSeg segLists[4]; /* left, right, top, bot */
-extern PClrPoint pointList, *ptLstArray;
-extern int32_t ptLstIndex, numPtLsts, maxPtLsts;
-extern bool scalinghints;
+extern PPathElt gPathStart, gPathEnd;
+extern bool gYgoesUp;
+extern bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix;
+extern bool gAutoExtraDebug, gDebugColorPath, gDebug, gLogging;
+extern bool gEditChar; /* whether character can be modified when adding hints */
+extern bool gScaleHints;
+extern bool gShowHs, gShowVs, gBandError, gListClrInfo;
+extern bool gReportErrors, gHasFlex, gFlexOK, gFlexStrict, gShowClrInfo;
+extern Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gMinMidPt, gGhostWidth,
+  gGhostLength, gBendLength, gBandMargin, gMaxFlare,
+  gMaxBendMerge, gMaxMerge, gMinColorElementLength, gFlexCand,
+  gPruneMargin;
+extern Fixed gPruneA, gPruneB, gPruneC, gPruneD, gPruneValue, gBonus;
+extern float gTheta, gHBigDistR, gVBigDistR, gMaxVal, gMinVal;
+extern int32_t gDMin, gDelta, gCPpercent, gBendTan, gSCurveTan;
+extern PClrVal gVColoring, gHColoring, gVPrimary, gHPrimary, gValList;
+extern PClrSeg gSegLists[4]; /* left, right, top, bot */
+extern PClrPoint gPointList, *gPtLstArray;
+extern int32_t gPtLstIndex, gNumPtLsts, gMaxPtLsts;
+extern bool gScalingHints;
 
 /* global callbacks */
 
 /* global log function which is supplied by the following */
-extern AC_REPORTFUNCPTR libReportCB;
+extern AC_REPORTFUNCPTR gLibReportCB;
 /* global error log function which is supplied by the following */
-extern AC_REPORTFUNCPTR libErrorReportCB;
+extern AC_REPORTFUNCPTR gLibErrorReportCB;
 
 /* if false, then stems defined by curves are excluded from the reporting */
 extern unsigned int allstems;
 
-extern AC_REPORTSTEMPTR addHStemCB;
-extern AC_REPORTSTEMPTR addVStemCB;
+extern AC_REPORTSTEMPTR gAddHStemCB;
+extern AC_REPORTSTEMPTR gAddVStemCB;
 
-extern AC_REPORTZONEPTR addCharExtremesCB;
-extern AC_REPORTZONEPTR addStemExtremesCB;
+extern AC_REPORTZONEPTR gAddCharExtremesCB;
+extern AC_REPORTZONEPTR gAddStemExtremesCB;
 
 void AddStemExtremes(Fixed bot, Fixed top);
 
-extern AC_RETRYPTR reportRetryCB;
+extern AC_RETRYPTR gReportRetryCB;
 
-#define leftList (segLists[0])
-#define rightList (segLists[1])
-#define topList (segLists[2])
-#define botList (segLists[3])
+#define leftList (gSegLists[0])
+#define rightList (gSegLists[1])
+#define topList (gSegLists[2])
+#define botList (gSegLists[3])
 
 #define MAXFLEX (PSDist(20))
 #define MAXBLUES (20)
 #define MAXSERIFS (5)
-extern Fixed topBands[MAXBLUES], botBands[MAXBLUES], serifs[MAXSERIFS];
-extern int32_t lenTopBands, lenBotBands, numSerifs;
+extern Fixed gTopBands[MAXBLUES], gBotBands[MAXBLUES], gSerifs[MAXSERIFS];
+extern int32_t gLenTopBands, gLenBotBands, gNumSerifs;
 #define MAXSTEMS (20)
-extern Fixed VStems[MAXSTEMS], HStems[MAXSTEMS];
-extern int32_t NumVStems, NumHStems;
-extern char *HColorList[], *VColorList[];
-extern int32_t NumHColors, NumVColors;
-extern bool writecoloredbez;
-extern Fixed bluefuzz;
-extern bool doAligns, doStems;
-extern bool idInFile;
-extern bool roundToInt;
+extern Fixed gVStems[MAXSTEMS], gHStems[MAXSTEMS];
+extern int32_t gNumVStems, gNumHStems;
+extern char *gHColorList[], *gVColorList[];
+extern int32_t gNumHColors, gNumVColors;
+extern bool gWriteColoredBez;
+extern Fixed gBlueFuzz;
+extern bool gDoAligns, gDoStems;
+extern bool gIdInFile;
+extern bool gRoundToInt;
 
 #define MAX_GLYPHNAME_LEN 64
 /* defined in read.c; set from the glyph name at the start of the bex file. */
-extern char glyphName[MAX_GLYPHNAME_LEN];
+extern char gGlyphName[MAX_GLYPHNAME_LEN];
 
 /* macros */
 
@@ -365,8 +365,8 @@ void AutoAddFlex(void);
 bool SameColors(int32_t cn1, int32_t cn2);
 bool PreCheckForColoring(void);
 int32_t CountSubPaths(void);
-void PickVVals(PClrVal valList);
-void PickHVals(PClrVal valList);
+void PickVVals(PClrVal gValList);
+void PickHVals(PClrVal gValList);
 void FindBestHVals(void);
 void FindBestVVals(void);
 void PrintMessage(char* format, ...);

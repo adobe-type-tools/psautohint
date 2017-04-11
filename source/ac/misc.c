@@ -12,7 +12,7 @@
 int32_t
 CountSubPaths(void)
 {
-    PPathElt e = pathStart;
+    PPathElt e = gPathStart;
     int32_t cnt = 0;
     while (e != NULL) {
         if (e->type == MOVETO)
@@ -25,7 +25,7 @@ void
 RoundPathCoords(void)
 {
     PPathElt e;
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) {
         if (e->type == CURVETO) {
             e->x1 = FHalfRnd(e->x1);
@@ -46,7 +46,7 @@ static int32_t
 CheckForClr(void)
 {
     PPathElt mt, cp;
-    mt = pathStart;
+    mt = gPathStart;
     while (mt != NULL) {
         if (mt->type != MOVETO) {
             ExpectedMoveTo(mt);
@@ -68,19 +68,19 @@ PreCheckForColoring(void)
     PPathElt e, nxt;
     int32_t cnt = 0;
     int32_t chk;
-    while (pathEnd != NULL) {
-        if (pathEnd->type == MOVETO)
-            Delete(pathEnd);
-        else if (pathEnd->type != CLOSEPATH) {
+    while (gPathEnd != NULL) {
+        if (gPathEnd->type == MOVETO)
+            Delete(gPathEnd);
+        else if (gPathEnd->type != CLOSEPATH) {
             ReportMissingClosePath();
             return false;
         } else
             break;
     }
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) {
         if (e->type == CLOSEPATH) {
-            if (e == pathEnd)
+            if (e == gPathEnd)
                 break;
             nxt = e->next;
             if (nxt->type == MOVETO) {
@@ -144,7 +144,7 @@ AddAutoFlexProp(PPathElt e, bool yflag)
     PPathElt e0 = e, e1 = e->next;
     if (e0->type != CURVETO || e1->type != CURVETO) {
         LogMsg(LOGERROR, NONFATALERROR, "Illegal input in glyph: %s.\n",
-               glyphName);
+               gGlyphName);
     }
     /* Don't add flex to linear curves. */
     if (yflag && e0->y3 == e1->y1 && e1->y1 == e1->y2 && e1->y2 == e1->y3)
@@ -172,7 +172,7 @@ TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 
     GetEndPoint(n, &x2, &y2);
     dy = abs(y0 - y2);
-    if (dy > flexCand)
+    if (dy > gFlexCand)
         return; /* too big diff in bases. If dy is within flexCand, flex will
                    fail , but we will report it as a candidate. */
     dx = abs(x0 - x2);
@@ -194,7 +194,7 @@ TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
     if (quot < LENGTHRATIOCUTOFF)
         return;
 
-    if (flexStrict) {
+    if (gFlexStrict) {
         q = GetSubpathNext(n);
         GetEndPoint(q, &x3, &y3);
         if (ProdLt0(y3 - y2, y1 - y2))
@@ -204,7 +204,7 @@ TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
         if (ProdLt0(y4 - y0, y1 - y0))
             return; /* y1 and y4 not on same side of y0 */
         top = (x0 > x1) ? true : false;
-        if (YgoesUp)
+        if (gYgoesUp)
             dwn = (y1 < y0) ? true : false;
         else
             dwn = (y1 > y0) ? true : false;
@@ -234,7 +234,7 @@ TryXFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 
     GetEndPoint(n, &x2, &y2);
     dx = abs(y0 - y2);
-    if (dx > flexCand)
+    if (dx > gFlexCand)
         return; /* too big diff in bases */
 
     dy = abs(x0 - x2);
@@ -257,7 +257,7 @@ TryXFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
     if (quot < LENGTHRATIOCUTOFF)
         return;
 
-    if (flexStrict) {
+    if (gFlexStrict) {
         q = GetSubpathNext(n);
         GetEndPoint(q, &x3, &y3);
         if (ProdLt0(x3 - x2, x1 - x2))
@@ -266,7 +266,7 @@ TryXFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
         GetEndPoint(p->prev, &x4, &y4);
         if (ProdLt0(x4 - x0, x1 - x0))
             return; /* x1 and x4 not on same side of x0 */
-        if (YgoesUp)
+        if (gYgoesUp)
             lft = (y0 > y2) ? true : false;
         else
             lft = (y0 < y2) ? true : false;
@@ -291,7 +291,7 @@ AutoAddFlex(void)
 {
     PPathElt e, n;
     Fixed x0, y0, x1, y1;
-    e = pathStart;
+    e = gPathStart;
     while (e != NULL) {
         if (e->type != CURVETO || e->isFlex)
             goto Nxt;

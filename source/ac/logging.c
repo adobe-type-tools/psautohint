@@ -23,13 +23,13 @@ static void LogMsg1(char* str, int16_t level, int16_t code);
 
 #define Write(s)                                                               \
     {                                                                          \
-        if (libReportCB != NULL)                                               \
-            libReportCB(s);                                                    \
+        if (gLibReportCB != NULL)                                              \
+            gLibReportCB(s);                                                   \
     }
 #define WriteWarnorErr(f, s)                                                   \
     {                                                                          \
-        if (libErrorReportCB != NULL)                                          \
-            libErrorReportCB(s);                                               \
+        if (gLibErrorReportCB != NULL)                                         \
+            gLibErrorReportCB(s);                                              \
     }
 
 void
