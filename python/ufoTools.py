@@ -1239,7 +1239,7 @@ class UFOTransform:
 
 
 
-def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transform = None, level = 0):
+def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, level = 0):
 	"""convert XML outline element containing contours and components to a bez string.
 	Since xml.etree.CElementTree is compiled code, this
 	will run faster than tokenizing and parsing in regular Python.
@@ -1297,7 +1297,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 						newTransform.concat(transform)
 				componentOutline = ufoFontData.getComponentOutline(outlineItem)
 				if componentOutline:
-					outlineBezString, curX, curY = convertGlyphOutlineToBezString(componentOutline, ufoFontData, curX, curY, newTransform, level+1)
+					outlineBezString = convertGlyphOutlineToBezString(componentOutline, ufoFontData, newTransform, level+1)
 					bezStringList.append(outlineBezString)
 				continue
 
@@ -1328,8 +1328,6 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 				if (not allowDecimals):
 					x = int(round(x))
 					y = int(round(y))
-				curX = x
-				curY = y
 
 				if (allowDecimals):
 					op = "%.3f %.3f mt" % (x , y)
@@ -1359,8 +1357,6 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 					if (not allowDecimals):
 						x = int(round(x))
 						y = int(round(y))
-					curX = x
-					curY = y
 
 					if lastType == "line":
 
@@ -1395,8 +1391,6 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 				if (not allowDecimals):
 					x = int(round(x))
 					y = int(round(y))
-				curX = x
-				curY = y
 
 				try:
 					type = contourItem.attrib["type"]
@@ -1437,7 +1431,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY, transfor
 			# we get here only if there was at least a move.
 			bezStringList.append("cp" + os.linesep)
 		bezstring = os.linesep.join(bezStringList)
-	return bezstring, curX, curY
+	return bezstring
 
 
 def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll= 0):
@@ -1451,8 +1445,7 @@ def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll= 0):
 			print("Glyph '%s' has no outline data" % (glyphName))
 		return None, width
 
-	curX = curY = 0
-	bezString, curX, curY = convertGlyphOutlineToBezString(outlineXML, ufoFontData, curX, curY)
+	bezString = convertGlyphOutlineToBezString(outlineXML, ufoFontData)
 	bezString = (r"%%%s%ssc " % (glyphName, os.linesep)) + bezString + " ed"
 	return bezString, width
 
