@@ -16,7 +16,6 @@ import os
 import FDKUtils
 import ConvertFontToCID
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
-from types import FloatType, LongType
 
 debug = 0
 def debugMsg(*args):
@@ -150,7 +149,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 			return
 
 		lastval = args[0]
-		if type(lastval) == LongType:
+		if type(lastval) == int:
 			lastval = float(lastval)/0x10000
 			arg = str(lastval) + " 100 div"
 		else:
@@ -160,13 +159,13 @@ class T2ToBezExtractor(T2OutlineExtractor):
 
 		for i in range(len(args))[1:]:
 			val = args[i]
-			if type(val) == LongType:
+			if type(val) == int:
 				val = float(val)/0x10000
 			newVal = lastval + val
 			lastval = newVal
 
 			if i % 2:
-				if (type(val) == FloatType):
+				if (type(val) == float):
 					if (int(val) != val):
 						arg = str(int(val*100)) + " 100 div"
 					else:
@@ -177,7 +176,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 				self.bezProgram.append(arg)
 				self.bezProgram.append(bezCommand + "\n")
 			else:
-				if (type(newVal) == FloatType):
+				if (type(newVal) == float):
 					if (int(newVal) != newVal):
 						arg = str(int(newVal*100)) + " 100 div"
 					else:
@@ -356,11 +355,11 @@ def makeHintList(hints, needHintMasks, isH):
 			continue
 		pos1 = hint[0]
 		pos = pos1 - lastPos
-		if (type(pos) == FloatType) and (int(pos) == pos):
+		if (type(pos) == float) and (int(pos) == pos):
 			pos = int(pos)
 		hintList.append(pos)
 		pos2 = hint[1]
-		if (type(pos2) == FloatType) and (int(pos2) == pos2):
+		if (type(pos2) == float) and (int(pos2) == pos2):
 			pos2 = int(pos2)
 		lastPos = pos1 + pos2
 		hintList.append(pos2)
