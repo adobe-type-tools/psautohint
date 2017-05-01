@@ -665,7 +665,7 @@ def getOptions(args):
 				command = "autohintexe -v"
 				report = FDKUtils.runShellCmd(command)
 				logMsg(report)
-			raise ACOptionParseError
+			return
 		elif arg == "-u":
 			print(__usage__)
 			try:
@@ -675,10 +675,10 @@ def getOptions(args):
 				command = "autohintexe -v"
 				report = FDKUtils.runShellCmd(command)
 				logMsg(report)
-			raise ACOptionParseError
+			return
 		elif arg == "-hfd":
 			print(__FDDoc__)
-			raise ACOptionParseError
+			return
 		elif arg == "-pfd":
 			options.printDefaultFDDict = 1
 		elif arg == "-pfdl":
@@ -1417,9 +1417,12 @@ def main(args):
 
 	try:
 		options = getOptions(args)
+		if options is None:
+			# Happens when one of the help arguments is given.
+			return True
 	except ACOptionParseError as e:
 		logMsg(e)
-		return not e
+		return 1
 
 	# verify that all files exist.
 	try:
