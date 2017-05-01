@@ -1046,7 +1046,7 @@ def openOpenTypeFile(path, outFilePath, options):
 			ttFont['CFF '] = cffTable
 			cffTable.decompile(data, ttFont)
 		except:
-			logMsg("\t%s" %(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1]))
+			logMsg("\t%s" %(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1]))
 			logMsg("Attempted to read font %s as CFF." % path)
 			raise ACFontError("Error parsing font file <%s>." % path)
 
@@ -1086,10 +1086,10 @@ def hintFile(options):
 		if options.writeToDefaultLayer and hasattr(fontData, "setWriteToDefault"): # UFO fonts only
 			fontData.setWriteToDefault()
 	except (IOError, OSError):
-		logMsg(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
+		logMsg(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1])
 		raise ACFontError("Error opening or reading from font file <%s>." % fontFileName)
 	except:
-		logMsg(traceback.format_exception_only(sys.exc_type, sys.exc_value)[-1])
+		logMsg(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1])
 		raise ACFontError("Error parsing font file <%s>." % fontFileName)
 
 	# filter specified list, if any, with font list.
