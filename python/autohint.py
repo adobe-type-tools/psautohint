@@ -646,13 +646,13 @@ def checkFontinfoFile(options):
 			options.counterHintFile = srcFontInfo
 
 
-def getOptions():
+def getOptions(args):
 	global gLogFile
 	options = ACOptions()
-	i = 1
-	numOptions = len(sys.argv)
+	i = 0
+	numOptions = len(args)
 	while i < numOptions:
-		arg = sys.argv[i]
+		arg = args[i]
 		if options.inputPath:
 			raise ACOptionParseError("Option Error: All options must preceed the input font path <%s>." % arg)
 
@@ -708,7 +708,7 @@ def getOptions():
 			if arg == "-xg":
 				options.excludeGlyphList = 1
 			i = i +1
-			glyphString = sys.argv[i]
+			glyphString = args[i]
 			if glyphString[0] == "-":
 				raise ACOptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.")
 			options.glyphList += parseGlyphListArg(glyphString)
@@ -716,7 +716,7 @@ def getOptions():
 			if arg == "-xgf":
 				options.excludeGlyphList = 1
 			i = i +1
-			filePath = sys.argv[i]
+			filePath = args[i]
 			if filePath[0] == "-":
 				raise ACOptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.")
 			try:
@@ -728,7 +728,7 @@ def getOptions():
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg == "-cf":
 			i = i +1
-			filePath = sys.argv[i]
+			filePath = args[i]
 			if filePath[0] == "-":
 				raise ACOptionParseError("Option Error: it looks like the the counter hint glyph list file following '-cf' is another option.")
 			try:
@@ -740,11 +740,11 @@ def getOptions():
 			options.logOnly = 1
 		elif arg == "-log":
 			i = i +1
-			options.logFilePath = sys.argv[i]
+			options.logFilePath = args[i]
 			gLogFile = open(options.logFilePath, "wt")
 		elif arg == "-o":
 			i = i +1
-			options.outputPath = sys.argv[i]
+			options.outputPath = args[i]
 		elif arg == "-d":
 			options.debug = 1
 		elif arg in ["-decimal", "-dec"]:
@@ -1407,7 +1407,7 @@ def hintFile(options):
 		logMsg("Done with font %s. End time: %s." % (path, time.asctime()))
 
 
-def main():
+def main(args):
 
 	try:
 		CheckEnvironment()
@@ -1416,7 +1416,7 @@ def main():
 		return 1
 
 	try:
-		options = getOptions()
+		options = getOptions(args)
 	except ACOptionParseError as e:
 		logMsg(e)
 		return not e
@@ -1434,4 +1434,4 @@ def main():
 
 
 if __name__=='__main__':
-	sys.exit(main())
+	sys.exit(main(sys.argv[1:]))
