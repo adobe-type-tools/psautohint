@@ -1408,12 +1408,11 @@ def hintFile(options):
 
 
 def main(args):
-
 	try:
 		CheckEnvironment()
 	except FDKEnvironmentError as e:
 		logMsg(e)
-		return 1
+		return False
 
 	try:
 		options = getOptions(args)
@@ -1422,19 +1421,23 @@ def main(args):
 			return True
 	except ACOptionParseError as e:
 		logMsg(e)
-		return 1
+		return False
 
 	# verify that all files exist.
 	try:
 		hintFile(options)
 	except (ACFontError, ACHintError, ufoTools.UFOParseError) as e:
 		logMsg("\t%s" % e)
-		return 1
+		return False
+
 	if gLogFile:
 		gLogFile.close()
 
-	return 0
+	return True
 
 
 if __name__=='__main__':
-	sys.exit(main(sys.argv[1:]))
+	if main(sys.argv[1:]):
+		sys.exit(0)
+	else:
+		sys.exit(1)
