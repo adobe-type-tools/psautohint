@@ -605,7 +605,7 @@ def parseGlyphListArg(glyphString):
 def parseCounterHintData(path):
 	hCounterGlyphList = []
 	vCounterGlyphList = []
-	gf = file(path, "rt")
+	gf = open(path, "rt")
 	data = gf.read()
 	gf.close()
 	lines = re.findall(r"([^\r\n]+)", data)
@@ -720,7 +720,7 @@ def getOptions(args):
 			if filePath[0] == "-":
 				raise ACOptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.")
 			try:
-				gf = file(filePath, "rt")
+				gf = open(filePath, "rt")
 				glyphString = gf.read()
 				gf.close()
 			except (IOError,OSError):
@@ -995,7 +995,7 @@ def openOpenTypeFile(path, outFilePath, options):
 	fontType = 0 # OTF
 	tempPathCFF = path + kTempCFFSuffix
 	try:
-		ff = file(path, "rb")
+		ff = open(path, "rb")
 		data = ff.read(10)
 		ff.close()
 	except (IOError, OSError):
@@ -1036,7 +1036,7 @@ def openOpenTypeFile(path, outFilePath, options):
 				raise ACFontError("Failed to convert PS font %s to a temp CFF font." % path)
 
 		# now package the CFF font as an OTF font.
-		ff = file(tempPathCFF, "rb")
+		ff = open(tempPathCFF, "rb")
 		data = ff.read()
 		ff.close()
 		try:
