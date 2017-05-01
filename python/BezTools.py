@@ -34,7 +34,7 @@ class SEACError(KeyError):
 def hintOn(i, hintMaskBytes):
 	# used to add the active hints to the bez string,
 	# when a T2 hintmask operator is encountered.
-	byteIndex = i/8
+	byteIndex = int(i/8)
 	byteValue = ord(hintMaskBytes[byteIndex])
 	offset = 7 - (i %8)
 	return ((2**offset) & byteValue) > 0
@@ -232,7 +232,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 			if args:
 				self.vhints = []
 				self.updateHints(args, self.vhints, "ry")
-			self.hintMaskBytes = (self.hintCount + 7) / 8
+			self.hintMaskBytes = int((self.hintCount + 7) / 8)
 
 		self.hintMaskString, index = self.callingStack[-1].getBytes(index, self.hintMaskBytes)
 
@@ -309,7 +309,7 @@ class HintMask:
 				i = hHints.index(hint)
 			except ValueError:
 				continue	# we get here if some hints have been dropped because of the stack limit
-			newbyteIndex = (i/8)
+			newbyteIndex = int(i/8)
 			if newbyteIndex != byteIndex:
 				mask += chr(maskVal)
 				byteIndex += 1
@@ -1073,7 +1073,7 @@ def convertBezToT2(bezString):
 	vhints.sort()
 	numHHints = len(hhints)
 	numVHints = len(vhints)
-	hintLimit = (kStackLimit-2)/2
+	hintLimit = int((kStackLimit-2)/2)
 	if numHHints >=hintLimit:
 		hhints = hhints[:hintLimit]
 		numHHints = hintLimit
