@@ -1001,7 +1001,7 @@ def openOpenTypeFile(path, outFilePath, options):
 	except (IOError, OSError):
 		logMsg("Failed to open and read font file %s." % path)
 
-	if data[:4] == "OTTO": # it is an OTF font, can process file directly
+	if data[:4] == b"OTTO": # it is an OTF font, can process file directly
 		try:
 			ttFont = TTFont(path)
 		except (IOError, OSError):
@@ -1017,10 +1017,10 @@ def openOpenTypeFile(path, outFilePath, options):
 	else:
 
 		# It is not an OTF file.
-		if (data[0] == '\1') and (data[1] == '\0'): # CFF file
+		if (data[0] == b'\1') and (data[1] == b'\0'): # CFF file
 			fontType = 1
 			tempPathCFF = path
-		elif not "%" in data:
+		elif not b"%" in data:
 			#not a PS file either
 			logMsg("Font file must be a PS, CFF or OTF fontfile: %s." % path)
 			raise ACFontError("Font file must be PS, CFF or OTF file: %s." % path)
