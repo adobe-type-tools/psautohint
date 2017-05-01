@@ -1220,16 +1220,16 @@ class CFFFontData:
 			data = ttFont["CFF "].compile(ttFont)
 			if fontType == 1: # CFF
 				if overwriteOriginal:
-					tf = file(inputPath, "wb")
+					tf = open(inputPath, "wb")
 					tf.write(data)
 					tf.close()
 				else:
-					tf = file(outFilePath, "wb")
+					tf = open(outFilePath, "wb")
 					tf.write(data)
 					tf.close()
 
 			elif fontType == 2: # PS.
-				tf = file(tempPath, "wb")
+				tf = open(tempPath, "wb")
 				tf.write(data)
 				tf.close()
 				finalPath = outFilePath
