@@ -1434,8 +1434,6 @@ class CFFFontData:
 				ConvertFontToCID.mergeFDDicts([finalFDict], topDict.Private)
 		return fdGlyphDict, fontDictList
 
-if __name__=='__main__':
-
 def test():
 	# Test program.
 	# Takes first argument font file path, optional second argument = glyph name.
