@@ -758,7 +758,7 @@ def needsDecryption(bezDataBuffer):
 
 LEN_IV = 4 #/* Length of initial random byte sequence */
 def bezDecrypt(bezDataBuffer):
-	r = 11586L
+	r = 11586
 	i = 0 # input buffer byte position index
 	lenBuffer = len(bezDataBuffer)
 	byteCnt = 0 # output buffer byte count.
@@ -784,14 +784,14 @@ def bezDecrypt(bezDataBuffer):
 				ch = ord(ch) - ord('0')
 			else:
 				ch = ord(ch) - ord('a') + 10
-			cipher = (cipher << 4) & 0xFFFFL
+			cipher = (cipher << 4) & 0xFFFF
 			cipher = cipher | ch
 			i += 1
 
 		plain = cipher ^ (r >> 8)
-		r = (cipher + r) * 902381661L + 341529579L
-		if r > 0xFFFFL:
-			r = r & 0xFFFFL
+		r = (cipher + r) * 902381661 + 341529579
+		if r > 0xFFFF:
+			r = r & 0xFFFF
 		byteCnt += 1
 		if (byteCnt > LEN_IV):
 			newBuffer += chr(plain)
