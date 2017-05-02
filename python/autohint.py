@@ -460,13 +460,13 @@ import sys
 import os
 import re
 import time
-import tempfile
 import plistlib
 import warnings
-import FDKUtils
 import ufoTools
 import traceback
 import shutil
+
+import _psautohint
 
 kACIDKey = "AutoHintKey"
 
@@ -512,9 +512,6 @@ class ACFontError(KeyError):
 class ACHintError(KeyError):
 	pass
 
-class FDKEnvironmentError(AttributeError):
-	pass
-
 kProgressChar = "."
 
 
@@ -547,17 +544,6 @@ def logMsg(*args):
 				gLogFile.write(msg + os.linesep)
 				gLogFile.flush()
 
-
-def CheckEnvironment():
-	try:
-		import _psautohint
-	except ImportError:
-		command = "autohintexe -u"
-		report = FDKUtils.runShellCmd(command)
-		if "version" not in report:
-			logMsg("Please re-install the FDK. The path to the program 'autohintexe' is not in the environment variable PATH.")
-			logMsg("Or install '_psautohint' module.")
-			raise FDKEnvironmentError
 
 global nameAliasDict
 nameAliasDict = {}
@@ -658,23 +644,11 @@ def getOptions(args):
 
 		if arg == "-h":
 			print(__help__)
-			try:
-				import _psautohint
-				print("Lib version:", _psautohint.version)
-			except ImportError:
-				command = "autohintexe -v"
-				report = FDKUtils.runShellCmd(command)
-				logMsg(report)
+			print("Lib version:", _psautohint.version)
 			return
 		elif arg == "-u":
 			print(__usage__)
-			try:
-				import _psautohint
-				print("Lib version:", _psautohint.version)
-			except ImportError:
-				command = "autohintexe -v"
-				report = FDKUtils.runShellCmd(command)
-				logMsg(report)
+			print("Lib version:", _psautohint.version)
 			return
 		elif arg == "-hfd":
 			print(__FDDoc__)
@@ -1026,6 +1000,7 @@ def openOpenTypeFile(path, outFilePath, options):
 			raise ACFontError("Font file must be PS, CFF or OTF file: %s." % path)
 
 		else: # It is a PS file. Convert to CFF.
+			import FDKUtils
 			fontType = 2
 			print("Converting Type1 font to temp CFF font file...")
 			command="tx -cff +b -std \"%s\" \"%s\"" % (path, tempPathCFF)
@@ -1098,13 +1073,8 @@ def hintFile(options):
 	if not glyphList:
 		raise ACFontError("Error: selected glyph list is empty for font <%s>." % fontFileName)
 
-	# temp file names for input and output bez files, and for the fontinfo file.
-	tempBaseName = tempfile.mktemp()
-	tempBez = tempBaseName + ".bez"
-	tempBezNew = tempBez + ".new"
-	tempFI = tempBaseName + ".fi"
+	fontInfo = ""
 
-	#print("tempBaseName", tempBaseName)
 	psName = fontData.getPSName()
 
 	if (not options.logOnly) and options.usePlistFile:
@@ -1170,9 +1140,7 @@ def hintFile(options):
 
 	if fdGlyphDict == None:
 		fdDict = fontDictList[0]
-		fp = open(tempFI, "wt")
-		fp.write(fdDict.getFontInfo())
-		fp.close()
+		fontInfo = fdDict.getFontInfo()
 	else:
 		if not options.verbose and not options.quiet:
 			logMsg("Note: Using alternate FDDict global values from fontinfo file for some glyphs. Remove option '-q' to see which dict is used for which glyphs.")
@@ -1239,9 +1207,7 @@ def hintFile(options):
 												options.vCounterGlyphs,
 												options.hCounterGlyphs,
 												fdIndex)
-				fp = open(tempFI, "wt")
-				fp.write(fdDict.getFontInfo())
-				fp.close()
+				fontInfo = fdDict.getFontInfo()
 		else:
 			if (fdGlyphDict != None):
 				try:
@@ -1252,9 +1218,7 @@ def hintFile(options):
 				if lastFDIndex != fdIndex:
 					lastFDIndex = fdIndex
 					fdDict = fontDictList[fdIndex]
-					fp = open(tempFI, "wt")
-					fp.write(fdDict.getFontInfo())
-					fp.close()
+					fontInfo = fdDict.getFontInfo()
 
 
 		# 	Build autohint point list identifier
@@ -1313,38 +1277,9 @@ def hintFile(options):
 		if oldBezString != "" and oldBezString == bezString:
 			newBezString = oldHintBezString
 		else:
-			newBezString = None
-			try:
-				import _psautohint
-				with open(tempFI, "rb") as fileFI:
-					newBezString = _psautohint.autohint(fileFI.read(), [bezString.encode("ascii")],
-                                                options.verbose, options.allowChanges, not options.noHintSub, options.allowDecimalCoords)
-					newBezString = newBezString[0].decode("ascii")
-				fontInfo = ""
-			except ImportError:
-				bp = open(tempBez, "wt")
-				bp.write(bezString)
-				bp.close()
-
-				if os.path.exists(tempBezNew):
-					os.remove(tempBezNew)
-				command = "autohintexe %s%s%s%s -s .new -f \"%s\" \"%s\"" % (verboseArg, suppressEditArg, supressHintSubArg, decimalArg, tempFI, tempBez)
-				if options.debug:
-					print(command)
-				report = FDKUtils.runShellCmd(command)
-				if report:
-					if not options.verbose and not options.quiet:
-						logMsg("") # end series of "."
-					logMsg(report)
-				if os.path.exists(tempBezNew):
-					bp = open(tempBezNew, "rt")
-					newBezString = bp.read()
-					bp.close()
-					if options.debug:
-						print("Wrote AC fontinfo data file to", tempFI)
-						print("Wrote AC output bez file to", tempBezNew)
-					else:
-						os.remove(tempBezNew)
+			newBezString = _psautohint.autohint(fontInfo.encode("ascii"), [bezString.encode("ascii")],
+                                        options.verbose, options.allowChanges, not options.noHintSub, options.allowDecimalCoords)
+			newBezString = newBezString[0].decode("ascii")
 
 		if not newBezString:
 			if not options.verbose and not options.quiet:
@@ -1376,11 +1311,9 @@ def hintFile(options):
 	if not options.verbose and not options.quiet:
 		print("") # print final new line after progress dots.
 
-	if options.debug:
-		print("Wrote input AC bez file to", tempBez)
-	else:
+	if not options.debug:
 		tempPathCFF = options.inputPath + kTempCFFSuffix # created when a PS file is opened.
-		removeTempFiles([tempBez, tempBezNew, tempFI, tempPathCFF])
+		removeTempFiles([tempPathCFF])
 
 	if not options.logOnly:
 		if anyGlyphChanged:
@@ -1408,12 +1341,6 @@ def hintFile(options):
 
 
 def main(args):
-	try:
-		CheckEnvironment()
-	except FDKEnvironmentError as e:
-		logMsg(e)
-		return False
-
 	try:
 		options = getOptions(args)
 		if options is None:
