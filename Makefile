@@ -1,4 +1,4 @@
-.PHONY: build install check clean format
+.PHONY: build install check dist clean format
 
 ROOT_DIR = .
 SRC_DIR = $(ROOT_DIR)/source
@@ -31,6 +31,9 @@ install:
 
 autohintexe:
 	make -C $(SRC_DIR)
+
+dist: clean
+	$(PYTHON) setup.py sdist bdist_wheel
 
 clean:
 	$(PYTHON) setup.py clean --all
