@@ -22,7 +22,7 @@ typedef unsigned char bool;
 #define false 0
 #endif
 
-/*#include "ac_C_lib.h"*/
+/*#include "psautohint.h"*/
 #include "ac.h"
 
 const char* C_ProgramVersion = "1.65240";

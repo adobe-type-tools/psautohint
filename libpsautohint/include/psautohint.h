@@ -13,8 +13,8 @@
  * ACLIB_API functions as being imported from a DLL, wheras this DLL sees symbols
  * defined with this macro as being exported.
 */
-#ifndef AC_C_LIB_H_
-#define AC_C_LIB_H_
+#ifndef PSAUTOHINT_H_
+#define PSAUTOHINT_H_
 
 #include <stddef.h>
 
@@ -137,4 +137,4 @@ ACLIB_API void AC_initCallGlobals(void);
 #ifdef __cplusplus
 }
 #endif 
-#endif /* AC_C_LIB_H_ */
+#endif /* PSAUTOHINT_H_ */
