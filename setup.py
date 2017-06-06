@@ -33,7 +33,19 @@ module1 = Extension("psautohint._psautohint",
                         "source/ac/shuffle.c",
                         "source/ac/stemreport.c",
                         "source/ac/write.c",
-                    ]
+                    ],
+                    depends=[
+                        "source/include/ac_C_lib.h",
+                        "source/ac/ac.h",
+                        "source/ac/bbox.h",
+                        "source/ac/fontinfo.h",
+                        "source/ac/memory.h",
+                        "source/ac/winstdint.h",
+                        "source/ac/basic.h",
+                        "source/ac/charpath.h",
+                        "source/ac/logging.h",
+                        "source/ac/opcodes.h",
+                    ],
         )
 
 setup(name="psautohint",
