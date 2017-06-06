@@ -23,7 +23,7 @@ all: $(TESTS)
 %.tst: %.ufo FORCE
 	@echo "	Testing $<"
 	@rm -rf $@
-	@$(PYTHON) $(PYT_DIR)/autohint.py -all -qq -o $@ $<
+	@$(PYTHON) -m psautohint.autohint -all -qq -o $@ $<
 	@diff -Naur -x '.DS_Store' $< $@
 	@rm -f $@/.DS_Store
 	@rm -rf $@
