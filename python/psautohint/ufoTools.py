@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 """
 ufoTools.py v1.30 May 2 2017
@@ -112,8 +112,6 @@ tools stripped out the _hintFormat1_ hint data as invalid elements.
 
 __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
-
-import ConvertFontToCID
 
 _hintFormat1_ = """
 
@@ -306,6 +304,8 @@ try:
 	import xml.etree.cElementTree as ET
 except ImportError:
 	import xml.etree.ElementTree as ET
+
+from psautohint import ConvertFontToCID
 
 XML = ET.XML
 XMLElement = ET.Element
