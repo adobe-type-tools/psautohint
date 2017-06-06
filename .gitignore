@@ -1,6 +1,15 @@
-*.pyc
+__pycache__/
+*.py[cod]
+*.so
 *.o
 *.a
 *.swp
 autohintexe
 build
+*.egg
+*.egg-info
+*.eggs
+MANIFEST
+build
+dist
+.DS_Store
