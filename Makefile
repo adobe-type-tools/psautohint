@@ -1,7 +1,7 @@
 .PHONY: build install check dist clean format
 
 ROOT_DIR = .
-SRC_DIR = $(ROOT_DIR)/source
+SRC_DIR = $(ROOT_DIR)/libpsautohint
 TST_DIR = $(ROOT_DIR)/tests
 
 PYTHON ?= python

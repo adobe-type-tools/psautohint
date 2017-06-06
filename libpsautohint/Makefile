@@ -15,7 +15,7 @@ LIB_TARGET = $(OBJ_DIR)/autohintlib.a
 
 CFLAGS = \
 	-I$(SRC_DIR)/include \
-	-I$(SRC_DIR)/ac \
+	-I$(SRC_DIR)/src \
 	-Wall \
 	-Wdeclaration-after-statement \
 	-Wstrict-prototypes \
@@ -31,31 +31,31 @@ PRG_LIBS += -lm
 endif
 					 
 LIB_OBJS = \
-	$(OBJ_DIR)/ac/ac_C_lib.o \
-	$(OBJ_DIR)/ac/acfixed.o \
-	$(OBJ_DIR)/ac/ac.o \
-	$(OBJ_DIR)/ac/auto.o \
-	$(OBJ_DIR)/ac/bbox.o \
-	$(OBJ_DIR)/ac/charpath.o \
-	$(OBJ_DIR)/ac/charprop.o \
-	$(OBJ_DIR)/ac/check.o \
-	$(OBJ_DIR)/ac/control.o \
-	$(OBJ_DIR)/ac/eval.o \
-	$(OBJ_DIR)/ac/fix.o \
-	$(OBJ_DIR)/ac/flat.o \
-	$(OBJ_DIR)/ac/fontinfo.o \
-	$(OBJ_DIR)/ac/gen.o \
-	$(OBJ_DIR)/ac/head.o \
-	$(OBJ_DIR)/ac/logging.o \
-	$(OBJ_DIR)/ac/memory.o \
-	$(OBJ_DIR)/ac/merge.o \
-	$(OBJ_DIR)/ac/misc.o \
-	$(OBJ_DIR)/ac/pick.o \
-	$(OBJ_DIR)/ac/read.o \
-	$(OBJ_DIR)/ac/report.o \
-	$(OBJ_DIR)/ac/shuffle.o \
-	$(OBJ_DIR)/ac/stemreport.o \
-	$(OBJ_DIR)/ac/write.o \
+	$(OBJ_DIR)/src/ac_C_lib.o \
+	$(OBJ_DIR)/src/acfixed.o \
+	$(OBJ_DIR)/src/ac.o \
+	$(OBJ_DIR)/src/auto.o \
+	$(OBJ_DIR)/src/bbox.o \
+	$(OBJ_DIR)/src/charpath.o \
+	$(OBJ_DIR)/src/charprop.o \
+	$(OBJ_DIR)/src/check.o \
+	$(OBJ_DIR)/src/control.o \
+	$(OBJ_DIR)/src/eval.o \
+	$(OBJ_DIR)/src/fix.o \
+	$(OBJ_DIR)/src/flat.o \
+	$(OBJ_DIR)/src/fontinfo.o \
+	$(OBJ_DIR)/src/gen.o \
+	$(OBJ_DIR)/src/head.o \
+	$(OBJ_DIR)/src/logging.o \
+	$(OBJ_DIR)/src/memory.o \
+	$(OBJ_DIR)/src/merge.o \
+	$(OBJ_DIR)/src/misc.o \
+	$(OBJ_DIR)/src/pick.o \
+	$(OBJ_DIR)/src/read.o \
+	$(OBJ_DIR)/src/report.o \
+	$(OBJ_DIR)/src/shuffle.o \
+	$(OBJ_DIR)/src/stemreport.o \
+	$(OBJ_DIR)/src/write.o \
 	$(NULL)
 
 default: $(PRG_TARGET)
