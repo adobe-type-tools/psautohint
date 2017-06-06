@@ -1,6 +1,6 @@
 #!/bin/env python
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 __copyright__ = """\
 Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
@@ -20,7 +20,7 @@ autohint [-g <glyph list>] [-gf <filename>] [-xg <glyph list>] [-xgf <filename>]
 
 """
 
-from ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
+from psautohint.ufoTools import kProcessedGlyphsLayerName, kProcessedGlyphsLayer
 
 __help__ = __usage__ + """
 
@@ -462,11 +462,11 @@ import re
 import time
 import plistlib
 import warnings
-import ufoTools
 import traceback
 import shutil
 
-import _psautohint
+from psautohint import _psautohint
+from psautohint import ufoTools
 
 kACIDKey = "AutoHintKey"
 
@@ -960,7 +960,7 @@ def openUFOFile(path, outFilePath, useHashMap, options):
 
 
 def openOpenTypeFile(path, outFilePath, options):
-	from BezTools import CFFFontData
+	from psautohint.BezTools import CFFFontData
 	from fontTools.ttLib import TTFont, getTableModule
 
 	# If input font is CFF or PS, build a dummy ttFont in memory.
@@ -1000,7 +1000,7 @@ def openOpenTypeFile(path, outFilePath, options):
 			raise ACFontError("Font file must be PS, CFF or OTF file: %s." % path)
 
 		else: # It is a PS file. Convert to CFF.
-			import FDKUtils
+			from psautohint import FDKUtils
 			fontType = 2
 			print("Converting Type1 font to temp CFF font file...")
 			command="tx -cff +b -std \"%s\" \"%s\"" % (path, tempPathCFF)
