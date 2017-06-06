@@ -15,7 +15,8 @@
 #ifndef AC_AC_H_
 #define AC_AC_H_
 
-#include "ac_C_lib.h"
+#include "psautohint.h"
+
 #include "logging.h"
 #include "memory.h"
 

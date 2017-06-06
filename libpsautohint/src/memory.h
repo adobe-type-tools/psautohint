@@ -7,7 +7,8 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include "ac_C_lib.h"
+#include "psautohint.h"
+
 #include "basic.h"
 
 #ifndef AC_MEMORY_H_

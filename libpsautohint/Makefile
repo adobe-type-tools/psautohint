@@ -31,7 +31,6 @@ PRG_LIBS += -lm
 endif
 					 
 LIB_OBJS = \
-	$(OBJ_DIR)/src/ac_C_lib.o \
 	$(OBJ_DIR)/src/acfixed.o \
 	$(OBJ_DIR)/src/ac.o \
 	$(OBJ_DIR)/src/auto.o \
@@ -51,6 +50,7 @@ LIB_OBJS = \
 	$(OBJ_DIR)/src/merge.o \
 	$(OBJ_DIR)/src/misc.o \
 	$(OBJ_DIR)/src/pick.o \
+	$(OBJ_DIR)/src/psautohint.o \
 	$(OBJ_DIR)/src/read.o \
 	$(OBJ_DIR)/src/report.o \
 	$(OBJ_DIR)/src/shuffle.o \

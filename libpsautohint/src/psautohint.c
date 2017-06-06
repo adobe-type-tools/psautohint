@@ -10,7 +10,7 @@
 #include "setjmp.h"
 
 #include "ac.h"
-#include "ac_C_lib.h"
+#include "psautohint.h"
 
 const char* libversion = "1.6.0";
 

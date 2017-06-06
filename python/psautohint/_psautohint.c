@@ -30,7 +30,7 @@ typedef unsigned char bool;
 #define false 0
 #endif
 
-#include "ac_C_lib.h"
+#include "psautohint.h"
 
 static void
 reportCB(char* msg)
