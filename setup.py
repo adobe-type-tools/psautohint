@@ -7,7 +7,7 @@ module1 = Extension("psautohint._psautohint",
                         "source/include",
                     ],
                     sources=[
-                        "source/_psautohint.c",
+                        "python/psautohint/_psautohint.c",
                         "source/ac/ac.c",
                         "source/ac/ac_C_lib.c",
                         "source/ac/acfixed.c",
