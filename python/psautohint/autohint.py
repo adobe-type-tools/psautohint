@@ -632,8 +632,10 @@ def checkFontinfoFile(options):
 			options.counterHintFile = srcFontInfo
 
 
-def getOptions(args):
+def getOptions(args=None):
 	global gLogFile
+	if args is None:
+		args = sys.argv[1:]
 	options = ACOptions()
 	i = 0
 	numOptions = len(args)
@@ -1340,31 +1342,26 @@ def hintFile(options):
 		logMsg("Done with font %s. End time: %s." % (path, time.asctime()))
 
 
-def main(args):
+def main(args=None):
 	try:
 		options = getOptions(args)
 		if options is None:
 			# Happens when one of the help arguments is given.
-			return True
+			return
 	except ACOptionParseError as e:
 		logMsg(e)
-		return False
+		return 1
 
 	# verify that all files exist.
 	try:
 		hintFile(options)
 	except (ACFontError, ACHintError, ufoTools.UFOParseError) as e:
 		logMsg("\t%s" % e)
-		return False
+		return 1
 
 	if gLogFile:
 		gLogFile.close()
 
-	return True
-
 
 if __name__=='__main__':
-	if main(sys.argv[1:]):
-		sys.exit(0)
-	else:
-		sys.exit(1)
+	sys.exit(main())
