@@ -1,11 +1,16 @@
 dist: trusty
 sudo: false
 
-language: c
+language: python
 
-os:
-  - linux
-  - osx
+matrix:
+  include:
+    - python: 2.7
+    - python: 3.6
+    # The 'osx' environment uses the python2.7 by default.
+    # TODO: maybe also tests python3 on macOS 
+    - language: generic
+      os: osx
 
 script:
-  - make PYTHON=/usr/bin/python check
+  - make check
