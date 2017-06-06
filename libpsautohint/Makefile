@@ -11,7 +11,7 @@ PRG_TARGET = $(OBJ_DIR)/autohintexe$(EXE)
 PRG_LIBS = $(LIB_TARGET)
 
 # Library
-LIB_TARGET = $(OBJ_DIR)/autohintlib.a
+LIB_TARGET = $(OBJ_DIR)/libpsautohint.a
 
 CFLAGS = \
 	-I$(SRC_DIR)/include \
