@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 """
 BezTools.py v1.12 April 27 2016
@@ -13,9 +13,10 @@ Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Re
 import sys
 import re
 import os
-import FDKUtils
-import ConvertFontToCID
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
+
+from psautohint import FDKUtils
+from psautohint import ConvertFontToCID
 
 debug = 0
 def debugMsg(*args):

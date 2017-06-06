@@ -1,6 +1,6 @@
 #!/bin/env python
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 __doc__ = """
 ConvertFontToCID.py. v 1.9 April 16 2016
@@ -22,7 +22,8 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 
 import re
 import types
-import FDKUtils
+
+from psautohint import FDKUtils
 
 
 # Tokens seen in font info file that are not part of a FDDict or GlyphSet definition.
