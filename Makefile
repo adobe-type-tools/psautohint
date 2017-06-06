@@ -5,12 +5,14 @@ SRC_DIR = $(ROOT_DIR)/source
 TST_DIR = $(ROOT_DIR)/tests
 
 PYTHON ?= python
+# Note: --user does not work from inside a virtual environment
+PIP_OPTIONS ?= --user --verbose
 
 build:
 	$(PYTHON) setup.py build
 
 install:
-	$(PYTHON) setup.py install --user
+	$(PYTHON) -m pip install -r requirements.txt $(PIP_OPTIONS) .
 
 autohintexe:
 	make -C $(SRC_DIR)
