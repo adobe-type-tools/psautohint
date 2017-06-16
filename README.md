@@ -27,7 +27,7 @@ Alternatively to install them for the current user:
 
 The authinter can be used by running:
 
-    autohint
+    psautohint
 
 The old `autohintexe` binary can also be built by running:
 

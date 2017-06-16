@@ -60,7 +60,7 @@ setup(name="psautohint",
       ext_modules=[module1],
       entry_points={
           'console_scripts': [
-              "autohint = psautohint.autohint:main",
+              "psautohint = psautohint.autohint:main",
           ],
       },
       install_requires=[
