@@ -1,6 +1,6 @@
 build_script:
   - pip install -v .
-  - autohint -u
+  - psautohint -u
 # - set PATH=%PATH%;C:\cygwin\bin
 # - make PYTHON=python check
 
