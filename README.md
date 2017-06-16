@@ -13,14 +13,21 @@ Still a work in progress. Use at your own risk!
 This repository currently consists of a core autohinter written in C, a Python C
 extension providing an interface to it, and helper Python code.
 
-To build and install the C extension:
+To build the C extension:
 
-    python setup.py install --user
+    make build
 
-The Python helpers are not currently installed, the authinter can be used by
-running:
+To install the C extension and the helper scripts globally:
 
-    python python/autohint.py
+    make install
+
+Alternatively to install them for the current user:
+
+    make PIP_OPTIONS=--user install
+
+The authinter can be used by running:
+
+    autohint
 
 The old `autohintexe` binary can also be built by running:
 
