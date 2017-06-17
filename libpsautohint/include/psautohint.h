@@ -109,7 +109,17 @@ typedef void (*AC_REPORTZONEPTR)(int top, int bottom, char* glyphName);
 
 ACLIB_API void  AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB);
 
+/*
+ * Function: AC_SetReportRetryCB
+ *
+ * If this is called, then the AC lib will call this function when it wants to
+ * discard the previous log content and start from scratch.
+ *
+ * This is to be used when AC_SetReportZonesCB or AC_SetReportStemsCB are used.
+ */
 typedef void (*AC_RETRYPTR)(void);
+
+ACLIB_API void AC_SetReportRetryCB(AC_RETRYPTR retryCB);
 
 /*
  * Function: AutoColorString

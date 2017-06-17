@@ -280,6 +280,12 @@ AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB)
     gDoStems = false;
 }
 
+ACLIB_API void
+AC_SetReportRetryCB(AC_RETRYPTR retryCB)
+{
+    gReportRetryCB = retryCB;
+}
+
 /*
  * This is our error handler, it gets called by LogMsg() whenever the log level
  * is LOGERROR (see logging.c for the exact condition). The call to longjmp()

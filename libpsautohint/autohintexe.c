@@ -22,8 +22,7 @@ typedef unsigned char bool;
 #define false 0
 #endif
 
-/*#include "psautohint.h"*/
-#include "ac.h"
+#include "psautohint.h"
 
 const char* C_ProgramVersion = "1.65240";
 const char* reportExt = ".rpt";
@@ -356,12 +355,12 @@ main(int argc, char* argv[])
                 fileSuffix = (char*)reportExt;
                 switch (current_arg[2]) {
                     case 'a':
-                        gReportRetryCB = reportRetry;
+                        AC_SetReportRetryCB(reportRetry);
                         AC_SetReportZonesCB(charZoneCB, stemZoneCB);
                         report = true;
                         break;
                     case 's':
-                        gReportRetryCB = reportRetry;
+                        AC_SetReportRetryCB(reportRetry);
                         AC_SetReportStemsCB(hstemCB, vstemCB, allStems);
                         report = true;
                         break;
