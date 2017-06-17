@@ -42,24 +42,24 @@ FRnd(int32_t x)
 static void
 WriteString(char* str)
 {
-    if (!bezoutput) {
+    if (!gBezOutput) {
         LogMsg(LOGERROR, FATALERROR,
                "NULL output buffer while writing glyph: %s", gGlyphName);
         return;
     }
 
-    if ((bezoutput->length + strlen(str)) >= bezoutput->capacity) {
+    if ((gBezOutput->length + strlen(str)) >= gBezOutput->capacity) {
         size_t desiredsize =
-          NUMMAX(bezoutput->capacity * 2, bezoutput->capacity + strlen(str));
-        bezoutput->data =
-          ReallocateMem(bezoutput->data, desiredsize, "output bez data");
-        if (bezoutput->data)
-            bezoutput->capacity = desiredsize;
+          NUMMAX(gBezOutput->capacity * 2, gBezOutput->capacity + strlen(str));
+        gBezOutput->data =
+          ReallocateMem(gBezOutput->data, desiredsize, "output bez data");
+        if (gBezOutput->data)
+            gBezOutput->capacity = desiredsize;
         else
             return; /*FATAL ERROR*/
     }
-    strcat(bezoutput->data, str);
-    bezoutput->length += strlen(str);
+    strcat(gBezOutput->data, str);
+    gBezOutput->length += strlen(str);
 }
 
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal places. */

@@ -183,7 +183,7 @@ typedef struct {
 
 /* global data */
 
-extern ACBuffer* bezoutput;
+extern ACBuffer* gBezOutput;
 
 extern PPathElt gPathStart, gPathEnd;
 extern bool gYgoesUp;
@@ -212,7 +212,7 @@ extern AC_REPORTFUNCPTR gLibReportCB;
 extern AC_REPORTFUNCPTR gLibErrorReportCB;
 
 /* if false, then stems defined by curves are excluded from the reporting */
-extern unsigned int allstems;
+extern unsigned int gAllStems;
 
 extern AC_REPORTSTEMPTR gAddHStemCB;
 extern AC_REPORTSTEMPTR gAddVStemCB;

@@ -12,7 +12,7 @@
 void
 AddVStem(Fixed top, Fixed bottom, bool curved)
 {
-    if (curved && !allstems)
+    if (curved && !gAllStems)
         return;
 
     if (gAddVStemCB != NULL) {
@@ -23,7 +23,7 @@ AddVStem(Fixed top, Fixed bottom, bool curved)
 void
 AddHStem(Fixed right, Fixed left, bool curved)
 {
-    if (curved && !allstems)
+    if (curved && !gAllStems)
         return;
 
     if (gAddHStemCB != NULL) {

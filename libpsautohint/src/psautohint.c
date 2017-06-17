@@ -14,7 +14,7 @@
 
 static const char* libversion = "1.6.0";
 
-ACBuffer* bezoutput = NULL;
+ACBuffer* gBezOutput = NULL;
 
 bool gScalingHints = false;
 
@@ -258,7 +258,7 @@ ACLIB_API void
 AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB,
                     unsigned int allStems)
 {
-    allstems = allStems;
+    gAllStems = allStems;
     gAddHStemCB = hstemCB;
     gAddVStemCB = vstemCB;
     gDoStems = true;
@@ -332,20 +332,20 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     } else if (value == 1) {
         /* AutoColor was called successfully */
         FreeFontInfo(fontinfo);
-        if (bezoutput->length < *length) {
-            *length = bezoutput->length + 1;
-            strncpy(dstbezdata, bezoutput->data, *length);
-            FreeBuffer(bezoutput);
+        if (gBezOutput->length < *length) {
+            *length = gBezOutput->length + 1;
+            strncpy(dstbezdata, gBezOutput->data, *length);
+            FreeBuffer(gBezOutput);
             return AC_Success;
         } else {
-            *length = bezoutput->length + 1;
-            FreeBuffer(bezoutput);
+            *length = gBezOutput->length + 1;
+            FreeBuffer(gBezOutput);
             return AC_DestBuffOfloError;
         }
     }
 
-    bezoutput = NewBuffer(*length);
-    if (!bezoutput) {
+    gBezOutput = NewBuffer(*length);
+    if (!gBezOutput) {
         FreeFontInfo(fontinfo);
         return AC_MemoryError;
     }
