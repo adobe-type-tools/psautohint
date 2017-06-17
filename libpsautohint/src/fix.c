@@ -100,14 +100,7 @@ CheckForNearBands(Fixed loc, Fixed* blues, int32_t numblues)
     for (i = 0; i < numblues; i++) {
         if ((bottom && loc >= blues[i] - bFuzz && loc < blues[i]) ||
             (!bottom && loc <= blues[i] + bFuzz && loc > blues[i])) {
-#if 0
-     ReportBandError(bottom? "below" : "above", loc, blues[i]);
-#else
             ReportBandNearMiss(bottom ? "below" : "above", loc, blues[i]);
-#endif
-#if 0
-      bandError = true;
-#endif
         }
         bottom = !bottom;
     }

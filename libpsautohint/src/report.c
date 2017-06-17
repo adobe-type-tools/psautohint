@@ -544,12 +544,6 @@ ReportRemHSeg(Fixed from, Fixed to, Fixed loc)
 }
 
 void
-ReportBandError(char* str, Fixed loc, Fixed blu)
-{
-    ReportError("Near miss %s horizontal zone at %g instead of %g.", str,
-                FixToDbl(loc), FixToDbl(blu));
-}
-void
 ReportBandNearMiss(char* str, Fixed loc, Fixed blu)
 {
     ReportError("Near miss %s horizontal zone at %g instead of %g.", str,

@@ -16,10 +16,12 @@ CFLAGS = \
 	-I$(SRC_DIR)/include \
 	-I$(SRC_DIR)/src \
 	-Wall \
+	-Wextra \
+	-Wpedantic \
 	-Wdeclaration-after-statement \
 	-Wstrict-prototypes \
-	-Wextra \
 	-Wunused-macros \
+	-Wmissing-prototypes \
 	-O3 \
 	$(NULL)
 

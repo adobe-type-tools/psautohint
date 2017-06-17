@@ -405,11 +405,7 @@ void ReportBestCP(PPathElt e, PPathElt cp);
 void LogColorInfo(PClrPoint pl);
 void ReportAddVSeg(Fixed from, Fixed to, Fixed loc, int32_t i);
 void ReportAddHSeg(Fixed from, Fixed to, Fixed loc, int32_t i);
-#if 0
-void ReportBandError(char *str, Fixed loc, Fixed blu);
-#else
 void ReportBandNearMiss(char* str, Fixed loc, Fixed blu);
-#endif
 void ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t,
                         bool curve);
 void ReportColorConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch);

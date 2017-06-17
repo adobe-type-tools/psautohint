@@ -160,7 +160,7 @@ wrtya(Fixed y)
 static char hintmaskstr[HINTMAXSTR];
 static char prevhintmaskstr[HINTMAXSTR];
 
-void
+static void
 safestrcat(char* s1, char* s2)
 {
     if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
@@ -322,7 +322,7 @@ wrtnewclrs(const ACFontInfo* fontinfo, PPathElt e)
     }
 }
 
-bool
+static bool
 IsFlex(PPathElt e)
 {
     PPathElt e0, e1;

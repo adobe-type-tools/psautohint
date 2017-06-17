@@ -397,7 +397,7 @@ ReadHintInfo(char nm, const char* str)
 
 /*Used instead of StringEqual to keep ac from cloberring source string*/
 
-int
+static int
 isPrefix(const char* s, const char* pref)
 {
     while (*pref) {
