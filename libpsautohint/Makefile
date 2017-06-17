@@ -25,6 +25,12 @@ CFLAGS = \
 	-O3 \
 	$(NULL)
 
+ifeq ($(firstword $(shell $(CC) --version)),clang)
+CFLAGS += \
+	-Wunreachable-code-break \
+	$(NULL)
+endif
+
 ifeq ($(OS),Windows_NT)
 EXE = .exe
 else

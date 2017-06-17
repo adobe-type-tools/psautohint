@@ -274,11 +274,9 @@ main(int argc, char* argv[])
             case 'u':
                 printUsage();
                 exit(0);
-                break;
             case 'h':
                 printHelp();
                 exit(0);
-                break;
             case 'e':
                 allowEdit = false;
                 break;
@@ -367,8 +365,6 @@ main(int argc, char* argv[])
             case 'v':
                 printVersions();
                 exit(0);
-                break;
-                break;
             default:
                 fprintf(stdout, "Error. %s is an invalid parameter.\n",
                         current_arg);
