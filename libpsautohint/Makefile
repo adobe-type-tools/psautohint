@@ -28,6 +28,7 @@ CFLAGS = \
 ifeq ($(firstword $(shell $(CC) --version)),clang)
 CFLAGS += \
 	-Wunreachable-code-break \
+	-Wmissing-variable-declarations \
 	$(NULL)
 endif
 

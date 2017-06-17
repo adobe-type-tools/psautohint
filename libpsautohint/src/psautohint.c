@@ -12,13 +12,13 @@
 #include "ac.h"
 #include "psautohint.h"
 
-const char* libversion = "1.6.0";
+static const char* libversion = "1.6.0";
 
 ACBuffer* bezoutput = NULL;
 
 bool gScalingHints = false;
 
-jmp_buf aclibmark; /* to handle exit() calls in the library version*/
+static jmp_buf aclibmark; /* to handle exit() calls in the library version*/
 
 #define skipblanks()                                                           \
     while (*current == '\t' || *current == '\n' || *current == ' ' ||          \

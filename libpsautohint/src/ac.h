@@ -183,6 +183,8 @@ typedef struct {
 
 /* global data */
 
+extern ACBuffer* bezoutput;
+
 extern PPathElt gPathStart, gPathEnd;
 extern bool gYgoesUp;
 extern bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix;

@@ -13,19 +13,17 @@
 
 #define WRTABS_COMMENT (0)
 
-Fixed currentx, currenty;
-bool firstFlex, wrtColorInfo;
+static Fixed currentx, currenty;
+static bool firstFlex, wrtColorInfo;
 #define MAXS0LEN 127
-char S0[MAXS0LEN + 1];
-PClrPoint bst;
-PClrPoint prv_bst;
-char bch;
-Fixed bx, by;
-bool bstB;
-int16_t subpathcount;
-extern ACBuffer* bezoutput;
+static char S0[MAXS0LEN + 1];
+static PClrPoint bst;
+static char bch;
+static Fixed bx, by;
+static bool bstB;
+static int16_t subpathcount;
 
-int writeAbsolute = 1;
+static int writeAbsolute = 1;
 
 int32_t
 FRnd(int32_t x)
@@ -395,8 +393,8 @@ dt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
     }
 }
 
-Fixed flX, flY;
-Cd fc1, fc2, fc3;
+static Fixed flX, flY;
+static Cd fc1, fc2, fc3;
 
 #define wrtpreflx2(c)                                                          \
     wrtcd(c);                                                                  \

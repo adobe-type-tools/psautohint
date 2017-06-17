@@ -16,14 +16,14 @@
 
 #include "psautohint.h"
 
-const char* C_ProgramVersion = "1.65240";
-const char* reportExt = ".rpt";
-const char* dfltExt = ".new";
-char* bezName = NULL;
-char* fileSuffix = NULL;
-FILE* reportFile = NULL;
+static const char* C_ProgramVersion = "1.65240";
+static const char* reportExt = ".rpt";
+static const char* dfltExt = ".new";
+static char* bezName = NULL;
+static char* fileSuffix = NULL;
+static FILE* reportFile = NULL;
 
-bool verbose = true; /* if true don't number of characters processed. */
+static bool verbose = true; /* if true don't number of characters processed. */
 
 static void openReportFile(char* name, char* fSuffix);
 
