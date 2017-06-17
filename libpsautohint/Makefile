@@ -5,7 +5,7 @@ OBJ_DIR = .
 SRC_DIR = .
 
 # Program
-PRG_OBJS = $(OBJ_DIR)/main.o
+PRG_OBJS = $(OBJ_DIR)/autohintexe.o
 PRG_TARGET = $(OBJ_DIR)/autohintexe$(EXE)
 PRG_LIBS = -L. -lpsautohint
 
