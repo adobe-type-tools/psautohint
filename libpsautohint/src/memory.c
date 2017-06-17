@@ -30,8 +30,8 @@ defaultAC_memmanage(void* ctxptr, void* old, size_t size)
     }
 }
 
-AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr = defaultAC_memmanage;
-void* AC_memmanageCtxPtr = NULL;
+static AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr = defaultAC_memmanage;
+static void* AC_memmanageCtxPtr = NULL;
 
 void
 setAC_memoryManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func)

@@ -14,9 +14,6 @@
 #ifndef AC_MEMORY_H_
 #define AC_MEMORY_H_
 
-extern AC_MEMMANAGEFUNCPTR AC_memmanageFuncPtr;
-extern void* AC_memmanageCtxPtr;
-
 void setAC_memoryManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 void* AllocateMem(size_t, size_t, const char*);
