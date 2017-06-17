@@ -281,6 +281,7 @@ main(int argc, char* argv[])
                 break;
             case 'e':
                 allowEdit = false;
+                break;
             case 'd':
                 roundCoords = false;
                 break;
