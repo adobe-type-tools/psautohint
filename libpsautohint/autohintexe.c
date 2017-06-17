@@ -226,7 +226,7 @@ main(int argc, char* argv[])
      static void Blues()
      */
 
-    int allowEdit, roundCoords, allowHintSub, debug, badParam, allStems;
+    bool allowEdit, roundCoords, allowHintSub, debug, badParam, allStems;
     bool argumentIsBezData = false;
     bool report = false;
     char* fontInfoFileName = NULL; /* font info file name, or suffix of
