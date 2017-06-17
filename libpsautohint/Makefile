@@ -5,10 +5,9 @@ OBJ_DIR = .
 SRC_DIR = .
 
 # Program
-PRG_SRCS = $(SRC_DIR)/main.c
 PRG_OBJS = $(OBJ_DIR)/main.o
 PRG_TARGET = $(OBJ_DIR)/autohintexe$(EXE)
-PRG_LIBS = $(LIB_TARGET)
+PRG_LIBS = -L. -lpsautohint
 
 # Library
 LIB_TARGET = $(OBJ_DIR)/libpsautohint.a
@@ -71,7 +70,7 @@ LINK    = $(if $(filter $V,1),,@echo "  LD $@ ";)$(CC)
 ARCHIVE = $(if $(filter $V,1),,@echo "  AR $@ ";)$(AR)
 
 # Program
-$(PRG_TARGET): $(PRG_OBJS) $(PRG_SRCS) $(LIB_TARGET)
+$(PRG_TARGET): $(PRG_OBJS) $(LIB_TARGET)
 	$(LINK) $(CFLAGS) -o $@ $(PRG_OBJS) $(PRG_LIBS)
 
 # Library
