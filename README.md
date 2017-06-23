@@ -30,9 +30,11 @@ The authinter can be used by running:
 
     psautohint
 
-The old `autohintexe` binary can also be built by running:
+The old `autohintexe` binary can also be built from `libpsautohint` directory:
 
-    make autohintexe
+    autoreconf -if
+    ./configure
+    make
 
 ## Testing
 

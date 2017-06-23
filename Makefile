@@ -29,15 +29,11 @@ build:
 install:
 	$(PYTHON) -m pip install -r requirements.txt -v $(PIP_OPTIONS) .
 
-autohintexe:
-	make -C $(SRC_DIR)
-
 dist: clean
 	$(PYTHON) setup.py sdist bdist_wheel
 
 clean:
 	$(PYTHON) setup.py clean --all
-	make -C $(SRC_DIR) clean
 
 check: build
 	make -C $(TST_DIR) PYTHONPATH="$(BUILD_DIR)"
