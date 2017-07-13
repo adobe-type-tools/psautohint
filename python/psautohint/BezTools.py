@@ -1,13 +1,13 @@
 from __future__ import print_function, absolute_import
 
 """
-BezTools.py v1.12 April 27 2016
+BezTools.py v1.13 July 11 2017
 
 Utilities for converting between T2 charstrings and the bez data format.
 Used by AC and focus/CheckOutlines.
 """
 __copyright__ = """\
-Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
+Copyright 2014-2017 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
 """
 
 import sys
@@ -1260,7 +1260,11 @@ class CFFFontData:
 		else:
 			fdDict.LanguageGroup = "0"
 
-		upm = int(1/pDict.FontMatrix[0])
+		if hasattr(pDict, "FontMatrix"):
+			fdDict.FontMatrix = pDict.FontMatrix
+		else:
+			fdDict.FontMatrix = pTopDict.FontMatrix
+		upm = int(1/fdDict.FontMatrix[0])
 		fdDict.OrigEmSqUnits = str(upm)
 
 		if hasattr(pTopDict, "FontName"):
