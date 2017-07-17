@@ -23,8 +23,6 @@ __copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.c
 import re
 import types
 
-from psautohint import FDKUtils
-
 
 # Tokens seen in font info file that are not part of a FDDict or GlyphSet definition.
 kBeginToken = "begin"
@@ -458,16 +456,3 @@ def mergeFDDicts(prevDictList, privateDict):
 	else:
 		privateDict.StemSnapV = None
 	return 
-	
-
-def getBlueFuzz(fPath):
-	blueFuzz = 1.0
-	command = "tx -dump -0 \"%s\"" % (fPath)
-	data = FDKUtils.runShellCmd(command)
-	if not data:
-		raise FontInfoParseError("Error: Failed getting log from tx from %s, when trying to get BlueFuzz." % (fPath))
-		
-	m = re.search(r"BlueFuzz\s+(\d+(?:\.\d+)*)", data) 
-	if m:
-		blueFuzz = int(m.group(1))
-	return blueFuzz

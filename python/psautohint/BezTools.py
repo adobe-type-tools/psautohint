@@ -1425,7 +1425,7 @@ class CFFFontData:
 		if "FDDict" in fontInfoData:
 			maxY = topDict.FontBBox[3]
 			minY = topDict.FontBBox[1]
-			blueFuzz = ConvertFontToCID.getBlueFuzz(inputPath)
+			blueFuzz = fdDict.BlueFuzz
 			fdGlyphDict, fontDictList, finalFDict = ConvertFontToCID.parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY, fontPSName, blueFuzz)
 			if finalFDict == None:
 				# If a font dict was not explicitly specified for the output font,
