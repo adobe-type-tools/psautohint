@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 #else
-#define ACLIB_API  
+#define ACLIB_API
 #endif
 
 enum 
@@ -64,7 +64,7 @@ ACLIB_API const char * AC_getVersion(void);
  */
 typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, size_t size);
 
-ACLIB_API void  AC_SetMemManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
+ACLIB_API void AC_SetMemManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 /*
  * Function: AC_SetReportCB
@@ -76,7 +76,7 @@ ACLIB_API void  AC_SetMemManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
  */
 typedef void (*AC_REPORTFUNCPTR)(char *msg);
 
-ACLIB_API void  AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose);
+ACLIB_API void AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose);
 
 /*
  * Function: AC_SetReportStemsCB
@@ -93,7 +93,7 @@ ACLIB_API void  AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose);
  */
 typedef void (*AC_REPORTSTEMPTR)(int top, int bottom, char* glyphName);
 
-ACLIB_API void  AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB, unsigned int allStems);
+ACLIB_API void AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB, unsigned int allStems);
 
 /*
  * Function: AC_SetReportZonesCB
@@ -107,7 +107,7 @@ ACLIB_API void  AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR v
  */
 typedef void (*AC_REPORTZONEPTR)(int top, int bottom, char* glyphName);
 
-ACLIB_API void  AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB);
+ACLIB_API void AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB);
 
 /*
  * Function: AC_SetReportRetryCB
