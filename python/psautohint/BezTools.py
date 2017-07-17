@@ -15,7 +15,6 @@ import re
 import os
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 
-from psautohint import FDKUtils
 from psautohint import ConvertFontToCID
 
 debug = 0
@@ -1227,17 +1226,6 @@ class CFFFontData:
 					tf = open(outFilePath, "wb")
 					tf.write(data)
 					tf.close()
-
-			elif fontType == 2: # PS.
-				tf = open(tempPath, "wb")
-				tf.write(data)
-				tf.close()
-				finalPath = outFilePath
-				command="tx -t1 -std \"%s\" \"%s\"" % (tempPath, outFilePath)
-				report = FDKUtils.runShellCmd(command)
-				self.logMsg(report)
-				if "fatal" in report:
-					raise IOError("Failed to convert hinted font temp file with tx %s. Maybe target font font file '%s' is set to read-only. %s" % (tempPath, outFilePath, report))
 
 			if os.path.exists(tempPath):
 				os.remove(tempPath)

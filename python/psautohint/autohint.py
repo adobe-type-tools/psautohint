@@ -939,7 +939,7 @@ def openUFOFile(path, outFilePath, useHashMap, options):
 	# Check if has glyphs/contents.plist
 	contentsPath = os.path.join(path, "glyphs", "contents.plist")
 	if not os.path.exists(contentsPath):
-		msg = "Font file must be a PS, CFF, OTF, or ufo font file: %s." % (path)
+		msg = "Font file must be a CFF, OTF, or ufo font file: %s." % (path)
 		logMsg(msg)
 		raise ACFontError(msg)
 
@@ -965,11 +965,10 @@ def openOpenTypeFile(path, outFilePath, options):
 	from psautohint.BezTools import CFFFontData
 	from fontTools.ttLib import TTFont, getTableModule
 
-	# If input font is CFF or PS, build a dummy ttFont in memory.
+	# If input font is CFF, build a dummy ttFont in memory.
 	# Return ttFont, and flag if is a real OTF font.
-	# Return flag is 0 if OTF, 1 if CFF, and 2 if PS.
+	# Return flag is 0 if OTF, and 1 if CFF.
 	fontType = 0 # OTF
-	tempPathCFF = path + kTempCFFSuffix
 	try:
 		ff = open(path, "rb")
 		data = ff.read(10)
@@ -995,25 +994,12 @@ def openOpenTypeFile(path, outFilePath, options):
 		# It is not an OTF file.
 		if (data[0] == b'\1') and (data[1] == b'\0'): # CFF file
 			fontType = 1
-			tempPathCFF = path
-		elif not b"%" in data:
-			#not a PS file either
-			logMsg("Font file must be a PS, CFF or OTF fontfile: %s." % path)
-			raise ACFontError("Font file must be PS, CFF or OTF file: %s." % path)
-
-		else: # It is a PS file. Convert to CFF.
-			from psautohint import FDKUtils
-			fontType = 2
-			print("Converting Type1 font to temp CFF font file...")
-			command="tx -cff +b -std \"%s\" \"%s\"" % (path, tempPathCFF)
-			report = FDKUtils.runShellCmd(command)
-			if "fatal" in report:
-				logMsg("Attempted to convert font %s from PS to a temporary CFF data file." % path)
-				logMsg(report)
-				raise ACFontError("Failed to convert PS font %s to a temp CFF font." % path)
+		else:
+			logMsg("Font file must be a CFF or OTF fontfile: %s." % path)
+			raise ACFontError("Font file must be CFF or OTF file: %s." % path)
 
 		# now package the CFF font as an OTF font.
-		ff = open(tempPathCFF, "rb")
+		ff = open(path, "rb")
 		data = ff.read()
 		ff.close()
 		try:
@@ -1135,8 +1121,6 @@ def hintFile(options):
 				logMsg(gTxt)
 		else:
 			logMsg("There are no user-defined FontDict Values.")
-		tempPathCFF = options.inputPath + kTempCFFSuffix
-		removeTempFiles([tempPathCFF])
 		fontData.close()
 		return
 
@@ -1312,10 +1296,6 @@ def hintFile(options):
 
 	if not options.verbose and not options.quiet:
 		print("") # print final new line after progress dots.
-
-	if not options.debug:
-		tempPathCFF = options.inputPath + kTempCFFSuffix # created when a PS file is opened.
-		removeTempFiles([tempPathCFF])
 
 	if not options.logOnly:
 		if anyGlyphChanged:
