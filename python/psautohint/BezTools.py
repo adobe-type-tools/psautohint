@@ -1241,6 +1241,7 @@ class CFFFontData:
 
 			if os.path.exists(tempPath):
 				os.remove(tempPath)
+
 	def close(self):
 		self.ttFont.close()
 
