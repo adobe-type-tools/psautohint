@@ -13,6 +13,7 @@ matrix:
       os: osx
 
 script:
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then pip install --user wheel; fi
   - make check
   - make dist
   - unzip dist/psautohint-$(python setup.py -V).zip
