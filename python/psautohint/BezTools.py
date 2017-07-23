@@ -14,6 +14,7 @@ import sys
 import re
 import os
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
+from fontTools.misc.py23 import *
 
 from psautohint import ConvertFontToCID
 
@@ -35,7 +36,7 @@ def hintOn(i, hintMaskBytes):
 	# used to add the active hints to the bez string,
 	# when a T2 hintmask operator is encountered.
 	byteIndex = int(i/8)
-	byteValue = ord(hintMaskBytes[byteIndex])
+	byteValue = byteord(hintMaskBytes[byteIndex])
 	offset = 7 - (i %8)
 	return ((2**offset) & byteValue) > 0
 
@@ -239,7 +240,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		if not self.removeHints:
 			curhhints, curvhints = self.getCurHints(self.hintMaskString)
 			strout = ""
-			mask = [strout + hex(ord(ch)) for ch in self.hintMaskString]
+			mask = [strout + hex(byteord(ch)) for ch in self.hintMaskString]
 			debugMsg(bezCommand, mask, curhhints, curvhints, args)
 
 			self.bezProgram.append("beginsubr snc\n")
@@ -302,7 +303,7 @@ class HintMask:
 		maskVal = 0
 		byteIndex = 0
 		self.byteLength = byteLength = int((7 + numHHints + numVHints)/8)
-		mask = ""
+		mask = b""
 		self.hList.sort()
 		for hint in self.hList:
 			try:
@@ -311,10 +312,10 @@ class HintMask:
 				continue	# we get here if some hints have been dropped because of the stack limit
 			newbyteIndex = int(i/8)
 			if newbyteIndex != byteIndex:
-				mask += chr(maskVal)
+				mask += bytechr(maskVal)
 				byteIndex += 1
 				while byteIndex < newbyteIndex:
-					mask += "\0"
+					mask += b"\0"
 					byteIndex += 1
 				maskVal = 0
 			maskVal += 2**(7 - (i %8))
@@ -325,21 +326,21 @@ class HintMask:
 				i = numHHints + vHints.index(hint)
 			except ValueError:
 				continue	# we get here if some hints have been dropped because of the stack limit
-			newbyteIndex = (i/8)
+			newbyteIndex = int(i/8)
 			if newbyteIndex != byteIndex:
-				mask += chr(maskVal)
+				mask += bytechr(maskVal)
 				byteIndex += 1
 				while byteIndex < newbyteIndex:
-					mask += "\0"
+					mask += b"\0"
 					byteIndex += 1
 				maskVal = 0
 			maskVal += 2**(7 - (i %8))
 
 		if maskVal:
-			mask += chr(maskVal)
+			mask += bytechr(maskVal)
 
 		if len(mask) < byteLength:
-			mask += "\0"*(byteLength - len(mask))
+			mask += b"\0"*(byteLength - len(mask))
 		self.mask = mask
 		return mask
 
