@@ -185,7 +185,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		return hintMaskString, index
 
 	def countHints(self, args):
-		self.hintCount = self.hintCount + len(args) / 2
+		self.hintCount = self.hintCount + int(len(args) / 2)
 
 def convertT2GlyphToBez(t2CharString, allowDecimals = 0):
 	# wrapper for T2ToBezExtractor which applies it to the supplied T2 charstring
