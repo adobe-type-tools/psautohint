@@ -426,7 +426,7 @@ class UFOFontData:
 				hasHints = 1
 		return hasHints
 
-	def convertToBez(self, glyphName, removeHints, beVerbose, doAll = 0):
+	def convertToBez(self, glyphName, beVerbose, doAll = 0):
 		# convertGLIFToBez does not yet support hints - no need for removeHints arg.
 		bezString, width = convertGLIFToBez(self, glyphName, beVerbose, doAll)
 		hasHints = self.checkForHints(glyphName)

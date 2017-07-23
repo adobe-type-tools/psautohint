@@ -48,12 +48,11 @@ class T2ToBezExtractor(T2OutlineExtractor):
 	# Note: flex is converted to regular rrcurveto's.
 	# cntrmasks just map to hint replacement blocks with the specified stems.
 	def __init__(self, localSubrs, globalSubrs, nominalWidthX, defaultWidthX,
-					removeHints=0, allowDecimals=0):
+					allowDecimals=0):
 		T2OutlineExtractor.__init__(self, None, localSubrs, globalSubrs, nominalWidthX, defaultWidthX)
 		self.vhints = []
 		self.hhints = []
 		self.bezProgram = []
-		self.removeHints = removeHints
 		self.firstMarkingOpSeen = 0
 		self.closePathSeen = 0
 		self.subrLevel = 0
@@ -132,6 +131,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 			debugMsg("endPath")
 			self.bezProgram.append("cp\n")
 		self.sawMoveTo = 0
+
 	def closePath(self):
 		self.closePathSeen = 1
 		debugMsg("closePath")
@@ -139,92 +139,29 @@ class T2ToBezExtractor(T2OutlineExtractor):
 			self.bezProgram.append("cp\n")
 		self.bezProgram.append("ed\n")
 
-	def updateHints(self, args, hintList, bezCommand, writeHints = 1):
-		self.countHints(args)
-
-		# first hint value is absolute hint coordinate, second is hint width
-		if self.removeHints:
-			writeHints = 0
-
-		if not writeHints:
-			return
-
-		lastval = args[0]
-		if type(lastval) == int:
-			lastval = float(lastval)/0x10000
-			arg = str(lastval) + " 100 div"
-		else:
-			arg = str(lastval)
-		hintList.append(arg)
-		self.bezProgram.append(arg)
-
-		for i in range(len(args))[1:]:
-			val = args[i]
-			if type(val) == int:
-				val = float(val)/0x10000
-			newVal = lastval + val
-			lastval = newVal
-
-			if i % 2:
-				if (type(val) == float):
-					if (int(val) != val):
-						arg = str(int(val*100)) + " 100 div"
-					else:
-						arg = str(int(val))
-				else:
-					arg = str(val)
-				hintList.append(arg)
-				self.bezProgram.append(arg)
-				self.bezProgram.append(bezCommand + "\n")
-			else:
-				if (type(newVal) == float):
-					if (int(newVal) != newVal):
-						arg = str(int(newVal*100)) + " 100 div"
-					else:
-						arg = str(int(newVal))
-				else:
-					arg = str(newVal)
-				hintList.append(arg)
-				self.bezProgram.append(arg)
-
-
 	def op_hstem(self, index):
 		args = self.popallWidth()
 		self.hhints = []
-		self.updateHints(args, self.hhints, "rb")
+		self.countHints(args)
 		debugMsg("hstem", self.hhints)
 
 	def op_vstem(self, index):
 		args = self.popallWidth()
 		self.vhints = []
-		self.updateHints(args, self.vhints, "ry")
+		self.countHints(args)
 		debugMsg("vstem", self.vhints)
 
 	def op_hstemhm(self, index):
 		args = self.popallWidth()
 		self.hhints = []
-		self.updateHints(args, self.hhints, "rb")
+		self.countHints(args)
 		debugMsg("stemhm", self.hhints, args)
 
 	def op_vstemhm(self, index):
 		args = self.popallWidth()
 		self.vhints = []
-		self.updateHints(args, self.vhints, "ry")
+		self.countHints(args)
 		debugMsg("vstemhm", self.vhints, args)
-
-	def getCurHints(self, hintMaskBytes):
-		curhhints = []
-		curvhints = []
-		numhhints = len(self.hhints)
-
-		for i in range(numhhints/2):
-			if hintOn(i, hintMaskBytes):
-				curhhints.extend(self.hhints[2*i:2*i+2])
-		numvhints = len(self.vhints)
-		for i in range(numvhints/2):
-			if hintOn(i + numhhints/2, hintMaskBytes):
-				curvhints.extend(self.vhints[2*i:2*i+2])
-		return curhhints, curvhints
 
 	def doMask(self, index, bezCommand):
 		args = []
@@ -232,31 +169,11 @@ class T2ToBezExtractor(T2OutlineExtractor):
 			args = self.popallWidth()
 			if args:
 				self.vhints = []
-				self.updateHints(args, self.vhints, "ry")
+				self.countHints(args)
 			self.hintMaskBytes = int((self.hintCount + 7) / 8)
 
 		self.hintMaskString, index = self.callingStack[-1].getBytes(index, self.hintMaskBytes)
 
-		if not self.removeHints:
-			curhhints, curvhints = self.getCurHints(self.hintMaskString)
-			strout = ""
-			mask = [strout + hex(byteord(ch)) for ch in self.hintMaskString]
-			debugMsg(bezCommand, mask, curhhints, curvhints, args)
-
-			self.bezProgram.append("beginsubr snc\n")
-			i = 0
-			for hint in curhhints:
-				self.bezProgram.append(str(hint))
-				if i %2:
-					self.bezProgram.append("rb\n")
-				i += 1
-			i = 0
-			for hint in curvhints:
-				self.bezProgram.append(str(hint))
-				if i %2:
-					self.bezProgram.append("ry\n")
-				i += 1
-			self.bezProgram.extend(["endsubr enc\n", "newcolors\n"])
 		return self.hintMaskString, index
 
 	def op_hintmask(self, index):
@@ -267,11 +184,10 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		hintMaskString, index = self.doMask(index, "cntrmask")
 		return hintMaskString, index
 
-
 	def countHints(self, args):
 		self.hintCount = self.hintCount + len(args) / 2
 
-def convertT2GlyphToBez(t2CharString, removeHints = 0, allowDecimals = 0):
+def convertT2GlyphToBez(t2CharString, allowDecimals = 0):
 	# wrapper for T2ToBezExtractor which applies it to the supplied T2 charstring
 	bezString = ""
 	subrs = getattr(t2CharString.private, "Subrs", [])
@@ -280,7 +196,6 @@ def convertT2GlyphToBez(t2CharString, removeHints = 0, allowDecimals = 0):
 				t2CharString.globalSubrs,
 				t2CharString.private.nominalWidthX,
 				t2CharString.private.defaultWidthX,
-				removeHints,
 				allowDecimals)
 	extractor.execute(t2CharString)
 	if extractor.gotWidth:
@@ -1100,14 +1015,13 @@ class CFFFontData:
 		psName = self.cffTable.cff.fontNames[0]
 		return psName
 
-	def convertToBez(self, glyphName, removeHints, beVerbose, doAll=False):
+	def convertToBez(self, glyphName, beVerbose, doAll=False):
 		hasHints = 0
 		t2Wdth = None
 		gid = self.charStrings.charStrings[glyphName]
 		t2CharString = self.charStringIndex[gid]
 		try:
 			bezString, hasHints, t2Wdth = convertT2GlyphToBez(t2CharString,
-														removeHints,
 														self.allowDecimalCoords)
 			# Note: the glyph name is important, as it is used by autohintexe
 			# for various heuristics, including [hv]stem3 derivation.
@@ -1386,13 +1300,12 @@ def test():
 	cffTable = ttFont["CFF "]
 	topDict = cffTable.cff.topDictIndex[0]
 	charStrings = topDict.CharStrings
-	removeHints = 0
 
 	for glyphName in glyphNames:
 		print()
 		print(glyphName)
 		t2CharString = charStrings[glyphName]
-		bezString, hasHints, t2Width = convertT2GlyphToBez(t2CharString, removeHints)
+		bezString, hasHints, t2Width = convertT2GlyphToBez(t2CharString)
 		#print(bezString)
 		t2Program = convertBezToT2(bezString)
 		if t2Width != None:

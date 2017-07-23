@@ -1133,7 +1133,6 @@ def hintFile(options):
 
 
 	# Get charstring for identifier in glyph-list
-	removeHints = 1
 	isCID = fontData.isCID()
 	lastFDIndex = None
 	anyGlyphChanged = 0
@@ -1171,7 +1170,7 @@ def hintFile(options):
 		seenGlyphCount += 1
 
 		# Convert to bez format
-		bezString, width, hasHints = fontData.convertToBez(name, removeHints,
+		bezString, width, hasHints = fontData.convertToBez(name,
 											options.verbose, options.hintAll)
 		processedGlyphCount += 1
 		if bezString == None:
