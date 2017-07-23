@@ -744,62 +744,6 @@ def optimizeT2Program(t2List):
 
 	return newT2List
 
-def needsDecryption(bezDataBuffer):
-	lenBuf = len(bezDataBuffer)
-	if lenBuf > 100:
-		lenBuf = 100
-	i = 0
-	while i < lenBuf:
-		ch = bezDataBuffer[i]
-		i += 1
-		if not (ch.isspace() or ch.isdigit() or (ch in "ABCDEFabcdef")):
-			return 0
-	return 1
-
-LEN_IV = 4 #/* Length of initial random byte sequence */
-def bezDecrypt(bezDataBuffer):
-	r = 11586
-	i = 0 # input buffer byte position index
-	lenBuffer = len(bezDataBuffer)
-	byteCnt = 0 # output buffer byte count.
-	newBuffer = ""
-	while 1:
-		cipher = 0 # restricted to int
-		plain = 0 # restricted to int
-		j = 2 # used to combine two successive bytes
-
-		# process next two bytes, skipping whitespace.
-		while j > 0:
-			j -=1
-			try:
-				while bezDataBuffer[i].isspace():
-					i += 1
-				ch = bezDataBuffer[i]
-			except IndexError:
-				return newBuffer
-
-			if not ch.islower():
-				ch = ch.lower()
-			if ch.isdigit():
-				ch = ord(ch) - ord('0')
-			else:
-				ch = ord(ch) - ord('a') + 10
-			cipher = (cipher << 4) & 0xFFFF
-			cipher = cipher | ch
-			i += 1
-
-		plain = cipher ^ (r >> 8)
-		r = (cipher + r) * 902381661 + 341529579
-		if r > 0xFFFF:
-			r = r & 0xFFFF
-		byteCnt += 1
-		if (byteCnt > LEN_IV):
-			newBuffer += chr(plain)
-		if i >= lenBuffer:
-			break
-
-	return newBuffer
-
 
 kHintArgsNoOverlap = 0
 kHintArgsOverLap = 1
@@ -1464,8 +1408,6 @@ def test2():
 	fp = open(path, "rt")
 	bezString = fp.read()
 	fp.close()
-	if needsDecryption(bezString):
-		bezString = bezDecrypt(bezString)
 
 	t2Program = convertBezToT2(bezString)
 
