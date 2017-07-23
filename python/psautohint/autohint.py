@@ -479,26 +479,26 @@ class ACOptions:
 		self.inputPath = None
 		self.outputPath = None
 		self.glyphList = []
-		self.excludeGlyphList = 0
-		self.usePlistFile = 0
-		self.hintAll = 0
-		self.rehint = 0
-		self.verbose = 1
-		self.quiet = 0
-		self.allowChanges = 0
-		self.noFlex = 0
-		self.noHintSub = 0
-		self.allow_no_blues = 0
+		self.excludeGlyphList = False
+		self.usePlistFile = False
+		self.hintAll = False
+		self.rehint = False
+		self.verbose = True
+		self.quiet = False
+		self.allowChanges = False
+		self.noFlex = False
+		self.noHintSub = False
+		self.allow_no_blues = False
 		self.hCounterGlyphs = []
 		self.vCounterGlyphs = []
 		self.counterHintFile = None
-		self.logOnly = 0
+		self.logOnly = False
 		self.logFilePath = None
-		self.printDefaultFDDict = 0
-		self.printFDDictList = 0
-		self.debug = 0
-		self.allowDecimalCoords = 0
-		self.writeToDefaultLayer = 0
+		self.printDefaultFDDict = False
+		self.printFDDictList = False
+		self.debug = False
+		self.allowDecimalCoords = False
+		self.writeToDefaultLayer = False
 
 class ACOptionParseError(KeyError):
 	pass
@@ -656,33 +656,33 @@ def getOptions(args=None):
 			print(__FDDoc__)
 			return
 		elif arg == "-pfd":
-			options.printDefaultFDDict = 1
+			options.printDefaultFDDict = True
 		elif arg == "-pfdl":
-			options.printFDDictList = 1
+			options.printFDDictList = True
 		elif arg == "-hf":
-			options.usePlistFile = 1
+			options.usePlistFile = True
 		elif arg == "-a":
-			options.hintAll = 1
+			options.hintAll = True
 		elif arg == "-all":
-			options.hintAll = 1
+			options.hintAll = True
 		elif arg == "-r":
-			options.rehint = 1
+			options.rehint = True
 		elif arg == "-q":
-			options.verbose = 0
+			options.verbose = False
 		elif arg == "-qq":
-			options.quiet = 1
-			options.verbose = 0
+			options.quiet = True
+			options.verbose = False
 		elif arg == "-c":
-			options.allowChanges = 1
+			options.allowChanges = True
 		elif arg == "-nf":
-			options.noFlex = 1
+			options.noFlex = True
 		elif arg == "-ns":
-			options.noHintSub = 1
+			options.noHintSub = True
 		elif arg == "-nb":
-			options.allow_no_blues = 1
+			options.allow_no_blues = True
 		elif arg in ["-xg", "-g"]:
 			if arg == "-xg":
-				options.excludeGlyphList = 1
+				options.excludeGlyphList = True
 			i = i +1
 			glyphString = args[i]
 			if glyphString[0] == "-":
@@ -690,7 +690,7 @@ def getOptions(args=None):
 			options.glyphList += parseGlyphListArg(glyphString)
 		elif arg in ["-xgf", "-gf"]:
 			if arg == "-xgf":
-				options.excludeGlyphList = 1
+				options.excludeGlyphList = True
 			i = i +1
 			filePath = args[i]
 			if filePath[0] == "-":
@@ -713,7 +713,7 @@ def getOptions(args=None):
 			except (IOError,OSError):
 				raise ACOptionParseError("Option Error: could not open counter hint glyph list file <%s>." % filePath)
 		elif arg == "-logOnly":
-			options.logOnly = 1
+			options.logOnly = True
 		elif arg == "-log":
 			i = i +1
 			options.logFilePath = args[i]
@@ -722,11 +722,11 @@ def getOptions(args=None):
 			i = i +1
 			options.outputPath = args[i]
 		elif arg == "-d":
-			options.debug = 1
+			options.debug = True
 		elif arg in ["-decimal", "-dec"]:
 			options.allowDecimalCoords = True
 		elif arg =="-wd":
-			options.writeToDefaultLayer = 1
+			options.writeToDefaultLayer = True
 		elif arg[0] == "-":
 			raise ACOptionParseError("Option Error: Unknown option <%s>." % arg)
 		else:
@@ -746,8 +746,8 @@ def getOptions(args=None):
 	checkFontinfoFile(options)
 
 	if options.logOnly:
-		options.verbose = 1
-		options.hintAll = 1
+		options.verbose = True
+		options.hintAll = True
 
 	return options
 
@@ -821,7 +821,7 @@ def openFontPlistFile(psName, dirPath):
 	# and which have changed since the last hint pass.
 	fontPlist = None
 	filePath = None
-	isNewPlistFile = 1
+	isNewPlistFile = True
 	pPath1 = os.path.join(dirPath, psName + kFontPlistSuffix)
 	if os.path.exists(pPath1):
 		filePath = pPath1
@@ -837,7 +837,7 @@ def openFontPlistFile(psName, dirPath):
 	else:
 		try:
 			fontPlist = plistlib.Plist.fromFile(filePath)
-			isNewPlistFile = 0
+			isNewPlistFile = False
 		except (IOError, OSError):
 			raise ACFontError("\tError: font plist file exists, but coud not be read <%s>." % filePath)
 		except:
@@ -1135,10 +1135,10 @@ def hintFile(options):
 	# Get charstring for identifier in glyph-list
 	isCID = fontData.isCID()
 	lastFDIndex = None
-	anyGlyphChanged = 0
-	pListChanged = 0
+	anyGlyphChanged = False
+	pListChanged = False
 	if isCID:
-		options.noFlex = 1
+		options.noFlex = True
 
 	if options.verbose:
 		verboseArg = ""
@@ -1223,7 +1223,7 @@ def hintFile(options):
 				oldBezString = oldHintBezString = ""
 			except KeyError:
 				# there wasn't an entry in tempList file, so we will add one.
-				pListChanged = 1
+				pListChanged = True
 				if hasHints and not options.rehint:
 					# Glyphs is hinted, but not referenced in the plist file.
 					# Skip it unless options.rehint is seen
@@ -1238,7 +1238,7 @@ def hintFile(options):
 				if hasHints and not (options.hintAll or options.rehint):
 					continue
 			else:
-				pListChanged = 1
+				pListChanged = True
 
 		if options.verbose:
 			if fdGlyphDict:
@@ -1278,7 +1278,7 @@ def hintFile(options):
 			continue
 
 		# Convert bez to charstring, and update CFF.
-		anyGlyphChanged = 1
+		anyGlyphChanged = True
 		fontData.updateFromBez(newBezString, name, width, options.verbose)
 
 

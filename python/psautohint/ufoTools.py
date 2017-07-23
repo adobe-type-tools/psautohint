@@ -310,7 +310,7 @@ from psautohint import ConvertFontToCID
 XML = ET.XML
 XMLElement = ET.Element
 xmlToString = ET.tostring
-debug = 0
+debug = False
 
 def debugMsg(*args):
 	if debug:
@@ -383,7 +383,7 @@ class UFOFontData:
 		self.fontDict = None
 		self.programName = programName
 		self.curSrcDir = None
-		self.hashMapChanged = 0
+		self.hashMapChanged = False
 		self.glyphDefaultDir = os.path.join(parentPath, "glyphs")
 		self.glyphLayerDir = os.path.join(parentPath, kProcessedGlyphsLayer)
 		self.glyphWriteDir = self.glyphLayerDir
@@ -416,17 +416,17 @@ class UFOFontData:
 		return 0
 
 	def checkForHints(self, glyphName):
-		hasHints = 0
+		hasHints = False
 		glyphPath = self.getGlyphProcessedPath(glyphName)
 		if glyphPath and os.path.exists(glyphPath):
 			fp = open(glyphPath, "rt")
 			data = fp.read()
 			fp.close()
 			if "hintSetList" in data:
-				hasHints = 1
+				hasHints = True
 		return hasHints
 
-	def convertToBez(self, glyphName, beVerbose, doAll = 0):
+	def convertToBez(self, glyphName, beVerbose, doAll=False):
 		# convertGLIFToBez does not yet support hints - no need for removeHints arg.
 		bezString, width = convertGLIFToBez(self, glyphName, beVerbose, doAll)
 		hasHints = self.checkForHints(glyphName)
@@ -440,7 +440,7 @@ class UFOFontData:
 	def saveChanges(self):
 		if self.hashMapChanged:
 			self.writeHashMap()
-		self.hashMapChanged = 0
+		self.hashMapChanged = False
 
 		if not os.path.exists(self.glyphWriteDir):
 			os.makedirs(self.glyphWriteDir)
@@ -587,7 +587,7 @@ class UFOFontData:
 		except KeyError:
 			hashEntry = None
 
-		self.hashMapChanged = 1
+		self.hashMapChanged = True
 		# If the program always reads data from the default layer, and we have just created a new glyph in the processed layer, then reset the history.
 		if (not self.useProcessedLayer) and changed:
 			self.hashMap[glyphName] = [srcHash, [self.programName] ]
@@ -631,7 +631,7 @@ class UFOFontData:
 				skip = True and (not doAll)
 			if not skip:
 				if not self.useProcessedLayer: # case for Checkoutlines
-					self.hashMapChanged = 1
+					self.hashMapChanged = True
 					self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
 					glyphPath = self.getGlyphProcessedPath(glyphName)
 					if glyphPath and os.path.exists(glyphPath):
@@ -653,7 +653,7 @@ class UFOFontData:
 					skip = True
 
 			# If the source hash has changed, we need to delete the processed layer glyph.
-			self.hashMapChanged = 1
+			self.hashMapChanged = True
 			self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
 			glyphPath = self.getGlyphProcessedPath(glyphName)
 			if glyphPath and os.path.exists(glyphPath):
@@ -678,7 +678,7 @@ class UFOFontData:
 			return None, None, None
 		return width, glifXML, outlineXML
 
-	def getOrSkipGlyphXML(self, glyphName, doAll = 0):
+	def getOrSkipGlyphXML(self, glyphName, doAll=False):
 		# Get default glyph layer data, so we can check if the glyph has been edited since this program was last run.
 		# If the program name is in the history list, and the srcHash matches the default glyph layer data, we can skip.
 		if len(self.glyphMap) == 0:
@@ -686,7 +686,7 @@ class UFOFontData:
 		glyphFileName = self.glyphMap[glyphName]
 		width, glifXML, outlineXML = self.getGlyphXML(self.glyphDefaultDir, glyphFileName)
 		if glifXML == None:
-			skip = 1
+			skip = True
 			return None, None, skip
 
 		useDefaultGlyphDir = True # Hash is always from the default glyph layer.
@@ -703,7 +703,7 @@ class UFOFontData:
 			if os.path.exists(glyphPath):
 				width, glifXML, outlineXML = self.getGlyphXML(self.glyphLayerDir, glyphFileName)
 				if glifXML == None:
-					skip = 1
+					skip = True
 					return None, None, skip
 
 		return width, outlineXML, skip
@@ -767,19 +767,19 @@ class UFOFontData:
 		if os.path.exists(contentsFilePath):
 			contentsList= plistlib.readPlist(contentsFilePath)
 			# If the layer name already exists, don't add a new one, or change the path
-			seenPublicDefault = 0
-			seenProcessedGlyph = 0
+			seenPublicDefault = False
+			seenProcessedGlyph = False
 			for layerName, layerPath in contentsList:
 				if (layerPath == kProcessedGlyphsLayer):
-					seenProcessedGlyph = 1
+					seenProcessedGlyph = True
 				if (layerPath == kDefaultGlyphsLayer):
-					seenPublicDefault = 1
-			update = 0
+					seenPublicDefault = True
+			update = False
 			if not seenPublicDefault:
-				update = 1
+				update = True
 				contentsList = [[kDefaultGlyphsLayerName, kDefaultGlyphsLayer]] + contentsList
 			if not seenProcessedGlyph:
-				update = 1
+				update = True
 				contentsList.append([kProcessedGlyphsLayerName, kProcessedGlyphsLayer])
 			if update:
 				plistlib.writePlist(contentsList, contentsFilePath)
@@ -1065,7 +1065,7 @@ class UFOFontData:
 	def close(self):
 		if self.hashMapChanged:
 			self.writeHashMap()
-			self.hashMapChanged = 0
+			self.hashMapChanged = False
 		return
 
 	def clearHashMap(self):
@@ -1434,7 +1434,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, le
 	return bezstring
 
 
-def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll= 0):
+def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll=False):
 	width, outlineXML, skip = ufoFontData.getOrSkipGlyphXML(glyphName, doAll)
 	if skip:
 		return None, width
@@ -1479,11 +1479,11 @@ class HintMask:
 
 		newHintSet = []
 		if (len(self.hList) > 0) or (len(self.vstem3List)):
-			isH = 1
+			isH = True
 			addHintList(self.hList, self.hstem3List, newHintSetArray, isH)
 
 		if (len(self.vList) > 0) or (len(self.vstem3List)):
-			isH = 0
+			isH = False
 			addHintList(self.vList, self.vstem3List, newHintSetArray, isH)
 
 
@@ -1616,7 +1616,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 	curY = 0
 	newOutline = XMLElement("outline")
 	outlineItem = None
-	seenHints = 0
+	seenHints = False
 
 	for token in bezList:
 		try:
@@ -1652,18 +1652,18 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 			lastPathOp = token
 			hintMask.hList.append(argList)
 			argList = []
-			seenHints = 1
+			seenHints = True
 		elif token == "ry":
 			if newHintMaskName == None:
 				newHintMaskName = hintMask.pointName
 			lastPathOp = token
 			hintMask.vList.append(argList)
 			argList = []
-			seenHints = 1
+			seenHints = True
 		elif token == "rm": # vstem3's are vhints
 			if newHintMaskName == None:
 				newHintMaskName = hintMask.pointName
-			seenHints = 1
+			seenHints = True
 			vStem3Args.append(argList)
 			argList = []
 			lastPathOp = token
@@ -1672,7 +1672,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 				vStem3Args = []
 
 		elif token == "rv": # hstem3's are hhints
-			seenHints = 1
+			seenHints = True
 			hStem3Args.append(argList)
 			argList = []
 			lastPathOp = token

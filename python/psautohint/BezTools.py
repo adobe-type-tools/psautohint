@@ -18,7 +18,7 @@ from fontTools.misc.py23 import *
 
 from psautohint import ConvertFontToCID
 
-debug = 0
+debug = False
 def debugMsg(*args):
 	if debug:
 		print(args)
@@ -48,13 +48,13 @@ class T2ToBezExtractor(T2OutlineExtractor):
 	# Note: flex is converted to regular rrcurveto's.
 	# cntrmasks just map to hint replacement blocks with the specified stems.
 	def __init__(self, localSubrs, globalSubrs, nominalWidthX, defaultWidthX,
-					allowDecimals=0):
+					allowDecimals=False):
 		T2OutlineExtractor.__init__(self, None, localSubrs, globalSubrs, nominalWidthX, defaultWidthX)
 		self.vhints = []
 		self.hhints = []
 		self.bezProgram = []
-		self.firstMarkingOpSeen = 0
-		self.closePathSeen = 0
+		self.firstMarkingOpSeen = False
+		self.closePathSeen = False
 		self.subrLevel = 0
 		self.allowDecimals = allowDecimals
 
@@ -68,7 +68,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 	def rMoveTo(self, point):
 		point = self._nextPoint(point)
 		if not self.firstMarkingOpSeen :
-			self.firstMarkingOpSeen = 1
+			self.firstMarkingOpSeen = True
 			self.bezProgram.append("sc\n")
 		debugMsg("moveto", point, "curpos", self.currentPoint)
 		x = point[0]
@@ -84,7 +84,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 	def rLineTo(self, point):
 		point = self._nextPoint(point)
 		if not self.firstMarkingOpSeen :
-			self.firstMarkingOpSeen = 1
+			self.firstMarkingOpSeen = True
 			self.bezProgram.append("sc\n")
 			self.bezProgram.append("0 0 mt\n")
 		debugMsg("lineto", point, "curpos", self.currentPoint)
@@ -104,7 +104,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		pt2 = list(self._nextPoint(pt2))
 		pt3 = list(self._nextPoint(pt3))
 		if not self.firstMarkingOpSeen :
-			self.firstMarkingOpSeen = 1
+			self.firstMarkingOpSeen = True
 			self.bezProgram.append("sc\n")
 			self.bezProgram.append("0 0 mt\n")
 		debugMsg("curveto", pt1, pt2, pt3, "curpos", self.currentPoint)
@@ -133,7 +133,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		self.sawMoveTo = 0
 
 	def closePath(self):
-		self.closePathSeen = 1
+		self.closePathSeen = True
 		debugMsg("closePath")
 		if self.bezProgram and self.bezProgram[-1] != "cp\n":
 			self.bezProgram.append("cp\n")
@@ -187,7 +187,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
 	def countHints(self, args):
 		self.hintCount = self.hintCount + int(len(args) / 2)
 
-def convertT2GlyphToBez(t2CharString, allowDecimals = 0):
+def convertT2GlyphToBez(t2CharString, allowDecimals=False):
 	# wrapper for T2ToBezExtractor which applies it to the supplied T2 charstring
 	bezString = ""
 	subrs = getattr(t2CharString.private, "Subrs", [])
@@ -612,18 +612,16 @@ def optimizeT2Program(t2List):
 			if pendingOp != kNoOp:
 				newT2List.append([arglist, pendingOp])
 				arglist = []
-			noFlex = 1
-			noDY = 1
+			noFlex = True
 			if (dy3 == 0 == dy4):
 				if (dy1 == dy6 == 0) and (dy2 == -dy5):
 						newT2List.append([[dx1, dx2, dy2, dx3, dx4, dx5, dx6], "hflex"]) # the device pixel threshold is always 50 , when coming back from AC.
-						noFlex = 0
+						noFlex = False
 				else:
 					dy = dy1 + dy2 + dy3 + dy4 + dy5 + dy6
-					noDY = 0
 					if dy == 0:
 						newT2List.append([[dx1, dy1, dx2, dy2, dx3, dx4, dx5, dy5, dx6], "hflex1"])
-						noFlex = 0
+						noFlex = False
 
 			if noFlex:
 				if 0:
@@ -1016,7 +1014,7 @@ class CFFFontData:
 		return psName
 
 	def convertToBez(self, glyphName, beVerbose, doAll=False):
-		hasHints = 0
+		hasHints = False
 		t2Wdth = None
 		gid = self.charStrings.charStrings[glyphName]
 		t2CharString = self.charStringIndex[gid]
@@ -1054,9 +1052,9 @@ class CFFFontData:
 		inputPath = self.inputPath
 		outFilePath = self.outFilePath
 
-		overwriteOriginal = 0
+		overwriteOriginal = False
 		if inputPath == outFilePath:
-			overwriteOriginal = 1
+			overwriteOriginal = True
 		tempPath = inputPath + ".temp.ac"
 
 		if fontType == 0: # OTF
