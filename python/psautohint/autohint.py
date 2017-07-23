@@ -1140,27 +1140,9 @@ def hintFile(options):
 	if isCID:
 		options.noFlex = True
 
-	if options.verbose:
-		verboseArg = ""
-	else:
-		verboseArg = " -q"
+	if not options.verbose:
 		dotCount = 0
 		curTime = time.time()
-
-	if options.allowChanges:
-		suppressEditArg = ""
-	else:
-		suppressEditArg = " -e"
-
-	if options.noHintSub:
-		supressHintSubArg = " -n"
-	else:
-		supressHintSubArg = ""
-
-	if options.allowDecimalCoords:
-		decimalArg = " -d"
-	else:
-		decimalArg = ""
 
 	dotCount = 0
 	seenGlyphCount = 0
