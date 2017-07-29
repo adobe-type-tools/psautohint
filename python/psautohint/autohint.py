@@ -57,6 +57,7 @@ class ACOptions:
 		self.inputPath = None
 		self.outputPath = None
 		self.glyphList = []
+		self.nameAliases = {}
 		self.excludeGlyphList = False
 		self.usePlistFile = False
 		self.hintAll = False
@@ -118,70 +119,6 @@ def logMsg(*args):
 			if gLogFile:
 				gLogFile.write(msg + os.linesep)
 				gLogFile.flush()
-
-
-global nameAliasDict
-nameAliasDict = {}
-
-
-def aliasName(glyphName):
-	if nameAliasDict:
-		alias = nameAliasDict.get(glyphName, glyphName)
-		return alias
-	return glyphName
-
-
-def expandNames(glyphName):
-	global nameAliasDict
-
-	glyphRange = glyphName.split("-")
-	if len(glyphRange) > 1:
-		g1 = expandNames(glyphRange[0])
-		g2 = expandNames(glyphRange[1])
-		glyphName = "%s-%s" % (g1, g2)
-
-	elif glyphName[0] == "/":
-		glyphName = "cid" + glyphName[1:].zfill(5)
-		if glyphName == "cid00000":
-			glyphName = ".notdef"
-			nameAliasDict[glyphName] = "cid00000"
-
-	elif glyphName.startswith("cid") and (len(glyphName) < 8):
-		glyphName = "cid" + glyphName[3:].zfill(5)
-		if glyphName == "cid00000":
-			glyphName = ".notdef"
-			nameAliasDict[glyphName] = "cid00000"
-
-	return glyphName
-
-
-def parseGlyphListArg(glyphString):
-	glyphString = re.sub(r"[ \t\r\n,]+", ",", glyphString)
-	glyphList = glyphString.split(",")
-	glyphList = [expandNames(n) for n in glyphList]
-	glyphList = filter(None, glyphList)
-	return glyphList
-
-
-def parseCounterHintData(path):
-	hCounterGlyphList = []
-	vCounterGlyphList = []
-	gf = open(path, "rt")
-	data = gf.read()
-	gf.close()
-	lines = re.findall(r"([^\r\n]+)", data)
-	# strip blank and comment lines
-	lines = filter(lambda line: re.sub(r"#.+", "", line), lines)
-	lines = filter(lambda line: line.strip(), lines)
-	for line in lines:
-		fields = line.split()
-		if (len(fields) != 2) or (fields[0] not in ["V", "v", "H", "h"]) :
-			print("\tError: could not process counter hint line '%s' in file %s. Doesn't look like V or H followed by a tab or space, and then a glyph name." % (line, path))
-		elif fields[0] in ["V", "v"]:
-			vCounterGlyphList.append(fields[1])
-		else:
-			hCounterGlyphList.append(fields[1])
-	return hCounterGlyphList, vCounterGlyphList
 
 
 def getGlyphID(glyphTag, fontGlyphList):
@@ -468,6 +405,7 @@ def cmpFDDictEntries(entry1, entry2):
 def hintFile(options):
 	global gLogFile
 	gLogFile = options.logFile
+	nameAliases = options.nameAliases
 
 	path = options.inputPath
 	fontFileName = os.path.basename(path)
@@ -646,7 +584,7 @@ def hintFile(options):
 					if not isNewPlistFile:
 						# Comment only if there is a plist file; otherwise, we'd
 						# be complaining for almost every glyph.
-						logMsg("%s Skipping glyph - it has hints, but it is not in the hint info plist file." % aliasName(name))
+						logMsg("%s Skipping glyph - it has hints, but it is not in the hint info plist file." % nameAliases.get(name, name))
 						dotCount = 0
 					continue
 			# there's an entry in the plist file and it matches what's in the font
@@ -658,9 +596,9 @@ def hintFile(options):
 
 		if options.verbose:
 			if fdGlyphDict:
-				logMsg("Hinting %s with fdDict %s." % (aliasName(name), fdDict.DictName))
+				logMsg("Hinting %s with fdDict %s." % (nameAliases.get(name, name), fdDict.DictName))
 			else:
-				logMsg("Hinting %s." % aliasName(name))
+				logMsg("Hinting %s." % nameAliases.get(name, name))
 		elif not options.quiet:
 			logMsg(".,")
 			dotCount += 1
@@ -685,7 +623,7 @@ def hintFile(options):
 		if not newBezString:
 			if not options.verbose and not options.quiet:
 				logMsg("")
-			raise ACHintError("%s Error - failure in processing outline data." % aliasName(name))
+			raise ACHintError("%s Error - failure in processing outline data." % nameAliases.get(name, name))
 
 		if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
 			print("No hints added!")
@@ -704,7 +642,7 @@ def hintFile(options):
 			# add glyph hint entry to plist file
 			if options.allowChanges:
 				if prevACIdentifier and (prevACIdentifier != ACidentifier):
-					logMsg("\t%s Glyph outline changed" % aliasName(name))
+					logMsg("\t%s Glyph outline changed" % nameAliases.get(name, name))
 					dotCount = 0
 
 			fontPlist[kACIDKey][name] = (ACidentifier, time.asctime(), bezString, newBezString)

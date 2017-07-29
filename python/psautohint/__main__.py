@@ -236,15 +236,15 @@ match in the search terms for any user-defined FDDict.
 The definitions use the following syntax:
 
 begin FDDict <name>
-	<key-1> <value-1>
-	<key-2> <value-2>
-	...
-	<key-n> <value-n>
+    <key-1> <value-1>
+    <key-2> <value-2>
+    ...
+    <key-n> <value-n>
 end FDDict <name>
 
 begin GlyphSet <name>
-	<glyphname-1> <glyphname-2> ...
-	<glyphname-n>
+    <glyphname-1> <glyphname-2> ...
+    <glyphname-n>
 end GlyphSet <name>
 
 The glyph names may be either a real glyph name, or a regular expression
@@ -264,7 +264,7 @@ $ ..... Matches at the end
 Examples:
 ^[A-Z]$    Matches names with one character in the range from A-Z.
 ^[A-Z].+   Matches any name where the first character is in the range A-Z,
-			 and it is followed by one or more characters.
+             and it is followed by one or more characters.
 [A-Z].+    Matches any name with a character that is in the range A-Z and
              which is followed by one or more characters.
 ^[A-Z].*   Matches any name with one or more characters, and
@@ -278,50 +278,50 @@ Example FDDict and GlyphSet definitions.
 ********************************
 
 begin FDDict ST_Smallcaps
-	# I like to put the non hint stuff first.
-	OrigEmSqUnits 1000
-	FlexOK true
-	# This gets used as the hint dict name if the font
-	# is eventually built as a CID font.
-	FontName AachenStd-Bold
+    # I like to put the non hint stuff first.
+    OrigEmSqUnits 1000
+    FlexOK true
+    # This gets used as the hint dict name if the font
+    # is eventually built as a CID font.
+    FontName AachenStd-Bold
 
-	# Alignment zones.
-	# The first is a bottom zone, the rest are top zones. See below.
-	BaselineOvershoot -20
-	BaselineYCoord 0
-	CapHeight 900
-	CapOvershoot 20
-	LcHeight 700
-	LcOvershoot 15
+    # Alignment zones.
+    # The first is a bottom zone, the rest are top zones. See below.
+    BaselineOvershoot -20
+    BaselineYCoord 0
+    CapHeight 900
+    CapOvershoot 20
+    LcHeight 700
+    LcOvershoot 15
 
-	# Stem widths.
-	DominantV [236 267]
-	DominantH [141 152]
+    # Stem widths.
+    DominantV [236 267]
+    DominantH [141 152]
 end FDDict ST_Smallcaps
 
 
 begin FDDict LM_Smallcaps
-	OrigEmSqUnits 1000
-	FontName AachenStd-Bold
-	BaselineOvershoot -25
-	BaselineYCoord 0
-	CapHeight 950
-	CapOvershoot 25
-	LcHeight 750
-	LcOvershoot 21
-	DominantV [236 267]
-	DominantH [141 152]
-	FlexOK true
+    OrigEmSqUnits 1000
+    FontName AachenStd-Bold
+    BaselineOvershoot -25
+    BaselineYCoord 0
+    CapHeight 950
+    CapOvershoot 25
+    LcHeight 750
+    LcOvershoot 21
+    DominantV [236 267]
+    DominantH [141 152]
+    FlexOK true
 end FDDict LM_Smallcaps
 
 
 begin GlyphSet LM_Smallcaps
-	[Ll]\S+\.smallcap  [Mm]\S+\.smallcap
+    [Ll]\S+\.smallcap  [Mm]\S+\.smallcap
 end GlyphSet LM_Smallcaps
 
 
 begin GlyphSet ST_Smallcaps
-	[Tt]\S+\.smallcap  [Ss]\S+\.smallcap
+    [Tt]\S+\.smallcap  [Ss]\S+\.smallcap
 end GlyphSet ST_Smallcaps
 
 ********************************
@@ -338,57 +338,57 @@ All other keywords are optional.
 The full set of recognized FDDict keywords are:
 
 BlueValue pairs:
-	# BaselineOvershoot is a bottom zone, the rest are top zones.
-	BaselineYCoord
-	BaselineOvershoot
+    # BaselineOvershoot is a bottom zone, the rest are top zones.
+    BaselineYCoord
+    BaselineOvershoot
 
-	CapHeight
-	CapOvershoot
+    CapHeight
+    CapOvershoot
 
-	LcHeight
-	LcOvershoot
+    LcHeight
+    LcOvershoot
 
-	AscenderHeight
-	AscenderOvershoot
+    AscenderHeight
+    AscenderOvershoot
 
-	FigHeight
-	FigOvershoot
+    FigHeight
+    FigOvershoot
 
-	Height5
-	Height5Overshoot
+    Height5
+    Height5Overshoot
 
-	Height6
-	Height6Overshoot
+    Height6
+    Height6Overshoot
 
 OtherBlues pairs:
-	# These
-	Baseline5Overshoot
-	Baseline5
+    # These
+    Baseline5Overshoot
+    Baseline5
 
-	Baseline6Overshoot
-	Baseline6
+    Baseline6Overshoot
+    Baseline6
 
-	SuperiorOvershoot
-	SuperiorBaseline
+    SuperiorOvershoot
+    SuperiorBaseline
 
-	OrdinalOvershoot
-	OrdinalBaseline
+    OrdinalOvershoot
+    OrdinalBaseline
 
-	DescenderOvershoot
-	DescenderHeight
+    DescenderOvershoot
+    DescenderHeight
 
 For zones which capture the bottom of a feature in the glyph, (BaselineYCoord
 and all the OtherBlues), the value specifies the top of the zone, and the
 "Overshoot" is a negative value which specifes the offset to the bottom of the
 zone, e.g.
-	BaselineYCoord 0
-	BaselineOvershoot 12
+    BaselineYCoord 0
+    BaselineOvershoot 12
 
 For zones which capture the top of a feature in the glyph, (the rest of the
 BlueValue zones), the value specifies the bottom of the zone, and the "Overshoot"
 is a positive value which specifes the offset to the top of the zone, e.g.
-	Height6 800
-	Height6Overshoot 20
+    Height6 800
+    Height6Overshoot 20
 
 
 Note also that there is no implied sequential order of values. Height6 may have
@@ -433,6 +433,57 @@ fewer entries this way.
 
 class OptionParseError(KeyError):
     pass
+
+
+def expandNames(glyphName, nameAliases):
+    glyphRange = glyphName.split("-")
+    if len(glyphRange) > 1:
+        g1 = expandNames(glyphRange[0], nameAliases)
+        g2 = expandNames(glyphRange[1], nameAliases)
+        glyphName = "%s-%s" % (g1, g2)
+
+    elif glyphName[0] == "/":
+        glyphName = "cid" + glyphName[1:].zfill(5)
+        if glyphName == "cid00000":
+            glyphName = ".notdef"
+            nameAliases[glyphName] = "cid00000"
+
+    elif glyphName.startswith("cid") and (len(glyphName) < 8):
+        glyphName = "cid" + glyphName[3:].zfill(5)
+        if glyphName == "cid00000":
+            glyphName = ".notdef"
+            nameAliases[glyphName] = "cid00000"
+
+    return glyphName
+
+
+def parseGlyphListArg(glyphString, nameAliases):
+    glyphString = re.sub(r"[ \t\r\n,]+", ",", glyphString)
+    glyphList = glyphString.split(",")
+    glyphList = [expandNames(n, nameAliases) for n in glyphList]
+    glyphList = filter(None, glyphList)
+    return glyphList
+
+
+def parseCounterHintData(path):
+    hCounterGlyphList = []
+    vCounterGlyphList = []
+    gf = open(path, "rt")
+    data = gf.read()
+    gf.close()
+    lines = re.findall(r"([^\r\n]+)", data)
+    # strip blank and comment lines
+    lines = filter(lambda line: re.sub(r"#.+", "", line), lines)
+    lines = filter(lambda line: line.strip(), lines)
+    for line in lines:
+        fields = line.split()
+        if (len(fields) != 2) or (fields[0] not in ["V", "v", "H", "h"]) :
+            print("\tError: could not process counter hint line '%s' in file %s. Doesn't look like V or H followed by a tab or space, and then a glyph name." % (line, path))
+        elif fields[0] in ["V", "v"]:
+            vCounterGlyphList.append(fields[1])
+        else:
+            hCounterGlyphList.append(fields[1])
+    return hCounterGlyphList, vCounterGlyphList
 
 
 def checkFontinfoFile(options):
@@ -511,7 +562,7 @@ def getOptions(args):
             glyphString = args[i]
             if glyphString[0] == "-":
                 raise OptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.")
-            options.glyphList += parseGlyphListArg(glyphString)
+            options.glyphList += parseGlyphListArg(glyphString, options.nameAliases)
         elif arg in ["-xgf", "-gf"]:
             if arg == "-xgf":
                 options.excludeGlyphList = True
@@ -525,7 +576,7 @@ def getOptions(args):
                 gf.close()
             except (IOError,OSError):
                 raise OptionParseError("Option Error: could not open glyph list file <%s>." % filePath)
-            options.glyphList += parseGlyphListArg(glyphString)
+            options.glyphList += parseGlyphListArg(glyphString, options.nameAliases)
         elif arg == "-cf":
             i = i +1
             filePath = args[i]
