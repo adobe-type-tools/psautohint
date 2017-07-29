@@ -1,8 +1,10 @@
-build_script:
-  - pip install -v .
-  - psautohint -u
-# - set PATH=%PATH%;C:\cygwin\bin
-# - make PYTHON=python check
+install:
+  - git submodule update --init
+  - set PATH=%PATH%;C:\cygwin\bin
+  - pip install -r requirements.txt
 
-# disable automatic tests
-test: off
+build_script:
+  - make
+
+test_script:
+  - make check
