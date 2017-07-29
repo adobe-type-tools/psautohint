@@ -1023,7 +1023,7 @@ class CFFFontData:
 														self.allowDecimalCoords)
 			# Note: the glyph name is important, as it is used by autohintexe
 			# for various heuristics, including [hv]stem3 derivation.
-			bezString = (r"%%%s%s " % (glyphName, os.linesep)) + bezString
+			bezString = "%" + glyphName + "\n" + bezString
 		except SEACError:
 			if not beVerbose:
 				dotCount = 0

@@ -98,7 +98,7 @@ def logMsg(*args):
 			print
 			sys.stdout.flush()
 			if gLogFile:
-				gLogFile.write(os.linesep)
+				gLogFile.write("\n")
 				gLogFile.flush()
 			return
 
@@ -117,7 +117,7 @@ def logMsg(*args):
 			print(msg)
 			sys.stdout.flush()
 			if gLogFile:
-				gLogFile.write(msg + os.linesep)
+				gLogFile.write(msg + "\n")
 				gLogFile.flush()
 
 
@@ -637,7 +637,7 @@ def hintFile(options):
 
 
 		if options.usePlistFile:
-			bezString = "%% %s%s%s" % (name, os.linesep, newBezString)
+			bezString = "%% %s\n%s" % (name, newBezString)
 			ACidentifier = makeACIdentifier(bezString)
 			# add glyph hint entry to plist file
 			if options.allowChanges:

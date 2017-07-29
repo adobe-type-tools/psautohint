@@ -21,8 +21,8 @@ all: $(TESTS)
 	@echo "	Testing $<"
 	@rm -rf $@
 	@$(PYTHON) -m psautohint -all -qq -o $@ $<
-	@diff -Naur -x '.DS_Store' $< $@
 	@rm -f $@/.DS_Store
+	@diff -Naur --strip-trailing-cr $< $@
 	@rm -rf $@
 
 %.pst: %.otf FORCE

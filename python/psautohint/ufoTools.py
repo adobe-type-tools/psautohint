@@ -519,7 +519,7 @@ class UFOFontData:
 			data.append("'%s': %s," % (gName, hashMap[gName]))
 		data.append("}")
 		data.append("")
-		data = os.linesep.join(data)
+		data = "\n".join(data)
 		fp = open(hashPath, "wt")
 		fp.write(data)
 		fp.close()
@@ -1429,8 +1429,8 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, le
 					raise UFOParseError("Unknown Point type not supported '%s'." % (xmlToString(contourItem)))
 
 			# we get here only if there was at least a move.
-			bezStringList.append("cp" + os.linesep)
-		bezstring = os.linesep.join(bezStringList)
+			bezStringList.append("cp\n")
+		bezstring = "\n".join(bezStringList)
 	return bezstring
 
 
@@ -1443,7 +1443,7 @@ def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll=False):
 		return None, width
 
 	bezString = convertGlyphOutlineToBezString(outlineXML, ufoFontData)
-	bezString = (r"%%%s%ssc " % (glyphName, os.linesep)) + bezString + " ed"
+	bezString = "%" + glyphName + "\nsc " + bezString + " ed"
 	return bezString, width
 
 
@@ -1956,8 +1956,8 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
 
 def addWhiteSpace(parent, level):
 	child = None
-	childIndent = os.linesep + ("  "*(level +1))
-	prentIndent = os.linesep + ("  "*(level))
+	childIndent = "\n" + ("  "*(level +1))
+	prentIndent = "\n" + ("  "*(level))
 	#print("parent Tag", parent.tag, repr(parent.text), repr(parent.tail))
 	for child in parent:
 		child.tail = childIndent
