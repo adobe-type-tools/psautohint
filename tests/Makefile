@@ -2,8 +2,9 @@
 
 PYTHON ?= python
 
-FONTS:=$(wildcard data/*/*/font.ufo)
-TESTS:=$(FONTS:%.ufo=%.tst)
+UFO:=$(wildcard data/*/*/font.ufo)
+OTF:=$(wildcard data/*/*/font.otf)
+TESTS:=$(UFO:%.ufo=%.tst) $(OTF:%.otf=%.pst)
 
 all: $(TESTS)
 
@@ -23,5 +24,14 @@ all: $(TESTS)
 	@diff -Naur -x '.DS_Store' $< $@
 	@rm -f $@/.DS_Store
 	@rm -rf $@
+
+%.pst: %.otf FORCE
+	@echo "	Testing $<"
+	@rm -rf $@
+	@$(PYTHON) -m psautohint -qq -o $@ $<
+	@ttx -q -t CFF -o $<.ttx $<
+	@ttx -q -t CFF -o $@.ttx $@
+	@diff -u $<.ttx $@.ttx
+	@rm -rf $@ $<.ttx $@.ttx
 
 FORCE:
