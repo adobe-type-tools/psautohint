@@ -319,8 +319,9 @@ VStemMiss(PClrSeg leftSeg, PClrSeg rightSeg)
     }
     if (minDiff > FixInt(2))
         return;
-    ReportStemNearMiss(true, w, minW, l, r, (leftSeg->sType == sCURVE) ||
-                                              (rightSeg->sType == sCURVE));
+    ReportStemNearMiss(true, w, minW, l, r,
+                       (leftSeg->sType == sCURVE) ||
+                         (rightSeg->sType == sCURVE));
 }
 
 static void

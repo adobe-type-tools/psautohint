@@ -232,10 +232,10 @@ main(int argc, char* argv[])
     char* fontInfoFileName = NULL; /* font info file name, or suffix of
                                       environment variable holding
                                       the fontfino string. */
-    char* fontinfo = NULL;       /* the string of fontinfo data */
-    int firstFileNameIndex = -1; /* arg index for first bez file name, or
-                                    suffix of environment variable holding the
-                                    bez string. */
+    char* fontinfo = NULL;         /* the string of fontinfo data */
+    int firstFileNameIndex = -1;   /* arg index for first bez file name, or
+                                      suffix of environment variable holding the
+                                      bez string. */
 
     char* current_arg;
     int16_t total_files = 0;

@@ -18,8 +18,8 @@
 
 static int32_t maxPathEntries = 0;
 static PPathList currPathList = NULL;
-static int32_t path_entries = 0;  /* number of elements in a character path */
-static bool addHints = true;  /* whether to include hints in the font */
+static int32_t path_entries = 0; /* number of elements in a character path */
+static bool addHints = true;     /* whether to include hints in the font */
 
 static void CheckPath(void);
 
