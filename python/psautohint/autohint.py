@@ -261,7 +261,7 @@ stringPattern = """ \S+"""
 counterPattern = """ \([\S ]+\)"""
 
 
-def parseFontInfoString(fontInfoString):
+def printFontInfo(fontInfoString):
 	for item in fontInfoKeywordList:
 		if item in ['FontName', 'FlexOK']:
 			matchingExp = item + stringPattern
@@ -459,7 +459,7 @@ def hintFile(options):
 										options.noFlex,
 										options.vCounterGlyphs,
 										options.hCounterGlyphs)
-		parseFontInfoString(str(fdDict))
+		printFontInfo(str(fdDict))
 		fontData.close()
 		return
 
@@ -478,7 +478,7 @@ def hintFile(options):
 				fontDict = fontDictList[fi]
 				logMsg("")
 				logMsg(fontDict.DictName)
-				parseFontInfoString(str(fontDict))
+				printFontInfo(str(fontDict))
 				gnameList = []
 				itemList = fdGlyphDict.items()
 				itemList.sort(cmpFDDictEntries)
