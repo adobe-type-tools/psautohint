@@ -296,6 +296,39 @@ Delete(PPathElt e)
         gPathStart = nxt;
 }
 
+/* This procedure is called from BuildFont when adding hints
+ to base designs of a multi-master font. */
+bool
+GetInflectionPoint(Fixed x, Fixed y, Fixed x1, Fixed cy1, Fixed x2, Fixed y2,
+                   Fixed x3, Fixed y3, Fixed* inflPt)
+{
+    FltnRec fltnrec;
+    Cd c0, c1, c2, c3;
+
+    fltnrec.report = chkDT;
+    c0.x = tfmx(x);
+    c0.y = tfmy(y);
+    c1.x = tfmx(x1);
+    c1.y = tfmy(cy1);
+    c2.x = tfmx(x2);
+    c2.y = tfmy(y2);
+    c3.x = tfmx(x3);
+    c3.y = tfmy(y3);
+    xstate = ystate = STARTING;
+    xdone = ydone = xflat = yflat = inflPtFound = false;
+    x0 = c0.x;
+    cy0 = c0.y;
+    x1 = c3.x;
+    cy1 = c3.y;
+    xloc = x0;
+    yloc = cy0;
+    forMultiMaster = true;
+    FltnCurve(c0, c1, c2, c3, &fltnrec);
+    if (inflPtFound)
+        *inflPt = fltnvalue;
+    return inflPtFound;
+}
+
 static void
 CheckSCurve(PPathElt ee)
 {

@@ -51,6 +51,12 @@
 
 /* structures */
 
+/* character bounding box */
+typedef struct Bbox
+   {
+   int32_t llx, lly, urx, ury;
+   } Bbox, *BboxPtr;
+
 /* character point coordinates */
 typedef struct
    {
@@ -311,6 +317,7 @@ bool NoBlueChar(void);
 int32_t SolEolCharCode(void);
 bool SpecialSolEol(void);
 bool MoveToNewClrs(void);
+bool GetInflectionPoint(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *);
 void CheckSmooth(void);
 void CheckBBoxEdge(PPathElt e, bool vrt, Fixed lc, Fixed* pf, Fixed* pl);
 bool CheckSmoothness(Fixed x0, Fixed cy0, Fixed x1, Fixed cy1, Fixed x2,
@@ -456,5 +463,8 @@ void AddCharExtremes(Fixed bot, Fixed top);
 bool AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata,
                bool fixStems, bool debug, bool extracolor, bool changeChar,
                bool roundCoords);
+
+bool MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
+                    char** outbuffer, size_t* outlen);
 
 #endif /* AC_AC_H_ */

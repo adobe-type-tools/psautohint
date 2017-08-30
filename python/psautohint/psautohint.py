@@ -28,3 +28,11 @@ def autohint(info, glyphs, verbose=True, allow_edit=True, allow_hint_sub=True,
                                   debug)
 
     return toStr(hinted)
+
+
+def autohintmm(info, glyphs, verbose=True):
+    hinted = _psautohint.autohintmm(toBytes(info),
+                                    toBytes(glyphs),
+                                    verbose)
+
+    return toStr(hinted)

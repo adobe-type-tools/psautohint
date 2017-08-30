@@ -369,6 +369,75 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     return AC_UnknownError;
 }
 
+ACLIB_API int
+AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
+                  int nmasters, char** dstbezdata, size_t* length)
+{
+    int value, result;
+    ACFontInfo* fontinfo = NULL;
+
+    if (!srcbezdata)
+        return AC_InvalidParameterError;
+
+    if (ParseFontInfo(fontinfodata, &fontinfo))
+        return AC_FontinfoParseFail;
+
+    set_errorproc(error_handler);
+    value = setjmp(aclibmark);
+
+    /* We will return here whenever an error occurs during the execution of
+     * AutoColor(), or after it finishes execution. See the error_handler
+     * comments above and below. */
+
+    if (value == -1) {
+        /* a fatal error occurred somewhere. */
+        FreeFontInfo(fontinfo);
+        return AC_FatalError;
+    } else if (value == 1) {
+        /* AutoColor was called successfully */
+        FreeFontInfo(fontinfo);
+        return AC_Success;
+#if 0
+        if (gBezOutput->length < *length) {
+            *length = gBezOutput->length + 1;
+            strncpy(dstbezdata, gBezOutput->data, *length);
+            FreeBuffer(gBezOutput);
+            return AC_Success;
+        } else {
+            *length = gBezOutput->length + 1;
+            FreeBuffer(gBezOutput);
+            return AC_DestBuffOfloError;
+        }
+#endif
+    }
+
+#if 0
+    gBezOutput = NewBuffer(*length);
+    if (!gBezOutput) {
+        FreeFontInfo(fontinfo);
+        return AC_MemoryError;
+    }
+
+    result = AutoColor(fontinfo,     /* font info */
+                       srcbezdata,   /* input glyph */
+                       false,        /* fixStems */
+                       debug,        /* debug */
+                       allowHintSub, /* extracolor*/
+                       allowEdit,    /* editChars */
+                       roundCoords);
+#endif
+    /* result == true is good */
+    result = MergeCharPaths(fontinfo, srcbezdata, nmasters, dstbezdata, length);
+
+    /* The following call to error_handler() always returns control to just
+     * after the setjmp() function call above, but with value set to 1 if
+     * success, or -1 if not */
+    error_handler((result == true) ? OK : NONFATALERROR);
+
+    /* Shouldn't get here */
+    return AC_UnknownError;
+}
+
 ACLIB_API void
 AC_initCallGlobals(void)
 {

@@ -14,12 +14,13 @@
 #include "charpath.h"
 #include "memory.h"
 
+int32_t gPathEntries = 0; /* number of elements in a character path */
+bool gAddHints = true;    /* whether to include hints in the font */
+
 #define MAXPATHELT 100 /* initial maximum number of path elements */
 
 static int32_t maxPathEntries = 0;
 static PPathList currPathList = NULL;
-static int32_t path_entries = 0; /* number of elements in a character path */
-static bool addHints = true;     /* whether to include hints in the font */
 
 static void CheckPath(void);
 
@@ -31,7 +32,7 @@ CheckPath(void)
         currPathList->path = (CharPathElt*)AllocateMem(
           maxPathEntries, sizeof(CharPathElt), "path element array");
     }
-    if (path_entries >= maxPathEntries) {
+    if (gPathEntries >= maxPathEntries) {
         int i;
 
         maxPathEntries += MAXPATHELT;
@@ -40,7 +41,7 @@ CheckPath(void)
           "path element array");
         /* Initialize certain fields in CharPathElt, since realloc'ed memory */
         /* may be non-zero. */
-        for (i = path_entries; i < maxPathEntries; i++) {
+        for (i = gPathEntries; i < maxPathEntries; i++) {
             currPathList->path[i].hints = NULL;
             currPathList->path[i].isFlex = false;
             currPathList->path[i].sol = false;
@@ -55,9 +56,22 @@ AppendCharPathElement(int pathtype)
 {
 
     CheckPath();
-    currPathList->path[path_entries].type = pathtype;
-    path_entries++;
-    return (&currPathList->path[path_entries - 1]);
+    currPathList->path[gPathEntries].type = pathtype;
+    gPathEntries++;
+    return (&currPathList->path[gPathEntries - 1]);
+}
+
+/* Called from CompareCharPaths when a new character is being read. */
+void
+ResetMaxPathEntries(void)
+{
+    maxPathEntries = MAXPATHELT;
+}
+
+void
+SetCurrPathList(PPathList plist)
+{
+    currPathList = plist;
 }
 
 void
@@ -67,13 +81,13 @@ SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2,
     PHintElt* hintEntry;
     PHintElt lastHintEntry = NULL;
 
-    if (!addHints)
+    if (!gAddHints)
         return;
     if (mainhints) /* define main hints for character */
         hintEntry = &currPathList->mainhints;
     else {
         CheckPath();
-        hintEntry = &currPathList->path[path_entries].hints;
+        hintEntry = &currPathList->path[gPathEntries].hints;
     }
     lastHintEntry = (PHintElt)AllocateMem(1, sizeof(HintElt), "hint element");
     lastHintEntry->type = hinttype;
@@ -95,7 +109,7 @@ SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2,
 void
 SetNoHints(void)
 {
-    addHints = false;
+    gAddHints = false;
 }
 
 /* According to Bill Paxton the offset locking commands should
@@ -107,8 +121,8 @@ void SetOffsetLocking(locktype)
 char *locktype;
 {
   if (strcmp(locktype, "sol") == 0)
-    currPathList[path_entries-1].sol = true;
+    currPathList[gPathEntries-1].sol = true;
   else
-    currPathList[path_entries-1].eol = true;
+    currPathList[gPathEntries-1].eol = true;
 }
 */

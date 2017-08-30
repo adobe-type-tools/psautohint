@@ -187,3 +187,6 @@
 #define POPCP 33
  /* cx cy POPCP -- set current position from font stack
    (graphics state operator) */
+
+
+#define ESCVAL 100
