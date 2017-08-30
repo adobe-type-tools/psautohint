@@ -13,6 +13,7 @@ libpsautohint_la_SOURCES = \
     src/basic.h \
     src/bbox.c \
     src/bbox.h \
+    src/charpath.c \
     src/charpath.h \
     src/charpathpriv.c \
     src/charprop.c \
@@ -32,6 +33,8 @@ libpsautohint_la_SOURCES = \
     src/merge.c \
     src/misc.c \
     src/opcodes.h \
+    src/optable.c \
+    src/optable.h \
     src/pick.c \
     src/psautohint.c \
     src/read.c \

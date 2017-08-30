@@ -13,7 +13,6 @@
 #include "charpath.h"
 #include "fontinfo.h"
 #include "opcodes.h"
-#define ESCVAL 100
 
 char gGlyphName[MAX_GLYPHNAME_LEN];
 

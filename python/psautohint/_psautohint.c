@@ -199,9 +199,142 @@ autohint(PyObject* self, PyObject* args)
     return outSeq;
 }
 
+static char autohintmm_doc[] =
+  "Autohint glyphs.\n"
+  "\n"
+  "Signature:\n"
+  "  autohintm(font_info, glyphs[, verbose])\n"
+  "\n"
+  "Args:\n"
+  "  font_info: font information.\n"
+  "  glyphs: sequence of glyph data in bez format.\n"
+  "  verbose: print verbose messages.\n"
+  "\n"
+  "Output:\n"
+  "  Sequence of autohinted glyph data in bez format.\n"
+  "\n"
+  "Raises:\n"
+  "  psautohint.error: If authinting fails.\n";
+
+static PyObject*
+autohintmm(PyObject* self, PyObject* args)
+{
+    int verbose = true;
+    PyObject* inSeq = NULL;
+    PyObject* fontObj = NULL;
+    PyObject* outSeq = NULL;
+    Py_ssize_t bezLen = 0;
+    char* fontInfo = NULL;
+    bool error = false;
+
+    if (!PyArg_ParseTuple(args, "O!O|i", &PyBytes_Type, &fontObj, &inSeq,
+                          &verbose))
+        return NULL;
+
+    inSeq = PySequence_Fast(inSeq, "argument must be sequence");
+    if (!inSeq)
+        return NULL;
+
+    fontInfo = PyBytes_AsString(fontObj);
+
+    AC_SetMemManager(NULL, memoryManager);
+    AC_SetReportCB(reportCB, verbose);
+
+    bezLen = PySequence_Fast_GET_SIZE(inSeq);
+    outSeq = PyTuple_New(bezLen);
+    if (!outSeq) {
+        error = true;
+    } else {
+        Py_ssize_t i, j;
+        for (i = 0; i < bezLen; i++) {
+            const char** inData = NULL;
+            char* outData = NULL;
+            size_t outputSize = 0;
+            int result;
+
+            PyObject* itemObj = PySequence_Fast_GET_ITEM(inSeq, i);
+            Py_ssize_t itemLen = PySequence_Fast_GET_SIZE(itemObj);
+
+            inData = MEMNEW(itemLen * sizeof(char*));
+            if (!inData) {
+                error = true;
+                break;
+            }
+
+            for (j = 0; j < itemLen; j++) {
+                PyObject* obj = PySequence_Fast_GET_ITEM(itemObj, j);
+                inData[j] = PyBytes_AsString(obj);
+                outputSize += 4 * strlen(inData[j]);
+            }
+
+            outData = MEMNEW(outputSize);
+            if (!outData) {
+                error = true;
+                break;
+            }
+
+            result = AutoColorStringMM(inData, fontInfo, itemLen, &outData,
+                                       &outputSize);
+#if 0
+            if (result == AC_DestBuffOfloError) {
+                outData = MEMRENEW(outData, outputSize);
+                AC_SetReportCB(reportCB, false);
+                result =
+                  AutoColorString(inData, fontInfo, outData, &outputSize,
+                                  allowEdit, allowHintSub, roundCoords, debug);
+                AC_SetReportCB(reportCB, verbose);
+            }
+#endif
+
+            if (outputSize != 0 && result == AC_Success) {
+                PyObject* outObj = PyBytes_FromString(outData);
+                PyTuple_SET_ITEM(outSeq, i, outObj);
+            }
+
+            MEMFREE(outData);
+
+            if (result != AC_Success) {
+                switch (result) {
+                    case AC_FontinfoParseFail:
+                        PyErr_SetString(PsAutoHintError,
+                                        "Parsing font info failed");
+                        break;
+                    case AC_FatalError:
+                        PyErr_SetString(PsAutoHintError, "Fatal error");
+                        break;
+                    case AC_MemoryError:
+                        PyErr_NoMemory();
+                        break;
+                    case AC_UnknownError:
+                        PyErr_SetString(PsAutoHintError, "Hinting failed");
+                        break;
+                    case AC_DestBuffOfloError:
+                        PyErr_SetString(PsAutoHintError, "Dest buffer small");
+                        break;
+                    case AC_InvalidParameterError:
+                        PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
+                        break;
+                }
+                error = true;
+                break;
+            }
+        }
+    }
+
+    Py_XDECREF(inSeq);
+
+    if (error) {
+        Py_XDECREF(outSeq);
+        return NULL;
+    }
+
+    return outSeq;
+}
+
 /* clang-format off */
 static PyMethodDef psautohint_methods[] = {
   { "autohint", autohint, METH_VARARGS, autohint_doc },
+  { "autohintmm", autohintmm, METH_VARARGS, autohintmm_doc },
   { NULL, NULL, 0, NULL }
 };
 /* clang-format on */
