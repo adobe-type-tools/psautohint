@@ -2,16 +2,18 @@
  * Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/).
  * All Rights Reserved.
  *
- * This software is licensed as OpenSource, under the Apache License, Version 2.0.
+ * This software is licensed as OpenSource, under the Apache License, Version
+ * 2.0.
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-/* The following ifdef block is the standard way of creating macros which make exporting 
- * from a DLL simpler. All files within this DLL are compiled with the ACLIB_API
- * symbol defined on the command line. this symbol should not be defined on any project
- * that uses this DLL. This way any other project whose source files include this file see 
- * ACLIB_API functions as being imported from a DLL, wheras this DLL sees symbols
- * defined with this macro as being exported.
+/* The following ifdef block is the standard way of creating macros which make
+ * exporting from a DLL simpler. All files within this DLL are compiled with
+ * the ACLIB_API symbol defined on the command line. This symbol should not be
+ * defined on any project that uses this DLL. This way any other project whose
+ * source files include this file see ACLIB_API functions as being imported
+ * from a DLL, wheras this DLL sees symbols defined with this macro as being
+ * exported.
 */
 #ifndef PSAUTOHINT_H_
 #define PSAUTOHINT_H_
@@ -27,26 +29,26 @@ extern "C" {
 #ifdef _WIN32
 #define ACLIB_API __declspec(dllexport)
 #else
-	
+
 #if __GNUC__ && __MACH__
 #define ACLIB_API __attribute__((visibility("default")))
 #endif
-	
+
 #endif
 
 #else
 #define ACLIB_API
 #endif
 
-enum 
+enum
 {
-	AC_Success,
-	AC_FontinfoParseFail,
-	AC_FatalError,
-	AC_MemoryError,
-	AC_UnknownError,
-	AC_DestBuffOfloError,
-	AC_InvalidParameterError
+    AC_Success,
+    AC_FontinfoParseFail,
+    AC_FatalError,
+    AC_MemoryError,
+    AC_UnknownError,
+    AC_DestBuffOfloError,
+    AC_InvalidParameterError
 };
 
 /*
@@ -54,7 +56,7 @@ enum
  *
  * Returns AC library version.
  */
-ACLIB_API const char * AC_getVersion(void);
+ACLIB_API const char* AC_getVersion(void);
 
 /*
  * Function: AC_SetMemManager
@@ -62,9 +64,9 @@ ACLIB_API const char * AC_getVersion(void);
  * If this is supplied, then the AC lib will call this function for all memory
  * allocations. Otherwise it will use alloc/malloc/free.
  */
-typedef void *(*AC_MEMMANAGEFUNCPTR)(void *ctxptr, void *old, size_t size);
+typedef void* (*AC_MEMMANAGEFUNCPTR)(void* ctxptr, void* old, size_t size);
 
-ACLIB_API void AC_SetMemManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
+ACLIB_API void AC_SetMemManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func);
 
 /*
  * Function: AC_SetReportCB
@@ -74,7 +76,7 @@ ACLIB_API void AC_SetMemManager(void *ctxptr, AC_MEMMANAGEFUNCPTR func);
  *
  * If verbose is set false, then only error messages are written.
  */
-typedef void (*AC_REPORTFUNCPTR)(char *msg);
+typedef void (*AC_REPORTFUNCPTR)(char* msg);
 
 ACLIB_API void AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose);
 
@@ -93,7 +95,9 @@ ACLIB_API void AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose);
  */
 typedef void (*AC_REPORTSTEMPTR)(int top, int bottom, char* glyphName);
 
-ACLIB_API void AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB, unsigned int allStems);
+ACLIB_API void AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB,
+                                   AC_REPORTSTEMPTR vstemCB,
+                                   unsigned int allStems);
 
 /*
  * Function: AC_SetReportZonesCB
@@ -107,7 +111,8 @@ ACLIB_API void AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vs
  */
 typedef void (*AC_REPORTZONEPTR)(int top, int bottom, char* glyphName);
 
-ACLIB_API void AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB);
+ACLIB_API void AC_SetReportZonesCB(AC_REPORTZONEPTR charCB,
+                                   AC_REPORTZONEPTR stemCB);
 
 /*
  * Function: AC_SetReportRetryCB
@@ -131,10 +136,12 @@ ACLIB_API void AC_SetReportRetryCB(AC_RETRYPTR retryCB);
  * Hint information is added to the bez data and returned to the caller through
  * the buffer dstbezdata. dstbezdata must be allocated before the call and a
  * pointer to its length passed as *length. If the space allocated is
- * insufficient for the target bezdata, an error will be returned and *length
+ * insufficient for the target bezdata, an error will be returned and length
  * will be set to the desired size.
  */
-ACLIB_API int AutoColorString(const char *srcbezdata, const char *fontinfo, char *dstbezdata, size_t *length, int allowEdit, int allowHintSub, int roundCoords, int debug);
+ACLIB_API int AutoColorString(const char* srcbezdata, const char* fontinfo,
+                              char* dstbezdata, size_t* length, int allowEdit,
+                              int allowHintSub, int roundCoords, int debug);
 
 /*
  * Function: AC_initCallGlobals
@@ -146,5 +153,5 @@ ACLIB_API void AC_initCallGlobals(void);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 #endif /* PSAUTOHINT_H_ */
