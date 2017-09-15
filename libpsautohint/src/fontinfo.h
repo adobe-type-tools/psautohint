@@ -31,7 +31,4 @@ bool ReadFontInfo(const ACFontInfo* fontinfo);
    key, returns a NULL.	 Otherwise, returns the value string. */
 char* GetFontInfo(const ACFontInfo*, char*, bool);
 
-void ParseIntStems(const ACFontInfo* fontinfo, char*, bool, int32_t, int*,
-                   int32_t*);
-
 #endif /* AC_FONTINFO_H_ */

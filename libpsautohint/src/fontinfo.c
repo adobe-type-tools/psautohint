@@ -14,6 +14,8 @@
 
 int32_t gNumHColors, gNumVColors;
 
+static void ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
+                          int32_t maxstems, int* stems, int32_t* pnum);
 static void
 ParseStems(const ACFontInfo* fontinfo, char* kw, Fixed* stems, int32_t* pnum)
 {
@@ -254,40 +256,12 @@ GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
     return NULL;
 }
 
-/* Appends Aux{H,V}Stems which is optional to StemSnap{H,V} respectively. */
-static char*
-GetHVStems(const ACFontInfo* fontinfo, char* kw, bool optional)
-{
-    char *fistr1, *fistr2, *newfistr;
-    char *end, *start;
-
-    fistr1 = GetFontInfo(
-      fontinfo, strcmp(kw, "AuxHStems") ? "StemSnapV" : "StemSnapH", optional);
-    fistr2 = GetFontInfo(fontinfo, kw, ACOPTIONAL);
-    if (fistr2 == NULL)
-        return fistr1;
-    if (fistr1 == NULL)
-        return fistr2;
-    /* Merge two arrays. */
-    newfistr = AllocateMem(strlen(fistr1) + strlen(fistr2) + 1, sizeof(char),
-                           "Aux stem value");
-    end = (char*)strrchr(fistr1, ']');
-    end[0] = '\0';
-    start = (char*)strchr(fistr2, '[');
-    start[0] = ' ';
-    snprintf(newfistr, strlen(fistr1) + strlen(fistr2), "%s%s", fistr1, fistr2);
-    UnallocateMem(fistr1);
-    UnallocateMem(fistr2);
-    return newfistr;
-}
-
-/* This procedure parses the various fontinfo file stem keywords:
-   StemSnap{H,V}, Dominant{H,V} and Aux{H,V}Stems.  If Aux{H,V}Stems
-   is specified then the StemSnap{H,V} values are automatically
-   added to the stem array.  ParseIntStems guarantees that stem values
-   are unique and in ascending order.
+/*
+ * This procedure parses the various fontinfo file stem keywords:
+ * StemSnap{H,V}, Dominant{H,V}.
+ * ParseIntStems guarantees that stem values are unique and in ascending order.
  */
-void
+static void
 ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
               int32_t maxstems, int* stems, int32_t* pnum)
 {
@@ -298,10 +272,7 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
 
     *pnum = 0;
 
-    if (strcmp(kw, "AuxHStems") == 0 || strcmp(kw, "AuxVStems") == 0)
-        initline = GetHVStems(fontinfo, kw, optional);
-    else
-        initline = GetFontInfo(fontinfo, kw, optional);
+    initline = GetFontInfo(fontinfo, kw, optional);
 
     if (initline == NULL || strlen(initline) == 0)
         return; /* optional keyword not found */
