@@ -122,7 +122,7 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             gListClrInfo = gDebug;
             if (gScalingHints) {
                 s = GetFontInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
-                sscanf(s, "%g", &origEmSquare);
+                origEmSquare = strtod(s, NULL);
                 UnallocateMem(s);
                 gBlueFuzz = (Fixed)(origEmSquare / 2000.0); /* .5 pixel */
             } else {

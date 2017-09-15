@@ -48,7 +48,7 @@ GetKeyFixedValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
     fontinfostr = GetFontInfo(fontinfo, keyword, optional);
 
     if ((fontinfostr != NULL) && (fontinfostr[0] != 0)) {
-        sscanf(fontinfostr, "%g", &tempValue);
+        tempValue = strtod(fontinfostr, NULL);
         *value = (Fixed)tempValue * (1 << FixShift);
         UnallocateMem(fontinfostr);
     }
@@ -319,7 +319,7 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
         while (misspace(*line))
             line++; /* skip past any blanks */
 
-        if (sscanf(line, " %d", &val) < 1)
+        if (sscanf(line, " %d", &val) == EOF)
             break;
 
         if (count >= maxstems) {

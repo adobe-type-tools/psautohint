@@ -704,7 +704,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                 val = val * 10 + (c - '0');
             else if ((c == ' ') || (c == '\t')) {
                 if (isReal) {
-                    sscanf(c0, "%f", &rval);
+                    rval = strtod(c0, NULL);
                     rval = roundf(rval * 100) / 100; // Autohint can only
                                                      // support 2 digits of
                                                      // decimal precision.
