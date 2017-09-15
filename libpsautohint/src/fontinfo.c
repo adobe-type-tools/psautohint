@@ -35,7 +35,6 @@ GetKeyValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
 
     if ((fontinfostr != NULL) && (fontinfostr[0] != 0)) {
         *value = atol(fontinfostr);
-        UnallocateMem(fontinfostr);
     }
     return;
 }
@@ -52,7 +51,6 @@ GetKeyFixedValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
     if ((fontinfostr != NULL) && (fontinfostr[0] != 0)) {
         tempValue = strtod(fontinfostr, NULL);
         *value = (Fixed)tempValue * (1 << FixShift);
-        UnallocateMem(fontinfostr);
     }
     return;
 }
@@ -94,11 +92,9 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     gFlexOK = (fontinfostr != NULL) && (fontinfostr[0] != '\0') &&
               strcmp(fontinfostr, "false");
 
-    UnallocateMem(fontinfostr);
     fontinfostr = GetFontInfo(fontinfo, "FlexStrict", true);
     if (fontinfostr != NULL)
         gFlexStrict = strcmp(fontinfostr, "false");
-    UnallocateMem(fontinfostr);
 
     /* get bluefuzz. It is already set to its default value in ac.c::InitData().
     GetKeyFixedValue does not change the value if it's not present in fontinfo.
@@ -106,16 +102,13 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     GetKeyFixedValue(fontinfo, "BlueFuzz", ACOPTIONAL, &gBlueFuzz);
 
     /* Check for counter coloring characters. */
-    if ((fontinfostr = GetFontInfo(fontinfo, "VCounterChars", ACOPTIONAL)) !=
-        NULL) {
+    fontinfostr = GetFontInfo(fontinfo, "VCounterChars", ACOPTIONAL);
+    if (fontinfostr != NULL)
         gNumVColors = AddCounterColorChars(fontinfostr, gVColorList);
-        UnallocateMem(fontinfostr);
-    };
-    if ((fontinfostr = GetFontInfo(fontinfo, "HCounterChars", ACOPTIONAL)) !=
-        NULL) {
+    fontinfostr = GetFontInfo(fontinfo, "HCounterChars", ACOPTIONAL);
+    if (fontinfostr != NULL)
         gNumHColors = AddCounterColorChars(fontinfostr, gHColorList);
-        UnallocateMem(fontinfostr);
-    };
+
     GetKeyValue(fontinfo, "AscenderHeight", ACOPTIONAL, &AscenderHeight);
     GetKeyValue(fontinfo, "AscenderOvershoot", ACOPTIONAL, &AscenderOvershoot);
     GetKeyValue(fontinfo, "BaselineYCoord", !ORDINARYCOLORING, &BaselineYCoord);
@@ -230,7 +223,6 @@ misdigit(int c)
 char*
 GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
 {
-    char* returnstring = NULL;
     size_t i;
 
     if (!fontinfo) {
@@ -241,10 +233,7 @@ GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
     for (i = 0; i < fontinfo->length; i++) {
         if (fontinfo->entries[i].key &&
             !strcmp(fontinfo->entries[i].key, keyword)) {
-            returnstring = AllocateMem(strlen(fontinfo->entries[i].value) + 1,
-                                       sizeof(char), "GetFontInfo return str");
-            strcpy(returnstring, fontinfo->entries[i].value);
-            return returnstring;
+            return fontinfo->entries[i].value;
         }
     }
 
@@ -336,5 +325,4 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
     }
 
     *pnum = count;
-    UnallocateMem(initline);
 }

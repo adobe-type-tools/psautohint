@@ -123,7 +123,6 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             if (gScalingHints) {
                 s = GetFontInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
                 origEmSquare = strtod(s, NULL);
-                UnallocateMem(s);
                 gBlueFuzz = (Fixed)(origEmSquare / 2000.0); /* .5 pixel */
             } else {
                 gBlueFuzz = DEFAULTBLUEFUZZ;
