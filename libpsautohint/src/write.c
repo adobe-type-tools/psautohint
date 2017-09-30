@@ -15,8 +15,7 @@
 
 static Fixed currentx, currenty;
 static bool firstFlex, wrtColorInfo;
-#define MAXS0LEN 127
-static char S0[MAXS0LEN + 1];
+static char S0[MAXBUFFLEN + 1];
 static PClrPoint bst;
 static char bch;
 static Fixed bx, by;
@@ -65,13 +64,13 @@ WriteString(char* str)
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal places. */
 #define WRTNUM(i)                                                              \
     {                                                                          \
-        snprintf(S0, MAXS0LEN, "%d ", (int32_t)(i));                           \
+        snprintf(S0, MAXBUFFLEN, "%d ", (int32_t)(i));                           \
         WriteString(S0);                                                       \
     }
 
 #define WRTRNUM(i)                                                             \
     {                                                                          \
-        snprintf(S0, MAXS0LEN, "%0.2f ", roundf((float)(i)*100) / 100);        \
+        snprintf(S0, MAXBUFFLEN, "%0.2f ", roundf((float)(i)*100) / 100);        \
         WriteString(S0);                                                       \
     }
 
@@ -171,13 +170,13 @@ safestrcat(char* s1, char* s2)
 
 #define SWRTNUM(i)                                                             \
     {                                                                          \
-        snprintf(S0, MAXS0LEN, "%d ", (int32_t)(i));                           \
+        snprintf(S0, MAXBUFFLEN, "%d ", (int32_t)(i));                           \
         sws(S0);                                                               \
     }
 
 #define SWRTNUMA(i)                                                            \
     {                                                                          \
-        snprintf(S0, MAXS0LEN, "%0.2f ", roundf((float)(i)*100) / 100);        \
+        snprintf(S0, MAXBUFFLEN, "%0.2f ", roundf((float)(i)*100) / 100);        \
         sws(S0);                                                               \
     }
 
