@@ -1,18 +1,35 @@
 from psautohint import autohint
 from psautohint import psautohint
 
-d = "tests/data/source-code-pro"
-mm = ("Black", "Bold", "ExtraLight", "Light", "Medium", "Regular", "Semibold")
-gg = []
-ii = None
+baseDir = "tests/data/source-code-pro"
+masters = ("Black", "Bold", "ExtraLight", "Light", "Medium", "Regular", "Semibold")
 
-for m in mm:
-    f = autohint.openOpenTypeFile("%s/%s/font.otf" % (d, m), "font.otf", None)
-    g = f.convertToBez("A", False)
-    gg.append(g[0])
-    if ii is None:
-        ii = f.getFontInfo(f.getPSName(), "%s/%s/font.otf" % (d, m), False, False, [], [])
-        ii = ii.getFontInfo()
+glyphList = None
 
-gg = psautohint.autohint(ii, gg, True)
-gg = psautohint.autohintmm(ii, [gg], True)
+fonts = []
+for master in masters:
+    print("Hinting %s" % master)
+
+    path = "%s/%s/font.otf" % (baseDir, master)
+    font = autohint.openOpenTypeFile(path, "font.otf", None)
+    names = font.getGlyphList()
+    info = font.getFontInfo(font.getPSName(), path, False, False, [], [])
+    info = info.getFontInfo()
+
+    if glyphList is None:
+        glyphList = names
+    else:
+        assert glyphList == names
+
+    glyphs = []
+    for name in names:
+        glyph = font.convertToBez(name, False)
+        glyphs.append(glyph[0])
+    fonts.append(psautohint.autohint(info, glyphs, False, False, False))
+
+glyphs = []
+for i in range(len(glyphList)):
+    glyphs.append([f[i] for f in fonts])
+
+print("MM Hinting")
+glyphs = psautohint.autohintmm(info, glyphs, True)
