@@ -7,6 +7,8 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
+#include <stdarg.h>
+
 #include "charpath.h"
 #include "ac.h"
 #include "bbox.h"
@@ -39,7 +41,6 @@ static bool bereallyQuiet = true;
 #if !IS_LIB
 static bool firstMT;
 static Cd* refPtArray = NULL;
-static char outstr[100];
 #endif
 static char *startbuff, **outbuff;
 static int16_t masterCount;
@@ -75,27 +76,21 @@ GetMasterDirName(char* dirname, indx ix)
 
 #if !IS_LIB
 #define Frac(x) ((x)&0xFF)
-#define WRTNUM(i)                                                              \
-    {                                                                          \
-        sprintf(outstr, "%d ", (int)(i));                                      \
-        WriteToBuffer();                                                       \
-    }
-#define WriteStr(str)                                                          \
-    {                                                                          \
-        sprintf(outstr, "%s ", (char*)str);                                    \
-        WriteToBuffer();                                                       \
-    }
-#define WriteSubr(val)                                                         \
-    {                                                                          \
-        sprintf(outstr, "%d subr ", val);                                      \
-        WriteToBuffer();                                                       \
-    }
+#define WRTNUM(i)       WriteToBuffer("%d ", (int)(i))
+#define WriteStr(str)   WriteToBuffer("%s ", str)
+#define WriteSubr(val)  WriteToBuffer("%d subr ", val)
 
 /* Checks if buffer needs to grow before writing out string. */
 static void
-WriteToBuffer(void)
+WriteToBuffer(char* format, ...)
 {
-    size_t len = strlen(outstr);
+    char outstr[MAXBUFFLEN + 1];
+    size_t len;
+    va_list va;
+
+    va_start(va, format);
+    len = vsnprintf(outstr, MAXBUFFLEN, format, va);
+    va_end(va);
 
     if ((byteCount + len) > buffSize) {
         buffSize += GROWBUFF;
@@ -107,6 +102,7 @@ WriteToBuffer(void)
             startbuff--;
         startbuff++;
     }
+
     byteCount += len;
     sprintf(startbuff, "%s", outstr);
     startbuff += len;
@@ -136,9 +132,9 @@ static void
 WriteOneHintVal(Fixed val)
 {
     if (Frac(val) == 0)
-        WRTNUM(FTrunc8(val))
+        WRTNUM(FTrunc8(val));
     else {
-        WRTNUM(FTrunc8(FRnd(val * 100)))
+        WRTNUM(FTrunc8(FRnd(val * 100)));
         WriteStr("100 div ");
     }
 }
@@ -706,47 +702,40 @@ WriteSbandWidth(void)
         wsame = wsame && (pathlist[ix].width == pathlist[ix - 1].width);
     }
     if (sbsame && wsame) {
-        sprintf(outstr, "%d %d ", pathlist[0].sb, pathlist[0].width);
-        WriteToBuffer();
+        WriteToBuffer("%d %d ", pathlist[0].sb, pathlist[0].width);
     } else if (sbsame) {
-        sprintf(outstr, "%d ", pathlist[0].sb);
-        WriteToBuffer();
+        WriteToBuffer("%d ", pathlist[0].sb);
         for (j = 0; j < masterCount; j++) {
-            sprintf(outstr, "%d ",
+            WriteToBuffer("%d ",
                     (j == 0) ? pathlist[j].width
                              : pathlist[j].width - pathlist[0].width);
-            WriteToBuffer();
         }
         GetLengthandSubrIx(1, &length, &subrix);
         WriteSubr(subrix);
     } else if (wsame) {
         for (j = 0; j < masterCount; j++) {
-            sprintf(outstr, "%d ",
+            WriteToBuffer("%d ",
                     (j == 0) ? pathlist[j].sb
                              : pathlist[j].sb - pathlist[0].sb);
-            WriteToBuffer();
         }
         GetLengthandSubrIx(1, &length, &subrix);
         WriteSubr(subrix);
-        sprintf(outstr, "%d ", pathlist[0].width);
-        WriteToBuffer();
+        WriteToBuffer("%d ", pathlist[0].width);
     } else {
         GetLengthandSubrIx(opcount, &length, &subrix);
         if ((writeSubrOnce = (length == opcount))) {
-            sprintf(outstr, "%d %d ", pathlist[0].sb, pathlist[0].width);
-            WriteToBuffer();
+            WriteToBuffer("%d %d ", pathlist[0].sb, pathlist[0].width);
             length = startix = 1;
         }
         for (ix = 0; ix < opcount; ix += length) {
             for (j = startix; j < masterCount; j++) {
-                sprintf(outstr, "%d ",
+                WriteToBuffer("%d ",
                         (ix == 0)
                           ? (j == 0) ? pathlist[j].sb
                                      : pathlist[j].sb - pathlist[0].sb
                           : (j == 0) ? (int32_t)pathlist[j].width
                                      : (int32_t)(pathlist[j].width -
                                                  pathlist[0].width));
-                WriteToBuffer();
             }
             if (!writeSubrOnce || (ix == (opcount - 1)))
                 WriteSubr(subrix);
@@ -1733,8 +1722,7 @@ WriteFlex(indx eltix)
             } /* end of for opix */
         }     /* end of last else clause */
         if (j != 7) {
-            sprintf(outstr, "%s 2 subr\n", operator);
-            WriteToBuffer();
+            WriteToBuffer("%s 2 subr\n", operator);
         }
         if (j == 7) {
             if (!ysame && (optype == HMT))
