@@ -10,8 +10,12 @@ fonts = []
 for master in masters:
     print("Hinting %s" % master)
 
-    path = "%s/%s/font.otf" % (baseDir, master)
-    font = autohint.openOpenTypeFile(path, "font.otf", None)
+    options = autohint.ACOptions()
+    options.quiet = True
+
+    path = "%s/%s/font.ufo" % (baseDir, master)
+    font = autohint.openUFOFile(path, "font.ufo", False, options)
+    font.useProcessedLayer = False
     names = font.getGlyphList()
     info = font.getFontInfo(font.getPSName(), path, False, False, [], [])
     info = info.getFontInfo()
@@ -22,9 +26,11 @@ for master in masters:
         assert glyphList == names
 
     glyphs = []
-    for name in names:
-        glyph = font.convertToBez(name, False)
-        glyphs.append(glyph[0])
+    for name in glyphList:
+        glyph = font.convertToBez(name, False, True)[0]
+        if not glyph:
+            glyph = "%%%s\n" % name
+        glyphs.append(glyph)
     fonts.append(psautohint.autohint(info, glyphs, False, False, False))
 
 glyphs = []
