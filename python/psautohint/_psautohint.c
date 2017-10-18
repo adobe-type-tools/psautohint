@@ -223,29 +223,46 @@ autohintmm(PyObject* self, PyObject* args)
     PyObject* inSeq = NULL;
     PyObject* fontObj = NULL;
     PyObject* outSeq = NULL;
+    PyObject* mastersSeq = NULL;
     Py_ssize_t bezLen = 0;
+    Py_ssize_t mastersLen = 0;
     char* fontInfo = NULL;
+    const char** masters;
     bool error = false;
+    Py_ssize_t i, j;
 
-    if (!PyArg_ParseTuple(args, "O!O|i", &PyBytes_Type, &fontObj, &inSeq,
-                          &verbose))
+    if (!PyArg_ParseTuple(args, "O!OO|i", &PyBytes_Type, &fontObj, &inSeq,
+                          &mastersSeq, &verbose))
         return NULL;
 
     inSeq = PySequence_Fast(inSeq, "argument must be sequence");
     if (!inSeq)
         return NULL;
+    bezLen = PySequence_Fast_GET_SIZE(inSeq);
+
+    mastersSeq = PySequence_Fast(mastersSeq, "argument must be sequence");
+    if (!mastersSeq)
+        return NULL;
+
+    mastersLen = PySequence_Fast_GET_SIZE(mastersSeq);
+    masters = MEMNEW(mastersLen * sizeof(char*));
+    if (!masters)
+        return NULL;
+
+    for (i = 0; i < mastersLen; i++) {
+        PyObject* obj = PySequence_Fast_GET_ITEM(mastersSeq, i);
+        masters[i] = PyBytes_AsString(obj);
+    }
 
     fontInfo = PyBytes_AsString(fontObj);
 
     AC_SetMemManager(NULL, memoryManager);
     AC_SetReportCB(reportCB, verbose);
 
-    bezLen = PySequence_Fast_GET_SIZE(inSeq);
     outSeq = PyTuple_New(bezLen);
     if (!outSeq) {
         error = true;
     } else {
-        Py_ssize_t i, j;
         for (i = 0; i < bezLen; i++) {
             const char** inData = NULL;
             char* outData = NULL;
@@ -254,6 +271,11 @@ autohintmm(PyObject* self, PyObject* args)
 
             PyObject* itemObj = PySequence_Fast_GET_ITEM(inSeq, i);
             Py_ssize_t itemLen = PySequence_Fast_GET_SIZE(itemObj);
+
+            if (itemLen != mastersLen) {
+                error = true;
+                break;
+            }
 
             inData = MEMNEW(itemLen * sizeof(char*));
             if (!inData) {
@@ -273,8 +295,8 @@ autohintmm(PyObject* self, PyObject* args)
                 break;
             }
 
-            result = AutoColorStringMM(inData, fontInfo, itemLen, &outData,
-                                       &outputSize);
+            result = AutoColorStringMM(inData, fontInfo, mastersLen, masters,
+                                       &outData, &outputSize);
 #if 0
             if (result == AC_DestBuffOfloError) {
                 outData = MEMRENEW(outData, outputSize);
@@ -322,6 +344,7 @@ autohintmm(PyObject* self, PyObject* args)
     }
 
     Py_XDECREF(inSeq);
+    Py_XDECREF(mastersSeq);
 
     if (error) {
         Py_XDECREF(outSeq);

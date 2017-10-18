@@ -50,14 +50,6 @@ typedef int indx;		/* for indexes that could be either short or
 /* Round the same way as PS. i.e. -6.5 ==> -6.0 */
 #define LROUND(a) ((a > 0) ? (int32_t)(a + 0.5) : ((a + (int32_t)(-a)) == -0.5) ? (int32_t) a : (int32_t)(a - 0.5))
 
-#define BEZDIR "bez"
-
-#ifdef MAXPATHLEN
-#undef MAXPATHLEN
-#endif
-#define MAXPATHLEN 1024        /* max path name len for a dir or folder
-                                  (includes 1 byte for null terminator) */
-
 #ifndef MAXINT
 #define MAXINT                   32767
 #endif
