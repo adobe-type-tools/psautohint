@@ -32,4 +32,4 @@ for i in range(len(glyphList)):
     glyphs.append([f[i] for f in fonts])
 
 print("MM Hinting")
-glyphs = psautohint.autohintmm(info, glyphs, True)
+glyphs = psautohint.autohintmm(info, glyphs, masters, True)

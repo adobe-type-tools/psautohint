@@ -371,7 +371,8 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
 
 ACLIB_API int
 AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
-                  int nmasters, char** dstbezdata, size_t* length)
+                  int nmasters, const char** masters, char** dstbezdata,
+                  size_t* length)
 {
     int value, result;
     ACFontInfo* fontinfo = NULL;
@@ -427,7 +428,8 @@ AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
                        roundCoords);
 #endif
     /* result == true is good */
-    result = MergeCharPaths(fontinfo, srcbezdata, nmasters, dstbezdata, length);
+    result = MergeCharPaths(fontinfo, srcbezdata, nmasters, masters, dstbezdata,
+                            length);
 
     /* The following call to error_handler() always returns control to just
      * after the setjmp() function call above, but with value set to 1 if

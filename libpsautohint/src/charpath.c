@@ -44,6 +44,7 @@ static Cd* refPtArray = NULL;
 #endif
 static char *startbuff, **outbuff;
 static int16_t masterCount;
+static const char** masterNames;
 static size_t byteCount, buffSize;
 static PPathList pathlist = NULL;
 static indx hintsdirIx;
@@ -54,12 +55,6 @@ static void GetRelativePosition(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed*);
 static int16_t GetOperandCount(int16_t);
 static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 #endif
-
-static void
-GetMasterDirName(char* dirname, indx ix)
-{
-    sprintf(dirname, "%d", ix);
-}
 
 /* macros */
 #define FixShift (8)
@@ -304,20 +299,16 @@ FreePathElements(indx startix, indx stopix)
 static void
 InconsistentPointCount(indx ix, int entries1, int entries2)
 {
-    char pathdir1[MAXPATHLEN], pathdir2[MAXPATHLEN];
-
-    GetMasterDirName(pathdir1, 0);
-    GetMasterDirName(pathdir2, ix);
-    LogMsg(WARNING, OK, "The character: %s will not be included in the font\n  "
+    LogMsg(WARNING, OK, "The character: %s will not be included in the font\n "
                         "because the version in %s has a total of %d elements "
                         "and\n  the one in %s has %d elements.\n",
-           gGlyphName, pathdir1, (int)entries1, pathdir2, (int)entries2);
+           gGlyphName, masterNames[0], (int)entries1, masterNames[ix],
+           (int)entries2);
 }
 
 static void
 InconsistentPathType(indx ix, int16_t type1, int16_t type2, indx eltno)
 {
-    char pathdir1[MAXPATHLEN], pathdir2[MAXPATHLEN];
     char typestr1[10], typestr2[10];
     Cd coord1, coord2;
 
@@ -325,14 +316,12 @@ InconsistentPathType(indx ix, int16_t type1, int16_t type2, indx eltno)
     GetPathType(type2, typestr2);
     GetCoordFromType(type1, &coord1, 0, eltno);
     GetCoordFromType(type2, &coord2, ix, eltno);
-    GetMasterDirName(pathdir1, 0);
-    GetMasterDirName(pathdir2, ix);
     LogMsg(WARNING, OK,
            "The character: %s will not be included in the font\n  "
            "because the version in %s has path type %s at coord: %d "
            "%d\n  and the one in %s has type %s at coord %d %d.\n",
-           gGlyphName, pathdir1, typestr1, (int)coord1.x, (int)coord1.y,
-           pathdir2, typestr2, (int)coord2.x, (int)coord2.y);
+           gGlyphName, masterNames[0], typestr1, (int)coord1.x, (int)coord1.y,
+           masterNames[ix], typestr2, (int)coord2.x, (int)coord2.y);
 }
 
 /* Returns whether changing the line to a curve is successful. */
@@ -385,16 +374,14 @@ AddLine(indx mIx, indx pathIx)
     Fixed xoffset = 0, yoffset = 0;
     Fixed xoffsetr = 0, yoffsetr = 0;
     PCharPathElt start, end, thisone, nxtone;
-    char dirname[MAXPATHLEN];
     indx i, n;
 
     if (pathlist[mIx].path[pathIx].type != RCT) {
         if (!bereallyQuiet) {
-            GetMasterDirName(dirname, mIx);
             LogMsg(WARNING, OK,
                    "Please convert the point closepath in directory: "
                    "%s, character: %s to a line closepath.\n",
-                   dirname, gGlyphName);
+                   masterNames[mIx], gGlyphName);
         }
         return;
     }
@@ -406,11 +393,10 @@ AddLine(indx mIx, indx pathIx)
     switch (start->type) {
         case RDT:
             if (!bereallyQuiet) {
-                GetMasterDirName(dirname, mIx);
                 LogMsg(WARNING, OK,
                        "Please convert the point closepath to a line "
                        "closepath in directory: %s, character: %s.\n",
-                       dirname, gGlyphName);
+                       masterNames[mIx], gGlyphName);
             }
             return;
         case RCT:
@@ -428,20 +414,18 @@ AddLine(indx mIx, indx pathIx)
                             : -FixOne;
             else {
                 if (!bereallyQuiet) {
-                    GetMasterDirName(dirname, mIx);
                     LogMsg(WARNING, OK,
                            "Could not modify point closepath in directory "
                            "'%s', character: %s near (%d, %d).\n",
-                           dirname, gGlyphName, FTrunc8(end->x),
+                           masterNames[mIx], gGlyphName, FTrunc8(end->x),
                            FTrunc8(end->y));
                 }
                 return;
             }
             break;
         default:
-            GetMasterDirName(dirname, mIx);
             LogMsg(LOGERROR, NONFATALERROR,
-                   "Bad character description file: %s/%s.\n", dirname,
+                   "Bad character description file: %s/%s.\n", masterNames[mIx],
                    gGlyphName);
     }
 
@@ -1223,7 +1207,6 @@ CheckFlexOK(indx ix)
     indx i;
     bool flexOK = pathlist[hintsdirIx].path[ix].isFlex;
     PCharPathElt end;
-    char pathdir[MAXPATHLEN];
 
     for (i = 0; i < masterCount; i++) {
         if (i == hintsdirIx)
@@ -1231,13 +1214,12 @@ CheckFlexOK(indx ix)
         if (flexOK && (!pathlist[i].path[ix].isFlex)) {
             if (!DoubleCheckFlexVals(i, ix, hintsdirIx)) {
                 end = &pathlist[i].path[ix];
-                GetMasterDirName(pathdir, i);
                 LogMsg(WARNING, OK,
                        "Flex will not be included in character: %s "
                        "in '%s' at element %d near (%d, %d) because "
                        "the character does not have flex in each "
                        "design.\n",
-                       gGlyphName, pathdir, (int)ix, FTrunc8(end->x),
+                       gGlyphName, masterNames[i], (int)ix, FTrunc8(end->x),
                        FTrunc8(end->y));
                 return false;
             } else {
@@ -1389,13 +1371,11 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
     int16_t count, newhinttype;
     bool ok = true;
     Fixed min, dmin, mid, dmid, max, dmax;
-    char dirname[MAXPATHLEN];
 
     for (ix = 0; ix < masterCount; ix++) {
         count = 1;
         if (ix == hintsdirIx)
             continue;
-        GetMasterDirName(dirname, ix);
         hintElt = (pathIx == MAINHINTS ? &pathlist[ix].mainhints
                                        : &pathlist[ix].path[pathIx].hints);
         /* Find specified hint element. */
@@ -1409,7 +1389,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
             LogMsg(LOGERROR, NONFATALERROR,
                    "Invalid format for hint operator: hstem3 or "
                    "vstem3 in character: %s/%s.\n",
-                   dirname, gGlyphName);
+                   masterNames[ix], gGlyphName);
         }
         if ((*hintElt)->type != hinttype ||
             (*hintElt)->next->type != hinttype ||
@@ -1417,7 +1397,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
             LogMsg(LOGERROR, NONFATALERROR,
                    "Invalid format for hint operator: hstem3 or "
                    "vstem3 in character: %s in '%s'.\n",
-                   gGlyphName, dirname);
+                   gGlyphName, masterNames[ix]);
         }
         min = (*hintElt)->leftorbot;
         dmin = (*hintElt)->rightortop - min;
@@ -1442,7 +1422,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
                    "%s in '%s'. (min=%d..%d[delta=%d], "
                    "mid=%d..%d[delta=%d], max=%d..%d[delta=%d])\n",
                    (hinttype == (RM + ESCVAL)) ? "vstem3" : "hstem3",
-                   gGlyphName, dirname, FTrunc8((*hintElt)->leftorbot),
+                   gGlyphName, masterNames[ix], FTrunc8((*hintElt)->leftorbot),
                    FTrunc8((*hintElt)->rightortop),
                    FTrunc8((*hintElt)->rightortop - (*hintElt)->leftorbot),
                    FTrunc8((*hintElt)->next->leftorbot),
@@ -1939,7 +1919,6 @@ CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
 {
     PCharPathElt path1 = &pathlist[dir1].path[eltIx],
                  path2 = &pathlist[dir2].path[eltIx];
-    char dirname[MAXPATHLEN];
 
     switch (opIx) {
         case 0:
@@ -1969,12 +1948,11 @@ CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
         case 5:
             return (path1->ry3 == path2->ry3);
         default:
-            GetMasterDirName(dirname, dir1);
             LogMsg(LOGERROR, NONFATALERROR,
                    "Invalid index value: %d defined for curveto "
                    "command4 in character: %s. Op=%d, dir=%s near "
                    "(%d %d).\n",
-                   (int)opIx, gGlyphName, (int)op, dirname, FTrunc8(path1->x),
+                   (int)opIx, gGlyphName, (int)op, masterNames[dir1], FTrunc8(path1->x),
                    FTrunc8(path1->y));
             break;
     }
@@ -2325,11 +2303,12 @@ GetHintsDir(void)
 
 bool
 MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
-               char** outbuffer, size_t* outlen)
+               const char** masters, char** outbuffer, size_t* outlen)
 {
     bool ok;
 
     masterCount = nmasters;
+    masterNames = masters;
     byteCount = 1;
     buffSize = *outlen;
     outbuff = outbuffer;
