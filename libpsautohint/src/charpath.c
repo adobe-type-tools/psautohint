@@ -47,7 +47,7 @@ static int16_t masterCount;
 static const char** masterNames;
 static size_t byteCount, buffSize;
 static PPathList pathlist = NULL;
-static indx hintsdirIx;
+static indx hintsMasterIx = 0; /* The index of the master we read hints from */
 
 /* Prototypes */
 static void GetRelativePosition(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed*);
@@ -514,7 +514,7 @@ static void
 AddLineCube(indx mIx, indx pathIx)
 {
     /* Path element types have already been coordinated by ChangeToCurve. */
-    /* Hints are only present in the hintsdirIx. */
+    /* Hints are only present in the hintsMasterIx. */
 
     if (pathlist[mIx].path[pathIx].type == RDT) {
         pathlist[mIx].path[pathIx].remove = true;
@@ -617,7 +617,7 @@ CompareCharPaths(const ACFontInfo* fontinfo, const char** glyphs)
         SetCurrPathList(&pathlist[mIx]);
         gPathEntries = 0;
 
-        if (hintsdirIx == mIx) {
+        if (hintsMasterIx == mIx) {
             /* read char data and hints from bez file */
             if (!ReadGlyph(fontinfo, glyphs[mIx], true, gAddHints))
                 return false;
@@ -834,7 +834,7 @@ _HintKind_(int hinttype)
 static char*
 _elttype_(int indx)
 {
-    switch (pathlist[hintsdirIx].path[indx].type) {
+    switch (pathlist[hintsMasterIx].path[indx].type) {
         case RMT:
             return ("Moveto");
             break;
@@ -883,7 +883,7 @@ GetPointType(int16_t hinttype, Fixed value, int32_t* pathEltIx)
 #endif
 
 retry:
-    GetEndPoints1(hintsdirIx, pathIx, &startPt, &endPt);
+    GetEndPoints1(hintsMasterIx, pathIx, &startPt, &endPt);
     switch (hinttype) {
         case RB:
         case RV + ESCVAL:
@@ -947,7 +947,7 @@ retry:
         return AVERAGE;
     }
 
-    pathtype = pathlist[hintsdirIx].path[pathIx].type;
+    pathtype = pathlist[hintsMasterIx].path[pathIx].type;
     if (tryAgain && (pathIx + 1 < gPathEntries) &&
         (pathtype != CP)) { /* try looking at other end of line or curve */
         pathIx++;
@@ -966,7 +966,7 @@ retry:
             fprintf(stderr, " (reset PathEltix to %d) ", *pathEltIx);
 #endif
     }
-    if (CurveBBox(hintsdirIx, hinttype, *pathEltIx - 1, &loc) &&
+    if (CurveBBox(hintsMasterIx, hinttype, *pathEltIx - 1, &loc) &&
         nearlyequal_(value, loc, FixOne)) {
 #if __CENTERLINE__
         if (TRACE)
@@ -987,7 +987,7 @@ GetRelPos(int32_t pathIx, int16_t hinttype, Fixed hintVal, Cd* startPt,
 {
     Cd origStart, origEnd;
 
-    GetEndPoints1(hintsdirIx, pathIx, &origStart, &origEnd);
+    GetEndPoints1(hintsMasterIx, pathIx, &origStart, &origEnd);
     if (hinttype == RB || hinttype == (RV + ESCVAL))
         GetRelativePosition(endPt->y, startPt->y, origEnd.y, origStart.y,
                             hintVal, val);
@@ -1047,12 +1047,12 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
             Fixed tx, ty;
             fprintf(stderr, "%d ", pathEltIx);
             if (type1 != GHOST) {
-                GetEndPoint1(hintsdirIx, currHintElt->pathix1 - 1, &tx, &ty);
+                GetEndPoint1(hintsMasterIx, currHintElt->pathix1 - 1, &tx, &ty);
                 fprintf(stderr, "Start attached to (%.2f %.2f)",
                         FIXED2FLOAT(tx), FIXED2FLOAT(ty));
             }
             if (type2 != GHOST) {
-                GetEndPoint1(hintsdirIx, currHintElt->pathix2 - 1, &tx, &ty);
+                GetEndPoint1(hintsMasterIx, currHintElt->pathix2 - 1, &tx, &ty);
                 fprintf(stderr, "End attached to (%.2f %.2f)", FIXED2FLOAT(tx),
                         FIXED2FLOAT(ty));
             }
@@ -1065,7 +1065,7 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
         /* ghostVal should be -20 or -21 */
         ghostVal = currHintElt->rightortop - currHintElt->leftorbot;
     for (ix = 0; ix < masterCount; ix++) {
-        if (ix == hintsdirIx)
+        if (ix == hintsMasterIx)
             continue;
         newEntry = (PHintElt)AllocateMem(1, sizeof(HintElt), "hint element");
         newEntry->type = hinttype;
@@ -1178,14 +1178,14 @@ ReadandAssignHints(void)
     indx ix;
 
     /* Check for main hints first, i.e. global to character. */
-    if (pathlist[hintsdirIx].mainhints != NULL)
-        ReadHints(pathlist[hintsdirIx].mainhints, MAINHINTS);
+    if (pathlist[hintsMasterIx].mainhints != NULL)
+        ReadHints(pathlist[hintsMasterIx].mainhints, MAINHINTS);
     /* Now check for local hint values. */
     for (ix = 0; ix < gPathEntries; ix++) {
-        if (pathlist[hintsdirIx].path == NULL)
+        if (pathlist[hintsMasterIx].path == NULL)
             return 1;
-        if (pathlist[hintsdirIx].path[ix].hints != NULL)
-            ReadHints(pathlist[hintsdirIx].path[ix].hints, ix);
+        if (pathlist[hintsMasterIx].path[ix].hints != NULL)
+            ReadHints(pathlist[hintsMasterIx].path[ix].hints, ix);
     }
     return 0;
 }
@@ -1209,14 +1209,14 @@ static bool
 CheckFlexOK(indx ix)
 {
     indx i;
-    bool flexOK = pathlist[hintsdirIx].path[ix].isFlex;
+    bool flexOK = pathlist[hintsMasterIx].path[ix].isFlex;
     PCharPathElt end;
 
     for (i = 0; i < masterCount; i++) {
-        if (i == hintsdirIx)
+        if (i == hintsMasterIx)
             continue;
         if (flexOK && (!pathlist[i].path[ix].isFlex)) {
-            if (!DoubleCheckFlexVals(i, ix, hintsdirIx)) {
+            if (!DoubleCheckFlexVals(i, ix, hintsMasterIx)) {
                 end = &pathlist[i].path[ix];
                 LogMsg(WARNING, OK,
                        "Flex will not be included in character: %s "
@@ -1378,7 +1378,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
 
     for (ix = 0; ix < masterCount; ix++) {
         count = 1;
-        if (ix == hintsdirIx)
+        if (ix == hintsMasterIx)
             continue;
         hintElt = (pathIx == MAINHINTS ? &pathlist[ix].mainhints
                                        : &pathlist[ix].path[pathIx].hints);
@@ -1484,9 +1484,9 @@ CheckHandVStem3(void)
     indx ix;
     bool errormsg = true;
 
-    FindHandVStem3(&pathlist[hintsdirIx].mainhints, MAINHINTS, &errormsg);
+    FindHandVStem3(&pathlist[hintsMasterIx].mainhints, MAINHINTS, &errormsg);
     for (ix = 0; ix < gPathEntries; ix++)
-        FindHandVStem3(&pathlist[hintsdirIx].path[ix].hints, ix, &errormsg);
+        FindHandVStem3(&pathlist[hintsMasterIx].path[ix].hints, ix, &errormsg);
 }
 
 #if !IS_LIB
@@ -1615,8 +1615,8 @@ static void
 WriteFlex(indx eltix)
 {
 #if !IS_LIB
-    bool vert = (pathlist[hintsdirIx].path[eltix].x ==
-                 pathlist[hintsdirIx].path[eltix + 1].x3);
+    bool vert = (pathlist[hintsMasterIx].path[eltix].x ==
+                 pathlist[hintsMasterIx].path[eltix + 1].x3);
     Cd coord, coord0; /* array of reference points */
     bool xsame, ysame, writeSubrOnce;
     char operator[MAXOPLEN]; /* rmt, hmt, vmt */
@@ -1744,7 +1744,7 @@ WriteHints(indx pathEltIx)
     rmcount = rvcount = 0;
     while (hintArray[0] != NULL) {
         startix = 0;
-        hinttype = hintArray[hintsdirIx]->type;
+        hinttype = hintArray[hintsMasterIx]->type;
         for (ix = 0; ix < masterCount; ix++) {
             hintArray[ix]->rightortop -=
               hintArray[ix]->leftorbot; /* relativize */
@@ -1998,7 +1998,7 @@ CombinePaths(void)
 
     if (!cubeLibrary)
         WriteSbandWidth();
-    if (gAddHints && (pathlist[hintsdirIx].mainhints != NULL))
+    if (gAddHints && (pathlist[hintsMasterIx].mainhints != NULL))
         WriteHints(MAINHINTS);
     WriteStr("sc\n");
     firstMT = true;
@@ -2009,7 +2009,7 @@ CombinePaths(void)
             continue;
 
         xequal = yequal = false;
-        if (gAddHints && (pathlist[hintsdirIx].path[eltix].hints != NULL))
+        if (gAddHints && (pathlist[hintsMasterIx].path[eltix].hints != NULL))
             WriteHints(eltix);
         switch (pathlist[0].path[eltix].type) {
             case RMT:
@@ -2291,20 +2291,6 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
 
  *************/
 
-#if 0
-static void
-SetHintsDir(indx dirIx)
-{
-    hintsdirIx = dirIx;
-}
-
-static int
-GetHintsDir(void)
-{
-    return hintsdirIx;
-}
-#endif
-
 bool
 MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
                const char** masters, char** outbuffer, size_t* outlen)
@@ -2323,7 +2309,7 @@ MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
     if (ok) {
         CheckForZeroLengthCP();
         SetSbandWidth();
-        if (gAddHints && hintsdirIx >= 0 && gPathEntries > 0) {
+        if (gAddHints && hintsMasterIx >= 0 && gPathEntries > 0) {
             if (ReadandAssignHints()) {
                 LogMsg(LOGERROR, FATALERROR,
                        "Path problem in ReadAndAssignHints, character %s.\n",
