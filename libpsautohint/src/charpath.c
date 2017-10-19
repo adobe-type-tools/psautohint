@@ -242,26 +242,26 @@ GetCoordFromType(int16_t pathtype, Cd* coord, indx mIx, indx eltno)
     };
 }
 
-static void
-GetPathType(int16_t pathtype, char* str)
+static const char* const pathTypes[] = { "moveto", "lineto", "curveto",
+                                         "closepath" };
+
+static const char*
+GetPathType(int16_t pathtype)
 {
     switch (pathtype) {
         case RMT:
-            strcpy(str, "moveto");
-            break;
+            return pathTypes[0];
         case RDT:
-            strcpy(str, "lineto");
-            break;
+            return pathTypes[1];
         case RCT:
-            strcpy(str, "curveto");
-            break;
+            return pathTypes[2];
         case CP:
-            strcpy(str, "closepath");
-            break;
+            return pathTypes[3];
         default:
             LogMsg(LOGERROR, NONFATALERROR,
                    "Illegal path type: %d in character: %s.\n", pathtype,
                    gGlyphName);
+            return NULL;
     }
 }
 
@@ -309,19 +309,16 @@ InconsistentPointCount(indx ix, int entries1, int entries2)
 static void
 InconsistentPathType(indx ix, int16_t type1, int16_t type2, indx eltno)
 {
-    char typestr1[10], typestr2[10];
     Cd coord1, coord2;
 
-    GetPathType(type1, typestr1);
-    GetPathType(type2, typestr2);
     GetCoordFromType(type1, &coord1, 0, eltno);
     GetCoordFromType(type2, &coord2, ix, eltno);
     LogMsg(WARNING, OK,
            "The character: %s will not be included in the font\n  "
            "because the version in %s has path type %s at coord: %d "
            "%d\n  and the one in %s has type %s at coord %d %d.\n",
-           gGlyphName, masterNames[0], typestr1, (int)coord1.x, (int)coord1.y,
-           masterNames[ix], typestr2, (int)coord2.x, (int)coord2.y);
+           gGlyphName, masterNames[0], GetPathType(type1), coord1.x, coord1.y,
+           masterNames[ix], GetPathType(type2), coord2.x, coord2.y);
 }
 
 /* Returns whether changing the line to a curve is successful. */
@@ -1112,9 +1109,10 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
                     pathElt = pathlist[ix].path[pathIx];
                     if (pathElt.type != RCT) {
                         LogMsg(LOGERROR, NONFATALERROR,
-                               "Malformed path list: %s, dir: %d, "
-                               "element: %d != RCT.\n",
-                               gGlyphName, ix, pathIx);
+                               "Malformed path list: %s, master: %s, "
+                               "element: %d, type: %s != curveto.\n",
+                               gGlyphName, masterNames[ix], pathIx,
+                               GetPathType(pathElt.type));
                     }
                     if (!GetInflectionPoint(startPt.x, startPt.y, pathElt.x1,
                                             pathElt.y1, pathElt.x2, pathElt.y2,
