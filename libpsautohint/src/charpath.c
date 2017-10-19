@@ -620,9 +620,15 @@ CompareCharPaths(const ACFontInfo* fontinfo, const char** glyphs)
         SetCurrPathList(&pathlist[mIx]);
         gPathEntries = 0;
 
-        /* read char data only */
-        if (!ReadGlyph(fontinfo, glyphs[mIx], true, false))
-            return false;
+        if (hintsdirIx == mIx) {
+            /* read char data and hints from bez file */
+            if (!ReadGlyph(fontinfo, glyphs[mIx], true, gAddHints))
+                return false;
+        } else {
+            /* read char data only */
+            if (!ReadGlyph(fontinfo, glyphs[mIx], true, false))
+                return false;
+        }
 
         if (mIx == 0)
             totalPathElt = gPathEntries;
