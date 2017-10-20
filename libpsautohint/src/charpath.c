@@ -1079,10 +1079,15 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
         else
             (*hintElt)->next = newEntry;
         for (j = 0; j < 2; j++) {
-            pathIx =
-              (j == 0 ? currHintElt->pathix1 - 1 : currHintElt->pathix2 - 1);
-            pathtype = (j == 0 ? type1 : type2);
-            value = (j == 0 ? &newEntry->leftorbot : &newEntry->rightortop);
+            if (j == 0) {
+                pathIx = currHintElt->pathix1 - 1;
+                pathtype = type1;
+                value = &newEntry->leftorbot;
+            } else {
+                pathIx = currHintElt->pathix2 - 1;
+                pathtype = type2;
+                value = &newEntry->rightortop;
+            }
             if (pathtype != GHOST)
                 GetEndPoints1(ix, pathIx, &startPt, &endPt);
             switch (pathtype) {
