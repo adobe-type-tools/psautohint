@@ -85,6 +85,7 @@ LogMsg1(char* str, int16_t level, int16_t code)
     switch (level) {
         case INFO:
             Write(str);
+            Write("\n");
             break;
         case WARNING:
             WriteWarnorErr(stderr, "WARNING: ");

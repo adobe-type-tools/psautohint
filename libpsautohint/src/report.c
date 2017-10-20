@@ -33,6 +33,7 @@ PrintMessage(char* format, ...)
         va_end(va);
 
         gLibReportCB(msgBuffer);
+        gLibReportCB("\n");
     }
 }
 

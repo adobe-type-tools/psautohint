@@ -36,11 +36,11 @@ static void
 reportCB(char* msg)
 {
 #if PY_MAJOR_VERSION >= 3
-    PySys_FormatStdout("%s\n", msg);
+    PySys_FormatStdout("%s", msg);
 #else
     /* Formatted string should not exceed 1000 bytes, see:
      * https://docs.python.org/2/c-api/sys.html#c.PySys_WriteStdout */
-    PySys_WriteStdout("%.999s\n", msg);
+    PySys_WriteStdout("%.1000s", msg);
 #endif
 }
 

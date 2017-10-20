@@ -110,7 +110,6 @@ static void
 reportCB(char* msg)
 {
     fprintf(stdout, "%s", msg);
-    fprintf(stdout, "\n");
 }
 
 static void
