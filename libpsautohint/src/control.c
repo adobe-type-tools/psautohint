@@ -937,7 +937,7 @@ AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
 {
     int32_t lentop = gLenTopBands, lenbot = gLenBotBands;
     if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
-        LogMsg(LOGERROR, NONFATALERROR, "Cannot prase %s glyph.\n", gGlyphName);
+        LogMsg(LOGERROR, NONFATALERROR, "Cannot parse %s glyph.\n", gGlyphName);
     }
     PrintMessage(""); /* Just print the file name. */
     AddColors(fontinfo, srcglyph, extracolor);
