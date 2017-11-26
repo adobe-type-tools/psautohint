@@ -76,9 +76,9 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		if (not self.allowDecimals):
 			x = int(round(x))
 			y = int(round(y))
-			self.bezProgram.append("%s  %s mt\n" % (x, y))
+			self.bezProgram.append("%s %s mt\n" % (x, y))
 		else:
-			self.bezProgram.append("%.2f  %.2f mt\n" % (x, y))
+			self.bezProgram.append("%.2f %.2f mt\n" % (x, y))
 		self.sawMoveTo = 1
 
 	def rLineTo(self, point):
@@ -95,9 +95,9 @@ class T2ToBezExtractor(T2OutlineExtractor):
 		if (not self.allowDecimals):
 			x = int(round(x))
 			y = int(round(y))
-			self.bezProgram.append("%s  %s dt\n" % (x, y))
+			self.bezProgram.append("%s %s dt\n" % (x, y))
 		else:
-			self.bezProgram.append("%.2f  %.2f dt\n" % (x, y))
+			self.bezProgram.append("%.2f %.2f dt\n" % (x, y))
 
 	def rCurveTo(self, pt1, pt2, pt3):
 		pt1 = list(self._nextPoint(pt1))
@@ -1023,7 +1023,7 @@ class CFFFontData:
 														self.allowDecimalCoords)
 			# Note: the glyph name is important, as it is used by autohintexe
 			# for various heuristics, including [hv]stem3 derivation.
-			bezString = "%" + glyphName + "\n" + bezString
+			bezString = "% " + glyphName + "\n" + bezString
 		except SEACError:
 			if not beVerbose:
 				dotCount = 0

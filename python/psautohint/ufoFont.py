@@ -1429,7 +1429,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, le
 					raise UFOParseError("Unknown Point type not supported '%s'." % (xmlToString(contourItem)))
 
 			# we get here only if there was at least a move.
-			bezStringList.append("cp\n")
+			bezStringList.append("cp")
 		bezstring = "\n".join(bezStringList)
 	return bezstring
 
@@ -1443,7 +1443,7 @@ def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll=False):
 		return None, width
 
 	bezString = convertGlyphOutlineToBezString(outlineXML, ufoFontData)
-	bezString = "%" + glyphName + "\nsc " + bezString + " ed"
+	bezString = "\n".join(["% " + glyphName, "sc", bezString, "ed", ""])
 	return bezString, width
 
 
