@@ -1,5 +1,22 @@
 import platform
 from setuptools import setup, Extension
+from setuptools.command.build_ext import build_ext
+
+
+class CustomBuildExt(build_ext):
+
+    def build_extension(self, ext):
+        compiler_type = self.compiler.compiler_type
+
+        if compiler_type == "unix":
+            if ext.extra_compile_args is None:
+                ext.extra_compile_args = []
+            # fixes segmentation fault when python (and thus the extension
+            # module) is compiled with -O3 and tree vectorize:
+            # https://github.com/khaledhosny/psautohint/issues/16
+            ext.extra_compile_args.append("-fno-tree-vectorize")
+
+        build_ext.build_extension(self, ext)
 
 
 module1 = Extension("psautohint._psautohint",
@@ -66,6 +83,9 @@ setup(name="psautohint",
       install_requires=[
           'fonttools>=3.1.2',
       ],
+      cmdclass={
+          'build_ext': CustomBuildExt,
+      },
       classifiers=[
           'Development Status :: 4 - Beta',
           'Environment :: Console',
