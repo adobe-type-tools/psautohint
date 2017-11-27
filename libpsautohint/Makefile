@@ -23,6 +23,7 @@ CFLAGS = \
 	-Wunused-macros \
 	-Wmissing-prototypes \
 	-O3 \
+	-fno-tree-vectorize \
 	$(NULL)
 
 ifeq ($(firstword $(shell $(CC) --version)),clang)
