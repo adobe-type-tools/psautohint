@@ -4,7 +4,7 @@ import os
 import re
 import sys
 
-from psautohint import _psautohint, autohint, ufoTools
+from psautohint import _psautohint, autohint, ufoFont
 
 
 __copyright__ = """\
@@ -189,7 +189,7 @@ the glyph has hints, then autohint assumes it was manually hinted, and will by
 default not hint it again. If the file is missing, autohint will assume that
 all the glyphs were manually hinted, and you will have to use the option -a
 or -r to hint any glyphs.
-""" % (ufoTools.kProcessedGlyphsLayerName)
+""" % (ufoFont.kProcessedGlyphsLayerName)
 
 __FDDoc__ = """
 By default, autohint uses the font's global alignment zones and stem widths
@@ -642,7 +642,7 @@ def main(args=None):
     try:
         autohint.hintFile(options)
     except (autohint.ACFontError, autohint.ACHintError,
-            ufoTools.UFOParseError) as e:
+            ufoFont.UFOParseError) as e:
         autohint.logMsg("\t%s" % e)
         return 1
 

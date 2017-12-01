@@ -44,7 +44,6 @@ import traceback
 import shutil
 
 from psautohint import _psautohint
-from psautohint import ufoTools
 
 kACIDKey = "AutoHintKey"
 
@@ -305,6 +304,8 @@ def openFile(path, outFilePath, useHashMap, options):
 
 
 def openUFOFile(path, outFilePath, useHashMap, options):
+	from psautohint import ufoFont
+
 	# Check if has glyphs/contents.plist
 	contentsPath = os.path.join(path, "glyphs", "contents.plist")
 	if not os.path.exists(contentsPath):
@@ -322,16 +323,16 @@ def openUFOFile(path, outFilePath, useHashMap, options):
 			shutil.rmtree(outFilePath)
 		shutil.copytree(path , outFilePath)
 		path = outFilePath
-	font = ufoTools.UFOFontData(path, useHashMap, ufoTools.kAutohintName)
+	font = ufoFont.UFOFontData(path, useHashMap, ufoFont.kAutohintName)
 	font.useProcessedLayer = True
 	# Programs in this list must be run before autohint,
 	# if the outlines have been edited.
-	font.requiredHistory.append(ufoTools.kCheckOutlineName)
+	font.requiredHistory.append(ufoFont.kCheckOutlineName)
 	return font
 
 
 def openOpenTypeFile(path, outFilePath, options):
-	from psautohint.BezTools import CFFFontData
+	from psautohint.otfFont import CFFFontData
 	from fontTools.ttLib import TTFont, getTableModule
 
 	# If input font is CFF, build a dummy ttFont in memory.

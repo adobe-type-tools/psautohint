@@ -1,7 +1,7 @@
 from __future__ import print_function, absolute_import
 
 """
-ufoTools.py v1.30 May 2 2017
+ufoFont.py v1.30 May 2 2017
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -44,13 +44,13 @@ on all glyphs in a font, then a second pass is under 2 seconds.
 
 Another issue is that since we no longer remove overlaps from the source
 glyph files, checkOutlines must write any edited glyph data to a
-different layer in order to not destroy the source data. The ufoTools
+different layer in order to not destroy the source data. The ufoFont
 defines an Adobe-specific glyph layer for processed glyphs, named
 "glyphs.com.adobe.type.processedGlyphs".
 checkOutlines writes new glyph files to the processed glyphs layer only
 when it makes a change to the glyph data.
 
-When the autohint program is run, the ufoTools must be able to tell
+When the autohint program is run, the ufoFont must be able to tell
 whether checkOutlines has been run and has altered a glyph: if so, the
 input file needs to be from the processed glyph layer, else it needs to
 be from the default glyph layer.
@@ -66,28 +66,28 @@ Altered GLIF data is always written to the Adobe processed glyph layer. The
 program may or may not have altered the outline data. For example, autohint adds
 private hint data, and adds names to points, but does not change any paths.
 
-If the stored hash for the glyph does not exist, the ufoTools lib will save the
+If the stored hash for the glyph does not exist, the ufoFont lib will save the
 new hash in the hash map entry and will set the history list to contain just the
 current program. The program will read the glyph from the default layer.
 
 If the stored hash matches the hash for the current glyph file in the default
-layer, and the current program name is in the history list,then ufoTools
+layer, and the current program name is in the history list,then ufoFont
 will return "skip=1", and the calling program may skip the glyph.
 
 If the stored hash matches the hash for the current glyph file in the default
 layer, and the current program name is not in the history list, then the
-ufoTools will return "skip=0". If the font object field 'usedProcessedLayer' is
+ufoFont will return "skip=0". If the font object field 'usedProcessedLayer' is
 set True, the program will read the glyph from the from the Adobe processed
 layer, if it exists, else it will always read from the default layer.
 
 If the hash differs between the hash map entry and the current glyph in the
-default layer, and usedProcessedLayer is False, then ufoTools will return
+default layer, and usedProcessedLayer is False, then ufoFont will return
 "skip=0". If usedProcessedLayer is True, then the program will consult the list
 of required programs. If any of these are in the history list, then the program
 will report an error and return skip =1, else it will return skip=1. The program
 will then save the new hash in the hash map entry and reset the history list to
 contain just the current program. If the old and new hash match, but the program
-name is not in the history list, then the ufoTools will not skip the glyph, and
+name is not in the history list, then the ufoFont will not skip the glyph, and
 will add the program name to the history list.
 
 

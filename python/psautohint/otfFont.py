@@ -1,7 +1,7 @@
 from __future__ import print_function, absolute_import
 
 """
-BezTools.py v1.13 July 11 2017
+otfFont.py v1.13 July 11 2017
 
 Utilities for converting between T2 charstrings and the bez data format.
 Used by AC and focus/CheckOutlines.
