@@ -305,7 +305,7 @@ try:
 except ImportError:
 	import xml.etree.ElementTree as ET
 
-from psautohint import ConvertFontToCID
+from psautohint import fdTools
 
 XML = ET.XML
 XMLElement = ET.Element
@@ -810,7 +810,7 @@ class UFOFontData:
 		if self.fontInfo == None:
 			self.loadFontInfo()
 
-		fdDict = ConvertFontToCID.FDDict()
+		fdDict = fdTools.FDDict()
 		fdDict.LanguageGroup = self.fontInfo.get("languagegroup", "0") # should be 1 if the glyphs are ideographic, else 0.
 		fdDict.OrigEmSqUnits = self.getUnitsPerEm()
 		fdDict.FontName = self.getPSName()
@@ -837,9 +837,9 @@ class UFOFontData:
 			blueValues[i] = blueValues[i] - blueValues[i-1]
 
 		blueValues = [str(v) for v in blueValues]
-		numBlueValues = min(numBlueValues, len(ConvertFontToCID.kBlueValueKeys))
+		numBlueValues = min(numBlueValues, len(fdTools.kBlueValueKeys))
 		for i in range(numBlueValues):
-			key = ConvertFontToCID.kBlueValueKeys[i]
+			key = fdTools.kBlueValueKeys[i]
 			value = blueValues[i]
 			exec("fdDict.%s = %s" % (key, value))
 
@@ -853,9 +853,9 @@ class UFOFontData:
 			for i in range(0, numBlueValues,2):
 				otherBlues[i] = otherBlues[i] - otherBlues[i+1]
 			otherBlues = [str(v) for v in otherBlues]
-			numBlueValues = min(numBlueValues, len(ConvertFontToCID.kOtherBlueValueKeys))
+			numBlueValues = min(numBlueValues, len(fdTools.kOtherBlueValueKeys))
 			for i in range(numBlueValues):
-				key = ConvertFontToCID.kOtherBlueValueKeys[i]
+				key = fdTools.kOtherBlueValueKeys[i]
 				value = otherBlues[i]
 				exec("fdDict.%s = %s" % (key, value))
 
@@ -933,12 +933,12 @@ class UFOFontData:
 			if "FDDict" in fontInfoData:
 
 				blueFuzz = fdDict.BlueFuzz
-				fdGlyphDict, fontDictList, finalFDict = ConvertFontToCID.parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY, psName, blueFuzz)
+				fdGlyphDict, fontDictList, finalFDict = fdTools.parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY, psName, blueFuzz)
 				if finalFDict == None:
 					# If a font dict was not explicitly specified for the output font, use the first user-specified font dict.
-					ConvertFontToCID.mergeFDDicts( fontDictList[1:], self.fontDict )
+					fdTools.mergeFDDicts( fontDictList[1:], self.fontDict )
 				else:
-					ConvertFontToCID.mergeFDDicts( [finalFDict], topDict )
+					fdTools.mergeFDDicts( [finalFDict], topDict )
 
 		return fdGlyphDict, fontDictList
 

@@ -3,7 +3,7 @@
 from __future__ import print_function, absolute_import
 
 __doc__ = """
-ConvertFontToCID.py. v 1.9 April 16 2016
+fdTools.py. v 1.9 April 16 2016
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
 "fontinfo" file. See AC.py help, with the "-hfd" option, or the MakeOTF

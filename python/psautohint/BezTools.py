@@ -16,7 +16,7 @@ import os
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import *
 
-from psautohint import ConvertFontToCID
+from psautohint import fdTools
 
 debug = False
 def debugMsg(*args):
@@ -1111,7 +1111,7 @@ class CFFFontData:
 			pDict = pTopDict
 		privateDict = pDict.Private
 
-		fdDict = ConvertFontToCID.FDDict()
+		fdDict = fdTools.FDDict()
 		if hasattr(privateDict, "LanguageGroup"):
 			fdDict.LanguageGroup = privateDict.LanguageGroup
 		else:
@@ -1161,9 +1161,9 @@ class CFFFontData:
 			blueValues[i] = blueValues[i] - blueValues[i-1]
 
 		blueValues = [str(v) for v in blueValues]
-		numBlueValues = min(numBlueValues, len(ConvertFontToCID.kBlueValueKeys))
+		numBlueValues = min(numBlueValues, len(fdTools.kBlueValueKeys))
 		for i in range(numBlueValues):
-			key = ConvertFontToCID.kBlueValueKeys[i]
+			key = fdTools.kBlueValueKeys[i]
 			value = blueValues[i]
 			exec("fdDict.%s = %s" % (key, value))
 
@@ -1181,9 +1181,9 @@ class CFFFontData:
 			for i in range(0, numBlueValues,2):
 				blueValues[i] = blueValues[i] - blueValues[i+1]
 			blueValues = [str(v) for v in blueValues]
-			numBlueValues = min(numBlueValues, len(ConvertFontToCID.kOtherBlueValueKeys))
+			numBlueValues = min(numBlueValues, len(fdTools.kOtherBlueValueKeys))
 			for i in range(numBlueValues):
-				key = ConvertFontToCID.kOtherBlueValueKeys[i]
+				key = fdTools.kOtherBlueValueKeys[i]
 				value = blueValues[i]
 				exec("fdDict.%s = %s" % (key, value))
 
@@ -1275,13 +1275,13 @@ class CFFFontData:
 			maxY = topDict.FontBBox[3]
 			minY = topDict.FontBBox[1]
 			blueFuzz = fdDict.BlueFuzz
-			fdGlyphDict, fontDictList, finalFDict = ConvertFontToCID.parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY, fontPSName, blueFuzz)
+			fdGlyphDict, fontDictList, finalFDict = fdTools.parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY, fontPSName, blueFuzz)
 			if finalFDict == None:
 				# If a font dict was not explicitly specified for the output font,
 				# use the first user-specified font dict.
-				ConvertFontToCID.mergeFDDicts(fontDictList[1:], topDict.Private)
+				fdTools.mergeFDDicts(fontDictList[1:], topDict.Private)
 			else:
-				ConvertFontToCID.mergeFDDicts([finalFDict], topDict.Private)
+				fdTools.mergeFDDicts([finalFDict], topDict.Private)
 		return fdGlyphDict, fontDictList
 
 def test():
