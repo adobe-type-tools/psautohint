@@ -873,7 +873,7 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
         /* SaveFile(); SaveFile is always called in AddColorsCleanup, so this is
          * a duplciate */
         InitAll(fontinfo, RESTART);
-        if (gWriteColoredBez && !ReadGlyph(fontinfo, srcglyph, false, false)) {
+        if (gWriteColoredBez && !ReadGlyph(fontinfo, srcglyph)) {
             break;
         }
         AddColorsSetup();
@@ -936,7 +936,7 @@ AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
                bool extracolor)
 {
     int32_t lentop = gLenTopBands, lenbot = gLenBotBands;
-    if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
+    if (!ReadGlyph(fontinfo, srcglyph)) {
         LogMsg(LOGERROR, NONFATALERROR, "Cannot parse %s glyph.\n", gGlyphName);
     }
     PrintMessage(""); /* Just print the file name. */

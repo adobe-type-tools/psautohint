@@ -434,8 +434,7 @@ void AddVSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
 void AddHSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
                  int32_t typ, int32_t i);
 void Delete(PPathElt e);
-bool ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
-               bool forBlendData, bool readHints);
+bool ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph);
 double FixToDbl(Fixed f);
 bool CompareValues(PClrVal val1, PClrVal val2, int32_t factor,
                    int32_t ghstshift);

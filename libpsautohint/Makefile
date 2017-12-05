@@ -44,7 +44,6 @@ LIB_OBJS = \
 	$(OBJ_DIR)/src/ac.o \
 	$(OBJ_DIR)/src/auto.o \
 	$(OBJ_DIR)/src/bbox.o \
-	$(OBJ_DIR)/src/charpathpriv.o \
 	$(OBJ_DIR)/src/charprop.o \
 	$(OBJ_DIR)/src/check.o \
 	$(OBJ_DIR)/src/control.o \
