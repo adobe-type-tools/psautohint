@@ -1203,8 +1203,7 @@ class CFFFontData:
 		if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1)):
 			vstems = [upm] # dummy value that will allow PyAC to run
 			self.logMsg("Warning: There is no value or 0 value for DominantV.")
-		vstems = repr(vstems)
-		fdDict.DominantV = vstems
+		fdDict.DominantV = "[" + " ".join([str(v) for v in vstems]) + "]"
 
 		if hasattr(privateDict, "StemSnapH"):
 			hstems = privateDict.StemSnapH
@@ -1222,8 +1221,7 @@ class CFFFontData:
 		if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1)):
 			hstems = [upm] # dummy value that will allow PyAC to run
 			self.logMsg("Warning: There is no value or 0 value for DominantH.")
-		hstems = repr(hstems)
-		fdDict.DominantH = hstems
+		fdDict.DominantH = "[" + " ".join([str(v) for v in hstems]) + "]"
 
 		if noFlex:
 			fdDict.FlexOK = "false"

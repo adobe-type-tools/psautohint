@@ -871,8 +871,7 @@ class UFOFontData:
 		if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1) ):
 			vstems = [fdDict.OrigEmSqUnits] # dummy value that will allow PyAC to run
 			logMsg("WARNING: There is no value or 0 value for DominantV.")
-		vstems = repr(vstems)
-		fdDict.DominantV = vstems
+		fdDict.DominantV = "[" + " ".join([str(v) for v in vstems]) + "]"
 
 		hstems = self.fontInfo.get("postscriptStemSnapH", [])
 		if len(hstems) == 0:
@@ -886,8 +885,7 @@ class UFOFontData:
 		if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1) ):
 			hstems = [fdDict.OrigEmSqUnits] # dummy value that will allow PyAC to run
 			logMsg("WARNING: There is no value or 0 value for DominantH.")
-		hstems = repr(hstems)
-		fdDict.DominantH = hstems
+		fdDict.DominantH = "[" + " ".join([str(v) for v in hstems]) + "]"
 
 		if noFlex:
 			fdDict.FlexOK = "false"
