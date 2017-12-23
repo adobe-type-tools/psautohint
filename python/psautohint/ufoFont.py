@@ -419,9 +419,8 @@ class UFOFontData:
 		hasHints = False
 		glyphPath = self.getGlyphProcessedPath(glyphName)
 		if glyphPath and os.path.exists(glyphPath):
-			fp = open(glyphPath, "rt")
-			data = fp.read()
-			fp.close()
+			with open(glyphPath, "rt") as fp:
+				data = fp.read()
 			if "hintSetList" in data:
 				hasHints = True
 		return hasHints
@@ -448,10 +447,9 @@ class UFOFontData:
 		for glyphName, glifXML in self.newGlyphMap.items():
 			glyphPath = self.getWriteGlyphPath(glyphName)
 			#print("Saving file", glyphPath)
-			fp = open(glyphPath, "wb")
 			et = ET.ElementTree(glifXML)
-			et.write(fp, encoding="UTF-8", xml_declaration=True)
-			fp.close()
+			with open(glyphPath, "wb") as fp:
+				et.write(fp, encoding="UTF-8", xml_declaration=True)
 
 		# Update the layer contents.plist file
 		layerContentsFilePath = os.path.join(self.parentPath, "layercontents.plist")
@@ -482,9 +480,8 @@ class UFOFontData:
 	def readHashMap(self):
 		hashPath = os.path.join(self.parentPath, "data", kAdobHashMapName)
 		if os.path.exists(hashPath):
-			fp = open(hashPath, "rt")
-			data = fp.read()
-			fp.close()
+			with open(hashPath, "rt") as fp:
+				data = fp.read()
 			newMap = eval(data)
 		else:
 			newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
@@ -520,9 +517,8 @@ class UFOFontData:
 		data.append("}")
 		data.append("")
 		data = "\n".join(data)
-		fp = open(hashPath, "wt")
-		fp.write(data)
-		fp.close()
+		with open(hashPath, "wt") as fp:
+			fp.write(data)
 		return
 
 	def getCurGlyphPath(self, glyphName):
@@ -923,9 +919,8 @@ class UFOFontData:
 		maxY = maxX
 		minY = -self.getUnitsPerEm()
 		if os.path.exists(srcFontInfo):
-			fi = open(srcFontInfo, "rU")
-			fontInfoData = fi.read()
-			fi.close()
+			with open(srcFontInfo, "rU") as fi:
+				fontInfoData = fi.read()
 			fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
 
 			if "FDDict" in fontInfoData:
@@ -1100,9 +1095,8 @@ def	parsePList(filePath, dictKey = None):
 	plistKeys = []
 
 	# I uses this rather than the plistlib in order to get a list that allows preserving key order.
-	fp = open(filePath, "r")
-	data = fp.read()
-	fp.close()
+	with open(filePath, "r") as fp:
+		data = fp.read()
 	contents = XML(data)
 	dict = contents.find("dict")
 	if dict == None:
@@ -1971,9 +1965,8 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
 	# I need to replace the contours with data from the bez string.
 	glyphPath = ufoFontData.getGlyphSrcPath(glyphName)
 
-	fp = open(glyphPath, "r")
-	data = fp.read()
-	fp.close()
+	with open(glyphPath, "r") as fp:
+		data = fp.read()
 
 	glifXML = XML(data)
 

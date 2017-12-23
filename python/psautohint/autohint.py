@@ -340,9 +340,8 @@ def openOpenTypeFile(path, outFilePath, options):
 	# Return flag is 0 if OTF, and 1 if CFF.
 	fontType = 0 # OTF
 	try:
-		ff = open(path, "rb")
-		data = ff.read(10)
-		ff.close()
+		with open(path, "rb") as ff:
+			data = ff.read(10)
 	except (IOError, OSError):
 		logMsg("Failed to open and read font file %s." % path)
 
@@ -369,9 +368,8 @@ def openOpenTypeFile(path, outFilePath, options):
 			raise ACFontError("Font file must be CFF or OTF file: %s." % path)
 
 		# now package the CFF font as an OTF font.
-		ff = open(path, "rb")
-		data = ff.read()
-		ff.close()
+		with open(path, "rb") as ff:
+			data = ff.read()
 		try:
 			ttFont = TTFont()
 			cffModule = getTableModule('CFF ')

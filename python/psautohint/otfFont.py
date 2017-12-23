@@ -1076,13 +1076,11 @@ class CFFFontData:
 			data = ttFont["CFF "].compile(ttFont)
 			if fontType == 1: # CFF
 				if overwriteOriginal:
-					tf = open(inputPath, "wb")
-					tf.write(data)
-					tf.close()
+					with open(inputPath, "wb") as tf:
+						tf.write(data)
 				else:
-					tf = open(outFilePath, "wb")
-					tf.write(data)
-					tf.close()
+					with open(outFilePath, "wb") as tf:
+						tf.write(data)
 
 			if os.path.exists(tempPath):
 				os.remove(tempPath)
@@ -1262,9 +1260,8 @@ class CFFFontData:
 		srcFontInfo = os.path.dirname(inputPath)
 		srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
 		if os.path.exists(srcFontInfo):
-			fi = open(srcFontInfo, "rU")
-			fontInfoData = fi.read()
-			fi.close()
+			with open(srcFontInfo, "rU") as fi:
+				fontInfoData = fi.read()
 			fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
 		else:
 			return fdGlyphDict, fontDictList
@@ -1315,9 +1312,8 @@ def test2():
 	# Use form "cid0769" for CID keys references.
 	from fontTools.ttLib import TTFont
 	path = sys.argv[1]
-	fp = open(path, "rt")
-	bezString = fp.read()
-	fp.close()
+	with open(path, "rt") as fp:
+		bezString = fp.read()
 
 	t2Program = convertBezToT2(bezString)
 

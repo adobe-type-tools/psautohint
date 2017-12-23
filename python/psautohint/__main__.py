@@ -468,9 +468,8 @@ def parseGlyphListArg(glyphString, nameAliases):
 def parseCounterHintData(path):
     hCounterGlyphList = []
     vCounterGlyphList = []
-    gf = open(path, "rt")
-    data = gf.read()
-    gf.close()
+    with open(path, "rt") as gf:
+        data = gf.read()
     lines = re.findall(r"([^\r\n]+)", data)
     # strip blank and comment lines
     lines = filter(lambda line: re.sub(r"#.+", "", line), lines)
@@ -493,9 +492,8 @@ def checkFontinfoFile(options):
     srcFontInfo = os.path.dirname(options.inputPath)
     srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
     if os.path.exists(srcFontInfo):
-        fi = open(srcFontInfo, "rU")
-        data = fi.read()
-        fi.close()
+        with open(srcFontInfo, "rU") as fi:
+            data = fi.read()
         data = re.sub(r"#[^\r\n]+", "", data)
         counterGlyphLists = re.findall(r"([VH])CounterChars\s+\(\s*([^\)\r\n]+)\)", data)
         for entry in counterGlyphLists:
@@ -558,7 +556,7 @@ def getOptions(args):
         elif arg in ["-xg", "-g"]:
             if arg == "-xg":
                 options.excludeGlyphList = True
-            i = i +1
+            i += 1
             glyphString = args[i]
             if glyphString[0] == "-":
                 raise OptionParseError("Option Error: it looks like the first item in the glyph list following '-g' is another option.")
@@ -566,19 +564,18 @@ def getOptions(args):
         elif arg in ["-xgf", "-gf"]:
             if arg == "-xgf":
                 options.excludeGlyphList = True
-            i = i +1
+            i += 1
             filePath = args[i]
             if filePath[0] == "-":
                 raise OptionParseError("Option Error: it looks like the the glyph list file following '-gf' is another option.")
             try:
-                gf = open(filePath, "rt")
-                glyphString = gf.read()
-                gf.close()
+                with open(filePath, "rt") as gf:
+                    glyphString = gf.read()
             except (IOError,OSError):
                 raise OptionParseError("Option Error: could not open glyph list file <%s>." % filePath)
             options.glyphList += parseGlyphListArg(glyphString, options.nameAliases)
         elif arg == "-cf":
-            i = i +1
+            i += 1
             filePath = args[i]
             if filePath[0] == "-":
                 raise OptionParseError("Option Error: it looks like the the counter hint glyph list file following '-cf' is another option.")
@@ -590,10 +587,10 @@ def getOptions(args):
         elif arg == "-logOnly":
             options.logOnly = True
         elif arg == "-log":
-            i = i +1
+            i += 1
             options.logFile = open(args[i], "wt")
         elif arg == "-o":
-            i = i +1
+            i += 1
             options.outputPath = args[i]
         elif arg == "-d":
             options.debug = True
@@ -606,16 +603,17 @@ def getOptions(args):
         else:
             options.inputPath = arg
         i += 1
+
     if not options.inputPath:
         raise OptionParseError("Option Error: You must provide a font file path.")
 
     if not os.path.exists(options.inputPath):
         raise OptionParseError("Option Error: The input font file path %s' does not exist." % (options.inputPath))
-    else:
-        # Might be a UFO font.
-        # Auto completion in some shells adds a dir separator,
-        # which then causes problems with os.path.dirname().
-        options.inputPath = options.inputPath.rstrip(os.sep)
+
+    # Might be a UFO font.
+    # Auto completion in some shells adds a dir separator,
+    # which then causes problems with os.path.dirname().
+    options.inputPath = options.inputPath.rstrip(os.sep)
 
     checkFontinfoFile(options)
 
