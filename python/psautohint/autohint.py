@@ -78,13 +78,13 @@ class ACOptions:
 		self.allowDecimalCoords = False
 		self.writeToDefaultLayer = False
 
-class ACFontInfoParseError(KeyError):
+class ACFontInfoParseError(Exception):
 	pass
 
-class ACFontError(KeyError):
+class ACFontError(Exception):
 	pass
 
-class ACHintError(KeyError):
+class ACHintError(Exception):
 	pass
 
 kProgressChar = "."

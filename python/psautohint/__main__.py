@@ -431,7 +431,7 @@ fewer entries this way.
 """
 
 
-class OptionParseError(KeyError):
+class OptionParseError(Exception):
     pass
 
 

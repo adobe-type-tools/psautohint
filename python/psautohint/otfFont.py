@@ -26,10 +26,10 @@ def debugMsg(*args):
 kStackLimit = 46
 kStemLimit = 96
 
-class ACFontError(KeyError):
+class ACFontError(Exception):
 	pass
 
-class SEACError(KeyError):
+class SEACError(Exception):
 	pass
 
 def hintOn(i, hintMaskBytes):
