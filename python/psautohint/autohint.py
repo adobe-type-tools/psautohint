@@ -207,9 +207,9 @@ def openFontPlistFile(psName, dirPath):
 			fontPlist = plistlib.Plist.fromFile(filePath)
 			isNewPlistFile = False
 		except (IOError, OSError):
-			raise ACFontError("\tError: font plist file exists, but coud not be read <%s>." % filePath)
+			raise ACFontError("\tError: font plist file exists, but could not be read <%s>." % filePath)
 		except:
-			raise ACFontError("\tError: font plist file exists, but coud not be parsed <%s>." % filePath)
+			raise ACFontError("\tError: font plist file exists, but could not be parsed <%s>." % filePath)
 
 	if fontPlist == None:
 		fontPlist = plistlib.Plist()
