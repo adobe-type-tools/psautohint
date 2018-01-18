@@ -10,8 +10,10 @@
 #include <math.h>
 
 #include "ac.h"
+#include "charpath.h"
 #include "fontinfo.h"
 #include "opcodes.h"
+#define ESCVAL 100
 
 char gGlyphName[MAX_GLYPHNAME_LEN];
 
@@ -21,6 +23,9 @@ static Fixed tempx, tempy;       /* used to calculate relative coordinates */
 static Fixed stk[STKMAX];
 static int32_t stkindex;
 static bool flex, startchar;
+static bool forMultiMaster, includeHints;
+/* Reading file for comparison of multiple master data and hint information.
+   Reads into PCharPathElt structure instead of PPathElt. */
 
 static float origEmSquare = 0.0;
 
@@ -130,23 +135,54 @@ psDIV(void)
 static void
 RDcurveto(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
 {
-    PPathElt new;
-    new = AppendElement(CURVETO);
-    new->x1 = tfmx(ScaleAbs(fontinfo, c1.x));
-    new->y1 = tfmy(ScaleAbs(fontinfo, c1.y));
-    new->x2 = tfmx(ScaleAbs(fontinfo, c2.x));
-    new->y2 = tfmy(ScaleAbs(fontinfo, c2.y));
-    new->x3 = tfmx(ScaleAbs(fontinfo, c3.x));
-    new->y3 = tfmy(ScaleAbs(fontinfo, c3.y));
+    if (!forMultiMaster) {
+        PPathElt new;
+        new = AppendElement(CURVETO);
+        new->x1 = tfmx(ScaleAbs(fontinfo, c1.x));
+        new->y1 = tfmy(ScaleAbs(fontinfo, c1.y));
+        new->x2 = tfmx(ScaleAbs(fontinfo, c2.x));
+        new->y2 = tfmy(ScaleAbs(fontinfo, c2.y));
+        new->x3 = tfmx(ScaleAbs(fontinfo, c3.x));
+        new->y3 = tfmy(ScaleAbs(fontinfo, c3.y));
+    } else {
+        PCharPathElt new;
+        new = AppendCharPathElement(RCT);
+        new->x = tempx;
+        new->y = tempy;
+        new->x1 = c1.x;
+        new->y1 = c1.y;
+        new->x2 = c2.x;
+        new->y2 = c2.y;
+        new->x3 = c3.x;
+        new->y3 = c3.y;
+        new->rx1 = c1.x - tempx;
+        new->ry1 = c1.y - tempy;
+        new->rx2 = c2.x - c1.x;
+        new->ry2 = c2.y - c1.y;
+        new->rx3 = c3.x - c2.x;
+        new->ry3 = c3.y - c2.y;
+        if (flex)
+            new->isFlex = true;
+    }
 }
 
 static void
 RDmtlt(const ACFontInfo* fontinfo, int32_t etype)
 {
-    PPathElt new;
-    new = AppendElement(etype);
-    new->x = tfmx(ScaleAbs(fontinfo, currentx));
-    new->y = tfmy(ScaleAbs(fontinfo, currenty));
+    if (!forMultiMaster) {
+        PPathElt new;
+        new = AppendElement(etype);
+        new->x = tfmx(ScaleAbs(fontinfo, currentx));
+        new->y = tfmy(ScaleAbs(fontinfo, currenty));
+        return;
+    } else {
+        PCharPathElt new;
+        new = AppendCharPathElement(etype == LINETO ? RDT : RMT);
+        new->x = currentx;
+        new->y = currenty;
+        new->rx = tempx;
+        new->ry = tempy;
+    }
 }
 
 #define RDlineto() RDmtlt(fontinfo, LINETO)
@@ -270,7 +306,10 @@ psHVCT(const ACFontInfo* fontinfo)
 static void
 psCP(void)
 {
-    AppendElement(CLOSEPATH);
+    if (!forMultiMaster)
+        AppendElement(CLOSEPATH);
+    else
+        AppendCharPathElement(CP);
 }
 
 static void
@@ -329,6 +368,29 @@ psFLX(const ACFontInfo* fontinfo)
     flex = false;
 }
 
+static void
+ReadHintInfo(char nm, const char* str)
+{
+    Cd c0;
+    int16_t hinttype =
+      nm == 'y' ? RY : nm == 'b' ? RB : nm == 'm' ? RM + ESCVAL : RV + ESCVAL;
+    int32_t elt1, elt2;
+    PopPCd(&c0);
+    c0.y += c0.x; /* make absolute */
+    /* Look for comment of path elements used to determine this band. */
+    if (sscanf(str, " %% %d %d", &elt1, &elt2) != 2) {
+        LogMsg(WARNING, NONFATALERROR,
+               "Extra hint information required for blended fonts is "
+               "not in\n  glyph: %s.  Please re-hint using "
+               "the latest software.\n  Hints will not be included "
+               "in this font.\n",
+               gGlyphName);
+        SetNoHints();
+        includeHints = false;
+    } else
+        SetHintsElt(hinttype, &c0, elt1, elt2, (bool)!startchar);
+}
+
 /*Used instead of StringEqual to keep ac from cloberring source string*/
 
 static int
@@ -344,7 +406,7 @@ isPrefix(const char* s, const char* pref)
 }
 
 static void
-DoName(const ACFontInfo* fontinfo, const char* nm, int len)
+DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
 {
     switch (len) {
         case 2:
@@ -381,7 +443,10 @@ DoName(const ACFontInfo* fontinfo, const char* nm, int len)
                         goto badFile;
                     break;
                 case 'r': /* rm, rv, ry, rb */
-                    Pop2();
+                    if (includeHints)
+                        ReadHintInfo(nm[1], buff);
+                    else
+                        Pop2();
                     break;
                 case 'i': /* id */
                     if (nm[1] != 'd')
@@ -616,7 +681,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                         if (c == 0)
                             break;
                     }
-                    DoName(fontinfo, s0, s - s0 - 1);
+                    DoName(fontinfo, s0, s, s - s0 - 1);
                     if (c == '\0')
                         s--;
                     continue;
@@ -668,13 +733,16 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
 }
 
 bool
-ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph)
+ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph, bool forBlendData,
+          bool readHints)
 {
     if (!srcglyph)
         return false;
 
     currentx = currenty = tempx = tempy = stkindex = 0;
     flex = gIdInFile = startchar = false;
+    forMultiMaster = forBlendData;
+    includeHints = readHints;
 
     ParseString(fontinfo, srcglyph);
 
