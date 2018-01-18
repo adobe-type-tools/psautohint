@@ -268,10 +268,10 @@ GetPathType(int16_t pathtype)
 static void
 FreePathElements(indx startix, indx stopix)
 {
-    indx j;
+    indx i, j;
 
     for (j = startix; j < stopix; j++) {
-#if 0
+#if 1
         PHintElt hintElt, next;
         if (pathlist[j].path != NULL)
         {
@@ -294,6 +294,8 @@ FreePathElements(indx startix, indx stopix)
         UnallocateMem(pathlist[j].path);
 #endif
     }
+    UnallocateMem(pathlist);
+    pathlist = NULL;
 }
 
 static void
