@@ -27,9 +27,10 @@ def getGlyphList(fonts):
 
 def mmHint(masters, fonts, infos, glyphList):
     hinted = []
+    failed = []
+    print("Hinting %s" % " ".join(masters))
     for name in glyphList:
         glyphs = []
-        print("Hinting %s" % name)
         for i, (font, info) in enumerate(zip(fonts, infos)):
             glyph = font.convertToBez(name, False, True)[0]
             if not glyph:
@@ -39,21 +40,21 @@ def mmHint(masters, fonts, infos, glyphList):
             glyphs.append(glyph)
 
         try:
-            glyphs = _psautohint.autohintmm(infos[0], [glyphs], masters, True)
-        except:
-            for i, glyph in enumerate(glyphs):
-                print(masters[i])
-                print(glyph)
-            raise
+            glyphs = psautohint.autohintmm(infos[0], [glyphs], masters, True)
+        except Exception as e:
+            failed.append(name)
         hinted.append(glyphs)
 
-    return hinted
+    return hinted, failed
 
 def main():
     masters = ["Regular", "Light", "ExtraLight", "Medium", "Semibold", "Bold", "Black"]
     fonts, infos = getFonts(masters, "tests/data/source-code-pro")
     glyphList = getGlyphList(fonts)
-    hinted = mmHint(masters, fonts, infos, glyphList)
+    hinted, failed = mmHint(masters, fonts, infos, glyphList)
+    if failed:
+        print("ERROR: Hinting the follwing glyphs failed:")
+        print("\t%s" % ", ".join(failed))
 
 if __name__ == "__main__":
     main()
