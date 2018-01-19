@@ -50,7 +50,7 @@ def mmHint(masters, fonts, infos, glyphList):
     return hinted
 
 def main():
-    masters = ["Black", "ExtraLight"]
+    masters = ["Regular", "Light", "ExtraLight", "Medium", "Semibold", "Bold", "Black"]
     fonts, infos = getFonts(masters, "tests/data/source-code-pro")
     glyphList = getGlyphList(fonts)
     hinted = mmHint(masters, fonts, infos, glyphList)
