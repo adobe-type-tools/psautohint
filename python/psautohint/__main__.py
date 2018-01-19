@@ -497,7 +497,7 @@ def checkFontinfoFile(options):
     Check if there is a makeotf fontinfo file in the input font directory.
     If so, get any Vcounter or HCouunter glyphs from it.
     """
-    srcFontInfo = os.path.dirname(options.inputPath)
+    srcFontInfo = os.path.dirname(options.inputPaths[0])
     srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
     if os.path.exists(srcFontInfo):
         with open(srcFontInfo, "rU") as fi:
@@ -523,7 +523,7 @@ def getOptions(args):
     numOptions = len(args)
     while i < numOptions:
         arg = args[i]
-        if options.inputPath:
+        if options.inputPaths and arg[0] == "-":
             raise OptionParseError(
                 "Option Error: All options must preceed the input font path "
                 "<%s>." % arg)
@@ -625,22 +625,27 @@ def getOptions(args):
         elif arg[0] == "-":
             raise OptionParseError("Option Error: Unknown option <%s>." % arg)
         else:
-            options.inputPath = arg
+            options.inputPaths.append(arg)
         i += 1
 
-    if not options.inputPath:
+    if not options.inputPaths:
         raise OptionParseError(
-            "Option Error: You must provide a font file path.")
+            "Option Error: You must provide a font path(s).")
 
-    if not os.path.exists(options.inputPath):
+    if not all(os.path.exists(p) for p in options.inputPaths):
         raise OptionParseError(
-            "Option Error: The input font file path %s' does not exist." %
-            options.inputPath)
+            "Option Error: The input font(s) %s' do not exist." %
+            " ".join(options.inputPaths))
+
+    if len(options.inputPaths) >=2 and options.outputPath:
+        raise OptionParseError(
+            "Option Error: Output path is not supported with multiple "
+            "input fonts.")
 
     # Might be a UFO font.
     # Auto completion in some shells adds a dir separator,
     # which then causes problems with os.path.dirname().
-    options.inputPath = options.inputPath.rstrip(os.sep)
+    options.inputPaths = [p.rstrip(os.sep) for p in options.inputPaths]
 
     checkFontinfoFile(options)
 
@@ -665,7 +670,7 @@ def main(args=None):
 
     # verify that all files exist.
     try:
-        autohint.hintFile(options)
+        autohint.hintFiles(options)
     except (autohint.ACFontError, autohint.ACHintError,
             ufoFont.UFOParseError) as e:
         autohint.logMsg("\t%s" % e)
