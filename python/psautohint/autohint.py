@@ -51,7 +51,7 @@ kProgressChar = "."
 
 class ACOptions:
     def __init__(self):
-        self.inputPath = None
+        self.inputPaths = []
         self.outputPath = None
         self.glyphList = []
         self.nameAliases = {}
@@ -414,13 +414,18 @@ def cmpFDDictEntries(entry1, entry2):
     else:
         return 0
 
+def hintFiles(options):
+    hintFile(options)
+    if len(options.inputPaths) > 1:
+        raise NotImplementedError("Hinting multiple master fonts is not supported.")
 
-def hintFile(options):
+def hintFile(options, path=None):
     global gLogFile
     gLogFile = options.logFile
     nameAliases = options.nameAliases
 
-    path = options.inputPath
+    if path is None:
+        path = options.inputPaths[0]
     fontFileName = os.path.basename(path)
     if not options.quiet:
         logMsg("Hinting font %s. Start time: %s." % (path, time.asctime()))
