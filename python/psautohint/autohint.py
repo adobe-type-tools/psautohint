@@ -75,6 +75,7 @@ class ACOptions:
         self.debug = False
         self.allowDecimalCoords = False
         self.writeToDefaultLayer = False
+        self.baseMaster = {}
 
 
 class ACFontInfoParseError(Exception):
@@ -417,9 +418,10 @@ def cmpFDDictEntries(entry1, entry2):
 def hintFiles(options):
     hintFile(options)
     if len(options.inputPaths) > 1:
-        raise NotImplementedError("Hinting multiple master fonts is not supported.")
+        for path in options.inputPaths[1:]:
+            hintFile(options, path, baseMaster=False)
 
-def hintFile(options, path=None):
+def hintFile(options, path=None, baseMaster=True):
     global gLogFile
     gLogFile = options.logFile
     nameAliases = options.nameAliases
@@ -649,9 +651,17 @@ def hintFile(options, path=None):
         if oldBezString != "" and oldBezString == bezString:
             newBezString = oldHintBezString
         else:
-            newBezString = psautohint.autohint(
-                fontInfo, [bezString], options.verbose, options.allowChanges,
-                not options.noHintSub, options.allowDecimalCoords)
+            if baseMaster:
+                newBezString = psautohint.autohint(
+                    fontInfo, [bezString], options.verbose,
+                    options.allowChanges, not options.noHintSub,
+                    options.allowDecimalCoords)
+                options.baseMaster[name] = newBezString[0]
+            else:
+                masters = [b"A", b"B"]
+                glyphs = [options.baseMaster[name], bezString]
+                newBezString = psautohint.autohintmm(
+                    fontInfo, [glyphs], masters, options.verbose)
             newBezString = newBezString[0]
 
         if not newBezString:
