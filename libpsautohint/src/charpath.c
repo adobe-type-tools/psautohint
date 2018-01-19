@@ -271,19 +271,15 @@ FreePathElements(indx startix, indx stopix)
     indx i, j;
 
     for (j = startix; j < stopix; j++) {
-#if 1
         PHintElt hintElt, next;
-        if (pathlist[j].path != NULL)
-        {
+        if (pathlist[j].path != NULL) {
             /* Before we can free hint elements will need to know gPathEntries
              value for char in each directory because this proc can be
              called when characters are inconsistent.
              */
-            for (i = 0; i < gPathEntries; i++)
-            {
+            for (i = 0; i < gPathEntries; i++) {
                 hintElt = pathlist[j].path[i].hints;
-                while (hintElt != NULL)
-                {
+                while (hintElt != NULL) {
                     next = hintElt->next;
                     UnallocateMem(hintElt);
                     hintElt = next;
@@ -292,7 +288,6 @@ FreePathElements(indx startix, indx stopix)
         }
         UnallocateMem(pathlist[j].mainhints);
         UnallocateMem(pathlist[j].path);
-#endif
     }
     UnallocateMem(pathlist);
     pathlist = NULL;
