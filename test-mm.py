@@ -28,7 +28,6 @@ def getGlyphList(fonts):
 def mmHint(masters, fonts, infos, glyphList):
     hinted = []
     failed = []
-    print("Hinting %s" % " ".join(masters))
     for name in glyphList:
         glyphs = []
         for i, (font, info) in enumerate(zip(fonts, infos)):
@@ -48,13 +47,30 @@ def mmHint(masters, fonts, infos, glyphList):
     return hinted, failed
 
 def main():
-    masters = ["Regular", "Light", "ExtraLight", "Medium", "Semibold", "Bold", "Black"]
-    fonts, infos = getFonts(masters, "tests/data/source-code-pro")
-    glyphList = getGlyphList(fonts)
-    hinted, failed = mmHint(masters, fonts, infos, glyphList)
-    if failed:
-        print("ERROR: Hinting the follwing glyphs failed:")
-        print("\t%s" % ", ".join(failed))
+    families = [
+        ["source-code-pro", (
+            ["Regular", "Light", "ExtraLight", "Medium", "Semibold", "Bold", "Black"],
+            ["It", "LightIt", "ExtraLightIt", "MediumIt", "SemiboldIt", "BoldIt", "BlackIt"]
+            ),
+        ],
+        ["source-serif-pro", (
+            ["Regular", "Light", "ExtraLight", "Semibold", "Bold", "Black"],
+            ),
+        ],
+    ]
+
+    for family, masterss in families:
+        for masters in masterss:
+            fonts, infos = getFonts(masters, "tests/data/%s" % family)
+            familyName = family
+            if hasattr(fonts[0], "fontInfo"):
+                familyName = fonts[0].fontInfo.get("familyName")
+            print("Hinting %s: %s" % (familyName, " ".join(masters)))
+            glyphList = getGlyphList(fonts)
+            hinted, failed = mmHint(masters, fonts, infos, glyphList)
+            if failed:
+                print("ERROR: Hinting the follwing glyphs failed:")
+                print("\t%s" % ", ".join(failed))
 
 if __name__ == "__main__":
     main()
