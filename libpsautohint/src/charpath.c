@@ -1986,7 +1986,7 @@ SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
  combines them into a single path description using new subroutine
  calls 7 - 11. */
 static void
-CombinePaths(void)
+CombineAndWritePaths(void)
 {
 #if COMBINE_PATHS
     indx ix, eltix, opix, startIx, mIx;
@@ -2315,7 +2315,7 @@ MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
             }
             CheckHandVStem3();
         }
-        CombinePaths();
+        CombineAndWritePaths();
     }
     FreePathElements(0, masterCount);
 
