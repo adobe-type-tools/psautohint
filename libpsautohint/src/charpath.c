@@ -15,9 +15,9 @@
 #include "opcodes.h"
 #include "optable.h"
 
-#define IS_LIB 0
+#define COMBINE_PATHS 1
 
-#if !IS_LIB
+#if COMBINE_PATHS
 #define DMIN 50       /* device minimum (one-half of a device pixel) */
 #define GROWBUFF 2048 /* Amount to grow output buffer, if necessary. */
 #define FONTSTKLIMIT 22
@@ -38,7 +38,7 @@
 static bool cubeLibrary = false;
 static bool bereallyQuiet = true;
 
-#if !IS_LIB
+#if COMBINE_PATHS
 static bool firstMT;
 static Cd* refPtArray = NULL;
 #endif
@@ -51,7 +51,7 @@ static indx hintsMasterIx = 0; /* The index of the master we read hints from */
 
 /* Prototypes */
 static void GetRelativePosition(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed*);
-#if !IS_LIB
+#if COMBINE_PATHS
 static int16_t GetOperandCount(int16_t);
 static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 #endif
@@ -69,7 +69,7 @@ static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 #define ITFMX(x) ((x))
 #define ITFMY(y) (-(y))
 
-#if !IS_LIB
+#if COMBINE_PATHS
 #define Frac(x) ((x)&0xFF)
 #define WRTNUM(i)       WriteToBuffer("%d ", (int)(i))
 #define WriteStr(str)   WriteToBuffer("%s ", str)
@@ -673,7 +673,7 @@ SetSbandWidth(void)
     }
 }
 
-#if !IS_LIB
+#if COMBINE_PATHS
 static void
 WriteSbandWidth(void)
 {
@@ -1192,7 +1192,7 @@ ReadandAssignHints(void)
     return 0;
 }
 
-#if !IS_LIB
+#if COMBINE_PATHS
 static bool
 DoubleCheckFlexVals(indx dirnum, indx eltix, indx hintdirnum)
 {
@@ -1491,7 +1491,7 @@ CheckHandVStem3(void)
         FindHandVStem3(&pathlist[hintsMasterIx].path[ix].hints, ix, &errormsg);
 }
 
-#if !IS_LIB
+#if COMBINE_PATHS
 static void
 CheckFlexValues(int16_t* operator, indx eltix, indx flexix, bool* xequal,
                 bool* yequal)
@@ -1616,7 +1616,6 @@ GetFlexCoord(indx rmtCt, indx mIx, indx eltix, Cd* coord)
 static void
 WriteFlex(indx eltix)
 {
-#if !IS_LIB
     bool vert = (pathlist[hintsMasterIx].path[eltix].x ==
                  pathlist[hintsMasterIx].path[eltix + 1].x3);
     Cd coord, coord0; /* array of reference points */
@@ -1717,9 +1716,6 @@ WriteFlex(indx eltix)
     } /* end of j for loop */
     WriteStr("0 subr\n");
     UnallocateMem(refPtArray);
-#else
-    (void)eltix;
-#endif
 }
 
 static void
@@ -1992,7 +1988,7 @@ SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
 static void
 CombinePaths(void)
 {
-#if !IS_LIB
+#if COMBINE_PATHS
     indx ix, eltix, opix, startIx, mIx;
     int16_t length, subrIx, opcount, op;
     char operator[MAXOPLEN];
@@ -2095,7 +2091,7 @@ CombinePaths(void)
 #endif
 }
 
-#if !IS_LIB
+#if COMBINE_PATHS
 /* Returns number of operands for the given operator. */
 static int16_t
 GetOperandCount(int16_t op)
