@@ -1174,7 +1174,7 @@ ReadHints(PHintElt hintElt, indx pathEltIx)
 
 /* Reads hints from hints directory path list and assigns corresponding
  hints to other designs. */
-static int
+static bool
 ReadandAssignHints(void)
 {
     indx ix;
@@ -1185,11 +1185,11 @@ ReadandAssignHints(void)
     /* Now check for local hint values. */
     for (ix = 0; ix < gPathEntries; ix++) {
         if (pathlist[hintsMasterIx].path == NULL)
-            return 1;
+            return false;
         if (pathlist[hintsMasterIx].path[ix].hints != NULL)
             ReadHints(pathlist[hintsMasterIx].path[ix].hints, ix);
     }
-    return 0;
+    return true;
 }
 
 #if COMBINE_PATHS
@@ -2308,7 +2308,7 @@ MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
         CheckForZeroLengthCP();
         SetSbandWidth();
         if (gAddHints && hintsMasterIx >= 0 && gPathEntries > 0) {
-            if (ReadandAssignHints()) {
+            if (!ReadandAssignHints()) {
                 LogMsg(LOGERROR, FATALERROR,
                        "Path problem in ReadAndAssignHints, character %s.\n",
                        gGlyphName);
