@@ -15,14 +15,11 @@
 #include "opcodes.h"
 #include "optable.h"
 
-#define COMBINE_PATHS 1
 #define DONT_COMBINE_PATHS 1
 
-#if COMBINE_PATHS
 #define DMIN 50       /* device minimum (one-half of a device pixel) */
 #define GROWBUFF 2048 /* Amount to grow output buffer, if necessary. */
 #define FONTSTKLIMIT 22
-#endif
 
 #define MAINHINTS -1
 /* The following definitions are used when determining
@@ -39,10 +36,8 @@
 static bool cubeLibrary = false;
 static bool bereallyQuiet = true;
 
-#if COMBINE_PATHS
 static bool firstMT;
 static Cd* refPtArray = NULL;
-#endif
 static char *startbuff, **outbuff;
 static int16_t masterCount;
 static const char** masterNames;
@@ -52,10 +47,8 @@ static indx hintsMasterIx = 0; /* The index of the master we read hints from */
 
 /* Prototypes */
 static void GetRelativePosition(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed*);
-#if COMBINE_PATHS
 static int16_t GetOperandCount(int16_t);
 static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
-#endif
 
 /* macros */
 #define FixShift (8)
@@ -70,7 +63,6 @@ static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 #define ITFMX(x) ((x))
 #define ITFMY(y) (-(y))
 
-#if COMBINE_PATHS
 #define Frac(x) ((x)&0xFF)
 #define WRTNUM(i)       WriteToBuffer("%d ", (int)(i))
 #define WriteStr(str)   WriteToBuffer("%s ", str)
@@ -134,7 +126,6 @@ WriteOneHintVal(Fixed val)
         WriteStr("100 div ");
     }
 }
-#endif
 
 /* Locates the first CP following the given path element. */
 static int32_t
@@ -674,7 +665,6 @@ SetSbandWidth(void)
     }
 }
 
-#if COMBINE_PATHS
 static void
 WriteSbandWidth(void)
 {
@@ -728,7 +718,6 @@ WriteSbandWidth(void)
     }
     WriteToBuffer("sbx\n");
 }
-#endif
 
 static bool
 CurveBBox(indx mIx, int16_t hinttype, int32_t pathIx, Fixed* value)
@@ -1193,7 +1182,6 @@ ReadandAssignHints(void)
     return true;
 }
 
-#if COMBINE_PATHS
 static bool
 DoubleCheckFlexVals(indx dirnum, indx eltix, indx hintdirnum)
 {
@@ -1367,7 +1355,6 @@ Ct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
                 break;
         }
 }
-#endif
 
 static void
 ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
@@ -1492,7 +1479,6 @@ CheckHandVStem3(void)
         FindHandVStem3(&pathlist[hintsMasterIx].path[ix].hints, ix, &errormsg);
 }
 
-#if COMBINE_PATHS
 static void
 CheckFlexValues(int16_t* operator, indx eltix, indx flexix, bool* xequal,
                 bool* yequal)
@@ -1994,7 +1980,6 @@ SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
     }
     return true;
 }
-#endif
 
 /* Takes multiple path descriptions for the same character name and
  combines them into a single path description using new subroutine
@@ -2002,7 +1987,6 @@ SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
 static void
 WritePaths(void)
 {
-#if COMBINE_PATHS
     indx ix, eltix, opix, startIx, mIx;
     int16_t length, subrIx, opcount, op;
     bool xequal, yequal;
@@ -2141,10 +2125,8 @@ WritePaths(void)
         WriteToBuffer("\n");
     } /* end of for eltix */
     WriteToBuffer("ed\n");
-#endif
 }
 
-#if COMBINE_PATHS
 /* Returns number of operands for the given operator. */
 static int16_t
 GetOperandCount(int16_t op)
@@ -2320,7 +2302,6 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
         }
     }
 }
-#endif
 
 /**********
  Normal MM fonts have their dimensionality wired into the subrs.
