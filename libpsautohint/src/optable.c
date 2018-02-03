@@ -37,6 +37,8 @@ static struct
                  { SBX, "sbx" },
                  { ED, "ed" },
                  { MT, "mt" },
+                 { CT, "ct" },
+                 { DT, "dt" },
                  { RMT, "rmt" },
                  { HMT, "hmt" },
                  { VHCT, "vhct" },
