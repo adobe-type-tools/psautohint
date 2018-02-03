@@ -49,12 +49,12 @@ def mmHint(masters, fonts, infos, glyphList):
 def main():
     families = [
         ["source-code-pro", (
-            ["Regular", "Light", "ExtraLight", "Medium", "Semibold", "Bold", "Black"],
-            ["It", "LightIt", "ExtraLightIt", "MediumIt", "SemiboldIt", "BoldIt", "BlackIt"]
+            ["Light", "Black"],
+            ["LightIt", "BlackIt"]
             ),
         ],
         ["source-serif-pro", (
-            ["Regular", "Light", "ExtraLight", "Semibold", "Bold", "Black"],
+            ["Light", "Black"],
             ),
         ],
     ]
