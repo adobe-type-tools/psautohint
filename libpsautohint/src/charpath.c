@@ -1620,7 +1620,6 @@ WriteFlex(indx eltix)
                  pathlist[hintsMasterIx].path[eltix + 1].x3);
     Cd coord, coord0; /* array of reference points */
     bool xsame, ysame, writeSubrOnce;
-    char operator[MAXOPLEN]; /* rmt, hmt, vmt */
     int16_t optype;
     indx ix, j, opix, startix;
     int16_t opcount, subrIx, length;
@@ -1644,7 +1643,6 @@ WriteFlex(indx eltix)
             GetLengthandSubrIx((opcount = 1), &length, &subrIx);
         else
             GetLengthandSubrIx(opcount, &length, &subrIx);
-        GetOperator(optype, operator);
         GetFlexCoord(j, 0, eltix, &coord);
         coord0.x = coord.x;
         coord0.y = coord.y;
@@ -1707,7 +1705,7 @@ WriteFlex(indx eltix)
             } /* end of for opix */
         }     /* end of last else clause */
         if (j != 7) {
-            WriteToBuffer("%s 2 subr\n", operator);
+            WriteToBuffer("%s 2 subr\n", GetOperator(optype));
         }
         if (j == 7) {
             if (!ysame && (optype == HMT))
@@ -1991,7 +1989,6 @@ CombineAndWritePaths(void)
 #if COMBINE_PATHS
     indx ix, eltix, opix, startIx, mIx;
     int16_t length, subrIx, opcount, op;
-    char operator[MAXOPLEN];
     bool xequal, yequal;
 
     if (!cubeLibrary)
@@ -2084,8 +2081,7 @@ CombineAndWritePaths(void)
                 if (subrIx >= 0 && op != CP)
                     WriteSubr(subrIx);
             } /* end of for opix */
-        GetOperator(op, operator);
-        WriteStr(operator);
+        WriteStr(GetOperator(op));
     } /* end of for eltix */
     WriteStr("ed\n");
 #endif

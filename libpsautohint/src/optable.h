@@ -10,6 +10,4 @@
 #include "ac.h"
 #include "opcodes.h"
 
-#define MAXOPLEN 5
-
-void GetOperator(int16_t, char *);
+char* GetOperator(int16_t op);
