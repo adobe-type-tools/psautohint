@@ -725,7 +725,7 @@ WriteSbandWidth(void)
                 WriteSubr(subrix);
         }
     }
-    WriteStr("sbx\n");
+    WriteToBuffer("sbx\n");
 }
 #endif
 
@@ -1632,7 +1632,7 @@ WriteFlex(indx eltix)
         refPtArray[ix].y =
           (vert ? pathlist[ix].path[eltix].y3 : pathlist[ix].path[eltix].y);
     }
-    WriteStr("1 subr\n");
+    WriteToBuffer("1 subr\n");
     for (j = 0; j < 8; j++) {
         if (j == 7)
             WRTNUM(DMIN);
@@ -1712,7 +1712,7 @@ WriteFlex(indx eltix)
                 WriteY(coord.y); /* usually=0. cf bottom of "CheckFlexValues" */
         }
     } /* end of j for loop */
-    WriteStr("0 subr\n");
+    WriteToBuffer("0 subr\n");
     UnallocateMem(refPtArray);
 }
 
@@ -1736,7 +1736,7 @@ WriteHints(indx pathEltIx)
           (pathEltIx == MAINHINTS ? pathlist[ix].mainhints
                                   : pathlist[ix].path[pathEltIx].hints);
     if (pathEltIx != MAINHINTS)
-        WriteStr("beginsubr snc\n");
+        WriteToBuffer("beginsubr snc\n");
     rmcount = rvcount = 0;
     while (hintArray[0] != NULL) {
         startix = 0;
@@ -1802,21 +1802,21 @@ WriteHints(indx pathEltIx)
         }
         switch (hinttype) {
             case RB:
-                WriteStr("rb\n");
+                WriteToBuffer("rb\n");
                 break;
             case RV + ESCVAL:
                 if (++rvcount == 3) {
                     rvcount = 0;
-                    WriteStr("rv\n");
+                    WriteToBuffer("rv\n");
                 }
                 break;
             case RY:
-                WriteStr("ry\n");
+                WriteToBuffer("ry\n");
                 break;
             case RM + ESCVAL:
                 if (++rmcount == 3) {
                     rmcount = 0;
-                    WriteStr("rm\n");
+                    WriteToBuffer("rm\n");
                 }
                 break;
             default:
@@ -1829,7 +1829,7 @@ WriteHints(indx pathEltIx)
               (hintArray[ix]->next == NULL) ? NULL : hintArray[ix]->next;
     } /* end of while */
     if (pathEltIx != MAINHINTS)
-        WriteStr("endsubr enc\nnewcolors\n");
+        WriteToBuffer("endsubr enc\nnewcolors\n");
     UnallocateMem(hintArray);
 }
 
@@ -2020,11 +2020,13 @@ CombineAndWritePaths(void)
     return;
 #endif
 
+    WriteToBuffer("%% %s\n", gGlyphName);
+
     if (!cubeLibrary)
         WriteSbandWidth();
     if (gAddHints && (pathlist[hintsMasterIx].mainhints != NULL))
         WriteHints(MAINHINTS);
-    WriteStr("sc\n");
+    WriteToBuffer("sc\n");
     firstMT = true;
     for (eltix = 0; eltix < gPathEntries; eltix++) {
         /* A RDT may be tagged 'remove' because it is followed by a point CP. */
@@ -2111,8 +2113,9 @@ CombineAndWritePaths(void)
                     WriteSubr(subrIx);
             } /* end of for opix */
         WriteStr(GetOperator(op));
+        WriteToBuffer("\n");
     } /* end of for eltix */
-    WriteStr("ed\n");
+    WriteToBuffer("ed\n");
 #endif
 }
 
