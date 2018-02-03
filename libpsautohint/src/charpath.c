@@ -16,6 +16,7 @@
 #include "optable.h"
 
 #define COMBINE_PATHS 1
+#define DONT_COMBINE_PATHS 1
 
 #if COMBINE_PATHS
 #define DMIN 50       /* device minimum (one-half of a device pixel) */
@@ -1854,14 +1855,29 @@ WritePathElt(indx mIx, indx eltIx, int16_t pathType, indx startix,
             break;
         case RDT:
         case RMT:
-            c1.x = (mIx == 0 ? path->rx : path->rx - path0->rx);
-            c1.y = (mIx == 0 ? path->ry : path->ry - path0->ry);
+        case DT:
+        case MT:
+            if (pathType == DT || pathType == MT) {
+                c1.x = path->x;
+                c1.y = path->y;
+            } else {
+                c1.x = (mIx == 0 ? path->rx : path->rx - path0->rx);
+                c1.y = (mIx == 0 ? path->ry : path->ry - path0->ry);
+            }
             MtorDt(c1, startix, length);
             break;
         case HVCT:
         case VHCT:
         case RCT:
-            if (mIx == 0) {
+        case CT:
+            if (pathType == CT) {
+                c1.x = path->x1;
+                c1.y = path->y1;
+                c2.x = path->x2;
+                c2.y = path->y2;
+                c3.x = path->x3;
+                c3.y = path->y3;
+            } else if (mIx == 0) {
                 c1.x = path->rx1;
                 c1.y = path->ry1;
                 c2.x = path->rx2;
@@ -1876,7 +1892,7 @@ WritePathElt(indx mIx, indx eltIx, int16_t pathType, indx startix,
                 c3.x = path->rx3 - path0->rx3;
                 c3.y = path->ry3 - path0->ry3;
             }
-            if (pathType == RCT)
+            if (pathType == RCT || pathType == CT)
                 Ct(c1, c2, c3, startix, length);
             else if (pathType == HVCT)
                 Hvct(c1, c2, c3, startix, length);
@@ -1984,33 +2000,42 @@ SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
  combines them into a single path description using new subroutine
  calls 7 - 11. */
 static void
-CombineAndWritePaths(void)
+WritePaths(void)
 {
 #if COMBINE_PATHS
     indx ix, eltix, opix, startIx, mIx;
     int16_t length, subrIx, opcount, op;
     bool xequal, yequal;
 
-#if 0
-    for (indx masterIx = 0; masterIx < masterCount; masterIx++) {
-        PathList path = pathlist[masterIx];
-        WriteToBuffer("%% %s %% %s\n", gGlyphName, masterNames[masterIx]);
+#if DONT_COMBINE_PATHS
+    for (mIx = 0; mIx < masterCount; mIx++) {
+        PathList path = pathlist[mIx];
+        WriteToBuffer("%% %s %% %s\n", gGlyphName, masterNames[mIx]);
 
         if (gAddHints && (pathlist[hintsMasterIx].mainhints != NULL))
             WriteHints(MAINHINTS);
 
         WriteToBuffer("sc\n");
-        for (indx eltIx = 0; eltIx < gPathEntries; eltIx++) {
-            CharPathElt elt = path.path[eltIx];
+        for (eltix = 0; eltix < gPathEntries; eltix++) {
+            CharPathElt elt = path.path[eltix];
             op = elt.type;
+
+            /* Use non-relative operators for easy comparison with input,
+             * I don’t think it is really required. */
+            if (op == RMT)
+                op = MT;
+            else if (op == RCT)
+                op = CT;
+            else if (op == RDT)
+                op = DT;
+
             if (gAddHints && elt.hints != NULL)
-                WriteHints(eltIx);
+                WriteHints(eltix);
 
             opcount = GetOperandCount(op);
             GetLengthandSubrIx(opcount, &length, &subrIx);
 
-            /* XXX produces relative coordinates */
-            WritePathElt(masterIx, eltIx, op, 0, opcount);
+            WritePathElt(mIx, eltix, op, 0, opcount);
 
             WriteToBuffer(GetOperator(op));
             WriteToBuffer("\n");
@@ -2136,7 +2161,9 @@ GetOperandCount(int16_t op)
                 count = 1;
                 break;
             case RMT:
+            case MT:
             case RDT:
+            case DT:
             case RB:
             case RY:
             case SBX:
@@ -2147,6 +2174,7 @@ GetOperandCount(int16_t op)
                 count = 4;
                 break;
             case RCT:
+            case CT:
                 count = 6;
                 break;
             default:
@@ -2343,7 +2371,7 @@ MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
             }
             CheckHandVStem3();
         }
-        CombineAndWritePaths();
+        WritePaths();
     }
     FreePathElements(0, masterCount);
 
