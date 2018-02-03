@@ -1,5 +1,6 @@
 from psautohint import autohint
-from psautohint import psautohint
+from psautohint.psautohint import autohint as cautohint
+from psautohint.psautohint import autohintmm as cautohintmm
 
 def getFonts(masters, baseDir):
     options = autohint.ACOptions()
@@ -35,11 +36,11 @@ def mmHint(masters, fonts, infos, glyphList):
             if not glyph:
                 glyph = "%%%s\n" % name
             if i == 0:
-                glyph = psautohint.autohint(info, [glyph], False, False, False, False)[0]
+                glyph = cautohint(info, [glyph], False, False, False, False)[0]
             glyphs.append(glyph)
 
         try:
-            glyphs = psautohint.autohintmm(infos[0], [glyphs], masters, True)
+            glyphs = cautohintmm(infos[0], [glyphs], masters, True)
         except Exception as e:
             failed.append(name)
         hinted.append(glyphs)
