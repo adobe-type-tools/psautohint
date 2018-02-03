@@ -1991,6 +1991,35 @@ CombineAndWritePaths(void)
     int16_t length, subrIx, opcount, op;
     bool xequal, yequal;
 
+#if 0
+    for (indx masterIx = 0; masterIx < masterCount; masterIx++) {
+        PathList path = pathlist[masterIx];
+        WriteToBuffer("%% %s %% %s\n", gGlyphName, masterNames[masterIx]);
+
+        if (gAddHints && (pathlist[hintsMasterIx].mainhints != NULL))
+            WriteHints(MAINHINTS);
+
+        WriteToBuffer("sc\n");
+        for (indx eltIx = 0; eltIx < gPathEntries; eltIx++) {
+            CharPathElt elt = path.path[eltIx];
+            op = elt.type;
+            if (gAddHints && elt.hints != NULL)
+                WriteHints(eltIx);
+
+            opcount = GetOperandCount(op);
+            GetLengthandSubrIx(opcount, &length, &subrIx);
+
+            /* XXX produces relative coordinates */
+            WritePathElt(masterIx, eltIx, op, 0, opcount);
+
+            WriteToBuffer(GetOperator(op));
+            WriteToBuffer("\n");
+        }
+        WriteToBuffer("ed\n");
+    }
+    return;
+#endif
+
     if (!cubeLibrary)
         WriteSbandWidth();
     if (gAddHints && (pathlist[hintsMasterIx].mainhints != NULL))
