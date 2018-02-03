@@ -13,8 +13,6 @@
 #include "ac.h"
 #include "opcodes.h"
 
-#define KNOWNOPSIZE 18
-
 /*
 Not all of the operators from opcodes.h are initialized here; in
    particular, some that seemed to be needed just for Courier were ignored.
@@ -26,39 +24,40 @@ Operators for which the encoding value has been incremented by ESCVAL must
   names to the binary encoded equivalents. */
 static struct
 {
-    int16_t encoding;
-    char operator[MAXOPLEN];
-} op_table[KNOWNOPSIZE] = { { VMT, "vmt" },
-                            { RDT, "rdt" },
-                            { HDT, "hdt" },
-                            { VDT, "vdt" },
-                            { RCT, "rct" },
-                            { CP, "cp" },
-                            { RET, "ret" },
-                            { ESC, "esc" },
-                            { SBX, "sbx" },
-                            { ED, "ed" },
-                            { MT, "mt" },
-                            { RMT, "rmt" },
-                            { HMT, "hmt" },
-                            { VHCT, "vhct" },
-                            { HVCT, "hvct" },
-                            /* special non-charstring perators start here */
-                            { SC, "sc" },
-                            { ID, "id" },
-                            /* escape perators start here */
-                            { CC + ESCVAL, "cc" } };
+    int16_t op;
+    char* operator;
+} op_table[] = { { VMT, "vmt" },
+                 { RDT, "rdt" },
+                 { HDT, "hdt" },
+                 { VDT, "vdt" },
+                 { RCT, "rct" },
+                 { CP, "cp" },
+                 { RET, "ret" },
+                 { ESC, "esc" },
+                 { SBX, "sbx" },
+                 { ED, "ed" },
+                 { MT, "mt" },
+                 { RMT, "rmt" },
+                 { HMT, "hmt" },
+                 { VHCT, "vhct" },
+                 { HVCT, "hvct" },
+                 /* special non-charstring perators start here */
+                 { SC, "sc" },
+                 { ID, "id" },
+                 /* escape perators start here */
+                 { CC + ESCVAL, "cc" },
+                 { 0, NULL } };
 
-void
-GetOperator(int16_t encoding, char* operator)
+char*
+GetOperator(int16_t op)
 {
     indx ix;
 
-    for (ix = 0; ix < KNOWNOPSIZE; ix++) {
-        if (encoding == op_table[ix].encoding) {
-            strcpy(operator, op_table[ix].operator);
-            return;
+    for (ix = 0; op_table[ix].operator!= NULL; ix++) {
+        if (op == op_table[ix].op) {
+            return op_table[ix].operator;
         }
     }
-    LogMsg(LOGERROR, NONFATALERROR, "The opcode: %d is invalid.\n", encoding);
+    LogMsg(LOGERROR, NONFATALERROR, "The opcode: %d is invalid.\n", op);
+    return "";
 }
