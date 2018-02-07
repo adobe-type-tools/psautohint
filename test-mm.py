@@ -36,11 +36,11 @@ def mmHint(masters, fonts, infos, glyphList):
             if not glyph:
                 glyph = "%%%s\n" % name
             if i == 0:
-                glyph = cautohint(info, [glyph], False, False, False, False)[0]
+                glyph = cautohint(info, glyph, False, False, False, False)
             glyphs.append(glyph)
 
         try:
-            glyphs = cautohintmm(infos[0], [glyphs], masters, True)
+            glyphs = cautohintmm(infos[0], glyphs, masters, True)
         except Exception as e:
             failed.append(name)
         hinted.append(glyphs)

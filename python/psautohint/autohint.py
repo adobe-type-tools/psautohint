@@ -653,16 +653,15 @@ def hintFile(options, path=None, baseMaster=True):
         else:
             if baseMaster:
                 newBezString = psautohint.autohint(
-                    fontInfo, [bezString], options.verbose,
+                    fontInfo, bezString, options.verbose,
                     options.allowChanges, not options.noHintSub,
                     options.allowDecimalCoords)
-                options.baseMaster[name] = newBezString[0]
+                options.baseMaster[name] = newBezString
             else:
                 masters = [b"A", b"B"]
                 glyphs = [options.baseMaster[name], bezString]
                 newBezString = psautohint.autohintmm(
-                    fontInfo, [glyphs], masters, options.verbose)
-            newBezString = newBezString[0]
+                    fontInfo, glyphs, masters, options.verbose)
 
         if not newBezString:
             if not options.verbose and not options.quiet:

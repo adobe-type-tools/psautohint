@@ -81,7 +81,7 @@ static char autohint_doc[] =
   "\n"
   "Args:\n"
   "  font_info: font information.\n"
-  "  glyphs: sequence of glyph data in bez format.\n"
+  "  glyph: glyph data in bez format.\n"
   "  verbose: print verbose messages.\n"
   "  allow_edit: allow editing (changing) the paths when hinting.\n"
   "  allow_hint_sub: no multiple layers of coloring.\n"
@@ -89,7 +89,7 @@ static char autohint_doc[] =
   "  debug: print debug messages.\n"
   "\n"
   "Output:\n"
-  "  Sequence of autohinted glyph data in bez format.\n"
+  "  Autohinted glyph data in bez format.\n"
   "\n"
   "Raises:\n"
   "  psautohint.error: If authinting fails.\n";
@@ -100,103 +100,80 @@ autohint(PyObject* self, PyObject* args)
     int allowEdit = true, roundCoords = true, allowHintSub = true;
     int verbose = true;
     int debug = false;
-    PyObject* inSeq = NULL;
     PyObject* fontObj = NULL;
-    PyObject* outSeq = NULL;
-    Py_ssize_t inCount = 0;
+    PyObject* inObj = NULL;
+    PyObject* outObj = NULL;
+    char* inData = NULL;
     char* fontInfo = NULL;
     bool error = false;
 
-    if (!PyArg_ParseTuple(args, "O!O|iiiii", &PyBytes_Type, &fontObj, &inSeq,
-                          &verbose, &allowEdit, &allowHintSub, &roundCoords,
-                          &debug))
+    if (!PyArg_ParseTuple(args, "O!O!|iiiii", &PyBytes_Type, &fontObj,
+                          &PyBytes_Type, &inObj, &verbose, &allowEdit,
+                          &allowHintSub, &roundCoords, &debug))
         return NULL;
-
-    inSeq = PySequence_Fast(inSeq, "argument must be sequence");
-    if (!inSeq)
-        return NULL;
-
-    fontInfo = PyBytes_AsString(fontObj);
 
     AC_SetMemManager(NULL, memoryManager);
     AC_SetReportCB(reportCB, verbose);
 
-    inCount = PySequence_Fast_GET_SIZE(inSeq);
-    outSeq = PyTuple_New(inCount);
-    if (!outSeq) {
+    fontInfo = PyBytes_AsString(fontObj);
+    inData = PyBytes_AsString(inObj);
+    if (!inData || !fontInfo) {
         error = true;
     } else {
-        int i = 0;
-        for (i = 0; i < inCount; i++) {
-            char* output = NULL;
-            size_t outputSize = 0;
-            int result;
+        int result;
 
-            PyObject* itemObj = PySequence_Fast_GET_ITEM(inSeq, i);
-
-            char* bezData = PyBytes_AsString(itemObj);
-            if (!bezData) {
-                error = true;
-                break;
-            }
-
-            outputSize = 4 * strlen(bezData);
-            output = MEMNEW(outputSize);
-
+        size_t outLen = 4 * strlen(inData);
+        char*  output = MEMNEW(outLen);
+        if (!output) {
+            result = AC_MemoryError;
+        } else {
             result =
-              AutoColorString(bezData, fontInfo, output, &outputSize, allowEdit,
+              AutoColorString(inData, fontInfo, output, &outLen, allowEdit,
                               allowHintSub, roundCoords, debug);
             if (result == AC_DestBuffOfloError) {
-                output = MEMRENEW(output, outputSize);
+                output = MEMRENEW(output, outLen);
                 AC_SetReportCB(reportCB, false);
                 result =
-                  AutoColorString(bezData, fontInfo, output, &outputSize,
-                                  allowEdit, allowHintSub, roundCoords, debug);
+                  AutoColorString(inData, fontInfo, output, &outLen, allowEdit,
+                                  allowHintSub, roundCoords, debug);
                 AC_SetReportCB(reportCB, verbose);
             }
 
-            if (outputSize != 0 && result == AC_Success) {
-                PyObject* bezObj = PyBytes_FromString(output);
-                PyTuple_SET_ITEM(outSeq, i, bezObj);
-            }
+            if (outLen != 0 && result == AC_Success)
+                outObj = PyBytes_FromString(output);
 
             MEMFREE(output);
-            if (result != AC_Success) {
-                switch (result) {
-                    case AC_FontinfoParseFail:
-                        PyErr_SetString(PsAutoHintError,
-                                        "Parsing font info failed");
-                        break;
-                    case AC_FatalError:
-                        PyErr_SetString(PsAutoHintError, "Fatal error");
-                        break;
-                    case AC_MemoryError:
-                        PyErr_NoMemory();
-                        break;
-                    case AC_UnknownError:
-                        PyErr_SetString(PsAutoHintError, "Hinting failed");
-                        break;
-                    case AC_DestBuffOfloError:
-                        PyErr_SetString(PsAutoHintError, "Dest buffer small");
-                        break;
-                    case AC_InvalidParameterError:
-                        PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
-                        break;
-                }
-                error = true;
-                break;
+        }
+
+        if (result != AC_Success) {
+            switch (result) {
+                case AC_FontinfoParseFail:
+                    PyErr_SetString(PsAutoHintError,
+                                    "Parsing font info failed");
+                    break;
+                case AC_FatalError:
+                    PyErr_SetString(PsAutoHintError, "Fatal error");
+                    break;
+                case AC_MemoryError:
+                    PyErr_NoMemory();
+                    break;
+                case AC_UnknownError:
+                    PyErr_SetString(PsAutoHintError, "Hinting failed");
+                    break;
+                case AC_DestBuffOfloError:
+                    PyErr_SetString(PsAutoHintError, "Dest buffer small");
+                    break;
+                case AC_InvalidParameterError:
+                    PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
+                    break;
             }
+            error = true;
         }
     }
 
-    Py_XDECREF(inSeq);
-
-    if (error) {
-        Py_XDECREF(outSeq);
+    if (error)
         return NULL;
-    }
-
-    return outSeq;
+    return outObj;
 }
 
 static char autohintmm_doc[] =
@@ -230,25 +207,32 @@ autohintmm(PyObject* self, PyObject* args)
     char* fontInfo = NULL;
     const char** masters;
     bool error = false;
-    Py_ssize_t i, j;
+    Py_ssize_t i;
 
     if (!PyArg_ParseTuple(args, "O!OO|i", &PyBytes_Type, &fontObj, &inSeq,
                           &mastersSeq, &verbose))
         return NULL;
 
     inSeq = PySequence_Fast(inSeq, "argument must be sequence");
-    if (!inSeq)
-        return NULL;
-    inCount = PySequence_Fast_GET_SIZE(inSeq);
-
     mastersSeq = PySequence_Fast(mastersSeq, "argument must be sequence");
-    if (!mastersSeq)
+
+    if (!inSeq || !mastersSeq)
         return NULL;
 
+    inCount = PySequence_Fast_GET_SIZE(inSeq);
     mastersCount = PySequence_Fast_GET_SIZE(mastersSeq);
-    masters = MEMNEW(mastersCount * sizeof(char*));
-    if (!masters)
+    if (inCount != mastersCount) {
+        PyErr_SetString(
+          PsAutoHintError,
+          "Length of \"glyphs\" must equal length of \"masters\".");
         return NULL;
+    }
+
+    masters = MEMNEW(mastersCount * sizeof(char*));
+    if (!masters) {
+        PyErr_NoMemory();
+        return NULL;
+    }
 
     for (i = 0; i < mastersCount; i++) {
         PyObject* obj = PySequence_Fast_GET_ITEM(mastersSeq, i);
@@ -264,85 +248,77 @@ autohintmm(PyObject* self, PyObject* args)
     if (!outSeq) {
         error = true;
     } else {
+        char* outGlyphs = NULL;
+        size_t outputSize = 0;
+        int result;
+
+        const char** inGlyphs = MEMNEW(inCount * sizeof(char*));
+        if (!inGlyphs) {
+            result = AC_MemoryError;
+            goto done;
+        }
+
         for (i = 0; i < inCount; i++) {
-            const char** inData = NULL;
-            char* outData = NULL;
-            size_t outputSize = 0;
-            int result;
+            PyObject* glyphObj = PySequence_Fast_GET_ITEM(inSeq, i);
+            inGlyphs[i] = PyBytes_AsString(glyphObj);
+            outputSize += 4 * strlen(inGlyphs[i]);
+        }
 
-            PyObject* itemObj = PySequence_Fast_GET_ITEM(inSeq, i);
-            Py_ssize_t itemCount = PySequence_Fast_GET_SIZE(itemObj);
+        outGlyphs = MEMNEW(outputSize);
+        if (!outGlyphs) {
+            result = AC_MemoryError;
+            goto done;
+        }
 
-            if (itemCount != mastersCount) {
-                error = true;
-                break;
-            }
-
-            inData = MEMNEW(itemCount * sizeof(char*));
-            if (!inData) {
-                error = true;
-                break;
-            }
-
-            for (j = 0; j < itemCount; j++) {
-                PyObject* obj = PySequence_Fast_GET_ITEM(itemObj, j);
-                inData[j] = PyBytes_AsString(obj);
-                outputSize += 4 * strlen(inData[j]);
-            }
-
-            outData = MEMNEW(outputSize);
-            if (!outData) {
-                error = true;
-                break;
-            }
-
-            result = AutoColorStringMM(inData, fontInfo, mastersCount, masters,
-                                       &outData, &outputSize);
+        result = AutoColorStringMM(inGlyphs, fontInfo, mastersCount, masters,
+                                   &outGlyphs, &outputSize);
 #if 0
-            if (result == AC_DestBuffOfloError) {
-                outData = MEMRENEW(outData, outputSize);
-                AC_SetReportCB(reportCB, false);
-                result =
-                  AutoColorString(inData, fontInfo, outData, &outputSize,
-                                  allowEdit, allowHintSub, roundCoords, debug);
-                AC_SetReportCB(reportCB, verbose);
-            }
+        if (result == AC_DestBuffOfloError) {
+            outGlyphs = MEMRENEW(outGlyphs, outputSize);
+            AC_SetReportCB(reportCB, false);
+            result =
+              AutoColorString(inGlyphs, fontInfo, outGlyphs, &outputSize,
+                              allowEdit, allowHintSub, roundCoords, debug);
+            AC_SetReportCB(reportCB, verbose);
+        }
 #endif
 
-            if (outputSize != 0 && result == AC_Success) {
-                PyObject* outObj = PyBytes_FromString(outData);
-                PyTuple_SET_ITEM(outSeq, i, outObj);
-            }
+        if (outputSize != 0 && result == AC_Success) {
+            PyObject* outObj = PyBytes_FromString(outGlyphs);
+            PyTuple_SET_ITEM(outSeq, 0, outObj);
+        }
 
-            MEMFREE(outData);
+    done:
+        MEMFREE(inGlyphs);
+        MEMFREE(outGlyphs);
 
-            if (result != AC_Success) {
-                switch (result) {
-                    case AC_FontinfoParseFail:
-                        PyErr_SetString(PsAutoHintError,
-                                        "Parsing font info failed");
-                        break;
-                    case AC_FatalError:
-                        PyErr_SetString(PsAutoHintError, "Fatal error");
-                        break;
-                    case AC_MemoryError:
-                        PyErr_NoMemory();
-                        break;
-                    case AC_UnknownError:
-                        PyErr_SetString(PsAutoHintError, "Hinting failed");
-                        break;
-                    case AC_DestBuffOfloError:
-                        PyErr_SetString(PsAutoHintError, "Dest buffer small");
-                        break;
-                    case AC_InvalidParameterError:
-                        PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
-                        break;
-                }
-                error = true;
-                break;
+        if (result != AC_Success) {
+            switch (result) {
+                case AC_FontinfoParseFail:
+                    PyErr_SetString(PsAutoHintError,
+                                    "Parsing font info failed");
+                    break;
+                case AC_FatalError:
+                    PyErr_SetString(PsAutoHintError, "Fatal error");
+                    break;
+                case AC_MemoryError:
+                    PyErr_NoMemory();
+                    break;
+                case AC_UnknownError:
+                    PyErr_SetString(PsAutoHintError, "Hinting failed");
+                    break;
+                case AC_DestBuffOfloError:
+                    PyErr_SetString(PsAutoHintError, "Dest buffer small");
+                    break;
+                case AC_InvalidParameterError:
+                    PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
+                    break;
             }
+            error = true;
         }
     }
+
+    MEMFREE(masters);
 
     Py_XDECREF(inSeq);
     Py_XDECREF(mastersSeq);
