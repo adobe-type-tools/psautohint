@@ -1704,6 +1704,75 @@ WriteFlex(indx eltix)
 }
 
 static void
+WriteUnmergedHints(indx pathEltIx)
+{
+    indx ix;
+    int16_t rmcount, rvcount, hinttype;
+    PHintElt* hintArray;
+
+    /* hintArray contains the pointers to the beginning of the linked list of
+     * hints for each design at pathEltIx. */
+    hintArray = (PHintElt*)AllocateMem(masterCount, sizeof(HintElt*),
+                                       "hint element array");
+    /* Initialize hint array. */
+    for (ix = 0; ix < masterCount; ix++) {
+        if (pathEltIx == MAINHINTS)
+            hintArray[ix] = pathlist[ix].mainhints;
+        else
+            hintArray[ix] = pathlist[ix].path[pathEltIx].hints;
+    }
+
+    rmcount = rvcount = 0;
+    while (hintArray[0] != NULL) {
+        hinttype = hintArray[hintsMasterIx]->type;
+        for (ix = 0; ix < masterCount; ix++) {
+            hintArray[ix]->rightortop -=
+              hintArray[ix]->leftorbot; /* relativize */
+            if ((hinttype == RY || hinttype == (RM + ESCVAL)) && !cubeLibrary)
+                /* If it is a cube library, sidebearings are considered to be
+                 * zero. for normal fonts, translate vstem hints left by
+                 * sidebearing. */
+                hintArray[ix]->leftorbot -= IntToFix(pathlist[ix].sb);
+        }
+
+        WriteOneHintVal(hintArray[0]->leftorbot);
+        WriteOneHintVal(hintArray[0]->rightortop);
+        switch (hinttype) {
+            case RB:
+                WriteToBuffer("rb\n");
+                break;
+            case RV + ESCVAL:
+                if (++rvcount == 3) {
+                    rvcount = 0;
+                    WriteToBuffer("rv\n");
+                }
+                break;
+            case RY:
+                WriteToBuffer("ry\n");
+                break;
+            case RM + ESCVAL:
+                if (++rmcount == 3) {
+                    rmcount = 0;
+                    WriteToBuffer("rm\n");
+                }
+                break;
+            default:
+                LogMsg(LOGERROR, NONFATALERROR,
+                       "Illegal hint type: %d in character: %s.\n", hinttype,
+                       gGlyphName);
+        }
+
+        for (ix = 0; ix < masterCount; ix++) {
+            if (hintArray[ix]->next == NULL)
+                hintArray[ix] = NULL;
+            else
+                hintArray[ix] = hintArray[ix]->next;
+        }
+    } /* end of while */
+    UnallocateMem(hintArray);
+}
+
+static void
 WriteHints(indx pathEltIx)
 {
     indx ix, opix, startix;
@@ -2004,7 +2073,7 @@ WritePaths(char** outBuffers, size_t* outLengths)
         WriteToBuffer("%% %s %% %s\n", gGlyphName, masterNames[mIx]);
 
         if (gAddHints && (pathlist[hintsMasterIx].mainhints != NULL))
-            WriteHints(MAINHINTS);
+            WriteUnmergedHints(MAINHINTS);
 
         WriteToBuffer("sc\n");
         for (eltix = 0; eltix < gPathEntries; eltix++) {
@@ -2021,7 +2090,7 @@ WritePaths(char** outBuffers, size_t* outLengths)
                 op = DT;
 
             if (gAddHints && elt.hints != NULL)
-                WriteHints(eltix);
+                WriteUnmergedHints(eltix);
 
             opcount = GetOperandCount(op);
             GetLengthandSubrIx(opcount, &length, &subrIx);
