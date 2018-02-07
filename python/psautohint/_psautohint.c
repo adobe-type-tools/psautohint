@@ -208,6 +208,7 @@ static char autohintmm_doc[] =
   "Args:\n"
   "  font_info: font information.\n"
   "  glyphs: sequence of glyph data in bez format.\n"
+  "  masters: sequence of master names.\n"
   "  verbose: print verbose messages.\n"
   "\n"
   "Output:\n"
