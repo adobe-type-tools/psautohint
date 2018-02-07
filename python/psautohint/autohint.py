@@ -658,10 +658,11 @@ def hintFile(options, path=None, baseMaster=True):
                     options.allowDecimalCoords)
                 options.baseMaster[name] = newBezString
             else:
-                masters = [b"A", b"B"]
+                masters = [b"A", b"B"]  # FIXME
                 glyphs = [options.baseMaster[name], bezString]
                 newBezString = psautohint.autohintmm(
                     fontInfo, glyphs, masters, options.verbose)
+                newBezString = newBezString[1]  # FIXME
 
         if not newBezString:
             if not options.verbose and not options.quiet:

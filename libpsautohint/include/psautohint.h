@@ -143,9 +143,13 @@ ACLIB_API int AutoColorString(const char* srcbezdata, const char* fontinfo,
                               char* dstbezdata, size_t* length, int allowEdit,
                               int allowHintSub, int roundCoords, int debug);
 
+/*
+ * Function: AutoColorStringMM
+ *
+ */
 ACLIB_API int AutoColorStringMM(const char** srcbezdata, const char* fontinfo,
                                 int nmasters, const char** masters,
-                                char** dstbezdata, size_t* length);
+                                char** dstbezdata, size_t* lengths);
 
 /*
  * Function: AC_initCallGlobals
