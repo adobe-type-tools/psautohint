@@ -17,10 +17,10 @@ def toStr(o):
     return o
 
 
-def autohint(info, glyphs, verbose=True, allow_edit=True, allow_hint_sub=True,
+def autohint(info, glyph, verbose=True, allow_edit=True, allow_hint_sub=True,
              round_ccordinates=True, debug=False):
     hinted = _psautohint.autohint(toBytes(info),
-                                  toBytes(glyphs),
+                                  toBytes(glyph),
                                   verbose,
                                   allow_edit,
                                   allow_hint_sub,
