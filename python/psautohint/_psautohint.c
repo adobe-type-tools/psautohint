@@ -103,7 +103,7 @@ autohint(PyObject* self, PyObject* args)
     PyObject* inSeq = NULL;
     PyObject* fontObj = NULL;
     PyObject* outSeq = NULL;
-    int inCount = 0;
+    Py_ssize_t inCount = 0;
     char* fontInfo = NULL;
     bool error = false;
 
