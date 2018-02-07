@@ -103,7 +103,7 @@ autohint(PyObject* self, PyObject* args)
     PyObject* inSeq = NULL;
     PyObject* fontObj = NULL;
     PyObject* outSeq = NULL;
-    int bezLen = 0;
+    int inCount = 0;
     char* fontInfo = NULL;
     bool error = false;
 
@@ -121,13 +121,13 @@ autohint(PyObject* self, PyObject* args)
     AC_SetMemManager(NULL, memoryManager);
     AC_SetReportCB(reportCB, verbose);
 
-    bezLen = PySequence_Fast_GET_SIZE(inSeq);
-    outSeq = PyTuple_New(bezLen);
+    inCount = PySequence_Fast_GET_SIZE(inSeq);
+    outSeq = PyTuple_New(inCount);
     if (!outSeq) {
         error = true;
     } else {
         int i = 0;
-        for (i = 0; i < bezLen; i++) {
+        for (i = 0; i < inCount; i++) {
             char* output = NULL;
             size_t outputSize = 0;
             int result;
@@ -221,11 +221,11 @@ autohintmm(PyObject* self, PyObject* args)
 {
     int verbose = true;
     PyObject* inSeq = NULL;
+    Py_ssize_t inCount = 0;
+    PyObject* mastersSeq = NULL;
+    Py_ssize_t mastersCount = 0;
     PyObject* fontObj = NULL;
     PyObject* outSeq = NULL;
-    PyObject* mastersSeq = NULL;
-    Py_ssize_t bezLen = 0;
-    Py_ssize_t mastersLen = 0;
     char* fontInfo = NULL;
     const char** masters;
     bool error = false;
@@ -238,18 +238,18 @@ autohintmm(PyObject* self, PyObject* args)
     inSeq = PySequence_Fast(inSeq, "argument must be sequence");
     if (!inSeq)
         return NULL;
-    bezLen = PySequence_Fast_GET_SIZE(inSeq);
+    inCount = PySequence_Fast_GET_SIZE(inSeq);
 
     mastersSeq = PySequence_Fast(mastersSeq, "argument must be sequence");
     if (!mastersSeq)
         return NULL;
 
-    mastersLen = PySequence_Fast_GET_SIZE(mastersSeq);
-    masters = MEMNEW(mastersLen * sizeof(char*));
+    mastersCount = PySequence_Fast_GET_SIZE(mastersSeq);
+    masters = MEMNEW(mastersCount * sizeof(char*));
     if (!masters)
         return NULL;
 
-    for (i = 0; i < mastersLen; i++) {
+    for (i = 0; i < mastersCount; i++) {
         PyObject* obj = PySequence_Fast_GET_ITEM(mastersSeq, i);
         masters[i] = PyBytes_AsString(obj);
     }
@@ -259,31 +259,31 @@ autohintmm(PyObject* self, PyObject* args)
     AC_SetMemManager(NULL, memoryManager);
     AC_SetReportCB(reportCB, verbose);
 
-    outSeq = PyTuple_New(bezLen);
+    outSeq = PyTuple_New(inCount);
     if (!outSeq) {
         error = true;
     } else {
-        for (i = 0; i < bezLen; i++) {
+        for (i = 0; i < inCount; i++) {
             const char** inData = NULL;
             char* outData = NULL;
             size_t outputSize = 0;
             int result;
 
             PyObject* itemObj = PySequence_Fast_GET_ITEM(inSeq, i);
-            Py_ssize_t itemLen = PySequence_Fast_GET_SIZE(itemObj);
+            Py_ssize_t itemCount = PySequence_Fast_GET_SIZE(itemObj);
 
-            if (itemLen != mastersLen) {
+            if (itemCount != mastersCount) {
                 error = true;
                 break;
             }
 
-            inData = MEMNEW(itemLen * sizeof(char*));
+            inData = MEMNEW(itemCount * sizeof(char*));
             if (!inData) {
                 error = true;
                 break;
             }
 
-            for (j = 0; j < itemLen; j++) {
+            for (j = 0; j < itemCount; j++) {
                 PyObject* obj = PySequence_Fast_GET_ITEM(itemObj, j);
                 inData[j] = PyBytes_AsString(obj);
                 outputSize += 4 * strlen(inData[j]);
@@ -295,7 +295,7 @@ autohintmm(PyObject* self, PyObject* args)
                 break;
             }
 
-            result = AutoColorStringMM(inData, fontInfo, mastersLen, masters,
+            result = AutoColorStringMM(inData, fontInfo, mastersCount, masters,
                                        &outData, &outputSize);
 #if 0
             if (result == AC_DestBuffOfloError) {
