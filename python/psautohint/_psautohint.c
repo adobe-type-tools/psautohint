@@ -228,6 +228,11 @@ autohintmm(PyObject* self, PyObject* args)
         return NULL;
     }
 
+    if (inCount <= 1) {
+        PyErr_SetString(PsAutoHintError, "Length of input glyphs must be > 1");
+        return NULL;
+    }
+
     masters = MEMNEW(mastersCount * sizeof(char*));
     if (!masters) {
         PyErr_NoMemory();
@@ -248,12 +253,12 @@ autohintmm(PyObject* self, PyObject* args)
     if (!outSeq) {
         error = true;
     } else {
-        char* outGlyphs = NULL;
-        size_t outputSize = 0;
         int result;
 
         const char** inGlyphs = MEMNEW(inCount * sizeof(char*));
-        if (!inGlyphs) {
+        char** outGlyphs = MEMNEW(inCount * sizeof(char*));
+        size_t* outputSizes = MEMNEW(inCount * sizeof(size_t*));
+        if (!inGlyphs || !outGlyphs || !outputSizes) {
             result = AC_MemoryError;
             goto done;
         }
@@ -261,17 +266,12 @@ autohintmm(PyObject* self, PyObject* args)
         for (i = 0; i < inCount; i++) {
             PyObject* glyphObj = PySequence_Fast_GET_ITEM(inSeq, i);
             inGlyphs[i] = PyBytes_AsString(glyphObj);
-            outputSize += 4 * strlen(inGlyphs[i]);
-        }
-
-        outGlyphs = MEMNEW(outputSize);
-        if (!outGlyphs) {
-            result = AC_MemoryError;
-            goto done;
+            outputSizes[i] = 4 * strlen(inGlyphs[i]);
+            outGlyphs[i] = MEMNEW(outputSizes[i]);
         }
 
         result = AutoColorStringMM(inGlyphs, fontInfo, mastersCount, masters,
-                                   &outGlyphs, &outputSize);
+                                   outGlyphs, outputSizes);
 #if 0
         if (result == AC_DestBuffOfloError) {
             outGlyphs = MEMRENEW(outGlyphs, outputSize);
@@ -283,14 +283,21 @@ autohintmm(PyObject* self, PyObject* args)
         }
 #endif
 
-        if (outputSize != 0 && result == AC_Success) {
-            PyObject* outObj = PyBytes_FromString(outGlyphs);
-            PyTuple_SET_ITEM(outSeq, 0, outObj);
+        if (result == AC_Success) {
+            for (i = 0; i < inCount; i++) {
+                PyObject* outObj = PyBytes_FromString(outGlyphs[i]);
+                PyTuple_SET_ITEM(outSeq, i, outObj);
+            }
         }
 
     done:
+        if (outGlyphs) {
+            for (i = 0; i < inCount; i++)
+                MEMFREE(outGlyphs[i]);
+        }
         MEMFREE(inGlyphs);
         MEMFREE(outGlyphs);
+        MEMFREE(outputSizes);
 
         if (result != AC_Success) {
             switch (result) {
