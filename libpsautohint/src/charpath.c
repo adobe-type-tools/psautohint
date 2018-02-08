@@ -2089,8 +2089,10 @@ WritePaths(char** outBuffers, size_t* outLengths)
             else if (op == RDT)
                 op = DT;
 
+            /* FIXME
             if (gAddHints && elt.hints != NULL)
                 WriteUnmergedHints(eltix);
+            */
 
             opcount = GetOperandCount(op);
             GetLengthandSubrIx(opcount, &length, &subrIx);
