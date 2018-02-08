@@ -2070,7 +2070,7 @@ WritePaths(char** outBuffers, size_t* outLengths)
         outbuff = &startbuff;
         memset(startbuff, 0, buffSize);
 
-        WriteToBuffer("%% %s %% %s\n", gGlyphName, masterNames[mIx]);
+        WriteToBuffer("%% %s\n", gGlyphName);
 
         if (gAddHints && (pathlist[hintsMasterIx].mainhints != NULL))
             WriteUnmergedHints(MAINHINTS);
