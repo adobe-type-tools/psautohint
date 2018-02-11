@@ -43,7 +43,7 @@ import warnings
 import traceback
 import shutil
 
-from psautohint import _psautohint
+from psautohint import psautohint
 
 kACIDKey = "AutoHintKey"
 
@@ -615,9 +615,10 @@ def hintFile(options):
 		if oldBezString != "" and oldBezString == bezString:
 			newBezString = oldHintBezString
 		else:
-			newBezString = _psautohint.autohint(fontInfo.encode("ascii"), [bezString.encode("ascii")],
-                                        options.verbose, options.allowChanges, not options.noHintSub, options.allowDecimalCoords)
-			newBezString = newBezString[0].decode("ascii")
+			newBezString = psautohint.autohint(fontInfo, [bezString],
+					options.verbose, options.allowChanges,
+					not options.noHintSub, options.allowDecimalCoords)
+			newBezString = newBezString[0]
 
 		if not newBezString:
 			if not options.verbose and not options.quiet:

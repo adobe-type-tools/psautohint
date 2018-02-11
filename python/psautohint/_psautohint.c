@@ -83,7 +83,7 @@ static char autohint_doc[] =
   "  font_info: font information.\n"
   "  glyphs: sequence of glyph data in bez format.\n"
   "  verbose: print verbose messages.\n"
-  "  no_edit: do not edit (change) the paths when hinting.\n"
+  "  allow_edit: allow editing (changing) the paths when hinting.\n"
   "  allow_hint_sub: no multiple layers of coloring.\n"
   "  round: round coordinates.\n"
   "  debug: print debug messages.\n"
