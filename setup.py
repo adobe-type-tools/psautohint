@@ -66,7 +66,7 @@ module1 = Extension("psautohint._psautohint",
         )
 
 setup(name="psautohint",
-      version="1.1.0",
+      version="1.1.1.dev0",
       description="Python wrapper for Adobe's PostScript autohinter",
       url='https://github.com/khaledhosny/psautohint',
       author='Khaled Hosny',
