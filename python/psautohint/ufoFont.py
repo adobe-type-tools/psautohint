@@ -709,7 +709,7 @@ class UFOFontData:
                 width = 1000
         except UFOParseError as e:
             print("Error. skipping glyph '%s' because of parse error: %s" %
-                  (glyphName, e.message))
+                  (glyphFileName, e.message))
             return None, None, None
         return width, glifXML, outlineXML
 
@@ -1008,7 +1008,7 @@ class UFOFontData:
                     # output font, use the first user-specified font dict.
                     fdTools.mergeFDDicts(fontDictList[1:], self.fontDict)
                 else:
-                    fdTools.mergeFDDicts([finalFDict], topDict)
+                    fdTools.mergeFDDicts([finalFDict], self.fontDict)
 
         return fdGlyphDict, fontDictList
 
@@ -1126,7 +1126,7 @@ class UFOFontData:
         except KeyError:
             raise UFOParseError(
                 "'%s' attribute missing from component '%s'." %
-                ("base", xmlToString(componentXML)))
+                ("base", xmlToString(componentItem)))
 
         if not self.useProcessedLayer:
             try:
