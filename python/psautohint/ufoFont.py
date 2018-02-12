@@ -729,7 +729,7 @@ class UFOFontData:
 
         # Hash is always from the default glyph layer.
         useDefaultGlyphDir = True
-        newHash, dataList = self.buildGlyphHashValue(
+        newHash, _ = self.buildGlyphHashValue(
             width, outlineXML, glyphName, useDefaultGlyphDir)
         skip = self.checkSkipGlyph(glyphName, newHash, doAll)
 
@@ -805,7 +805,7 @@ class UFOFontData:
         fontInfoPath = os.path.join(self.parentPath, "fontinfo.plist")
         if not os.path.exists(fontInfoPath):
             return
-        self.fontInfo, tempList = parsePList(fontInfoPath)
+        self.fontInfo, _ = parsePList(fontInfoPath)
 
     def updateLayerContents(self, contentsFilePath):
         if os.path.exists(contentsFilePath):
@@ -814,7 +814,7 @@ class UFOFontData:
             # or change the path
             seenPublicDefault = False
             seenProcessedGlyph = False
-            for layerName, layerPath in contentsList:
+            for _, layerPath in contentsList:
                 if (layerPath == kProcessedGlyphsLayer):
                     seenProcessedGlyph = True
                 if (layerPath == kDefaultGlyphsLayer):
@@ -1108,10 +1108,9 @@ class UFOFontData:
                             pass
                     componentXML = etRoot.parse(componentPath)
                     componentOutlineXML = componentXML.find("outline")
-                    componentHash, componentDataList = \
-                        self.buildGlyphHashValue(
-                            width, componentOutlineXML, glyphName,
-                            useDefaultGlyphDir, level + 1)
+                    _, componentDataList = self.buildGlyphHashValue(
+                        width, componentOutlineXML, glyphName,
+                        useDefaultGlyphDir, level + 1)
                     dataList.extend(componentDataList)
         data = "".join(dataList)
         if len(data) < 128:
@@ -1191,7 +1190,7 @@ class UFOFontData:
 def parseGlyphOrder(filePath):
     orderMap = None
     if os.path.exists(filePath):
-        publicOrderDict, temp = parsePList(filePath, kPublicGlyphOrderKey)
+        publicOrderDict, _ = parsePList(filePath, kPublicGlyphOrderKey)
         if publicOrderDict is not None:
             orderMap = {}
             glyphList = publicOrderDict[kPublicGlyphOrderKey]
@@ -1696,7 +1695,7 @@ def fixStartPoint(outlineItem, opList):
     # the point list, and move the last curveto to the first op, replacing
     # the move-to.
 
-    firstOp, firstX, firstY = opList[0]
+    _, firstX, firstY = opList[0]
     lastOp, lastX, lastY = opList[-1]
     firstPointElement = outlineItem[0]
     if (firstX == lastX) and (firstY == lastY):
@@ -2214,7 +2213,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
         else:
             width = 1000
         useDefaultGlyphDir = False
-        newGlyphHash, dataList = ufoFontData.buildGlyphHashValue(
+        newGlyphHash, _ = ufoFontData.buildGlyphHashValue(
             width, newOutlineElement, glyphName, useDefaultGlyphDir)
         # We add this hash to the T1 data, as it is the hash which matches
         # the output outline data. This is not necessarily the same as the

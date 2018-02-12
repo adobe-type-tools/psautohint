@@ -93,7 +93,6 @@ def logMsg(*args):
     for arg in args:
         msg = str(arg).strip()
         if not msg:
-            print
             sys.stdout.flush()
             if gLogFile:
                 gLogFile.write("\n")
@@ -119,6 +118,7 @@ def logMsg(*args):
 
 
 def getGlyphID(glyphTag, fontGlyphList):
+    # FIXME: This is unnecessarily convoluted
     glyphID = None
     try:
         glyphID = int(glyphTag)
@@ -593,10 +593,10 @@ def hintFile(options):
             # we hint it.
             ACidentifier = makeACIdentifier(bezString)
             try:
-                (prevACIdentifier, ACtime, oldBezString,
+                (prevACIdentifier, _, oldBezString,
                     oldHintBezString) = fontPlist[kACIDKey][name]
             except ValueError:
-                (prevACIdentifier, ACtime) = fontPlist[kACIDKey][name]
+                prevACIdentifier, _ = fontPlist[kACIDKey][name]
                 oldBezString = oldHintBezString = ""
             except KeyError:
                 # there wasn't an entry in tempList file, so we will add one.
