@@ -1,4 +1,3 @@
-#!/bin/env python
 # Copyright 2016 Adobe. All rights reserved.
 
 # Methods:
