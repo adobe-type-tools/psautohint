@@ -424,8 +424,7 @@ def mergeFDDicts(prevDictList, privateDict):
             bluePairList = eval("prefDDict.%s" % (bluePairName))
             if not bluePairList:
                 continue
-            for (topPos, bottomPos, zoneName, dictName,
-                 isBottomZone) in bluePairList:
+            for topPos, bottomPos, zoneName, _, isBottomZone in bluePairList:
                 zoneDict[(topPos, bottomPos)] = (isBottomZone, zoneName,
                                                  prefDDict.DictName)
         # Now for the stem widths.

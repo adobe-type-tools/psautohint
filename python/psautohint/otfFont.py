@@ -1358,7 +1358,7 @@ def test():
         print()
         print(glyphName)
         t2CharString = charStrings[glyphName]
-        bezString, hasHints, t2Width = convertT2GlyphToBez(t2CharString)
+        bezString, _, t2Width = convertT2GlyphToBez(t2CharString)
         # print(bezString)
         t2Program = convertBezToT2(bezString)
         if t2Width is not None:
