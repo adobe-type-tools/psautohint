@@ -1,7 +1,7 @@
-from __future__ import print_function, absolute_import
+# Copyright 2014 Adobe. All rights reserved.
 
 """
-ufoFont.py v1.30 May 2 2017
+ufoFont.py v1.30.1 Feb 12 2018
 
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
@@ -60,15 +60,17 @@ has been processed, identified by a hash of its marking path data. Each
 entry contains:
 - a hash of the glyph point coordinates, from the default layer.
 This is set after a program has been run.
-- a history list: a list of the names of each program that has been run, in order.
+- a history list: a list of the names of each program that has been run,
+  in order.
 - an editStatus flag.
 Altered GLIF data is always written to the Adobe processed glyph layer. The
-program may or may not have altered the outline data. For example, autohint adds
-private hint data, and adds names to points, but does not change any paths.
+program may or may not have altered the outline data. For example, autohint
+adds private hint data, and adds names to points, but does not change any
+paths.
 
 If the stored hash for the glyph does not exist, the ufoFont lib will save the
-new hash in the hash map entry and will set the history list to contain just the
-current program. The program will read the glyph from the default layer.
+new hash in the hash map entry and will set the history list to contain just
+the current program. The program will read the glyph from the default layer.
 
 If the stored hash matches the hash for the current glyph file in the default
 layer, and the current program name is in the history list,then ufoFont
@@ -82,21 +84,21 @@ layer, if it exists, else it will always read from the default layer.
 
 If the hash differs between the hash map entry and the current glyph in the
 default layer, and usedProcessedLayer is False, then ufoFont will return
-"skip=0". If usedProcessedLayer is True, then the program will consult the list
-of required programs. If any of these are in the history list, then the program
-will report an error and return skip =1, else it will return skip=1. The program
-will then save the new hash in the hash map entry and reset the history list to
-contain just the current program. If the old and new hash match, but the program
-name is not in the history list, then the ufoFont will not skip the glyph, and
-will add the program name to the history list.
+"skip=0". If usedProcessedLayer is True, then the program will consult the
+list of required programs. If any of these are in the history list, then the
+program will report an error and return skip =1, else it will return skip=1.
+The program will then save the new hash in the hash map entry and reset the
+history list to contain just the current program. If the old and new hash
+match, but the program name is not in the history list, then the ufoFont will
+not skip the glyph, and will add the program name to the history list.
 
 
 The only tools using this are, at the moment, checkOutlines, checkOutlinesUFO
 and autohint. checkOutlines and checkOutlinesUFO use the hash map to skip
 processing only when being used to edit glyphs, not when reporting them.
 checkOutlines necessarily flattens any components in the source glyph file to
-actual outlines. autohint adds point names, and saves the hint data as a private
-data in the new GLIF file.
+actual outlines. autohint adds point names, and saves the hint data as a
+private data in the new GLIF file.
 
 autohint saves the hint data in the GLIF private data area, /lib/dict,
 as a key and data pair. See below for the format.
@@ -110,8 +112,20 @@ tools stripped out the _hintFormat1_ hint data as invalid elements.
 
 """
 
-__copyright__ = """Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-"""
+from __future__ import print_function, absolute_import
+
+import hashlib
+import os
+import plistlib
+import re
+
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
+
+from psautohint import fdTools
+
 
 _hintFormat1_ = """
 
@@ -145,10 +159,12 @@ move-to only.
             <data>
                 <hintSetList>
                     <hintset pointTag="point name">
-                        (<hstem pos="<decimal value>" width="decimal value" />)*
-                        (<vstem pos="<decimal value>" width="decimal value" />)*
-                        <hstem3 stem3List="n0,n1,n2,n3,n4,n5" />* # where n1-5 are decimal values
-                        <vstem3 stem3List="n0,n1,n2,n3,n4,n5" />* # where n1-5 are decimal values
+                      (<hstem pos="<decimal value>" width="decimal value" />)*
+                      (<vstem pos="<decimal value>" width="decimal value" />)*
+                      <!-- where n1-5 are decimal values -->
+                      <hstem3 stem3List="n0,n1,n2,n3,n4,n5" />*
+                      <!-- where n1-5 are decimal values -->
+                      <vstem3 stem3List="n0,n1,n2,n3,n4,n5" />*
                     </hintset>*
                     (<hintSetList>*
                         (<hintset pointIndex="positive integer">
@@ -167,7 +183,8 @@ move-to only.
 Example from "B" in SourceCodePro-Regular
 <key><com.adobe.type.autohint><key>
 <data>
-<hintSetList id="64bf4987f05ced2a50195f971cd924984047eb1d79c8c43e6a0054f59cc85dea23a49deb20946a4ea84840534363f7a13cca31a81b1e7e33c832185173369086">
+<hintSetList id="64bf4987f05ced2a50195f971cd924984047eb1d79c8c43e6a0054f59cc85
+dea23a49deb20946a4ea84840534363f7a13cca31a81b1e7e33c832185173369086">
     <hintset pointTag="hintSet0000">
         <hstem pos="0" width="28" />
         <hstem pos="338" width="28" />
@@ -201,17 +218,17 @@ A <dict> element in the hintSetList array identifies a specific point by its
 name, and describes a new set of stem hints which should be applied before the
 specific point.
 
-A <string> element in the flexList identifies a specific point by its name. The
-point is the first point of a curve. The presence of the element is a processing
-suggestion, that the curve and its successor curve should be converted to a flex
-operator.
+A <string> element in the flexList identifies a specific point by its name.
+The point is the first point of a curve. The presence of the element is a
+processing suggestion, that the curve and its successor curve should be
+converted to a flex operator.
 
-One challenge in applying the hintSetList and flexList elements is that in the
-GLIF format, there is no explicit start and end operator: the first path
+One challenge in applying the hintSetList and flexList elements is that in
+the GLIF format, there is no explicit start and end operator: the first path
 operator is both the end and the start of the path. I have chosen to convert
 this to T1 by taking the first path operator, and making it a move-to. I then
-also use it as the last path operator. An exception is a line-to; in T1, this is
-omitted, as it is implied by the need to close the path. Hence, if a hintset
+also use it as the last path operator. An exception is a line-to; in T1, this
+is omitted, as it is implied by the need to close the path. Hence, if a hintset
 references the first operator, there is a potential ambiguity: should it be
 applied before the T1 move-to, or before the final T1 path operator? The logic
 here applies it before the move-to only.
@@ -226,15 +243,17 @@ here applies it before the move-to only.
                 <key>hintSetList</key>
                 <array>
                     <dict>
-                        <key>pointTag</key>
-                        <string> <point name> </string>
-                        <key>stems</key>
-                        <array>
-                            <string>hstem <position value> <width value></string>*
-                            <string>vstem <position value> <width value></string>*
-                            <string>hstem3 <position value 0>...<position value 5></string>*
-                            <string>vstem3 <position value 0>...<position value 5></string>*
-                        </array>
+                      <key>pointTag</key>
+                      <string> <point name> </string>
+                      <key>stems</key>
+                      <array>
+                        <string>hstem <position value> <width value></string>*
+                        <string>vstem <position value> <width value></string>*
+                        <string>hstem3 <position value 0>...<position value 5>
+                        </string>*
+                        <string>vstem3 <position value 0>...<position value 5>
+                        </string>*
+                      </array>
                     </dict>*
                 </array>
 
@@ -251,7 +270,8 @@ Example from "B" in SourceCodePro-Regular
 <key><com.adobe.type.autohint><key>
 <dict>
     <key>id</key>
-    <string>64bf4987f05ced2a50195f971cd924984047eb1d79c8c43e6a0054f59cc85dea23a49deb20946a4ea84840534363f7a13cca31a81b1e7e33c832185173369086</string>
+    <string>64bf4987f05ced2a50195f971cd924984047eb1d79c8c43e6a0054f59cc85dea23
+    a49deb20946a4ea84840534363f7a13cca31a81b1e7e33c832185173369086</string>
     <key>hintSetList</key>
     <array>
         <dict>
@@ -295,28 +315,18 @@ Example from "B" in SourceCodePro-Regular
 
 """
 
-import re
-import os
-import plistlib
-import hashlib
-
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-
-from psautohint import fdTools
-
 XML = ET.XML
 XMLElement = ET.Element
 xmlToString = ET.tostring
 debug = False
 
+
 def debugMsg(*args):
     if debug:
         print(args)
 
-#UFO names
+
+# UFO names
 kDefaultGlyphsLayerName = "public.default"
 kDefaultGlyphsLayer = "glyphs"
 kProcessedGlyphsLayerName = "AFDKO ProcessedGlyphs"
@@ -329,7 +339,7 @@ kPublicGlyphOrderKey = "public.glyphOrder"
 kAdobeDomainPrefix = "com.adobe.type"
 kAdobHashMapName = "%s.processedHashMap" % (kAdobeDomainPrefix)
 kAdobHashMapVersionName = "hashMapVersion"
-kAdobHashMapVersion = (1,0) # If major version differs, do not use.
+kAdobHashMapVersion = (1, 0)  # If major version differs, do not use.
 kAutohintName = "autohint"
 kCheckOutlineName = "checkOutlines"
 kCheckOutlineNameUFO = "checkOutlines"
@@ -366,8 +376,10 @@ kDefaultGOADBPath = "GlyphOrderAndAliasDB"
 class UFOParseError(ValueError):
     pass
 
+
 class BezParseError(ValueError):
     pass
+
 
 class UFOFontData:
     def __init__(self, parentPath, useHashMap, programName):
@@ -377,9 +389,14 @@ class UFOFontData:
         self.newGlyphMap = {}
         self.glyphList = []
         self.fontInfo = None
-        self.useHashMap = useHashMap # if False, will skip reading has map and testing to see if glyph can be skipped.
-        # should be used only when calling program is running in report mdoe only, and not changing any glyph data.
-        self.hashMap = {} # Used to skip getting glyph data when glyph hash matches hash of current glyph data.
+        # if False, will skip reading has map
+        # and testing to see if glyph can be skipped.
+        self.useHashMap = useHashMap
+        # should be used only when calling program is running
+        # in report mode only, and not changing any glyph data.
+        # Used to skip getting glyph data when glyph hash
+        # matches hash of current glyph data.
+        self.hashMap = {}
         self.fontDict = None
         self.programName = programName
         self.curSrcDir = None
@@ -388,16 +405,24 @@ class UFOFontData:
         self.glyphLayerDir = os.path.join(parentPath, kProcessedGlyphsLayer)
         self.glyphWriteDir = self.glyphLayerDir
         self.historyList = []
-        self.requiredHistory = [] # See documentation above.
-        self.useProcessedLayer = False # If False, then read data only from the default layer; else read glyphs from processed layer, if it exists.
-        self.writeToDefaultLayer = False # If True, then write data to the default layer
-        self.doAll = False # if True, then do not skip any glyphs.
-        self.deletedGlyph = False # track whether checkSkipGLyph has deleted a out of date glyph from the processed glyph layer
-        self.allowDecimalCoords = False # if true, do NOT round x,y values when processing.
+        # See documentation above.
+        self.requiredHistory = []
+        # If False, then read data only from the default layer;
+        # else read glyphs from processed layer, if it exists.
+        self.useProcessedLayer = False
+        # If True, then write data to the default layer
+        self.writeToDefaultLayer = False
+        # if True, then do not skip any glyphs.
+        self.doAll = False
+        # track whether checkSkipGLyph has deleted an
+        # out of date glyph from the processed glyph layer
+        self.deletedGlyph = False
+        # if true, do NOT round x,y values when processing.
+        self.allowDecimalCoords = False
 
     def getUnitsPerEm(self):
         unitsPerEm = "1000"
-        if self.fontInfo == None:
+        if self.fontInfo is None:
             self.loadFontInfo()
         if self.fontInfo:
             unitsPerEm = int(self.fontInfo["unitsPerEm"])
@@ -406,7 +431,7 @@ class UFOFontData:
 
     def getPSName(self):
         psName = "PSName-Undefined"
-        if self.fontInfo == None:
+        if self.fontInfo is None:
             self.loadFontInfo()
         if self.fontInfo:
             psName = self.fontInfo.get("postscriptFontName", psName)
@@ -426,14 +451,16 @@ class UFOFontData:
         return hasHints
 
     def convertToBez(self, glyphName, beVerbose, doAll=False):
-        # convertGLIFToBez does not yet support hints - no need for removeHints arg.
+        # convertGLIFToBez does not yet support hints;
+        # no need for removeHints arg.
         bezString, width = convertGLIFToBez(self, glyphName, beVerbose, doAll)
         hasHints = self.checkForHints(glyphName)
         return bezString, width, hasHints
 
     def updateFromBez(self, bezData, glyphName, width, beVerbose):
-        # For UFO font, we don't use the width parameter: it is carried over from the input glif file.
-        glifXML = convertBezToGLIF(self, glyphName, bezData )
+        # For UFO font, we don't use the width parameter:
+        # it is carried over from the input glif file.
+        glifXML = convertBezToGLIF(self, glyphName, bezData)
         self.newGlyphMap[glyphName] = glifXML
 
     def saveChanges(self):
@@ -446,15 +473,17 @@ class UFOFontData:
 
         for glyphName, glifXML in self.newGlyphMap.items():
             glyphPath = self.getWriteGlyphPath(glyphName)
-            #print("Saving file", glyphPath)
+            # print("Saving file", glyphPath)
             et = ET.ElementTree(glifXML)
             with open(glyphPath, "wb") as fp:
                 et.write(fp, encoding="UTF-8", xml_declaration=True)
 
         # Update the layer contents.plist file
-        layerContentsFilePath = os.path.join(self.parentPath, "layercontents.plist")
+        layerContentsFilePath = os.path.join(self.parentPath,
+                                             "layercontents.plist")
         self.updateLayerContents(layerContentsFilePath)
-        glyphContentsFilePath = os.path.join(self.glyphWriteDir, "contents.plist")
+        glyphContentsFilePath = os.path.join(self.glyphWriteDir,
+                                             "contents.plist")
         self.updateLayerGlyphContents(glyphContentsFilePath, self.newGlyphMap)
 
     def getWriteGlyphPath(self, glyphName):
@@ -484,25 +513,26 @@ class UFOFontData:
                 data = fp.read()
             newMap = eval(data)
         else:
-            newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
+            newMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
 
         try:
             version = newMap[kAdobHashMapVersionName]
             if version[0] > kAdobHashMapVersion[0]:
-                raise UFOParseError("Hash map version is newer than program. Please update the FDK")
+                raise UFOParseError("Hash map version is newer than program. "
+                                    "Please update the FDK")
             elif version[0] < kAdobHashMapVersion[0]:
                 print("Updating hash map: was older version")
-                newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
+                newMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
         except KeyError:
             print("Updating hash map: was older version")
-            newMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
+            newMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
         self.hashMap = newMap
         return
 
     def writeHashMap(self):
         hashMap = self.hashMap
         if len(hashMap) == 0:
-            return # no glyphs were processed.
+            return  # no glyphs were processed.
 
         hashDir = os.path.join(self.parentPath, "data")
         if not os.path.exists(hashDir):
@@ -522,7 +552,7 @@ class UFOFontData:
         return
 
     def getCurGlyphPath(self, glyphName):
-        if self.curSrcDir == None:
+        if self.curSrcDir is None:
             self.curSrcDir = self.glyphDefaultDir
 
         # Get the glyph file name.
@@ -537,7 +567,8 @@ class UFOFontData:
             self.loadGlyphMap()
         glyphFileName = self.glyphMap[glyphName]
 
-        if self.useProcessedLayer and self.processedLayerGlyphMap: # Try for processed layer first.
+        # Try for processed layer first.
+        if self.useProcessedLayer and self.processedLayerGlyphMap:
             try:
                 glyphFileName = self.processedLayerGlyphMap[glyphName]
                 self.curSrcDir = self.glyphLayerDir
@@ -584,17 +615,18 @@ class UFOFontData:
             hashEntry = None
 
         self.hashMapChanged = True
-        # If the program always reads data from the default layer, and we have just created a new glyph in the processed layer, then reset the history.
+        # If the program always reads data from the default layer,
+        # and we have just created a new glyph in the processed layer,
+        # then reset the history.
         if (not self.useProcessedLayer) and changed:
-            self.hashMap[glyphName] = [srcHash, [self.programName] ]
+            self.hashMap[glyphName] = [srcHash, [self.programName]]
             return
         else:
             try:
-                programHistoryIndex = historyList.index(self.programName)
+                historyList.index(self.programName)
             except ValueError:
-                #If the program is not in the history list, add it.
+                # If the program is not in the history list, add it.
                 historyList.append(self.programName)
-
 
     def checkSkipGlyph(self, glyphName, newSrcHash, doAll):
         skip = False
@@ -607,7 +639,7 @@ class UFOFontData:
 
         hashEntry = srcHash = None
         historyList = []
-        programHistoryIndex = -1 # not found in historyList
+        programHistoryIndex = -1  # not found in historyList
 
         # Get hash entry for glyph
         try:
@@ -623,12 +655,13 @@ class UFOFontData:
 
         if (srcHash == newSrcHash):
             if (programHistoryIndex >= 0):
-                # The glyph has already been processed by this program, and there have been no changes since.
+                # The glyph has already been processed by this program,
+                # and there have been no changes since.
                 skip = True and (not doAll)
             if not skip:
-                if not self.useProcessedLayer: # case for Checkoutlines
+                if not self.useProcessedLayer:  # case for Checkoutlines
                     self.hashMapChanged = True
-                    self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
+                    self.hashMap[glyphName] = [newSrcHash, [self.programName]]
                     glyphPath = self.getGlyphProcessedPath(glyphName)
                     if glyphPath and os.path.exists(glyphPath):
                         os.remove(glyphPath)
@@ -636,21 +669,26 @@ class UFOFontData:
                     if (programHistoryIndex < 0):
                         historyList.append(self.programName)
         else:
-            if self.useProcessedLayer: # case for autohint
-                # default layer glyph and stored glyph hash differ,and useProcessedLayer is True
-                # If any of the programs in requiredHistory in are in the historyList, we need to complain and skip.
+            if self.useProcessedLayer:  # case for autohint
+                # default layer glyph and stored glyph hash differ, and
+                # useProcessedLayer is True. If any of the programs in
+                # requiredHistory in are in the historyList, we need to
+                # complain and skip.
                 foundMatch = False
                 if len(historyList) > 0:
                     for programName in self.requiredHistory:
                         if programName in historyList:
                             foundMatch = True
                 if foundMatch:
-                    print("Error. Glyph '%s' has been edited. You must first run '%s' before running '%s'. Skipping." % (glyphName, self.requiredHistory, self.programName))
+                    print("Error. Glyph '%s' has been edited. You must first "
+                          "run '%s' before running '%s'. Skipping." %
+                          (glyphName, self.requiredHistory, self.programName))
                     skip = True
 
-            # If the source hash has changed, we need to delete the processed layer glyph.
+            # If the source hash has changed, we need to delete
+            # the processed layer glyph.
             self.hashMapChanged = True
-            self.hashMap[glyphName] = [newSrcHash, [self.programName] ]
+            self.hashMap[glyphName] = [newSrcHash, [self.programName]]
             glyphPath = self.getGlyphProcessedPath(glyphName)
             if glyphPath and os.path.exists(glyphPath):
                 os.remove(glyphPath)
@@ -659,37 +697,44 @@ class UFOFontData:
         return skip
 
     def getGlyphXML(self, glyphDir, glyphFileName):
-        glyphPath = os.path.join(glyphDir, glyphFileName) # default
+        glyphPath = os.path.join(glyphDir, glyphFileName)  # default
         etRoot = ET.ElementTree()
         glifXML = etRoot.parse(glyphPath)
         outlineXML = glifXML.find("outline")
         try:
             widthXML = glifXML.find("advance")
-            if widthXML != None:
+            if widthXML is not None:
                 width = int(eval(widthXML.get("width")))
             else:
                 width = 1000
         except UFOParseError as e:
-            print("Error. skipping glyph '%s' because of parse error: %s" % (glyphName, e.message))
+            print("Error. skipping glyph '%s' because of parse error: %s" %
+                  (glyphName, e.message))
             return None, None, None
         return width, glifXML, outlineXML
 
     def getOrSkipGlyphXML(self, glyphName, doAll=False):
-        # Get default glyph layer data, so we can check if the glyph has been edited since this program was last run.
-        # If the program name is in the history list, and the srcHash matches the default glyph layer data, we can skip.
+        # Get default glyph layer data, so we can check if the glyph
+        # has been edited since this program was last run.
+        # If the program name is in the history list, and the srcHash
+        # matches the default glyph layer data, we can skip.
         if len(self.glyphMap) == 0:
             self.loadGlyphMap()
         glyphFileName = self.glyphMap[glyphName]
-        width, glifXML, outlineXML = self.getGlyphXML(self.glyphDefaultDir, glyphFileName)
-        if glifXML == None:
+        width, glifXML, outlineXML = self.getGlyphXML(
+            self.glyphDefaultDir, glyphFileName)
+        if glifXML is None:
             skip = True
             return None, None, skip
 
-        useDefaultGlyphDir = True # Hash is always from the default glyph layer.
-        newHash, dataList = self.buildGlyphHashValue(width, outlineXML, glyphName, useDefaultGlyphDir)
+        # Hash is always from the default glyph layer.
+        useDefaultGlyphDir = True
+        newHash, dataList = self.buildGlyphHashValue(
+            width, outlineXML, glyphName, useDefaultGlyphDir)
         skip = self.checkSkipGlyph(glyphName, newHash, doAll)
 
-        # If self.useProcessedLayer and there is a glyph in the processed layer, get the outline from that.
+        # If self.useProcessedLayer and there is a glyph
+        # in the processed layer, get the outline from that.
         if self.useProcessedLayer and self.processedLayerGlyphMap:
             try:
                 glyphFileName = self.processedLayerGlyphMap[glyphName]
@@ -697,13 +742,13 @@ class UFOFontData:
                 pass
             glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
             if os.path.exists(glyphPath):
-                width, glifXML, outlineXML = self.getGlyphXML(self.glyphLayerDir, glyphFileName)
-                if glifXML == None:
+                width, glifXML, outlineXML = self.getGlyphXML(
+                    self.glyphLayerDir, glyphFileName)
+                if glifXML is None:
                     skip = True
                     return None, None, skip
 
         return width, outlineXML, skip
-
 
     def getGlyphList(self):
         if len(self.glyphMap) == 0:
@@ -711,20 +756,24 @@ class UFOFontData:
         return self.glyphList
 
     def loadGlyphMap(self):
-        # Need to both get the list of glyphs from contents.plist, and also the glyph order.
-        # the latter is take from the public.glyphOrder key in lib.py, if it exists,
-        # else it is taken from the contents.plist file. Any glyphs in contents.plist
-        # which are not named in the public.glyphOrder are sorted after all glyphs which are named
-        # in the public.glyphOrder,, in the order that they occured in contents.plist.
+        # Need to both get the list of glyphs from contents.plist, and also
+        # the glyph order. The latter is take from the public.glyphOrder key
+        # in lib.py, if it exists, else it is taken from the contents.plist
+        # file. Any glyphs in contents.plist which are not named in the
+        # public.glyphOrder are sorted after all glyphs which are named
+        # in the public.glyphOrder,, in the order that they occured in
+        # contents.plist.
         contentsPath = os.path.join(self.parentPath, "glyphs", kContentsName)
         self.glyphMap, self.glyphList = parsePList(contentsPath)
         orderPath = os.path.join(self.parentPath, kLibName)
         self.orderMap = parseGlyphOrder(orderPath)
-        if self.orderMap != None:
+        if self.orderMap is not None:
             orderIndex = len(self.orderMap)
             orderList = []
 
-            # If there are glyphs in the font which are not named in the public.glyphOrder entry, add then in the order of the contents.plist file.
+            # If there are glyphs in the font which are not named in the
+            # public.glyphOrder entry, add then in the order of the
+            # contents.plist file.
             for glyphName in self.glyphList:
                 try:
                     entry = [self.orderMap[glyphName], glyphName]
@@ -745,13 +794,12 @@ class UFOFontData:
 
         # I also need to get the glyph map for the processed layer,
         # and use this when the glyph is read from the processed layer.
-        # Because checkOutliensUFO used the defcon library, it can write glyph file names
-        # that differ from what is in the default glyph layer.
+        # glyph file names that differ from what is in the default glyph layer.
+        # Because checkOutliensUFO used the defcon library, it can write
         contentsPath = os.path.join(self.glyphLayerDir, kContentsName)
         if os.path.exists(contentsPath):
-            self.processedLayerGlyphMap, self.processedLayerGlyphList = parsePList(contentsPath)
-
-
+            self.processedLayerGlyphMap, self.processedLayerGlyphList = \
+                parsePList(contentsPath)
 
     def loadFontInfo(self):
         fontInfoPath = os.path.join(self.parentPath, "fontinfo.plist")
@@ -761,8 +809,9 @@ class UFOFontData:
 
     def updateLayerContents(self, contentsFilePath):
         if os.path.exists(contentsFilePath):
-            contentsList= plistlib.readPlist(contentsFilePath)
-            # If the layer name already exists, don't add a new one, or change the path
+            contentsList = plistlib.readPlist(contentsFilePath)
+            # If the layer name already exists, don't add a new one,
+            # or change the path
             seenPublicDefault = False
             seenProcessedGlyph = False
             for layerName, layerPath in contentsList:
@@ -773,15 +822,18 @@ class UFOFontData:
             update = False
             if not seenPublicDefault:
                 update = True
-                contentsList = [[kDefaultGlyphsLayerName, kDefaultGlyphsLayer]] + contentsList
+                contentsList = [[kDefaultGlyphsLayerName,
+                                kDefaultGlyphsLayer]] + contentsList
             if not seenProcessedGlyph:
                 update = True
-                contentsList.append([kProcessedGlyphsLayerName, kProcessedGlyphsLayer])
+                contentsList.append([kProcessedGlyphsLayerName,
+                                     kProcessedGlyphsLayer])
             if update:
                 plistlib.writePlist(contentsList, contentsFilePath)
         else:
             contentsList = [[kDefaultGlyphsLayerName, kDefaultGlyphsLayer]]
-            contentsList.append([kProcessedGlyphsLayerName, kProcessedGlyphsLayer])
+            contentsList.append([kProcessedGlyphsLayerName,
+                                 kProcessedGlyphsLayer])
         plistlib.writePlist(contentsList, contentsFilePath)
 
     def updateLayerGlyphContents(self, contentsFilePath, newGlyphData):
@@ -790,32 +842,39 @@ class UFOFontData:
         else:
             contentsDict = {}
         for glyphName in newGlyphData.keys():
-            if self.useProcessedLayer and self.processedLayerGlyphMap: # Try for processed layer first.
+            # Try for processed layer first.
+            if self.useProcessedLayer and self.processedLayerGlyphMap:
                 try:
-                    contentsDict[glyphName] = self.processedLayerGlyphMap[glyphName]
+                    contentsDict[glyphName] = \
+                        self.processedLayerGlyphMap[glyphName]
                 except KeyError:
                     contentsDict[glyphName] = self.glyphMap[glyphName]
             else:
                 contentsDict[glyphName] = self.glyphMap[glyphName]
         plistlib.writePlist(contentsDict, contentsFilePath)
 
-    def getFontInfo(self, fontPSName, inputPath, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs, fdIndex=0):
-        if self.fontDict != None:
+    def getFontInfo(self, fontPSName, inputPath, allow_no_blues, noFlex,
+                    vCounterGlyphs, hCounterGlyphs, fdIndex=0):
+        if self.fontDict is not None:
             return self.fontDict
 
-        if self.fontInfo == None:
+        if self.fontInfo is None:
             self.loadFontInfo()
 
         fdDict = fdTools.FDDict()
-        fdDict.LanguageGroup = self.fontInfo.get("languagegroup", "0") # should be 1 if the glyphs are ideographic, else 0.
+        # should be 1 if the glyphs are ideographic, else 0.
+        fdDict.LanguageGroup = self.fontInfo.get("languagegroup", "0")
         fdDict.OrigEmSqUnits = self.getUnitsPerEm()
         fdDict.FontName = self.getPSName()
         upm = self.getUnitsPerEm()
-        low = min( -upm*0.25, float(self.fontInfo.get("openTypeOS2WinDescent", "0")) - 200)
-        high = max ( upm*1.25, float(self.fontInfo.get("openTypeOS2WinAscent", "0")) + 200)
-        # Make a set of inactive alignment zones: zones outside of the font bbox so as not to affect hinting.
-        # Used when src font has no BlueValues or has invalid BlueValues. Some fonts have bad BBox values, so
-        # I don't let this be smaller than -upm*0.25, upm*1.25.
+        low = min(-upm * 0.25, float(
+            self.fontInfo.get("openTypeOS2WinDescent", "0")) - 200)
+        high = max(upm * 1.25, float(
+            self.fontInfo.get("openTypeOS2WinAscent", "0")) + 200)
+        # Make a set of inactive alignment zones: zones outside of the font
+        # bbox so as not to affect hinting. Used when src font has no
+        # BlueValues or has invalid BlueValues. Some fonts have bad BBox
+        # values, so I don't let this be smaller than -upm*0.25, upm*1.25.
         inactiveAlignmentValues = [low, low, high, high]
         blueValues = self.fontInfo.get("postscriptBlueValues", [])
         numBlueValues = len(blueValues)
@@ -824,13 +883,16 @@ class UFOFontData:
                 blueValues = inactiveAlignmentValues
                 numBlueValues = len(blueValues)
             else:
-                raise   UFOParseError("ERROR: Font must have at least four values in its BlueValues array for AC to work!")
+                raise UFOParseError(
+                    "ERROR: Font must have at least four values in its "
+                    "BlueValues array for AC to work!")
         blueValues.sort()
-        # The first pair only is a bottom zone, where the first value is the overshoot position;
-        # the rest are top zones, and second value of the pair is the overshoot position.
+        # The first pair only is a bottom zone, where the first value is the
+        # overshoot position; the rest are top zones, and second value of the
+        # pair is the overshoot position.
         blueValues[0] = blueValues[0] - blueValues[1]
-        for i in range(3, numBlueValues,2):
-            blueValues[i] = blueValues[i] - blueValues[i-1]
+        for i in range(3, numBlueValues, 2):
+            blueValues[i] = blueValues[i] - blueValues[i - 1]
 
         blueValues = [str(v) for v in blueValues]
         numBlueValues = min(numBlueValues, len(fdTools.kBlueValueKeys))
@@ -846,10 +908,11 @@ class UFOFontData:
             i = 0
             numBlueValues = len(otherBlues)
             otherBlues.sort()
-            for i in range(0, numBlueValues,2):
-                otherBlues[i] = otherBlues[i] - otherBlues[i+1]
+            for i in range(0, numBlueValues, 2):
+                otherBlues[i] = otherBlues[i] - otherBlues[i + 1]
             otherBlues = [str(v) for v in otherBlues]
-            numBlueValues = min(numBlueValues, len(fdTools.kOtherBlueValueKeys))
+            numBlueValues = min(numBlueValues,
+                                len(fdTools.kOtherBlueValueKeys))
             for i in range(numBlueValues):
                 key = fdTools.kOtherBlueValueKeys[i]
                 value = otherBlues[i]
@@ -858,29 +921,37 @@ class UFOFontData:
         vstems = self.fontInfo.get("postscriptStemSnapV", [])
         if len(vstems) == 0:
             if allow_no_blues:
-                vstems = [fdDict.OrigEmSqUnits] # dummy value. Needs to be larger than any hint will likely be,
-                # as the autohint program strips out any hint wider than twice the largest global stem width.
+                # dummy value. Needs to be larger than any hint will likely be,
+                # as the autohint program strips out any hint wider than twice
+                # the largest global stem width.
+                vstems = [fdDict.OrigEmSqUnits]
             else:
-                raise   UFOParseError("ERROR: Font does not have postscriptStemSnapV!")
+                raise UFOParseError(
+                    "ERROR: Font does not have postscriptStemSnapV!")
 
         vstems.sort()
-        if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1) ):
-            vstems = [fdDict.OrigEmSqUnits] # dummy value that will allow PyAC to run
-            logMsg("WARNING: There is no value or 0 value for DominantV.")
+        if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1)):
+            # dummy value that will allow PyAC to run
+            vstems = [fdDict.OrigEmSqUnits]
+            print("WARNING: There is no value or 0 value for DominantV.")
         fdDict.DominantV = "[" + " ".join([str(v) for v in vstems]) + "]"
 
         hstems = self.fontInfo.get("postscriptStemSnapH", [])
         if len(hstems) == 0:
             if allow_no_blues:
-                hstems = [fdDict.OrigEmSqUnits] # dummy value. Needs to be larger than any hint will likely be,
-                # as the autohint program strips out any hint wider than twice the largest global stem width.
+                # dummy value. Needs to be larger than any hint will likely be,
+                # as the autohint program strips out any hint wider than twice
+                # the largest global stem width.
+                hstems = [fdDict.OrigEmSqUnits]
             else:
-                raise   UFOParseError("ERROR: Font does not have postscriptStemSnapH!")
+                raise UFOParseError(
+                    "ERROR: Font does not have postscriptStemSnapH!")
 
         hstems.sort()
-        if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1) ):
-            hstems = [fdDict.OrigEmSqUnits] # dummy value that will allow PyAC to run
-            logMsg("WARNING: There is no value or 0 value for DominantH.")
+        if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1)):
+            # dummy value that will allow PyAC to run
+            hstems = [fdDict.OrigEmSqUnits]
+            print("WARNING: There is no value or 0 value for DominantH.")
         fdDict.DominantH = "[" + " ".join([str(v) for v in hstems]) + "]"
 
         if noFlex:
@@ -906,16 +977,18 @@ class UFOFontData:
         fdIndex = 0
         return fdIndex
 
-    def getfdInfo(self, psName, inputPath, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs, glyphList, fdIndex=0):
+    def getfdInfo(self, psName, inputPath, allow_no_blues, noFlex,
+                  vCounterGlyphs, hCounterGlyphs, glyphList, fdIndex=0):
         fontDictList = []
         fdGlyphDict = None
-        fdDict = self.getFontInfo(psName, inputPath, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs, fdIndex)
+        fdDict = self.getFontInfo(psName, inputPath, allow_no_blues, noFlex,
+                                  vCounterGlyphs, hCounterGlyphs, fdIndex)
         fontDictList.append(fdDict)
 
         # Check the fontinfo file, and add any other font dicts
         srcFontInfo = os.path.dirname(inputPath)
         srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
-        maxX = self.getUnitsPerEm()*2
+        maxX = self.getUnitsPerEm() * 2
         maxY = maxX
         minY = -self.getUnitsPerEm()
         if os.path.exists(srcFontInfo):
@@ -926,12 +999,16 @@ class UFOFontData:
             if "FDDict" in fontInfoData:
 
                 blueFuzz = fdDict.BlueFuzz
-                fdGlyphDict, fontDictList, finalFDict = fdTools.parseFontInfoFile(fontDictList, fontInfoData, glyphList, maxY, minY, psName, blueFuzz)
-                if finalFDict == None:
-                    # If a font dict was not explicitly specified for the output font, use the first user-specified font dict.
-                    fdTools.mergeFDDicts( fontDictList[1:], self.fontDict )
+                fdGlyphDict, fontDictList, finalFDict = \
+                    fdTools.parseFontInfoFile(
+                        fontDictList, fontInfoData, glyphList, maxY, minY,
+                        psName, blueFuzz)
+                if finalFDict is None:
+                    # If a font dict was not explicitly specified for the
+                    # output font, use the first user-specified font dict.
+                    fdTools.mergeFDDicts(fontDictList[1:], self.fontDict)
                 else:
-                    fdTools.mergeFDDicts( [finalFDict], topDict )
+                    fdTools.mergeFDDicts([finalFDict], topDict)
 
         return fdGlyphDict, fontDictList
 
@@ -939,18 +1016,24 @@ class UFOFontData:
         try:
             gid = self.orderMap[glyphName]
         except IndexError:
-            raise UFOParseError("Could not find glyph name '%s' in UFO font contents plist. '%s'. " % (glyphName, self.parentPath))
+            raise UFOParseError(
+                "Could not find glyph name '%s' in UFO font contents plist. "
+                "'%s'. " % (glyphName, self.parentPath))
         return gid
 
-    def buildGlyphHashValue(self, width, outlineXML, glyphName, useDefaultGlyphDir, level = 0):
+    def buildGlyphHashValue(self, width, outlineXML, glyphName,
+                            useDefaultGlyphDir, level=0):
         """
         glyphData must be the official <outline> XML from a GLIF.
         We skip contours with only one point.
         """
         dataList = ["w%s" % (str(width))]
         if level > 10:
-            raise UFOParseError("In parsing component, exceeded 10 levels of reference. '%s'. " % (glyphName))
-        # <outline> tag is optional per spec., e.g. space glyph does not necessarily have it.
+            raise UFOParseError(
+                "In parsing component, exceeded 10 levels of reference. '%s'."
+                % (glyphName))
+        # <outline> tag is optional per spec., e.g. space glyph
+        # does not necessarily have it.
         if outlineXML:
             for childContour in outlineXML:
                 if childContour.tag == "contour":
@@ -963,42 +1046,58 @@ class UFOFontData:
                                     pointType = child.attrib["type"][0]
                                 except KeyError:
                                     pointType = ""
-                                dataList.append("%s%s%s" % (pointType, child.attrib["x"], child.attrib["y"]))
-                                #print(dataList[-3:])
+                                dataList.append("%s%s%s" % (
+                                    pointType, child.attrib["x"],
+                                    child.attrib["y"]))
+                                # print(dataList[-3:])
                 elif childContour.tag == "component":
                     # append the component hash.
                     try:
                         compGlyphName = childContour.attrib["base"]
                         dataList.append("%s%s" % ("base:", compGlyphName))
                     except KeyError:
-                        raise UFOParseError("'%s' is missing the 'base' attribute in a component. glyph '%s'." % (glyphName))
+                        raise UFOParseError(
+                            "'%s' is missing the 'base' attribute in a "
+                            "component. glyph '%s'." % glyphName)
 
                     if useDefaultGlyphDir:
                         try:
-                            componentPath = self.getGlyphDefaultPath(compGlyphName)
+                            componentPath = self.getGlyphDefaultPath(
+                                compGlyphName)
                         except KeyError:
-                            raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
+                            raise UFOParseError(
+                                "'%s' component glyph is missing from "
+                                "contents.plist." % compGlyphName)
                     else:
-                        # If we are not necessarily using the default layer for the main glyph, then a missing component
-                        # may not have been processed, and may just be in the default layer. We need to look for component
-                        # glyphs in the src list first, then in the defualt layer.
+                        # If we are not necessarily using the default layer for
+                        # the main glyph, then a missing component may not have
+                        # been processed, and may just be in the default layer.
+                        # We need to look for component glyphs in the src list
+                        # first, then in the defualt layer.
                         try:
                             componentPath = self.getGlyphSrcPath(compGlyphName)
                             if not os.path.exists(componentPath):
-                                componentPath = self.getGlyphDefaultPath(compGlyphName)
+                                componentPath = self.getGlyphDefaultPath(
+                                    compGlyphName)
                         except KeyError:
                             try:
-                                componentPath = self.getGlyphDefaultPath(compGlyphName)
+                                componentPath = self.getGlyphDefaultPath(
+                                    compGlyphName)
                             except KeyError:
-                                raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
+                                raise UFOParseError(
+                                    "'%s' component glyph is missing from "
+                                    "contents.plist." % compGlyphName)
 
                     if not os.path.exists(componentPath):
-                        raise UFOParseError("'%s' component file is missing: '%s'." % (compGlyphName, componentPath))
+                        raise UFOParseError(
+                            "'%s' component file is missing: '%s'." %
+                            (compGlyphName, componentPath))
 
                     etRoot = ET.ElementTree()
 
                     # Collect transformm fields, if any.
-                    for transformTag in ["xScale", "xyScale", "yxScale", "yScale", "xOffset", "yOffset"]:
+                    for transformTag in ["xScale", "xyScale", "yxScale",
+                                         "yScale", "xOffset", "yOffset"]:
                         try:
                             value = childContour.attrib[transformTag]
                             rval = eval(value)
@@ -1009,7 +1108,10 @@ class UFOFontData:
                             pass
                     componentXML = etRoot.parse(componentPath)
                     componentOutlineXML = componentXML.find("outline")
-                    componentHash, componentDataList = self.buildGlyphHashValue(width, componentOutlineXML, glyphName, useDefaultGlyphDir, level+1)
+                    componentHash, componentDataList = \
+                        self.buildGlyphHashValue(
+                            width, componentOutlineXML, glyphName,
+                            useDefaultGlyphDir, level + 1)
                     dataList.extend(componentDataList)
         data = "".join(dataList)
         if len(data) < 128:
@@ -1022,16 +1124,21 @@ class UFOFontData:
         try:
             compGlyphName = componentItem.attrib["base"]
         except KeyError:
-            raise UFOParseError("'%s' attribute missing from component '%s'." % ("base", xmlToString(componentXML)))
+            raise UFOParseError(
+                "'%s' attribute missing from component '%s'." %
+                ("base", xmlToString(componentXML)))
 
         if not self.useProcessedLayer:
             try:
                 compGlyphFilePath = self.getGlyphDefaultPath(compGlyphName)
             except KeyError:
-                raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
+                raise UFOParseError(
+                    "'%s' component glyph is missing from contents.plist." %
+                    compGlyphName)
         else:
-            # If we are not necessarily using the default layer for the main glyph, then a missing component
-            # may not have been processed, and may just be in the default layer. We need to look for component
+            # If we are not necessarily using the default layer for the main
+            # glyph, then a missing component may not have been processed, and
+            # may just be in the default layer. We need to look for component
             # glyphs in the src list first, then in the defualt layer.
             try:
                 compGlyphFilePath = self.getGlyphSrcPath(compGlyphName)
@@ -1041,10 +1148,14 @@ class UFOFontData:
                 try:
                     compGlyphFilePath = self.getGlyphDefaultPath(compGlyphName)
                 except KeyError:
-                    raise UFOParseError("'%s' component glyph is missing from contents.plist." % (compGlyphName))
+                    raise UFOParseError(
+                        "'%s' component glyph is missing from contents.plist."
+                        % compGlyphName)
 
         if not os.path.exists(compGlyphFilePath):
-            raise UFOParseError("'%s' component file is missing: '%s'." % (compGlyphName, compGlyphFilePath))
+            raise UFOParseError(
+                "'%s' component file is missing: '%s'." %
+                (compGlyphName, compGlyphFilePath))
 
         etRoot = ET.ElementTree()
         glifXML = etRoot.parse(compGlyphFilePath)
@@ -1062,7 +1173,7 @@ class UFOFontData:
         return
 
     def clearHashMap(self):
-        self.hashMap = {kAdobHashMapVersionName:kAdobHashMapVersion}
+        self.hashMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
         hashDir = os.path.join(self.parentPath, "data")
         if not os.path.exists(hashDir):
             return
@@ -1076,11 +1187,12 @@ class UFOFontData:
         self.writeToDefaultLayer = True
         self.glyphWriteDir = self.glyphDefaultDir
 
+
 def parseGlyphOrder(filePath):
     orderMap = None
     if os.path.exists(filePath):
         publicOrderDict, temp = parsePList(filePath, kPublicGlyphOrderKey)
-        if publicOrderDict != None:
+        if publicOrderDict is not None:
             orderMap = {}
             glyphList = publicOrderDict[kPublicGlyphOrderKey]
             numGlyphs = len(glyphList)
@@ -1088,52 +1200,64 @@ def parseGlyphOrder(filePath):
                 orderMap[glyphList[i]] = i
     return orderMap
 
-def parsePList(filePath, dictKey = None):
+
+def parsePList(filePath, dictKey=None):
     # if dictKey is defined, parse and return only the data for that key.
-    # This helps avoid needing to parse all plist types. I need to support only data for known keys amd lists.
+    # This helps avoid needing to parse all plist types. I need to support
+    # only data for known keys amd lists.
     plistDict = {}
     plistKeys = []
 
-    # I uses this rather than the plistlib in order to get a list that allows preserving key order.
+    # I uses this rather than the plistlib in order
+    # to get a list that allows preserving key order.
     with open(filePath, "r") as fp:
         data = fp.read()
     contents = XML(data)
     dict = contents.find("dict")
-    if dict == None:
+    if dict is None:
         raise UFOParseError("In '%s', failed to find dict. '%s'." % (filePath))
     lastTag = "string"
     for child in dict:
         if child.tag == "key":
             if lastTag == "key":
-                raise UFOParseError("In contents.plist, key name '%s' followed another key name '%s'." % (xmlToString(child), lastTag) )
+                raise UFOParseError(
+                    "In contents.plist, key name '%s' followed another key "
+                    "name '%s'." % (xmlToString(child), lastTag))
             skipKeyData = False
             lastName = child.text
             lastTag = "key"
-            if dictKey != None:
+            if dictKey is not None:
                 if lastName != dictKey:
                     skipKeyData = True
         elif child.tag != "key":
             if lastTag != "key":
-                raise UFOParseError("In contents.plist, key value '%s' followed a non-key tag '%s'." % (xmlToString(child), lastTag) )
+                raise UFOParseError(
+                    "In contents.plist, key value '%s' followed a non-key "
+                    "tag '%s'." % (xmlToString(child), lastTag))
             lastTag = child.tag
 
             if skipKeyData:
                 continue
 
             if lastName in plistDict:
-                raise UFOParseError("Encountered duplicate key name '%s' in '%s'." % (lastName, filePath) )
+                raise UFOParseError(
+                    "Encountered duplicate key name '%s' in '%s'." %
+                    (lastName, filePath))
             if child.tag == "array":
                 list = []
                 for listChild in child:
                     val = listChild.text
                     if listChild.tag == "integer":
-                        val= int(eval(val))
+                        val = int(eval(val))
                     elif listChild.tag == "real":
                         val = float(eval(val))
                     elif listChild.tag == "string":
                         pass
                     else:
-                        raise UFOParseError("In plist file, encountered unhandled key type '%s' in '%s' for parent key %s. %s." % (listChild.tag, child.tag, lastName, filePath))
+                        raise UFOParseError(
+                            "In plist file, encountered unhandled key type "
+                            "'%s' in '%s' for parent key %s. %s." %
+                            (listChild.tag, child.tag, lastName, filePath))
                     list.append(val)
                 plistDict[lastName] = list
             elif child.tag == "integer":
@@ -1147,19 +1271,23 @@ def parsePList(filePath, dictKey = None):
             elif child.tag == "string":
                 plistDict[lastName] = child.text
             else:
-                raise UFOParseError("In plist file, encountered unhandled key type '%s' for key %s. %s." % (child.tag, lastName, filePath))
+                raise UFOParseError(
+                    "In plist file, encountered unhandled key type '%s' for "
+                    "key %s. %s." % (child.tag, lastName, filePath))
             plistKeys.append(lastName)
         else:
-            raise UFOParseError("In plist file, encountered unexpected element '%s'. %s." % (xmlToString(child), filePath ))
+            raise UFOParseError(
+                "In plist file, encountered unexpected element '%s'. %s." %
+                (xmlToString(child), filePath))
     if len(plistDict) == 0:
         plistDict = None
     return plistDict, plistKeys
 
 
-
-
 class UFOTransform:
-    kTransformTagList = ["xScale", "xyScale", "yxScale", "yScale", "xOffset", "yOffset"]
+    kTransformTagList = ["xScale", "xyScale", "yxScale", "yScale",
+                         "xOffset", "yOffset"]
+
     def __init__(self, componentXML):
         self.transformFactors = []
         self.isDefault = True
@@ -1169,14 +1297,14 @@ class UFOTransform:
         for tag in self.kTransformTagList:
             val = componentXML.attrib.get(tag, None)
             if tag in ["xScale", "yScale"]:
-                if val == None:
+                if val is None:
                     val = 1.0
                 else:
                     val = float(val)
                     if val != 1.0:
                         hasScale = True
             else:
-                if val == None:
+                if val is None:
                     val = 0
                 else:
                     val = float(val)
@@ -1187,7 +1315,9 @@ class UFOTransform:
                         elif tag in ["xOffset", "yOffset"]:
                             hasOffset = True
                         else:
-                            raise UFOParseError("Unknown tag '%s' in component '%s'." % (tag, xmlToString(componentXML)))
+                            raise UFOParseError(
+                                "Unknown tag '%s' in component '%s'." %
+                                (tag, xmlToString(componentXML)))
 
             self.transformFactors.append(val)
         if hasScale or hasOffset:
@@ -1196,7 +1326,7 @@ class UFOTransform:
             self.isOffsetOnly = False
 
     def concat(self, transform):
-        if transform == None:
+        if transform is None:
             return
         if transform.isDefault:
             return
@@ -1207,13 +1337,13 @@ class UFOTransform:
             tfCur[5] += tfPrev[5]
             self.isDefault = False
         else:
-            tfNew = [0.0]*6
-            tfNew[0] = tfCur[0]*tfPrev[0] + tfCur[1]*tfPrev[2];
-            tfNew[1] = tfCur[0]*tfPrev[1] + tfCur[1]*tfPrev[3];
-            tfNew[2] = tfCur[2]*tfPrev[0] + tfCur[3]*tfPrev[2];
-            tfNew[3] = tfCur[2]*tfPrev[1] + tfCur[3]*tfPrev[3];
-            tfNew[4] = tfCur[4]*tfPrev[0] + tfCur[5]*tfPrev[2] + tfPrev[4];
-            tfNew[5] = tfCur[4]*tfPrev[1] + tfCur[5]*tfPrev[3] + tfPrev[5];
+            tfNew = [0.0] * 6
+            tfNew[0] = tfCur[0] * tfPrev[0] + tfCur[1] * tfPrev[2]
+            tfNew[1] = tfCur[0] * tfPrev[1] + tfCur[1] * tfPrev[3]
+            tfNew[2] = tfCur[2] * tfPrev[0] + tfCur[3] * tfPrev[2]
+            tfNew[3] = tfCur[2] * tfPrev[1] + tfCur[3] * tfPrev[3]
+            tfNew[4] = tfCur[4] * tfPrev[0] + tfCur[5] * tfPrev[2] + tfPrev[4]
+            tfNew[5] = tfCur[4] * tfPrev[1] + tfCur[5] * tfPrev[3] + tfPrev[5]
             self.transformFactors = tfNew
             self.isOffsetOnly = self.isOffsetOnly and transform.isOffsetOnly
             self.isDefault = False
@@ -1224,20 +1354,21 @@ class UFOTransform:
             x += tfCur[4]
             y += tfCur[5]
         else:
-            x, y = x*tfCur[0] + y*tfCur[2] + tfCur[4], \
-                   x*tfCur[1] + y*tfCur[3] + tfCur[5]
-        return x,y
+            x, y = (x * tfCur[0] + y * tfCur[2] + tfCur[4],
+                    x * tfCur[1] + y * tfCur[3] + tfCur[5])
+        return x, y
 
 
-
-
-def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, level = 0):
-    """convert XML outline element containing contours and components to a bez string.
+def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
+                                   level=0):
+    """
+    Convert XML outline element containing contours and components
+    to a bez string.
     Since xml.etree.CElementTree is compiled code, this
     will run faster than tokenizing and parsing in regular Python.
 
-    glyphMap is a dict mapping glyph names to component file names.
-    If it has a length of 1, it needs to be filled from the contents.plist file.
+    glyphMap is a dict mapping glyph names to component file names. If it
+    has a length of 1, it needs to be filled from the contents.plist file.
     It must have a key/value [UFO_FONTPATH] = path to parent UFO font.
 
     transformList is None, or a list of floats in the order:
@@ -1260,19 +1391,21 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, le
                     call convertGlyphOutlineToBezString with transform
                     add to bez string
     I don't bother adding in any hinting info, as this is used only for making
-    temp bez files as input to checkOutlines or autohint, which invalidate hinting data
-    by changing the outlines data, or at best ignore hinting data.
+    temp bez files as input to checkOutlines or autohint, which invalidate
+    hinting data by changing the outlines data, or at best ignore hinting data.
 
     bez ops output: ["rrmt", "dt", "rct", "cp" , "ed"]
     """
 
     if level > 10:
-        raise UFOParseError("In parsing component, exceeded 10 levels of reference. '%s'. " % (outlineXML))
+        raise UFOParseError(
+            "In parsing component, exceeded 10 levels of reference. '%s'. " %
+            outlineXML)
 
     allowDecimals = ufoFontData.allowDecimalCoords
 
     bezStringList = []
-    if outlineXML == None:
+    if outlineXML is None:
         bezstring = ""
     else:
         for outlineItem in outlineXML:
@@ -1280,16 +1413,17 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, le
             if outlineItem.tag == "component":
                 newTransform = UFOTransform(outlineItem)
                 if newTransform.isDefault:
-                    if transform != None:
+                    if transform is not None:
                         newTransform.concat(transform)
                     else:
                         newTransform = None
                 else:
-                    if transform != None:
+                    if transform is not None:
                         newTransform.concat(transform)
                 componentOutline = ufoFontData.getComponentOutline(outlineItem)
                 if componentOutline:
-                    outlineBezString = convertGlyphOutlineToBezString(componentOutline, ufoFontData, newTransform, level+1)
+                    outlineBezString = convertGlyphOutlineToBezString(
+                        componentOutline, ufoFontData, newTransform, level + 1)
                     bezStringList.append(outlineBezString)
                 continue
 
@@ -1308,43 +1442,49 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, le
                 type = lastItem.attrib["type"]
             except KeyError:
                 type = "offcurve"
-            if type in ["curve","line","qccurve"]:
+            if type in ["curve", "line", "qccurve"]:
                 outlineItem = outlineItem[1:]
                 if type != "line":
-                    outlineItem.append(lastItem) # I don't do this for line, as AC behaves differently when a final line-to is explicit.
+                    # I don't do this for line, as AC behaves differently
+                    # when a final line-to is explicit.
+                    outlineItem.append(lastItem)
                 x = float(lastItem.attrib["x"])
                 y = float(lastItem.attrib["y"])
-                if transform != None:
-                    x,y = transform.apply(x,y)
+                if transform is not None:
+                    x, y = transform.apply(x, y)
 
                 if (not allowDecimals):
                     x = int(round(x))
                     y = int(round(y))
 
                 if (allowDecimals):
-                    op = "%.3f %.3f mt" % (x , y)
+                    op = "%.3f %.3f mt" % (x, y)
                 else:
                     op = "%s %s mt" % (x, y)
                 bezStringList.append(op)
             elif type == "move":
                 # first op is a move-to.
                 if len(outlineItem) == 1:
-                    # this is a move, and is the only op in this outline. Don't pass it through.
-                    # this is most likely left over from a GLIF format 1 anchor.
+                    # this is a move, and is the only op in this outline.
+                    # Don't pass it through. This is most likely left over
+                    # from a GLIF format 1 anchor.
                     argStack = []
                     continue
             elif type == "offcurve":
-                # We should only see an off curve point as the first point when the first op is a curve and the last op is a line.
-                # In this case, insert a move-to to the line's coords, then omit the line.
-                # Breaking news! In rare cases, a first off-curve point can occur when the first AND last op is a curve.
+                # We should only see an off curve point as the first point
+                # when the first op is a curve and the last op is a line.
+                # In this case, insert a move-to to the line's coords, then
+                # omit the line.
+                # Breaking news! In rare cases, a first off-curve point can
+                # occur when the first AND last op is a curve.
                 curLastItem = outlineItem[-1]
                 # In this case, insert a move-to to the last op's end pos.
                 try:
                     lastType = curLastItem.attrib["type"]
                     x = float(curLastItem.attrib["x"])
                     y = float(curLastItem.attrib["y"])
-                    if transform != None:
-                        x,y = transform.apply(x,y)
+                    if transform is not None:
+                        x, y = transform.apply(x, y)
 
                     if (not allowDecimals):
                         x = int(round(x))
@@ -1353,7 +1493,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, le
                     if lastType == "line":
 
                         if (allowDecimals):
-                            op = "%.3f %.3f mt" % (x , y)
+                            op = "%.3f %.3f mt" % (x, y)
                         else:
                             op = "%s %s mt" % (x, y)
 
@@ -1362,23 +1502,27 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, le
                     elif lastType == "curve":
 
                         if (allowDecimals):
-                            op = "%.3f %.3f mt" % (x , y)
+                            op = "%.3f %.3f mt" % (x, y)
                         else:
                             op = "%s %s mt" % (x, y)
                         bezStringList.append(op)
 
                 except KeyError:
-                    raise UFOParseError("Unhandled case for first and last points in outline '%s'." % (xmlToString(outlineItem)))
+                    raise UFOParseError(
+                        "Unhandled case for first and last points in outline "
+                        "'%s'." % xmlToString(outlineItem))
             else:
-                raise UFOParseError("Unhandled case for first point in outline '%s'." % (xmlToString(outlineItem)))
+                raise UFOParseError(
+                    "Unhandled case for first point in outline '%s'." %
+                    xmlToString(outlineItem))
 
             for contourItem in outlineItem:
                 if contourItem.tag != "point":
                     continue
                 x = float(contourItem.attrib["x"])
                 y = float(contourItem.attrib["y"])
-                if transform != None:
-                    x,y = transform.apply(x,y)
+                if transform is not None:
+                    x, y = transform.apply(x, y)
 
                 if (not allowDecimals):
                     x = int(round(x))
@@ -1394,7 +1538,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, le
                     argStack.append(y)
                 elif type == "move":
                     if (allowDecimals):
-                        op = "%.3f %.3f mt" % (x , y)
+                        op = "%.3f %.3f mt" % (x, y)
                     else:
                         op = "%s %s mt" % (x, y)
                     bezStringList.append(op)
@@ -1408,17 +1552,27 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform = None, le
                     argStack = []
                 elif type == "curve":
                     if len(argStack) != 4:
-                        raise UFOParseError("Argument stack error seen for curve point '%s'." % (xmlToString(contourItem)))
+                        raise UFOParseError(
+                            "Argument stack error seen for curve point '%s'." %
+                            xmlToString(contourItem))
                     if (allowDecimals):
-                        op = "%.3f %.3f %.3f %.3f %.3f %.3f ct" % ( argStack[0], argStack[1], argStack[2], argStack[3], x, y)
+                        op = "%.3f %.3f %.3f %.3f %.3f %.3f ct" % \
+                             (argStack[0], argStack[1], argStack[2],
+                              argStack[3], x, y)
                     else:
-                        op = "%s %s %s %s %s %s ct" % ( argStack[0], argStack[1], argStack[2], argStack[3], x, y)
+                        op = "%s %s %s %s %s %s ct" % \
+                             (argStack[0], argStack[1], argStack[2],
+                              argStack[3], x, y)
                     argStack = []
                     bezStringList.append(op)
                 elif type == "qccurve":
-                    raise UFOParseError("Point type not supported '%s'." % (xmlToString(contourItem)))
+                    raise UFOParseError(
+                        "Point type not supported '%s'." %
+                        xmlToString(contourItem))
                 else:
-                    raise UFOParseError("Unknown Point type not supported '%s'." % (xmlToString(contourItem)))
+                    raise UFOParseError(
+                        "Unknown Point type not supported '%s'." %
+                        xmlToString(contourItem))
 
             # we get here only if there was at least a move.
             bezStringList.append("cp")
@@ -1431,7 +1585,7 @@ def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll=False):
     if skip:
         return None, width
 
-    if outlineXML == None:
+    if outlineXML is None:
         return None, width
 
     bezString = convertGlyphOutlineToBezString(outlineXML, ufoFontData)
@@ -1440,14 +1594,18 @@ def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll=False):
 
 
 class HintMask:
-    # class used to collect hints for the current hint mask when converting bez to T2.
+    # class used to collect hints for the current
+    # hint mask when converting bez to T2.
     def __init__(self, listPos):
-        self.listPos = listPos # The index into the pointList is kept so we can quickly find them later.
-        self.hList = [] # These contain the actual hint values.
+        # The index into the pointList is kept
+        # so we can quickly find them later.
+        self.listPos = listPos
+        self.hList = []  # These contain the actual hint values.
         self.vList = []
         self.hstem3List = []
         self.vstem3List = []
-        self.pointName = "hintSet" + str(listPos).zfill(4)  # The name attribute of the point which follows the new hint set.
+        # The name attribute of the point which follows the new hint set.
+        self.pointName = "hintSet" + str(listPos).zfill(4)
 
     def addHintSet(self, hintSetList):
         # Add the hint set to hintSetList
@@ -1469,7 +1627,6 @@ class HintMask:
         newHintSetArray = XMLElement("array")
         newHintSetDict.append(newHintSetArray)
 
-        newHintSet = []
         if (len(self.hList) > 0) or (len(self.vstem3List)):
             isH = True
             addHintList(self.hList, self.hstem3List, newHintSetArray, isH)
@@ -1480,9 +1637,8 @@ class HintMask:
 
 
 def makeStemHintList(hintsStem3, stemList, isH):
-    stem3Args = []
-    lastPos = 0
-    # In bez terms, the first coordinate in each pair is absolute, second is relative, and hence is the width.
+    # In bez terms, the first coordinate in each pair is
+    # absolute, second is relative, and hence is the width.
     if isH:
         op = kHStem3Name
     else:
@@ -1491,28 +1647,28 @@ def makeStemHintList(hintsStem3, stemList, isH):
     posList = [op]
     for stem3 in hintsStem3:
         for pos, width in stem3:
-            if (type(pos) == type(0.0)) and (int(pos) == pos):
+            if (isinstance(pos, float)) and (int(pos) == pos):
                 pos = int(pos)
-            if (type(width) == type(0.0)) and (int(width) == width):
+            if (isinstance(width, float)) and (int(width) == width):
                 width = int(width)
             posList.append("%s %s" % (pos, width))
     posString = " ".join(posList)
     newStem.text = posString
     stemList.append(newStem)
 
+
 def makeHintList(hints, newHintSetArray, isH):
     # Add the list of hint operators
-    hintList = []
-    lastPos = 0
-    # In bez terms, the first coordinate in each pair is absolute, second is relative, and hence is the width.
+    # In bez terms, the first coordinate in each pair is
+    # absolute, second is relative, and hence is the width.
     for hint in hints:
         if not hint:
             continue
         pos = hint[0]
-        if (type(pos) == type(0.0)) and (int(pos) == pos):
+        if (isinstance(pos, float)) and (int(pos) == pos):
             pos = int(pos)
         width = hint[1]
-        if (type(width) == type(0.0)) and (int(width) == width):
+        if (isinstance(width, float)) and (int(width) == width):
             width = int(width)
         if isH:
             op = kHStemName
@@ -1522,18 +1678,23 @@ def makeHintList(hints, newHintSetArray, isH):
         newStem.text = "%s %s %s" % (op, pos, width)
         newHintSetArray.append(newStem)
 
+
 def addFlexHint(flexList, flexArray):
     for pointTag in flexList:
         newFlexTag = XMLElement("string")
         newFlexTag.text = pointTag
         flexArray.append(newFlexTag)
 
+
 def fixStartPoint(outlineItem, opList):
-    # For the GLIF format, the idea of first/last point is funky, because the format avoids identifying a
-    # a start point. This means there is no implied close-path line-to. If the last implied or explicit path-close
-    # operator is a line-to, then replace the "mt" with linto, and remove the last explicit path-closing line-to, if any.
-    # If the last op is a curve, then leave the first two point args on the stack at the end of the point list,
-    # and move the last curveto to the first op, replacing the move-to.
+    # For the GLIF format, the idea of first/last point is funky, because
+    # the format avoids identifying a start point. This means there is no
+    # implied close-path line-to. If the last implied or explicit path-close
+    # operator is a line-to, then replace the "mt" with linto, and remove
+    # the last explicit path-closing line-to, if any. If the last op is a
+    # curve, then leave the first two point args on the stack at the end of
+    # the point list, and move the last curveto to the first op, replacing
+    # the move-to.
 
     firstOp, firstX, firstY = opList[0]
     lastOp, lastX, lastY = opList[-1]
@@ -1542,25 +1703,27 @@ def fixStartPoint(outlineItem, opList):
         del outlineItem[-1]
         firstPointElement.set("type", lastOp)
     else:
-        # we have an implied final line to. All we need to do is convert the inital moveto to a lineto.
+        # we have an implied final line to. All we need to do
+        # is convert the inital moveto to a lineto.
         firstPointElement.set("type", "line")
 
 
 bezToUFOPoint = {
-        "mt" : 'move',
-        "rmt" : 'move',
-         "hmt" : 'move',
-        "vmt" : 'move',
-        "rdt" : 'line',
-        "dt" : 'line',
-        "hdt" : "line",
-        "vdt" : "line",
-        "rct" : 'curve',
-        "ct" : 'curve',
-        "rcv" : 'curve', # Morisawa's alternate name for 'rct'.
-        "vhct": 'curve',
-        "hvct": 'curve',
-        }
+    "mt": 'move',
+    "rmt": 'move',
+    "hmt": 'move',
+    "vmt": 'move',
+    "rdt": 'line',
+    "dt": 'line',
+    "hdt": "line",
+    "vdt": "line",
+    "rct": 'curve',
+    "ct": 'curve',
+    "rcv": 'curve',  # Morisawa's alternate name for 'rct'.
+    "vhct": 'curve',
+    "hvct": 'curve',
+}
+
 
 def convertCoords(curX, curY):
     showX = int(curX)
@@ -1571,32 +1734,35 @@ def convertCoords(curX, curY):
         showY = curY
     return showX, showY
 
+
 def convertBezToOutline(ufoFontData, glyphName, bezString):
-    """ Since the UFO outline element as no attributes to preserve, I can
-    just make a new one.
+    """
+    Since the UFO outline element as no attributes to preserve,
+    I can just make a new one.
     """
     # convert bez data to a UFO glif XML representation
     #
     # Convert all bez ops to simplest UFO equivalent
-    # Add all hints to vertical and horizontal hint lists as encountered; insert a HintMask class whenever a
-    # new set of hints is encountered
-    # after all operators have been processed, convert HintMask items into hintmask ops and hintmask bytes
-    # add all hints as prefix
-    # review operator list to optimize T2 operators.
-    # if useStem3 == 1, then any counter hints must be processed as stem3 hints, else the opposite.
-    # counter hints are used only in LanguageGroup 1 glyphs, aka ideographs
+    # Add all hints to vertical and horizontal hint lists as encountered;
+    # insert a HintMask class whenever a new set of hints is encountered
+    # after all operators have been processed, convert HintMask items into
+    # hintmask ops and hintmask bytes add all hints as prefix review operator
+    # list to optimize T2 operators.
+    # if useStem3 == 1, then any counter hints must be processed as stem3
+    # hints, else the opposite.
+    # Counter hints are used only in LanguageGroup 1 glyphs, aka ideographs
 
-    bezString = re.sub(r"%.+?\n", "", bezString) # supress comments
+    bezString = re.sub(r"%.+?\n", "", bezString)  # supress comments
     bezList = re.findall(r"(\S+)", bezString)
     if not bezList:
         return "", None, None
     flexList = []
-    hintMask = HintMask(0) # Create an initial hint mask. We use this if there is no explicit initial hint sub.
+    # Create an initial hint mask. We use this if
+    # there is no explicit initial hint sub.
+    hintMask = HintMask(0)
     hintMaskList = [hintMask]
     vStem3Args = []
     hStem3Args = []
-    vStem3List = []
-    hStem3List = []
     argList = []
     opList = []
     newHintMaskName = None
@@ -1626,7 +1792,10 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
         elif token in ["snc"]:
             lastPathOp = token
             hintMask = HintMask(opIndex)
-            if opIndex == 0: # If the new colors precedes any marking operator, then we want throw away the initial hint mask we made, and use the new one as the first hint mask.
+            # If the new colors precedes any marking operator,
+            # then we want throw away the initial hint mask we
+            # made, and use the new one as the first hint mask.
+            if opIndex == 0:
                 hintMaskList = [hintMask]
             else:
                 hintMaskList.append(hintMask)
@@ -1636,24 +1805,24 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             pass
         elif token == "div":
             # I specifically do NOT set lastPathOp for this.
-            value = argList[-2]/float(argList[-1])
-            argList[-2:] =[value]
+            value = argList[-2] / float(argList[-1])
+            argList[-2:] = [value]
         elif token == "rb":
-            if newHintMaskName == None:
+            if newHintMaskName is None:
                 newHintMaskName = hintMask.pointName
             lastPathOp = token
             hintMask.hList.append(argList)
             argList = []
             seenHints = True
         elif token == "ry":
-            if newHintMaskName == None:
+            if newHintMaskName is None:
                 newHintMaskName = hintMask.pointName
             lastPathOp = token
             hintMask.vList.append(argList)
             argList = []
             seenHints = True
-        elif token == "rm": # vstem3's are vhints
-            if newHintMaskName == None:
+        elif token == "rm":  # vstem3's are vhints
+            if newHintMaskName is None:
                 newHintMaskName = hintMask.pointName
             seenHints = True
             vStem3Args.append(argList)
@@ -1663,7 +1832,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 hintMask.vstem3List.append(vStem3Args)
                 vStem3Args = []
 
-        elif token == "rv": # hstem3's are hhints
+        elif token == "rv":  # hstem3's are hhints
             seenHints = True
             hStem3Args.append(argList)
             argList = []
@@ -1673,51 +1842,62 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 hStem3Args = []
 
         elif token == "preflx1":
-            # the preflx1/preflx2 sequence provides the same i as the flex sequence; the difference is that the
-            # preflx1/preflx2 sequence provides the argument values needed for building a Type1 string
-            # while the flex sequence is simply the 6 rcurveto points. Both sequences are always provided.
+            # the preflx1/preflx2 sequence provides the same i as the flex
+            # sequence; the difference is that the preflx1/preflx2 sequence
+            # provides the argument values needed for building a Type1 string
+            # while the flex sequence is simply the 6 rcurveto points. Both
+            # sequences are always provided.
             lastPathOp = token
             argList = []
-            inPreFlex = True # need to skip all move-tos until we see the "flex" operator.
+            # need to skip all move-tos until we see the "flex" operator.
+            inPreFlex = True
         elif token == "preflx2a":
             lastPathOp = token
             argList = []
         elif token == "preflx2":
             lastPathOp = token
             argList = []
-        elif token == "flxa": # flex with absolute coords.
+        elif token == "flxa":  # flex with absolute coords.
             inPreFlex = False
             flexPointName = kBaseFlexName + str(opIndex).zfill(4)
             flexList.append(flexPointName)
             curveCnt = 2
             i = 0
-            # The first 12 args are the 6 args for each of the two curves that make up the flex feature.
+            # The first 12 args are the 6 args for each of
+            # the two curves that make up the flex feature.
             while i < curveCnt:
                 curX = argList[0]
                 curY = argList[1]
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                newPoint = XMLElement(
+                    "point", {"x": "%s" % showX, "y": "%s" % showY})
                 outlineItem.append(newPoint)
                 curX = argList[2]
                 curY = argList[3]
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                newPoint = XMLElement(
+                    "point", {"x": "%s" % showX, "y": "%s" % showY})
                 outlineItem.append(newPoint)
                 curX = argList[4]
                 curY = argList[5]
                 showX, showY = convertCoords(curX, curY)
                 opName = 'curve'
-                newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": opName } )
+                newPoint = XMLElement(
+                    "point", {"x": "%s" % showX, "y": "%s" % showY,
+                              "type": opName})
                 outlineItem.append(newPoint)
-                opList.append([opName,curX, curY])
+                opList.append([opName, curX, curY])
                 opIndex += 1
                 if i == 0:
                     argList = argList[6:12]
                 i += 1
-            outlineItem[-6].set(kPointName, flexPointName) # attach the point name to the first point of the first curve.
-            if (newHintMaskName != None):
-                # We have a hint mask that we want to attach to the first point of the flex op. However, there is already
-                # a flex name in that attribute. What we do is set the flex point name into the hint mask.
+            # attach the point name to the first point of the first curve.
+            outlineItem[-6].set(kPointName, flexPointName)
+            if (newHintMaskName is not None):
+                # We have a hint mask that we want to attach to the first
+                # point of the flex op. However, there is already a flex
+                # name in that attribute. What we do is set the flex point
+                # name into the hint mask.
                 hintMask.pointName = flexPointName
                 newHintMaskName = None
             lastPathOp = token
@@ -1728,33 +1908,41 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             flexList.append(flexPointName)
             curveCnt = 2
             i = 0
-            # The first 12 args are the 6 args for each of the two curves that make up the flex feature.
+            # The first 12 args are the 6 args for each of
+            # the two curves that make up the flex feature.
             while i < curveCnt:
                 curX += argList[0]
                 curY += argList[1]
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                newPoint = XMLElement(
+                    "point", {"x": "%s" % showX, "y": "%s" % showY})
                 outlineItem.append(newPoint)
                 curX += argList[2]
                 curY += argList[3]
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                newPoint = XMLElement(
+                    "point", {"x": "%s" % showX, "y": "%s" % showY})
                 outlineItem.append(newPoint)
                 curX += argList[4]
                 curY += argList[5]
                 showX, showY = convertCoords(curX, curY)
                 opName = 'curve'
-                newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": opName } )
+                newPoint = XMLElement(
+                    "point", {"x": "%s" % showX, "y": "%s" % showY,
+                              "type": opName})
                 outlineItem.append(newPoint)
-                opList.append([opName,curX, curY])
+                opList.append([opName, curX, curY])
                 opIndex += 1
                 if i == 0:
                     argList = argList[6:12]
                 i += 1
-            outlineItem[-6].set(kPointName, flexPointName) # attach the point name to the first point of the first curve.
-            if (newHintMaskName != None):
-                # We have a hint mask that we want to attach to the first point of the flex op. However, there is already
-                # a flex name in that attribute. What we do is set the flex point name into the hint mask.
+            # attach the point name to the first point of the first curve.
+            outlineItem[-6].set(kPointName, flexPointName)
+            if (newHintMaskName is not None):
+                # We have a hint mask that we want to attach to the first
+                # point of the flex op. However, there is already a flex
+                # name in that attribute. What we do is set the flex point
+                # name into the hint mask.
                 hintMask.pointName = flexPointName
                 newHintMaskName = None
             lastPathOp = token
@@ -1775,7 +1963,8 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 opIndex += 1
             else:
                 print("Unhandled operation", argList, token)
-                raise BezParseError("Unhandled operation: '%s' '%s'.", argList, token)
+                raise BezParseError(
+                    "Unhandled operation: '%s' '%s'.", argList, token)
             dx = dy = 0
             opName = bezToUFOPoint[token]
             if token[-2:] in ["mt", "dt"]:
@@ -1793,106 +1982,133 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                     curX += dx
                     curY += dy
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
+                newPoint = XMLElement(
+                    "point", {"x": "%s" % showX, "y": "%s" % showY,
+                              "type": "%s" % opName})
 
                 if opName == "move":
-                    if outlineItem != None:
+                    if outlineItem is not None:
                         if len(outlineItem) == 1:
-                            # Just in case we see two moves in a row, delete the previous outlineItem if it has only the move-to''
-                            print("Deleting moveto:", xmlToString(newOutline[-1]), "adding", xmlToString(outlineItem))
+                            # Just in case we see two moves in a row,
+                            # delete the previous outlineItem if it has
+                            # only the move-to
+                            print("Deleting moveto:",
+                                  xmlToString(newOutline[-1]),
+                                  "adding", xmlToString(outlineItem))
                             del newOutline[-1]
                         else:
-                            fixStartPoint(outlineItem, opList) # Fix the start/implied end path of the previous path.
+                            # Fix the start/implied end path
+                            # of the previous path.
+                            fixStartPoint(outlineItem, opList)
                     opList = []
                     outlineItem = XMLElement('contour')
                     newOutline.append(outlineItem)
 
-                if (newHintMaskName != None):
+                if (newHintMaskName is not None):
                     newPoint.set(kPointName, newHintMaskName)
                     newHintMaskName = None
                 outlineItem.append(newPoint)
-                opList.append([opName,curX, curY])
+                opList.append([opName, curX, curY])
             else:
                 if token in ["ct", "cv"]:
                     curX = argList[0]
                     curY = argList[1]
                     showX, showY = convertCoords(curX, curY)
-                    newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                    newPoint = XMLElement(
+                        "point", {"x": "%s" % showX, "y": "%s" % showY})
                     outlineItem.append(newPoint)
                     curX = argList[2]
                     curY = argList[3]
                     showX, showY = convertCoords(curX, curY)
-                    newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                    newPoint = XMLElement(
+                        "point", {"x": "%s" % showX, "y": "%s" % showY})
                     outlineItem.append(newPoint)
                     curX = argList[4]
                     curY = argList[5]
                     showX, showY = convertCoords(curX, curY)
-                    newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
+                    newPoint = XMLElement(
+                        "point", {"x": "%s" % showX, "y": "%s" % showY,
+                                  "type": "%s" % opName})
                     outlineItem.append(newPoint)
                 else:
                     if token in ["rct", "rcv"]:
                         curX += argList[0]
                         curY += argList[1]
                         showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                        newPoint = XMLElement(
+                            "point", {"x": "%s" % showX, "y": "%s" % showY})
                         outlineItem.append(newPoint)
                         curX += argList[2]
                         curY += argList[3]
                         showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                        newPoint = XMLElement(
+                            "point", {"x": "%s" % showX, "y": "%s" % showY})
                         outlineItem.append(newPoint)
                         curX += argList[4]
                         curY += argList[5]
                         showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
+                        newPoint = XMLElement(
+                            "point", {"x": "%s" % showX, "y": "%s" % showY,
+                                      "type": "%s" % opName})
                         outlineItem.append(newPoint)
                     elif token == "vhct":
                         curY += argList[0]
                         showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                        newPoint = XMLElement(
+                            "point", {"x": "%s" % showX, "y": "%s" % showY})
                         outlineItem.append(newPoint)
                         curX += argList[1]
                         curY += argList[2]
                         showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                        newPoint = XMLElement(
+                            "point", {"x": "%s" % showX, "y": "%s" % showY})
                         outlineItem.append(newPoint)
                         curX += argList[3]
                         showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
+                        newPoint = XMLElement(
+                            "point", {"x": "%s" % showX, "y": "%s" % showY,
+                                      "type": "%s" % opName})
                         outlineItem.append(newPoint)
                     elif token == "hvct":
                         curX += argList[0]
                         showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                        newPoint = XMLElement(
+                            "point", {"x": "%s" % showX, "y": "%s" % showY})
                         outlineItem.append(newPoint)
                         curX += argList[1]
                         curY += argList[2]
                         showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY) } )
+                        newPoint = XMLElement(
+                            "point", {"x": "%s" % showX, "y": "%s" % showY})
                         outlineItem.append(newPoint)
                         curY += argList[3]
                         showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement("point", {"x": "%s" % (showX), "y": "%s" % (showY), "type": "%s" % (opName) } )
+                        newPoint = XMLElement(
+                            "point", {"x": "%s" % showX, "y": "%s" % showY,
+                                      "type": "%s" % opName})
                         outlineItem.append(newPoint)
-                if (newHintMaskName != None):
-                    outlineItem[-3].set(kPointName, newHintMaskName) # attach the pointName to the first point of the curve.
+                if (newHintMaskName is not None):
+                    # attach the pointName to the first point of the curve.
+                    outlineItem[-3].set(kPointName, newHintMaskName)
                     newHintMaskName = None
-                opList.append([opName,curX, curY])
+                opList.append([opName, curX, curY])
             argList = []
-    if outlineItem != None:
+
+    if outlineItem is not None:
         if len(outlineItem) == 1:
-            # Just in case we see two moves in a row, delete the previous outlineItem if it has zero length.
+            # Just in case we see two moves in a row, delete
+            # the previous outlineItem if it has zero length.
             del newOutline[-1]
         else:
             fixStartPoint(outlineItem, opList)
 
     # add hints, if any
-    # Must be done at the end of op processing to make sure we have seen all the
-    # hints in the bez string.
+    # Must be done at the end of op processing to make sure we have seen
+    # all the hints in the bez string.
     # Note that the hintmasks are identified in the opList by the point name.
-    # We will follow the T1 spec: a glyph may have stem3 counter hints or regular hints, but not both.
+    # We will follow the T1 spec: a glyph may have stem3 counter hints or
+    # regular hints, but not both.
 
-    hintSetList = None
     if (seenHints) or (len(flexList) > 0):
         hintInfoDict = XMLElement("dict")
 
@@ -1910,7 +2126,8 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
 
         hintSetListArray = XMLElement("array")
         hintInfoDict.append(hintSetListArray)
-        # Convert the rest of the hint masks to a hintmask op and hintmask bytes.
+        # Convert the rest of the hint masks
+        # to a hintmask op and hintmask bytes.
         for hintMask in hintMaskList:
             hintMask.addHintSet(hintSetListArray)
 
@@ -1922,7 +2139,9 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             flexArray = XMLElement("array")
             hintInfoDict.append(flexArray)
             addFlexHint(flexList, flexArray)
+
     return newOutline, hintInfoDict
+
 
 def addHintList(hints, hintsStem3, newHintSetArray, isH):
     # A charstring may have regular v stem hints or vstem3 hints, but not both.
@@ -1930,8 +2149,8 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
     if len(hintsStem3) > 0:
         hintsStem3.sort()
         numHints = len(hintsStem3)
-        hintLimit = (kStackLimit-2)/2
-        if numHints >=hintLimit:
+        hintLimit = (kStackLimit - 2) / 2
+        if numHints >= hintLimit:
             hintsStem3 = hintsStem3[:hintLimit]
             numHints = hintLimit
         makeStemHintList(hintsStem3, newHintSetArray, isH)
@@ -1939,8 +2158,8 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
     else:
         hints.sort()
         numHints = len(hints)
-        hintLimit = (kStackLimit-2)/2
-        if numHints >=hintLimit:
+        hintLimit = (kStackLimit - 2) / 2
+        if numHints >= hintLimit:
             hints = hints[:hintLimit]
             numHints = hintLimit
         makeHintList(hints, newHintSetArray, isH)
@@ -1948,20 +2167,21 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
 
 def addWhiteSpace(parent, level):
     child = None
-    childIndent = "\n" + ("  "*(level +1))
-    prentIndent = "\n" + ("  "*(level))
-    #print("parent Tag", parent.tag, repr(parent.text), repr(parent.tail))
+    childIndent = "\n" + ("  " * (level + 1))
+    prentIndent = "\n" + ("  " * (level))
+    # print("parent Tag", parent.tag, repr(parent.text), repr(parent.tail))
     for child in parent:
         child.tail = childIndent
-        addWhiteSpace(child, level +1)
-    if child != None:
-        if parent.text == None:
+        addWhiteSpace(child, level + 1)
+    if child is not None:
+        if parent.text is None:
             parent.text = childIndent
         child.tail = prentIndent
-        #print("lastChild Tag", child.tag, repr(child.text), repr(child.tail), "parent Tag", parent.tag)
+        # print("lastChild Tag", child.tag, repr(child.text), repr(child.tail),
+        #       "parent Tag", parent.tag)
 
 
-def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
+def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     # I need to replace the contours with data from the bez string.
     glyphPath = ufoFontData.getGlyphSrcPath(glyphName)
 
@@ -1982,12 +2202,12 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
             libIndex = childIndex
         childIndex += 1
 
-
-    newOutlineElement, hintInfoDict = convertBezToOutline(ufoFontData, glyphName, bezString )
-    #print(xmlToString(stemHints))
+    newOutlineElement, hintInfoDict = convertBezToOutline(
+        ufoFontData, glyphName, bezString)
+    # print(xmlToString(stemHints))
 
     if not hintsOnly:
-        if outlineItem == None:
+        if outlineItem is None:
             # need to add it. Add it before the lib item, if any.
             if libIndex > 0:
                 glifXML.insert(libIndex, newOutlineElement)
@@ -1998,21 +2218,24 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
             glifXML.remove(outlineItem)
             glifXML.insert(outlineIndex, newOutlineElement)
 
-    # convertBezToGLIF is called only if the GLIF has been edited by a tool. We need to update the edit status
-    # in the has map entry.
-    # I assume that convertGLIFToBez has ben run before, which will add an entry for this glyph.
+    # convertBezToGLIF is called only if the GLIF has been edited by a tool.
+    # We need to update the edit status in the has map entry. I assume that
+    # convertGLIFToBez has ben run before, which will add an entry for this
+    # glyph.
     ufoFontData.updateHashEntry(glyphName, changed=True)
     # Add the stem hints.
-    if (hintInfoDict != None):
+    if (hintInfoDict is not None):
         widthXML = glifXML.find("advance")
-        if widthXML != None:
+        if widthXML is not None:
             width = int(eval(widthXML.get("width")))
         else:
             width = 1000
         useDefaultGlyphDir = False
-        newGlyphHash, dataList = ufoFontData.buildGlyphHashValue(width, newOutlineElement, glyphName, useDefaultGlyphDir)
-        # We add this hash to the T1 data, as it is the hash which matches the output outline data.
-        # This is not necessarily the same as the the hash of the source data - autohint can be used to change outlines.
+        newGlyphHash, dataList = ufoFontData.buildGlyphHashValue(
+            width, newOutlineElement, glyphName, useDefaultGlyphDir)
+        # We add this hash to the T1 data, as it is the hash which matches
+        # the output outline data. This is not necessarily the same as the
+        # hash of the source data - autohint can be used to change outlines.
         if libIndex > 0:
             libItem = glifXML[libIndex]
         else:
@@ -2020,7 +2243,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
             glifXML.append(libItem)
 
         dictItem = libItem.find("dict")
-        if dictItem == None:
+        if dictItem is None:
             dictItem = XMLElement("dict")
             libItem.append(dictItem)
 
@@ -2029,9 +2252,11 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly = False):
         childList = list(dictItem)
         for childItem in childList:
             i += 1
-            if (childItem.tag == "key") and ((childItem.text == kHintDomainName1) or (childItem.text == kHintDomainName2)):
-                dictItem.remove(childItem) # remove key
-                dictItem.remove(childList[i]) # remove data item.
+            if (childItem.tag == "key") and (
+                (childItem.text == kHintDomainName1) or (
+                    childItem.text == kHintDomainName2)):
+                dictItem.remove(childItem)  # remove key
+                dictItem.remove(childList[i])  # remove data item.
 
         glyphDictItem = dictItem
         key = XMLElement("key")
