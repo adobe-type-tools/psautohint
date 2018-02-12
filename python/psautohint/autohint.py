@@ -1,10 +1,5 @@
 #!/bin/env python
-
-from __future__ import print_function, absolute_import
-
-__copyright__ = """\
-Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Reserved.
-"""
+# Copyright 2016 Adobe. All rights reserved.
 
 # Methods:
 
@@ -34,22 +29,26 @@ Copyright 2016 Adobe Systems Incorporated (http://www.adobe.com/). All Rights Re
 #     Add glyph hint entry to plist file
 #  Save font plist file.
 
+from __future__ import print_function, absolute_import
+
 import sys
 import os
 import re
 import time
 import plistlib
-import warnings
 import traceback
 import shutil
 
 from psautohint import psautohint
+
 
 kACIDKey = "AutoHintKey"
 
 gLogFile = None
 kFontPlistSuffix = ".plist"
 kTempCFFSuffix = ".temp.ac.cff"
+kProgressChar = "."
+
 
 class ACOptions:
     def __init__(self):
@@ -78,16 +77,17 @@ class ACOptions:
         self.allowDecimalCoords = False
         self.writeToDefaultLayer = False
 
+
 class ACFontInfoParseError(Exception):
     pass
+
 
 class ACFontError(Exception):
     pass
 
+
 class ACHintError(Exception):
     pass
-
-kProgressChar = "."
 
 
 def logMsg(*args):
@@ -104,7 +104,7 @@ def logMsg(*args):
         if msg[-1] == ",":
             msg = msg[:-1]
             if msg == kProgressChar:
-                sys.stdout.write(msg) # avoid space, which is added by 'print'
+                sys.stdout.write(msg)  # avoid space, which is added by 'print'
             else:
                 print(msg,)
             sys.stdout.flush()
@@ -112,7 +112,6 @@ def logMsg(*args):
                 gLogFile.write(msg)
                 gLogFile.flush()
         else:
-
             print(msg)
             sys.stdout.flush()
             if gLogFile:
@@ -124,7 +123,7 @@ def getGlyphID(glyphTag, fontGlyphList):
     glyphID = None
     try:
         glyphID = int(glyphTag)
-        glyphName = fontGlyphList[glyphID]
+        fontGlyphList[glyphID]
     except IndexError:
         pass
     except ValueError:
@@ -141,20 +140,25 @@ def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
     glyphNameList = []
     rangeList = glyphTag.split("-")
     prevGID = getGlyphID(rangeList[0], fontGlyphList)
-    if prevGID == None:
+    if prevGID is None:
         if len(rangeList) > 1:
-            logMsg("\tWarning: glyph ID <%s> in range %s from glyph selection list option is not in font. <%s>." % (rangeList[0], glyphTag, fontFileName))
+            logMsg("\tWarning: glyph ID <%s> in range %s from glyph selection "
+                   "list option is not in font. <%s>." %
+                   (rangeList[0], glyphTag, fontFileName))
         else:
-            logMsg("\tWarning: glyph ID <%s> from glyph selection list option is not in font. <%s>." % (rangeList[0], fontFileName))
+            logMsg("\tWarning: glyph ID <%s> from glyph selection list option "
+                   "is not in font. <%s>." % (rangeList[0], fontFileName))
         return None
     glyphNameList.append(fontGlyphList[prevGID])
 
     for glyphTag2 in rangeList[1:]:
         gid = getGlyphID(glyphTag2, fontGlyphList)
-        if gid == None:
-            logMsg("\tWarning: glyph ID <%s> in range %s from glyph selection list option is not in font. <%s>." % (glyphTag2, glyphTag, fontFileName))
+        if gid is None:
+            logMsg("\tWarning: glyph ID <%s> in range %s from glyph selection "
+                   "list option is not in font. <%s>." %
+                   (glyphTag2, glyphTag, fontFileName))
             return None
-        for i in range(prevGID+1, gid+1):
+        for i in range(prevGID + 1, gid + 1):
             glyphNameList.append(fontGlyphList[i])
         prevGID = gid
 
@@ -172,7 +176,7 @@ def filterGlyphList(options, fontGlyphList, fontFileName):
         glyphList = []
         for glyphTag in options.glyphList:
             glyphNames = getGlyphNames(glyphTag, fontGlyphList, fontFileName)
-            if glyphNames != None:
+            if glyphNames is not None:
                 glyphList.extend(glyphNames)
         if options.excludeGlyphList:
             newList = filter(lambda name: name not in glyphList, fontGlyphList)
@@ -197,7 +201,8 @@ def openFontPlistFile(psName, dirPath):
         # Crude approach to file length limitations.
         # Since Adobe keeps face info in separate directories, I don't worry
         # about name collisions.
-        pPath2 = os.path.join(dirPath, psName[:-len(kFontPlistSuffix)] + kFontPlistSuffix)
+        pPath2 = os.path.join(
+            dirPath, psName[:-len(kFontPlistSuffix)] + kFontPlistSuffix)
         if os.path.exists(pPath2):
             filePath = pPath2
     if not filePath:
@@ -207,11 +212,13 @@ def openFontPlistFile(psName, dirPath):
             fontPlist = plistlib.Plist.fromFile(filePath)
             isNewPlistFile = False
         except (IOError, OSError):
-            raise ACFontError("\tError: font plist file exists, but could not be read <%s>." % filePath)
-        except:
-            raise ACFontError("\tError: font plist file exists, but could not be parsed <%s>." % filePath)
+            raise ACFontError("\tError: font plist file exists, but could not "
+                              "be read <%s>." % filePath)
+        except Exception:
+            raise ACFontError("\tError: font plist file exists, but could not "
+                              "be parsed <%s>." % filePath)
 
-    if fontPlist == None:
+    if fontPlist is None:
         fontPlist = plistlib.Plist()
     if kACIDKey not in fontPlist:
         fontPlist[kACIDKey] = {}
@@ -219,15 +226,15 @@ def openFontPlistFile(psName, dirPath):
 
 
 fontInfoKeywordList = [
-    'FontName', #string
+    'FontName',  # string
     'OrigEmSqUnits',
     'LanguageGroup',
-    'DominantV', #array
-    'DominantH', #array
-    'FlexOK', #string
+    'DominantV',  # array
+    'DominantH',  # array
+    'FlexOK',  # string
     'BlueFuzz',
-    'VCounterChars', #counter
-    'HCounterChars', #counter
+    'VCounterChars',  # counter
+    'HCounterChars',  # counter
     'BaselineYCoord',
     'BaselineOvershoot',
     'CapHeight',
@@ -252,7 +259,7 @@ fontInfoKeywordList = [
     'Baseline5',
     'Baseline6Overshoot',
     'Baseline6',
-    ]
+]
 
 integerPattern = """ -?\d+"""
 arrayPattern = """ \[[ ,0-9]+\]"""
@@ -273,10 +280,15 @@ def printFontInfo(fontInfoString):
 
         try:
             print('\t%s' % re.search(matchingExp, fontInfoString).group())
-        except:
+        except Exception:
             pass
 
-flexPatthern = re.compile(r"preflx1[^f]+preflx2[\r\n](-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+)(-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+).+?flx([\r\n])", re.DOTALL)
+
+flexPatthern = re.compile(
+    r"preflx1[^f]+preflx2[\r\n]"
+    r"(-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+)"
+    r"(-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+).+?flx([\r\n])",
+    re.DOTALL)
 commentPattern = re.compile(r"[^\r\n]*%[^\r\n]*[\r\n]")
 hintGroupPattern = re.compile(r"beginsubr.+?newcolors[\r\n]", re.DOTALL)
 whiteSpacePattern = re.compile(r"\s+", re.DOTALL)
@@ -315,13 +327,15 @@ def openUFOFile(path, outFilePath, useHashMap, options):
 
     # If user has specified a path other than the source font path,
     # then copy the entire UFO font, and operate on the copy.
-    if (outFilePath != None) and (os.path.abspath(path) != os.path.abspath(outFilePath)):
+    if (outFilePath is not None) and (
+       os.path.abspath(path) != os.path.abspath(outFilePath)):
         if not options.quiet:
-            msg = "Copying from source UFO font to output UFO font before processing..."
+            msg = "Copying from source UFO font to output UFO font " + \
+                  "before processing..."
             logMsg(msg)
         if os.path.exists(outFilePath):
             shutil.rmtree(outFilePath)
-        shutil.copytree(path , outFilePath)
+        shutil.copytree(path, outFilePath)
         path = outFilePath
     font = ufoFont.UFOFontData(path, useHashMap, ufoFont.kAutohintName)
     font.useProcessedLayer = True
@@ -333,35 +347,35 @@ def openUFOFile(path, outFilePath, useHashMap, options):
 
 def openOpenTypeFile(path, outFilePath, options):
     from psautohint.otfFont import CFFFontData
-    from fontTools.ttLib import TTFont, getTableModule
+    from fontTools.ttLib import TTFont, TTLibError, getTableModule
 
     # If input font is CFF, build a dummy ttFont in memory.
     # Return ttFont, and flag if is a real OTF font.
     # Return flag is 0 if OTF, and 1 if CFF.
-    fontType = 0 # OTF
+    fontType = 0  # OTF
     try:
         with open(path, "rb") as ff:
             data = ff.read(10)
     except (IOError, OSError):
         logMsg("Failed to open and read font file %s." % path)
 
-    if data[:4] == b"OTTO": # it is an OTF font, can process file directly
+    if data[:4] == b"OTTO":  # it is an OTF font, can process file directly
         try:
             ttFont = TTFont(path)
         except (IOError, OSError):
-            raise ACFontError("Error opening or reading from font file <%s>." % path)
+            raise ACFontError("Error opening or reading from font file <%s>." %
+                              path)
         except TTLibError:
             raise ACFontError("Error parsing font file <%s>." % path)
 
         try:
             cffTable = ttFont["CFF "]
         except KeyError:
-            raise ACFontError("Error: font is not a CFF font <%s>." % fontFileName)
-
+            raise ACFontError("Error: font is not a CFF font <%s>." %
+                              path)
     else:
-
         # It is not an OTF file.
-        if (data[0] == b'\1') and (data[1] == b'\0'): # CFF file
+        if (data[0] == b'\1') and (data[1] == b'\0'):  # CFF file
             fontType = 1
         else:
             logMsg("Font file must be a CFF or OTF fontfile: %s." % path)
@@ -376,8 +390,9 @@ def openOpenTypeFile(path, outFilePath, options):
             cffTable = cffModule.table_C_F_F_('CFF ')
             ttFont['CFF '] = cffTable
             cffTable.decompile(data, ttFont)
-        except:
-            logMsg("\t%s" %(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1]))
+        except Exception:
+            logMsg("\t%s" % (traceback.format_exception_only(sys.exc_info()[0],
+                             sys.exc_info()[1])[-1]))
             logMsg("Attempted to read font %s as CFF." % path)
             raise ACFontError("Error parsing font file <%s>." % path)
 
@@ -413,61 +428,72 @@ def hintFile(options):
 
     try:
         # For UFO fonts only.
-        # We always use the hash map, unless the user requested only report issues.
+        # We always use the hash map, unless the user
+        # requested only report issues.
         useHashMap = not options.logOnly
         fontData = openFile(path, options.outputPath, useHashMap, options)
         fontData.allowDecimalCoords = options.allowDecimalCoords
-        if options.writeToDefaultLayer and hasattr(fontData, "setWriteToDefault"): # UFO fonts only
+        if options.writeToDefaultLayer and (
+           hasattr(fontData, "setWriteToDefault")):  # UFO fonts only
             fontData.setWriteToDefault()
     except (IOError, OSError):
-        logMsg(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1])
-        raise ACFontError("Error opening or reading from font file <%s>." % fontFileName)
-    except:
-        logMsg(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])[-1])
+        logMsg(traceback.format_exception_only(sys.exc_info()[0],
+                                               sys.exc_info()[1])[-1])
+        raise ACFontError("Error opening or reading from font file <%s>." %
+                          fontFileName)
+    except Exception:
+        logMsg(traceback.format_exception_only(sys.exc_info()[0],
+                                               sys.exc_info()[1])[-1])
         raise ACFontError("Error parsing font file <%s>." % fontFileName)
 
     # filter specified list, if any, with font list.
     fontGlyphList = fontData.getGlyphList()
     glyphList = filterGlyphList(options, fontGlyphList, fontFileName)
     if not glyphList:
-        raise ACFontError("Error: selected glyph list is empty for font <%s>." % fontFileName)
+        raise ACFontError("Error: selected glyph list is empty for font "
+                          "<%s>." % fontFileName)
 
     fontInfo = ""
 
     psName = fontData.getPSName()
 
     if (not options.logOnly) and options.usePlistFile:
-        fontPlist, fontPlistFilePath, isNewPlistFile = openFontPlistFile(psName, os.path.dirname(path))
+        fontPlist, fontPlistFilePath, isNewPlistFile = openFontPlistFile(
+            psName, os.path.dirname(path))
         if isNewPlistFile and not (options.hintAll or options.rehint):
-            logMsg("No hint info plist file was found, so all glyphs are unknown to autohint. To hint all glyphs, run autohint again with option -a to hint all glyphs unconditionally.")
+            logMsg("No hint info plist file was found, so all glyphs are "
+                   "unknown to autohint. To hint all glyphs, run autohint "
+                   "again with option -a to hint all glyphs unconditionally.")
             logMsg("Done with font %s. End time: %s." % (path, time.asctime()))
             fontData.close()
             return
 
     # Check counter glyphs, if any.
     if options.hCounterGlyphs or options.vCounterGlyphs:
-        missingList = filter(lambda name: name not in fontGlyphList, options.hCounterGlyphs + options.vCounterGlyphs)
+        missingList = filter(lambda name: name not in fontGlyphList,
+                             options.hCounterGlyphs + options.vCounterGlyphs)
         if missingList:
-            logMsg("\tError: glyph named in counter hint list file '%s' are not in font: %s" % (options.counterHintFile, missingList))
+            logMsg("\tError: glyph named in counter hint list file '%s' are "
+                   "not in font: %s" % (options.counterHintFile, missingList))
 
     # Build alignment zone string
     if (options.printDefaultFDDict):
         logMsg("Showing default FDDict Values:")
         fdDict = fontData.getFontInfo(psName, path,
-                                        options.allow_no_blues,
-                                        options.noFlex,
-                                        options.vCounterGlyphs,
-                                        options.hCounterGlyphs)
+                                      options.allow_no_blues,
+                                      options.noFlex,
+                                      options.vCounterGlyphs,
+                                      options.hCounterGlyphs)
         printFontInfo(str(fdDict))
         fontData.close()
         return
 
     fdGlyphDict, fontDictList = fontData.getfdInfo(psName, path,
-                                                    options.allow_no_blues,
-                                                    options.noFlex,
-                                                    options.vCounterGlyphs,
-                                                    options.hCounterGlyphs,
-                                                    glyphList)
+                                                   options.allow_no_blues,
+                                                   options.noFlex,
+                                                   options.vCounterGlyphs,
+                                                   options.hCounterGlyphs,
+                                                   glyphList)
 
     if options.printFDDictList:
         # Print the user defined FontDicts, and exit.
@@ -495,13 +521,14 @@ def hintFile(options):
         fontData.close()
         return
 
-    if fdGlyphDict == None:
+    if fdGlyphDict is None:
         fdDict = fontDictList[0]
         fontInfo = fdDict.getFontInfo()
     else:
         if not options.verbose and not options.quiet:
-            logMsg("Note: Using alternate FDDict global values from fontinfo file for some glyphs. Remove option '-q' to see which dict is used for which glyphs.")
-
+            logMsg("Note: Using alternate FDDict global values from fontinfo "
+                   "file for some glyphs. Remove option '-q' to see which "
+                   "dict is used for which glyphs.")
 
     # Get charstring for identifier in glyph-list
     isCID = fontData.isCID()
@@ -513,7 +540,6 @@ def hintFile(options):
 
     if not options.verbose:
         dotCount = 0
-        curTime = time.time()
 
     dotCount = 0
     seenGlyphCount = 0
@@ -523,10 +549,10 @@ def hintFile(options):
         seenGlyphCount += 1
 
         # Convert to bez format
-        bezString, width, hasHints = fontData.convertToBez(name,
-                                            options.verbose, options.hintAll)
+        bezString, width, hasHints = fontData.convertToBez(
+            name, options.verbose, options.hintAll)
         processedGlyphCount += 1
-        if bezString == None:
+        if bezString is None:
             continue
 
         if "mt" not in bezString:
@@ -535,19 +561,19 @@ def hintFile(options):
         # get new fontinfo string if FDarray index has changed,
         # as each FontDict has different alignment zones.
         gid = fontData.getGlyphID(name)
-        if isCID: #
+        if isCID:
             fdIndex = fontData.getfdIndex(gid)
             if not fdIndex == lastFDIndex:
                 lastFDIndex = fdIndex
                 fdDict = fontData.getFontInfo(psName, path,
-                                                options.allow_no_blues,
-                                                options.noFlex,
-                                                options.vCounterGlyphs,
-                                                options.hCounterGlyphs,
-                                                fdIndex)
+                                              options.allow_no_blues,
+                                              options.noFlex,
+                                              options.vCounterGlyphs,
+                                              options.hCounterGlyphs,
+                                              fdIndex)
                 fontInfo = fdDict.getFontInfo()
         else:
-            if (fdGlyphDict != None):
+            if (fdGlyphDict is not None):
                 try:
                     fdIndex = fdGlyphDict[name][0]
                 except KeyError:
@@ -558,9 +584,7 @@ def hintFile(options):
                     fdDict = fontDictList[fdIndex]
                     fontInfo = fdDict.getFontInfo()
 
-
-        #   Build autohint point list identifier
-
+        # Build autohint point list identifier
         oldBezString = ""
         oldHintBezString = ""
         if (not options.logOnly) and options.usePlistFile:
@@ -570,7 +594,8 @@ def hintFile(options):
             # we hint it.
             ACidentifier = makeACIdentifier(bezString)
             try:
-                (prevACIdentifier, ACtime, oldBezString, oldHintBezString) = fontPlist[kACIDKey][name]
+                (prevACIdentifier, ACtime, oldBezString,
+                    oldHintBezString) = fontPlist[kACIDKey][name]
             except ValueError:
                 (prevACIdentifier, ACtime) = fontPlist[kACIDKey][name]
                 oldBezString = oldHintBezString = ""
@@ -581,12 +606,15 @@ def hintFile(options):
                     # Glyphs is hinted, but not referenced in the plist file.
                     # Skip it unless options.rehint is seen
                     if not isNewPlistFile:
-                        # Comment only if there is a plist file; otherwise, we'd
-                        # be complaining for almost every glyph.
-                        logMsg("%s Skipping glyph - it has hints, but it is not in the hint info plist file." % nameAliases.get(name, name))
+                        # Comment only if there is a plist file; otherwise,
+                        # we'd be complaining for almost every glyph.
+                        logMsg("%s Skipping glyph - it has hints, but it is "
+                               "not in the hint info plist file." %
+                               nameAliases.get(name, name))
                         dotCount = 0
                     continue
-            # there's an entry in the plist file and it matches what's in the font
+            # there's an entry in the plist file
+            # and it matches what's in the font
             if prevACIdentifier and (prevACIdentifier == ACidentifier):
                 if hasHints and not (options.hintAll or options.rehint):
                     continue
@@ -595,37 +623,42 @@ def hintFile(options):
 
         if options.verbose:
             if fdGlyphDict:
-                logMsg("Hinting %s with fdDict %s." % (nameAliases.get(name, name), fdDict.DictName))
+                logMsg("Hinting %s with fdDict %s." %
+                       (nameAliases.get(name, name), fdDict.DictName))
             else:
                 logMsg("Hinting %s." % nameAliases.get(name, name))
         elif not options.quiet:
             logMsg(".,")
             dotCount += 1
+            # I do this to never have more than 40 dots on a line.
+            # This in turn give reasonable performance when calling autohint
+            # in a subprocess and getting output with std.readline()
             if dotCount > 40:
                 dotCount = 0
-                logMsg("") # I do this to never have more than 40 dots on a line.
-                # This in turn give reasonable performance when calling autohint
-                # in a subprocess and getting output with std.readline()
+                logMsg("")
 
         # Call auto-hint library on bez string.
-        #print("oldBezString", oldBezString)
-        #print("")
-        #print("bezString", bezString)
+        # print("oldBezString", oldBezString)
+        # print("")
+        # print("bezString", bezString)
 
         if oldBezString != "" and oldBezString == bezString:
             newBezString = oldHintBezString
         else:
-            newBezString = psautohint.autohint(fontInfo, [bezString],
-                    options.verbose, options.allowChanges,
-                    not options.noHintSub, options.allowDecimalCoords)
+            newBezString = psautohint.autohint(
+                fontInfo, [bezString], options.verbose, options.allowChanges,
+                not options.noHintSub, options.allowDecimalCoords)
             newBezString = newBezString[0]
 
         if not newBezString:
             if not options.verbose and not options.quiet:
                 logMsg("")
-            raise ACHintError("%s Error - failure in processing outline data." % nameAliases.get(name, name))
+            raise ACHintError(
+                "%s Error - failure in processing outline data." %
+                nameAliases.get(name, name))
 
-        if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
+        if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or
+           ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
             print("No hints added!")
 
         if options.logOnly:
@@ -635,20 +668,21 @@ def hintFile(options):
         anyGlyphChanged = True
         fontData.updateFromBez(newBezString, name, width, options.verbose)
 
-
         if options.usePlistFile:
             bezString = "%% %s\n%s" % (name, newBezString)
             ACidentifier = makeACIdentifier(bezString)
             # add glyph hint entry to plist file
             if options.allowChanges:
                 if prevACIdentifier and (prevACIdentifier != ACidentifier):
-                    logMsg("\t%s Glyph outline changed" % nameAliases.get(name, name))
+                    logMsg("\t%s Glyph outline changed" %
+                           nameAliases.get(name, name))
                     dotCount = 0
 
-            fontPlist[kACIDKey][name] = (ACidentifier, time.asctime(), bezString, newBezString)
+            fontPlist[kACIDKey][name] = (ACidentifier, time.asctime(),
+                                         bezString, newBezString)
 
     if not options.verbose and not options.quiet:
-        print("") # print final new line after progress dots.
+        print("")  # print final new line after progress dots.
 
     if not options.logOnly:
         if anyGlyphChanged:
@@ -659,9 +693,13 @@ def hintFile(options):
             fontData.close()
             if options.usePlistFile:
                 if options.rehint:
-                    logMsg("No new hints. All glyphs had hints that matched the hint record file %s." % (fontPlistFilePath))
+                    logMsg("No new hints. All glyphs had hints that matched "
+                           "the hint record file %s." % (fontPlistFilePath))
                 if options.hintAll:
-                    logMsg("No new hints. All glyphs had hints that matched the hint history file %s, or were not in the history file and already had hints." % (fontPlistFilePath))
+                    logMsg("No new hints. All glyphs had hints that matched "
+                           "the hint history file %s, or were not in the "
+                           "history file and already had hints." %
+                           fontPlistFilePath)
                 else:
                     logMsg("No new hints. All glyphs were already hinted.")
             else:
@@ -670,6 +708,7 @@ def hintFile(options):
         # save font plist file.
         fontPlist.write(fontPlistFilePath)
     if processedGlyphCount != seenGlyphCount:
-        logMsg("Skipped %s of %s glyphs." % (seenGlyphCount - processedGlyphCount, seenGlyphCount))
+        logMsg("Skipped %s of %s glyphs." %
+               (seenGlyphCount - processedGlyphCount, seenGlyphCount))
     if not options.quiet:
         logMsg("Done with font %s. End time: %s." % (path, time.asctime()))
