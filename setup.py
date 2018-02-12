@@ -1,4 +1,3 @@
-import platform
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
@@ -63,7 +62,7 @@ module1 = Extension("psautohint._psautohint",
                         "libpsautohint/src/logging.h",
                         "libpsautohint/src/opcodes.h",
                     ],
-        )
+                    )
 
 setup(name="psautohint",
       version="1.1.1.dev0",
@@ -100,4 +99,4 @@ setup(name="psautohint",
           'Topic :: Multimedia :: Graphics',
           'Topic :: Multimedia :: Graphics :: Graphics Conversion',
       ],
-    )
+      )
