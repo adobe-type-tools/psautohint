@@ -261,6 +261,8 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
     glyphSetState = 4
     fdIndexDict = {}
     lenSrcFontDictList = len(fontDictList)
+    dictValueList = []
+    dictKeyWord = ''
 
     state = baseState
 
@@ -469,6 +471,8 @@ def mergeFDDicts(prevDictList, privateDict):
         goodZoneList.append(prevZone[1])
         goodZoneList.append(prevZone[0])
         zoneBuffer = 2 * prefDDict.BlueFuzz + 1
+        zoneName = ''
+        fdDictName = ''
         for zone in zoneList[1:]:
             if (ki == 0) and (len(zoneList) >= 14):
                 print("Warning. For final FontDict, skipping BlueValues "
