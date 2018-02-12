@@ -1,5 +1,6 @@
-[![Build Status](https://travis-ci.org/khaledhosny/psautohint.svg?branch=master)](https://travis-ci.org/khaledhosny/psautohint)
-[![Build status](https://ci.appveyor.com/api/projects/status/0xy2iyc6wsl5ag4e?svg=true)](https://ci.appveyor.com/project/khaledhosny/psautohint)
+[![Build Status](https://travis-ci.org/adobe-type-tools/psautohint.svg?branch=master)](https://travis-ci.org/adobe-type-tools/psautohint)
+[![AppVeyor status](https://ci.appveyor.com/api/projects/status/frpwwnql34k70drl?svg=true)](https://ci.appveyor.com/project/adobe-type-tools/psautohint)
+
 
 # PSAutoHint
 
