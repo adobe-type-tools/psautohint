@@ -1769,7 +1769,6 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
     inPreFlex = False
     hintInfoDict = None
     opIndex = 0
-    lastPathOp = None
     curX = 0
     curY = 0
     newOutline = XMLElement("outline")
@@ -1784,13 +1783,10 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
         except ValueError:
             pass
         if token == "newcolors":
-            lastPathOp = token
             pass
         elif token in ["beginsubr", "endsubr"]:
-            lastPathOp = token
             pass
         elif token in ["snc"]:
-            lastPathOp = token
             hintMask = HintMask(opIndex)
             # If the new colors precedes any marking operator,
             # then we want throw away the initial hint mask we
@@ -1801,23 +1797,19 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 hintMaskList.append(hintMask)
             newHintMaskName = hintMask.pointName
         elif token in ["enc"]:
-            lastPathOp = token
             pass
         elif token == "div":
-            # I specifically do NOT set lastPathOp for this.
             value = argList[-2] / float(argList[-1])
             argList[-2:] = [value]
         elif token == "rb":
             if newHintMaskName is None:
                 newHintMaskName = hintMask.pointName
-            lastPathOp = token
             hintMask.hList.append(argList)
             argList = []
             seenHints = True
         elif token == "ry":
             if newHintMaskName is None:
                 newHintMaskName = hintMask.pointName
-            lastPathOp = token
             hintMask.vList.append(argList)
             argList = []
             seenHints = True
@@ -1827,7 +1819,6 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             seenHints = True
             vStem3Args.append(argList)
             argList = []
-            lastPathOp = token
             if len(vStem3Args) == 3:
                 hintMask.vstem3List.append(vStem3Args)
                 vStem3Args = []
@@ -1836,7 +1827,6 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             seenHints = True
             hStem3Args.append(argList)
             argList = []
-            lastPathOp = token
             if len(hStem3Args) == 3:
                 hintMask.hstem3List.append(hStem3Args)
                 hStem3Args = []
@@ -1847,15 +1837,12 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             # provides the argument values needed for building a Type1 string
             # while the flex sequence is simply the 6 rcurveto points. Both
             # sequences are always provided.
-            lastPathOp = token
             argList = []
             # need to skip all move-tos until we see the "flex" operator.
             inPreFlex = True
         elif token == "preflx2a":
-            lastPathOp = token
             argList = []
         elif token == "preflx2":
-            lastPathOp = token
             argList = []
         elif token == "flxa":  # flex with absolute coords.
             inPreFlex = False
@@ -1900,7 +1887,6 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 # name into the hint mask.
                 hintMask.pointName = flexPointName
                 newHintMaskName = None
-            lastPathOp = token
             argList = []
         elif token == "flx":
             inPreFlex = False
@@ -1945,10 +1931,8 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 # name into the hint mask.
                 hintMask.pointName = flexPointName
                 newHintMaskName = None
-            lastPathOp = token
             argList = []
         elif token == "sc":
-            lastPathOp = token
             pass
         elif token == "cp":
             pass
@@ -1959,7 +1943,6 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 continue
 
             if token[-2:] in ["mt", "dt", "ct", "cv"]:
-                lastPathOp = token
                 opIndex += 1
             else:
                 print("Unhandled operation", argList, token)
