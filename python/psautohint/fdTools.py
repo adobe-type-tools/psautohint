@@ -1,11 +1,6 @@
 # Copyright 2014 Adobe. All rights reserved.
 
-from __future__ import print_function, absolute_import
-
-import re
-import types
-
-__doc__ = """
+"""
 fdTools.py v1.9.1 Feb 11 2018
 
 Convert a Type 1 font to CID, given multiple hint dict defs in the
@@ -19,6 +14,11 @@ Note that this file makes a lot of temporary files, using the input font
 path as the base file path, so the parent directory needs to be
 read/write enabled.
 """
+
+from __future__ import print_function, absolute_import
+
+import re
+import types
 
 # Tokens seen in font info file that are not
 # part of a FDDict or GlyphSet definition.
