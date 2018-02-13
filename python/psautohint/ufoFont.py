@@ -706,7 +706,7 @@ class UFOFontData:
         try:
             widthXML = glifXML.find("advance")
             if widthXML is not None:
-                width = int(eval(widthXML.get("width")))
+                width = int(widthXML.get("width"))
             else:
                 width = 1000
         except UFOParseError as e:
@@ -1251,9 +1251,9 @@ def parsePList(filePath, dictKey=None):
                 for listChild in child:
                     val = listChild.text
                     if listChild.tag == "integer":
-                        val = int(eval(val))
+                        val = int(val)
                     elif listChild.tag == "real":
-                        val = float(eval(val))
+                        val = float(val)
                     elif listChild.tag == "string":
                         pass
                     else:
@@ -1264,9 +1264,9 @@ def parsePList(filePath, dictKey=None):
                     list_.append(val)
                 plistDict[lastName] = list_
             elif child.tag == "integer":
-                plistDict[lastName] = int(eval(child.text))
+                plistDict[lastName] = int(child.text)
             elif child.tag == "real":
-                plistDict[lastName] = float(eval(child.text))
+                plistDict[lastName] = float(child.text)
             elif child.tag == "false":
                 plistDict[lastName] = 0
             elif child.tag == "true":
@@ -2213,7 +2213,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     if (hintInfoDict is not None):
         widthXML = glifXML.find("advance")
         if widthXML is not None:
-            width = int(eval(widthXML.get("width")))
+            width = int(widthXML.get("width"))
         else:
             width = 1000
         useDefaultGlyphDir = False
