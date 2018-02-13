@@ -110,7 +110,7 @@ class FDDict:
     def __init__(self):
         self.DictName = None
         for key in kFDDictKeys:
-            exec("self.%s = None" % (key))
+            setattr(self, key, None)
         self.FlexOK = "true"
 
     def getFontInfo(self):
@@ -210,7 +210,7 @@ class FDDict:
                               (self.DictName, prevPair[2], prevPair[0],
                                zoneBuffer, pair[2], pair[1]))
                     prevPair = pair
-                exec("self.%s = %s" % (pairFieldName, bluePairList))
+                setattr(self, pairFieldName, bluePairList)
                 bluesList = []
                 for pairEntry in bluePairList:
                     bluesList.append(pairEntry[1])
@@ -219,7 +219,7 @@ class FDDict:
                 bluesList = "[%s]" % (" ".join(bluesList))
                 # print(self.DictName, bluePairList)
                 # print("\t", bluesList)
-                exec("self.%s = \"%s\"" % (fieldName, bluesList))
+                setattr(self, fieldName, bluesList)
         return
 
     def __repr__(self):
@@ -316,7 +316,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
             dictValueList.append(token)
             if token[-1] in ["]", ")"]:
                 value = " ".join(dictValueList)
-                exec("fdDict.%s = \"%s\"" % (dictKeyWord, value))
+                setattr(fdDict, dictKeyWord, value)
                 state = dictState  # found the last token in the list value.
 
         elif state == glyphSetState:
@@ -372,7 +372,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
                         dictValueList = [value]
                         dictKeyWord = token
                     else:
-                        exec("fdDict.%s = \"%s\"" % (token, value))
+                        setattr(fdDict, token, value)
                 else:
                     raise FontInfoParseError(
                         "FDDict key \"%s\" in fdDict named \"%s\" is not "
@@ -390,7 +390,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
         # outside the font BBox, so that hinting won't be affected by them.
         defaultFDDict = fontDictList[0]
         for key in kBlueValueKeys + kOtherBlueValueKeys:
-            exec("defaultFDDict.%s = None" % (key))
+            setattr(defaultFDDict, key, None)
         defaultFDDict.BaselineYCoord = minY - 100
         defaultFDDict.BaselineOvershoot = 0
         defaultFDDict.CapHeight = maxY + 100
