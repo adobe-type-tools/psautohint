@@ -293,11 +293,11 @@ def makeHintList(hints, needHintMasks, isH):
             continue
         pos1 = hint[0]
         pos = pos1 - lastPos
-        if (type(pos) == float) and (int(pos) == pos):
+        if isinstance(pos, float) and (int(pos) == pos):
             pos = int(pos)
         hintList.append(pos)
         pos2 = hint[1]
-        if (type(pos2) == float) and (int(pos2) == pos2):
+        if isinstance(pos2, float) and (int(pos2) == pos2):
             pos2 = int(pos2)
         lastPos = pos1 + pos2
         hintList.append(pos2)
