@@ -119,7 +119,7 @@ class FDDict:
         for key in keys:
             if key.startswith("_") or (key in kRunTimeFDDictKeys):
                 continue
-            value = eval("self.%s" % (key))
+            value = getattr(self, key)
             if isinstance(value, types.MethodType):
                 continue
 
@@ -149,21 +149,19 @@ class FDDict:
             bluePairList = []
             for key in keyList:
                 if key.endswith("Overshoot"):
-                    width = eval("self.%s" % (key))
+                    width = getattr(self, key)
                     if width is not None:
                         width = int(width)
                         baseName = key[:-len("Overshoot")]
                         zonePos = None
                         if key == "BaselineOvershoot":
-                            zonePos = eval("self.BaselineYCoord")
-                            zonePos = int(zonePos)
+                            zonePos = int(self.BaselineYCoord)
                             tempKey = "BaselineYCoord"
                         else:
                             for posSuffix in ["", "Height", "Baseline"]:
                                 tempKey = "%s%s" % (baseName, posSuffix)
                                 try:
-                                    zonePos = eval("self.%s" % (tempKey))
-                                    zonePos = int(zonePos)
+                                    zonePos = int(getattr(self, tempKey))
                                     break
                                 except AttributeError:
                                     continue
@@ -226,7 +224,7 @@ class FDDict:
         printStr = []
         keys = dir(self)
         for key in keys:
-            val = eval("self.%s" % (key))
+            val = getattr(self, key)
             # print(key, type(val))
             if (val is None) or (
                isinstance(val, types.MethodType)) or key.startswith("_"):
@@ -421,7 +419,7 @@ def mergeFDDicts(prevDictList, privateDict):
         for ki in [0, 1]:
             zoneDict = zoneDictList[ki]
             bluePairName = bluePairListNames[ki]
-            bluePairList = eval("prefDDict.%s" % (bluePairName))
+            bluePairList = getattr(prefDDict, bluePairName)
             if not bluePairList:
                 continue
             for topPos, bottomPos, zoneName, _, isBottomZone in bluePairList:
@@ -432,7 +430,7 @@ def mergeFDDicts(prevDictList, privateDict):
         stemDictList = [dominantHDict, dominantVDict]
         for wi in (0, 1):
             stemFieldName = stemNameList[wi]
-            dList = eval("prefDDict.%s" % (stemFieldName))
+            dList = getattr(prefDDict, stemFieldName)
             stemDict = stemDictList[wi]
             if dList is not None:
                 dList = dList[1:-1]  # remove the braces
