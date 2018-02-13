@@ -21,9 +21,16 @@ install:
       source .venv/bin/activate;
     fi
   - pip install -r requirements.txt
+  - pip install coverage
+  - pip install codacy-coverage
 
 script:
   - make -j4 check
   - make dist
   - unzip dist/psautohint-$(python setup.py -V).zip
   - make -C psautohint-$(python setup.py -V)
+
+after_success:
+  - cd tests
+  - coverage xml
+  - python-codacy-coverage -r coverage.xml

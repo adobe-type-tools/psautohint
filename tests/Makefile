@@ -1,6 +1,6 @@
 .PHONY: all FORCE
 
-PYTHON ?= python
+PYTHON ?= coverage run
 
 UFO:=$(wildcard data/*/*/font.ufo)
 OTF:=$(wildcard data/*/*/font.otf)
