@@ -437,7 +437,8 @@ class UFOFontData:
             psName = self.fontInfo.get("postscriptFontName", psName)
         return psName
 
-    def isCID(self):
+    @staticmethod
+    def isCID():
         return 0
 
     def checkForHints(self, glyphName):
@@ -696,7 +697,8 @@ class UFOFontData:
 
         return skip
 
-    def getGlyphXML(self, glyphDir, glyphFileName):
+    @staticmethod
+    def getGlyphXML(glyphDir, glyphFileName):
         glyphPath = os.path.join(glyphDir, glyphFileName)  # default
         etRoot = ET.ElementTree()
         glifXML = etRoot.parse(glyphPath)
@@ -807,7 +809,8 @@ class UFOFontData:
             return
         self.fontInfo, _ = parsePList(fontInfoPath)
 
-    def updateLayerContents(self, contentsFilePath):
+    @staticmethod
+    def updateLayerContents(contentsFilePath):
         if os.path.exists(contentsFilePath):
             contentsList = plistlib.readPlist(contentsFilePath)
             # If the layer name already exists, don't add a new one,
@@ -973,9 +976,9 @@ class UFOFontData:
         self.fontDict = fdDict
         return fdDict
 
-    def getfdIndex(self, gid):
-        fdIndex = 0
-        return fdIndex
+    @staticmethod
+    def getfdIndex(gid):
+        return 0
 
     def getfdInfo(self, psName, inputPath, allow_no_blues, noFlex,
                   vCounterGlyphs, hCounterGlyphs, glyphList, fdIndex=0):
@@ -1161,7 +1164,8 @@ class UFOFontData:
         outlineXML = glifXML.find("outline")
         return outlineXML
 
-    def copyTo(self, dstPath):
+    @staticmethod
+    def copyTo(dstPath):
         """ Copy UFO font to target path"""
         return
 
