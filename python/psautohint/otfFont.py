@@ -830,10 +830,8 @@ def convertBezToT2(bezString):
 
         if token == "newcolors":
             lastPathOp = token
-            pass
         elif token in ["beginsubr", "endsubr"]:
             lastPathOp = token
-            pass
         elif token in ["snc"]:
             lastPathOp = token
             # The index into the t2list is kept
@@ -843,7 +841,6 @@ def convertBezToT2(bezString):
             hintMaskList.append(hintMask)
         elif token in ["enc"]:
             lastPathOp = token
-            pass
         elif token == "div":
             # i specifically do NOT set lastPathOp for this.
             value = argList[-2] / float(argList[-1])
@@ -935,7 +932,6 @@ def convertBezToT2(bezString):
             argList = []
         elif token == "sc":
             lastPathOp = token
-            pass
         else:
             if token[-2:] in ["mt", "dt", "ct", "cv"]:
                 lastPathOp = token
