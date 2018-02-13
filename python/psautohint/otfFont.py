@@ -64,6 +64,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         self.closePathSeen = False
         self.subrLevel = 0
         self.allowDecimals = allowDecimals
+        self.hintMaskBytes = None
 
     def execute(self, charString):
         self.subrLevel += 1
