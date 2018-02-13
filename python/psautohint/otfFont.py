@@ -1294,8 +1294,7 @@ class CFFFontData:
         return fdDict
 
     def getfdIndex(self, gid):
-        fdIndex = self.topDict.FDSelect[gid]
-        return fdIndex
+        return self.topDict.FDSelect[gid]
 
     def getfdInfo(self, fontPSName, inputPath, allow_no_blues, noFlex,
                   vCounterGlyphs, hCounterGlyphs, glyphList, fdIndex=0):
