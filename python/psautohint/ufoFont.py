@@ -2135,7 +2135,7 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
     if len(hintsStem3) > 0:
         hintsStem3.sort()
         numHints = len(hintsStem3)
-        hintLimit = (kStackLimit - 2) / 2
+        hintLimit = int((kStackLimit - 2) / 2)
         if numHints >= hintLimit:
             hintsStem3 = hintsStem3[:hintLimit]
             numHints = hintLimit
@@ -2144,7 +2144,7 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
     else:
         hints.sort()
         numHints = len(hints)
-        hintLimit = (kStackLimit - 2) / 2
+        hintLimit = int((kStackLimit - 2) / 2)
         if numHints >= hintLimit:
             hints = hints[:hintLimit]
             numHints = hintLimit
