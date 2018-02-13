@@ -902,7 +902,7 @@ class UFOFontData:
         for i in range(numBlueValues):
             key = fdTools.kBlueValueKeys[i]
             value = blueValues[i]
-            exec("fdDict.%s = %s" % (key, value))
+            setattr(fdDict, key, value)
 
         otherBlues = self.fontInfo.get("postscriptOtherBlues", [])
         numBlueValues = len(otherBlues)
@@ -919,7 +919,7 @@ class UFOFontData:
             for i in range(numBlueValues):
                 key = fdTools.kOtherBlueValueKeys[i]
                 value = otherBlues[i]
-                exec("fdDict.%s = %s" % (key, value))
+                setattr(fdDict, key, value)
 
         vstems = self.fontInfo.get("postscriptStemSnapV", [])
         if len(vstems) == 0:
