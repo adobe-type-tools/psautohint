@@ -1212,7 +1212,7 @@ class CFFFontData:
         for i in range(numBlueValues):
             key = fdTools.kBlueValueKeys[i]
             value = blueValues[i]
-            exec("fdDict.%s = %s" % (key, value))
+            setattr(fdDict, key, value)
 
         # print(numBlueValues)
         # for i in range(0, len(fontinfo),2):
@@ -1233,7 +1233,7 @@ class CFFFontData:
             for i in range(numBlueValues):
                 key = fdTools.kOtherBlueValueKeys[i]
                 value = blueValues[i]
-                exec("fdDict.%s = %s" % (key, value))
+                setattr(fdDict, key, value)
 
         if hasattr(privateDict, "StemSnapV"):
             vstems = privateDict.StemSnapV
