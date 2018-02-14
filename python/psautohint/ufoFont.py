@@ -1117,10 +1117,10 @@ class UFOFontData:
                     dataList.extend(componentDataList)
         data = "".join(dataList)
         if len(data) < 128:
-            hash_ = data
+            glyph_hash = data
         else:
-            hash_ = hashlib.sha512(data.encode("utf-8")).hexdigest()
-        return hash_, dataList
+            glyph_hash = hashlib.sha512(data.encode("utf-8")).hexdigest()
+        return glyph_hash, dataList
 
     def getComponentOutline(self, componentItem):
         try:
@@ -1247,7 +1247,7 @@ def parsePList(filePath, dictKey=None):
                     "Encountered duplicate key name '%s' in '%s'." %
                     (lastName, filePath))
             if child.tag == "array":
-                list_ = []
+                plistDict[lastName] = []
                 for listChild in child:
                     val = listChild.text
                     if listChild.tag == "integer":
@@ -1261,8 +1261,7 @@ def parsePList(filePath, dictKey=None):
                             "In plist file, encountered unhandled key type "
                             "'%s' in '%s' for parent key %s. %s." %
                             (listChild.tag, child.tag, lastName, filePath))
-                    list_.append(val)
-                plistDict[lastName] = list_
+                    plistDict[lastName].append(val)
             elif child.tag == "integer":
                 plistDict[lastName] = int(child.text)
             elif child.tag == "real":
@@ -1442,12 +1441,12 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
             # Deal with setting up move-to.
             lastItem = outlineItem[0]
             try:
-                type_ = lastItem.attrib["type"]
+                point_type = lastItem.attrib["type"]
             except KeyError:
-                type_ = "offcurve"
-            if type_ in ["curve", "line", "qccurve"]:
+                point_type = "offcurve"
+            if point_type in ["curve", "line", "qccurve"]:
                 outlineItem = outlineItem[1:]
-                if type_ != "line":
+                if point_type != "line":
                     # I don't do this for line, as AC behaves differently
                     # when a final line-to is explicit.
                     outlineItem.append(lastItem)
@@ -1465,7 +1464,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                 else:
                     op = "%s %s mt" % (x, y)
                 bezStringList.append(op)
-            elif type_ == "move":
+            elif point_type == "move":
                 # first op is a move-to.
                 if len(outlineItem) == 1:
                     # this is a move, and is the only op in this outline.
@@ -1473,7 +1472,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                     # from a GLIF format 1 anchor.
                     argStack = []
                     continue
-            elif type_ == "offcurve":
+            elif point_type == "offcurve":
                 # We should only see an off curve point as the first point
                 # when the first op is a curve and the last op is a line.
                 # In this case, insert a move-to to the line's coords, then
@@ -1532,28 +1531,28 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                     y = int(round(y))
 
                 try:
-                    type_ = contourItem.attrib["type"]
+                    point_type = contourItem.attrib["type"]
                 except KeyError:
-                    type_ = "offcurve"
+                    point_type = "offcurve"
 
-                if type_ == "offcurve":
+                if point_type == "offcurve":
                     argStack.append(x)
                     argStack.append(y)
-                elif type_ == "move":
+                elif point_type == "move":
                     if (allowDecimals):
                         op = "%.3f %.3f mt" % (x, y)
                     else:
                         op = "%s %s mt" % (x, y)
                     bezStringList.append(op)
                     argStack = []
-                elif type_ == "line":
+                elif point_type == "line":
                     if (allowDecimals):
                         op = "%.3f %.3f dt" % (x, y)
                     else:
                         op = "%s %s dt" % (x, y)
                     bezStringList.append(op)
                     argStack = []
-                elif type_ == "curve":
+                elif point_type == "curve":
                     if len(argStack) != 4:
                         raise UFOParseError(
                             "Argument stack error seen for curve point '%s'." %
@@ -1568,7 +1567,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                               argStack[3], x, y)
                     argStack = []
                     bezStringList.append(op)
-                elif type_ == "qccurve":
+                elif point_type == "qccurve":
                     raise UFOParseError(
                         "Point type not supported '%s'." %
                         xmlToString(contourItem))
