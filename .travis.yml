@@ -25,7 +25,7 @@ install:
   - pip install codacy-coverage
 
 script:
-  - make -j4 check
+  - make check
   - make dist
   - unzip dist/psautohint-$(python setup.py -V).zip
   - make -C psautohint-$(python setup.py -V)
