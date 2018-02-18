@@ -165,49 +165,39 @@ static void
 writeFileData(char* name, char* output, char* fSuffix)
 {
     FILE* fp;
-    size_t nameSize = 1 + strlen(name);
-    char* savedName;
-    int usedNewName = 0;
 
     if ((fSuffix != NULL) && (fSuffix[0] != '\0')) {
-        nameSize += strlen(fSuffix);
+        char* savedName;
+        size_t nameSize;
+        nameSize = strlen(name) + strlen(fSuffix) + 1;
         savedName = malloc(nameSize);
         savedName[0] = '\0';
         strcat(savedName, name);
         strcat(savedName, fSuffix);
-        usedNewName = 1;
+        fp = fopen(savedName, "w");
+        free(savedName);
     } else
-        savedName = malloc(nameSize);
+        fp = fopen(name, "w");
 
-    fp = fopen(savedName, "w");
     fwrite(output, 1, strlen(output), fp);
     fclose(fp);
-
-    if (usedNewName)
-        free(savedName);
 }
 
 static void
 openReportFile(char* name, char* fSuffix)
 {
-    size_t nameSize = 1 + strlen(name);
-    char* savedName;
-    int usedNewName = 0;
-
     if ((fSuffix != NULL) && (fSuffix[0] != '\0')) {
-        nameSize += strlen(fSuffix);
+        char* savedName;
+        size_t nameSize;
+        nameSize = strlen(name) + strlen(fSuffix) + 1;
         savedName = malloc(nameSize);
         savedName[0] = '\0';
         strcat(savedName, name);
         strcat(savedName, fSuffix);
-        usedNewName = 1;
-    } else
-        savedName = malloc(nameSize);
-
-    reportFile = fopen(savedName, "w");
-
-    if (usedNewName)
+        reportFile = fopen(savedName, "w");
         free(savedName);
+    } else
+        reportFile = fopen(name, "w");
 }
 
 static void
