@@ -34,4 +34,5 @@ after_success:
   - cd tests
   - coverage combine
   - coverage xml
-  - python-codacy-coverage -r coverage.xml
+  - sed 's/\/home\/travis\/build\/adobe-type-tools\/psautohint\/build\/*/python/' coverage.xml > coverage2.xml
+  - python-codacy-coverage -r coverage2.xml
