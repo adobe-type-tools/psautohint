@@ -8,7 +8,7 @@ matrix:
     - python: 2.7
     - python: 3.6
     # The 'osx' environment uses the python2.7 by default.
-    # TODO: maybe also tests python3 on macOS 
+    # TODO: maybe also tests python3 on macOS
     - language: generic
       os: osx
 
@@ -23,8 +23,11 @@ install:
   - pip install -r requirements.txt
   - pip install -r dev-requirements.txt
   - pip install codacy-coverage
+  - pip install collective.checkdocs
 
 script:
+  - python setup.py checkdocs
+  - python setup.py check --restructuredtext --strict
   - make check
   - make dist
   - unzip dist/psautohint-$(python setup.py -V).zip
