@@ -498,7 +498,7 @@ def hintFile(options):
         # Print the user defined FontDicts, and exit.
         if fdGlyphDict:
             logMsg("Showing user-defined FontDict Values:")
-            for fi in range(len(fontDictList)):
+            for fi in enumerate(fontDictList):
                 fontDict = fontDictList[fi]
                 logMsg("")
                 logMsg(fontDict.DictName)
