@@ -226,9 +226,8 @@ main(int argc, char* argv[])
                                       suffix of environment variable holding the
                                       bez string. */
 
-    char* current_arg;
     int16_t total_files = 0;
-    int result, argi;
+    int argi;
 
     badParam = false;
     debug = false;
@@ -240,7 +239,7 @@ main(int argc, char* argv[])
     /* read in options */
     argi = 0;
     while (++argi < argc) {
-        current_arg = argv[argi];
+        char* current_arg = argv[argi];
 
         if (current_arg[0] == '\0') {
             continue;
@@ -383,6 +382,7 @@ main(int argc, char* argv[])
         char* bezdata;
         char* output;
         size_t outputsize = 0;
+        int result;
         bezName = argv[argi];
         if (!argumentIsBezData) {
             bezdata = getFileData(bezName);
