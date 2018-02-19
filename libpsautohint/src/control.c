@@ -221,14 +221,14 @@ CopyMainH(void)
 void
 AddHPair(PClrVal v, char ch)
 {
-    Fixed bot, top, tmp;
+    Fixed bot, top;
     PPathElt p0, p1, p;
     bot = itfmy(v->vLoc1);
     top = itfmy(v->vLoc2);
     p0 = v->vBst->vSeg1->sElt;
     p1 = v->vBst->vSeg2->sElt;
     if (top < bot) {
-        tmp = top;
+        Fixed tmp = top;
         top = bot;
         bot = tmp;
         p = p0;
@@ -254,14 +254,14 @@ AddHPair(PClrVal v, char ch)
 void
 AddVPair(PClrVal v, char ch)
 {
-    Fixed lft, rght, tmp;
+    Fixed lft, rght;
     PPathElt p0, p1, p;
     lft = itfmx(v->vLoc1);
     rght = itfmx(v->vLoc2);
     p0 = v->vBst->vSeg1->sElt;
     p1 = v->vBst->vSeg2->sElt;
     if (lft > rght) {
-        tmp = lft;
+        Fixed tmp = lft;
         lft = rght;
         rght = tmp;
         p = p0;
@@ -276,7 +276,7 @@ UseCounter(PClrVal sLst, bool mclr)
 {
     int32_t cnt = 0;
     Fixed minLoc, midLoc, maxLoc, prevBstVal, bestVal;
-    Fixed minDelta, midDelta, maxDelta, loc, delta, th;
+    Fixed minDelta, midDelta, maxDelta, th;
     PClrVal lst, newLst;
     minLoc = midLoc = maxLoc = FixInt(20000);
     minDelta = midDelta = maxDelta = 0;
@@ -303,8 +303,8 @@ UseCounter(PClrVal sLst, bool mclr)
     }
     newLst = sLst;
     while (sLst != NULL) {
-        loc = sLst->vLoc1;
-        delta = sLst->vLoc2 - loc;
+        Fixed loc = sLst->vLoc1;
+        Fixed delta = sLst->vLoc2 - loc;
         loc += FixHalfMul(delta);
         if (loc < minLoc) {
             maxLoc = midLoc;
@@ -737,11 +737,11 @@ static void
 DoVStems(PClrVal sLst)
 {
     Fixed lft, rght;
-    bool curved;
     if (!gDoAligns && !gDoStems) {
         return;
     }
     while (sLst != NULL) {
+        bool curved;
         curved = !FindLineSeg(sLst->vLoc1, leftList) &&
                  !FindLineSeg(sLst->vLoc2, rightList);
         lft = itfmx(sLst->vLoc1);
