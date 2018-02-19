@@ -97,9 +97,8 @@ static void
 EvalHPair(PClrSeg botSeg, PClrSeg topSeg, Fixed* pspc, Fixed* pv)
 {
     Fixed brght, blft, bloc, tloc, trght, tlft, ldst, rdst;
-    Fixed mndist, dist, dx, dy, minlen, overlaplen;
+    Fixed mndist, dist, dy, minlen, overlaplen;
     bool inBotBand, inTopBand;
-    int i;
     *pspc = 0;
     brght = botSeg->sMax;
     blft = botSeg->sMin;
@@ -129,6 +128,7 @@ EvalHPair(PClrSeg botSeg, PClrSeg topSeg, Fixed* pspc, Fixed* pv)
         else
             dist = CalcOverlapDist(dy, overlaplen, minlen);
     } else { /* no overlap; take closer ends */
+        Fixed dx;
         ldst = abs(tlft - brght);
         rdst = abs(trght - blft);
         dx = NUMMIN(ldst, rdst);
@@ -145,6 +145,7 @@ EvalHPair(PClrSeg botSeg, PClrSeg topSeg, Fixed* pspc, Fixed* pv)
     mndist = FixTwoMul(gMinDist);
     dist = NUMMAX(dist, mndist);
     if (gNumHStems > 0) {
+        int i;
         Fixed w = idtfmy(dy);
         w = abs(w);
         for (i = 0; i < gNumHStems; i++)
@@ -160,8 +161,8 @@ static void
 HStemMiss(PClrSeg botSeg, PClrSeg topSeg)
 {
     Fixed brght, blft, bloc, tloc, trght, tlft;
-    Fixed mndist, dist, dy, minlen, overlaplen;
-    Fixed b, t, diff, minDiff, minW, w, sw;
+    Fixed mndist, dist, dy;
+    Fixed b, t, minDiff, minW, w;
     int i;
     if (gNumHStems == 0)
         return;
@@ -176,8 +177,8 @@ HStemMiss(PClrSeg botSeg, PClrSeg topSeg)
         return;
     /* left is always < right */
     if ((tlft <= brght) && (trght >= blft)) { /* overlap */
-        overlaplen = NUMMIN(trght, brght) - NUMMAX(tlft, blft);
-        minlen = NUMMIN(trght - tlft, brght - blft);
+        Fixed overlaplen = NUMMIN(trght, brght) - NUMMAX(tlft, blft);
+        Fixed minlen = NUMMIN(trght - tlft, brght - blft);
         if (minlen == overlaplen)
             dist = dy;
         else
@@ -197,8 +198,8 @@ HStemMiss(PClrSeg botSeg, PClrSeg topSeg)
         return;
     w = abs(w);
     for (i = 0; i < gNumHStems; i++) {
-        sw = gHStems[i];
-        diff = abs(sw - w);
+        Fixed sw = gHStems[i];
+        Fixed diff = abs(sw - w);
         if (diff == 0)
             return;
         if (diff < minDiff) {
@@ -215,8 +216,8 @@ HStemMiss(PClrSeg botSeg, PClrSeg topSeg)
 static void
 EvalVPair(PClrSeg leftSeg, PClrSeg rightSeg, Fixed* pspc, Fixed* pv)
 {
-    Fixed ltop, lbot, lloc, rloc, rtop, rbot, tdst, bdst;
-    Fixed mndist, dx, dy, dist, overlaplen, minlen;
+    Fixed ltop, lbot, lloc, rloc, rtop, rbot;
+    Fixed mndist, dx, dist;
     Fixed bonus, lbonus, rbonus;
     int i;
     *pspc = 0;
@@ -233,16 +234,16 @@ EvalVPair(PClrSeg leftSeg, PClrSeg rightSeg, Fixed* pspc, Fixed* pv)
     }
     /* top is always > bot, independent of YgoesUp */
     if ((ltop >= rbot) && (lbot <= rtop)) { /* overlap */
-        overlaplen = NUMMIN(ltop, rtop) - NUMMAX(lbot, rbot);
-        minlen = NUMMIN(ltop - lbot, rtop - rbot);
+        Fixed overlaplen = NUMMIN(ltop, rtop) - NUMMAX(lbot, rbot);
+        Fixed minlen = NUMMIN(ltop - lbot, rtop - rbot);
         if (minlen == overlaplen)
             dist = dx;
         else
             dist = CalcOverlapDist(dx, overlaplen, minlen);
     } else { /* no overlap; take closer ends */
-        tdst = abs(ltop - rbot);
-        bdst = abs(lbot - rtop);
-        dy = NUMMIN(tdst, bdst);
+        Fixed tdst = abs(ltop - rbot);
+        Fixed bdst = abs(lbot - rtop);
+        Fixed dy = NUMMIN(tdst, bdst);
         dist = (7 * dx) / 5 + GapDist(dy); /* extra penalty for nonoverlap */
         DEBUG_ROUND(dist)                  /* DEBUG 8 BIT */
         if (dy > dx)
@@ -271,7 +272,7 @@ VStemMiss(PClrSeg leftSeg, PClrSeg rightSeg)
 {
     Fixed ltop, lbot, lloc, rloc, rtop, rbot;
     Fixed mndist, dx, dist, overlaplen, minlen;
-    Fixed l, r, diff, minDiff, minW, w, sw;
+    Fixed l, r, minDiff, minW, w;
     int i;
     if (gNumVStems == 0)
         return;
@@ -302,8 +303,8 @@ VStemMiss(PClrSeg leftSeg, PClrSeg rightSeg)
     minDiff = FixInt(1000);
     minW = 0;
     for (i = 0; i < gNumVStems; i++) {
-        sw = gVStems[i];
-        diff = abs(sw - w);
+        Fixed sw = gVStems[i];
+        Fixed diff = abs(sw - w);
         if (diff < minDiff) {
             minDiff = diff;
             minW = sw;
@@ -479,17 +480,13 @@ CombVals(Fixed v1, Fixed v2)
 static void
 CombineValues(void)
 { /* works for both H and V */
-    PClrVal vlist, v1;
-    Fixed loc1, loc2;
-    Fixed val;
-    bool match;
-    vlist = gValList;
+    PClrVal vlist = gValList;
     while (vlist != NULL) {
-        v1 = vlist->vNxt;
-        loc1 = vlist->vLoc1;
-        loc2 = vlist->vLoc2;
-        val = vlist->vVal;
-        match = false;
+        PClrVal v1 = vlist->vNxt;
+        Fixed loc1 = vlist->vLoc1;
+        Fixed loc2 = vlist->vLoc2;
+        Fixed val = vlist->vVal;
+        bool match = false;
         while (v1 != NULL && v1->vLoc1 == loc1 && v1->vLoc2 == loc2) {
             if (v1->vGhst)
                 val = v1->vVal;
