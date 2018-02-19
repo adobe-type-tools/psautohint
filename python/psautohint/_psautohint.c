@@ -128,14 +128,13 @@ autohint(PyObject* self, PyObject* args)
     } else {
         int i = 0;
         for (i = 0; i < bezLen; i++) {
-            char* bezData = NULL;
             char* output = NULL;
             size_t outputSize = 0;
             int result;
 
             PyObject* itemObj = PySequence_Fast_GET_ITEM(inSeq, i);
 
-            bezData = PyBytes_AsString(itemObj);
+            char* bezData = PyBytes_AsString(itemObj);
             if (!bezData) {
                 error = true;
                 break;
