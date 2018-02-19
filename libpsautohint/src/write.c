@@ -79,8 +79,8 @@ static void
 wrtx(Fixed x)
 {
     Fixed i;
-    Fixed dx;
     if ((gRoundToInt) || (FracPart(x) == 0)) {
+        Fixed dx;
         i = FRnd(x);
         dx = i - currentx;
         WRTNUM(FTrunc(dx));
@@ -97,9 +97,8 @@ wrtx(Fixed x)
 static void
 wrtxa(Fixed x)
 {
-    Fixed i;
     if ((gRoundToInt) || (FracPart(x) == 0)) {
-        i = FRnd(x);
+        Fixed i = FRnd(x);
         WRTNUM(FTrunc(i));
         currentx = i;
     } else {
@@ -114,8 +113,8 @@ static void
 wrty(Fixed y)
 {
     Fixed i;
-    Fixed dy;
     if ((gRoundToInt) || (FracPart(y) == 0)) {
+        Fixed dy;
         i = FRnd(y);
         dy = i - currenty;
         WRTNUM(FTrunc(dy));
@@ -132,9 +131,8 @@ wrty(Fixed y)
 static void
 wrtya(Fixed y)
 {
-    Fixed i;
     if ((gRoundToInt) || (FracPart(y) == 0)) {
-        i = FRnd(y);
+        Fixed i = FRnd(y);
         WRTNUM(FTrunc(i));
         currenty = i;
     } else {
