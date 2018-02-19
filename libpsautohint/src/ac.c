@@ -71,8 +71,7 @@ Alloc(int32_t sz)
 void
 InitData(const ACFontInfo* fontinfo, int32_t reason)
 {
-    char* s;
-    float tmp, origEmSquare;
+    float tmp;
 
     switch (reason) {
         case STARTUP:
@@ -121,8 +120,8 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             gShowHs = gShowVs = gDebug;
             gListClrInfo = gDebug;
             if (gScalingHints) {
-                s = GetFontInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
-                origEmSquare = strtod(s, NULL);
+                char* s = GetFontInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
+                float origEmSquare = strtod(s, NULL);
                 gBlueFuzz = (Fixed)(origEmSquare / 2000.0); /* .5 pixel */
             } else {
                 gBlueFuzz = DEFAULTBLUEFUZZ;
