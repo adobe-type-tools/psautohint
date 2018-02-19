@@ -124,11 +124,10 @@ FindLineSeg(Fixed loc, PClrSeg sL)
 void
 CheckTfmVal(PClrSeg hSegList, Fixed* bandList, int32_t length)
 {
-    Fixed tfmval;
     PClrSeg sList = hSegList;
 
     while (sList != NULL) {
-        tfmval = itfmy(sList->sLoc);
+        Fixed tfmval = itfmy(sList->sLoc);
         if ((length >= 2) && !gBandError &&
             !CheckForInsideBands(tfmval, bandList, length))
             CheckForNearBands(tfmval, bandList, length);
@@ -160,7 +159,6 @@ CheckVal(PClrVal val, bool vert)
     Fixed* stems;
     int32_t numstems, i;
     Fixed wd, diff, minDiff, minW, b, t, w;
-    bool curve = false;
     if (vert) {
         stems = gVStems;
         numstems = gNumVStems;
@@ -188,6 +186,7 @@ CheckVal(PClrVal val, bool vert)
     if (minDiff == 0 || minDiff > FixInt(2))
         return;
     if (b != bPrev || t != tPrev) {
+        bool curve = false;
         if ((vert && (!FindLineSeg(val->vLoc1, leftList) ||
                       !FindLineSeg(val->vLoc2, rightList))) ||
             (!vert && (!FindLineSeg(val->vLoc1, botList) ||
