@@ -188,7 +188,7 @@ PPathElt
 NxtForBend(PPathElt p, Fixed* px2, Fixed* py2, Fixed* px3, Fixed* py3)
 {
     PPathElt nxt, nxtMT = NULL;
-    Fixed x = 0, y = 0, x2 = 0, y2 = 0;
+    Fixed x = 0, y = 0;
     nxt = p;
     GetEndPoint(p, &x, &y);
     while (true) {
@@ -212,8 +212,8 @@ NxtForBend(PPathElt p, Fixed* px2, Fixed* py2, Fixed* px3, Fixed* py3)
             break;
     }
     if (nxt->type == CURVETO) {
-        x2 = nxt->x1;
-        y2 = nxt->y1;
+        Fixed x2 = nxt->x1;
+        Fixed y2 = nxt->y1;
         if (x2 == x && y2 == y) {
             x2 = nxt->x2;
             y2 = nxt->y2;
