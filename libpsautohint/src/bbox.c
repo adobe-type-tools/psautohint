@@ -180,7 +180,6 @@ FindCurveBBox(Fixed x0, Fixed y0, Fixed px1, Fixed py1, Fixed px2, Fixed py2,
 void
 ClrVBnds(void)
 {
-    Fixed tmp;
     PPathElt p;
     if (gPathStart == NULL || VColorChar())
         return;
@@ -190,7 +189,7 @@ ClrVBnds(void)
     pvMn = pxmn;
     pvMx = pxmx;
     if (vMn > vMx) {
-        tmp = vMn;
+        Fixed tmp = vMn;
         vMn = vMx;
         vMx = tmp;
         p = pvMn;
@@ -238,7 +237,7 @@ ReClrHBnds(void)
 static bool
 CheckValOverlaps(Fixed lft, Fixed rht, PClrVal lst, bool xflg)
 {
-    Fixed lft2, rht2, tmp;
+    Fixed tmp;
     if (xflg) {
         lft = itfmx(lft);
         rht = itfmx(rht);
@@ -252,8 +251,8 @@ CheckValOverlaps(Fixed lft, Fixed rht, PClrVal lst, bool xflg)
         rht = tmp;
     }
     while (lst != NULL) {
-        lft2 = lst->vLoc1;
-        rht2 = lst->vLoc2;
+        Fixed lft2 = lst->vLoc1;
+        Fixed rht2 = lst->vLoc2;
         if (xflg) {
             lft2 = itfmx(lft2);
             rht2 = itfmx(rht2);
