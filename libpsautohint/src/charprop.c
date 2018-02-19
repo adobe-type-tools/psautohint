@@ -59,8 +59,8 @@ static char* SolEolNeg1List[] = { "question", NULL };
 static bool
 StrEqual(char* s1, char* s2)
 {
-    unsigned char c1, c2;
     while (true) {
+        unsigned char c1, c2;
         c1 = *s1++;
         c2 = *s2++;
         if (c1 != c2)
@@ -75,10 +75,9 @@ StrEqual(char* s1, char* s2)
 bool
 FindNameInList(char* nm, char** lst)
 {
-    char **l, *lnm;
-    l = lst;
+    char **l = lst;
     while (true) {
-        lnm = *l;
+        char *lnm = *l;
         if (lnm == NULL)
             return false;
         if (StrEqual(lnm, nm))
