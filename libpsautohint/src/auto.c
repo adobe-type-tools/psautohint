@@ -41,9 +41,10 @@ GetSubPathPrv(PPathElt e)
 static PClrVal
 FindClosestVal(PClrVal sLst, Fixed loc)
 {
-    Fixed dist = FixInt(10000), bot, top, d;
+    Fixed dist = FixInt(10000);
     PClrVal best = NULL;
     while (sLst != NULL) {
+        Fixed bot, top, d;
         bot = sLst->vLoc1;
         top = sLst->vLoc2;
         if (bot > top) {
@@ -94,14 +95,12 @@ static void
 PruneColorSegs(PPathElt e, bool hFlg)
 {
     PSegLnkLst lst, nxt, prv;
-    PSegLnk lnk;
     PClrSeg seg;
-    PClrVal val;
     lst = hFlg ? e->Hs : e->Vs;
     prv = NULL;
     while (lst != NULL) {
-        val = NULL;
-        lnk = lst->lnk;
+        PClrVal val = NULL;
+        PSegLnk lnk = lst->lnk;
         if (lnk != NULL) {
             seg = lnk->seg;
             if (seg != NULL)
@@ -211,8 +210,7 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
 {
     /* -1 means already in colorList; 0 means conflicts; 1 means ok to add */
     PClrVal v, clst;
-    Fixed top, bot, cTop, cBot, vT, vB, loc;
-    bool loc1;
+    Fixed top, bot, vT, vB, loc;
     if (s == NULL)
         return -1;
     v = s->sLnk;
@@ -239,6 +237,7 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
         }
     }
     if (v->vGhst) {
+        bool loc1;
         /* if best value for segment uses a ghost, and
            segment loc is already in the colorList, then return -1 */
         clst = colorList;
@@ -265,8 +264,8 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
         bot += gBandMargin;
     }
     while (colorList != NULL) { /* check for conflict */
-        cTop = colorList->vLoc2;
-        cBot = colorList->vLoc1;
+        Fixed cTop = colorList->vLoc2;
+        Fixed cBot = colorList->vLoc1;
         if (vB == cBot && vT == cTop) {
             return -1;
         }
@@ -294,11 +293,11 @@ int
 TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst)
 {
     /* -1 means already in colorList; 0 means conflicts; 1 means ok to add */
-    int result, i, cnt;
+    int result, cnt;
     result = -1;
     cnt = 0;
     while (lst != NULL) {
-        i = TestColor(lst->lnk->seg, colorList, flg, doLst);
+        int i = TestColor(lst->lnk->seg, colorList, flg, doLst);
         if (i == 0) {
             result = 0;
             break;
@@ -764,12 +763,12 @@ SetVColors(PClrVal lst)
 PClrVal
 CopyClrs(PClrVal lst)
 {
-    PClrVal v, vlst;
+    PClrVal vlst;
     int cnt;
     vlst = NULL;
     cnt = 0;
     while (lst != NULL) {
-        v = (PClrVal)Alloc(sizeof(ClrVal));
+        PClrVal v = (PClrVal)Alloc(sizeof(ClrVal));
         *v = *lst;
         v->vNxt = vlst;
         vlst = v;
@@ -989,9 +988,8 @@ CarryIfNeed(Fixed loc, bool vert, PClrVal clrs)
 static void
 ProClrs(PPathElt e, bool hFlg, Fixed loc)
 {
-    PSegLnkLst lst, plst;
+    PSegLnkLst lst;
     PPathElt prv;
-    Fixed cx, cy, dst;
     lst = ElmntClrSegLst(e, hFlg);
     if (lst == NULL)
         return;
@@ -999,6 +997,8 @@ ProClrs(PPathElt e, bool hFlg, Fixed loc)
         return;
     prv = e;
     while (true) {
+        Fixed cx, cy, dst;
+        PSegLnkLst plst;
         prv = GetSubPathPrv(prv);
         plst = ElmntClrSegLst(prv, hFlg);
         if (plst != NULL)
@@ -1021,9 +1021,9 @@ static void
 PromoteColors(void)
 {
     PPathElt e;
-    Fixed cx, cy;
     e = gPathStart;
     while (e != NULL) {
+        Fixed cx, cy;
         GetEndPoint(e, &cx, &cy);
         ProClrs(e, true, cy);
         ProClrs(e, false, cx);
@@ -1078,7 +1078,6 @@ AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
 {
     int32_t h, v, ph, pv;
     PPathElt e, cp, p;
-    int32_t etype;
     PSegLnkLst hLst, vLst, phLst, pvLst;
     PClrVal mtVclrs, mtHclrs, prvHclrs, prvVclrs;
 
@@ -1110,7 +1109,7 @@ AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
         PrintMessage("color loop");
     mtVclrs = mtHclrs = NULL;
     while (e != NULL) {
-        etype = e->type;
+        int32_t etype = e->type;
         if (movetoNewClrs && etype == MOVETO) {
             StartNewColoring(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
             Tst = IsOk;
