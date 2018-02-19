@@ -166,7 +166,6 @@ static void
 TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     Fixed x2, y2, x3, y3, x4, y4;
-    PPathElt p, q;
     bool top, dwn;
     double d0sq, d1sq, quot, dx, dy;
 
@@ -195,6 +194,7 @@ TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
         return;
 
     if (gFlexStrict) {
+        PPathElt p, q;
         q = GetSubpathNext(n);
         GetEndPoint(q, &x3, &y3);
         if (ProdLt0(y3 - y2, y1 - y2))
@@ -228,8 +228,6 @@ static void
 TryXFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     Fixed x2, y2, x3, y3, x4, y4;
-    PPathElt p, q;
-    bool lft;
     double d0sq, d1sq, quot, dx, dy;
 
     GetEndPoint(n, &x2, &y2);
@@ -258,6 +256,8 @@ TryXFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
         return;
 
     if (gFlexStrict) {
+        PPathElt p, q;
+        bool lft;
         q = GetSubpathNext(n);
         GetEndPoint(q, &x3, &y3);
         if (ProdLt0(x3 - x2, x1 - x2))
