@@ -207,8 +207,8 @@ IsCCW(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed x2, Fixed y2)
 static void
 DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 {
-    Fixed x2, y2, delta, strt, end, x3, y3;
-    bool ysame, ccw, above, doboth;
+    Fixed x2, y2, x3, y3;
+    bool ysame;
     if (y0 == y1)
         return;
     (void)NxtForBend(p, &x2, &y2, &x3, &y3);
@@ -217,13 +217,15 @@ DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
         (TestTan(x1 - x2, y1 - y2) &&
          (ProdLt0(x2 - x1, x1 - x0) ||
           (IsVertical(x0, y0, x1, y1) && TestBend(x0, y0, x1, y1, x2, y2))))) {
-        delta = FixHalfMul(gBendLength);
-        doboth = false;
+        Fixed strt, end;
+        Fixed delta = FixHalfMul(gBendLength);
+        bool doboth = false;
         if ((x0 <= x1 && x1 < x2) || (x0 < x1 && x1 <= x2)) {
         } else if ((x2 < x1 && x1 <= x0) || (x2 <= x1 && x1 < x0))
             delta = -delta;
         else if (ysame) {
-            above = y0 > y1;
+            bool ccw;
+            bool above = y0 > y1;
             if (!gYgoesUp)
                 above = !above;
             ccw = IsCCW(x0, y0, x1, y1, x2, y2);
@@ -242,8 +244,8 @@ DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 static void
 DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 {
-    Fixed x2, y2, delta, strt, end;
-    bool ysame, ccw, above, doboth;
+    Fixed x2, y2;
+    bool ysame;
     if (y0 == y1)
         return;
     (void)PrvForBend(p, &x2, &y2);
@@ -252,13 +254,15 @@ DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
         (TestTan(x0 - x2, y0 - y2) &&
          (ProdLt0(x2 - x0, x0 - x1) ||
           (IsVertical(x0, y0, x1, y1) && TestBend(x2, y2, x0, y0, x1, y1))))) {
-        delta = FixHalfMul(gBendLength);
-        doboth = false;
+        Fixed strt, end;
+        Fixed delta = FixHalfMul(gBendLength);
+        bool doboth = false;
         if ((x2 < x0 && x0 <= x1) || (x2 <= x0 && x0 < x1)) {
         } else if ((x1 < x0 && x0 <= x2) || (x1 <= x0 && x0 < x2))
             delta = -delta;
         else if (ysame) {
-            above = (y2 > y0);
+            bool ccw;
+            bool above = (y2 > y0);
             if (!gYgoesUp)
                 above = !above;
             ccw = IsCCW(x2, y2, x0, y0, x1, y1);
@@ -276,8 +280,8 @@ DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 static void
 DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 {
-    Fixed x2, y2, delta, strt, end, x3, y3;
-    bool xsame, ccw, right, doboth;
+    Fixed x2, y2, x3, y3;
+    bool xsame;
     if (x0 == x1)
         return;
     (void)NxtForBend(p, &x2, &y2, &x3, &y3);
@@ -286,14 +290,15 @@ DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
         (TestTan(y1 - y2, x1 - x2) &&
          (ProdLt0(y2 - y1, y1 - y0) || (IsHorizontal(x0, y0, x1, y1) &&
                                         TestBend(x0, y0, x1, y1, x2, y2))))) {
-        delta = FixHalfMul(gBendLength);
-        doboth = false;
+        Fixed strt, end;
+        Fixed delta = FixHalfMul(gBendLength);
+        bool doboth = false;
         if ((y0 <= y1 && y1 < y2) || (y0 < y1 && y1 <= y2)) {
         } else if ((y2 < y1 && y1 <= y0) || (y2 <= y1 && y1 < y0))
             delta = -delta;
         else if (xsame) {
-            right = x0 > x1;
-            ccw = IsCCW(x0, y0, x1, y1, x2, y2);
+            bool right = x0 > x1;
+            bool ccw = IsCCW(x0, y0, x1, y1, x2, y2);
             if (right != ccw)
                 delta = -delta;
             if (!gYgoesUp)
@@ -311,8 +316,8 @@ DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 static void
 DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 {
-    Fixed x2, y2, delta, strt, end;
-    bool xsame, ccw, right, doboth;
+    Fixed x2, y2;
+    bool xsame;
     if (x0 == x1)
         return;
     (void)PrvForBend(p, &x2, &y2);
@@ -321,14 +326,15 @@ DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
         (TestTan(y0 - y2, x0 - x2) &&
          (ProdLt0(y2 - y0, y0 - y1) || (IsHorizontal(x0, y0, x1, y1) &&
                                         TestBend(x2, y2, x0, y0, x1, y1))))) {
-        delta = FixHalfMul(gBendLength);
-        doboth = false;
+        Fixed strt, end;
+        Fixed delta = FixHalfMul(gBendLength);
+        bool doboth = false;
         if ((y2 < y0 && y0 <= y1) || (y2 <= y0 && y0 < y1)) {
         } else if ((y1 < y0 && y0 <= y2) || (y1 <= y0 && y0 < y2))
             delta = -delta;
         else if (xsame) {
-            right = x0 > x1;
-            ccw = IsCCW(x2, y2, x0, y0, x1, y1);
+            bool right = x0 > x1;
+            bool ccw = IsCCW(x2, y2, x0, y0, x1, y1);
             if (right != ccw)
                 delta = -delta;
             if (!gYgoesUp)
@@ -346,9 +352,8 @@ static void
 MergeLnkSegs(PClrSeg seg1, PClrSeg seg2, PSegLnkLst lst)
 {
     /* replace lnk refs to seg1 by seg2 */
-    PSegLnk lnk;
     while (lst != NULL) {
-        lnk = lst->lnk;
+        PSegLnk lnk = lst->lnk;
         if (lnk->seg == seg1)
             lnk->seg = seg2;
         lst = lst->next;
@@ -817,7 +822,6 @@ PickHSpot(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed xdist, Fixed px1,
           Fixed nxty)
 {
     bool topSeg = (xdist < 0) ? true : false;
-    Fixed upper, lower;
     bool inBlue0, inBlue1;
     if (topSeg) {
         inBlue0 = InBlueBand(y0, gLenTopBands, gTopBands);
@@ -839,6 +843,7 @@ PickHSpot(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed xdist, Fixed px1,
     if (y0 != prvy && y1 == nxty)
         return y1;
     if (inBlue0 && inBlue1) {
+        Fixed upper, lower;
         if (y0 > y1) {
             upper = y0;
             lower = y1;
