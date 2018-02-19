@@ -72,7 +72,7 @@ NewFontInfo(size_t length)
 {
     ACFontInfo* fontinfo;
 
-    if (length <= 0)
+    if (length == 0)
         return NULL;
 
     fontinfo = (ACFontInfo*)AllocateMem(1, sizeof(ACFontInfo), "fontinfo");
@@ -96,7 +96,7 @@ NewBuffer(size_t size)
 {
     ACBuffer* buffer;
 
-    if (size <= 0)
+    if (size == 0)
         return NULL;
 
     buffer = (ACBuffer*)AllocateMem(1, sizeof(ACBuffer), "out buffer");
