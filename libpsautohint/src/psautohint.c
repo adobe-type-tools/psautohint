@@ -129,7 +129,7 @@ FreeBuffer(ACBuffer* buffer)
 static int
 ParseFontInfo(const char* data, ACFontInfo** fontinfo)
 {
-    const char *kwstart, *kwend, *tkstart, *current;
+    const char *current;
     size_t i;
 
     ACFontInfo* info = *fontinfo = NewFontInfo(34);
@@ -185,6 +185,7 @@ ParseFontInfo(const char* data, ACFontInfo** fontinfo)
     current = data;
     while (*current) {
         size_t kwLen;
+        const char *kwstart, *kwend, *tkstart;
         skipblanks();
         kwstart = current;
         skipnonblanks();
