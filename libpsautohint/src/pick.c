@@ -44,12 +44,13 @@ ConsiderPicking(Fixed bestSpc, Fixed bestVal, PClrVal colorList,
 void
 PickVVals(PClrVal valList)
 {
-    PClrVal colorList, rejectList, vlist, prev, best, bestPrev, nxt;
+    PClrVal colorList, rejectList, vlist, nxt;
     Fixed bestVal, prevBestVal;
-    Fixed lft, rght, vlft, vrght;
     colorList = rejectList = NULL;
     prevBestVal = 0;
     while (true) {
+        PClrVal prev, bestPrev, best;
+        Fixed lft, rght;
         vlist = valList;
         prev = bestPrev = best = NULL;
         while (vlist != NULL) {
@@ -79,8 +80,8 @@ PickVVals(PClrVal valList)
         vlist = valList;
         prev = NULL;
         while (vlist != NULL) {
-            vlft = vlist->vLoc1;
-            vrght = vlist->vLoc2;
+            Fixed vlft = vlist->vLoc1;
+            Fixed vrght = vlist->vLoc2;
             if ((vlft <= rght) && (vrght >= lft)) {
                 nxt = vlist->vNxt;
                 vlist->vNxt = rejectList;
@@ -148,13 +149,13 @@ FndBstVal(PClrSeg seg, bool seg1Flg, PClrVal cList, PClrVal rList, int32_t nb,
           Fixed* b, int32_t ns, Fixed* s, bool locFlg, bool hFlg)
 {
     Fixed loc, vloc;
-    PClrVal best, vList, initLst;
+    PClrVal best, vList;
     PClrSeg vseg;
     best = NULL;
     loc = seg->sLoc;
     vList = cList;
     while (true) {
-        initLst = vList;
+        PClrVal initLst = vList;
         while (vList != NULL) {
             if (seg1Flg) {
                 vseg = vList->vSeg1;
