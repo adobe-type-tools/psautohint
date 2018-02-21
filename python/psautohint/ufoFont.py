@@ -114,6 +114,7 @@ tools stripped out the _hintFormat1_ hint data as invalid elements.
 
 from __future__ import print_function, absolute_import
 
+import ast
 import hashlib
 import os
 import plistlib
@@ -512,7 +513,7 @@ class UFOFontData:
         if os.path.exists(hashPath):
             with open(hashPath, "rt") as fp:
                 data = fp.read()
-            newMap = eval(data)
+            newMap = ast.literal_eval(data)
         else:
             newMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
 
