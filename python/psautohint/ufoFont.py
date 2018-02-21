@@ -1104,9 +1104,8 @@ class UFOFontData:
                                          "yScale", "xOffset", "yOffset"]:
                         try:
                             value = childContour.attrib[transformTag]
-                            rval = eval(value)
-                            if int(rval) == rval:
-                                value = str(int(rval))
+                            if self._represents_integer(value):
+                                value = str(int(value))
                             dataList.append(value)
                         except KeyError:
                             pass
@@ -1122,6 +1121,14 @@ class UFOFontData:
         else:
             glyph_hash = hashlib.sha512(data.encode("utf-8")).hexdigest()
         return glyph_hash, dataList
+
+    @staticmethod
+    def _represents_integer(string):
+        try:
+            int(string)
+            return True
+        except ValueError:
+            return False
 
     def getComponentOutline(self, componentItem):
         try:
