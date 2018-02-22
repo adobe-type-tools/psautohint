@@ -158,7 +158,7 @@ CheckVal(PClrVal val, bool vert)
 {
     Fixed* stems;
     int32_t numstems, i;
-    Fixed wd, diff, minDiff, minW, b, t, w;
+    Fixed minDiff, minW, b, t, w;
     if (vert) {
         stems = gVStems;
         numstems = gNumVStems;
@@ -174,8 +174,8 @@ CheckVal(PClrVal val, bool vert)
     minDiff = FixInt(1000);
     minW = 0;
     for (i = 0; i < numstems; i++) {
-        wd = stems[i];
-        diff = abs(wd - w);
+        Fixed wd = stems[i];
+        Fixed diff = abs(wd - w);
         if (diff < minDiff) {
             minDiff = diff;
             minW = wd;
