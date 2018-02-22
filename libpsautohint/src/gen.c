@@ -406,19 +406,16 @@ ReportRemSeg(int32_t l, PClrSeg lst)
 static void
 RemExtraBends(int32_t l0, int32_t l1)
 {
-    PClrSeg lst0, lst, n, p;
-    PClrSeg nxt, prv;
-    Fixed loc0, loc;
-    lst0 = gSegLists[l0];
-    prv = NULL;
+    PClrSeg lst0 = gSegLists[l0];
+    PClrSeg prv = NULL;
     while (lst0 != NULL) {
-        nxt = lst0->sNxt;
-        loc0 = lst0->sLoc;
-        lst = gSegLists[l1];
-        p = NULL;
+        PClrSeg nxt = lst0->sNxt;
+        Fixed loc0 = lst0->sLoc;
+        PClrSeg lst = gSegLists[l1];
+        PClrSeg p = NULL;
         while (lst != NULL) {
-            n = lst->sNxt;
-            loc = lst->sLoc;
+            PClrSeg n = lst->sNxt;
+            Fixed loc = lst->sLoc;
             if (loc > loc0)
                 break; /* list in increasing order by sLoc */
             if (loc == loc0 && lst->sMin < lst0->sMax &&
@@ -460,15 +457,14 @@ RemExtraBends(int32_t l0, int32_t l1)
 static void
 CompactList(int32_t i, void (*nm)(PClrSeg, PClrSeg))
 {
-    PClrSeg lst, prv, nxtprv, nxt;
-    Fixed lstmin, lstmax, nxtmin, nxtmax;
-    bool flg;
-    lst = gSegLists[i];
-    prv = NULL;
+    PClrSeg lst = gSegLists[i];
+    PClrSeg prv = NULL;
     while (lst != NULL) {
-        nxt = lst->sNxt;
-        nxtprv = lst;
+        bool flg;
+        PClrSeg nxt = lst->sNxt;
+        PClrSeg nxtprv = lst;
         while (true) {
+            Fixed lstmin, lstmax, nxtmin, nxtmax;
             if ((nxt == NULL) || (nxt->sLoc > lst->sLoc)) {
                 flg = true;
                 break;
