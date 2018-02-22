@@ -96,8 +96,8 @@ CalcOverlapDist(Fixed d, Fixed overlaplen, Fixed minlen)
 static void
 EvalHPair(PClrSeg botSeg, PClrSeg topSeg, Fixed* pspc, Fixed* pv)
 {
-    Fixed brght, blft, bloc, tloc, trght, tlft, ldst, rdst;
-    Fixed mndist, dist, dy, minlen, overlaplen;
+    Fixed brght, blft, bloc, tloc, trght, tlft;
+    Fixed mndist, dist, dy;
     bool inBotBand, inTopBand;
     *pspc = 0;
     brght = botSeg->sMax;
@@ -121,16 +121,16 @@ EvalHPair(PClrSeg botSeg, PClrSeg topSeg, Fixed* pspc, Fixed* pv)
         *pspc = FixInt(2);
     /* left is always < right */
     if ((tlft <= brght) && (trght >= blft)) { /* overlap */
-        overlaplen = NUMMIN(trght, brght) - NUMMAX(tlft, blft);
-        minlen = NUMMIN(trght - tlft, brght - blft);
+        Fixed overlaplen = NUMMIN(trght, brght) - NUMMAX(tlft, blft);
+        Fixed minlen = NUMMIN(trght - tlft, brght - blft);
         if (minlen == overlaplen)
             dist = dy;
         else
             dist = CalcOverlapDist(dy, overlaplen, minlen);
     } else { /* no overlap; take closer ends */
         Fixed dx;
-        ldst = abs(tlft - brght);
-        rdst = abs(trght - blft);
+        Fixed ldst = abs(tlft - brght);
+        Fixed rdst = abs(trght - blft);
         dx = NUMMIN(ldst, rdst);
         dist = GapDist(dx);
         /* extra penalty for nonoverlap changed from 7/5 to 12/5 for
@@ -219,7 +219,6 @@ EvalVPair(PClrSeg leftSeg, PClrSeg rightSeg, Fixed* pspc, Fixed* pv)
     Fixed ltop, lbot, lloc, rloc, rtop, rbot;
     Fixed mndist, dx, dist;
     Fixed bonus, lbonus, rbonus;
-    int i;
     *pspc = 0;
     ltop = leftSeg->sMax;
     lbot = leftSeg->sMin;
@@ -256,6 +255,7 @@ EvalVPair(PClrSeg leftSeg, PClrSeg rightSeg, Fixed* pspc, Fixed* pv)
     bonus = NUMMIN(lbonus, rbonus);
     *pspc = (bonus > 0) ? FixInt(2) : 0; /* this is for sol-eol characters */
     if (gNumVStems > 0) {
+        int i;
         Fixed w = idtfmx(dx);
         w = abs(w);
         for (i = 0; i < gNumVStems; i++)
@@ -271,7 +271,7 @@ static void
 VStemMiss(PClrSeg leftSeg, PClrSeg rightSeg)
 {
     Fixed ltop, lbot, lloc, rloc, rtop, rbot;
-    Fixed mndist, dx, dist, overlaplen, minlen;
+    Fixed mndist, dx, dist;
     Fixed l, r, minDiff, minW, w;
     int i;
     if (gNumVStems == 0)
@@ -287,8 +287,8 @@ VStemMiss(PClrSeg leftSeg, PClrSeg rightSeg)
         return;
     /* top is always > bot, independent of YgoesUp */
     if ((ltop >= rbot) && (lbot <= rtop)) { /* overlap */
-        overlaplen = NUMMIN(ltop, rtop) - NUMMAX(lbot, rbot);
-        minlen = NUMMIN(ltop - lbot, rtop - rbot);
+        Fixed overlaplen = NUMMIN(ltop, rtop) - NUMMAX(lbot, rbot);
+        Fixed minlen = NUMMIN(ltop - lbot, rtop - rbot);
         if (minlen == overlaplen)
             dist = dx;
         else
