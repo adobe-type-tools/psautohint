@@ -572,7 +572,7 @@ static bool
 NxtHorz(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2, x3, y3;
-    p = NxtForBend(p, &x2, &y2, &x3, &y3);
+    (void)NxtForBend(p, &x2, &y2, &x3, &y3);
     return TstFlat(y2 - y, x2 - x);
 }
 
@@ -580,7 +580,7 @@ static bool
 PrvHorz(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2;
-    p = PrvForBend(p, &x2, &y2);
+    (void)PrvForBend(p, &x2, &y2);
     return TstFlat(y2 - y, x2 - x);
 }
 
@@ -588,7 +588,7 @@ static bool
 NxtVert(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2, x3, y3;
-    p = NxtForBend(p, &x2, &y2, &x3, &y3);
+    (void)NxtForBend(p, &x2, &y2, &x3, &y3);
     return TstFlat(x2 - x, y2 - y);
 }
 
@@ -596,7 +596,7 @@ static bool
 PrvVert(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2;
-    p = PrvForBend(p, &x2, &y2);
+    (void)PrvForBend(p, &x2, &y2);
     return TstFlat(x2 - x, y2 - y);
 }
 
