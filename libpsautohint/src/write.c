@@ -184,15 +184,16 @@ safestrcat(char* s1, char* s2)
 static void
 NewBest(PClrPoint lst)
 {
-    Fixed x0, x1, y0, y1;
     bst = lst;
     bch = lst->c;
     if (bch == 'y' || bch == 'm') {
+        Fixed x0, x1;
         bstB = true;
         x0 = lst->x0;
         x1 = lst->x1;
         bx = NUMMIN(x0, x1);
     } else {
+        Fixed y0, y1;
         bstB = false;
         y0 = lst->y0;
         y1 = lst->y1;
