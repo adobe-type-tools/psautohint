@@ -440,16 +440,15 @@ void
 LogColorInfo(PClrPoint pl)
 {
     char c = pl->c;
-    Fixed lft, rht, top, bot, wdth;
     if (c == 'y' || c == 'm') { /* vertical lines */
-        lft = pl->x0;
-        rht = pl->x1;
+        Fixed lft = pl->x0;
+        Fixed rht = pl->x1;
         PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(rht - lft), gGlyphName,
                      FixToDbl(lft), FixToDbl(rht));
     } else {
-        bot = pl->y0;
-        top = pl->y1;
-        wdth = top - bot;
+        Fixed bot = pl->y0;
+        Fixed top = pl->y1;
+        Fixed wdth = top - bot;
         if (wdth == -FixInt(21) || wdth == -FixInt(20))
             return; /* ghost pair */
         PrintMessage("%4g  %-30s%5g%5g\n", FixToDbl(wdth), gGlyphName,
