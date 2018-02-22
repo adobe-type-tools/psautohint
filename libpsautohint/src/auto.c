@@ -547,14 +547,11 @@ CheckElmntClrSegs(void)
 static bool
 ClrLstsClash(PSegLnkLst lst1, PSegLnkLst lst2, bool flg)
 {
-    PClrSeg seg;
-    PClrVal val;
-    PSegLnkLst lst;
     while (lst1 != NULL) {
-        seg = lst1->lnk->seg;
-        val = seg->sLnk;
+        PClrSeg seg = lst1->lnk->seg;
+        PClrVal val = seg->sLnk;
         if (val != NULL) {
-            lst = lst2;
+            PSegLnkLst lst = lst2;
             while (lst != NULL) {
                 if (TestColorLst(lst, val, flg, false) == 0) {
                     return true;
@@ -570,18 +567,14 @@ ClrLstsClash(PSegLnkLst lst1, PSegLnkLst lst2, bool flg)
 static PSegLnkLst
 BestFromLsts(PSegLnkLst lst1, PSegLnkLst lst2)
 {
-    PSegLnkLst lst, bst;
-    PClrSeg seg;
-    PClrVal val;
-    Fixed bstval;
+    PSegLnkLst bst = NULL;
+    Fixed bstval = 0;
     int32_t i;
-    bst = NULL;
-    bstval = 0;
     for (i = 0; i < 2; i++) {
-        lst = i ? lst1 : lst2;
+        PSegLnkLst lst = i ? lst1 : lst2;
         while (lst != NULL) {
-            seg = lst->lnk->seg;
-            val = seg->sLnk;
+            PClrSeg seg = lst->lnk->seg;
+            PClrVal val = seg->sLnk;
             if (val != NULL && val->vVal > bstval) {
                 bst = lst;
                 bstval = val->vVal;
