@@ -620,15 +620,14 @@ Blues(const ACFontInfo* fontinfo)
 static void
 DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1)
 {
-    Fixed bot, top;
     Fixed charTop = INT32_MIN, charBot = INT32_MAX;
     bool curved;
     if (!gDoAligns && !gDoStems) {
         return;
     }
     while (sLst1 != NULL) {
-        bot = itfmy(sLst1->vLoc1);
-        top = itfmy(sLst1->vLoc2);
+        Fixed bot = itfmy(sLst1->vLoc1);
+        Fixed top = itfmy(sLst1->vLoc2);
         if (top < bot) {
             Fixed tmp = top;
             top = bot;
@@ -736,11 +735,11 @@ Yellows(void)
 static void
 DoVStems(PClrVal sLst)
 {
-    Fixed lft, rght;
     if (!gDoAligns && !gDoStems) {
         return;
     }
     while (sLst != NULL) {
+        Fixed lft, rght;
         bool curved;
         curved = !FindLineSeg(sLst->vLoc1, leftList) &&
                  !FindLineSeg(sLst->vLoc2, rightList);
