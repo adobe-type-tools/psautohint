@@ -208,8 +208,6 @@ ReClrVBnds(void)
 void
 ClrHBnds(void)
 {
-    Fixed tmp;
-    PPathElt p;
     if (gPathStart == NULL || HColorChar())
         return;
     FindPathBBox();
@@ -218,7 +216,8 @@ ClrHBnds(void)
     phMn = pymn;
     phMx = pymx;
     if (hMn > hMx) {
-        tmp = hMn;
+        PPathElt p;
+        Fixed tmp = hMn;
         hMn = hMx;
         hMx = tmp;
         p = phMn;
@@ -357,11 +356,11 @@ AddBBoxHV(bool Hflg, bool subs)
 void
 ClrBBox(void)
 {
-    Fixed llx, lly, urx, ury, tmp;
+    Fixed tmp;
     PPathElt p, p0, p1;
     if (!gUseV) {
-        llx = itfmx(xmin);
-        urx = itfmx(xmax);
+        Fixed llx = itfmx(xmin);
+        Fixed urx = itfmx(xmax);
         p0 = pxmn;
         p1 = pxmx;
         if (llx > urx) {
@@ -375,8 +374,8 @@ ClrBBox(void)
         AddColorPoint(llx, 0, urx, 0, 'y', p0, p1);
     }
     if (!gUseH) {
-        lly = itfmy(ymax);
-        ury = itfmy(ymin);
+        Fixed lly = itfmy(ymax);
+        Fixed ury = itfmy(ymin);
         p0 = pymx;
         p1 = pymn;
         if (lly > ury) {
