@@ -65,9 +65,8 @@ CheckForClr(void)
 bool
 PreCheckForColoring(void)
 {
-    PPathElt e, nxt;
+    PPathElt e;
     int32_t cnt = 0;
-    int32_t chk;
     while (gPathEnd != NULL) {
         if (gPathEnd->type == MOVETO)
             Delete(gPathEnd);
@@ -80,6 +79,7 @@ PreCheckForColoring(void)
     e = gPathStart;
     while (e != NULL) {
         if (e->type == CLOSEPATH) {
+            PPathElt nxt;
             if (e == gPathEnd)
                 break;
             nxt = e->next;
@@ -95,7 +95,7 @@ PreCheckForColoring(void)
         e = e->next;
     }
     while (true) {
-        chk = CheckForClr();
+        int32_t chk = CheckForClr();
         if (chk == -1)
             return false;
         if (chk == 0)
@@ -166,7 +166,6 @@ static void
 TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     Fixed x2, y2, x3, y3, x4, y4;
-    bool top, dwn;
     double d0sq, d1sq, quot, dx, dy;
 
     GetEndPoint(n, &x2, &y2);
@@ -194,6 +193,7 @@ TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
         return;
 
     if (gFlexStrict) {
+        bool top, dwn;
         PPathElt p, q;
         q = GetSubpathNext(n);
         GetEndPoint(q, &x3, &y3);
