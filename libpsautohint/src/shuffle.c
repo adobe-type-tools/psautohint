@@ -168,7 +168,7 @@ DoShuffleSubpaths(void)
 {
     unsigned char sumlinks[MAXCNT], output[MAXCNT], outlinks[MAXCNT];
     unsigned char* lnks;
-    int32_t i, j, bst, bstsum, bstlnks;
+    int32_t i, j;
     if (links == NULL)
         return;
     if (gDebug)
@@ -185,8 +185,8 @@ DoShuffleSubpaths(void)
     if (gDebug)
         PrintSumLinks((char*)sumlinks);
     while (true) {
-        bst = -1;
-        bstsum = 0;
+        int32_t bst = -1;
+        int32_t bstsum = 0;
         for (i = 0; i < rowcnt; i++) {
             if (output[i] == 0 && (bst == -1 || sumlinks[i] > bstsum)) {
                 bstsum = sumlinks[i];
@@ -197,6 +197,7 @@ DoShuffleSubpaths(void)
             break;
         Outpath(links, outlinks, output, bst);
         while (true) {
+            int32_t bstlnks;
             bst = -1;
             bstsum = 0;
             bstlnks = 0;
