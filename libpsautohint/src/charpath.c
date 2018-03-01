@@ -1228,7 +1228,7 @@ CheckFlexOK(indx ix)
 static void
 OptimizeCT(indx ix)
 {
-    int16_t newtype;
+    int16_t newtype = 0;
     bool vhct = true, hvct = true;
     indx i;
 
@@ -1361,7 +1361,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
                     bool* errormsg)
 {
     indx ix;
-    PHintElt* hintElt;
+    PHintElt* hintElt = NULL;
     int16_t count, newhinttype;
     bool ok = true;
     Fixed min, dmin, mid, dmid, max, dmax;
@@ -1704,39 +1704,34 @@ WriteFlex(indx eltix)
 }
 
 static void
-WriteUnmergedHints(indx pathEltIx)
+WriteUnmergedHints(indx pathEltIx, indx mIx)
 {
-    indx ix;
     int16_t rmcount, rvcount, hinttype;
-    PHintElt* hintArray;
+    PHintElt hintList;
 
     /* hintArray contains the pointers to the beginning of the linked list of
      * hints for each design at pathEltIx. */
-    hintArray = (PHintElt*)AllocateMem(masterCount, sizeof(HintElt*),
-                                       "hint element array");
-    /* Initialize hint array. */
-    for (ix = 0; ix < masterCount; ix++) {
-        if (pathEltIx == MAINHINTS)
-            hintArray[ix] = pathlist[ix].mainhints;
-        else
-            hintArray[ix] = pathlist[ix].path[pathEltIx].hints;
-    }
+    hintList = (PHintElt)AllocateMem(1, sizeof(HintElt*),
+                                     "hint element array");
+    /* Initialize hint list. */
+    if (pathEltIx == MAINHINTS)
+        hintList = pathlist[mIx].mainhints;
+    else
+        hintList = pathlist[mIx].path[pathEltIx].hints;
 
     rmcount = rvcount = 0;
-    while (hintArray[0] != NULL) {
-        hinttype = hintArray[hintsMasterIx]->type;
-        for (ix = 0; ix < masterCount; ix++) {
-            hintArray[ix]->rightortop -=
-              hintArray[ix]->leftorbot; /* relativize */
-            if ((hinttype == RY || hinttype == (RM + ESCVAL)) && !cubeLibrary)
-                /* If it is a cube library, sidebearings are considered to be
-                 * zero. for normal fonts, translate vstem hints left by
-                 * sidebearing. */
-                hintArray[ix]->leftorbot -= IntToFix(pathlist[ix].sb);
-        }
+    while (hintList != NULL) {
+        hinttype = hintList->type;
+        hintList->rightortop -=
+        hintList->leftorbot; /* relativize */
+        if ((hinttype == RY || hinttype == (RM + ESCVAL)) && !cubeLibrary)
+        /* If it is a cube library, sidebearings are considered to be
+         * zero. for normal fonts, translate vstem hints left by
+         * sidebearing. */
+            hintList->leftorbot -= IntToFix(pathlist[mIx].sb);
 
-        WriteOneHintVal(hintArray[0]->leftorbot);
-        WriteOneHintVal(hintArray[0]->rightortop);
+        WriteOneHintVal(hintList->leftorbot);
+        WriteOneHintVal(hintList->rightortop);
         switch (hinttype) {
             case RB:
                 WriteToBuffer("rb\n");
@@ -1762,14 +1757,12 @@ WriteUnmergedHints(indx pathEltIx)
                        gGlyphName);
         }
 
-        for (ix = 0; ix < masterCount; ix++) {
-            if (hintArray[ix]->next == NULL)
-                hintArray[ix] = NULL;
-            else
-                hintArray[ix] = hintArray[ix]->next;
-        }
+        if (hintList->next == NULL)
+            hintList = NULL;
+        else
+            hintList = hintList->next;
     } /* end of while */
-    UnallocateMem(hintArray);
+    UnallocateMem(hintList);
 }
 
 static void
@@ -2073,7 +2066,7 @@ WritePaths(char** outBuffers, size_t* outLengths)
         WriteToBuffer("%% %s\n", gGlyphName);
 
         if (gAddHints && (pathlist[hintsMasterIx].mainhints != NULL))
-            WriteUnmergedHints(MAINHINTS);
+            WriteUnmergedHints(MAINHINTS, mIx);
 
         WriteToBuffer("sc\n");
         for (eltix = 0; eltix < gPathEntries; eltix++) {
@@ -2089,10 +2082,8 @@ WritePaths(char** outBuffers, size_t* outLengths)
             else if (op == RDT)
                 op = DT;
 
-            /* FIXME
             if (gAddHints && elt.hints != NULL)
-                WriteUnmergedHints(eltix);
-            */
+                WriteUnmergedHints(eltix, mIx);
 
             opcount = GetOperandCount(op);
             GetLengthandSubrIx(opcount, &length, &subrIx);
@@ -2411,7 +2402,8 @@ MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
                const char** masters, char** outbuffers, size_t* outlengths)
 {
     bool ok;
-
+    /* This requires that  master  hintsMasterIx has already been hinted with
+     * AutoColor().  See comments in psautohint,c::AutoColorStringMM() */
     masterCount = nmasters;
     masterNames = masters;
 

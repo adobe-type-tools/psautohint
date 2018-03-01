@@ -374,6 +374,30 @@ AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
                   int nmasters, const char** masters, char** dstbezdata,
                   size_t* lengths)
 {
+    /* Only the master with index 'hintsMasterIx' needs to be hinted; this is
+     * why only the fontinfo data for that master is needed. This function
+     * expects that the master with index 'hintsMasterIx' has already been
+     * hinted with AutoColor().
+     *
+     * The hints for the others masters are derived a very simple process. When
+     * the first master was hinted, the logic recorded the path element index
+     * for the path element which sets the inner or outer edge of each hint,
+     * and whether it is the endpoint or startpoint which sets the edge. For
+     * each other master, the logic gets the path element for the current
+     * master using the same path element index as in the first master, and
+     * uses the end or start point of that path element to set the edge in the
+     * current master.
+     *
+     * Some code notes: The original hinting pass in AutoColorString() on the
+     * first master records the path indicies for each path element that sets a
+     * hint edge, and whether it is a start or end point; this stored in the
+     * hintElt structures in the first master. There is a hintElt for the main
+     * (default) hints at the start of the charstring, and there is hintElt
+     * structure attached to each path element which triggers a new hint set.
+     * The function charpath.c::ReadandAssignHints(), called from
+     * charpath.c::MergeCharPaths(), then copies all the hintElts to the
+     * current master main or path elements. (This actually happens in
+     * charpath.c::InsertHint().) */
     int value, result;
     ACFontInfo* fontinfo = NULL;
 
@@ -398,35 +422,8 @@ AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
         /* AutoColor was called successfully */
         FreeFontInfo(fontinfo);
         return AC_Success;
-#if 0
-        if (gBezOutput->length < *length) {
-            *length = gBezOutput->length + 1;
-            strncpy(dstbezdata, gBezOutput->data, *length);
-            FreeBuffer(gBezOutput);
-            return AC_Success;
-        } else {
-            *length = gBezOutput->length + 1;
-            FreeBuffer(gBezOutput);
-            return AC_DestBuffOfloError;
-        }
-#endif
     }
 
-#if 0
-    gBezOutput = NewBuffer(*length);
-    if (!gBezOutput) {
-        FreeFontInfo(fontinfo);
-        return AC_MemoryError;
-    }
-
-    result = AutoColor(fontinfo,     /* font info */
-                       srcbezdata,   /* input glyph */
-                       false,        /* fixStems */
-                       debug,        /* debug */
-                       allowHintSub, /* extracolor*/
-                       allowEdit,    /* editChars */
-                       roundCoords);
-#endif
     /* result == true is good */
     result = MergeCharPaths(fontinfo, srcbezdata, nmasters, masters, dstbezdata,
                             lengths);
