@@ -34,7 +34,7 @@ GetKeyValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
     fontinfostr = GetFontInfo(fontinfo, keyword, optional);
 
     if ((fontinfostr != NULL) && (fontinfostr[0] != 0)) {
-        *value = atol(fontinfostr);
+        *value = (int32_t)atol(fontinfostr);
     }
     return;
 }
