@@ -457,7 +457,7 @@ CombVals(Fixed v1, Fixed v2)
 {
     int32_t i;
     float r1, r2;
-    float x, a, xx;
+    float x, a, xx = 0;
     acfixtopflt(v1, &r1);
     acfixtopflt(v2, &r2);
     /* home brew sqrt */

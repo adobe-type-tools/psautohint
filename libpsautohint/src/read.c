@@ -680,7 +680,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                         if (c == 0)
                             break;
                     }
-                    DoName(fontinfo, s0, s, s - s0 - 1);
+                    DoName(fontinfo, s0, s, (int)(s - s0 - 1));
                     if (c == '\0')
                         s--;
                     continue;
