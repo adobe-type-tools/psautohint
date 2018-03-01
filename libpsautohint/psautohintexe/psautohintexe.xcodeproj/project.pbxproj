@@ -1,0 +1,345 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BD2C11C8203DF81200D922B6 /* autohintexe.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C11C7203DF81200D922B6 /* autohintexe.c */; };
+		BD2C11DC203DFA8200D922B6 /* libpsautohint.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD2C11D9203DFA4900D922B6 /* libpsautohint.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BD2C11D8203DFA4900D922B6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD2C11D4203DFA4900D922B6 /* libpsautohint.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = BD2C115E203DF50800D922B6;
+			remoteInfo = libpsautohint;
+		};
+		BD2C11DA203DFA7800D922B6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD2C11D4203DFA4900D922B6 /* libpsautohint.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = BD2C115D203DF50800D922B6;
+			remoteInfo = libpsautohint;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BD2C1145203DF47200D922B6 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		BD2C1147203DF47200D922B6 /* psautohintexe */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = psautohintexe; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD2C11B8203DF77000D922B6 /* libpsautohint.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpsautohint.a; path = "../../../../../../Users/rroberts/Library/Developer/Xcode/DerivedData/libpsautohint-adnprwhqznqfblergcjoongqpnfu/Build/Products/Debug/libpsautohint.a"; sourceTree = "<group>"; };
+		BD2C11C6203DF7F200D922B6 /* psautohint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = psautohint.h; sourceTree = "<group>"; };
+		BD2C11C7203DF81200D922B6 /* autohintexe.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = autohintexe.c; path = ../autohintexe.c; sourceTree = "<group>"; };
+		BD2C11D4203DFA4900D922B6 /* libpsautohint.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = libpsautohint.xcodeproj; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BD2C1144203DF47200D922B6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD2C11DC203DFA8200D922B6 /* libpsautohint.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BD2C113E203DF47200D922B6 = {
+			isa = PBXGroup;
+			children = (
+				BD2C11D3203DFA4900D922B6 /* libpsautohint */,
+				BD2C11C9203DF81500D922B6 /* src */,
+				BD2C11C5203DF7F200D922B6 /* include */,
+				BD2C11CA203DF84000D922B6 /* lib */,
+				BD2C1148203DF47200D922B6 /* Products */,
+				BD2C11B7203DF77000D922B6 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		BD2C1148203DF47200D922B6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD2C1147203DF47200D922B6 /* psautohintexe */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD2C11B7203DF77000D922B6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BD2C11B8203DF77000D922B6 /* libpsautohint.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BD2C11C5203DF7F200D922B6 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				BD2C11C6203DF7F200D922B6 /* psautohint.h */,
+			);
+			name = include;
+			path = ../include;
+			sourceTree = "<group>";
+		};
+		BD2C11C9203DF81500D922B6 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				BD2C11C7203DF81200D922B6 /* autohintexe.c */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		BD2C11CA203DF84000D922B6 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = lib;
+			sourceTree = "<group>";
+		};
+		BD2C11D3203DFA4900D922B6 /* libpsautohint */ = {
+			isa = PBXGroup;
+			children = (
+				BD2C11D4203DFA4900D922B6 /* libpsautohint.xcodeproj */,
+			);
+			path = libpsautohint;
+			sourceTree = "<group>";
+		};
+		BD2C11D5203DFA4900D922B6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD2C11D9203DFA4900D922B6 /* libpsautohint.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BD2C1146203DF47200D922B6 /* psautohintexe */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD2C114E203DF47200D922B6 /* Build configuration list for PBXNativeTarget "psautohintexe" */;
+			buildPhases = (
+				BD2C1143203DF47200D922B6 /* Sources */,
+				BD2C1144203DF47200D922B6 /* Frameworks */,
+				BD2C1145203DF47200D922B6 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BD2C11DB203DFA7800D922B6 /* PBXTargetDependency */,
+			);
+			name = psautohintexe;
+			productName = psautohintexe;
+			productReference = BD2C1147203DF47200D922B6 /* psautohintexe */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BD2C113F203DF47200D922B6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = rroberts;
+				TargetAttributes = {
+					BD2C1146203DF47200D922B6 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = BD2C1142203DF47200D922B6 /* Build configuration list for PBXProject "psautohintexe" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = BD2C113E203DF47200D922B6;
+			productRefGroup = BD2C1148203DF47200D922B6 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = BD2C11D5203DFA4900D922B6 /* Products */;
+					ProjectRef = BD2C11D4203DFA4900D922B6 /* libpsautohint.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				BD2C1146203DF47200D922B6 /* psautohintexe */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		BD2C11D9203DFA4900D922B6 /* libpsautohint.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libpsautohint.a;
+			remoteRef = BD2C11D8203DFA4900D922B6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BD2C1143203DF47200D922B6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD2C11C8203DF81200D922B6 /* autohintexe.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BD2C11DB203DFA7800D922B6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libpsautohint;
+			targetProxy = BD2C11DA203DFA7800D922B6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		BD2C114C203DF47200D922B6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		BD2C114D203DF47200D922B6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		BD2C114F203DF47200D922B6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		BD2C1150203DF47200D922B6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BD2C1142203DF47200D922B6 /* Build configuration list for PBXProject "psautohintexe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD2C114C203DF47200D922B6 /* Debug */,
+				BD2C114D203DF47200D922B6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD2C114E203DF47200D922B6 /* Build configuration list for PBXNativeTarget "psautohintexe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD2C114F203DF47200D922B6 /* Debug */,
+				BD2C1150203DF47200D922B6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BD2C113F203DF47200D922B6 /* Project object */;
+}
