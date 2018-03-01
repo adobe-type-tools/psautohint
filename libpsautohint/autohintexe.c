@@ -217,6 +217,7 @@ main(int argc, char* argv[])
 
     bool allowEdit, roundCoords, allowHintSub, debug, badParam, allStems;
     bool argumentIsBezData = false;
+    bool doMM = false;
     bool report = false;
     char* fontInfoFileName = NULL; /* font info file name, or suffix of
                                       environment variable holding
@@ -227,7 +228,7 @@ main(int argc, char* argv[])
                                       bez string. */
 
     int16_t total_files = 0;
-    int argi;
+    int result, argi;
 
     badParam = false;
     debug = false;
@@ -316,6 +317,9 @@ main(int argc, char* argv[])
                     exit(1);
                 }
                 break;
+            case 'm':
+                doMM = true;
+                break;
             case 'n':
                 allowHintSub = false;
                 break;
@@ -378,59 +382,123 @@ main(int argc, char* argv[])
 
     AC_SetReportCB(reportCB, verbose);
     argi = firstFileNameIndex - 1;
-    while (++argi < argc) {
-        char* bezdata;
-        char* output;
-        size_t outputsize = 0;
-        int result;
-        bezName = argv[argi];
-        if (!argumentIsBezData) {
-            bezdata = getFileData(bezName);
-        } else {
-            bezdata = bezName;
-        }
-        outputsize = 4 * strlen(bezdata);
-        output = malloc(outputsize);
+    if (!doMM)
+    {
+        while (++argi < argc) {
+            char* bezdata;
+            char* output;
+            size_t outputsize = 0;
+            bezName = argv[argi];
+            if (!argumentIsBezData) {
+                bezdata = getFileData(bezName);
+            } else {
+                bezdata = bezName;
+            }
+            outputsize = 4 * strlen(bezdata);
+            output = malloc(outputsize);
 
-        if (!argumentIsBezData && report) {
-            openReportFile(bezName, fileSuffix);
-        }
+            if (!argumentIsBezData && report) {
+                openReportFile(bezName, fileSuffix);
+            }
 
-        result = AutoColorString(bezdata, fontinfo, output, &outputsize,
-                                 allowEdit, allowHintSub, roundCoords, debug);
-        if (result == AC_DestBuffOfloError) {
+            result = AutoColorString(bezdata, fontinfo, output, &outputsize,
+                                     allowEdit, allowHintSub, roundCoords, debug);
+            if (result == AC_DestBuffOfloError) {
+                if (reportFile != NULL) {
+                    closeReportFile();
+                    if (!argumentIsBezData && report) {
+                        openReportFile(bezName, fileSuffix);
+                    }
+                }
+                free(output);
+                output = malloc(outputsize);
+                /* printf("NOTE: trying again. Input size %d output size %d.\n",
+                 * strlen(bezdata), outputsize); */
+                AC_SetReportCB(reportCB, false);
+                result =
+                AutoColorString(bezdata, fontinfo, output, &outputsize, allowEdit,
+                                allowHintSub, roundCoords, debug);
+                AC_SetReportCB(reportCB, verbose);
+            }
+
             if (reportFile != NULL) {
                 closeReportFile();
-                if (!argumentIsBezData && report) {
-                    openReportFile(bezName, fileSuffix);
+            } else {
+                if ((outputsize != 0) && (result == AC_Success)) {
+                    if (!argumentIsBezData) {
+                        writeFileData(bezName, output, fileSuffix);
+                    } else {
+                        printf("%s", output);
+                    }
                 }
             }
+
             free(output);
-            output = malloc(outputsize);
-            /* printf("NOTE: trying again. Input size %d output size %d.\n",
-             * strlen(bezdata), outputsize); */
+            if (result != AC_Success)
+                exit(result);
+        }
+    }
+    else /* assume files are MM bez files */
+    {
+        /** MM support */
+        char** masters = NULL; /* master names - here, harwired to 001 - <num files>-1 */
+        char** inGlyphs = NULL; /* Input bez data */
+        char** outGlyphs = NULL;/* output bez data */
+        size_t* outputSizes = NULL; /* size of output data */
+        int i;
+
+        masters = malloc(sizeof(char*)*total_files);
+        outputSizes = malloc(sizeof(size_t)*total_files);
+        inGlyphs = malloc(sizeof(char*)*total_files);
+        outGlyphs = malloc(sizeof(char*)*total_files);
+
+        argi = firstFileNameIndex -1;
+        for (i = 0; i < total_files; i++)
+        {
+            argi++;
+            bezName = argv[argi];
+            masters[i] = malloc(strlen(bezName));
+            strcpy(masters[i],bezName);
+            inGlyphs[i] = getFileData(bezName);
+            outputSizes[i] = 4 * strlen(inGlyphs[i]);
+            outGlyphs[i] = malloc(outputSizes[i]);
+        }
+
+        result = AutoColorString(inGlyphs[0], fontinfo, outGlyphs[0], &outputSizes[0],
+                                 allowEdit, allowHintSub, roundCoords, debug);
+        free(inGlyphs[0]);
+        inGlyphs[0] = malloc(sizeof(char*)*outputSizes[0]);
+        strcpy(inGlyphs[0],outGlyphs[0] );
+        result = AutoColorStringMM((const char **)inGlyphs, fontinfo,
+                                   total_files, (const char **)masters, outGlyphs, outputSizes);
+        if (result == AC_DestBuffOfloError) {
+            for (i = 0; i < total_files; i++)
+            {
+                free(outGlyphs[i]);
+                outputSizes[i] = outputSizes[i]*4;
+                outGlyphs[i] = malloc(outputSizes[i]);
+            }
             AC_SetReportCB(reportCB, false);
-            result =
-              AutoColorString(bezdata, fontinfo, output, &outputsize, allowEdit,
-                              allowHintSub, roundCoords, debug);
+            result = AutoColorStringMM((const char **)inGlyphs, fontinfo,
+                                       total_files, (const char **)masters, outGlyphs, outputSizes);
             AC_SetReportCB(reportCB, verbose);
         }
 
-        if (reportFile != NULL) {
-            closeReportFile();
-        } else {
-            if ((outputsize != 0) && (result == AC_Success)) {
-                if (!argumentIsBezData) {
-                    writeFileData(bezName, output, fileSuffix);
-                } else {
-                    printf("%s", output);
-                }
-            }
-        }
 
-        free(output);
+        for (i = 0; i < total_files; i++)
+        {
+            writeFileData(masters[i], outGlyphs[i], "new");
+            free(masters[i]);
+            free(inGlyphs[i]);
+            free(outGlyphs[i]);
+        }
+        free(inGlyphs);
+        free(outGlyphs);
+        free(masters);
+        free(outputSizes);
         if (result != AC_Success)
             exit(result);
+
     }
 
     return 0;
