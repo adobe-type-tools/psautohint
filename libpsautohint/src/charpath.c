@@ -1719,6 +1719,9 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
     else
         hintList = pathlist[mIx].path[pathEltIx].hints;
 
+    if (pathEltIx != MAINHINTS)
+        WriteToBuffer("beginsubr snc\n");
+
     rmcount = rvcount = 0;
     while (hintList != NULL) {
         hinttype = hintList->type;
@@ -1762,6 +1765,10 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
         else
             hintList = hintList->next;
     } /* end of while */
+
+    if (pathEltIx != MAINHINTS)
+        WriteToBuffer("endsubr enc\nnewcolors\n");
+
     UnallocateMem(hintList);
 }
 
