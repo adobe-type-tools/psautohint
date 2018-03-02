@@ -34,7 +34,6 @@
 #define GHOST 5
 
 static bool cubeLibrary = false;
-static bool bereallyQuiet = true;
 
 static bool firstMT;
 static Cd* refPtArray = NULL;
@@ -363,12 +362,10 @@ AddLine(indx mIx, indx pathIx)
     indx i, n;
 
     if (pathlist[mIx].path[pathIx].type != RCT) {
-        if (!bereallyQuiet) {
-            LogMsg(WARNING, OK,
-                   "Please convert the point closepath in directory: "
-                   "%s, character: %s to a line closepath.\n",
-                   masterNames[mIx], gGlyphName);
-        }
+        LogMsg(WARNING, OK,
+               "Please convert the point closepath in directory: "
+               "%s, character: %s to a line closepath.\n",
+               masterNames[mIx], gGlyphName);
         return;
     }
     i = GetMTIx(mIx, pathIx) + 1;
@@ -378,12 +375,10 @@ AddLine(indx mIx, indx pathIx)
      in order to get a smooth curve. */
     switch (start->type) {
         case RDT:
-            if (!bereallyQuiet) {
-                LogMsg(WARNING, OK,
-                       "Please convert the point closepath to a line "
-                       "closepath in directory: %s, character: %s.\n",
-                       masterNames[mIx], gGlyphName);
-            }
+            LogMsg(WARNING, OK,
+                   "Please convert the point closepath to a line "
+                   "closepath in directory: %s, character: %s.\n",
+                   masterNames[mIx], gGlyphName);
             return;
         case RCT:
             if ((abs(start->x1 - end->x2) < fixTwo) &&
@@ -399,13 +394,11 @@ AddLine(indx mIx, indx pathIx)
                             ? FixOne
                             : -FixOne;
             else {
-                if (!bereallyQuiet) {
-                    LogMsg(WARNING, OK,
-                           "Could not modify point closepath in directory "
-                           "'%s', character: %s near (%d, %d).\n",
-                           masterNames[mIx], gGlyphName, FTrunc8(end->x),
-                           FTrunc8(end->y));
-                }
+                LogMsg(WARNING, OK,
+                       "Could not modify point closepath in directory "
+                       "'%s', character: %s near (%d, %d).\n",
+                       masterNames[mIx], gGlyphName, FTrunc8(end->x),
+                       FTrunc8(end->y));
                 return;
             }
             break;
