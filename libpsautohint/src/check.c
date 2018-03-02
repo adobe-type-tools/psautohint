@@ -299,21 +299,21 @@ Delete(PPathElt e)
 /* This procedure is called from BuildFont when adding hints
  to base designs of a multi-master font. */
 bool
-GetInflectionPoint(Fixed x, Fixed y, Fixed x1, Fixed cy1, Fixed x2, Fixed y2,
-                   Fixed x3, Fixed y3, Fixed* inflPt)
+GetInflectionPoint(Fixed px, Fixed py, Fixed px1, Fixed pcy1, Fixed px2,
+                   Fixed py2, Fixed px3, Fixed py3, Fixed* inflPt)
 {
     FltnRec fltnrec;
     Cd c0, c1, c2, c3;
 
     fltnrec.report = chkDT;
-    c0.x = tfmx(x);
-    c0.y = tfmy(y);
-    c1.x = tfmx(x1);
-    c1.y = tfmy(cy1);
-    c2.x = tfmx(x2);
-    c2.y = tfmy(y2);
-    c3.x = tfmx(x3);
-    c3.y = tfmy(y3);
+    c0.x = tfmx(px);
+    c0.y = tfmy(py);
+    c1.x = tfmx(px1);
+    c1.y = tfmy(pcy1);
+    c2.x = tfmx(px2);
+    c2.y = tfmy(py2);
+    c3.x = tfmx(px3);
+    c3.y = tfmy(py3);
     xstate = ystate = STARTING;
     xdone = ydone = xflat = yflat = inflPtFound = false;
     x0 = c0.x;
