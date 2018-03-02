@@ -359,7 +359,7 @@ AddLine(indx mIx, indx pathIx)
     Fixed fixTwo = IntToFix(2);
     Fixed xoffset = 0, yoffset = 0;
     Fixed xoffsetr = 0, yoffsetr = 0;
-    PCharPathElt start, end, thisone, nxtone;
+    PCharPathElt start, end, thisone;
     indx i, n;
 
     if (pathlist[mIx].path[pathIx].type != RCT) {
@@ -427,7 +427,7 @@ AddLine(indx mIx, indx pathIx)
     /* Now, fix up the following MT's rx1, ry1 values
      This fixes a LOOOONG-standing bug.    renner Wed Jul 16 09:33:50 1997*/
     if ((n = GetNextMTIx(mIx, pathIx)) > 0) {
-        nxtone = &(pathlist[mIx].path[n]);
+        PCharPathElt nxtone = &(pathlist[mIx].path[n]);
         nxtone->rx += (-xoffsetr);
         nxtone->ry += (-yoffsetr);
     }
@@ -989,12 +989,10 @@ static void
 GetRelativePosition(Fixed currEnd, Fixed currStart, Fixed end, Fixed start,
                     Fixed hintVal, Fixed* fixedRelValue)
 {
-    float relVal;
-
     if ((end - start) == 0)
         *fixedRelValue = (Fixed)LROUND((float)(hintVal - start) + currStart);
     else {
-        relVal = (float)(hintVal - start) / (float)(end - start);
+        float relVal = (float)(hintVal - start) / (float)(end - start);
         *fixedRelValue =
           (Fixed)LROUND(((currEnd - currStart) * relVal) + currStart);
     }
@@ -1362,7 +1360,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
 {
     indx ix;
     PHintElt* hintElt = NULL;
-    int16_t count, newhinttype;
+    int16_t count;
     bool ok = true;
     Fixed min, dmin, mid, dmid, max, dmax;
 
@@ -1409,7 +1407,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
     }
     if (!ok) { /* change RM's to RY's or RV's to RB's for this element in each
                   directory */
-        newhinttype = (hinttype == (RM + ESCVAL) ? RY : RB);
+        int16_t newhinttype = (hinttype == (RM + ESCVAL) ? RY : RB);
         if (*errormsg) {
             LogMsg(WARNING, OK,
                    "Near miss for using operator: %s in character: "
@@ -1609,7 +1607,7 @@ WriteFlex(indx eltix)
     bool xsame, ysame, writeSubrOnce;
     int16_t optype;
     indx ix, j, opix, startix;
-    int16_t opcount, subrIx, length;
+    int16_t subrIx, length;
 
     refPtArray =
       (Cd*)AllocateMem(masterCount, sizeof(Cd), "reference point array");
@@ -1621,6 +1619,7 @@ WriteFlex(indx eltix)
     }
     WriteToBuffer("1 subr\n");
     for (j = 0; j < 8; j++) {
+        int16_t opcount;
         if (j == 7)
             WRTNUM(DMIN);
         xsame = ysame = false;
@@ -1706,7 +1705,7 @@ WriteFlex(indx eltix)
 static void
 WriteUnmergedHints(indx pathEltIx, indx mIx)
 {
-    int16_t rmcount, rvcount, hinttype;
+    int16_t rmcount, rvcount;
     PHintElt hintList;
 
     /* hintArray contains the pointers to the beginning of the linked list of
@@ -1724,7 +1723,7 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
 
     rmcount = rvcount = 0;
     while (hintList != NULL) {
-        hinttype = hintList->type;
+        int16_t hinttype = hintList->type;
         hintList->rightortop -=
         hintList->leftorbot; /* relativize */
         if ((hinttype == RY || hinttype == (RM + ESCVAL)) && !cubeLibrary)
@@ -1775,11 +1774,11 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
 static void
 WriteHints(indx pathEltIx)
 {
-    indx ix, opix, startix;
-    int16_t rmcount, rvcount, hinttype;
+    indx ix, opix;
+    int16_t rmcount, rvcount;
     int16_t opcount, subrIx, length;
     PHintElt* hintArray;
-    bool lbsame, rtsame, writeSubrOnce;
+    bool writeSubrOnce;
 
     /* hintArray contains the pointers to the beginning of the linked list of
      hints for
@@ -1795,8 +1794,9 @@ WriteHints(indx pathEltIx)
         WriteToBuffer("beginsubr snc\n");
     rmcount = rvcount = 0;
     while (hintArray[0] != NULL) {
-        startix = 0;
-        hinttype = hintArray[hintsMasterIx]->type;
+        bool lbsame, rtsame;
+        indx startix = 0;
+        int16_t hinttype = hintArray[hintsMasterIx]->type;
         for (ix = 0; ix < masterCount; ix++) {
             hintArray[ix]->rightortop -=
               hintArray[ix]->leftorbot; /* relativize */
