@@ -441,10 +441,10 @@ main(int argc, char* argv[])
     else /* assume files are MM bez files */
     {
         /** MM support */
-        char** masters = NULL; /* master names - here, harwired to 001 - <num files>-1 */
-        char** inGlyphs = NULL; /* Input bez data */
-        char** outGlyphs = NULL;/* output bez data */
-        size_t* outputSizes = NULL; /* size of output data */
+        char** masters; /* master names - here, harwired to 001 - <num files>-1 */
+        char** inGlyphs; /* Input bez data */
+        char** outGlyphs;/* output bez data */
+        size_t* outputSizes; /* size of output data */
         int i;
 
         masters = malloc(sizeof(char*)*total_files);
@@ -466,24 +466,27 @@ main(int argc, char* argv[])
 
         result = AutoColorString(inGlyphs[0], fontinfo, outGlyphs[0], &outputSizes[0],
                                  allowEdit, allowHintSub, roundCoords, debug);
+        if (result == AC_DestBuffOfloError) {
+            if (reportFile != NULL) {
+                closeReportFile();
+                if (!argumentIsBezData && report) {
+                    openReportFile(bezName, fileSuffix);
+                }
+            }
+            free(outGlyphs[0]);
+            outGlyphs[0] = malloc(outputSizes[0]);
+            AC_SetReportCB(reportCB, false);
+            result = AutoColorString(inGlyphs[0], fontinfo, outGlyphs[0],
+                                     &outputSizes[0], allowEdit, allowHintSub,
+                                     roundCoords, debug);
+            AC_SetReportCB(reportCB, verbose);
+        }
+
         free(inGlyphs[0]);
         inGlyphs[0] = malloc(sizeof(char*)*outputSizes[0]);
         strcpy(inGlyphs[0],outGlyphs[0] );
         result = AutoColorStringMM((const char **)inGlyphs, fontinfo,
                                    total_files, (const char **)masters, outGlyphs, outputSizes);
-        if (result == AC_DestBuffOfloError) {
-            for (i = 0; i < total_files; i++)
-            {
-                free(outGlyphs[i]);
-                outputSizes[i] = outputSizes[i]*4;
-                outGlyphs[i] = malloc(outputSizes[i]);
-            }
-            AC_SetReportCB(reportCB, false);
-            result = AutoColorStringMM((const char **)inGlyphs, fontinfo,
-                                       total_files, (const char **)masters, outGlyphs, outputSizes);
-            AC_SetReportCB(reportCB, verbose);
-        }
-
 
         for (i = 0; i < total_files; i++)
         {
