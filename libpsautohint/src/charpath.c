@@ -37,7 +37,7 @@ static bool cubeLibrary = false;
 
 static bool firstMT;
 static Cd* refPtArray = NULL;
-static char *startbuff, **outbuff;
+static char *outbuff;
 static int16_t masterCount;
 static const char** masterNames;
 static size_t byteCount, buffSize;
@@ -81,18 +81,11 @@ WriteToBuffer(char* format, ...)
 
     if ((byteCount + len) > buffSize) {
         buffSize += GROWBUFF;
-        startbuff = (char*)ReallocateMem(*outbuff, buffSize, "file buffer");
-        *outbuff = startbuff;
-        startbuff += byteCount;
-        memset(startbuff, 0, GROWBUFF);
-        while (*startbuff == '\0')
-            startbuff--;
-        startbuff++;
+        outbuff = (char*)ReallocateMem(outbuff, buffSize, "file buffer");
     }
 
+    sprintf(outbuff + byteCount, "%s", outstr);
     byteCount += len;
-    sprintf(startbuff, "%s", outstr);
-    startbuff += len;
 }
 
 static void
@@ -2041,11 +2034,9 @@ WritePaths(char** outBuffers, size_t* outLengths)
     for (mIx = 0; mIx < masterCount; mIx++) {
         PathList path = pathlist[mIx];
 
-        byteCount = 1;
+        byteCount = 0;
         buffSize = outLengths[mIx];
-        startbuff = outBuffers[mIx];
-        outbuff = &startbuff;
-        memset(startbuff, 0, buffSize);
+        outbuff = outBuffers[mIx];
 
         WriteToBuffer("%% %s\n", gGlyphName);
 
@@ -2080,6 +2071,7 @@ WritePaths(char** outBuffers, size_t* outLengths)
         WriteToBuffer("ed\n");
 
         outLengths[mIx] = byteCount;
+        outBuffers[mIx] = outbuff;
     }
     return;
 #endif
