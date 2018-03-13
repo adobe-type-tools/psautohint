@@ -1698,7 +1698,6 @@ WriteFlex(indx eltix)
 static void
 WriteUnmergedHints(indx pathEltIx, indx mIx)
 {
-    int16_t rmcount, rvcount;
     PHintElt hintList;
 
     /* hintArray contains the pointers to the beginning of the linked list of
@@ -1714,7 +1713,6 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
     if (pathEltIx != MAINHINTS)
         WriteToBuffer("beginsubr snc\n");
 
-    rmcount = rvcount = 0;
     while (hintList != NULL) {
         int16_t hinttype = hintList->type;
         hintList->rightortop -=
@@ -1732,19 +1730,13 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
                 WriteToBuffer("rb\n");
                 break;
             case RV + ESCVAL:
-                if (++rvcount == 3) {
-                    rvcount = 0;
-                    WriteToBuffer("rv\n");
-                }
+                WriteToBuffer("rv\n");
                 break;
             case RY:
                 WriteToBuffer("ry\n");
                 break;
             case RM + ESCVAL:
-                if (++rmcount == 3) {
-                    rmcount = 0;
                     WriteToBuffer("rm\n");
-                }
                 break;
             default:
                 LogMsg(LOGERROR, NONFATALERROR,
@@ -1768,7 +1760,6 @@ static void
 WriteHints(indx pathEltIx)
 {
     indx ix, opix;
-    int16_t rmcount, rvcount;
     int16_t opcount, subrIx, length;
     PHintElt* hintArray;
     bool writeSubrOnce;
@@ -1785,7 +1776,6 @@ WriteHints(indx pathEltIx)
                                   : pathlist[ix].path[pathEltIx].hints);
     if (pathEltIx != MAINHINTS)
         WriteToBuffer("beginsubr snc\n");
-    rmcount = rvcount = 0;
     while (hintArray[0] != NULL) {
         bool lbsame, rtsame;
         indx startix = 0;
@@ -1854,19 +1844,13 @@ WriteHints(indx pathEltIx)
                 WriteToBuffer("rb\n");
                 break;
             case RV + ESCVAL:
-                if (++rvcount == 3) {
-                    rvcount = 0;
                     WriteToBuffer("rv\n");
-                }
                 break;
             case RY:
                 WriteToBuffer("ry\n");
                 break;
             case RM + ESCVAL:
-                if (++rmcount == 3) {
-                    rmcount = 0;
                     WriteToBuffer("rm\n");
-                }
                 break;
             default:
                 LogMsg(LOGERROR, NONFATALERROR,
