@@ -76,6 +76,7 @@ class ACOptions:
         self.allowDecimalCoords = False
         self.writeToDefaultLayer = False
         self.baseMaster = {}
+        self.doMM = False
 
 
 class ACFontInfoParseError(Exception):
@@ -416,9 +417,13 @@ def cmpFDDictEntries(entry1, entry2):
         return 0
 
 def hintFiles(options):
-    hintFile(options)
-    if len(options.inputPaths) > 1:
-        for path in options.inputPaths[1:]:
+    if options.doMM == True:
+        hintFile(options)
+        if len(options.inputPaths) > 1:
+            for path in options.inputPaths[1:]:
+                hintFile(options, path, baseMaster=False)
+    else:
+        for path in options.inputPaths:
             hintFile(options, path, baseMaster=False)
 
 def hintFile(options, path=None, baseMaster=True):
@@ -651,14 +656,14 @@ def hintFile(options, path=None, baseMaster=True):
         if oldBezString != "" and oldBezString == bezString:
             newBezString = oldHintBezString
         else:
-            if baseMaster:
+            if baseMaster or not options.doMM:
                 newBezString = psautohint.autohint(
                     fontInfo, bezString, options.verbose,
                     options.allowChanges, not options.noHintSub,
                     options.allowDecimalCoords)
                 options.baseMaster[name] = newBezString
             else:
-                masters = [b"A", b"B"]  # FIXME
+                masters = [b"baseFont", fontFileName]
                 glyphs = [options.baseMaster[name], bezString]
                 newBezString = psautohint.autohintmm(
                     fontInfo, glyphs, masters, options.verbose)

@@ -161,6 +161,11 @@ Options:
 
 -wd .. Write changed glyphs to default layer instead of '%s'.
 
+-m    With this option, multiple font files in the argument list will be
+       hinted as a set of variable font masters, and will get blend-
+       compatible hinting. Without this option, each font file will be
+       hinted separately.
+
 psautohint can also apply different sets of alignment zones while hinting a
 particular set of glyphs. This is useful for name-keyed fonts, which, unlike
 CID fonts, only have one set of global alignment zones and stem widths.
@@ -551,6 +556,8 @@ def getOptions(args):
             options.hintAll = True
         elif arg == "-r":
             options.rehint = True
+        elif arg == "-m":
+            options.doMM = True
         elif arg == "-q":
             options.verbose = False
         elif arg == "-qq":
