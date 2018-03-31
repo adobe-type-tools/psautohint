@@ -272,17 +272,6 @@ autohintmm(PyObject* self, PyObject* args)
 
         result = AutoColorStringMM(inGlyphs, fontInfo, mastersCount, masters,
                                    outGlyphs, outputSizes);
-#if 0
-        if (result == AC_DestBuffOfloError) {
-            outGlyphs = MEMRENEW(outGlyphs, outputSize);
-            AC_SetReportCB(reportCB, false);
-            result =
-              AutoColorString(inGlyphs, fontInfo, outGlyphs, &outputSize,
-                              allowEdit, allowHintSub, roundCoords, debug);
-            AC_SetReportCB(reportCB, verbose);
-        }
-#endif
-
         if (result == AC_Success) {
             for (i = 0; i < inCount; i++) {
                 PyObject* outObj = PyBytes_FromString(outGlyphs[i]);
