@@ -128,16 +128,8 @@ autohint(PyObject* self, PyObject* args)
             result = AC_MemoryError;
         } else {
             result =
-              AutoColorString(inData, fontInfo, output, &outLen, allowEdit,
+              AutoColorString(inData, fontInfo, &output, &outLen, allowEdit,
                               allowHintSub, roundCoords, debug);
-            if (result == AC_DestBuffOfloError) {
-                output = MEMRENEW(output, outLen);
-                AC_SetReportCB(reportCB, false);
-                result =
-                  AutoColorString(inData, fontInfo, output, &outLen, allowEdit,
-                                  allowHintSub, roundCoords, debug);
-                AC_SetReportCB(reportCB, verbose);
-            }
 
             if (outLen != 0 && result == AC_Success)
                 outObj = PyBytes_FromString(output);

@@ -401,25 +401,8 @@ main(int argc, char* argv[])
                 openReportFile(bezName, fileSuffix);
             }
 
-            result = AutoColorString(bezdata, fontinfo, output, &outputsize,
+            result = AutoColorString(bezdata, fontinfo, &output, &outputsize,
                                      allowEdit, allowHintSub, roundCoords, debug);
-            if (result == AC_DestBuffOfloError) {
-                if (reportFile != NULL) {
-                    closeReportFile();
-                    if (!argumentIsBezData && report) {
-                        openReportFile(bezName, fileSuffix);
-                    }
-                }
-                free(output);
-                output = malloc(outputsize);
-                /* printf("NOTE: trying again. Input size %d output size %d.\n",
-                 * strlen(bezdata), outputsize); */
-                AC_SetReportCB(reportCB, false);
-                result =
-                AutoColorString(bezdata, fontinfo, output, &outputsize, allowEdit,
-                                allowHintSub, roundCoords, debug);
-                AC_SetReportCB(reportCB, verbose);
-            }
 
             if (reportFile != NULL) {
                 closeReportFile();
@@ -464,24 +447,8 @@ main(int argc, char* argv[])
             outGlyphs[i] = malloc(outputSizes[i]);
         }
 
-        result = AutoColorString(inGlyphs[0], fontinfo, outGlyphs[0], &outputSizes[0],
+        result = AutoColorString(inGlyphs[0], fontinfo, &outGlyphs[0], &outputSizes[0],
                                  allowEdit, allowHintSub, roundCoords, debug);
-        if (result == AC_DestBuffOfloError) {
-            if (reportFile != NULL) {
-                closeReportFile();
-                if (!argumentIsBezData && report) {
-                    openReportFile(bezName, fileSuffix);
-                }
-            }
-            free(outGlyphs[0]);
-            outGlyphs[0] = malloc(outputSizes[0]);
-            AC_SetReportCB(reportCB, false);
-            result = AutoColorString(inGlyphs[0], fontinfo, outGlyphs[0],
-                                     &outputSizes[0], allowEdit, allowHintSub,
-                                     roundCoords, debug);
-            AC_SetReportCB(reportCB, verbose);
-        }
-
         free(inGlyphs[0]);
         inGlyphs[0] = malloc(sizeof(char*)*outputSizes[0]);
         strcpy(inGlyphs[0],outGlyphs[0] );

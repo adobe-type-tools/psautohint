@@ -136,11 +136,10 @@ ACLIB_API void AC_SetReportRetryCB(AC_RETRYPTR retryCB);
  * Hint information is added to the bez data and returned to the caller through
  * the buffer dstbezdata. dstbezdata must be allocated before the call and a
  * pointer to its length passed as *length. If the space allocated is
- * insufficient for the target bezdata, an error will be returned and length
- * will be set to the desired size.
+ * insufficient for the target bezdata, it will be reallocated as needed.
  */
 ACLIB_API int AutoColorString(const char* srcbezdata, const char* fontinfo,
-                              char* dstbezdata, size_t* length, int allowEdit,
+                              char** dstbezdata, size_t* length, int allowEdit,
                               int allowHintSub, int roundCoords, int debug);
 
 /*
