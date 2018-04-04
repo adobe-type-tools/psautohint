@@ -307,7 +307,7 @@ error_handler(int16_t code)
 
 ACLIB_API int
 AutoColorString(const char* srcbezdata, const char* fontinfodata,
-                char* dstbezdata, size_t* length, int allowEdit,
+                char** dstbezdata, size_t* length, int allowEdit,
                 int allowHintSub, int roundCoords, int debug)
 {
     int value, result;
@@ -333,16 +333,16 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     } else if (value == 1) {
         /* AutoColor was called successfully */
         FreeFontInfo(fontinfo);
-        if (gBezOutput->length < *length) {
-            *length = gBezOutput->length + 1;
-            strncpy(dstbezdata, gBezOutput->data, *length);
-            FreeBuffer(gBezOutput);
-            return AC_Success;
-        } else {
-            *length = gBezOutput->length + 1;
-            FreeBuffer(gBezOutput);
-            return AC_DestBuffOfloError;
-        }
+
+        if (gBezOutput->length >= *length)
+            *dstbezdata = ReallocateMem(*dstbezdata, gBezOutput->length + 1, "Output buffer");
+
+        *length = gBezOutput->length + 1;
+        strncpy(*dstbezdata, gBezOutput->data, *length);
+
+        FreeBuffer(gBezOutput);
+
+        return AC_Success;
     }
 
     gBezOutput = NewBuffer(*length);
