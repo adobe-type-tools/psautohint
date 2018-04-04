@@ -152,9 +152,6 @@ autohint(PyObject* self, PyObject* args)
                 case AC_UnknownError:
                     PyErr_SetString(PsAutoHintError, "Hinting failed");
                     break;
-                case AC_DestBuffOfloError:
-                    PyErr_SetString(PsAutoHintError, "Dest buffer small");
-                    break;
                 case AC_InvalidParameterError:
                     PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
                     break;
@@ -294,9 +291,6 @@ autohintmm(PyObject* self, PyObject* args)
                     break;
                 case AC_UnknownError:
                     PyErr_SetString(PsAutoHintError, "Hinting failed");
-                    break;
-                case AC_DestBuffOfloError:
-                    PyErr_SetString(PsAutoHintError, "Dest buffer small");
                     break;
                 case AC_InvalidParameterError:
                     PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
