@@ -22,7 +22,7 @@ install:
     fi
   - pip install -r requirements.txt
   - pip install -r dev-requirements.txt
-  - pip install codacy-coverage
+  - pip install codecov
   - pip install collective.checkdocs
 
 script:
@@ -36,6 +36,4 @@ script:
 after_success:
   - cd tests
   - coverage combine
-  - coverage xml
-  - sed 's/\/home\/travis\/build\/adobe-type-tools\/psautohint\/build\/*/python/' coverage.xml > coverage2.xml
-  - python-codacy-coverage -r coverage2.xml
+  - codecov
