@@ -1,4 +1,4 @@
-|Travis status| |AppVeyor status| |Codacy badge| |Coverage badge|
+|Travis| |AppVeyor| |Codacy| |Codecov|
 
 
 PSAutoHint
@@ -60,11 +60,11 @@ We have a very primitive test suite that can be run with:
 
 .. _AFDKO: https://github.com/adobe-type-tools/afdko
 
-.. |Travis status| image:: https://travis-ci.org/adobe-type-tools/psautohint.svg?branch=master
+.. |Travis| image:: https://travis-ci.org/adobe-type-tools/psautohint.svg?branch=master
    :target: https://travis-ci.org/adobe-type-tools/psautohint
-.. |AppVeyor status| image:: https://ci.appveyor.com/api/projects/status/frpwwnql34k70drl?svg=true
+.. |AppVeyor| image:: https://ci.appveyor.com/api/projects/status/frpwwnql34k70drl?svg=true
    :target: https://ci.appveyor.com/project/adobe-type-tools/psautohint
-.. |Codacy badge| image:: https://api.codacy.com/project/badge/Grade/171cdb2c833f484f8d2d85253123bd39
+.. |Codacy| image:: https://api.codacy.com/project/badge/Grade/171cdb2c833f484f8d2d85253123bd39
    :target: https://www.codacy.com/app/adobe-type-tools/psautohint?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/psautohint&amp;utm_campaign=Badge_Grade
-.. |Coverage badge| image:: https://api.codacy.com/project/badge/Coverage/171cdb2c833f484f8d2d85253123bd39
-   :target: https://www.codacy.com/app/adobe-type-tools/psautohint?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/psautohint&amp;utm_campaign=Badge_Coverage
+.. |Codecov| image:: https://codecov.io/gh/adobe-type-tools/psautohint/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/adobe-type-tools/psautohint
