@@ -47,7 +47,6 @@ enum
     AC_FatalError,
     AC_MemoryError,
     AC_UnknownError,
-    AC_DestBuffOfloError,
     AC_InvalidParameterError
 };
 
