@@ -1,3 +1,4 @@
+import io
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
@@ -67,12 +68,16 @@ module1 = Extension("psautohint._psautohint",
                     ],
                     )
 
+with io.open("README.rst", encoding="utf-8") as readme:
+    long_description = readme.read()
+
 setup(name="psautohint",
       version="1.1.1.dev0",
       description="Python wrapper for Adobe's PostScript autohinter",
+      long_description=long_description,
       url='https://github.com/adobe-type-tools/psautohint',
-      author='Khaled Hosny',
-      author_email='khaledhosny@eglug.org',
+      author='Adobe Type team & friends',
+      author_email='afdko@adobe.com',
       license='Apache License, Version 2.0',
       package_dir={'': 'python'},
       packages=['psautohint'],
