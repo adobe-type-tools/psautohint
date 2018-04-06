@@ -449,6 +449,9 @@ main(int argc, char* argv[])
 
         result = AutoColorString(inGlyphs[0], fontinfo, &outGlyphs[0], &outputSizes[0],
                                  allowEdit, allowHintSub, roundCoords, debug);
+        if (result != AC_Success)
+            exit(result);
+
         free(inGlyphs[0]);
         inGlyphs[0] = malloc(sizeof(char*)*outputSizes[0]);
         strcpy(inGlyphs[0],outGlyphs[0] );
