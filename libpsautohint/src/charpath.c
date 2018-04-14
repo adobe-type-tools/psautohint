@@ -2074,7 +2074,10 @@ WritePaths(char** outBuffers, size_t* outLengths)
         outBuffers[mIx] = outbuff;
     }
     return;
-#endif
+#endif /* DONT_COMBINE_PATHS */
+
+    /* The code below is not used, but were are not ifdef'ing it and the code
+     * it calls so it keep compiling and does not bitrot. */
 
     WriteToBuffer("%% %s\n", gGlyphName);
 
