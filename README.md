@@ -55,6 +55,6 @@ Testing
 
 We have a very primitive test suite that can be run with:
 
-``` {.sourceCode .sh}
+```sh
 make check
 ```
