@@ -6,8 +6,8 @@
 PSAutoHint
 ==========
 
-A standalone version of
-[AFDKO](https://github.com/adobe-type-tools/afdko)'s autohinter.
+A standalone version of [AFDKO](https://github.com/adobe-type-tools/afdko)’s
+autohinter.
 
 Still a work in progress. Use at your own risk!
 
@@ -19,42 +19,30 @@ Python C extension providing an interface to it, and helper Python code.
 
 To build the C extension:
 
-```sh
-make build
-```
+    make build
 
 To install the C extension and the helper scripts globally:
 
-```sh
-make install
-```
+    make install
 
 Alternatively to install them for the current user:
 
-```sh
-make PIP_OPTIONS=--user install
-```
+    make PIP_OPTIONS=--user install
 
 The authinter can be used by running:
 
-```sh
-psautohint
-```
+    psautohint
 
 The old `autohintexe` binary can also be built from `libpsautohint`
 directory:
 
-```sh
-autoreconf -if
-./configure
-make
-```
+    autoreconf -if
+    ./configure
+    make
 
 Testing
 -------
 
 We have a very primitive test suite that can be run with:
 
-```sh
-make check
-```
+    make check
