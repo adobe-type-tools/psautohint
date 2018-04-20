@@ -68,13 +68,14 @@ module1 = Extension("psautohint._psautohint",
                     ],
                     )
 
-with io.open("README.rst", encoding="utf-8") as readme:
+with io.open("README.md", encoding="utf-8") as readme:
     long_description = readme.read()
 
 setup(name="psautohint",
       version="1.1.1.dev0",
       description="Python wrapper for Adobe's PostScript autohinter",
       long_description=long_description,
+      long_description_content_type='text/markdown',
       url='https://github.com/adobe-type-tools/psautohint',
       author='Adobe Type team & friends',
       author_email='afdko@adobe.com',
