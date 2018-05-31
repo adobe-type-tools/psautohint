@@ -20,7 +20,7 @@ all: $(TESTS)
 %.tst: %.ufo FORCE
 	@echo "	Testing $<"
 	@rm -rf $@
-	@$(PYTHON) -m psautohint -all -qq -o $@ $<
+	@$(PYTHON) -m psautohint --all -o $@ $<
 	@rm -f $@/.DS_Store
 	@diff -Naur --strip-trailing-cr $< $@
 	@rm -rf $@
@@ -28,7 +28,7 @@ all: $(TESTS)
 %.pst: %.otf FORCE
 	@echo "	Testing $<"
 	@rm -rf $@
-	@$(PYTHON) -m psautohint -qq -o $@ $<
+	@$(PYTHON) -m psautohint -o $@ $<
 	@ttx -q -t CFF -o $<.ttx $<
 	@ttx -q -t CFF -o $@.ttx $@
 	@diff -u $<.ttx $@.ttx

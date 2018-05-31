@@ -1,246 +1,91 @@
 # Copyright 2014 Adobe. All rights reserved.
 
-from __future__ import print_function, absolute_import
-
-import os
-import re
-import sys
-
-from psautohint import _psautohint, autohint, ufoFont
-
-__usage__ = """
-Auto-hinting program for PostScript and OpenType/CFF fonts.
-psautohint.py v1.50.0 Feb 11 2018
-
-psautohint -h
-psautohint -u
-psautohint -hfd
-psautohint -pfd
-psautohint [-g <glyph list>] [-gf <filename>] [-xg <glyph list>]
-           [-xgf <filename>] [-cf path] [-a] [-logOnly] [-log <logFile path>]
-           [-r] [-q] [-qq] [-c] [-nf] [-ns] [-nb] [-wd] [-o <output font path>]
-           FONT
-
+"""
+Auto-hinting program for PostScript, OpenType/CFF and UFO fonts.
 """
 
-__help__ = __usage__ + """
+from __future__ import print_function, absolute_import
 
-Takes a list of fonts, and an optional list of glyphs, and hints the fonts. If
-the list of glyphs is supplied, the hinting is limited to the specified glyphs.
+import argparse
+import os
+import plistlib
+import re
+import sys
+import textwrap
 
-Note that the hinting is better if the font's global alignment zones are set
-usefully; at the very least, you should have entered values that capture
-capital height, x-height, ascender and descender heights, and ascender and
-descender overshoot. The reports provided by the stemHist tool are useful for
-choosing these.
+from fontTools.misc.py23 import open
 
-By default, autothint will hint all glyphs in the font. Options allow you to
-specify a subset of the glyphs for hinting.
+from psautohint._psautohint import version as PSAUTOHINT_VERSION
+from psautohint.autohint import hintFiles, ACFontError, ACHintError, logMsg
+from psautohint.ufoFont import UFOParseError
+from psautohint.ufoFont import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 
-Options:
+__version__ = PSAUTOHINT_VERSION
 
--h ... Print help.
 
--u ... Print usage.
+SUPPORTED_FONT_FORMATS = ('PFA', 'PFB', 'CFF', 'OTF', 'UFO')
+FONTINFO_FILE_NAME = 'fontinfo'
 
--hfd . Print a description of the format for defining a set of alternate
-       alignment zones in an "fontinfo" file.
+GENERAL_INFO = """
+psautohint is a tool for hinting fonts. It supports the following formats:
+Type 1 (PFA and PFB), CFF (a.k.a. Type 2), OTF (name- and CID-keyed), and UFO.
 
--pfd . Print the default FDDict values for the source font: the alignment
-       zone, stem width, and other global values. This is useful
-       as a starting point for building FDDict defintions (see -hfd).
+By default, psautohint will hint all glyphs in the input font. Options are
+available to specify a subset of the glyphs for hinting and other settings.
 
--pfdl  Print the list of user-defined FDDict values, and which glyphs
-       are included in each. This is useful for checking your FDDict
-       definitions and glyph search terms. (see -hfd).
+Note that the hinting results are better if the font's alignment zones are set
+properly. For a font supporting a bicameral script (e.g. Latin, Greek, or
+Cyrillic) the zones should capture the baseline, the x-height and the capital
+height, and respective overshoots of the glyphs, at the very least.
+Additionally, ascender, descender, small cap, and figures heights may also be
+considered.
 
--g <glyphID1>,<glyphID2>,...,<glyphIDn>
-       Hint only the specified list of glyphs. Note that all glyphs will be
-       written to the output file. The list must be comma-delimited. The glyph
-       references may be glyph IDs, glyph names, or glyph CIDs. If the latter,
-       the CID value must be prefixed with the string "/". There must be no
-       white-space in the glyph list.
-       Examples:
-          psautohint -g A,B,C,68 myFont
-          psautohint -g /1030,/434,/1535,68 myCIDFont
+The reports provided by the stemHist tool can be useful for choosing alignment
+zone and stem width values.
+"""
 
-       A range of glyphs may be specified by providing two names separated
-       only by a hyphen:
-          psautohint -g zero-nine,onehalf myFont
-
-       Note that the range will be resolved by expanding the glyph indices,
-       not by alphabetic names.
-
--gf <file name>
-       Hint only the list of glyphs contained in the specified file. The file
-       must contain a comma-delimited list of glyph identifiers. Any number of
-       space, tab, and new-line characters are permitted between glyph names
-       and commas.
-
--xg, -xgf
-       Same as -g and -gf, but will exclude the specified glyphs from hinting.
-
--cf <path>
-       AC will try and add counter hints to only a short hard-coded list of
-       glyphs:
-          V counters: "m", "M", "T", "ellipsis"
-          H counters: "element", "equivalence", "notelement", "divide".
-       Counter hints help to keep the space between stems open and equal in
-       size.
-
-       To extend this list, use the option -cf followed by a path to a text
-       file. The text file must contain one record per line. A record
-       references one glyph, and should consist of a single letter V or H,
-       to indicate whether the counters should be vertical or horizontal,
-       followed by a space or tab, followed by a glyph name. A maximum of 64
-       glyph names can be added to either the vertical or horizontal list.
-       Example:
-          V ffi
-          V ffl
-          V f_f_j
-
-       Alternatively, if there is a file named "fontinfo" in the same directory
-       as the source font, this script will look in that file for lines with
-       this format:
-          VCounterChar (<glyph name1> <glyph name2> ...)
-          HCounterChar (<glyph name1> <glyph name2> ...)
-       and add the referenced glyphs to the counter hint lists.
-       Example:
-          VCounterChar (ffi ffl f_f_j)
-
--logOnly
-       Do not change any outlines, but report warnings for all selected glyphs,
-       including those already hinted.
-       The option -q is ignored.
-       The option -a is implied.
-
--q ... Quiet mode. Will suppress comments from the auto-hinting library about
-       recommended glyph outline changes.
-
--qq .. Really quiet mode. Will suppress all normal messages.
-
--c ... Permit changes to the glyph outline. When this is turned on, the
-       psautohint program will fix a few issues: if there are many hint
-       substitutions, it will try and shuffle the order of paths to reduce
-       this, and it will flatten nearly straight curves.
-       This tool no longer blunts sharp angles. That is better done with
-       checkOutlines.
-
--nf .. Suppress generation of flex commands.
-
--ns .. Suppress hint substitution. Do this only if you really want the smallest
-       possible font file. This will use only one set of hints for the entire
-       glyph.
-
--nb .. Allow the font to have no stem widths or blue values specified.
-       Without this option, psautohint will complain and quit.
-
--o <output font path>
-       If not specified, psautohint will write the hinted output to the
-       original font path name.
-
--log . Write output to a log file.
-
--all . Hint all glyphs, even if the source glyphs is unchanged and the glyph
-       has been hinted before.
-       Applies only to UFO fonts.
-
--hf .. Use history file. Will create it if it does not already exist.
-       Should not be used with UFO fonts, where another mechanism is employed.
-
--a ... Hint all glyphs that are in the history file, or are unhinted.
-       Has effect only if the history file is being used.
-
--r ... Re-hint glyphs. Glyphs not in the history file will be hinted even
-       if they already have hints. However, glyphs will not be hinted if
-       they both have not changed and are in the history file.
-
--decimal
-       Use decimal coordinates, instead of rounding to the nearest integer
-       value.
-
--wd .. Write changed glyphs to default layer instead of '%s'.
-
--m    With this option, multiple font files in the argument list will be
-       hinted as a set of variable font masters, and will get blend-
-       compatible hinting. Without this option, each font file will be
-       hinted separately.
-
-psautohint can also apply different sets of alignment zones while hinting a
-particular set of glyphs. This is useful for name-keyed fonts, which, unlike
-CID fonts, only have one set of global alignment zones and stem widths.
+FDDICT_DOC = """
 By default, psautohint uses the font's global alignment zones and stem widths
-for each glyph. However, if there is a file named "fontinfo" in the same
-directory as the input font file, psautohint will check the "fontinfo" file for
-definitions of alternate sets of alignment zones, and the matching lists of
-glyphs to which they should be applied. To see the format for these entries,
-use the option "-hfd". This allows one set of glyphs to be hinted using a
-different set of zones and stem widths than other glyphs. This isn't as useful
-as having real multiple hint dictionaries in the font, as the final name-keyed
-font can only have one set of alignment zones, but it does allow for improved
-glyph hints when different sets of glyphs need different zones.
-
-psautohint can maintain a history file, which allows you to avoid hinting
-glyphs that have already been auto-hinted or manually hinted. When this is in
-use, psautohint will by default hint only those glyphs that are not already
-hinted, and also those glyphs which are hinted, but whose outlines have changed
-since the last time psautohint was run. psautohint knows whether an outline has
-changed by storing the outline in the history file whenever the glyph is
-hinted, and then consulting the history file when it is asked to hint the glyph
-again. By default, psautohint does not maintain or use the history file, but
-this can be turned on with an option.
-
-When used, the history file is named "<PostScriptName>.plist", in the same
-location as the parent font file. For each glyph, psautohint stores a
-simplified version of the outline coordinates. If this entry is missing for a
-glyph and the glyph has hints, then psautohint assumes it was manually hinted,
-and will by default not hint it again. If the file is missing, psautohint will
-assume that all the glyphs were manually hinted, and you will have to use the
-option -a or -r to hint any glyphs.
-""" % (ufoFont.kProcessedGlyphsLayerName)
-
-__FDDoc__ = """
-By default, psautohint uses the font's global alignment zones and stem widths
-when hinting each glyph. However, if there is a file named "fontinfo" in the
-same directory as the input font file, psautohint will check the "fontinfo"
-file for definitions of sets of alignment zones (a "FDDict"), and the matching
-lists of glyphs to which they should be applied. This allows one set of glyphs
-to be hinted using a different set of zones and stem widths than other glyphs.
-This isn't as useful as having real multiple hint dictionaries in the font, as
-the final name-keyed font can only have one set of alignment zones, but it does
-allow for improved hinting when different sets of glyphs need different
-alignment zones.
+when hinting each glyph. However, if there is a file named 'fontinfo' in the
+same directory as the input font file, psautohint will search it for
+definitions of sets of alignment zones (a.k.a 'FDDict'), and for matching
+lists of glyphs to which each FDDict should be applied to. This approach
+allows a group of glyphs to be hinted using a different set of zones and stem
+widths than other glyphs. This solution isn't as robust as having multiple
+hint dictionaries --supported in CID fonts-- in the font, as the final
+name-keyed font can only have one set of alignment zones, but it does allow
+for improved hinting when different sets of glyphs need different alignment
+zones.
 
 If FDDict definitions are used, then the global alignment zones and stem widths
 in the source font will be ignored. For any glyphs not covered by an explicit
 FDDict definition, psautohint will synthesize a dummy FDDict, where the zones
-are set outside of the the font's bounding box, so they will not affect
-hinting. This is desirable for glyphs that have no features that need to be
-aligned.
+are set outside of the font's bounding box, so not to influence the hinting.
+This is desirable for glyphs that have no features that need to be aligned.
 
-If psautohint finds an FDDict named "FinalFont", then it will write that set of
-values to the output font. Otherwise, it will merge all the alignment zones and
-stem widths in the union of all the FDDict definitions. If this merge fails
-because some of the alignment zones and stem widths overlap, then you have to
-provide a "FinalFont" FDDict that explicitly defines which stems and zones to
-use in the hinted output font.
+If psautohint finds an FDDict named 'FinalFont', it will write that set of
+values to the output font. Otherwise, it will merge all the alignment zones
+and stem widths as the union of all FDDict definitions. If this merging fails
+because some of the alignment zones and stem widths overlap, then the font
+developer will have to provide a 'FinalFont' FDDict that explicitly defines
+which stems and zones to use in the hinted output font.
 
-To use a dictionary of alignment zones and stem widths, you need to define both
-the dictionary of alternate values, and the set of glyphs to apply it to. The
-FDDict must be defined in the file before the set of glyphs which belong to it.
-Both the FDDict and the glyph set define a name; an FDDict is applied to the
-glyph set with the same name.
+To use a FDDict, one must define both the values of alignment zones and stem
+widths, and the set of glyphs to apply it to. The FDDict must be defined in
+the file before the set of glyphs which belong to it. Both the FDDict and the
+glyph set define a name; an FDDict is applied to the glyph set with the same
+name.
 
-If you run psautohint with the option "-pfd", it will print out the list of
-FDDict values for the source font. You can use this text as a starting point
-for your FDDict definitions.
+Running psautohint with the option --print-dflt-fddict will provide the list
+of default FDDict values for the source font. These can be used as a starting
+point for alternate FDDict definitions.
 
-You can also run psautohint with the option "-pfdl". This will print the
-user-defined FDDict defintions, and the list of glyphs associated with each
-FDDict. You can use this to check your values, and to check which glyphs are
-assigned to which FDDict. In particular, check the glyph list for the first
-FDDict "No Alignment Zones": this list exists because these glyphs did not
-match in the search terms for any user-defined FDDict.
+Running psautohint with the option --print-list-fddict will provide all the
+user-defined FDDict defintions, as well as the list of glyphs associated with
+each of them. One can use these to confirm the values, and to check which
+glyphs are assigned to which FDDict. In particular, one should check the glyph
+list of the FDDict named 'No Alignment Zones'; this list contains the glyphs
+that did not match any of the search terms of the user-defined FDDicts.
 
 The definitions use the following syntax:
 
@@ -257,13 +102,15 @@ begin GlyphSet <name>
 end GlyphSet <name>
 
 The glyph names may be either a real glyph name, or a regular expression
-designed to match several names. An abbreviated regex primer:
+designed to match several names.
+
+An abbreviated regex primer:
 ^ ..... Matches at the start of the glyph name
 $ ..... Matches at the end
 [aABb]  Matches any one character in the set a, A, b, B
-[A-Z] . Matches any one character in the set comprising the range from A-Z
-[abA-Z] Matches any one character in the set comprising set set of a, b,
-          and the characters in the range from A-Z
+[A-Z]   Matches any one character in the set comprising the range from A-Z
+[abA-Z] Matches any one character in the set a, b, and the characters
+          in the range from A-Z
 . ..... Matches any single character
 + ..... Maches whatever preceded it one or more times
 * ..... Matches whatever preceded it none or more times.
@@ -280,22 +127,22 @@ Examples:
              the first character is in the range A-Z
 ^.+\.smallcaps   Matches any name that contains ".smallcaps"
 ^.+\.smallcaps$  Matches any name that ends with ".smallcaps"
-^.+\.s[0-24]0$   Matches any name that ends with ".s00",".s10",".s20" or ".s04"
+^.+\.s[0-24]0$   Matches any name that ends with ".s00",".s10",".s20" or ".s40"
 
 
 Example FDDict and GlyphSet definitions
-***************************************
+=======================================
 
 begin FDDict ST_Smallcaps
-    # I like to put the non hint stuff first.
+    # It's good practice to put the non-hint stuff first
     OrigEmSqUnits 1000
     FlexOK true
     # This gets used as the hint dict name if the font
     # is eventually built as a CID font.
-    FontName AachenStd-Bold
+    FontName MyFont-Bold
 
-    # Alignment zones.
-    # The first is a bottom zone, the rest are top zones. See below.
+    # Alignment zones
+    # The first is a bottom zone, the rest are top zones
     BaselineOvershoot -20
     BaselineYCoord 0
     CapHeight 900
@@ -303,7 +150,7 @@ begin FDDict ST_Smallcaps
     LcHeight 700
     LcOvershoot 15
 
-    # Stem widths.
+    # Stem widths
     DominantV [236 267]
     DominantH [141 152]
 end FDDict ST_Smallcaps
@@ -311,7 +158,8 @@ end FDDict ST_Smallcaps
 
 begin FDDict LM_Smallcaps
     OrigEmSqUnits 1000
-    FontName AachenStd-Bold
+    FlexOK true
+    FontName MyFont-Bold
     BaselineOvershoot -25
     BaselineYCoord 0
     CapHeight 950
@@ -320,7 +168,6 @@ begin FDDict LM_Smallcaps
     LcOvershoot 21
     DominantV [236 267]
     DominantH [141 152]
-    FlexOK true
 end FDDict LM_Smallcaps
 
 
@@ -336,15 +183,15 @@ end GlyphSet ST_Smallcaps
 ***************************************
 
 Note that whitespace must exist between keywords and values, but is otherwise
-ignored. "#" is a comment character; any occurrence of "#" and all following
-text on a line is skipped. GlyphSet and FDDict definitions may be intermixed,
+ignored. '#' marks the start of a comment; all the text after this character
+on a line is ignored. GlyphSet and FDDict definitions may be intermixed,
 as long as any FDDict is defined before the GlyphSet which refers to it.
 
-You must provide at least two BlueValue pairs (the 'BaselineYCoord' bottom zone
-and any top zone), and you must provide the DominantH and DominantV keywords.
-All other keywords are optional.
+At least two BlueValue pairs (the 'BaselineYCoord' bottom zone and any top
+zone), and DominantH and DominantV values must be provided. All other keywords
+are optional.
 
-The full set of recognized FDDict keywords are:
+The full set of recognized FDDict keywords is:
 
 BlueValue pairs:
     # BaselineOvershoot is a bottom zone, the rest are top zones.
@@ -370,7 +217,6 @@ BlueValue pairs:
     Height6Overshoot
 
 OtherBlues pairs:
-    # These
     Baseline5Overshoot
     Baseline5
 
@@ -386,301 +232,522 @@ OtherBlues pairs:
     DescenderOvershoot
     DescenderHeight
 
-For zones which capture the bottom of a feature in the glyph, (BaselineYCoord
-and all the OtherBlues), the value specifies the top of the zone, and the
-"Overshoot" is a negative value which specifes the offset to the bottom of
+For zones which capture the bottom of a feature in a glyph --BaselineYCoord
+and all OtherBlues values-- the value specifies the top of the zone, and the
+'Overshoot' is a negative value which specifes the offset to the bottom of
 the zone, e.g.
     BaselineYCoord 0
     BaselineOvershoot -12
 
-For zones which capture the top of a feature in the glyph, (the rest of the
-BlueValue zones), the value specifies the bottom of the zone, and the
-"Overshoot" is a positive value which specifes the offset to the top of the
+For zones which capture the top of a feature in a glyph --all BlueValue values
+except BaselineYCoord-- the value specifies the bottom of the zone, and the
+'Overshoot' is a positive value which specifes the offset to the top of the
 zone, e.g.
     Height6 800
     Height6Overshoot 20
-
 
 Note also that there is no implied sequential order of values. Height6 may have
 a value less than or equal to CapHeight.
 
 The values for keywords in one FontDict definiton are completely independent
-of the values used in another FontDict. There is no inheritance from one
+from the values used in another FontDict. There is no inheritance from one
 definition to the next.
-
-All FontDicts must specify at least the BaselineYCoord and one top zone.
 
 Miscellaneous values:
   FontName ..... PostScript font name.
                  Only used by makeotf when building a CID font.
   OrigEmSqUnits  Single value: size of em-square.
                  Only used by makeotf when building a CID font.
-  LanguageGroup  0 or 1. Specifies whether counter hints for ideographic glyphs
-                 should be applied.
+  LanguageGroup  0 or 1. Specifies whether counter hints for ideographic
+                 glyphs should be applied.
                  Only used by makeotf when building a CID font.
   DominantV .... List of dominant vertical stems, in the form
                  [<stem-value-1> <stem-value-2> ...]
   DominantH .... List of dominant horizontal stems, in the form
                  [<stem-value-1> <stem-value-2> ...]
   FlexOK ....... true or false.
-  VCounterChars  List of characters to which counter hints may be applied,
+  VCounterChars  List of glyphs to which counter hints may be applied,
                  in the form [<glyph-name-1> <glyph-name-2> ...]
-  HCounterChars  List of characters to which counter hints may be applied,
+  HCounterChars  List of glyphs to which counter hints may be applied,
                  in the form [<glyph-name-1> <glyph-name-2> ...]
 
+Counter hints help to keep the space between stems open and equal in size.
+psautohint will try and add counter hints to only a short hard-coded list
+of glyphs,
+    V-counters: m, M, T, ellipsis
+    H-counters: element, equivalence, notelement, divide
+
+To extend this list, use the VCounterChars and HCounterChars keywords.
+A maximum of 64 glyph names can be added to either the vertical or
+horizontal list.
+
+---
 Note for cognoscenti: the psautohint program code ignores StdHW and StdVW
 entries if DominantV and DominantH entries are present, so it omits writing the
 Std[HV]W keywords to fontinfo file. Also, psautohint will add any non-duplicate
 stem width values for StemSnap[HV] to the Dominant[HV] stem width list, but the
 StemSnap[HV] entries are not necessary if the full list of stem widths are
-supplied as values for the Dominant[HV] keywords, hence it also writes the full
+supplied as values for the Dominant[HV] keywords. Hence it also writes the full
 stem list for the Dominant[HV] keywords, and does not write the StemSnap[HV]
 keywords, to the fontinfo file. This is technically not right, as Dominant[HV]
-array is supposed to hold only two values, but the psautohint program does not
-care, and it can write fewer entries this way.
+array is supposed to hold only two values, but the psautohint program is not
+affected, and it can write fewer entries this way.
 """
 
 
-class OptionParseError(Exception):
-    pass
+def _read_txt_file(file_path):
+    with open(file_path, encoding='utf-8') as f:
+        return f.read()
 
 
-def expandNames(glyphName, nameAliases):
-    glyphRange = glyphName.split("-")
+def _expand_cid_name(glyph_name, name_aliases):
+    glyphRange = glyph_name.split("-")
     if len(glyphRange) > 1:
-        g1 = expandNames(glyphRange[0], nameAliases)
-        g2 = expandNames(glyphRange[1], nameAliases)
-        glyphName = "%s-%s" % (g1, g2)
+        g1 = _expand_cid_name(glyphRange[0], name_aliases)
+        g2 = _expand_cid_name(glyphRange[1], name_aliases)
+        glyph_name = "%s-%s" % (g1, g2)
 
-    elif glyphName[0] == "/":
-        glyphName = "cid" + glyphName[1:].zfill(5)
-        if glyphName == "cid00000":
-            glyphName = ".notdef"
-            nameAliases[glyphName] = "cid00000"
+    elif glyph_name[0] == "/":
+        glyph_name = "cid" + glyph_name[1:].zfill(5)
+        if glyph_name == "cid00000":
+            glyph_name = ".notdef"
+            name_aliases[glyph_name] = "cid00000"
 
-    elif glyphName.startswith("cid") and (len(glyphName) < 8):
-        glyphName = "cid" + glyphName[3:].zfill(5)
-        if glyphName == "cid00000":
-            glyphName = ".notdef"
-            nameAliases[glyphName] = "cid00000"
+    elif glyph_name.startswith("cid") and (len(glyph_name) < 8):
+        glyph_name = "cid" + glyph_name[3:].zfill(5)
+        if glyph_name == "cid00000":
+            glyph_name = ".notdef"
+            name_aliases[glyph_name] = "cid00000"
 
-    return glyphName
-
-
-def parseGlyphListArg(glyphString, nameAliases):
-    glyphString = re.sub(r"[ \t\r\n,]+", ",", glyphString)
-    glyphList = glyphString.split(",")
-    glyphList = [expandNames(n, nameAliases) for n in glyphList]
-    glyphList = filter(None, glyphList)
-    return glyphList
+    return glyph_name
 
 
-def parseCounterHintData(path):
-    hCounterGlyphList = []
-    vCounterGlyphList = []
-    with open(path, "rt") as gf:
-        data = gf.read()
-    lines = re.findall(r"([^\r\n]+)", data)
-    # strip blank and comment lines
-    lines = filter(lambda line: re.sub(r"#.+", "", line), lines)
-    lines = filter(lambda line: line.strip(), lines)
-    for line in lines:
-        fields = line.split()
-        if (len(fields) != 2) or (fields[0] not in ["V", "v", "H", "h"]):
-            print("\tError: could not process counter hint line '%s' in file "
-                  "%s. Doesn't look like V or H followed by a tab or space, "
-                  "and then a glyph name." % (line, path))
-        elif fields[0] in ["V", "v"]:
-            vCounterGlyphList.append(fields[1])
-        else:
-            hCounterGlyphList.append(fields[1])
-    return hCounterGlyphList, vCounterGlyphList
+def _process_glyph_list_arg(glyph_list, name_aliases):
+    glyph_list = [_expand_cid_name(n, name_aliases) for n in glyph_list]
+    return filter(None, glyph_list)
 
 
-def checkFontinfoFile(options):
+class ACOptions(object):
+    def __init__(self, pargs):
+        self.inputPaths = pargs.font_paths
+        self.outputPath = pargs.output_path
+        self.reference_font = pargs.reference_font
+        self.hintAll = pargs.hint_all_ufo
+        self.verbose = pargs.verbose
+        self.allowChanges = pargs.allow_changes
+        self.noFlex = pargs.no_flex
+        self.noHintSub = pargs.no_hint_sub
+        self.allow_no_blues = pargs.no_zones_stems
+        self.logOnly = pargs.report_only
+        self.logFile = pargs.log_path
+        self.printDefaultFDDict = pargs.print_dflt_fddict
+        self.printFDDictList = pargs.print_list_fddict
+        self.allowDecimalCoords = pargs.decimal
+        self.writeToDefaultLayer = pargs.write_to_default_layer
+
+        self.glyphList = []
+        self.excludeGlyphList = False
+        self.nameAliases = {}
+        self.hCounterGlyphs = []
+        self.vCounterGlyphs = []
+        self.baseMaster = {}
+        self.font_format = None
+
+
+class _CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
     """
-    Check if there is a makeotf fontinfo file in the input font directory.
-    If so, get any Vcounter or HCouunter glyphs from it.
+    Adds extra line between options
     """
-    srcFontInfo = os.path.dirname(options.inputPaths[0])
-    srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
-    if os.path.exists(srcFontInfo):
-        with open(srcFontInfo, "rU") as fi:
-            data = fi.read()
-        data = re.sub(r"#[^\r\n]+", "", data)
-        counterGlyphLists = re.findall(
-            r"([VH])CounterChars\s+\(\s*([^\)\r\n]+)\)", data)
-        for entry in counterGlyphLists:
-            glyphList = entry[1].split()
-            if glyphList:
-                if entry[0] == "V":
-                    options.vCounterGlyphs.extend(glyphList)
-                else:
-                    options.hCounterGlyphs.extend(glyphList)
+    @staticmethod
+    def __add_whitespace(i, i_wtsp, arg):
+        if i == 0:
+            return arg
+        return (" " * i_wtsp) + arg
 
-        if options.vCounterGlyphs or options.hCounterGlyphs:
-            options.counterHintFile = srcFontInfo
+    def _split_lines(self, arg, width):
+        arg_rows = arg.splitlines()
+        for i, line in enumerate(arg_rows):
+            search = re.search('\s*[0-9\-]{0,}\.?\s*', line)
+            if line.strip() is "":
+                arg_rows[i] = " "
+            elif search:
+                line_wtsp = search.end()
+                lines = [self.__add_whitespace(j, line_wtsp, x)
+                         for j, x in enumerate(textwrap.wrap(line, width))]
+                arg_rows[i] = lines
+
+        # [''] adds the extra line between args
+        return [item for sublist in arg_rows for item in sublist] + ['']
 
 
-def getOptions(args):
-    options = autohint.ACOptions()
-    i = 0
-    numOptions = len(args)
-    while i < numOptions:
-        arg = args[i]
-        if options.inputPaths and arg[0] == "-":
-            raise OptionParseError(
-                "Option Error: All options must preceed the input font path "
-                "<%s>." % arg)
+class _AdditionalHelpAction(argparse.Action):
+    """
+    Based on argparse's _HelpAction and _VersionAction.
+    """
+    def __init__(self,
+                 option_strings,
+                 addl_help=None,
+                 dest=argparse.SUPPRESS,
+                 default=argparse.SUPPRESS,
+                 help=None):
+        super(_AdditionalHelpAction, self).__init__(
+            option_strings=option_strings,
+            dest=dest,
+            default=default,
+            nargs=0,
+            help=help)
+        self.addl_help = addl_help
 
-        if arg == "-h":
-            print(__help__)
-            print("Lib version:", _psautohint.version)
-            return
-        elif arg == "-u":
-            print(__usage__)
-            print("Lib version:", _psautohint.version)
-            return
-        elif arg == "-hfd":
-            print(__FDDoc__)
-            return
-        elif arg == "-pfd":
-            options.printDefaultFDDict = True
-        elif arg == "-pfdl":
-            options.printFDDictList = True
-        elif arg == "-hf":
-            options.usePlistFile = True
-        elif arg == "-a":
-            options.hintAll = True
-        elif arg == "-all":
-            options.hintAll = True
-        elif arg == "-r":
-            options.rehint = True
-        elif arg == "-m":
-            options.doMM = True
-        elif arg == "-q":
-            options.verbose = False
-        elif arg == "-qq":
-            options.quiet = True
-            options.verbose = False
-        elif arg == "-c":
-            options.allowChanges = True
-        elif arg == "-nf":
-            options.noFlex = True
-        elif arg == "-ns":
-            options.noHintSub = True
-        elif arg == "-nb":
-            options.allow_no_blues = True
-        elif arg in ["-xg", "-g"]:
-            if arg == "-xg":
-                options.excludeGlyphList = True
-            i += 1
-            glyphString = args[i]
-            if glyphString[0] == "-":
-                raise OptionParseError(
-                    "Option Error: it looks like the first item in the glyph "
-                    "list following '-g' is another option.")
-            options.glyphList += parseGlyphListArg(glyphString,
-                                                   options.nameAliases)
-        elif arg in ["-xgf", "-gf"]:
-            if arg == "-xgf":
-                options.excludeGlyphList = True
-            i += 1
-            filePath = args[i]
-            if filePath[0] == "-":
-                raise OptionParseError(
-                    "Option Error: it looks like the the glyph list file "
-                    "following '-gf' is another option.")
-            try:
-                with open(filePath, "rt") as gf:
-                    glyphString = gf.read()
-            except (IOError, OSError):
-                raise OptionParseError(
-                    "Option Error: could not open glyph list file <%s>." %
-                    filePath)
-            options.glyphList += parseGlyphListArg(glyphString,
-                                                   options.nameAliases)
-        elif arg == "-cf":
-            i += 1
-            filePath = args[i]
-            if filePath[0] == "-":
-                raise OptionParseError(
-                    "Option Error: it looks like the the counter hint glyph "
-                    "list file following '-cf' is another option.")
-            try:
-                options.counterHintFile = filePath
-                (options.hCounterGlyphs,
-                 options.vCounterGlyphs) = parseCounterHintData(filePath)
-            except (IOError, OSError):
-                raise OptionParseError(
-                    "Option Error: could not open counter hint glyph list "
-                    "file <%s>." % filePath)
-        elif arg == "-logOnly":
-            options.logOnly = True
-        elif arg == "-log":
-            i += 1
-            options.logFile = open(args[i], "wt")
-        elif arg == "-o":
-            i += 1
-            options.outputPath = args[i]
-        elif arg == "-d":
-            options.debug = True
-        elif arg in ["-decimal", "-dec"]:
-            options.allowDecimalCoords = True
-        elif arg == "-wd":
-            options.writeToDefaultLayer = True
-        elif arg[0] == "-":
-            raise OptionParseError("Option Error: Unknown option <%s>." % arg)
-        else:
-            options.inputPaths.append(arg)
-        i += 1
+    def __call__(self, parser, namespace, values, option_string=None):
+        formatter = parser._get_formatter()
+        formatter.add_text(self.addl_help)
+        parser.exit(message=formatter.format_help())
 
-    if not options.inputPaths:
-        raise OptionParseError(
-            "Option Error: You must provide a font path(s).")
 
-    if not all(os.path.exists(p) for p in options.inputPaths):
-        raise OptionParseError(
-            "Option Error: The input font(s) %s' do not exist." %
-            " ".join(options.inputPaths))
+def _split_comma_sequence(comma_str):
+    return [item.strip() for item in comma_str.split(',')]
 
-    if len(options.inputPaths) >=2 and options.outputPath:
-        raise OptionParseError(
-            "Option Error: Output path is not supported with multiple "
-            "input fonts.")
 
-    # Might be a UFO font.
-    # Auto completion in some shells adds a dir separator,
-    # which then causes problems with os.path.dirname().
-    options.inputPaths = [p.rstrip(os.sep) for p in options.inputPaths]
+def _check_save_path(path_str):
+    test_path = os.path.abspath(os.path.realpath(path_str))
+    del_test_file = True
+    try:
+        if os.path.exists(test_path):
+            del_test_file = False
+        open(test_path, 'a').close()
+        if del_test_file:
+            os.remove(test_path)
+    except (IOError, OSError):
+        raise argparse.ArgumentTypeError(
+            "{} is not a valid path to write to.".format(test_path))
+    return test_path
 
-    checkFontinfoFile(options)
 
-    if options.logOnly:
-        options.verbose = True
-        options.hintAll = True
+def _font_is_ufo(path):
+    if os.path.isdir(path) and path.lower().endswith('.ufo'):
+        meta_path = os.path.join(path, 'metainfo.plist')
+        if os.path.isfile(meta_path):
+            metainfo = plistlib.readPlist(meta_path)
+            if all([key in metainfo for key in ('creator', 'formatVersion')]):
+                return True
+    return False
+
+
+def _get_font_format(font_file_path):
+    if os.path.isfile(font_file_path):
+        with open(font_file_path, 'rb') as f:
+            head = f.read(4)
+            if head == b'OTTO':
+                return 'OTF'
+            elif head[0:2] == b'\x01\x00':
+                return 'CFF'
+            elif head == b'\x80\x01\xb6\x12':
+                return 'PFB'
+            elif head in (b'%!PS', b'%!Fo'):
+                for fullhead in (b'%!PS-AdobeFont', b'%!FontType1'):
+                    f.seek(0)
+                    if f.read(len(fullhead)) == fullhead:
+                        return 'PFA'
+        return None
+    else:
+        if _font_is_ufo(font_file_path):
+            return "UFO"
+        return None
+
+
+def _validate_font_paths(path_lst, parser):
+    """
+    Checks that all input paths are fonts, and that all are the same format.
+    Returns the font format string.
+    """
+    format_set = set()
+    for path in path_lst:
+        font_format = _get_font_format(path)
+        if font_format not in SUPPORTED_FONT_FORMATS:
+            parser.error("{} is not a supported font format".format(
+                os.path.basename(path)))
+        format_set.add(font_format)
+    if len(format_set) > 1:
+        parser.error("the input fonts must be all of the same format")
+    # get the set's single-item via tuple unpacking
+    ft_format_str, = format_set
+    return ft_format_str
+
+
+def _validate_path(path_str):
+    valid_path = os.path.abspath(os.path.realpath(path_str))
+    if not os.path.exists(valid_path):
+        raise argparse.ArgumentTypeError(
+            "{} is not a valid path.".format(path_str))
+    return valid_path
+
+
+RE_COUNTER_CHARS = re.compile(
+    r"([VH])CounterChars\s+[\(\[]\s*([^\)\r\n]+)[\)\]]")
+RE_COMMENT_LINE = re.compile(r"#[^\r\n]+")
+
+
+def _parse_fontinfo_file(options, fontinfo_path):
+    """
+    Collects VCounterChars and HCounterChars values from a fontinfo file,
+    and updates the ACOptions class.
+    """
+    data = _read_txt_file(fontinfo_path)
+    data = re.sub(RE_COMMENT_LINE, "", data)
+    counterGlyphLists = RE_COUNTER_CHARS.findall(data)
+    for entry in counterGlyphLists:
+        glyphList = entry[1].split()
+        if glyphList:
+            if entry[0] == "V":
+                options.vCounterGlyphs.extend(glyphList)
+            else:
+                options.hCounterGlyphs.extend(glyphList)
+
+
+def get_options(args):
+    parser = argparse.ArgumentParser(
+        formatter_class=_CustomHelpFormatter,
+        description=__doc__
+    )
+    parser.add_argument(
+        'font_paths',
+        metavar='FONT',
+        nargs='+',
+        type=_validate_path,
+        help='Type1/CFF/OTF/UFO font files'
+    )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='verbose mode\n'
+             'Use -vv for extra-verbose mode.'
+    )
+    mode_parser = parser.add_mutually_exclusive_group()
+    mode_parser.add_argument(
+        '-o',
+        '--output',
+        metavar='PATH',
+        dest='output_path',
+        type=_check_save_path,
+        help='specify a file to write the hints to\n'
+             'The hints are written to a new font instead of modifying the '
+             'original one.'
+    )
+    mode_parser.add_argument(
+        '-r',
+        '--reference-font',
+        metavar='PATH',
+        type=_validate_path,
+        help='reference font\n'
+             'Font to be used as reference, when hinting multiple fonts '
+             'compatibily.'
+    )
+    parser.add_argument(
+        '-a',
+        '--all',
+        action='store_true',
+        dest='hint_all_ufo',
+        help='hint all glyphs\n'
+             'All glyphs get hinted even if:\n'
+             '- they have been hinted before, or\n'
+             '- the outlines in the default layer have not changed\n'
+             'This is a UFO-only option.'
+    )
+    parser.add_argument(
+        '-w',
+        '--write-to-default-layer',
+        action='store_true',
+        help='write hints to default layer\n'
+             "The layer's name is {}.\n"
+             'This is a UFO-only option.'.format(PROCD_GLYPHS_LAYER)
+    )
+    glyphs_parser = parser.add_mutually_exclusive_group()
+    glyphs_parser.add_argument(
+        '-g',
+        '--glyphs',
+        metavar='GLYPH_LIST',
+        dest='glyphs_to_hint',
+        type=_split_comma_sequence,
+        default=[],
+        help='comma-separated sequence of glyphs to hint\n'
+             'The glyph identifiers may be glyph indexes, glyph names, or '
+             'glyph CIDs. CID values must be prefixed with a forward slash.\n'
+             'Examples:\n'
+             '    psautohint -g A,B,C,69 MyFont.ufo\n'
+             '    psautohint -g /103,/434,68 MyCIDFont'
+    )
+    glyphs_parser.add_argument(
+        '--glyphs-file',
+        metavar='PATH',
+        dest='glyphs_to_hint_file',
+        type=_validate_path,
+        help='file containing a list of glyphs to hint\n'
+             'The file must contain a comma-separated sequence of glyph '
+             'identifiers.'
+    )
+    glyphs_parser.add_argument(
+        '-x',
+        '--exclude-glyphs',
+        metavar='GLYPH_LIST',
+        dest='glyphs_to_not_hint',
+        type=_split_comma_sequence,
+        default=[],
+        help='comma-separated sequence of glyphs to NOT hint\n'
+             "Counterpart to '--glyphs' option."
+    )
+    glyphs_parser.add_argument(
+        '--exclude-glyphs-file',
+        metavar='PATH',
+        dest='glyphs_to_not_hint_file',
+        type=_validate_path,
+        help='file containing a list of glyphs to NOT hint\n'
+             "Counterpart to '--glyphs-file' option."
+    )
+    report_parser = parser.add_mutually_exclusive_group()
+    report_parser.add_argument(
+        '-c',
+        '--allow-changes',
+        action='store_true',
+        help='allow changes to the glyph outlines\n'
+             'Paths are reordered to reduce hint substitution, and nearly '
+             'straight curves are flattened.'
+    )
+    report_parser.add_argument(
+        '--report-only',
+        action='store_true',
+        help='process the font without modifying it'
+    )
+    parser.add_argument(
+        '--log',
+        metavar='PATH',
+        dest='log_path',
+        type=_check_save_path,
+        help='write output messages to a file'
+    )
+    parser.add_argument(
+        '-d',
+        '--decimal',
+        action='store_true',
+        help='use decimal coordinates'
+    )
+    parser.add_argument(
+        '--no-flex',
+        action='store_true',
+        help='suppress generation of flex commands'
+    )
+    parser.add_argument(
+        '--no-hint-sub',
+        action='store_true',
+        help='suppress hint substitution'
+    )
+    parser.add_argument(
+        '--no-zones-stems',
+        action='store_true',
+        help='allow the font to have no alignment zones nor stem widths'
+    )
+    parser.add_argument(
+        '--fontinfo-file',
+        metavar='PATH',
+        type=_validate_path,
+        help='file containing hinting parameters\n'
+             "Default: '{}'".format(FONTINFO_FILE_NAME)
+    )
+    parser.add_argument(
+        '--print-dflt-fddict',
+        action='store_true',
+        help="print the font's default FDDict set\n"
+             'This can be used as a starting point for building FDDict '
+             "sets. Use '--doc-fddict' option for more info."
+    )
+    parser.add_argument(
+        '--print-list-fddict',
+        action='store_true',
+        help='print the list of user-defined FDDict sets, and the glyphs '
+             'associated with each of them\n'
+             'This is useful for checking the FDDict sets and their glyph-'
+             "matching definitions. Use '--doc-fddict' option for more info."
+    )
+    parser.add_argument(
+        '--doc-fddict',
+        action=_AdditionalHelpAction,
+        help="show a description of the format for defining sets of "
+             "alternate alignment zones in a 'fontinfo' file and exit",
+        addl_help=FDDICT_DOC
+    )
+    parser.add_argument(
+        '--info',
+        action=_AdditionalHelpAction,
+        help="show program's general info and exit",
+        addl_help=GENERAL_INFO
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=__version__
+    )
+    parsed_args = parser.parse_args(args)
+
+    if len(parsed_args.font_paths) > 1 and parsed_args.output_path:
+        parser.error("-o/--output can't be used with multiple font inputs")
+
+    if len(parsed_args.font_paths) > 1 and parsed_args.fontinfo_file:
+        parser.error("--fontinfo-file can't be used with multiple font inputs")
+
+    if parsed_args.reference_font in parsed_args.font_paths:
+        parser.error("the reference font cannot also be a font input")
+
+    if len(parsed_args.font_paths) != len(set(parsed_args.font_paths)):
+        parser.error("found duplicate font inputs")
+
+    if parsed_args.reference_font:
+        all_font_paths = parsed_args.font_paths + [parsed_args.reference_font]
+    else:
+        all_font_paths = parsed_args.font_paths
+
+    options = ACOptions(parsed_args)
+
+    options.font_format = _validate_font_paths(all_font_paths, parser)
+
+    if parsed_args.glyphs_to_hint:
+        options.glyphList = _process_glyph_list_arg(
+            parsed_args.glyphs_to_hint, options.nameAliases)
+    elif parsed_args.glyphs_to_not_hint:
+        options.excludeGlyphList = True
+        options.glyphList = _process_glyph_list_arg(
+            parsed_args.glyphs_to_not_hint, options.nameAliases)
+    elif parsed_args.glyphs_to_hint_file:
+        options.glyphList = _process_glyph_list_arg(
+            _read_txt_file(parsed_args.glyphs_to_hint_file),
+            options.nameAliases)
+    elif parsed_args.glyphs_to_not_hint_file:
+        options.excludeGlyphList = True
+        options.glyphList = _process_glyph_list_arg(
+            _read_txt_file(parsed_args.glyphs_to_not_hint_file),
+            options.nameAliases)
+
+    if not parsed_args.fontinfo_file:
+        fontinfo_path = os.path.join(os.path.dirname(all_font_paths[0]),
+                                     FONTINFO_FILE_NAME)
+        if os.path.isfile(fontinfo_path):
+            _parse_fontinfo_file(options, fontinfo_path)
+    else:
+        _parse_fontinfo_file(options, parsed_args.fontinfo_file)
 
     return options
 
 
 def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
-    try:
-        options = getOptions(args)
-        if options is None:
-            # Happens when one of the help arguments is given.
-            return
-    except OptionParseError as e:
-        autohint.logMsg(e)
-        return 1
+    options = get_options(args)
 
-    # verify that all files exist.
+    if options.logFile:
+        open(options.logFile, 'w')
+
     try:
-        autohint.hintFiles(options)
-    except (autohint.ACFontError, autohint.ACHintError,
-            ufoFont.UFOParseError) as e:
-        autohint.logMsg("\t%s" % e)
+        hintFiles(options)
+    except (ACFontError, ACHintError, UFOParseError) as err:
+        logMsg("\t%s" % err)
         return 1
 
     if options.logFile:
