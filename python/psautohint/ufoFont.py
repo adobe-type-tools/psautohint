@@ -1955,9 +1955,8 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             if token[-2:] in ["mt", "dt", "ct", "cv"]:
                 opIndex += 1
             else:
-                print("Unhandled operation", argList, token)
                 raise BezParseError(
-                    "Unhandled operation: '%s' '%s'.", argList, token)
+                    "Unhandled operation: '%s' '%s'." % (argList, token))
             dx = dy = 0
             opName = bezToUFOPoint[token]
             if token[-2:] in ["mt", "dt"]:

@@ -1,3 +1,5 @@
+from __future__ import print_function, absolute_import
+
 from . import _psautohint
 
 
@@ -18,13 +20,13 @@ def toStr(o):
 
 
 def autohint(info, glyph, verbose=True, allow_edit=True, allow_hint_sub=True,
-             round_ccordinates=True, debug=False):
+             round_coordinates=True, debug=False):
     hinted = _psautohint.autohint(toBytes(info),
                                   toBytes(glyph),
                                   verbose,
                                   allow_edit,
                                   allow_hint_sub,
-                                  round_ccordinates,
+                                  round_coordinates,
                                   debug)
 
     return toStr(hinted)
