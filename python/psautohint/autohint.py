@@ -52,6 +52,33 @@ kTempCFFSuffix = ".temp.ac.cff"
 kProgressChar = "."
 
 
+class ACOptions(object):
+    def __init__(self):
+        self.inputPaths = []
+        self.outputPath = None
+        self.glyphList = []
+        self.nameAliases = {}
+        self.excludeGlyphList = False
+        self.usePlistFile = False
+        self.hintAll = False
+        self.rehint = False
+        self.verbose = True
+        self.allowChanges = False
+        self.noFlex = False
+        self.noHintSub = False
+        self.allow_no_blues = False
+        self.hCounterGlyphs = []
+        self.vCounterGlyphs = []
+        self.logOnly = False
+        self.logFile = None
+        self.printDefaultFDDict = False
+        self.printFDDictList = False
+        self.allowDecimalCoords = False
+        self.writeToDefaultLayer = False
+        self.baseMaster = {}
+        self.font_format = None
+
+
 class ACFontError(Exception):
     pass
 

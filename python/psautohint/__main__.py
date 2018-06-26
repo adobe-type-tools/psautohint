@@ -16,7 +16,7 @@ import textwrap
 from fontTools.misc.py23 import open
 
 from psautohint._psautohint import version as PSAUTOHINT_VERSION
-from psautohint.autohint import hintFiles, ACFontError, ACHintError, logMsg
+from psautohint.autohint import hintFiles, ACOptions, ACFontError, ACHintError, logMsg
 from psautohint.ufoFont import UFOParseError
 from psautohint.ufoFont import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 
@@ -327,8 +327,9 @@ def _process_glyph_list_arg(glyph_list, name_aliases):
     return filter(None, glyph_list)
 
 
-class ACOptions(object):
+class Options(ACOptions):
     def __init__(self, pargs):
+        super(Options, self).__init__()
         self.inputPaths = pargs.font_paths
         self.outputPath = pargs.output_path
         self.reference_font = pargs.reference_font
@@ -344,14 +345,6 @@ class ACOptions(object):
         self.printFDDictList = pargs.print_list_fddict
         self.allowDecimalCoords = pargs.decimal
         self.writeToDefaultLayer = pargs.write_to_default_layer
-
-        self.glyphList = []
-        self.excludeGlyphList = False
-        self.nameAliases = {}
-        self.hCounterGlyphs = []
-        self.vCounterGlyphs = []
-        self.baseMaster = {}
-        self.font_format = None
 
 
 class _CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -706,7 +699,7 @@ def get_options(args):
     else:
         all_font_paths = parsed_args.font_paths
 
-    options = ACOptions(parsed_args)
+    options = Options(parsed_args)
 
     options.font_format = _validate_font_paths(all_font_paths, parser)
 
