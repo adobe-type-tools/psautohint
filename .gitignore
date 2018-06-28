@@ -15,3 +15,5 @@ build
 dist
 .DS_Store
 .coverage*
+.tox/
+.pytest_cache/
