@@ -1,12 +1,12 @@
 install:
   - git submodule update --init
-  - set PATH=%PATH%;C:\cygwin\bin
   - python -m pip install --upgrade pip
   - pip install -r requirements.txt
   - pip install -r dev-requirements.txt
 
 build_script:
-  - make
+  - tox
 
 test_script:
+  - set PATH=%PATH%;C:\cygwin\bin
   - make check
