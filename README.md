@@ -19,15 +19,15 @@ Python C extension providing an interface to it, and helper Python code.
 
 To build the C extension:
 
-    make build
+    python setup.py build
 
 To install the C extension and the helper scripts globally:
 
-    make install
+    pip install -r requirements.txt .
 
 Alternatively to install them for the current user:
 
-    make PIP_OPTIONS=--user install
+    pip install -r requirements.txt --user .
 
 The authinter can be used by running:
 
@@ -43,6 +43,6 @@ directory:
 Testing
 -------
 
-We have a very primitive test suite that can be run with:
+We have a test suite that can be run with:
 
-    make check
+    tox
