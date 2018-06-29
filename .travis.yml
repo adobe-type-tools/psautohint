@@ -30,9 +30,7 @@ install:
 script:
   - tox
   - make check
-  - make dist
-  - unzip dist/psautohint-$(python setup.py -V).zip
-  - make -C psautohint-$(python setup.py -V)
+  - tox -e bdist
 
 after_success:
   - tox -e codecov
