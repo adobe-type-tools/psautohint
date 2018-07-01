@@ -1,6 +1,7 @@
 .PHONY: all FORCE
 
-PYTHON ?= coverage run
+PYTHON ?= python
+COVERAGE = $(PYTHON) -m coverage run
 
 UFO:=$(wildcard data/*/*/font.ufo)
 OTF:=$(wildcard data/*/*/font.otf)
@@ -20,18 +21,18 @@ all: $(TESTS)
 %.tst: %.ufo FORCE
 	@echo "	Testing $<"
 	@rm -rf $@
-	@$(PYTHON) -m psautohint --all -o $@ $<
+	@$(COVERAGE) -m psautohint --all -o $@ $<
 	@rm -f $@/.DS_Store
-	@diff -Naur --strip-trailing-cr $< $@
+	@$(PYTHON) differ.py $< $@
 	@rm -rf $@
 
 %.pst: %.otf FORCE
 	@echo "	Testing $<"
 	@rm -rf $@
-	@$(PYTHON) -m psautohint -o $@ $<
+	@$(COVERAGE) -m psautohint -o $@ $<
 	@ttx -q -t CFF -o $<.ttx $<
 	@ttx -q -t CFF -o $@.ttx $@
-	@diff -u $<.ttx $@.ttx
+	@$(PYTHON) differ.py $<.ttx $@.ttx
 	@rm -rf $@ $<.ttx $@.ttx
 
 FORCE:
