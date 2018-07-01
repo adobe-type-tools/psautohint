@@ -56,6 +56,7 @@ class ACOptions(object):
     def __init__(self):
         self.inputPaths = []
         self.outputPath = None
+        self.reference_font = None
         self.glyphList = []
         self.nameAliases = {}
         self.excludeGlyphList = False
