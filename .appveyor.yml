@@ -4,9 +4,7 @@ install:
   - pip install -r requirements.txt
   - pip install -r dev-requirements.txt
 
-build_script:
-  - tox
+build: false
 
 test_script:
-  - set PATH=%PATH%;C:\cygwin\bin
-  - make check
+  - tox
