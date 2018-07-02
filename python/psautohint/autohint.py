@@ -44,12 +44,7 @@ from .otfFont import CFFFontData
 from .ufoFont import UFOFontData, kAutohintName, kCheckOutlineName
 
 
-kACIDKey = "AutoHintKey"
-
 gLogFile = None
-kFontPlistSuffix = ".plist"
-kTempCFFSuffix = ".temp.ac.cff"
-kProgressChar = "."
 
 
 class ACOptions(object):
@@ -100,10 +95,7 @@ def logMsg(*args):
 
         if msg[-1] == ",":
             msg = msg[:-1]
-            if msg == kProgressChar:
-                sys.stdout.write(msg)  # avoid space, which is added by 'print'
-            else:
-                print(msg,)
+            print(msg,)
             sys.stdout.flush()
             if gLogFile:
                 gLogFile.write(msg)
@@ -241,26 +233,6 @@ def printFontInfo(fontInfoString):
             pass
 
 
-flexPatthern = re.compile(
-    r"preflx1[^f]+preflx2[\r\n]"
-    r"(-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+)"
-    r"(-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+-*\d+\s+).+?flx([\r\n])",
-    re.DOTALL)
-commentPattern = re.compile(r"[^\r\n]*%[^\r\n]*[\r\n]")
-hintGroupPattern = re.compile(r"beginsubr.+?newcolors[\r\n]", re.DOTALL)
-whiteSpacePattern = re.compile(r"\s+", re.DOTALL)
-
-
-def makeACIdentifier(bezText):
-    # Get rid of all the hint operators and their args
-    # collapse flex to just the two rct's
-    bezText = commentPattern.sub("", bezText)
-    bezText = hintGroupPattern.sub("", bezText)
-    bezText = flexPatthern.sub("\1 rct\3\2 rct\3", bezText)
-    bezText = whiteSpacePattern.sub("", bezText)
-    return bezText
-
-
 def openFile(path, outFilePath, useHashMap, options):
     if os.path.isfile(path):
         font = openOpenTypeFile(path, outFilePath, options)
@@ -350,12 +322,6 @@ def openOpenTypeFile(path, outFilePath, options):
 
     fontData = CFFFontData(ttFont, path, outFilePath, fontType, logMsg)
     return fontData
-
-
-def removeTempFiles(fileList):
-    for filePath in fileList:
-        if os.path.exists(filePath):
-            os.remove(filePath)
 
 
 def cmpFDDictEntries(entry1, entry2):
