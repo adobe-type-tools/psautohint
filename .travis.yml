@@ -29,7 +29,6 @@ install:
 
 script:
   - tox
-  - make check
   - tox -e bdist
 
 after_success:
