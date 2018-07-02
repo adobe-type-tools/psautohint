@@ -8,3 +8,6 @@ build: false
 
 test_script:
   - tox
+
+on_success:
+  - tox -e codecov
