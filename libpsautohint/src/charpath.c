@@ -258,7 +258,7 @@ FreePathElements(indx startix, indx stopix)
         PHintElt hintElt, next;
         if (pathlist[j].path != NULL) {
             /* Before we can free hint elements will need to know gPathEntries
-             value for char in each directory because this proc can be
+             value for char in each master because this proc can be
              called when characters are inconsistent.
              */
             for (i = 0; i < gPathEntries; i++) {
@@ -356,7 +356,7 @@ AddLine(indx mIx, indx pathIx)
 
     if (pathlist[mIx].path[pathIx].type != RCT) {
         LogMsg(WARNING, OK,
-               "Please convert the point closepath in directory: "
+               "Please convert the point closepath in master: "
                "%s, character: %s to a line closepath.\n",
                masterNames[mIx], gGlyphName);
         return;
@@ -370,7 +370,7 @@ AddLine(indx mIx, indx pathIx)
         case RDT:
             LogMsg(WARNING, OK,
                    "Please convert the point closepath to a line "
-                   "closepath in directory: %s, character: %s.\n",
+                   "closepath in master: %s, character: %s.\n",
                    masterNames[mIx], gGlyphName);
             return;
         case RCT:
@@ -388,7 +388,7 @@ AddLine(indx mIx, indx pathIx)
                             : -FixOne;
             else {
                 LogMsg(WARNING, OK,
-                       "Could not modify point closepath in directory "
+                       "Could not modify point closepath in master "
                        "'%s', character: %s near (%d, %d).\n",
                        masterNames[mIx], gGlyphName, FTrunc8(end->x),
                        FTrunc8(end->y));
@@ -618,7 +618,7 @@ CompareCharPaths(const ACFontInfo* fontinfo, const char** glyphs)
 
                 if ((type1 == RDT) &&
                     (type2 == RCT)) { /* Change this element in all previous
-                                         directories to a curve. */
+                                         masters to a curve. */
                     ix = mIx - 1;
                     do {
                         ok = ok && ChangetoCurve(ix, i);
@@ -1146,7 +1146,7 @@ ReadHints(PHintElt hintElt, indx pathEltIx)
     }
 }
 
-/* Reads hints from hints directory path list and assigns corresponding
+/* Reads hints from hints master path list and assigns corresponding
  hints to other designs. */
 static bool
 ReadandAssignHints(void)
@@ -1392,7 +1392,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
         }
     }
     if (!ok) { /* change RM's to RY's or RV's to RB's for this element in each
-                  directory */
+                  master */
         int16_t newhinttype = (hinttype == (RM + ESCVAL) ? RY : RB);
         if (*errormsg) {
             LogMsg(WARNING, OK,
@@ -2002,7 +2002,7 @@ CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
 }
 
 /* Checks if path element values are the same for the RCT, HVCT and VHCT
- operators in each master directory between operands startIx to
+ operators in each master master between operands startIx to
  startIx + length.  Returns true if they are the same and false otherwise. */
 static bool
 SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
