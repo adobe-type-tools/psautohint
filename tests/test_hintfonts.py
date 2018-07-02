@@ -1,3 +1,5 @@
+from __future__ import print_function, division, absolute_import
+
 import glob
 import pytest
 
@@ -32,7 +34,7 @@ def test_otf(otf):
     options = Options(otf, out)
     hintFiles(options)
 
-    for path in [otf, out]:
+    for path in (otf, out):
         font = TTFont(path)
         assert "CFF " in font
         writer = XMLWriter(path + ".xml")
