@@ -16,3 +16,6 @@ test_script:
 
 on_success:
   - tox -e codecov
+
+skip_branch_with_pr: true
+
