@@ -14,7 +14,7 @@ class Options(ACOptions):
     def __init__(self, inpath, outpath):
         super(Options, self).__init__()
         self.inputPaths = [inpath]
-        self.outputPath = outpath
+        self.outputPaths = [outpath]
         self.hintAll = True
         self.verbose = False
 
