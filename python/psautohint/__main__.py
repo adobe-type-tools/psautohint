@@ -16,7 +16,8 @@ import textwrap
 from fontTools.misc.py23 import open
 
 from psautohint._psautohint import version as PSAUTOHINT_VERSION
-from psautohint.autohint import hintFiles, ACOptions, ACFontError, ACHintError, logMsg
+from psautohint.autohint import (ACFontError, ACHintError, ACOptions,
+                                 hintFiles, logMsg)
 from psautohint.ufoFont import UFOParseError
 from psautohint.ufoFont import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 
