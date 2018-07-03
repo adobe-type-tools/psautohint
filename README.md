@@ -2,6 +2,7 @@
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/frpwwnql34k70drl?svg=true)](https://ci.appveyor.com/project/adobe-type-tools/psautohint)
 [![Codacy](https://api.codacy.com/project/badge/Grade/171cdb2c833f484f8d2d85253123bd39)](https://www.codacy.com/app/adobe-type-tools/psautohint?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adobe-type-tools/psautohint&amp;utm_campaign=Badge_Grade)
 [![Codecov](https://codecov.io/gh/adobe-type-tools/psautohint/branch/master/graph/badge.svg)](https://codecov.io/gh/adobe-type-tools/psautohint)
+[![PyPI](https://img.shields.io/pypi/v/psautohint.svg)](https://pypi.org/project/psautohint)
 
 PSAutoHint
 ==========
