@@ -1,3 +1,8 @@
+environment:
+  matrix:
+    - TOXENV: py27-cov
+    - TOXENV: py36-cov
+
 install:
   - git submodule update --init
   - python -m pip install --upgrade pip
