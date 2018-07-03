@@ -37,4 +37,7 @@ after_success:
 branches:
   only:
     - master
+    # We want to build wip/* branches since these are not usually used for PRs
     - /^wip\/.*$/
+    # We want to build version tags as well.
+    - /^v\d+\.\d+.*$/
