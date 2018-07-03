@@ -55,7 +55,7 @@ kProgressChar = "."
 class ACOptions(object):
     def __init__(self):
         self.inputPaths = []
-        self.outputPath = None
+        self.outputPaths = []
         self.reference_font = None
         self.glyphList = []
         self.nameAliases = {}
@@ -370,12 +370,16 @@ def cmpFDDictEntries(entry1, entry2):
 
 def hintFiles(options):
     if options.reference_font:
-        hintFile(options, options.reference_font, reference_master=True)
-    for path in options.inputPaths:
-        hintFile(options, path, reference_master=False)
+        hintFile(options, options.reference_font, None, reference_master=True)
+    for i, path in enumerate(options.inputPaths):
+        try:
+            outpath = options.outputPaths[i]
+        except IndexError:
+            outpath = None
+        hintFile(options, path, outpath, reference_master=False)
 
 
-def hintFile(options, path, reference_master):
+def hintFile(options, path, outpath, reference_master):
     global gLogFile
     gLogFile = options.logFile
     nameAliases = options.nameAliases
@@ -389,7 +393,7 @@ def hintFile(options, path, reference_master):
         # We always use the hash map, unless the user
         # requested only report issues.
         useHashMap = not options.logOnly
-        fontData = openFile(path, options.outputPath, useHashMap, options)
+        fontData = openFile(path, outpath, useHashMap, options)
         fontData.allowDecimalCoords = options.allowDecimalCoords
         if options.writeToDefaultLayer and (
            hasattr(fontData, "setWriteToDefault")):  # UFO fonts only

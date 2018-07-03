@@ -331,7 +331,7 @@ class Options(ACOptions):
     def __init__(self, pargs):
         super(Options, self).__init__()
         self.inputPaths = pargs.font_paths
-        self.outputPath = pargs.output_path
+        self.outputPaths = pargs.output_paths
         self.reference_font = pargs.reference_font
         self.hintAll = pargs.hint_all_ufo
         self.verbose = pargs.verbose
@@ -517,18 +517,18 @@ def get_options(args):
         help='verbose mode\n'
              'Use -vv for extra-verbose mode.'
     )
-    mode_parser = parser.add_mutually_exclusive_group()
-    mode_parser.add_argument(
+    parser.add_argument(
         '-o',
         '--output',
         metavar='PATH',
-        dest='output_path',
+        nargs='+',
+        dest='output_paths',
         type=_check_save_path,
         help='specify a file to write the hints to\n'
              'The hints are written to a new font instead of modifying the '
              'original one.'
     )
-    mode_parser.add_argument(
+    parser.add_argument(
         '-r',
         '--reference-font',
         metavar='PATH',
@@ -682,8 +682,9 @@ def get_options(args):
     )
     parsed_args = parser.parse_args(args)
 
-    if len(parsed_args.font_paths) > 1 and parsed_args.output_path:
-        parser.error("-o/--output can't be used with multiple font inputs")
+    if (parsed_args.output_paths and
+            len(parsed_args.font_paths) != len(parsed_args.output_paths)):
+        parser.error("number of input and output fonts differ")
 
     if len(parsed_args.font_paths) > 1 and parsed_args.fontinfo_file:
         parser.error("--fontinfo-file can't be used with multiple font inputs")
