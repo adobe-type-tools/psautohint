@@ -569,7 +569,8 @@ def hintFile(options, path, outpath, reference_master):
                                         options.allowDecimalCoords)
                 options.baseMaster[name] = newBezString
             else:
-                masters = [b"baseFont", fontFileName]
+                baseFontFileName = os.path.basename(options.reference_font)
+                masters = [baseFontFileName, fontFileName]
                 glyphs = [options.baseMaster[name], bezString]
                 newBezString = autohintmm(fontInfo, glyphs, masters,
                                           options.verbose)
