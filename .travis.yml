@@ -3,8 +3,8 @@ language: python
 env:
   global:
     - CIBW_SKIP="cp34-* cp35-*"
-    - CIBW_TEST_REQUIRES: pytest
-    - CIBW_TEST_COMMAND: "cd {project}/tests && pytest"
+    - CIBW_TEST_REQUIRES=pytest
+    - CIBW_TEST_COMMAND="cd {project}/tests && pytest"
 
 matrix:
   include:
