@@ -18,3 +18,5 @@ tests/.coverage*
 .tox/
 .pytest_cache/
 .coverage
+.mypy_*
+venv
