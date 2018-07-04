@@ -4,7 +4,7 @@ env:
   global:
     - CIBW_SKIP="cp34-* cp35-*"
     - CIBW_TEST_REQUIRES="tox"
-    - CIBW_TEST_COMMAND="tox --installpkg wheelhouse/*.whl --workdir {project} -c {project}"
+    - CIBW_TEST_COMMAND="tox --installpkg /tmp/delocated_wheel/*.whl --workdir {project} -c {project}"
 
 matrix:
   include:
