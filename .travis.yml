@@ -4,7 +4,7 @@ env:
   global:
     - CIBW_SKIP="cp34-* cp35-*"
     - CIBW_TEST_REQUIRES="tox"
-    - CIBW_TEST_COMMAND="tox --workdir {project}"
+    - CIBW_TEST_COMMAND="tox --workdir {project} -c {project}"
 
 matrix:
   include:
@@ -21,7 +21,8 @@ script:
   - cibuildwheel --output-dir wheelhouse
   - $PIP install -r requirements.txt
   - $PIP install -r dev-requirements.txt
-  - tox -e codecov
+  - wheel=`ls ${wheelhouse}/psautohint*.whl | head -n 1`
+  - tox --installpkg $wheel -e codecov --workdir {project} -c {project}
 
 branches:
   only:
@@ -29,4 +30,4 @@ branches:
     # We want to build wip/* branches since these are not usually used for PRs
     - /^wip\/.*$/
     # We want to build version tags as well.
-    - /^v\d+\.\d+.*$/
+    - /^\d+\.\d+\.\d+.*$/
