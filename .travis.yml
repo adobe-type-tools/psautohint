@@ -19,7 +19,7 @@ matrix:
 script:
   - $PIP install cibuildwheel==0.9.2 coverage codecov
   - cibuildwheel --output-dir wheelhouse
-  - coverage combine
+  - coverage combine tests
   - codecov
 
 branches:
