@@ -1,38 +1,24 @@
-dist: trusty
-sudo: false
-
 language: python
+
+env:
+  global:
+    - CIBW_SKIP="cp34-* cp35-*"
+    - CIBW_TEST_REQUIRES="tox"
+    - CIBW_TEST_COMMAND="tox --installpkg /tmp/delocated_wheel/*.whl --workdir {project} -c {project}"
 
 matrix:
   include:
-    - python: 2.7
-      env: TOXENV=py27-cov
-    - python: 3.6
-      env: TOXENV=py36-cov
-    # The 'osx' environment uses the python2.7 by default.
-    # TODO: maybe also tests python3 on macOS
-    - language: generic
-      os: osx
-      env: TOXENV=py27-cov
-
-install:
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-      curl -O https://bootstrap.pypa.io/get-pip.py;
-      python get-pip.py --user;
-      python -m pip install --user virtualenv;
-      python -m virtualenv .venv/;
-      source .venv/bin/activate;
-    fi
-  - pip install --upgrade pip
-  - pip install -r requirements.txt
-  - pip install -r dev-requirements.txt
+    - sudo: required
+      services:
+        - docker
+      env: PIP=pip
+    - os: osx
+      language: generic
+      env: PIP=pip2
 
 script:
-  - tox
-  - tox -e bdist
-
-after_success:
-  - tox -e codecov
+  - $PIP install cibuildwheel==0.9.2
+  - cibuildwheel --output-dir wheelhouse
 
 branches:
   only:
@@ -40,4 +26,4 @@ branches:
     # We want to build wip/* branches since these are not usually used for PRs
     - /^wip\/.*$/
     # We want to build version tags as well.
-    - /^v\d+\.\d+.*$/
+    - /^\d+\.\d+\.\d+.*$/
