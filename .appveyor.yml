@@ -2,7 +2,7 @@ environment:
   global:
     CIBW_SKIP: cp33-* cp34-* cp35-*
     CIBW_TEST_REQUIRES: pytest
-    CIBW_TEST_COMMAND: "cd {project}\\tests; pytest"
+    CIBW_TEST_COMMAND: "cd {project}\\tests && pytest"
 
 build_script:
   - pip install cibuildwheel==0.9.2
