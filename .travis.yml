@@ -3,8 +3,8 @@ language: python
 env:
   global:
     - CIBW_SKIP="cp34-* cp35-*"
-    - CIBW_TEST_REQUIRES="pytest pytest-cov"
-    - CIBW_TEST_COMMAND="cd {project}/tests && pytest --cov"
+    - CIBW_TEST_REQUIRES="tox"
+    - CIBW_TEST_COMMAND="tox"
 
 matrix:
   include:
@@ -17,10 +17,11 @@ matrix:
       env: PIP=pip2
 
 script:
-  - $PIP install cibuildwheel==0.9.2 coverage codecov
+  - $PIP install cibuildwheel==0.9.2
   - cibuildwheel --output-dir wheelhouse
-  - coverage combine tests
-  - codecov
+  - $PIP install -r requirements.txt
+  - $PIP install -r dev-requirements.txt
+  - tox -e codecov
 
 branches:
   only:

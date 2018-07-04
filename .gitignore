@@ -17,3 +17,4 @@ dist
 tests/.coverage*
 .tox/
 .pytest_cache/
+.coverage
