@@ -63,7 +63,7 @@ on_success:
   - ps: >-
       if($env:APPVEYOR_REPO_TAG -eq 'true') {
         Write-Output ("Deploying " + $env:APPVEYOR_REPO_TAG_NAME + " to PyPI...")
-        tox -e wheel,pypi
+        tox -e pypi-wheel
       } else {
         Write-Output "Not deploying as this is not a tagged commit"
       }
