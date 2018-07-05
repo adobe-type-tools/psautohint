@@ -25,4 +25,8 @@ function run_tests {
 
     # Install pre-compiled wheel and run tests against it
     tox --installpkg "${wheel}" -e "${TOXENV}"
+
+    # clean up after us, or else running tox later on outside the docker
+    # container can lead to permission errors
+    rm -rf .tox
 }
