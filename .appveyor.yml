@@ -1,13 +1,57 @@
+cache:
+  - '%LOCALAPPDATA%\pip\Cache'
+
 environment:
   matrix:
-    - TOXENV: py27-cov
-    - TOXENV: py36-cov
+    - PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7"
+      PYTHON_ARCH: "32"
+      TOXENV: "py27-cov"
+      TOXPYTHON: "C:\\Python27\\python.exe"
+
+    - PYTHON: "C:\\Python36"
+      PYTHON_VERSION: "3.6"
+      PYTHON_ARCH: "32"
+      TOXENV: "py36-cov"
+      TOXPYTHON: "C:\\Python36\\python.exe"
+
+    - PYTHON: "C:\\Python27-x64"
+      PYTHON_VERSION: "2.7"
+      PYTHON_ARCH: "64"
+      TOXENV: "py27-cov"
+      TOXPYTHON: "C:\\Python27-x64\\python.exe"
+
+    - PYTHON: "C:\\Python36-x64"
+      PYTHON_VERSION: "3.6"
+      PYTHON_ARCH: "64"
+      TOXENV: "py36-cov"
+      TOXPYTHON: "C:\\Python36-x64\\python.exe"
+
+matrix:
+  fast_finish: true
+
+skip_branch_with_pr: true
+
+init:
+  - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
 
 install:
-  - git submodule update --init
-  - python -m pip install --upgrade pip
-  - pip install -r requirements.txt
-  - pip install -r dev-requirements.txt
+  # checkout git sub-modules
+  - git submodule update --init --recursive
+
+  # prepend newly installed Python to the PATH
+  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+
+  # check that we have the expected version and architecture for Python
+  - python --version
+  - python -c "import struct; print(struct.calcsize('P') * 8)"
+
+  # upgrade pip to avoid out-of-date warnings
+  - python -m pip install --disable-pip-version-check --upgrade pip
+  - python -m pip --version
+
+  # install tox
+  - python -m pip install -r dev-requirements.txt
 
 build: false
 
@@ -15,7 +59,21 @@ test_script:
   - tox
 
 on_success:
-  - tox -e codecov
+  - tox -e coverage,codecov
+  - >
+    IF "%APPVEYOR_REPO_TAG%" == "true"
+    (
+        tox -e wheel,pypi
+    )
 
-skip_branch_with_pr: true
+on_failure:
+  # print the content of tox *.log files
+  - ps: Get-Content .tox\\log\\*.log
+  - ps: $envlogdir = ".tox\\" + ${env:TOXENV} + "\\log"; `
+        foreach($logfile in Get-ChildItem $envlogdir){ `
+            $logpath = $envlogdir + "\\" + $logfile; `
+            Get-Content -path $logpath }
 
+artifacts:
+  # archive the generated packages in the ci.appveyor.com build report
+  - path: dist\*.whl
