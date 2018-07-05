@@ -46,15 +46,6 @@ matrix:
         - MB_PYTHON_VERSION=3.6
 
 before_install:
-  - |
-    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-      curl -O https://bootstrap.pypa.io/get-pip.py
-      python get-pip.py --user
-      python -m pip install --user virtualenv
-      python -m virtualenv .venv/
-      source .venv/bin/activate
-    fi
-  - pip install -r dev-requirements.txt
   - source multibuild/common_utils.sh
   - source multibuild/travis_steps.sh
   - before_install
@@ -66,6 +57,15 @@ script:
   - install_run $PLAT
 
 after_success:
+  - |
+    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      curl -O https://bootstrap.pypa.io/get-pip.py
+      python get-pip.py --user
+      python -m pip install --user virtualenv
+      python -m virtualenv .venv/
+      source .venv/bin/activate
+    fi
+  - pip install -r dev-requirements.txt
   # upload code coverage to Codecov.io
   - tox -e coverage,codecov
   # if tagged, create the source distribution for the deploy stage
