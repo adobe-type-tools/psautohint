@@ -60,11 +60,13 @@ test_script:
 
 on_success:
   - tox -e coverage,codecov
-  - >
-    IF "%APPVEYOR_REPO_TAG%" == "true"
-    (
+  - ps: >-
+      if($env:APPVEYOR_REPO_TAG -eq 'true') {
+        Write-Output ("Deploying " + $env:APPVEYOR_REPO_TAG_NAME + " to PyPI...")
         tox -e wheel,pypi
-    )
+      } else {
+        Write-Output "Not deploying as this is not a tagged commit"
+      }
 
 on_failure:
   # print the content of tox *.log files
