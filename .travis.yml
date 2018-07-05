@@ -46,6 +46,7 @@ matrix:
         - MB_PYTHON_VERSION=3.6
 
 before_install:
+  - pip install -r dev-requirements.txt
   - source multibuild/common_utils.sh
   - source multibuild/travis_steps.sh
   - before_install
