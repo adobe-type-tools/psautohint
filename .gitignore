@@ -14,6 +14,5 @@ MANIFEST
 build
 dist
 .DS_Store
-tests/.coverage*
 .tox/
 .pytest_cache/
