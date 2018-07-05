@@ -1,6 +1,7 @@
 from __future__ import print_function, division, absolute_import
 
 import glob
+from os.path import basename
 import pytest
 
 from fontTools.misc.xmlWriter import XMLWriter
@@ -8,6 +9,7 @@ from fontTools.ttLib import TTFont
 from psautohint.autohint import ACOptions, hintFiles
 
 from .differ import main as differ
+from . import DATA_DIR
 
 
 class Options(ACOptions):
@@ -19,18 +21,18 @@ class Options(ACOptions):
         self.verbose = False
 
 
-@pytest.mark.parametrize("ufo", glob.glob("data/*/*/font.ufo"))
-def test_ufo(ufo):
-    out = ufo + ".out"
+@pytest.mark.parametrize("ufo", glob.glob("%s/*/*/font.ufo" % DATA_DIR))
+def test_ufo(ufo, tmpdir):
+    out = str(tmpdir / basename(ufo))
     options = Options(ufo, out)
     hintFiles(options)
 
     assert differ([ufo, out])
 
 
-@pytest.mark.parametrize("otf", glob.glob("data/*/*/font.otf"))
-def test_otf(otf):
-    out = otf + ".out"
+@pytest.mark.parametrize("otf", glob.glob("%s/*/*/font.otf" % DATA_DIR))
+def test_otf(otf, tmpdir):
+    out = str(tmpdir / basename(otf))
     options = Options(otf, out)
     hintFiles(options)
 
