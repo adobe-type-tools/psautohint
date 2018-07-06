@@ -28,5 +28,5 @@ function run_tests {
 
     # clean up after us, or else running tox later on outside the docker
     # container can lead to permission errors
-    rm -rf .tox
+    rm -rf ../.tox
 }
