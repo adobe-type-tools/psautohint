@@ -1312,7 +1312,7 @@ class CFFFontData:
         srcFontInfo = os.path.dirname(inputPath)
         srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
         if os.path.exists(srcFontInfo):
-            with open(srcFontInfo, "rU") as fi:
+            with open(srcFontInfo, "r", encoding="utf-8") as fi:
                 fontInfoData = fi.read()
             fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
         else:
@@ -1368,7 +1368,7 @@ def test2():
     # Takes first argument = bez path, writes T2 string.
     # Use form "cid0769" for CID keys references.
     path = sys.argv[1]
-    with open(path, "rt") as fp:
+    with open(path, "rt", encoding="utf-8") as fp:
         bezString = fp.read()
 
     convertBezToT2(bezString)

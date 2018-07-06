@@ -1,6 +1,1 @@
-# required for formatting the 'long_description' as Markdown
-setuptools>=36.4.0
-wheel>=0.31.0
-
-coverage>=4.5.1
 tox>=2.9.1

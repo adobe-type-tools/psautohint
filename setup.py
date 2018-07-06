@@ -91,6 +91,14 @@ setup(name="psautohint",
       install_requires=[
           'fonttools>=3.1.2',
       ],
+      extras_require={
+          "testing": [
+              "pytest >= 3.0.0, <4",
+              "pytest-cov >= 2.5.1, <3",
+              "pytest-xdist >= 1.22.2, <2",
+              "pytest-randomly >= 1.2.3, <2",
+          ],
+      },
       cmdclass={
           'build_ext': CustomBuildExt,
       },

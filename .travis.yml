@@ -1,38 +1,10 @@
 dist: trusty
-sudo: false
-
+sudo: required
 language: python
-
-matrix:
-  include:
-    - python: 2.7
-      env: TOXENV=py27-cov
-    - python: 3.6
-      env: TOXENV=py36-cov
-    # The 'osx' environment uses the python2.7 by default.
-    # TODO: maybe also tests python3 on macOS
-    - language: generic
-      os: osx
-      env: TOXENV=py27-cov
-
-install:
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-      curl -O https://bootstrap.pypa.io/get-pip.py;
-      python get-pip.py --user;
-      python -m pip install --user virtualenv;
-      python -m virtualenv .venv/;
-      source .venv/bin/activate;
-    fi
-  - pip install --upgrade pip
-  - pip install -r requirements.txt
-  - pip install -r dev-requirements.txt
-
-script:
-  - tox
-  - tox -e bdist
-
-after_success:
-  - tox -e codecov
+# The travis Python version is unrelated to the version we build and test
+# with.  This is set with the MB_PYTHON_VERSION variable.
+python: 3.5
+services: docker
 
 branches:
   only:
@@ -41,3 +13,70 @@ branches:
     - /^wip\/.*$/
     # We want to build version tags as well.
     - /^v\d+\.\d+.*$/
+
+env:
+  global:
+    # directory containing the project source
+    - REPO_DIR=.
+    # pip dependencies to _build_ project
+    # - BUILD_DEPENDS="..."
+    # pip dependencies to _test_ project
+    - TEST_DEPENDS="-rdev-requirements.txt"
+    - PLAT=x86_64
+    - UNICODE_WIDTH=32
+    - TWINE_USERNAME=adobe-type-tools-ci
+    # TWINE_PASSWORD is set in Travis settings
+
+matrix:
+  exclude:
+    # Exclude the default Python 3.5 build
+    - python: 3.5
+  include:
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=2.7
+    - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.6
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=2.7
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.6
+
+cache: pip
+
+before_install:
+  - source multibuild/common_utils.sh
+  - source multibuild/travis_steps.sh
+  - before_install
+
+install:
+  - build_wheel $REPO_DIR $PLAT
+
+script:
+  - install_run $PLAT
+
+after_success:
+  - pip install tox
+  # upload code coverage to Codecov.io
+  - tox -e codecov
+  # if tagged, create the source distribution for the deploy stage
+  - if [ -n "$TRAVIS_TAG" ] && [ "$BUILD_SDIST" == true ]; then tox -e sdist; fi
+  # copy compiled wheels to dist/ where Travis `dpl` tool can find them and upload to PyPI
+  - if [ -n "$TRAVIS_TAG" ]; then mkdir -p dist; cp wheelhouse/*.whl dist; fi
+
+deploy:
+  provider: pypi
+  on:
+    tags: true
+    repo: adobe-type-tools/psautohint
+    all_branches: true
+  # 'check' is a do-nothing setup.py command, to prevent Travis from trying
+  # to rebuild the wheel we just built with multibuild
+  distributions: check
+  skip_cleanup: true
+  skip_upload_docs: true

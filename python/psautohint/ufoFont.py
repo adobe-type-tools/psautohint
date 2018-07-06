@@ -125,6 +125,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
+from fontTools.misc.py23 import open, tobytes
 from psautohint import fdTools
 
 
@@ -316,7 +317,6 @@ Example from "B" in SourceCodePro-Regular
 
 """
 
-XML = ET.XML
 XMLElement = ET.Element
 xmlToString = ET.tostring
 debug = False
@@ -446,7 +446,7 @@ class UFOFontData:
         hasHints = False
         glyphPath = self.getGlyphProcessedPath(glyphName)
         if glyphPath and os.path.exists(glyphPath):
-            with open(glyphPath, "rt") as fp:
+            with open(glyphPath, "rt", encoding="utf-8") as fp:
                 data = fp.read()
             if "hintSetList" in data:
                 hasHints = True
@@ -511,7 +511,7 @@ class UFOFontData:
     def readHashMap(self):
         hashPath = os.path.join(self.parentPath, "data", kAdobHashMapName)
         if os.path.exists(hashPath):
-            with open(hashPath, "rt") as fp:
+            with open(hashPath, "rt", encoding="utf-8") as fp:
                 data = fp.read()
             newMap = ast.literal_eval(data)
         else:
@@ -549,9 +549,8 @@ class UFOFontData:
         data.append("}")
         data.append("")
         data = "\n".join(data)
-        with open(hashPath, "wt") as fp:
-            fp.write(data)
-        return
+        with open(hashPath, "wb") as fp:
+            fp.write(tobytes(data, encoding="utf-8"))
 
     def getCurGlyphPath(self, glyphName):
         if self.curSrcDir is None:
@@ -996,7 +995,7 @@ class UFOFontData:
         maxY = maxX
         minY = -self.getUnitsPerEm()
         if os.path.exists(srcFontInfo):
-            with open(srcFontInfo, "rU") as fi:
+            with open(srcFontInfo, "r", encoding="utf-8") as fi:
                 fontInfoData = fi.read()
             fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
 
@@ -1221,9 +1220,7 @@ def parsePList(filePath, dictKey=None):
 
     # I uses this rather than the plistlib in order
     # to get a list that allows preserving key order.
-    with open(filePath, "r") as fp:
-        data = fp.read()
-    contents = XML(data)
+    contents = ET.parse(filePath).getroot()
     ufo_dict = contents.find("dict")
     if ufo_dict is None:
         raise UFOParseError("In '%s', failed to find dict. '%s'." % (filePath))
@@ -2176,11 +2173,7 @@ def addWhiteSpace(parent, level):
 def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     # I need to replace the contours with data from the bez string.
     glyphPath = ufoFontData.getGlyphSrcPath(glyphName)
-
-    with open(glyphPath, "r") as fp:
-        data = fp.read()
-
-    glifXML = XML(data)
+    glifXML = ET.parse(glyphPath).getroot()
 
     outlineItem = None
     libIndex = outlineIndex = -1
