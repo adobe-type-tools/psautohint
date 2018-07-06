@@ -57,17 +57,25 @@ install:
   # install tox
   - python -m pip install -r dev-requirements.txt
 
+  # build psautohint wheel
+  - tox -e wheel
+  - for /f "usebackq tokens=*" %w in (`dir /b dist\psautohint*.whl`) do set WHEEL_PATH=%cd%\dist\%w
+
 build: false
 
 test_script:
-  - tox
+  # run tests on the compiled wheel
+  - tox --installpkg "%WHEEL_PATH%"
 
 on_success:
+  # upload test coverage to codecov.io
   - tox -e codecov
+  # if commit is tagged, upload wheel to PyPI
   - ps: >-
       if($env:APPVEYOR_REPO_TAG -eq 'true') {
         Write-Output ("Deploying " + $env:APPVEYOR_REPO_TAG_NAME + " to PyPI...")
-        tox -e pypi-wheel
+        pip install --upgrade twine
+        twine upload $env:WHEEL_PATH
       } else {
         Write-Output "Not deploying as this is not a tagged commit"
       }
