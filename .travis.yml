@@ -75,7 +75,7 @@ deploy:
     all_branches: true
   user: anthrotype
   password:
-    secure: ...  # encrypt password with `travis encrypt`
+    secure: NMFwzW1lWIqAxnfkSJ147zPncATi2ToDBpsu1osdxkZafndSUYJGJ1Es1oBnBkmtc73f2G1n9ZoLd3vsL/YhU5VmNJAy3mADgRtpUGAwth5CeHXSyjVNh5nSfjkr2fO3VLMnmHKbhWRHa5OjHTwr341bAIh3Ij10mCiw2Fk26IZIZ9qnp2HP43gsmCNVag0Bp7MhEXiH+mJ2d2R5T/4RNeh1TpQq2NRn5/dIHPX5Y1YAxRF1C0wqu6o3Vyl8NwmS16nH0u7KtGg/hYzFO1s+DdeewRBMzy6v3AZ8faBgsolXMN96i2gVZeAoosCihWflRkkmNioYnPPHWItZFNc7yVv1GMrw1C2dezM9LnpAPKjHFbPm4TahM4sCitgmFIwxFf4Oh8+49rZj75WxnmYCJ/lQWyd84LQG32vj7hnFi/fDV1GVZ+PfrAL6Q/kk1natKSBn9Ue6l3a1uXnzk0/aQR/JuBz+7+Q0uX/4JGcB6QpZRL7KsojinHlb1j8ijuUrbFTepos8IC4Tc5z3GdJxaxbX3F+wNLIfB1p1KMbjb3/vjJSUX6BZ10SOYqCtsxJaQjcfBbZgGtf1KlhJAuDDpwwlFseqi87hyrhK2hFaqq0ha7yD/jXcDrTF0DRDooFNVSiDadtCU8lrfr05Ue5emw/fbjgRzMtPRiNBTQs5IAw=
   # 'check' is a do-nothing setup.py command, to prevent Travis from trying
   # to rebuild the wheel we just built with multibuild
   distributions: check
