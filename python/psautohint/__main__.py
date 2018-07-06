@@ -737,7 +737,7 @@ def main(args=None):
     options = get_options(args)
 
     if options.logFile:
-        open(options.logFile, 'w')
+        open(options.logFile, 'w', encoding="utf-8")
 
     try:
         hintFiles(options)

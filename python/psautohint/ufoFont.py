@@ -125,6 +125,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
+from fontTools.misc.py23 import open
 from psautohint import fdTools
 
 
@@ -446,7 +447,7 @@ class UFOFontData:
         hasHints = False
         glyphPath = self.getGlyphProcessedPath(glyphName)
         if glyphPath and os.path.exists(glyphPath):
-            with open(glyphPath, "rt") as fp:
+            with open(glyphPath, "rt", encoding="utf-8") as fp:
                 data = fp.read()
             if "hintSetList" in data:
                 hasHints = True
@@ -511,7 +512,7 @@ class UFOFontData:
     def readHashMap(self):
         hashPath = os.path.join(self.parentPath, "data", kAdobHashMapName)
         if os.path.exists(hashPath):
-            with open(hashPath, "rt") as fp:
+            with open(hashPath, "rt", encoding="utf-8") as fp:
                 data = fp.read()
             newMap = ast.literal_eval(data)
         else:
@@ -549,7 +550,7 @@ class UFOFontData:
         data.append("}")
         data.append("")
         data = "\n".join(data)
-        with open(hashPath, "wt") as fp:
+        with open(hashPath, "wt", encoding="utf-8") as fp:
             fp.write(data)
         return
 
@@ -996,7 +997,7 @@ class UFOFontData:
         maxY = maxX
         minY = -self.getUnitsPerEm()
         if os.path.exists(srcFontInfo):
-            with open(srcFontInfo, "rU") as fi:
+            with open(srcFontInfo, "r", encoding="utf-8") as fi:
                 fontInfoData = fi.read()
             fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
 
@@ -1221,7 +1222,7 @@ def parsePList(filePath, dictKey=None):
 
     # I uses this rather than the plistlib in order
     # to get a list that allows preserving key order.
-    with open(filePath, "r") as fp:
+    with open(filePath, "r", encoding="utf-8") as fp:
         data = fp.read()
     contents = XML(data)
     ufo_dict = contents.find("dict")
@@ -2177,7 +2178,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     # I need to replace the contours with data from the bez string.
     glyphPath = ufoFontData.getGlyphSrcPath(glyphName)
 
-    with open(glyphPath, "r") as fp:
+    with open(glyphPath, "r", encoding="utf-8") as fp:
         data = fp.read()
 
     glifXML = XML(data)
