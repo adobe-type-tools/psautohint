@@ -72,7 +72,7 @@ with io.open("README.md", encoding="utf-8") as readme:
     long_description = readme.read()
 
 setup(name="psautohint",
-      version="1.1.1a2",
+      version="1.1.1a3",
       description="Python wrapper for Adobe's PostScript autohinter",
       long_description=long_description,
       long_description_content_type='text/markdown',
