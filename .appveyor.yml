@@ -3,9 +3,8 @@ cache:
 
 environment:
   global:
-    TWINE_USERNAME: "afdko-travis"
-    TWINE_PASSWORD:
-      secure: myMd6E3niwjGvxEHeChOlg==
+    TWINE_USERNAME: "adobe-type-tools-ci"
+    # TWINE_PASSWORD is set in Appveyor settings
 
   matrix:
     - PYTHON: "C:\\Python27"
