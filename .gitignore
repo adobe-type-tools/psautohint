@@ -16,4 +16,5 @@ dist
 .DS_Store
 .tox/
 .pytest_cache/
+.coverage*
 htmlcov/
