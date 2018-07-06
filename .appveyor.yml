@@ -59,7 +59,9 @@ install:
 
   # build psautohint wheel
   - tox -e wheel
-  - for /f "usebackq tokens=*" %w in (`dir /b dist\psautohint*.whl`) do set WHEEL_PATH=%cd%\dist\%w
+  # get the full path to the compiled wheel (ugly but works)
+  - dir /s /b dist\psautohint*.whl > wheel.pth
+  - set WHEEL_PATH=<wheel.pth
 
 build: false
 
