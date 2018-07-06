@@ -61,7 +61,7 @@ install:
   - tox -e wheel
   # get the full path to the compiled wheel (ugly but works)
   - dir /s /b dist\psautohint*.whl > wheel.pth
-  - set WHEEL_PATH=<wheel.pth
+  - set /p WHEEL_PATH=<wheel.pth
 
 build: false
 
