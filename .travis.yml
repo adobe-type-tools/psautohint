@@ -45,6 +45,8 @@ matrix:
       env:
         - MB_PYTHON_VERSION=3.6
 
+cache: pip
+
 before_install:
   - source multibuild/common_utils.sh
   - source multibuild/travis_steps.sh
@@ -64,3 +66,18 @@ after_success:
   - if [ -n "$TRAVIS_TAG" ] && [ "$BUILD_SDIST" == true ]; then tox -e sdist; fi
   # copy compiled wheels to dist/ where Travis `dpl` tool can find them and upload to PyPI
   - if [ -n "$TRAVIS_TAG" ]; then mkdir -p dist; cp wheelhouse/*.whl dist; fi
+
+deploy:
+  provider: pypi
+  on:
+    tags: true
+    repo: adobe-type-tools/psautohint
+    all_branches: true
+  user: anthrotype
+  password:
+    secure: ...  # encrypt password with `travis encrypt`
+  # 'check' is a do-nothing setup.py command, to prevent Travis from trying
+  # to rebuild the wheel we just built with multibuild
+  distributions: check
+  skip_cleanup: true
+  skip_upload_docs: true
