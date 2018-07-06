@@ -125,7 +125,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-from fontTools.misc.py23 import open
+from fontTools.misc.py23 import open, tobytes
 from psautohint import fdTools
 
 
@@ -550,9 +550,8 @@ class UFOFontData:
         data.append("}")
         data.append("")
         data = "\n".join(data)
-        with open(hashPath, "wt", encoding="utf-8") as fp:
-            fp.write(data)
-        return
+        with open(hashPath, "wb") as fp:
+            fp.write(tobytes(data, encoding="utf-8"))
 
     def getCurGlyphPath(self, glyphName):
         if self.curSrcDir is None:
