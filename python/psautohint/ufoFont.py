@@ -317,7 +317,6 @@ Example from "B" in SourceCodePro-Regular
 
 """
 
-XML = ET.XML
 XMLElement = ET.Element
 xmlToString = ET.tostring
 debug = False
@@ -1221,9 +1220,7 @@ def parsePList(filePath, dictKey=None):
 
     # I uses this rather than the plistlib in order
     # to get a list that allows preserving key order.
-    with open(filePath, "r", encoding="utf-8") as fp:
-        data = fp.read()
-    contents = XML(data)
+    contents = ET.parse(filePath).getroot()
     ufo_dict = contents.find("dict")
     if ufo_dict is None:
         raise UFOParseError("In '%s', failed to find dict. '%s'." % (filePath))
@@ -2176,11 +2173,7 @@ def addWhiteSpace(parent, level):
 def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     # I need to replace the contours with data from the bez string.
     glyphPath = ufoFontData.getGlyphSrcPath(glyphName)
-
-    with open(glyphPath, "r", encoding="utf-8") as fp:
-        data = fp.read()
-
-    glifXML = XML(data)
+    glifXML = ET.parse(glyphPath).getroot()
 
     outlineItem = None
     libIndex = outlineIndex = -1
