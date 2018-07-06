@@ -59,7 +59,7 @@ script:
 after_success:
   - pip install tox
   # upload code coverage to Codecov.io
-  - tox -e coverage,codecov
+  - tox -e codecov
   # if tagged, create the source distribution for the deploy stage
   - if [ -n "$TRAVIS_TAG" ] && [ "$BUILD_SDIST" == true ]; then tox -e sdist; fi
   # copy compiled wheels to dist/ where Travis `dpl` tool can find them and upload to PyPI
