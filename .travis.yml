@@ -62,21 +62,12 @@ after_success:
   - pip install tox
   # upload code coverage to Codecov.io
   - tox -e codecov
-  # if tagged, create the source distribution for the deploy stage
-  - if [ -n "$TRAVIS_TAG" ] && [ "$BUILD_SDIST" == true ]; then tox -e sdist; fi
-  # copy compiled wheels to dist/ where Travis `dpl` tool can find them and upload to PyPI
-  - if [ -n "$TRAVIS_TAG" ]; then mkdir -p dist; cp wheelhouse/*.whl dist; fi
-
-deploy:
-  provider: pypi
-  on:
-    tags: true
-    repo: adobe-type-tools/psautohint
-    all_branches: true
-  # password set in Travis project settings
-  user: adobe-type-tools-ci
-  # 'check' is a do-nothing setup.py command, to prevent Travis from trying
-  # to rebuild the wheel we just built with multibuild
-  distributions: check
-  skip_cleanup: true
-  skip_upload_docs: true
+  - |
+    if [ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_REPO_SLUG" == "adobe-type-tools/psautohint" ]; then
+      pip install --upgrade twine
+      twine upload wheelhouse/psautohint*.whl
+      if [ "$BUILD_SDIST" == true ]; then
+        tox -e sdist
+        twine upload dist/psautohint*.zip
+      fi
+    fi
