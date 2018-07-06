@@ -2,6 +2,11 @@ cache:
   - '%LOCALAPPDATA%\pip\Cache'
 
 environment:
+  global:
+    TWINE_USERNAME: "afdko-travis"
+    TWINE_PASSWORD:
+      secure: myMd6E3niwjGvxEHeChOlg==
+
   matrix:
     - PYTHON: "C:\\Python27"
       PYTHON_VERSION: "2.7"
