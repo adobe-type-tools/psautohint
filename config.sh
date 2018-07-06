@@ -11,8 +11,10 @@ function pre_build {
 
 function run_tests {
     # The function is called from an empty temporary directory.
+    cd ..
+
     # Get absolute path to the pre-compiled wheel
-    wheelhouse=$(abspath ../wheelhouse)
+    wheelhouse=$(abspath wheelhouse)
     wheel=$(ls ${wheelhouse}/psautohint*.whl | head -n 1)
     if [ ! -e "${wheel}" ]; then
         echo "error: can't find wheel in ${wheelhouse} folder" 1>&2
@@ -28,5 +30,5 @@ function run_tests {
 
     # clean up after us, or else running tox later on outside the docker
     # container can lead to permission errors
-    rm -rf ../.tox
+    rm -rf .tox
 }
