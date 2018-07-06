@@ -24,8 +24,6 @@ env:
     - TEST_DEPENDS="-rdev-requirements.txt"
     - PLAT=x86_64
     - UNICODE_WIDTH=32
-    - TWINE_USERNAME=adobe-type-tools-ci
-    # TWINE_PASSWORD is set in Travis settings
 
 matrix:
   exclude:
@@ -75,6 +73,8 @@ deploy:
     tags: true
     repo: adobe-type-tools/psautohint
     all_branches: true
+  # password set in Travis project settings
+  user: adobe-type-tools-ci
   # 'check' is a do-nothing setup.py command, to prevent Travis from trying
   # to rebuild the wheel we just built with multibuild
   distributions: check
