@@ -57,15 +57,7 @@ script:
   - install_run $PLAT
 
 after_success:
-  - |
-    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-      curl -O https://bootstrap.pypa.io/get-pip.py
-      python get-pip.py --user
-      python -m pip install --user virtualenv
-      python -m virtualenv .venv/
-      source .venv/bin/activate
-    fi
-  - pip install -r dev-requirements.txt
+  - pip install tox
   # upload code coverage to Codecov.io
   - tox -e coverage,codecov
   # if tagged, create the source distribution for the deploy stage
