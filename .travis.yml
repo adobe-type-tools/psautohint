@@ -24,6 +24,8 @@ env:
     - TEST_DEPENDS="-rdev-requirements.txt"
     - PLAT=x86_64
     - UNICODE_WIDTH=32
+    # the pypi password is stored in Travis settings
+    - TWINE_USERNAME="adobe-type-tools-ci"
 
 matrix:
   exclude:
