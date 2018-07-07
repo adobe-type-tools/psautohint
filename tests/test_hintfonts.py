@@ -5,6 +5,7 @@ from os.path import basename
 import pytest
 
 from fontTools.misc.xmlWriter import XMLWriter
+from fontTools.cffLib import CFFFontSet
 from fontTools.ttLib import TTFont
 from psautohint.autohint import ACOptions, hintFiles
 
@@ -45,3 +46,21 @@ def test_otf(otf, tmpdir):
         del font
 
     assert differ([otf + ".xml", out + ".xml"])
+
+
+@pytest.mark.parametrize("cff", glob.glob("%s/*/*/font.cff" % DATA_DIR))
+def test_cff(cff, tmpdir):
+    out = str(tmpdir / basename(cff))
+    options = Options(cff, out)
+    hintFiles(options)
+
+    for path in (cff, out):
+        font = CFFFontSet()
+        writer = XMLWriter(path + ".xml")
+        with open(path, "rb") as fp:
+            font.decompile(fp, None)
+            font.toXML(writer)
+        del writer
+        del font
+
+    assert differ([cff + ".xml", out + ".xml"])
