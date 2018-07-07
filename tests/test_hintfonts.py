@@ -33,34 +33,36 @@ def test_ufo(ufo, tmpdir):
 
 @pytest.mark.parametrize("otf", glob.glob("%s/*/*/font.otf" % DATA_DIR))
 def test_otf(otf, tmpdir):
-    out = str(tmpdir / basename(otf))
+    out = str(tmpdir / basename(otf)) + ".out"
     options = Options(otf, out)
     hintFiles(options)
 
     for path in (otf, out):
         font = TTFont(path)
         assert "CFF " in font
-        writer = XMLWriter(path + ".xml")
+        writer = XMLWriter(str(tmpdir / basename(path)) + ".xml")
         font["CFF "].toXML(writer, font)
         del writer
         del font
 
-    assert differ([otf + ".xml", out + ".xml"])
+    assert differ([str(tmpdir / basename(otf)) + ".xml",
+                   str(tmpdir / basename(out)) + ".xml"])
 
 
 @pytest.mark.parametrize("cff", glob.glob("%s/*/*/font.cff" % DATA_DIR))
 def test_cff(cff, tmpdir):
-    out = str(tmpdir / basename(cff))
+    out = str(tmpdir / basename(cff)) + ".out"
     options = Options(cff, out)
     hintFiles(options)
 
     for path in (cff, out):
         font = CFFFontSet()
-        writer = XMLWriter(path + ".xml")
+        writer = XMLWriter(str(tmpdir / basename(path)) + ".xml")
         with open(path, "rb") as fp:
             font.decompile(fp, None)
             font.toXML(writer)
         del writer
         del font
 
-    assert differ([cff + ".xml", out + ".xml"])
+    assert differ([str(tmpdir / basename(cff)) + ".xml",
+                   str(tmpdir / basename(out)) + ".xml"])
