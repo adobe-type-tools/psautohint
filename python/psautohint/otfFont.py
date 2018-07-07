@@ -1107,13 +1107,11 @@ class CFFFontData:
                         os.remove(inputPath)
                         os.rename(tempPath, inputPath)
                     except (OSError, IOError):
-                        import traceback
-                        self.logMsg("\t%s" % (traceback.format_exception_only(
-                            sys.exc_info()[0], sys.exc_info()[1])[-1]))
                         self.logMsg(
                             "Error: could not overwrite original font file "
                             "path '%s'. Hinted font file path is '%s'." %
                             (inputPath, tempPath))
+                        raise
             else:
                 ttFont.save(outFilePath)
                 ttFont.close()
