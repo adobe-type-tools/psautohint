@@ -1,8 +1,6 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-ufoFont.py v1.30.1 Feb 12 2018
-
 This module supports using the Adobe FDK tools which operate on 'bez'
 files with UFO fonts. It provides low level utilities to manipulate UFO
 data without fully parsing and instantiating UFO objects, and without

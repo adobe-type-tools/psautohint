@@ -1,8 +1,6 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-otfFont.py v1.13.1 Feb 11 2018
-
 Utilities for converting between T2 charstrings and the bez data format.
 Used by AC and focus/CheckOutlines.
 """

@@ -1,8 +1,6 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-fdTools.py v1.9.1 Feb 11 2018
-
 Convert a Type 1 font to CID, given multiple hint dict defs in the
 "fontinfo" file. See AC.py help, with the "-hfd" option, or the MakeOTF
 user guide for details on this format.
