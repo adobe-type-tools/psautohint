@@ -383,7 +383,8 @@ class BezParseError(ValueError):
 
 
 class UFOFontData:
-    def __init__(self, parentPath, useHashMap, programName):
+    def __init__(self, parentPath, useHashMap, allow_decimal_coords,
+                 programName):
         self.parentPath = parentPath
         self.glyphMap = {}
         self.processedLayerGlyphMap = {}
@@ -419,7 +420,7 @@ class UFOFontData:
         # out of date glyph from the processed glyph layer
         self.deletedGlyph = False
         # if true, do NOT round x,y values when processing.
-        self.allowDecimalCoords = False
+        self.allowDecimalCoords = allow_decimal_coords
 
     def getUnitsPerEm(self):
         unitsPerEm = "1000"

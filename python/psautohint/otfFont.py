@@ -1014,7 +1014,8 @@ def convertBezToT2(bezString):
 
 
 class CFFFontData:
-    def __init__(self, ttFont, inputPath, outFilePath, font_format, logMsgCB):
+    def __init__(self, ttFont, inputPath, outFilePath, allow_decimal_coords,
+                 font_format, logMsgCB):
         self.ttFont = ttFont
         self.inputPath = inputPath
         if (outFilePath is None):
@@ -1034,7 +1035,7 @@ class CFFFontData:
         self.topDict = topDict
         self.charStrings = topDict.CharStrings
         self.charStringIndex = self.charStrings.charStringsIndex
-        self.allowDecimalCoords = False
+        self.allowDecimalCoords = allow_decimal_coords
 
     def getGlyphList(self):
         fontGlyphList = self.ttFont.getGlyphOrder()
