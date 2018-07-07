@@ -16,9 +16,7 @@ from fontTools.misc.py23 import open
 
 from psautohint import get_font_format
 from psautohint._psautohint import version as PSAUTOHINT_VERSION
-from psautohint.autohint import (ACFontError, ACHintError, ACOptions,
-                                 hintFiles, logMsg)
-from psautohint.ufoFont import UFOParseError
+from psautohint.autohint import ACOptions, hintFiles, logMsg
 from psautohint.ufoFont import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 
 __version__ = PSAUTOHINT_VERSION
@@ -708,9 +706,9 @@ def main(args=None):
 
     try:
         hintFiles(options)
-    except (ACFontError, ACHintError, UFOParseError) as err:
+    except Exception as err:
         logMsg("\t%s" % err)
-        return 1
+        raise
 
     if options.logFile:
         options.logFile.close()
