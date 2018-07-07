@@ -28,6 +28,7 @@ env:
     - TWINE_USERNAME="adobe-type-tools-ci"
 
 matrix:
+  fast_finish: true
   exclude:
     # Exclude the default Python 3.5 build
     - python: 3.5
