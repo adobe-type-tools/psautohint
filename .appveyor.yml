@@ -19,6 +19,12 @@ environment:
     #   TOXENV: "py36-cov"
     #   TOXPYTHON: "C:\\Python36\\python.exe"
 
+    # - PYTHON: "C:\\Python37"
+    #   PYTHON_VERSION: "3.7"
+    #   PYTHON_ARCH: "32"
+    #   TOXENV: "py37-cov"
+    #   TOXPYTHON: "C:\\Python37\\python.exe"
+
     # - PYTHON: "C:\\Python27-x64"
     #   PYTHON_VERSION: "2.7"
     #   PYTHON_ARCH: "64"
@@ -30,6 +36,12 @@ environment:
       PYTHON_ARCH: "64"
       TOXENV: "py36-cov"
       TOXPYTHON: "C:\\Python36-x64\\python.exe"
+
+    - PYTHON: "C:\\Python37-x64"
+      PYTHON_VERSION: "3.7"
+      PYTHON_ARCH: "64"
+      TOXENV: "py37-cov"
+      TOXPYTHON: "C:\\Python37-x64\\python.exe"
 
 matrix:
   fast_finish: true
@@ -43,7 +55,8 @@ install:
   # checkout git sub-modules
   - git submodule update --init --recursive
 
-  # prepend newly installed Python to the PATH
+  # install required python version if not present, and prepend to the PATH
+  - ps: multibuild\install_python.ps1
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
   # check that we have the expected version and architecture for Python
