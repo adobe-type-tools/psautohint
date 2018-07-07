@@ -35,9 +35,8 @@ import re
 import shutil
 import sys
 import time
-import traceback
 
-from fontTools.ttLib import TTFont, TTLibError, getTableModule
+from fontTools.ttLib import TTFont, getTableModule
 
 from .psautohint import autohint, autohintmm
 from .otfFont import CFFFontData
@@ -277,14 +276,7 @@ def openUFOFile(path, outFilePath, useHashMap, options):
 def openOpenTypeFile(path, outFilePath, font_format, options):
     # If input font is CFF, build a dummy ttFont in memory.
     if font_format == "OTF":  # it is an OTF font, can process file directly
-        try:
-            ttFont = TTFont(path)
-        except (IOError, OSError):
-            raise ACFontError("Error opening or reading from font file <%s>." %
-                              path)
-        except TTLibError:
-            raise ACFontError("Error parsing font file <%s>." % path)
-
+        ttFont = TTFont(path)
         try:
             cffTable = ttFont["CFF "]
         except KeyError:
@@ -293,17 +285,12 @@ def openOpenTypeFile(path, outFilePath, font_format, options):
         # now package the CFF font as an OTF font.
         with open(path, "rb") as ff:
             data = ff.read()
-        try:
-            ttFont = TTFont()
-            cffModule = getTableModule('CFF ')
-            cffTable = cffModule.table_C_F_F_('CFF ')
-            ttFont['CFF '] = cffTable
-            cffTable.decompile(data, ttFont)
-        except Exception:
-            logMsg("\t%s" % (traceback.format_exception_only(sys.exc_info()[0],
-                             sys.exc_info()[1])[-1]))
-            logMsg("Attempted to read font %s as CFF." % path)
-            raise ACFontError("Error parsing font file <%s>." % path)
+
+        ttFont = TTFont()
+        cffModule = getTableModule('CFF ')
+        cffTable = cffModule.table_C_F_F_('CFF ')
+        ttFont['CFF '] = cffTable
+        cffTable.decompile(data, ttFont)
     else:
         logMsg("Font file must be a CFF or OTF fontfile: %s." % path)
         raise ACFontError("Font file must be CFF or OTF file: %s." % path)
@@ -342,25 +329,15 @@ def hintFile(options, path, outpath, reference_master):
     if options.verbose:
         logMsg("Hinting font %s. Start time: %s." % (path, time.asctime()))
 
-    try:
-        # For UFO fonts only.
-        # We always use the hash map, unless the user
-        # requested only report issues.
-        useHashMap = not options.logOnly
-        fontData = openFile(path, outpath, useHashMap, options)
-        fontData.allowDecimalCoords = options.allowDecimalCoords
-        if options.writeToDefaultLayer and (
-           hasattr(fontData, "setWriteToDefault")):  # UFO fonts only
-            fontData.setWriteToDefault()
-    except (IOError, OSError):
-        logMsg(traceback.format_exception_only(sys.exc_info()[0],
-                                               sys.exc_info()[1])[-1])
-        raise ACFontError("Error opening or reading from font file <%s>." %
-                          fontFileName)
-    except Exception:
-        logMsg(traceback.format_exception_only(sys.exc_info()[0],
-                                               sys.exc_info()[1])[-1])
-        raise ACFontError("Error parsing font file <%s>." % fontFileName)
+    # For UFO fonts only.
+    # We always use the hash map, unless the user
+    # requested only report issues.
+    useHashMap = not options.logOnly
+    fontData = openFile(path, outpath, useHashMap, options)
+    fontData.allowDecimalCoords = options.allowDecimalCoords
+    if options.writeToDefaultLayer and (
+       hasattr(fontData, "setWriteToDefault")):  # UFO fonts only
+        fontData.setWriteToDefault()
 
     # filter specified list, if any, with font list.
     fontGlyphList = fontData.getGlyphList()
