@@ -36,7 +36,7 @@ import shutil
 import sys
 import time
 
-from fontTools.ttLib import TTFont, getTableModule
+from fontTools.ttLib import TTFont, getTableClass
 
 from .psautohint import autohint, autohintmm
 from .otfFont import CFFFontData
@@ -277,9 +277,7 @@ def openOpenTypeFile(path, outFilePath, font_format, options):
     # If input font is CFF, build a dummy ttFont in memory.
     if font_format == "OTF":  # it is an OTF font, can process file directly
         ttFont = TTFont(path)
-        try:
-            cffTable = ttFont["CFF "]
-        except KeyError:
+        if "CFF " not in ttFont:
             raise ACFontError("Error: font is not a CFF font <%s>." % path)
     elif font_format == "CFF":
         # now package the CFF font as an OTF font.
@@ -287,10 +285,9 @@ def openOpenTypeFile(path, outFilePath, font_format, options):
             data = ff.read()
 
         ttFont = TTFont()
-        cffModule = getTableModule('CFF ')
-        cffTable = cffModule.table_C_F_F_('CFF ')
-        ttFont['CFF '] = cffTable
-        cffTable.decompile(data, ttFont)
+        cffClass = getTableClass('CFF ')
+        ttFont['CFF '] = cffClass('CFF ')
+        ttFont['CFF '].decompile(data, ttFont)
     else:
         logMsg("Font file must be a CFF or OTF fontfile: %s." % path)
         raise ACFontError("Font file must be CFF or OTF file: %s." % path)
