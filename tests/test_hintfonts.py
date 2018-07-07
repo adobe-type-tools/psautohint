@@ -7,7 +7,7 @@ import pytest
 from fontTools.misc.xmlWriter import XMLWriter
 from fontTools.cffLib import CFFFontSet
 from fontTools.ttLib import TTFont
-from psautohint.autohint import ACOptions, hintFiles
+from psautohint.autohint import ACFontError, ACOptions, hintFiles
 
 from .differ import main as differ
 from . import DATA_DIR
@@ -66,3 +66,11 @@ def test_cff(cff, tmpdir):
 
     assert differ([str(tmpdir / basename(cff)) + ".xml",
                    str(tmpdir / basename(out)) + ".xml"])
+
+
+@pytest.mark.parametrize("pfa", glob.glob("%s/*/*/font.pfa" % DATA_DIR))
+def test_pfa(pfa, tmpdir):
+    out = str(tmpdir / basename(pfa)) + ".out"
+    options = Options(pfa, out)
+    with pytest.raises(ACFontError):
+        hintFiles(options)
