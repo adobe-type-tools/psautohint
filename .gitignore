@@ -18,4 +18,4 @@ dist
 .pytest_cache/
 .coverage*
 htmlcov/
-libpsautohint/include/version.h
+libpsautohint/src/version.h

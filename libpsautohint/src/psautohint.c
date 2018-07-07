@@ -11,6 +11,7 @@
 
 #include "ac.h"
 #include "psautohint.h"
+#include "version.h"
 
 ACBuffer* gBezOutput = NULL;
 
