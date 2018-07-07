@@ -288,8 +288,7 @@ def openOpenTypeFile(path, outFilePath, font_format, options):
         try:
             cffTable = ttFont["CFF "]
         except KeyError:
-            raise ACFontError("Error: font is not a CFF font <%s>." %
-                              path)
+            raise ACFontError("Error: font is not a CFF font <%s>." % path)
     elif font_format == "CFF":
         # now package the CFF font as an OTF font.
         with open(path, "rb") as ff:
