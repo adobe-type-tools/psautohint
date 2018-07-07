@@ -42,8 +42,7 @@ def test_otf(otf, tmpdir):
         assert "CFF " in font
         writer = XMLWriter(str(tmpdir / basename(path)) + ".xml")
         font["CFF "].toXML(writer, font)
-        del writer
-        del font
+        writer.close()
 
     assert differ([str(tmpdir / basename(otf)) + ".xml",
                    str(tmpdir / basename(out)) + ".xml"])
@@ -61,8 +60,7 @@ def test_cff(cff, tmpdir):
         with open(path, "rb") as fp:
             font.decompile(fp, None)
             font.toXML(writer)
-        del writer
-        del font
+        writer.close()
 
     assert differ([str(tmpdir / basename(cff)) + ".xml",
                    str(tmpdir / basename(out)) + ".xml"])
