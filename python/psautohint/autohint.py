@@ -234,7 +234,7 @@ def printFontInfo(fontInfoString):
             pass
 
 
-def openFile(path, outFilePath, useHashMap, options):
+def openFile(path, outFilePath, options):
     font_format = get_font_format(path)
     if font_format is None:
         msg = "{} is not a supported font format".format(path)
@@ -242,17 +242,14 @@ def openFile(path, outFilePath, useHashMap, options):
         raise ACFontError(msg)
 
     if font_format == "UFO":
-        # UFO font.
-        # We always use the hash map to skip glyphs that have been previously
-        # processed, unless the user has report only, not make changes.
-        font = openUFOFile(path, outFilePath, useHashMap, options)
+        font = openUFOFile(path, outFilePath, options)
     else:
         font = openOpenTypeFile(path, outFilePath, font_format, options)
 
     return font
 
 
-def openUFOFile(path, outFilePath, useHashMap, options):
+def openUFOFile(path, outFilePath, options):
     # If user has specified a path other than the source font path,
     # then copy the entire UFO font, and operate on the copy.
     if (outFilePath is not None) and (
@@ -265,6 +262,9 @@ def openUFOFile(path, outFilePath, useHashMap, options):
             shutil.rmtree(outFilePath)
         shutil.copytree(path, outFilePath)
         path = outFilePath
+    # We always use the hash map to skip glyphs that have been previously
+    # processed, unless the user has report only, not make changes.
+    useHashMap = not options.logOnly
     font = UFOFontData(path, useHashMap, options.allowDecimalCoords,
                        kAutohintName)
     font.useProcessedLayer = True
@@ -328,11 +328,7 @@ def hintFile(options, path, outpath, reference_master):
     if options.verbose:
         logMsg("Hinting font %s. Start time: %s." % (path, time.asctime()))
 
-    # For UFO fonts only.
-    # We always use the hash map, unless the user
-    # requested only report issues.
-    useHashMap = not options.logOnly
-    fontData = openFile(path, outpath, useHashMap, options)
+    fontData = openFile(path, outpath, options)
     if options.writeToDefaultLayer and (
        hasattr(fontData, "setWriteToDefault")):  # UFO fonts only
         fontData.setWriteToDefault()
