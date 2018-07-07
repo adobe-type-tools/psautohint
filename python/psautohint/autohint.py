@@ -268,6 +268,8 @@ def openUFOFile(path, outFilePath, options):
     font = UFOFontData(path, useHashMap, options.allowDecimalCoords,
                        kAutohintName)
     font.useProcessedLayer = True
+    if options.writeToDefaultLayer:
+        font.setWriteToDefault()
     # Programs in this list must be run before autohint,
     # if the outlines have been edited.
     font.requiredHistory.append(kCheckOutlineName)
@@ -329,9 +331,6 @@ def hintFile(options, path, outpath, reference_master):
         logMsg("Hinting font %s. Start time: %s." % (path, time.asctime()))
 
     fontData = openFile(path, outpath, options)
-    if options.writeToDefaultLayer and (
-       hasattr(fontData, "setWriteToDefault")):  # UFO fonts only
-        fontData.setWriteToDefault()
 
     # filter specified list, if any, with font list.
     fontGlyphList = fontData.getGlyphList()
