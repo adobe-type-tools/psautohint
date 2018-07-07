@@ -24,7 +24,6 @@ from psautohint.ufoFont import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 __version__ = PSAUTOHINT_VERSION
 
 
-SUPPORTED_FONT_FORMATS = ('PFA', 'PFB', 'CFF', 'OTF', 'UFO')
 FONTINFO_FILE_NAME = 'fontinfo'
 
 GENERAL_INFO = """
@@ -457,7 +456,7 @@ def _validate_font_paths(path_lst, parser):
     format_set = set()
     for path in path_lst:
         font_format = _get_font_format(path)
-        if font_format not in SUPPORTED_FONT_FORMATS:
+        if font_format is None:
             parser.error("{} is not a supported font format".format(
                 os.path.basename(path)))
         format_set.add(font_format)
