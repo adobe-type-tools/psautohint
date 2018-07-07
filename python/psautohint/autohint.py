@@ -265,7 +265,8 @@ def openUFOFile(path, outFilePath, useHashMap, options):
             shutil.rmtree(outFilePath)
         shutil.copytree(path, outFilePath)
         path = outFilePath
-    font = UFOFontData(path, useHashMap, kAutohintName)
+    font = UFOFontData(path, useHashMap, options.allowDecimalCoords,
+                       kAutohintName)
     font.useProcessedLayer = True
     # Programs in this list must be run before autohint,
     # if the outlines have been edited.
@@ -292,7 +293,8 @@ def openOpenTypeFile(path, outFilePath, font_format, options):
         logMsg("Font file must be a CFF or OTF fontfile: %s." % path)
         raise ACFontError("Font file must be CFF or OTF file: %s." % path)
 
-    fontData = CFFFontData(ttFont, path, outFilePath, font_format, logMsg)
+    fontData = CFFFontData(ttFont, path, outFilePath,
+                           options.allowDecimalCoords, font_format, logMsg)
     return fontData
 
 
@@ -331,7 +333,6 @@ def hintFile(options, path, outpath, reference_master):
     # requested only report issues.
     useHashMap = not options.logOnly
     fontData = openFile(path, outpath, useHashMap, options)
-    fontData.allowDecimalCoords = options.allowDecimalCoords
     if options.writeToDefaultLayer and (
        hasattr(fontData, "setWriteToDefault")):  # UFO fonts only
         fontData.setWriteToDefault()
