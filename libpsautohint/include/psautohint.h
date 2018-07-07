@@ -19,6 +19,7 @@
 #define PSAUTOHINT_H_
 
 #include <stddef.h>
+#include "version.h"
 
 #ifdef __cplusplus
 extern "C" {

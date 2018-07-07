@@ -12,8 +12,6 @@
 #include "ac.h"
 #include "psautohint.h"
 
-static const char* libversion = "1.6.0";
-
 ACBuffer* gBezOutput = NULL;
 
 bool gScalingHints = false;
@@ -453,5 +451,5 @@ AC_initCallGlobals(void)
 ACLIB_API const char*
 AC_getVersion(void)
 {
-    return libversion;
+    return PSAUTOHINT_VERSION;
 }
