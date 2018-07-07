@@ -3,6 +3,8 @@ from __future__ import print_function, absolute_import
 import os
 import plistlib
 
+from ._psautohint import version as __version__
+
 
 def _font_is_ufo(path):
     if os.path.isdir(path) and path.lower().endswith('.ufo'):
