@@ -80,7 +80,7 @@ VERSION_TEMPLATE = """\
 
 setup(name="psautohint",
       use_scm_version={
-          "write_to": "libpsautohint/include/version.h",
+          "write_to": "libpsautohint/src/version.h",
           "write_to_template": VERSION_TEMPLATE,
       },
       description="Python wrapper for Adobe's PostScript autohinter",
