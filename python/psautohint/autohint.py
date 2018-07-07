@@ -43,6 +43,8 @@ from .psautohint import autohint, autohintmm
 from .otfFont import CFFFontData
 from .ufoFont import UFOFontData, kAutohintName, kCheckOutlineName
 
+from . import get_font_format
+
 
 gLogFile = None
 
@@ -234,24 +236,24 @@ def printFontInfo(fontInfoString):
 
 
 def openFile(path, outFilePath, useHashMap, options):
-    if os.path.isfile(path):
-        font = openOpenTypeFile(path, outFilePath, options)
-    else:
-        # maybe it is a a UFO font.
+    font_format = get_font_format(path)
+    if font_format is None:
+        msg = "{} is not a supported font format".format(path)
+        logMsg(msg)
+        raise ACFontError(msg)
+
+    if font_format == "UFO":
+        # UFO font.
         # We always use the hash map to skip glyphs that have been previously
         # processed, unless the user has report only, not make changes.
         font = openUFOFile(path, outFilePath, useHashMap, options)
+    else:
+        font = openOpenTypeFile(path, outFilePath, font_format, options)
+
     return font
 
 
 def openUFOFile(path, outFilePath, useHashMap, options):
-    # Check if has glyphs/contents.plist
-    contentsPath = os.path.join(path, "glyphs", "contents.plist")
-    if not os.path.exists(contentsPath):
-        msg = "Font file must be a CFF, OTF, or ufo font file: %s." % (path)
-        logMsg(msg)
-        raise ACFontError(msg)
-
     # If user has specified a path other than the source font path,
     # then copy the entire UFO font, and operate on the copy.
     if (outFilePath is not None) and (
@@ -272,18 +274,9 @@ def openUFOFile(path, outFilePath, useHashMap, options):
     return font
 
 
-def openOpenTypeFile(path, outFilePath, options):
+def openOpenTypeFile(path, outFilePath, font_format, options):
     # If input font is CFF, build a dummy ttFont in memory.
-    # Return ttFont, and flag if is a real OTF font.
-    # Return flag is 0 if OTF, and 1 if CFF.
-    fontType = 0  # OTF
-    try:
-        with open(path, "rb") as ff:
-            data = ff.read(10)
-    except (IOError, OSError):
-        logMsg("Failed to open and read font file %s." % path)
-
-    if data[:4] == b"OTTO":  # it is an OTF font, can process file directly
+    if font_format == "OTF":  # it is an OTF font, can process file directly
         try:
             ttFont = TTFont(path)
         except (IOError, OSError):
@@ -297,14 +290,7 @@ def openOpenTypeFile(path, outFilePath, options):
         except KeyError:
             raise ACFontError("Error: font is not a CFF font <%s>." %
                               path)
-    else:
-        # It is not an OTF file.
-        if (data[0] == b'\1') and (data[1] == b'\0'):  # CFF file
-            fontType = 1
-        else:
-            logMsg("Font file must be a CFF or OTF fontfile: %s." % path)
-            raise ACFontError("Font file must be CFF or OTF file: %s." % path)
-
+    elif font_format == "CFF":
         # now package the CFF font as an OTF font.
         with open(path, "rb") as ff:
             data = ff.read()
@@ -319,8 +305,11 @@ def openOpenTypeFile(path, outFilePath, options):
                              sys.exc_info()[1])[-1]))
             logMsg("Attempted to read font %s as CFF." % path)
             raise ACFontError("Error parsing font file <%s>." % path)
+    else:
+        logMsg("Font file must be a CFF or OTF fontfile: %s." % path)
+        raise ACFontError("Font file must be CFF or OTF file: %s." % path)
 
-    fontData = CFFFontData(ttFont, path, outFilePath, fontType, logMsg)
+    fontData = CFFFontData(ttFont, path, outFilePath, font_format, logMsg)
     return fontData
 
 

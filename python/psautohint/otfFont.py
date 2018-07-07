@@ -1014,13 +1014,13 @@ def convertBezToT2(bezString):
 
 
 class CFFFontData:
-    def __init__(self, ttFont, inputPath, outFilePath, fontType, logMsgCB):
+    def __init__(self, ttFont, inputPath, outFilePath, font_format, logMsgCB):
         self.ttFont = ttFont
         self.inputPath = inputPath
         if (outFilePath is None):
             outFilePath = inputPath
         self.outFilePath = outFilePath
-        self.fontType = fontType
+        self.font_format = font_format
         self.logMsg = logMsgCB
         try:
             self.cffTable = ttFont["CFF "]
@@ -1089,7 +1089,7 @@ class CFFFontData:
 
     def saveChanges(self):
         ttFont = self.ttFont
-        fontType = self.fontType
+        font_format = self.font_format
         inputPath = self.inputPath
         outFilePath = self.outFilePath
 
@@ -1098,7 +1098,7 @@ class CFFFontData:
             overwriteOriginal = True
         tempPath = inputPath + ".temp.ac"
 
-        if fontType == 0:  # OTF
+        if font_format == "OTF":
             if overwriteOriginal:
                 ttFont.save(tempPath)
                 ttFont.close()
@@ -1120,7 +1120,7 @@ class CFFFontData:
 
         else:
             data = ttFont["CFF "].compile(ttFont)
-            if fontType == 1:  # CFF
+            if font_format == "CFF":
                 if overwriteOriginal:
                     with open(inputPath, "wb") as tf:
                         tf.write(data)
