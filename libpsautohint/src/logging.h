@@ -25,6 +25,9 @@
 /* maximum message length */
 #define MAXMSGLEN 500
 
+/* global log function which is supplied by the following */
+extern AC_REPORTFUNCPTR gLibReportCB;
+
 void LogMsg(int16_t, int16_t, char *, ...);
 
 void set_errorproc( int (*)(int16_t) );

@@ -11,6 +11,8 @@
 
 #include "ac.h"
 
+AC_REPORTFUNCPTR gLibReportCB = NULL;
+
 /* proc to be called from LogMsg if error occurs */
 static int (*errorproc)(int16_t);
 

@@ -39,7 +39,6 @@ bool gIdInFile;
 bool gRoundToInt;
 static int maxStemDist = MAXSTEMDIST;
 
-AC_REPORTFUNCPTR gLibReportCB = NULL;
 /* if false, then stems defined by curves are excluded from the reporting */
 unsigned int gAllStems = false;
 AC_REPORTSTEMPTR gAddHStemCB = NULL;

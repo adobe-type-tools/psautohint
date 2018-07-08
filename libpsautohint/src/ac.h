@@ -212,9 +212,6 @@ extern bool gScalingHints;
 
 /* global callbacks */
 
-/* global log function which is supplied by the following */
-extern AC_REPORTFUNCPTR gLibReportCB;
-
 /* if false, then stems defined by curves are excluded from the reporting */
 extern unsigned int gAllStems;
 
