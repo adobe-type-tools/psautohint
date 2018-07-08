@@ -317,12 +317,6 @@ Example from "B" in SourceCodePro-Regular
 
 XMLElement = ET.Element
 xmlToString = ET.tostring
-debug = False
-
-
-def debugMsg(*args):
-    if debug:
-        print(args)
 
 
 # UFO names
@@ -451,14 +445,14 @@ class UFOFontData:
                 hasHints = True
         return hasHints
 
-    def convertToBez(self, glyphName, beVerbose, doAll=False):
+    def convertToBez(self, glyphName, doAll=False):
         # convertGLIFToBez does not yet support hints;
         # no need for removeHints arg.
-        bezString, width = convertGLIFToBez(self, glyphName, beVerbose, doAll)
+        bezString, width = convertGLIFToBez(self, glyphName, doAll)
         hasHints = self.checkForHints(glyphName)
         return bezString, width, hasHints
 
-    def updateFromBez(self, bezData, glyphName, width, beVerbose):
+    def updateFromBez(self, bezData, glyphName, width):
         # For UFO font, we don't use the width parameter:
         # it is carried over from the input glif file.
         glifXML = convertBezToGLIF(self, glyphName, bezData)
@@ -1586,7 +1580,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
     return bezstring
 
 
-def convertGLIFToBez(ufoFontData, glyphName, beVerbose, doAll=False):
+def convertGLIFToBez(ufoFontData, glyphName, doAll=False):
     width, outlineXML, skip = ufoFontData.getOrSkipGlyphXML(glyphName, doAll)
     if skip:
         return None, width

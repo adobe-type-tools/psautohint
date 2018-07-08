@@ -1,5 +1,7 @@
 from __future__ import print_function, absolute_import
 
+import logging
+
 from . import _psautohint
 
 
@@ -19,8 +21,10 @@ def toStr(o):
     return o
 
 
-def autohint(info, glyph, verbose=True, allow_edit=True, allow_hint_sub=True,
-             round_coordinates=True, debug=False):
+def autohint(info, glyph, allow_edit=True, allow_hint_sub=True,
+             round_coordinates=True):
+    verbose = logging.getLogger().isEnabledFor(logging.INFO)
+    debug = logging.getLogger().isEnabledFor(logging.DEBUG)
     hinted = _psautohint.autohint(toBytes(info),
                                   toBytes(glyph),
                                   verbose,
@@ -32,7 +36,8 @@ def autohint(info, glyph, verbose=True, allow_edit=True, allow_hint_sub=True,
     return toStr(hinted)
 
 
-def autohintmm(info, glyphs, masters, verbose=True):
+def autohintmm(info, glyphs, masters):
+    verbose = logging.getLogger().isEnabledFor(logging.INFO)
     hinted = _psautohint.autohintmm(toBytes(info),
                                     toBytes(glyphs),
                                     toBytes(masters),
