@@ -365,8 +365,7 @@ def hintFile(options, path, outpath, reference_master):
         fontInfo = fdDict.getFontInfo()
     else:
         log.info("Using alternate FDDict global values from fontinfo "
-                 "file for some glyphs. Remove option '-q' to see which "
-                 "dict is used for which glyphs.")
+                 "file for some glyphs.")
 
     # Get charstring for identifier in glyph-list
     isCID = fontData.isCID()
