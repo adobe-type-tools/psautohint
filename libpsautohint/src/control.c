@@ -178,15 +178,13 @@ AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
     pt->p0 = p0;
     pt->p1 = p1;
     chk = PointListCheck(pt, gPointList);
-    if (chk == 0 && gShowClrInfo) {
+    if (chk == 0) {
         ReportColorConflict(x0, y0, x1, y1, ch);
     }
     if (chk == -1) {
         pt->next = gPointList;
         gPointList = pt;
-        if (gLogging) {
-            LogColorInfo(gPointList);
-        }
+        LogColorInfo(gPointList);
     }
 }
 
@@ -543,16 +541,12 @@ Blues(const ACFontInfo* fontinfo)
      4) pick.c:FindBestHVals();
      When a hint segment    */
 
-    if (gShowClrInfo) {
-        LogMsg(INFO, OK, "generate blues");
-    }
+    LogMsg(LOGDEBUG, OK, "generate blues");
     if (NoBlueChar()) {
         gLenTopBands = gLenBotBands = 0;
     }
     GenHPts();
-    if (gShowClrInfo) {
-        LogMsg(INFO, OK, "evaluate");
-    }
+    LogMsg(LOGDEBUG, OK, "evaluate");
     if (!CounterFailed && HColorChar()) {
         pv = gPruneValue;
         gPruneValue = (Fixed)gMinVal;
@@ -570,10 +564,8 @@ Blues(const ACFontInfo* fontinfo)
     FindBestHVals();
     MergeVals(false);
 
-    if (gShowClrInfo) {
-        ShowHVals(gValList);
-        LogMsg(INFO, OK, "pick best");
-    }
+    ShowHVals(gValList);
+    LogMsg(LOGDEBUG, OK, "pick best");
     MarkLinks(gValList, true);
     CheckVals(gValList, false);
     DoHStems(fontinfo, gValList); /* Report stems and alignment zones, if this
@@ -604,11 +596,9 @@ Blues(const ACFontInfo* fontinfo)
     if (gHColoring == NULL) {
         AddBBoxHV(true, false);
     }
-    if (gShowClrInfo) {
-        LogMsg(INFO, OK, "results");
-        LogMsg(INFO, OK, gUseH ? "rv" : "rb");
-        ShowHVals(gHColoring);
-    }
+    LogMsg(LOGDEBUG, OK, "results");
+    LogMsg(LOGDEBUG, OK, gUseH ? "rv" : "rb");
+    ShowHVals(gHColoring);
     if (gUseH) {
         LogMsg(INFO, OK, "Using H counter hints.");
     }
@@ -666,13 +656,9 @@ Yellows(void)
 {
     Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
     PClrVal sLst;
-    if (gShowClrInfo) {
-        LogMsg(INFO, OK, "generate yellows");
-    }
+    LogMsg(LOGDEBUG, OK, "generate yellows");
     GenVPts(SpecialCharType());
-    if (gShowClrInfo) {
-        LogMsg(INFO, OK, "evaluate");
-    }
+    LogMsg(LOGDEBUG, OK, "evaluate");
     if (!CounterFailed && VColorChar()) {
         pv = gPruneValue;
         gPruneValue = (Fixed)gMinVal;
@@ -689,10 +675,8 @@ Yellows(void)
     PruneVVals();
     FindBestVVals();
     MergeVals(true);
-    if (gShowClrInfo) {
-        ShowVVals(gValList);
-        LogMsg(INFO, OK, "pick best");
-    }
+    ShowVVals(gValList);
+    LogMsg(LOGDEBUG, OK, "pick best");
     MarkLinks(gValList, false);
     CheckVals(gValList, true);
     DoVStems(gValList);
@@ -720,11 +704,9 @@ Yellows(void)
     if (gVColoring == NULL) {
         AddBBoxHV(false, false);
     }
-    if (gShowClrInfo) {
-        LogMsg(INFO, OK, "results");
-        LogMsg(INFO, OK, gUseV ? "rm" : "ry");
-        ShowVVals(gVColoring);
-    }
+    LogMsg(LOGDEBUG, OK, "results");
+    LogMsg(LOGDEBUG, OK, gUseV ? "rm" : "ry");
+    ShowVVals(gVColoring);
     if (gUseV) {
         LogMsg(INFO, OK, "Using V counter hints.");
     }
@@ -836,9 +818,7 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
          solEolCode = isSolEol? SolEolCharCode() : 2;
          */
         PruneElementColorSegs();
-        if (gListClrInfo) {
-            ListClrInfo();
-        }
+        ListClrInfo();
         if (extracolor) {
             AutoExtraColors(MoveToNewClrs(), isSolEol, solEolCode);
         }
@@ -886,7 +866,6 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
             gHasFlex = false;
             AutoAddFlex();
         }
-        gReportErrors = false;
     }
 }
 
@@ -894,7 +873,6 @@ static void
 AddColorsCleanup(const ACFontInfo* fontinfo)
 {
     RemoveRedundantFirstColors();
-    gReportErrors = true;
     if (gWriteColoredBez) {
 
         if (gPathStart == NULL || gPathStart == gPathEnd) {
@@ -917,7 +895,6 @@ AddColors(const ACFontInfo* fontinfo, const char* srcglyph, bool extracolor)
         SaveFile(fontinfo); /* make sure it gets saved with no coloring */
         return;
     }
-    gReportErrors = true;
     CounterFailed = gBandError = false;
     CheckPathBBox();
     CheckForDups();

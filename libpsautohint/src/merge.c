@@ -389,14 +389,12 @@ ReplaceVals(Fixed oldB, Fixed oldT, Fixed newB, Fixed newT, PClrVal newBst,
     for (vL = gValList; vL != NULL; vL = vL->vNxt) {
         if (vL->vLoc1 != oldB || vL->vLoc2 != oldT || vL->merge)
             continue;
-        if (gShowClrInfo) {
-            if (vert)
-                ReportMergeVVal(oldB, oldT, newB, newT, vL->vVal, vL->vSpc,
-                                newBst->vVal, newBst->vSpc);
-            else
-                ReportMergeHVal(oldB, oldT, newB, newT, vL->vVal, vL->vSpc,
-                                newBst->vVal, newBst->vSpc);
-        }
+        if (vert)
+            ReportMergeVVal(oldB, oldT, newB, newT, vL->vVal, vL->vSpc,
+                            newBst->vVal, newBst->vSpc);
+        else
+            ReportMergeHVal(oldB, oldT, newB, newT, vL->vVal, vL->vSpc,
+                            newBst->vVal, newBst->vSpc);
         vL->vLoc1 = newB;
         vL->vLoc2 = newT;
         vL->vVal = newBst->vVal;

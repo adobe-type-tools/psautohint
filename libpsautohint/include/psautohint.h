@@ -138,7 +138,7 @@ ACLIB_API void AC_SetReportRetryCB(AC_RETRYPTR retryCB);
  */
 ACLIB_API int AutoColorString(const char* srcbezdata, const char* fontinfo,
                               char** dstbezdata, size_t* length, int allowEdit,
-                              int allowHintSub, int roundCoords, int debug);
+                              int allowHintSub, int roundCoords);
 
 /*
  * Function: AutoColorStringMM

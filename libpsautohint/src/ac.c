@@ -15,9 +15,7 @@
 PPathElt gPathStart, gPathEnd;
 bool gYgoesUp;
 bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix, gEditChar;
-bool gAutoExtraDebug, gDebugColorPath, gDebug, gLogging;
-bool gShowVs, gShowHs, gListClrInfo;
-bool gReportErrors, gHasFlex, gFlexOK, gFlexStrict, gShowClrInfo, gBandError;
+bool gHasFlex, gFlexOK, gFlexStrict, gBandError;
 Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth, gGhostLength,
   gBendLength, gBandMargin, gMaxFlare, gMaxBendMerge, gMaxMerge,
   gMinColorElementLength, gFlexCand;
@@ -73,7 +71,6 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
 
     switch (reason) {
         case STARTUP:
-            gDebug = false;
             gDMin = 50;
             gDelta = 0;
             gYgoesUp = (dtfmy(FixOne) > 0) ? true : false;
@@ -111,12 +108,6 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             gAutoLinearCurveFix = true;
             gFlexOK = false;
             gFlexStrict = true;
-            gAutoExtraDebug = gDebug;
-            gLogging = gDebug;
-            gDebugColorPath = false;
-            gShowClrInfo = gDebug;
-            gShowHs = gShowVs = gDebug;
-            gListClrInfo = gDebug;
             if (gScalingHints) {
                 char* s = GetFontInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
                 float origEmSquare = strtod(s, NULL);
@@ -146,7 +137,7 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
 /* Returns whether coloring was successful. */
 bool
 AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
-          bool debug, bool extracolor, bool changeChar, bool roundCoords)
+          bool extracolor, bool changeChar, bool roundCoords)
 {
     InitAll(fontinfo, STARTUP);
 
@@ -158,9 +149,6 @@ AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
     gAutoLinearCurveFix = gEditChar;
     if (gEditChar && fixStems)
         gAutoVFix = gAutoHFix = fixStems;
-
-    if (debug)
-        gDebug = gShowClrInfo = gShowHs = gShowVs = gListClrInfo = true;
 
     return AutoColorGlyph(fontinfo, srcbezdata, extracolor);
 }

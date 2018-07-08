@@ -183,8 +183,7 @@ FndBstVal(PClrSeg seg, bool seg1Flg, PClrVal cList, PClrVal rList, int32_t nb,
             break;
         vList = rList;
     }
-    if (gShowClrInfo)
-        ReportFndBstVal(seg, best, hFlg);
+    ReportFndBstVal(seg, best, hFlg);
     return best;
 }
 

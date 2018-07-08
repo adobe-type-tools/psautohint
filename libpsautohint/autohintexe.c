@@ -24,6 +24,7 @@ static char* fileSuffix = NULL;
 static FILE* reportFile = NULL;
 
 static bool verbose = true; /* if true don't number of characters processed. */
+static bool debug = false;
 
 static void openReportFile(char* name, char* fSuffix);
 
@@ -110,6 +111,10 @@ static void
 reportCB(char* msg, int level)
 {
     switch (level) {
+        case -1: /* LOGDEBUG */
+            if (debug)
+                fprintf(stdout, "DEBUG: %s\n", msg);
+            break;
         case 0: /* INFO */
             if (verbose)
                 fprintf(stdout, "INFO: %s\n", msg);
@@ -229,7 +234,7 @@ main(int argc, char* argv[])
      static void Blues()
      */
 
-    bool allowEdit, roundCoords, allowHintSub, debug, badParam, allStems;
+    bool allowEdit, roundCoords, allowHintSub, badParam, allStems;
     bool argumentIsBezData = false;
     bool doMM = false;
     bool report = false;
@@ -245,7 +250,6 @@ main(int argc, char* argv[])
     int result, argi;
 
     badParam = false;
-    debug = false;
     allStems = false;
 
     allowEdit = allowHintSub = roundCoords = true;
@@ -416,7 +420,7 @@ main(int argc, char* argv[])
             }
 
             result = AutoColorString(bezdata, fontinfo, &output, &outputsize,
-                                     allowEdit, allowHintSub, roundCoords, debug);
+                                     allowEdit, allowHintSub, roundCoords);
 
             if (reportFile != NULL) {
                 closeReportFile();
@@ -462,7 +466,7 @@ main(int argc, char* argv[])
         }
 
         result = AutoColorString(inGlyphs[0], fontinfo, &outGlyphs[0], &outputSizes[0],
-                                 allowEdit, allowHintSub, roundCoords, debug);
+                                 allowEdit, allowHintSub, roundCoords);
         if (result != AC_Success)
             exit(result);
 

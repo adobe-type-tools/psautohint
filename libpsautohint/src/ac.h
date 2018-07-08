@@ -194,10 +194,9 @@ extern ACBuffer* gBezOutput;
 extern PPathElt gPathStart, gPathEnd;
 extern bool gYgoesUp;
 extern bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix;
-extern bool gAutoExtraDebug, gDebugColorPath, gDebug, gLogging;
 extern bool gEditChar; /* whether character can be modified when adding hints */
-extern bool gShowHs, gShowVs, gBandError, gListClrInfo;
-extern bool gReportErrors, gHasFlex, gFlexOK, gFlexStrict, gShowClrInfo;
+extern bool gBandError;
+extern bool gHasFlex, gFlexOK, gFlexStrict;
 extern Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth,
   gGhostLength, gBendLength, gBandMargin, gMaxFlare,
   gMaxBendMerge, gMaxMerge, gMinColorElementLength, gFlexCand;
@@ -389,7 +388,6 @@ void AskForSplit(PPathElt e);
 void ReportSplit(PPathElt e);
 void ReportConflictCheck(PPathElt e, PPathElt conflict, PPathElt cp);
 void ReportConflictCnt(PPathElt e, int32_t cnt);
-void ReportMoveSubpath(PPathElt e, char* s);
 void ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i);
 void ReportRemConflict(PPathElt e);
 void ReportRotateSubpath(PPathElt e);
@@ -407,8 +405,6 @@ void ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg);
 void ReportCarry(Fixed l0, Fixed l1, Fixed loc, PClrVal clrs, bool vert);
 void ReportBestCP(PPathElt e, PPathElt cp);
 void LogColorInfo(PClrPoint pl);
-void ReportAddVSeg(Fixed from, Fixed to, Fixed loc, int32_t i);
-void ReportAddHSeg(Fixed from, Fixed to, Fixed loc, int32_t i);
 void ReportBandNearMiss(char* str, Fixed loc, Fixed blu);
 void ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t,
                         bool curve);
@@ -420,8 +416,6 @@ void ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
 void ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
                      Fixed v1, Fixed s1);
 void ReportPruneHVal(PClrVal val, PClrVal v, int32_t i);
-void ReportRemVSeg(Fixed from, Fixed to, Fixed loc);
-void ReportRemHSeg(Fixed from, Fixed to, Fixed loc);
 void ReportPruneVVal(PClrVal val, PClrVal v, int32_t i);
 Fixed ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled);
 Fixed UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled);
@@ -456,7 +450,7 @@ void AddHStem(Fixed right, Fixed left, bool curved);
 void AddCharExtremes(Fixed bot, Fixed top);
 
 bool AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata,
-               bool fixStems, bool debug, bool extracolor, bool changeChar,
+               bool fixStems, bool extracolor, bool changeChar,
                bool roundCoords);
 
 bool MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs,

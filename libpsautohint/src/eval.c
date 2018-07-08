@@ -352,8 +352,7 @@ InsertVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PClrSeg lSeg,
     else
         vprev->vNxt = item;
     item->vNxt = vlist;
-    if (gShowClrInfo && gShowVs)
-        ReportAddVVal(item);
+    ReportAddVVal(item);
 }
 
 #define LePruneValue(val) ((val) < FixOne && ((val) << 10) <= gPruneValue)
@@ -420,8 +419,7 @@ InsertHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, PClrSeg bSeg,
     else
         vprev->vNxt = item;
     item->vNxt = vlist;
-    if (gShowClrInfo && gShowHs)
-        ReportAddHVal(item);
+    ReportAddHVal(item);
 }
 
 static void
