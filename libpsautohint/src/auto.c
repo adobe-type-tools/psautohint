@@ -225,12 +225,12 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
         else
             top = bot;
     }
-    if (gDebug) {
+    {
         int32_t cnt = 0;
         clst = colorList;
         while (clst != NULL) {
             if (++cnt > 100) {
-                LogMsg(WARNING, OK, "Loop in hintlist for TestHint\n\007");
+                LogMsg(LOGDEBUG, OK, "Loop in hintlist for TestHint\n\007");
                 return 0;
             }
             clst = clst->vNxt;
@@ -450,53 +450,46 @@ TryResolveConflict(PPathElt e, bool Hflg)
     val2 = seg2->sLnk;
     if (val1->vVal < FixInt(50) && OkToRemLnk(loc1, Hflg, val1->vSpc)) {
         RemLnk(e, Hflg, lnk1);
-        if (gShowClrInfo)
-            ReportRemConflict(e);
+        ReportRemConflict(e);
         return true;
     }
     if (val2->vVal < FixInt(50) && val1->vVal > val2->vVal * 20 &&
         OkToRemLnk(loc2, Hflg, val2->vSpc)) {
         RemLnk(e, Hflg, lnk2);
-        if (gShowClrInfo)
-            ReportRemConflict(e);
+        ReportRemConflict(e);
         return true;
     }
     if (typ != CURVETO || ((((Hflg && IsHorizontal(x0, y0, x1, y1)) ||
                              (!Hflg && IsVertical(x0, y0, x1, y1)))) &&
                            OkToRemLnk(loc1, Hflg, val1->vSpc))) {
         RemLnk(e, Hflg, lnk1);
-        if (gShowClrInfo)
-            ReportRemConflict(e);
+        ReportRemConflict(e);
         return true;
     }
     GetEndPoints(GetSubPathPrv(e), &x0, &y0, &x1, &y1);
     loc0 = Hflg ? y0 : x0;
     if (ProdLt0(loc2 - loc1, loc0 - loc1)) {
         RemLnk(e, Hflg, lnk1);
-        if (gShowClrInfo)
-            ReportRemConflict(e);
+        ReportRemConflict(e);
         return true;
     }
     GetEndPoint(GetSubPathNxt(e), &x1, &y1);
     loc3 = Hflg ? y1 : x1;
     if (ProdLt0(loc3 - loc2, loc1 - loc2)) {
         RemLnk(e, Hflg, lnk2);
-        if (gShowClrInfo)
-            ReportRemConflict(e);
+        ReportRemConflict(e);
         return true;
     }
     if ((loc2 == val2->vLoc1 || loc2 == val2->vLoc2) && loc1 != val1->vLoc1 &&
         loc1 != val1->vLoc2) {
         RemLnk(e, Hflg, lnk1);
-        if (gShowClrInfo)
-            ReportRemConflict(e);
+        ReportRemConflict(e);
         return true;
     }
     if ((loc1 == val1->vLoc1 || loc1 == val1->vLoc2) && loc2 != val2->vLoc1 &&
         loc2 != val2->vLoc2) {
         RemLnk(e, Hflg, lnk2);
-        if (gShowClrInfo)
-            ReportRemConflict(e);
+        ReportRemConflict(e);
         return true;
     }
     if (gEditChar && ResolveConflictBySplit(e, Hflg, lnk1, lnk2))
@@ -811,8 +804,7 @@ static void
 RemFlareLnk(PPathElt e, bool hFlg, PSegLnkLst rm, PPathElt e2, int32_t i)
 {
     RemLnk(e, hFlg, rm);
-    if (gShowClrInfo)
-        ReportRemFlare(e, e2, hFlg, i);
+    ReportRemFlare(e, e2, hFlg, i);
 }
 
 bool
@@ -956,15 +948,13 @@ CarryIfNeed(Fixed loc, bool vert, PClrVal clrs)
             seg->sLnk = clrs;
             if (vert) {
                 if (TestColor(seg, gVColoring, true, true) == 1) {
-                    if (gShowClrInfo)
-                        ReportCarry(l0, l1, loc, clrs, vert);
+                    ReportCarry(l0, l1, loc, clrs, vert);
                     AddVColoring(clrs);
                     seg->sLnk = seglnk;
                     break;
                 }
             } else if (TestColor(seg, gHColoring, gYgoesUp, true) == 1) {
-                if (gShowClrInfo)
-                    ReportCarry(l0, l1, loc, clrs, vert);
+                ReportCarry(l0, l1, loc, clrs, vert);
                 AddHColoring(clrs);
                 seg->sLnk = seglnk;
                 break;
@@ -1056,8 +1046,7 @@ RemShortColors(void)
         GetEndPoint(e, &ex, &ey);
         if (abs(cx - ex) < gMinColorElementLength &&
             abs(cy - ey) < gMinColorElementLength) {
-            if (gShowClrInfo)
-                ReportRemShortColors(ex, ey);
+            ReportRemShortColors(ex, ey);
             e->Hs = NULL;
             e->Vs = NULL;
         }
@@ -1082,25 +1071,20 @@ AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
     isSpc = clrBBox = clrVBounds = clrHBounds = false;
     mergeMain = (CountSubPaths() <= 5);
     e = gPathStart;
-    if (gAutoExtraDebug)
-        LogMsg(INFO, OK, "RemFlares");
+    LogMsg(LOGDEBUG, OK, "RemFlares");
     RemFlares(true);
     RemFlares(false);
-    if (gAutoExtraDebug)
-        LogMsg(INFO, OK, "CheckElmntClrSegs");
+    LogMsg(LOGDEBUG, OK, "CheckElmntClrSegs");
     CheckElmntClrSegs();
-    if (gAutoExtraDebug)
-        LogMsg(INFO, OK, "PromoteColors");
+    LogMsg(LOGDEBUG, OK, "PromoteColors");
     PromoteColors();
-    if (gAutoExtraDebug)
-        LogMsg(INFO, OK, "RemShortColors");
+    LogMsg(LOGDEBUG, OK, "RemShortColors");
     RemShortColors();
     haveVBnds = clrVBounds;
     haveHBnds = clrHBounds;
     p = NULL;
     Tst = IsOk; /* it is ok to add to primary coloring */
-    if (gAutoExtraDebug)
-        LogMsg(INFO, OK, "color loop");
+    LogMsg(LOGDEBUG, OK, "color loop");
     mtVclrs = mtHclrs = NULL;
     while (e != NULL) {
         int32_t etype = e->type;
@@ -1176,9 +1160,7 @@ AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
         e = e->next;
     }
     ReClrBounds(gPathEnd);
-    if (gAutoExtraDebug)
-        LogMsg(INFO, OK, "RemPromotedClrs");
+    LogMsg(LOGDEBUG, OK, "RemPromotedClrs");
     RemPromotedClrs();
-    if (gAutoExtraDebug)
-        LogMsg(INFO, OK, "done autoextracolors");
+    LogMsg(LOGDEBUG, OK, "done autoextracolors");
 }

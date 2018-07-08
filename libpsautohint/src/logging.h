@@ -18,6 +18,7 @@
 #define FATALERROR 2
 
 /* defines for LogMsg level param */
+#define LOGDEBUG -1
 #define INFO 0
 #define WARNING 1
 #define LOGERROR 2

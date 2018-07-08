@@ -302,7 +302,7 @@ error_handler(int16_t code)
 ACLIB_API int
 AutoColorString(const char* srcbezdata, const char* fontinfodata,
                 char** dstbezdata, size_t* length, int allowEdit,
-                int allowHintSub, int roundCoords, int debug)
+                int allowHintSub, int roundCoords)
 {
     int value, result;
     ACFontInfo* fontinfo = NULL;
@@ -349,7 +349,6 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     result = AutoColor(fontinfo,     /* font info */
                        srcbezdata,   /* input glyph */
                        false,        /* fixStems */
-                       debug,        /* debug */
                        allowHintSub, /* extracolor*/
                        allowEdit,    /* editChars */
                        roundCoords);

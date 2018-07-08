@@ -211,11 +211,9 @@ void
 ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i)
 {
     Fixed ex1, ey1, ex2, ey2;
-    if (!gShowClrInfo)
-        return;
     GetEndPoint(e, &ex1, &ey1);
     GetEndPoint(e2, &ex2, &ey2);
-    LogMsg(INFO, OK, "Removed %s flare at %g %g by %g %g : %d.",
+    LogMsg(LOGDEBUG, OK, "Removed %s flare at %g %g by %g %g : %d.",
            hFlg ? "horizontal" : "vertical", FixToDbl(itfmx(ex1)),
            FixToDbl(itfmy(ey1)), FixToDbl(itfmx(ex2)), FixToDbl(itfmy(ey2)), i);
 }
@@ -224,8 +222,6 @@ void
 ReportRemConflict(PPathElt e)
 {
     Fixed ex, ey;
-    if (!gShowClrInfo)
-        return;
     GetEndPoint(e, &ex, &ey);
     LogMsg(LOGERROR, OK, "Removed conflicting hints at %g %g.",
            FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
@@ -235,29 +231,25 @@ void
 ReportRotateSubpath(PPathElt e)
 {
     Fixed ex, ey;
-    if (!gShowClrInfo)
-        return;
     GetEndPoint(e, &ex, &ey);
-    LogMsg(INFO, OK, "changed closepath to %g %g.", FixToDbl(itfmx(ex)),
+    LogMsg(LOGDEBUG, OK, "changed closepath to %g %g.", FixToDbl(itfmx(ex)),
            FixToDbl(itfmy(ey)));
 }
 
 void
 ReportRemShortColors(Fixed ex, Fixed ey)
 {
-    if (!gShowClrInfo)
-        return;
-    LogMsg(INFO, OK, "Removed hints from short element at %g %g.",
+    LogMsg(LOGDEBUG, OK, "Removed hints from short element at %g %g.",
            FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
 }
 
 static void
-PrntVal(Fixed v)
+PrintDebugVal(Fixed v)
 {
     if (v >= FixInt(100000))
-        LogMsg(INFO, OK, "%d", FTrunc(v));
+        LogMsg(LOGDEBUG, OK, "%d", FTrunc(v));
     else
-        LogMsg(INFO, OK, "%g", FixToDbl(v));
+        LogMsg(LOGDEBUG, OK, "%g", FixToDbl(v));
 }
 
 static void
@@ -266,11 +258,11 @@ ShwHV(PClrVal val)
     Fixed bot, top;
     bot = itfmy(val->vLoc1);
     top = itfmy(val->vLoc2);
-    LogMsg(INFO, OK, "b %g t %g v ", FixToDbl(bot), FixToDbl(top));
-    PrntVal(val->vVal);
-    LogMsg(INFO, OK, " s %g", FixToDbl(val->vSpc));
+    LogMsg(LOGDEBUG, OK, "b %g t %g v ", FixToDbl(bot), FixToDbl(top));
+    PrintDebugVal(val->vVal);
+    LogMsg(LOGDEBUG, OK, " s %g", FixToDbl(val->vSpc));
     if (val->vGhst)
-        LogMsg(INFO, OK, " G");
+        LogMsg(LOGDEBUG, OK, " G");
 }
 
 void
@@ -284,11 +276,11 @@ ShowHVal(PClrVal val)
         return;
     l = itfmx(seg->sMin);
     r = itfmx(seg->sMax);
-    LogMsg(INFO, OK, " l1 %g r1 %g ", FixToDbl(l), FixToDbl(r));
+    LogMsg(LOGDEBUG, OK, " l1 %g r1 %g ", FixToDbl(l), FixToDbl(r));
     seg = val->vSeg2;
     l = itfmx(seg->sMin);
     r = itfmx(seg->sMax);
-    LogMsg(INFO, OK, " l2 %g r2 %g", FixToDbl(l), FixToDbl(r));
+    LogMsg(LOGDEBUG, OK, " l2 %g r2 %g", FixToDbl(l), FixToDbl(r));
 }
 
 void
@@ -312,9 +304,9 @@ ShwVV(PClrVal val)
     Fixed lft, rht;
     lft = itfmx(val->vLoc1);
     rht = itfmx(val->vLoc2);
-    LogMsg(INFO, OK, "l %g r %g v ", FixToDbl(lft), FixToDbl(rht));
-    PrntVal(val->vVal);
-    LogMsg(INFO, OK, " s %g", FixToDbl(val->vSpc));
+    LogMsg(LOGDEBUG, OK, "l %g r %g v ", FixToDbl(lft), FixToDbl(rht));
+    PrintDebugVal(val->vVal);
+    LogMsg(LOGDEBUG, OK, " s %g", FixToDbl(val->vSpc));
 }
 
 void
@@ -328,11 +320,11 @@ ShowVVal(PClrVal val)
         return;
     b = itfmy(seg->sMin);
     t = itfmy(seg->sMax);
-    LogMsg(INFO, OK, " b1 %g t1 %g ", FixToDbl(b), FixToDbl(t));
+    LogMsg(LOGDEBUG, OK, " b1 %g t1 %g ", FixToDbl(b), FixToDbl(t));
     seg = val->vSeg2;
     b = itfmy(seg->sMin);
     t = itfmy(seg->sMax);
-    LogMsg(INFO, OK, " b2 %g t2 %g", FixToDbl(b), FixToDbl(t));
+    LogMsg(LOGDEBUG, OK, " b2 %g t2 %g", FixToDbl(b), FixToDbl(t));
 }
 
 void
@@ -354,29 +346,27 @@ void
 ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg)
 {
     if (hFlg) {
-        LogMsg(INFO, OK, "FndBstVal: sLoc %g sLft %g sRght %g ",
+        LogMsg(LOGDEBUG, OK, "FndBstVal: sLoc %g sLft %g sRght %g ",
                FixToDbl(itfmy(seg->sLoc)), FixToDbl(itfmx(seg->sMin)),
                FixToDbl(itfmx(seg->sMax)));
         if (val)
             ShwHV(val);
         else
-            LogMsg(INFO, OK, "NULL");
+            LogMsg(LOGDEBUG, OK, "NULL");
     } else {
-        LogMsg(INFO, OK, "FndBstVal: sLoc %g sBot %g sTop %g ",
+        LogMsg(LOGDEBUG, OK, "FndBstVal: sLoc %g sBot %g sTop %g ",
                FixToDbl(itfmx(seg->sLoc)), FixToDbl(itfmy(seg->sMin)),
                FixToDbl(itfmy(seg->sMax)));
         if (val)
             ShwVV(val);
         else
-            LogMsg(INFO, OK, "NULL");
+            LogMsg(LOGDEBUG, OK, "NULL");
     }
 }
 
 void
 ReportCarry(Fixed l0, Fixed l1, Fixed loc, PClrVal clrs, bool vert)
 {
-    if (!gShowClrInfo)
-        return;
     if (vert) {
         ShowVVal(clrs);
         loc = itfmx(loc);
@@ -388,8 +378,8 @@ ReportCarry(Fixed l0, Fixed l1, Fixed loc, PClrVal clrs, bool vert)
         l0 = itfmy(l0);
         l1 = itfmy(l1);
     }
-    LogMsg(INFO, OK, " carry to %g in [%g..%g]", FixToDbl(loc), FixToDbl(l0),
-           FixToDbl(l1));
+    LogMsg(LOGDEBUG, OK, " carry to %g in [%g..%g]", FixToDbl(loc),
+           FixToDbl(l0), FixToDbl(l1));
 }
 
 void
@@ -414,15 +404,15 @@ LogColorInfo(PClrPoint pl)
     if (c == 'y' || c == 'm') { /* vertical lines */
         Fixed lft = pl->x0;
         Fixed rht = pl->x1;
-        LogMsg(INFO, OK, "%4g  %-30s%5g%5g\n", FixToDbl(rht - lft), gGlyphName,
-               FixToDbl(lft), FixToDbl(rht));
+        LogMsg(LOGDEBUG, OK, "%4g  %-30s%5g%5g\n", FixToDbl(rht - lft),
+               gGlyphName, FixToDbl(lft), FixToDbl(rht));
     } else {
         Fixed bot = pl->y0;
         Fixed top = pl->y1;
         Fixed wdth = top - bot;
         if (wdth == -FixInt(21) || wdth == -FixInt(20))
             return; /* ghost pair */
-        LogMsg(INFO, OK, "%4g  %-30s%5g%5g\n", FixToDbl(wdth), gGlyphName,
+        LogMsg(LOGDEBUG, OK, "%4g  %-30s%5g%5g\n", FixToDbl(wdth), gGlyphName,
                FixToDbl(bot), FixToDbl(top));
     }
 }
@@ -430,17 +420,17 @@ LogColorInfo(PClrPoint pl)
 static void
 LstHVal(PClrVal val)
 {
-    LogMsg(INFO, OK, "\t");
+    LogMsg(LOGDEBUG, OK, "\t");
     ShowHVal(val);
-    LogMsg(INFO, OK, " ");
+    LogMsg(LOGDEBUG, OK, " ");
 }
 
 static void
 LstVVal(PClrVal val)
 {
-    LogMsg(INFO, OK, "\t");
+    LogMsg(LOGDEBUG, OK, "\t");
     ShowVVal(val);
-    LogMsg(INFO, OK, " ");
+    LogMsg(LOGDEBUG, OK, " ");
 }
 
 void
@@ -458,7 +448,7 @@ ListClrInfo(void)
             GetEndPoint(e, &x, &y);
             x = itfmx(x);
             y = itfmy(y);
-            LogMsg(INFO, OK, "x %g y %g ", FixToDbl(x), FixToDbl(y));
+            LogMsg(LOGDEBUG, OK, "x %g y %g ", FixToDbl(x), FixToDbl(y));
             while (hLst != NULL) {
                 seg = hLst->lnk->seg;
                 LstHVal(seg->sLnk);
@@ -472,42 +462,6 @@ ListClrInfo(void)
         }
         e = e->next;
     }
-}
-
-void
-ReportAddVSeg(Fixed from, Fixed to, Fixed loc, int32_t i)
-{
-    if (!gShowClrInfo || !gShowVs)
-        return;
-    LogMsg(INFO, OK, "add vseg %g %g to %g %g %d", FixToDbl(itfmx(loc)),
-           FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)), FixToDbl(itfmy(to)), i);
-}
-
-void
-ReportAddHSeg(Fixed from, Fixed to, Fixed loc, int32_t i)
-{
-    if (!gShowClrInfo || !gShowHs)
-        return;
-    LogMsg(INFO, OK, "add hseg %g %g to %g %g %d", FixToDbl(itfmx(from)),
-           FixToDbl(itfmy(loc)), FixToDbl(itfmx(to)), FixToDbl(itfmy(loc)), i);
-}
-
-void
-ReportRemVSeg(Fixed from, Fixed to, Fixed loc)
-{
-    if (!gShowClrInfo || !gShowVs)
-        return;
-    LogMsg(INFO, OK, "rem vseg %g %g to %g %g", FixToDbl(itfmx(loc)),
-           FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)), FixToDbl(itfmy(to)));
-}
-
-void
-ReportRemHSeg(Fixed from, Fixed to, Fixed loc)
-{
-    if (!gShowClrInfo || !gShowHs)
-        return;
-    LogMsg(INFO, OK, "rem hseg %g %g to %g %g", FixToDbl(itfmx(from)),
-           FixToDbl(itfmy(loc)), FixToDbl(itfmx(to)), FixToDbl(itfmy(loc)));
 }
 
 void
@@ -554,61 +508,44 @@ void
 ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
                 Fixed v1, Fixed s1)
 {
-    if (!gShowClrInfo)
-        return;
-    LogMsg(INFO, OK,
+    LogMsg(LOGDEBUG, OK,
 
            "Replace H hints pair at %g %g by %g %g\n\told value ",
            FixToDbl(itfmy(b0)), FixToDbl(itfmy(t0)), FixToDbl(itfmy(b1)),
            FixToDbl(itfmy(t1)));
-    PrntVal(v0);
-    LogMsg(INFO, OK, " %g new value ", FixToDbl(s0));
-    PrntVal(v1);
-    LogMsg(INFO, OK, " %g", FixToDbl(s1));
+    PrintDebugVal(v0);
+    LogMsg(LOGDEBUG, OK, " %g new value ", FixToDbl(s0));
+    PrintDebugVal(v1);
+    LogMsg(LOGDEBUG, OK, " %g", FixToDbl(s1));
 }
 
 void
 ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
                 Fixed v1, Fixed s1)
 {
-    if (!gShowClrInfo)
-        return;
-    LogMsg(INFO, OK, "Replace V hints pair at %g %g by %g %g\n\told value ",
+    LogMsg(LOGDEBUG, OK, "Replace V hints pair at %g %g by %g %g\n\told value ",
            FixToDbl(itfmx(l0)), FixToDbl(itfmx(r0)), FixToDbl(itfmx(l1)),
            FixToDbl(itfmx(r1)));
-    PrntVal(v0);
-    LogMsg(INFO, OK, " %g new value ", FixToDbl(s0));
-    PrntVal(v1);
-    LogMsg(INFO, OK, " %g", FixToDbl(s1));
+    PrintDebugVal(v0);
+    LogMsg(LOGDEBUG, OK, " %g new value ", FixToDbl(s0));
+    PrintDebugVal(v1);
+    LogMsg(LOGDEBUG, OK, " %g", FixToDbl(s1));
 }
 
 void
 ReportPruneHVal(PClrVal val, PClrVal v, int32_t i)
 {
-    if (!gShowClrInfo)
-        return;
-    LogMsg(INFO, OK, "PruneHVal: %d\n\t", i);
+    LogMsg(LOGDEBUG, OK, "PruneHVal: %d\n\t", i);
     ShowHVal(val);
-    LogMsg(INFO, OK, "\n\t");
+    LogMsg(LOGDEBUG, OK, "\n\t");
     ShowHVal(v);
 }
 
 void
 ReportPruneVVal(PClrVal val, PClrVal v, int32_t i)
 {
-    if (!gShowClrInfo)
-        return;
-    LogMsg(INFO, OK, "PruneVVal: %d\n\t", i);
+    LogMsg(LOGDEBUG, OK, "PruneVVal: %d\n\t", i);
     ShowVVal(val);
-    LogMsg(INFO, OK, "\n\t");
+    LogMsg(LOGDEBUG, OK, "\n\t");
     ShowVVal(v);
-}
-
-void
-ReportMoveSubpath(PPathElt e, char* s)
-{
-    Fixed x, y;
-    GetEndPoint(e, &x, &y);
-    LogMsg(INFO, OK, "Moving subpath %g %g to %s.", FixToDbl(itfmx(x)),
-           FixToDbl(itfmy(y)), s);
 }

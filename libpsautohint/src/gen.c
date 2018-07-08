@@ -128,8 +128,9 @@ void
 AddVSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
             int32_t typ, int32_t i)
 {
-    if (gDebug)
-        ReportAddVSeg(from, to, loc, i);
+    LogMsg(LOGDEBUG, OK, "add vseg %g %g to %g %g %d", FixToDbl(itfmx(loc)),
+           FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)), FixToDbl(itfmy(to)), i);
+
     if (gYgoesUp)
         AddSegment(from, to, loc, 0, 1, p1, p2, false, typ);
     else
@@ -140,8 +141,9 @@ void
 AddHSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
             int32_t typ, int32_t i)
 {
-    if (gDebug)
-        ReportAddHSeg(from, to, loc, i);
+    LogMsg(LOGDEBUG, OK, "add hseg %g %g to %g %g %d", FixToDbl(itfmx(from)),
+           FixToDbl(itfmy(loc)), FixToDbl(itfmx(to)), FixToDbl(itfmy(loc)), i);
+
     AddSegment(from, to, loc, 2, 3, p1, p2, true, typ);
 }
 
@@ -393,11 +395,15 @@ ReportRemSeg(int32_t l, PClrSeg lst)
     switch (l) {
         case 0:
         case 1:
-            ReportRemVSeg(from, to, loc);
+            LogMsg(LOGDEBUG, OK, "rem vseg %g %g to %g %g",
+                   FixToDbl(itfmx(loc)), FixToDbl(itfmy(from)),
+                   FixToDbl(itfmx(loc)), FixToDbl(itfmy(to)));
             break;
         case 2:
         case 3:
-            ReportRemHSeg(from, to, loc);
+            LogMsg(LOGDEBUG, OK, "rem hseg %g %g to %g %g",
+                   FixToDbl(itfmx(from)), FixToDbl(itfmy(loc)),
+                   FixToDbl(itfmx(to)), FixToDbl(itfmy(loc)));
             break;
     }
 }
@@ -428,8 +434,7 @@ RemExtraBends(int32_t l0, int32_t l1)
                         gSegLists[l0] = nxt;
                     else
                         prv->sNxt = nxt;
-                    if (gDebug)
-                        ReportRemSeg(l0, lst0);
+                    ReportRemSeg(l0, lst0);
                     lst0 = prv;
                     break;
                 }
@@ -441,8 +446,7 @@ RemExtraBends(int32_t l0, int32_t l1)
                         gSegLists[l1] = n;
                     else
                         p->sNxt = n;
-                    if (gDebug)
-                        ReportRemSeg(l1, lst);
+                    ReportRemSeg(l1, lst);
                     lst = p;
                 }
             }

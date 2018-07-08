@@ -47,6 +47,9 @@ reportCB(char* msg, int level)
     }
 
     switch (level) {
+        case -1: /* LOGDEBUG */
+            PyObject_CallMethod(logger, "debug", "s", msg);
+            break;
         case 0: /* INFO */
             PyObject_CallMethod(logger, "info", "s", msg);
             break;
@@ -93,7 +96,7 @@ static char autohint_doc[] =
   "Autohint glyphs.\n"
   "\n"
   "Signature:\n"
-  "  autohint(font_info, glyphs[, no_edit, allow_hint_sub, round, debug])\n"
+  "  autohint(font_info, glyphs[, no_edit, allow_hint_sub, round])\n"
   "\n"
   "Args:\n"
   "  font_info: font information.\n"
@@ -101,7 +104,6 @@ static char autohint_doc[] =
   "  allow_edit: allow editing (changing) the paths when hinting.\n"
   "  allow_hint_sub: no multiple layers of coloring.\n"
   "  round: round coordinates.\n"
-  "  debug: print debug messages.\n"
   "\n"
   "Output:\n"
   "  Autohinted glyph data in bez format.\n"
@@ -113,7 +115,6 @@ static PyObject*
 autohint(PyObject* self, PyObject* args)
 {
     int allowEdit = true, roundCoords = true, allowHintSub = true;
-    int debug = false;
     PyObject* fontObj = NULL;
     PyObject* inObj = NULL;
     PyObject* outObj = NULL;
@@ -121,9 +122,9 @@ autohint(PyObject* self, PyObject* args)
     char* fontInfo = NULL;
     bool error = false;
 
-    if (!PyArg_ParseTuple(args, "O!O!|iiii", &PyBytes_Type, &fontObj,
+    if (!PyArg_ParseTuple(args, "O!O!|iii", &PyBytes_Type, &fontObj,
                           &PyBytes_Type, &inObj, &allowEdit,
-                          &allowHintSub, &roundCoords, &debug))
+                          &allowHintSub, &roundCoords))
         return NULL;
 
     AC_SetMemManager(NULL, memoryManager);
@@ -143,7 +144,7 @@ autohint(PyObject* self, PyObject* args)
         } else {
             result =
               AutoColorString(inData, fontInfo, &output, &outLen, allowEdit,
-                              allowHintSub, roundCoords, debug);
+                              allowHintSub, roundCoords);
 
             if (outLen != 0 && result == AC_Success)
                 outObj = PyBytes_FromString(output);

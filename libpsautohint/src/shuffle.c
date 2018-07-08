@@ -21,11 +21,9 @@ InitShuffleSubpaths(void)
     while (e != NULL) { /* every element is marked with its subpath count */
         if (e->type == MOVETO)
             cnt++;
-        if (gDebug) {
-            if (e->type == MOVETO) { /* DEBUG */
-                LogMsg(INFO, OK, "subpath %d starts at %g %g\n", cnt,
-                       FixToDbl(itfmx(e->x)), FixToDbl(itfmy(e->y)));
-            }
+        if (e->type == MOVETO) {
+            LogMsg(LOGDEBUG, OK, "subpath %d starts at %g %g\n", cnt,
+                   FixToDbl(itfmx(e->x)), FixToDbl(itfmy(e->y)));
         }
         e->count = (int16_t)cnt;
         e = e->next;
@@ -40,21 +38,21 @@ static void
 PrintLinks(void)
 {
     int32_t i, j;
-    LogMsg(INFO, OK, "Links ");
+    LogMsg(LOGDEBUG, OK, "Links ");
     for (i = 0; i < rowcnt; i++) {
-        LogMsg(INFO, OK, "%d  ", i);
+        LogMsg(LOGDEBUG, OK, "%d  ", i);
         if (i < 10)
-            LogMsg(INFO, OK, " ");
+            LogMsg(LOGDEBUG, OK, " ");
     }
-    LogMsg(INFO, OK, "\n");
+    LogMsg(LOGDEBUG, OK, "\n");
     for (i = 0; i < rowcnt; i++) {
-        LogMsg(INFO, OK, " %d   ", i);
+        LogMsg(LOGDEBUG, OK, " %d   ", i);
         if (i < 10)
-            LogMsg(INFO, OK, " ");
+            LogMsg(LOGDEBUG, OK, " ");
         for (j = 0; j < rowcnt; j++) {
-            LogMsg(INFO, OK, "%d   ", links[rowcnt * i + j]);
+            LogMsg(LOGDEBUG, OK, "%d   ", links[rowcnt * i + j]);
         }
-        LogMsg(INFO, OK, "\n");
+        LogMsg(LOGDEBUG, OK, "\n");
     }
 }
 
@@ -62,36 +60,36 @@ static void
 PrintSumLinks(char* sumlinks)
 {
     int32_t i;
-    LogMsg(INFO, OK, "Sumlinks ");
+    LogMsg(LOGDEBUG, OK, "Sumlinks ");
     for (i = 0; i < rowcnt; i++) {
-        LogMsg(INFO, OK, "%d  ", i);
+        LogMsg(LOGDEBUG, OK, "%d  ", i);
         if (i < 10)
-            LogMsg(INFO, OK, " ");
+            LogMsg(LOGDEBUG, OK, " ");
     }
-    LogMsg(INFO, OK, "\n");
-    LogMsg(INFO, OK, "         ");
+    LogMsg(LOGDEBUG, OK, "\n");
+    LogMsg(LOGDEBUG, OK, "         ");
     for (i = 0; i < rowcnt; i++) {
-        LogMsg(INFO, OK, "%d   ", sumlinks[i]);
+        LogMsg(LOGDEBUG, OK, "%d   ", sumlinks[i]);
     }
-    LogMsg(INFO, OK, "\n");
+    LogMsg(LOGDEBUG, OK, "\n");
 }
 
 static void
 PrintOutLinks(unsigned char* outlinks)
 {
     int32_t i;
-    LogMsg(INFO, OK, "Outlinks ");
+    LogMsg(LOGDEBUG, OK, "Outlinks ");
     for (i = 0; i < rowcnt; i++) {
-        LogMsg(INFO, OK, "%d  ", i);
+        LogMsg(LOGDEBUG, OK, "%d  ", i);
         if (i < 10)
-            LogMsg(INFO, OK, " ");
+            LogMsg(LOGDEBUG, OK, " ");
     }
-    LogMsg(INFO, OK, "\n");
-    LogMsg(INFO, OK, "         ");
+    LogMsg(LOGDEBUG, OK, "\n");
+    LogMsg(LOGDEBUG, OK, "         ");
     for (i = 0; i < rowcnt; i++) {
-        LogMsg(INFO, OK, "%d   ", outlinks[i]);
+        LogMsg(LOGDEBUG, OK, "%d   ", outlinks[i]);
     }
-    LogMsg(INFO, OK, "\n");
+    LogMsg(LOGDEBUG, OK, "\n");
 }
 
 void
@@ -121,13 +119,11 @@ MarkLinks(PClrVal vL, bool hFlg)
         j = e->count;
         if (i == j)
             continue;
-        if (gDebug) {
-            if (hFlg)
-                ShowHVal(vL);
-            else
-                ShowVVal(vL);
-            LogMsg(INFO, OK, " : %d <-> %d\n", i, j);
-        }
+        if (hFlg)
+            ShowHVal(vL);
+        else
+            ShowVVal(vL);
+        LogMsg(LOGDEBUG, OK, " : %d <-> %d\n", i, j);
         links[rowcnt * i + j] = 1;
         links[rowcnt * j + i] = 1;
     }
@@ -146,16 +142,13 @@ Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
         e = e->next;
     }
     MoveSubpathToEnd(e);
-    if (gDebug) {
-        LogMsg(INFO, OK, "move subpath %d to end\n", bst); /* DEBUG */
-    }
+    LogMsg(LOGDEBUG, OK, "move subpath %d to end\n", bst);
     output[bst] = 1;
     lnks = &links[bst * rowcnt];
     outlnks = outlinks;
     for (i = 0; i < rowcnt; i++)
         *outlnks++ += *lnks++;
-    if (gDebug)
-        PrintOutLinks(outlinks);
+    PrintOutLinks(outlinks);
 }
 
 /* The intent of this code is to order the subpaths so that
@@ -171,8 +164,7 @@ DoShuffleSubpaths(void)
     int32_t i, j;
     if (links == NULL)
         return;
-    if (gDebug)
-        PrintLinks();
+    PrintLinks();
     for (i = 0; i < rowcnt; i++)
         output[i] = sumlinks[i] = outlinks[i] = 0;
     lnks = links;
@@ -182,8 +174,7 @@ DoShuffleSubpaths(void)
                 sumlinks[i]++;
         }
     }
-    if (gDebug)
-        PrintSumLinks((char*)sumlinks);
+    PrintSumLinks((char*)sumlinks);
     while (true) {
         int32_t bst = -1;
         int32_t bstsum = 0;
