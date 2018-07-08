@@ -244,14 +244,9 @@ AC_SetMemManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func)
 }
 
 ACLIB_API void
-AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose)
+AC_SetReportCB(AC_REPORTFUNCPTR reportCB)
 {
-    if (verbose)
-        gLibReportCB = reportCB;
-    else
-        gLibReportCB = NULL;
-
-    gLibErrorReportCB = reportCB;
+    gLibReportCB = reportCB;
 }
 
 ACLIB_API void
@@ -440,7 +435,6 @@ ACLIB_API void
 AC_initCallGlobals(void)
 {
     gLibReportCB = NULL;
-    gLibErrorReportCB = NULL;
     gAddCharExtremesCB = NULL;
     gAddStemExtremesCB = NULL;
     gDoAligns = false;

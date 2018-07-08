@@ -70,14 +70,13 @@ ACLIB_API void AC_SetMemManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func);
 /*
  * Function: AC_SetReportCB
  *
- * If this is supplied and verbose is set to true, then the AC lib will write
- * (many!) text status messages to this file.
+ * If this is supplied, then the AC lib will use this call back to report
+ * messages.
  *
- * If verbose is set false, then only error messages are written.
  */
-typedef void (*AC_REPORTFUNCPTR)(char* msg);
+typedef void (*AC_REPORTFUNCPTR)(char* msg, int level);
 
-ACLIB_API void AC_SetReportCB(AC_REPORTFUNCPTR reportCB, int verbose);
+ACLIB_API void AC_SetReportCB(AC_REPORTFUNCPTR reportCB);
 
 /*
  * Function: AC_SetReportStemsCB

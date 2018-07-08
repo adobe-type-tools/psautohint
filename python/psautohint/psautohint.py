@@ -23,11 +23,9 @@ def toStr(o):
 
 def autohint(info, glyph, allow_edit=True, allow_hint_sub=True,
              round_coordinates=True):
-    verbose = logging.getLogger().isEnabledFor(logging.INFO)
     debug = logging.getLogger().isEnabledFor(logging.DEBUG)
     hinted = _psautohint.autohint(toBytes(info),
                                   toBytes(glyph),
-                                  verbose,
                                   allow_edit,
                                   allow_hint_sub,
                                   round_coordinates,
@@ -37,10 +35,8 @@ def autohint(info, glyph, allow_edit=True, allow_hint_sub=True,
 
 
 def autohintmm(info, glyphs, masters):
-    verbose = logging.getLogger().isEnabledFor(logging.INFO)
     hinted = _psautohint.autohintmm(toBytes(info),
                                     toBytes(glyphs),
-                                    toBytes(masters),
-                                    verbose)
+                                    toBytes(masters))
 
     return toStr(hinted)

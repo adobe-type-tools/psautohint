@@ -107,9 +107,23 @@ vstemCB(int right, int left, char* glyphName)
 }
 
 static void
-reportCB(char* msg)
+reportCB(char* msg, int level)
 {
-    fprintf(stdout, "%s", msg);
+    switch (level) {
+        case 0: /* INFO */
+            if (verbose)
+                fprintf(stdout, "INFO: %s\n", msg);
+            break;
+        case 1: /* WARNING */
+            if (verbose)
+                fprintf(stdout, "WARNING: %s\n", msg);
+            break;
+        case 2: /* LOGERROR */
+            fprintf(stdout, "ERROR: %s\n", msg);
+            break;
+        default:
+            break;
+    }
 }
 
 static void
@@ -380,7 +394,7 @@ main(int argc, char* argv[])
     if (badParam)
         exit(AC_InvalidParameterError);
 
-    AC_SetReportCB(reportCB, verbose);
+    AC_SetReportCB(reportCB);
     argi = firstFileNameIndex - 1;
     if (!doMM)
     {
