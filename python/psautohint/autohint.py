@@ -282,10 +282,9 @@ def hintFiles(options):
     if options.reference_font:
         hintFile(options, options.reference_font, None, reference_master=True)
     for i, path in enumerate(options.inputPaths):
-        try:
+        outpath = None
+        if options.outputPaths is not None and i < len(options.outputPaths):
             outpath = options.outputPaths[i]
-        except IndexError:
-            outpath = None
         hintFile(options, path, outpath, reference_master=False)
 
 
