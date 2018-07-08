@@ -23,8 +23,8 @@ InitShuffleSubpaths(void)
             cnt++;
         if (gDebug) {
             if (e->type == MOVETO) { /* DEBUG */
-                PrintMessage("subpath %d starts at %g %g\n", cnt,
-                             FixToDbl(itfmx(e->x)), FixToDbl(itfmy(e->y)));
+                LogMsg(INFO, OK, "subpath %d starts at %g %g\n", cnt,
+                       FixToDbl(itfmx(e->x)), FixToDbl(itfmy(e->y)));
             }
         }
         e->count = (int16_t)cnt;
@@ -40,21 +40,21 @@ static void
 PrintLinks(void)
 {
     int32_t i, j;
-    PrintMessage("Links ");
+    LogMsg(INFO, OK, "Links ");
     for (i = 0; i < rowcnt; i++) {
-        PrintMessage("%d  ", i);
+        LogMsg(INFO, OK, "%d  ", i);
         if (i < 10)
-            PrintMessage(" ");
+            LogMsg(INFO, OK, " ");
     }
-    PrintMessage("\n");
+    LogMsg(INFO, OK, "\n");
     for (i = 0; i < rowcnt; i++) {
-        PrintMessage(" %d   ", i);
+        LogMsg(INFO, OK, " %d   ", i);
         if (i < 10)
-            PrintMessage(" ");
+            LogMsg(INFO, OK, " ");
         for (j = 0; j < rowcnt; j++) {
-            PrintMessage("%d   ", links[rowcnt * i + j]);
+            LogMsg(INFO, OK, "%d   ", links[rowcnt * i + j]);
         }
-        PrintMessage("\n");
+        LogMsg(INFO, OK, "\n");
     }
 }
 
@@ -62,36 +62,36 @@ static void
 PrintSumLinks(char* sumlinks)
 {
     int32_t i;
-    PrintMessage("Sumlinks ");
+    LogMsg(INFO, OK, "Sumlinks ");
     for (i = 0; i < rowcnt; i++) {
-        PrintMessage("%d  ", i);
+        LogMsg(INFO, OK, "%d  ", i);
         if (i < 10)
-            PrintMessage(" ");
+            LogMsg(INFO, OK, " ");
     }
-    PrintMessage("\n");
-    PrintMessage("         ");
+    LogMsg(INFO, OK, "\n");
+    LogMsg(INFO, OK, "         ");
     for (i = 0; i < rowcnt; i++) {
-        PrintMessage("%d   ", sumlinks[i]);
+        LogMsg(INFO, OK, "%d   ", sumlinks[i]);
     }
-    PrintMessage("\n");
+    LogMsg(INFO, OK, "\n");
 }
 
 static void
 PrintOutLinks(unsigned char* outlinks)
 {
     int32_t i;
-    PrintMessage("Outlinks ");
+    LogMsg(INFO, OK, "Outlinks ");
     for (i = 0; i < rowcnt; i++) {
-        PrintMessage("%d  ", i);
+        LogMsg(INFO, OK, "%d  ", i);
         if (i < 10)
-            PrintMessage(" ");
+            LogMsg(INFO, OK, " ");
     }
-    PrintMessage("\n");
-    PrintMessage("         ");
+    LogMsg(INFO, OK, "\n");
+    LogMsg(INFO, OK, "         ");
     for (i = 0; i < rowcnt; i++) {
-        PrintMessage("%d   ", outlinks[i]);
+        LogMsg(INFO, OK, "%d   ", outlinks[i]);
     }
-    PrintMessage("\n");
+    LogMsg(INFO, OK, "\n");
 }
 
 void
@@ -126,7 +126,7 @@ MarkLinks(PClrVal vL, bool hFlg)
                 ShowHVal(vL);
             else
                 ShowVVal(vL);
-            PrintMessage(" : %d <-> %d\n", i, j);
+            LogMsg(INFO, OK, " : %d <-> %d\n", i, j);
         }
         links[rowcnt * i + j] = 1;
         links[rowcnt * j + i] = 1;
@@ -147,7 +147,7 @@ Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
     }
     MoveSubpathToEnd(e);
     if (gDebug) {
-        PrintMessage("move subpath %d to end\n", bst); /* DEBUG */
+        LogMsg(INFO, OK, "move subpath %d to end\n", bst); /* DEBUG */
     }
     output[bst] = 1;
     lnks = &links[bst * rowcnt];

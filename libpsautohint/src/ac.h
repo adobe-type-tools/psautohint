@@ -377,8 +377,6 @@ void PickVVals(PClrVal gValList);
 void PickHVals(PClrVal gValList);
 void FindBestHVals(void);
 void FindBestVVals(void);
-void PrintMessage(char* format, ...);
-void ReportError(char* format, ...);
 void ReportSmoothError(Fixed x, Fixed y);
 void ReportAddFlex(void);
 void ReportClipSharpAngle(Fixed x, Fixed y);
