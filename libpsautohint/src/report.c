@@ -22,7 +22,7 @@ FixToDbl(Fixed f)
 void
 PrintMessage(char* format, ...)
 {
-    if ((gLibReportCB != NULL) && (strlen(format) > 0)) {
+    if (strlen(format) > 0) {
         char msgBuffer[MAXMSGLEN + 1];
         va_list va;
 
@@ -32,8 +32,7 @@ PrintMessage(char* format, ...)
         vsnprintf(msgBuffer + 1, MAXMSGLEN - 1, format, va);
         va_end(va);
 
-        gLibReportCB(msgBuffer);
-        gLibReportCB("\n");
+        LogMsg(INFO, OK, msgBuffer);
     }
 }
 
@@ -48,7 +47,7 @@ ReportError(char* format, ...)
         vsnprintf(msgBuffer, MAXMSGLEN, format, va);
         va_end(va);
 
-        PrintMessage(msgBuffer);
+        LogMsg(LOGERROR, OK, msgBuffer);
     }
 }
 

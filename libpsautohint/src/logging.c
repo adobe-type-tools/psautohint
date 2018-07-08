@@ -21,17 +21,6 @@ static int logCount = 0;
 
 static void LogMsg1(char* str, int16_t level, int16_t code);
 
-#define Write(s)                                                               \
-    {                                                                          \
-        if (gLibReportCB != NULL)                                              \
-            gLibReportCB(s);                                                   \
-    }
-#define WriteWarnorErr(f, s)                                                   \
-    {                                                                          \
-        if (gLibErrorReportCB != NULL)                                         \
-            gLibErrorReportCB(s);                                              \
-    }
-
 void
 set_errorproc(int (*userproc)(int16_t))
 {
@@ -82,24 +71,9 @@ LogMsg(int16_t level, /* error, warning, info */
 static void
 LogMsg1(char* str, int16_t level, int16_t code)
 {
-    switch (level) {
-        case INFO:
-            Write(str);
-            Write("\n");
-            break;
-        case WARNING:
-            WriteWarnorErr(stderr, "WARNING: ");
-            WriteWarnorErr(stderr, str);
-            break;
-        case LOGERROR:
-            WriteWarnorErr(stderr, "ERROR: ");
-            WriteWarnorErr(stderr, str);
-            break;
-        default:
-            WriteWarnorErr(stderr, "ERROR - log level not recognized: ");
-            WriteWarnorErr(stderr, str);
-            break;
-    }
+    if (gLibReportCB != NULL)
+        gLibReportCB(str, level);
+
     if (level == LOGERROR && (code == NONFATALERROR || code == FATALERROR)) {
         (*errorproc)(code);
     }

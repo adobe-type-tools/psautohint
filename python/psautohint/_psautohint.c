@@ -33,15 +33,32 @@ typedef unsigned char bool;
 #include "psautohint.h"
 
 static void
-reportCB(char* msg)
+reportCB(char* msg, int level)
 {
-#if PY_MAJOR_VERSION >= 3
-    PySys_FormatStdout("%s", msg);
-#else
-    /* Formatted string should not exceed 1000 bytes, see:
-     * https://docs.python.org/2/c-api/sys.html#c.PySys_WriteStdout */
-    PySys_WriteStdout("%.1000s", msg);
-#endif
+    static PyObject* logger = NULL;
+
+    if (logger == NULL) {
+        PyObject* logging = PyImport_ImportModule("logging");
+        if (logging == NULL)
+          return;
+        logger = PyObject_CallMethod(logging, "getLogger", "s", "_psautohint");
+        if (logger == NULL)
+          return;
+    }
+
+    switch (level) {
+        case 0: /* INFO */
+            PyObject_CallMethod(logger, "info", "s", msg);
+            break;
+        case 1: /* WARNING */
+            PyObject_CallMethod(logger, "warning", "s", msg);
+            break;
+        case 2: /* LOGERROR */
+            PyObject_CallMethod(logger, "error", "s", msg);
+            break;
+        default:
+            break;
+    }
 }
 
 #if PY_MAJOR_VERSION >= 3
@@ -76,13 +93,11 @@ static char autohint_doc[] =
   "Autohint glyphs.\n"
   "\n"
   "Signature:\n"
-  "  autohint(font_info, glyphs[, verbose, no_edit, allow_hint_sub, "
-  "round, debug])\n"
+  "  autohint(font_info, glyphs[, no_edit, allow_hint_sub, round, debug])\n"
   "\n"
   "Args:\n"
   "  font_info: font information.\n"
   "  glyph: glyph data in bez format.\n"
-  "  verbose: print verbose messages.\n"
   "  allow_edit: allow editing (changing) the paths when hinting.\n"
   "  allow_hint_sub: no multiple layers of coloring.\n"
   "  round: round coordinates.\n"
@@ -98,7 +113,6 @@ static PyObject*
 autohint(PyObject* self, PyObject* args)
 {
     int allowEdit = true, roundCoords = true, allowHintSub = true;
-    int verbose = true;
     int debug = false;
     PyObject* fontObj = NULL;
     PyObject* inObj = NULL;
@@ -107,13 +121,13 @@ autohint(PyObject* self, PyObject* args)
     char* fontInfo = NULL;
     bool error = false;
 
-    if (!PyArg_ParseTuple(args, "O!O!|iiiii", &PyBytes_Type, &fontObj,
-                          &PyBytes_Type, &inObj, &verbose, &allowEdit,
+    if (!PyArg_ParseTuple(args, "O!O!|iiii", &PyBytes_Type, &fontObj,
+                          &PyBytes_Type, &inObj, &allowEdit,
                           &allowHintSub, &roundCoords, &debug))
         return NULL;
 
     AC_SetMemManager(NULL, memoryManager);
-    AC_SetReportCB(reportCB, verbose);
+    AC_SetReportCB(reportCB);
 
     fontInfo = PyBytes_AsString(fontObj);
     inData = PyBytes_AsString(inObj);
@@ -169,13 +183,12 @@ static char autohintmm_doc[] =
   "Autohint glyphs.\n"
   "\n"
   "Signature:\n"
-  "  autohintm(font_info, glyphs[, verbose])\n"
+  "  autohintm(font_info, glyphs)\n"
   "\n"
   "Args:\n"
   "  font_info: font information.\n"
   "  glyphs: sequence of glyph data in bez format.\n"
   "  masters: sequence of master names.\n"
-  "  verbose: print verbose messages.\n"
   "\n"
   "Output:\n"
   "  Sequence of autohinted glyph data in bez format.\n"
@@ -186,7 +199,6 @@ static char autohintmm_doc[] =
 static PyObject*
 autohintmm(PyObject* self, PyObject* args)
 {
-    int verbose = true;
     PyObject* inSeq = NULL;
     Py_ssize_t inCount = 0;
     PyObject* mastersSeq = NULL;
@@ -198,8 +210,8 @@ autohintmm(PyObject* self, PyObject* args)
     bool error = false;
     Py_ssize_t i;
 
-    if (!PyArg_ParseTuple(args, "O!OO|i", &PyBytes_Type, &fontObj, &inSeq,
-                          &mastersSeq, &verbose))
+    if (!PyArg_ParseTuple(args, "O!OO", &PyBytes_Type, &fontObj, &inSeq,
+                          &mastersSeq))
         return NULL;
 
     inSeq = PySequence_Fast(inSeq, "argument must be sequence");
@@ -236,7 +248,7 @@ autohintmm(PyObject* self, PyObject* args)
     fontInfo = PyBytes_AsString(fontObj);
 
     AC_SetMemManager(NULL, memoryManager);
-    AC_SetReportCB(reportCB, verbose);
+    AC_SetReportCB(reportCB);
 
     outSeq = PyTuple_New(inCount);
     if (!outSeq) {
