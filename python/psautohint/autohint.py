@@ -381,8 +381,7 @@ def hintFile(options, path, outpath, reference_master):
         seenGlyphCount += 1
 
         # Convert to bez format
-        bezString, width, hasHints = fontData.convertToBez(name, 
-                                                           options.hintAll)
+        bezString, width = fontData.convertToBez(name, options.hintAll)
         processedGlyphCount += 1
         if bezString is None:
             continue

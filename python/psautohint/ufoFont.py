@@ -435,22 +435,11 @@ class UFOFontData:
     def isCID():
         return 0
 
-    def checkForHints(self, glyphName):
-        hasHints = False
-        glyphPath = self.getGlyphProcessedPath(glyphName)
-        if glyphPath and os.path.exists(glyphPath):
-            with open(glyphPath, "rt", encoding="utf-8") as fp:
-                data = fp.read()
-            if "hintSetList" in data:
-                hasHints = True
-        return hasHints
-
     def convertToBez(self, glyphName, doAll=False):
         # convertGLIFToBez does not yet support hints;
         # no need for removeHints arg.
         bezString, width = convertGLIFToBez(self, glyphName, doAll)
-        hasHints = self.checkForHints(glyphName)
-        return bezString, width, hasHints
+        return bezString, width
 
     def updateFromBez(self, bezData, glyphName, width):
         # For UFO font, we don't use the width parameter:
