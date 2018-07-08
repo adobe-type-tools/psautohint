@@ -210,7 +210,7 @@ def convertT2GlyphToBez(t2CharString, allowDecimals=False):
         t2Wdth = extractor.width - t2CharString.private.nominalWidthX
     else:
         t2Wdth = None
-    return "".join(extractor.bezProgram), extractor.hintCount > 0, t2Wdth
+    return "".join(extractor.bezProgram), t2Wdth
 
 
 class HintMask:
@@ -1047,13 +1047,12 @@ class CFFFontData:
         return psName
 
     def convertToBez(self, glyphName, doAll=False):
-        hasHints = False
         t2Wdth = None
         gid = self.charStrings.charStrings[glyphName]
         t2CharString = self.charStringIndex[gid]
         try:
-            bezString, hasHints, t2Wdth = convertT2GlyphToBez(
-                t2CharString, self.allowDecimalCoords)
+            bezString, t2Wdth = convertT2GlyphToBez(t2CharString,
+                                                    self.allowDecimalCoords)
             # Note: the glyph name is important, as it is used by autohintexe
             # for various heuristics, including [hv]stem3 derivation.
             bezString = "% " + glyphName + "\n" + bezString
@@ -1061,7 +1060,7 @@ class CFFFontData:
             log.warning("Skipping %s: can't process SEAC composite glyphs.",
                         glyphName)
             bezString = None
-        return bezString, t2Wdth, hasHints
+        return bezString, t2Wdth
 
     def updateFromBez(self, bezData, glyphName, width):
         t2Program = [width] + convertBezToT2(bezData)
@@ -1338,7 +1337,7 @@ def test():
         print()
         print(glyphName)
         t2CharString = charStrings[glyphName]
-        bezString, _, t2Width = convertT2GlyphToBez(t2CharString)
+        bezString, t2Width = convertT2GlyphToBez(t2CharString)
         # print(bezString)
         t2Program = convertBezToT2(bezString)
         if t2Width is not None:
