@@ -322,13 +322,13 @@ DoFixes(void)
     bool didfixes = false;
     int32_t i;
     if (HFixCount > 0 && gAutoHFix) {
-        PrintMessage("Fixing horizontal near misses.");
+        LogMsg(INFO, OK, "Fixing horizontal near misses.");
         didfixes = true;
         for (i = 0; i < HFixCount; i++)
             FixHs(HFixYs[i], HFixDYs[i]);
     }
     if (VFixCount > 0 && gAutoVFix) {
-        PrintMessage("Fixing vertical near misses.");
+        LogMsg(INFO, OK, "Fixing vertical near misses.");
         didfixes = true;
         for (i = 0; i < VFixCount; i++)
             FixVs(VFixXs[i], VFixDXs[i]);

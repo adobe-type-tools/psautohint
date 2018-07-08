@@ -1083,24 +1083,24 @@ AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
     mergeMain = (CountSubPaths() <= 5);
     e = gPathStart;
     if (gAutoExtraDebug)
-        PrintMessage("RemFlares");
+        LogMsg(INFO, OK, "RemFlares");
     RemFlares(true);
     RemFlares(false);
     if (gAutoExtraDebug)
-        PrintMessage("CheckElmntClrSegs");
+        LogMsg(INFO, OK, "CheckElmntClrSegs");
     CheckElmntClrSegs();
     if (gAutoExtraDebug)
-        PrintMessage("PromoteColors");
+        LogMsg(INFO, OK, "PromoteColors");
     PromoteColors();
     if (gAutoExtraDebug)
-        PrintMessage("RemShortColors");
+        LogMsg(INFO, OK, "RemShortColors");
     RemShortColors();
     haveVBnds = clrVBounds;
     haveHBnds = clrHBounds;
     p = NULL;
     Tst = IsOk; /* it is ok to add to primary coloring */
     if (gAutoExtraDebug)
-        PrintMessage("color loop");
+        LogMsg(INFO, OK, "color loop");
     mtVclrs = mtHclrs = NULL;
     while (e != NULL) {
         int32_t etype = e->type;
@@ -1177,8 +1177,8 @@ AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
     }
     ReClrBounds(gPathEnd);
     if (gAutoExtraDebug)
-        PrintMessage("RemPromotedClrs");
+        LogMsg(INFO, OK, "RemPromotedClrs");
     RemPromotedClrs();
     if (gAutoExtraDebug)
-        PrintMessage("done autoextracolors");
+        LogMsg(INFO, OK, "done autoextracolors");
 }

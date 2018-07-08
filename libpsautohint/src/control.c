@@ -336,8 +336,9 @@ UseCounter(PClrVal sLst, bool mclr)
     }
     if (abs(minDelta - maxDelta) < FixInt(3) &&
         abs((maxLoc - midLoc) - (midLoc - minLoc)) < FixInt(3)) {
-        ReportError(mclr ? "Near miss for using V counter hinting."
-                         : "Near miss for using H counter hinting.");
+        LogMsg(LOGERROR, OK,
+               mclr ? "Near miss for using V counter hinting."
+                    : "Near miss for using H counter hinting.");
     }
     return false;
 }
@@ -543,14 +544,14 @@ Blues(const ACFontInfo* fontinfo)
      When a hint segment    */
 
     if (gShowClrInfo) {
-        PrintMessage("generate blues");
+        LogMsg(INFO, OK, "generate blues");
     }
     if (NoBlueChar()) {
         gLenTopBands = gLenBotBands = 0;
     }
     GenHPts();
     if (gShowClrInfo) {
-        PrintMessage("evaluate");
+        LogMsg(INFO, OK, "evaluate");
     }
     if (!CounterFailed && HColorChar()) {
         pv = gPruneValue;
@@ -571,7 +572,7 @@ Blues(const ACFontInfo* fontinfo)
 
     if (gShowClrInfo) {
         ShowHVals(gValList);
-        PrintMessage("pick best");
+        LogMsg(INFO, OK, "pick best");
     }
     MarkLinks(gValList, true);
     CheckVals(gValList, false);
@@ -591,8 +592,9 @@ Blues(const ACFontInfo* fontinfo)
             AddBBoxHV(true, true);
             gUseH = UseCounter(gHColoring, false);
             if (!gUseH) { /* still bad news */
-                ReportError("Note: Glyph is in list for using H counter hints, "
-                            "but didn't find any candidates.");
+                LogMsg(LOGERROR, OK,
+                       "Note: Glyph is in list for using H counter hints, "
+                       "but didn't find any candidates.");
                 CounterFailed = true;
             }
         }
@@ -603,12 +605,12 @@ Blues(const ACFontInfo* fontinfo)
         AddBBoxHV(true, false);
     }
     if (gShowClrInfo) {
-        PrintMessage("results");
-        PrintMessage(gUseH ? "rv" : "rb");
+        LogMsg(INFO, OK, "results");
+        LogMsg(INFO, OK, gUseH ? "rv" : "rb");
         ShowHVals(gHColoring);
     }
     if (gUseH) {
-        PrintMessage("Using H counter hints.");
+        LogMsg(INFO, OK, "Using H counter hints.");
     }
     sLst = gHColoring;
     while (sLst != NULL) {
@@ -665,11 +667,11 @@ Yellows(void)
     Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
     PClrVal sLst;
     if (gShowClrInfo) {
-        PrintMessage("generate yellows");
+        LogMsg(INFO, OK, "generate yellows");
     }
     GenVPts(SpecialCharType());
     if (gShowClrInfo) {
-        PrintMessage("evaluate");
+        LogMsg(INFO, OK, "evaluate");
     }
     if (!CounterFailed && VColorChar()) {
         pv = gPruneValue;
@@ -689,7 +691,7 @@ Yellows(void)
     MergeVals(true);
     if (gShowClrInfo) {
         ShowVVals(gValList);
-        PrintMessage("pick best");
+        LogMsg(INFO, OK, "pick best");
     }
     MarkLinks(gValList, false);
     CheckVals(gValList, true);
@@ -706,8 +708,9 @@ Yellows(void)
             AddBBoxHV(false, true);
             gUseV = UseCounter(gVColoring, true);
             if (!gUseV) { /* still bad news */
-                ReportError("Note: Glyph is in list for using V counter hints, "
-                            "but didn't find any candidates.");
+                LogMsg(LOGERROR, OK,
+                       "Note: Glyph is in list for using V counter hints, "
+                       "but didn't find any candidates.");
                 CounterFailed = true;
             }
         }
@@ -718,12 +721,12 @@ Yellows(void)
         AddBBoxHV(false, false);
     }
     if (gShowClrInfo) {
-        PrintMessage("results");
-        PrintMessage(gUseV ? "rm" : "ry");
+        LogMsg(INFO, OK, "results");
+        LogMsg(INFO, OK, gUseV ? "rm" : "ry");
         ShowVVals(gVColoring);
     }
     if (gUseV) {
-        PrintMessage("Using V counter hints.");
+        LogMsg(INFO, OK, "Using V counter hints.");
     }
     sLst = gVColoring;
     while (sLst != NULL) {
@@ -910,7 +913,7 @@ static void
 AddColors(const ACFontInfo* fontinfo, const char* srcglyph, bool extracolor)
 {
     if (gPathStart == NULL || gPathStart == gPathEnd) {
-        PrintMessage("No character path, so no hints.");
+        LogMsg(INFO, OK, "No character path, so no hints.");
         SaveFile(fontinfo); /* make sure it gets saved with no coloring */
         return;
     }
@@ -938,7 +941,6 @@ AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
     if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
         LogMsg(LOGERROR, NONFATALERROR, "Cannot parse %s glyph.\n", gGlyphName);
     }
-    PrintMessage(""); /* Just print the file name. */
     AddColors(fontinfo, srcglyph, extracolor);
     gLenTopBands = lentop;
     gLenBotBands = lenbot;
