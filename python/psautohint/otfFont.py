@@ -7,6 +7,7 @@ Used by AC and focus/CheckOutlines.
 
 from __future__ import print_function, absolute_import
 
+import logging
 import os
 import re
 import sys
@@ -16,13 +17,8 @@ from fontTools.misc.py23 import *
 
 from psautohint import fdTools
 
-debug = False
 
-
-def debugMsg(*args):
-    if debug:
-        print(args)
-
+log = logging.getLogger(__name__)
 
 kStackLimit = 46
 kStemLimit = 96
@@ -76,7 +72,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         if not self.firstMarkingOpSeen:
             self.firstMarkingOpSeen = True
             self.bezProgram.append("sc\n")
-        debugMsg("moveto", point, "curpos", self.currentPoint)
+        log.debug("moveto %s, curpos %s", point, self.currentPoint)
         x = point[0]
         y = point[1]
         if (not self.allowDecimals):
@@ -93,7 +89,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
             self.firstMarkingOpSeen = True
             self.bezProgram.append("sc\n")
             self.bezProgram.append("0 0 mt\n")
-        debugMsg("lineto", point, "curpos", self.currentPoint)
+        log.debug("lineto %s, curpos %s", point, self.currentPoint)
         if not self.sawMoveTo:
             self.rMoveTo((0, 0))
         x = point[0]
@@ -113,7 +109,8 @@ class T2ToBezExtractor(T2OutlineExtractor):
             self.firstMarkingOpSeen = True
             self.bezProgram.append("sc\n")
             self.bezProgram.append("0 0 mt\n")
-        debugMsg("curveto", pt1, pt2, pt3, "curpos", self.currentPoint)
+        log.debug("curveto %s %s %s, curpos %s", pt1, pt2, pt3,
+                  self.currentPoint)
         if not self.sawMoveTo:
             self.rMoveTo((0, 0))
         if (not self.allowDecimals):
@@ -138,13 +135,13 @@ class T2ToBezExtractor(T2OutlineExtractor):
         # In T2 there are no open paths, so always do a closePath when
         # finishing a sub path.
         if self.sawMoveTo:
-            debugMsg("endPath")
+            log.debug("endPath")
             self.bezProgram.append("cp\n")
         self.sawMoveTo = 0
 
     def closePath(self):
         self.closePathSeen = True
-        debugMsg("closePath")
+        log.debug("closePath")
         if self.bezProgram and self.bezProgram[-1] != "cp\n":
             self.bezProgram.append("cp\n")
         self.bezProgram.append("ed\n")
@@ -153,25 +150,25 @@ class T2ToBezExtractor(T2OutlineExtractor):
         args = self.popallWidth()
         self.hhints = []
         self.countHints(args)
-        debugMsg("hstem", self.hhints)
+        log.debug("hstem %s", self.hhints)
 
     def op_vstem(self, index):
         args = self.popallWidth()
         self.vhints = []
         self.countHints(args)
-        debugMsg("vstem", self.vhints)
+        log.debug("vstem %s", self.vhints)
 
     def op_hstemhm(self, index):
         args = self.popallWidth()
         self.hhints = []
         self.countHints(args)
-        debugMsg("stemhm", self.hhints, args)
+        log.debug("stemhm %s %s", self.hhints, args)
 
     def op_vstemhm(self, index):
         args = self.popallWidth()
         self.vhints = []
         self.countHints(args)
-        debugMsg("vstemhm", self.vhints, args)
+        log.debug("vstemhm %s %s", self.vhints, args)
 
     def doMask(self, index, bezCommand):
         args = []
@@ -1013,14 +1010,13 @@ def convertBezToT2(bezString):
 
 class CFFFontData:
     def __init__(self, ttFont, inputPath, outFilePath, allow_decimal_coords,
-                 font_format, logMsgCB):
+                 font_format):
         self.ttFont = ttFont
         self.inputPath = inputPath
         if (outFilePath is None):
             outFilePath = inputPath
         self.outFilePath = outFilePath
         self.font_format = font_format
-        self.logMsg = logMsgCB
         try:
             self.cffTable = ttFont["CFF "]
             topDict = self.cffTable.cff.topDictIndex[0]
@@ -1050,7 +1046,7 @@ class CFFFontData:
         psName = self.cffTable.cff.fontNames[0]
         return psName
 
-    def convertToBez(self, glyphName, beVerbose, doAll=False):
+    def convertToBez(self, glyphName, doAll=False):
         hasHints = False
         t2Wdth = None
         gid = self.charStrings.charStrings[glyphName]
@@ -1062,28 +1058,19 @@ class CFFFontData:
             # for various heuristics, including [hv]stem3 derivation.
             bezString = "% " + glyphName + "\n" + bezString
         except SEACError:
-            if not beVerbose:
-                # end series of "."
-                self.logMsg("")
-                # output message when SEAC glyph is found
-                self.logMsg("Checking %s -- ," % glyphName)
-            self.logMsg("Skipping %s: can't process SEAC composite glyphs." %
+            log.warning("Skipping %s: can't process SEAC composite glyphs.",
                         glyphName)
             bezString = None
         return bezString, t2Wdth, hasHints
 
-    def updateFromBez(self, bezData, glyphName, width, beVerbose):
+    def updateFromBez(self, bezData, glyphName, width):
         t2Program = [width] + convertBezToT2(bezData)
         if t2Program:
             gid = self.charStrings.charStrings[glyphName]
             t2CharString = self.charStringIndex[gid]
             t2CharString.program = t2Program
         else:
-            if not beVerbose:
-                # end series of "."
-                self.logMsg("")
-                self.logMsg("Checking %s -- ," % aliasName(name))
-            self.logMsg("Skipping %s: error in processing fixed outline." %
+            log.warning("Skipping %s: error in processing fixed outline." %
                         aliasName(name))
 
     def saveChanges(self):
@@ -1106,10 +1093,10 @@ class CFFFontData:
                         os.remove(inputPath)
                         os.rename(tempPath, inputPath)
                     except (OSError, IOError):
-                        self.logMsg(
+                        log.exception(
                             "Error: could not overwrite original font file "
-                            "path '%s'. Hinted font file path is '%s'." %
-                            (inputPath, tempPath))
+                            "path '%s'. Hinted font file path is '%s'.",
+                            inputPath, tempPath)
                         raise
             else:
                 ttFont.save(outFilePath)
@@ -1248,7 +1235,7 @@ class CFFFontData:
         vstems.sort()
         if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1)):
             vstems = [upm]  # dummy value that will allow PyAC to run
-            self.logMsg("Warning: There is no value or 0 value for DominantV.")
+            log.warning("There is no value or 0 value for DominantV.")
         fdDict.DominantV = "[" + " ".join([str(v) for v in vstems]) + "]"
 
         if hasattr(privateDict, "StemSnapH"):
@@ -1267,7 +1254,7 @@ class CFFFontData:
         hstems.sort()
         if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1)):
             hstems = [upm]  # dummy value that will allow PyAC to run
-            self.logMsg("Warning: There is no value or 0 value for DominantH.")
+            log.warning("There is no value or 0 value for DominantH.")
         fdDict.DominantH = "[" + " ".join([str(v) for v in hstems]) + "]"
 
         if noFlex:

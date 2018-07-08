@@ -7,6 +7,7 @@ Auto-hinting program for PostScript, OpenType/CFF and UFO fonts.
 from __future__ import print_function, absolute_import
 
 import argparse
+import logging
 import os
 import re
 import sys
@@ -16,7 +17,7 @@ from fontTools.misc.py23 import open
 
 from psautohint import get_font_format
 from psautohint._psautohint import version as PSAUTOHINT_VERSION
-from psautohint.autohint import ACOptions, hintFiles, logMsg
+from psautohint.autohint import ACOptions, hintFiles
 from psautohint.ufoFont import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 
 __version__ = PSAUTOHINT_VERSION
@@ -332,13 +333,11 @@ class Options(ACOptions):
         self.outputPaths = pargs.output_paths
         self.reference_font = pargs.reference_font
         self.hintAll = pargs.hint_all_ufo
-        self.verbose = pargs.verbose
         self.allowChanges = pargs.allow_changes
         self.noFlex = pargs.no_flex
         self.noHintSub = pargs.no_hint_sub
         self.allow_no_blues = pargs.no_zones_stems
         self.logOnly = pargs.report_only
-        self.logFile = pargs.log_path
         self.printDefaultFDDict = pargs.print_dflt_fddict
         self.printFDDictList = pargs.print_list_fddict
         self.allowDecimalCoords = pargs.decimal
@@ -648,6 +647,16 @@ def get_options(args):
     )
     parsed_args = parser.parse_args(args)
 
+    if parsed_args.verbose == 0:
+        log_level = logging.WARNING
+    elif parsed_args.verbose == 1:
+        log_level = logging.INFO
+    else:
+        log_level = logging.DEBUG
+
+    logging.basicConfig(format="%(levelname)s:%(message)s", level=log_level,
+                        filename=parsed_args.log_path)
+
     if (parsed_args.output_paths and
             len(parsed_args.font_paths) != len(parsed_args.output_paths)):
         parser.error("number of input and output fonts differ")
@@ -701,17 +710,11 @@ def get_options(args):
 def main(args=None):
     options = get_options(args)
 
-    if options.logFile:
-        open(options.logFile, 'w', encoding="utf-8")
-
     try:
         hintFiles(options)
     except Exception as err:
-        logMsg("\t%s" % err)
+        logging.exception("%s", err)
         raise
-
-    if options.logFile:
-        options.logFile.close()
 
 
 if __name__ == '__main__':
