@@ -712,8 +712,8 @@ def main(args=None):
 
     try:
         hintFiles(options)
-    except Exception as err:
-        logging.exception("%s", err)
+    except Exception:
+        logging.exception("Unhandled exception occurred")
         raise
 
 
