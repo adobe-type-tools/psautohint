@@ -45,7 +45,7 @@ void
 PickVVals(PClrVal valList)
 {
     PClrVal colorList, rejectList, vlist, nxt;
-    Fixed bestVal=0, prevBestVal;
+    Fixed bestVal = 0, prevBestVal;
     colorList = rejectList = NULL;
     prevBestVal = 0;
     while (true) {

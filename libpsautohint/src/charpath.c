@@ -9,9 +9,9 @@
 
 #include <stdarg.h>
 
-#include "charpath.h"
 #include "ac.h"
 #include "bbox.h"
+#include "charpath.h"
 #include "opcodes.h"
 #include "optable.h"
 
@@ -37,7 +37,7 @@ static bool cubeLibrary = false;
 
 static bool firstMT;
 static Cd* refPtArray = NULL;
-static char *outbuff;
+static char* outbuff;
 static int16_t masterCount;
 static const char** masterNames;
 static size_t byteCount, buffSize;
@@ -63,9 +63,9 @@ static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 #define ITFMY(y) (-(y))
 
 #define Frac(x) ((x)&0xFF)
-#define WRTNUM(i)       WriteToBuffer("%d ", (int)(i))
-#define WriteStr(str)   WriteToBuffer("%s ", str)
-#define WriteSubr(val)  WriteToBuffer("%d subr ", val)
+#define WRTNUM(i) WriteToBuffer("%d ", (int)(i))
+#define WriteStr(str) WriteToBuffer("%s ", str)
+#define WriteSubr(val) WriteToBuffer("%d subr ", val)
 
 /* Checks if buffer needs to grow before writing out string. */
 static void
@@ -280,9 +280,10 @@ FreePathElements(indx startix, indx stopix)
 static void
 InconsistentPointCount(indx ix, int entries1, int entries2)
 {
-    LogMsg(WARNING, OK, "The character: %s will not be included in the font\n "
-                        "because the version in %s has a total of %d elements "
-                        "and\n  the one in %s has %d elements.\n",
+    LogMsg(WARNING, OK,
+           "The character: %s will not be included in the font\n "
+           "because the version in %s has a total of %d elements "
+           "and\n  the one in %s has %d elements.\n",
            gGlyphName, masterNames[0], (int)entries1, masterNames[ix],
            (int)entries2);
 }
@@ -667,17 +668,16 @@ WriteSbandWidth(void)
     } else if (sbsame) {
         WriteToBuffer("%d ", pathlist[0].sb);
         for (j = 0; j < masterCount; j++) {
-            WriteToBuffer("%d ",
-                    (j == 0) ? pathlist[j].width
-                             : pathlist[j].width - pathlist[0].width);
+            WriteToBuffer("%d ", (j == 0)
+                                   ? pathlist[j].width
+                                   : pathlist[j].width - pathlist[0].width);
         }
         GetLengthandSubrIx(1, &length, &subrix);
         WriteSubr(subrix);
     } else if (wsame) {
         for (j = 0; j < masterCount; j++) {
-            WriteToBuffer("%d ",
-                    (j == 0) ? pathlist[j].sb
-                             : pathlist[j].sb - pathlist[0].sb);
+            WriteToBuffer("%d ", (j == 0) ? pathlist[j].sb
+                                          : pathlist[j].sb - pathlist[0].sb);
         }
         GetLengthandSubrIx(1, &length, &subrix);
         WriteSubr(subrix);
@@ -690,13 +690,12 @@ WriteSbandWidth(void)
         }
         for (ix = 0; ix < opcount; ix += length) {
             for (j = startix; j < masterCount; j++) {
-                WriteToBuffer("%d ",
-                        (ix == 0)
-                          ? (j == 0) ? pathlist[j].sb
-                                     : pathlist[j].sb - pathlist[0].sb
-                          : (j == 0) ? (int32_t)pathlist[j].width
-                                     : (int32_t)(pathlist[j].width -
-                                                 pathlist[0].width));
+                WriteToBuffer(
+                  "%d ", (ix == 0) ? (j == 0) ? pathlist[j].sb
+                                              : pathlist[j].sb - pathlist[0].sb
+                                   : (j == 0) ? (int32_t)pathlist[j].width
+                                              : (int32_t)(pathlist[j].width -
+                                                          pathlist[0].width));
             }
             if (!writeSubrOnce || (ix == (opcount - 1)))
                 WriteSubr(subrix);
@@ -848,8 +847,9 @@ GetPointType(int16_t hinttype, Fixed value, int32_t* pathEltIx)
 
 #if __CENTERLINE__
     if (TRACE) {
-        fprintf(stderr, "Enter GetPointType: Hinttype=%s @(%.2f) curr "
-                        "patheltix=%d pathIx=%d  <%s>",
+        fprintf(stderr,
+                "Enter GetPointType: Hinttype=%s @(%.2f) curr "
+                "patheltix=%d pathIx=%d  <%s>",
                 _HintKind_(hinttype), FIXED2FLOAT(value), *pathEltIx, pathIx,
                 _elttype_(pathIx));
     }
@@ -1695,8 +1695,7 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
 
     /* hintArray contains the pointers to the beginning of the linked list of
      * hints for each design at pathEltIx. */
-    hintList = (PHintElt)AllocateMem(1, sizeof(HintElt*),
-                                     "hint element array");
+    hintList = (PHintElt)AllocateMem(1, sizeof(HintElt*), "hint element array");
     /* Initialize hint list. */
     if (pathEltIx == MAINHINTS)
         hintList = pathlist[mIx].mainhints;
@@ -1708,12 +1707,11 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
 
     while (hintList != NULL) {
         int16_t hinttype = hintList->type;
-        hintList->rightortop -=
-        hintList->leftorbot; /* relativize */
+        hintList->rightortop -= hintList->leftorbot; /* relativize */
         if ((hinttype == RY || hinttype == (RM + ESCVAL)) && !cubeLibrary)
-        /* If it is a cube library, sidebearings are considered to be
-         * zero. for normal fonts, translate vstem hints left by
-         * sidebearing. */
+            /* If it is a cube library, sidebearings are considered to be
+             * zero. for normal fonts, translate vstem hints left by
+             * sidebearing. */
             hintList->leftorbot -= IntToFix(pathlist[mIx].sb);
 
         WriteOneHintVal(hintList->leftorbot);
@@ -1729,7 +1727,7 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
                 WriteToBuffer("ry\n");
                 break;
             case RM + ESCVAL:
-                    WriteToBuffer("rm\n");
+                WriteToBuffer("rm\n");
                 break;
             default:
                 LogMsg(LOGERROR, NONFATALERROR,
@@ -1837,13 +1835,13 @@ WriteHints(indx pathEltIx)
                 WriteToBuffer("rb\n");
                 break;
             case RV + ESCVAL:
-                    WriteToBuffer("rv\n");
+                WriteToBuffer("rv\n");
                 break;
             case RY:
                 WriteToBuffer("ry\n");
                 break;
             case RM + ESCVAL:
-                    WriteToBuffer("rm\n");
+                WriteToBuffer("rm\n");
                 break;
             default:
                 LogMsg(LOGERROR, NONFATALERROR,
@@ -1993,8 +1991,8 @@ CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
                    "Invalid index value: %d defined for curveto "
                    "command4 in character: %s. Op=%d, dir=%s near "
                    "(%d %d).\n",
-                   (int)opIx, gGlyphName, (int)op, masterNames[dir1], FTrunc8(path1->x),
-                   FTrunc8(path1->y));
+                   (int)opIx, gGlyphName, (int)op, masterNames[dir1],
+                   FTrunc8(path1->x), FTrunc8(path1->y));
             break;
     }
 

@@ -45,10 +45,9 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, PFltnRec pfr, bool inside)
     int32_t* p;
     p = cds;
     dpth = 1;
-    *(p++) =
-      inside; /* initial value of inrect2. Set to True by caller, and is never
-                 set false.  */
-    *(p++) = false; /* inbbox2 starts out false */
+    *(p++) = inside; /* initial value of inrect2. Set to True by caller, and is
+                        never set false.  */
+    *(p++) = false;  /* inbbox2 starts out false */
     /* shift coordinates so that lower left of BBox is at (0,0)*/
     /* This  fills the first  MiniBlkSz series of ints with the start point,
     control point, end end point
@@ -301,7 +300,7 @@ FFltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr, bool inrect)
     if (pfr->limit <= 0)
         goto ReportC3;
     { /* set initial bbox of llx,lly, urx, ury from bez control and end points
-         */
+       */
         Fixed c;
         llx = urx = c0.x;
         if ((c = c1.x) < llx)
@@ -386,9 +385,8 @@ ReportC3:
 void
 FltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr)
 {
-    pfr->limit =
-      6; /* limit on how many times a bez curve can be split in half by
-            recursive calls to FFltnCurve() */
+    pfr->limit = 6; /* limit on how many times a bez curve can be split in half
+                       by recursive calls to FFltnCurve() */
     // pfr->feps = FixHalf;
     pfr->feps = FixOne; /* DEBUG 8 BIT FIX */
     FFltnCurve(c0, c1, c2, c3, pfr, true);

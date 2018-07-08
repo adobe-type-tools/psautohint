@@ -401,8 +401,9 @@ RemDupLnks(PPathElt e, bool Hflg)
 }
 
 #define OkToRemLnk(loc, Hflg, spc)                                             \
-    (!(Hflg) || (spc) == 0 || (!InBlueBand((loc), gLenTopBands, gTopBands) &&  \
-                               !InBlueBand((loc), gLenBotBands, gBotBands)))
+    (!(Hflg) || (spc) == 0 ||                                                  \
+     (!InBlueBand((loc), gLenTopBands, gTopBands) &&                           \
+      !InBlueBand((loc), gLenBotBands, gBotBands)))
 
 /* The changes made here were to fix a problem in MinisterLight/E.
    The top left point was not getting colored. */

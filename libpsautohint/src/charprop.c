@@ -75,9 +75,9 @@ StrEqual(char* s1, char* s2)
 bool
 FindNameInList(char* nm, char** lst)
 {
-    char **l = lst;
+    char** l = lst;
     while (true) {
-        char *lnm = *l;
+        char* lnm = *l;
         if (lnm == NULL)
             return false;
         if (StrEqual(lnm, nm))
@@ -107,9 +107,10 @@ AddCounterColorChars(char* charlist, char* ColorList[])
             continue;
         /* Currently, ColorList must end with a NULL pointer. */
         if (ListEntries == (COUNTERLISTSIZE - 1)) {
-            LogMsg(WARNING, OK, "Exceeded counter hints list size. (maximum is "
-                                "%d.)\n  Cannot add %s or subsequent "
-                                "characters.\n",
+            LogMsg(WARNING, OK,
+                   "Exceeded counter hints list size. (maximum is "
+                   "%d.)\n  Cannot add %s or subsequent "
+                   "characters.\n",
                    (int)COUNTERLISTSIZE, token);
             break;
         }
