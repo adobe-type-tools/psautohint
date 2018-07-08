@@ -65,6 +65,7 @@ module1 = Extension("psautohint._psautohint",
                         "libpsautohint/src/opcodes.h",
                         "libpsautohint/src/optable.h",
                         "libpsautohint/src/winstdint.h",
+                        "libpsautohint/src/version.h",
                     ],
                     )
 
