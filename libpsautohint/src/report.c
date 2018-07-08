@@ -154,8 +154,9 @@ ExpectedMoveTo(PPathElt e)
 void
 ReportMissingClosePath(void)
 {
-    LogMsg(LOGERROR, NONFATALERROR, "Missing closepath in %s character.\n"
-                                    "  The data are probably truncated.",
+    LogMsg(LOGERROR, NONFATALERROR,
+           "Missing closepath in %s character.\n"
+           "  The data are probably truncated.",
            gGlyphName);
 }
 

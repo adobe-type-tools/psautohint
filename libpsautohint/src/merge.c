@@ -265,10 +265,9 @@ PruneHVals(void)
                    ? (CloseSegs(seg1, sg1, false) ||
                       CloseSegs(seg2, sg2, false))
                    : (CloseSegs(seg1, sg1, false) &&
-                      CloseSegs(seg2, sg2,
-                                false))) && /* val is less than 100, and the
-                                               segments are close to each
-                                               other.*/
+                      CloseSegs(seg2, sg2, false))) && /* val is less than 100,
+                                                          and the segments are
+                                                          close to each other.*/
 
                 (val < Fix16 ||
                  /* needs to be greater than FixOne << 3 for
@@ -280,7 +279,7 @@ PruneHVals(void)
                                                 the value is the same as SL,
                                                 and not in a blue zone. */
 
-                ) {
+            ) {
                 sLst = PruneOne(sLst, true, sL, 5);
                 flg = false;
                 break;
@@ -295,7 +294,7 @@ PruneHVals(void)
                 if (PruneGt(val, v) && /* If v is more than 3* val) */
                     !topInBlue && seg2->sType == sBEND &&
                     CloseSegs(seg1, sg1, false) /* and the tops are close */
-                    ) {
+                ) {
                     sLst = PruneOne(sLst, true, sL, 6);
                     flg = false;
                     break;

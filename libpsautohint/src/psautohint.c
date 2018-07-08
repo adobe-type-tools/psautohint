@@ -128,7 +128,7 @@ FreeBuffer(ACBuffer* buffer)
 static int
 ParseFontInfo(const char* data, ACFontInfo** fontinfo)
 {
-    const char *current;
+    const char* current;
     size_t i;
 
     ACFontInfo* info = *fontinfo = NewFontInfo(34);
@@ -329,7 +329,8 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
         FreeFontInfo(fontinfo);
 
         if (gBezOutput->length >= *length)
-            *dstbezdata = ReallocateMem(*dstbezdata, gBezOutput->length + 1, "Output buffer");
+            *dstbezdata = ReallocateMem(*dstbezdata, gBezOutput->length + 1,
+                                        "Output buffer");
 
         *length = gBezOutput->length + 1;
         strncpy(*dstbezdata, gBezOutput->data, *length);
