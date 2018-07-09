@@ -34,6 +34,37 @@ def test_outpath(path, tmpdir):
     psautohint([path, '-o', out])
 
 
+def test_outpath_multi(tmpdir):
+    """Test handling multiple output paths."""
+    base = glob.glob("%s/*/*Masters" % DATA_DIR)[0]
+    paths = sorted(glob.glob(base + "/*.ufo"))
+    # the reference font is modified in-place, make a temp copy first
+    referenceSrc = py.path.local(paths[0])
+    referenceDst = tmpdir / referenceSrc.basename
+    referenceSrc.copy(referenceDst)
+    reference = str(referenceDst)
+    inpaths = paths[1:]
+    outpaths = [str(tmpdir / basename(p)) for p in inpaths]
+
+    psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
+
+
+def test_outpath_multi_unequal(tmpdir):
+    """Test that we exit if output paths don't match number of input paths."""
+    base = glob.glob("%s/*/*Masters" % DATA_DIR)[0]
+    paths = sorted(glob.glob(base + "/*.ufo"))
+    # the reference font is modified in-place, make a temp copy first
+    referenceSrc = py.path.local(paths[0])
+    referenceDst = tmpdir / referenceSrc.basename
+    referenceSrc.copy(referenceDst)
+    reference = str(referenceDst)
+    inpaths = paths[1:]
+    outpaths = [str(tmpdir / basename(p)) for p in inpaths][1:]
+
+    with pytest.raises(SystemExit):
+        psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
+
+
 @pytest.mark.parametrize("path", glob.glob("%s/*/*/font.pfa" % DATA_DIR))
 def test_pfa(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
