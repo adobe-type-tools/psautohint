@@ -39,3 +39,27 @@ def test_pfa(path, tmpdir):
 
     with pytest.raises(ACFontError):
         psautohint([path, '-o', out])
+
+
+@pytest.mark.parametrize("path", FONTS)
+def test_glyph_list(path, tmpdir):
+    out = str(tmpdir / basename(path)) + ".out"
+
+    psautohint([path, '-o', out, '-g', 'a,b,c'])
+
+
+@pytest.mark.parametrize("path", FONTS)
+def test_filter_glyph_list(path, tmpdir):
+    """Test that we don't fail if some glyphs in the list do not exist."""
+    out = str(tmpdir / basename(path)) + ".out"
+
+    psautohint([path, '-o', out, '-g', 'FOO,BAR,a'])
+
+
+@pytest.mark.parametrize("path", FONTS)
+def test_missing_glyph_list(path, tmpdir):
+    """Test that we raise if all glyph in the list do not exist."""
+    out = str(tmpdir / basename(path)) + ".out"
+
+    with pytest.raises(ACFontError):
+        psautohint([path, '-o', out, '-g', 'FOO,BAR'])
