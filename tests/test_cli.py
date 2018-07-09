@@ -13,6 +13,7 @@ from . import DATA_DIR
 
 UFO_FONTS = glob.glob("%s/*/*/font.ufo" % DATA_DIR)
 OTF_FONTS = glob.glob("%s/*/*/font.otf" % DATA_DIR)
+FONTINFO = glob.glob("%s/*/*/fontinfo" % DATA_DIR)
 FONTS = (UFO_FONTS[0], OTF_FONTS[0])
 
 
@@ -63,3 +64,9 @@ def test_missing_glyph_list(path, tmpdir):
 
     with pytest.raises(ACFontError):
         psautohint([path, '-o', out, '-g', 'FOO,BAR'])
+
+
+@pytest.mark.parametrize("path", [FONTINFO[0], DATA_DIR])
+def test_unsupported_format(path, tmpdir):
+    with pytest.raises(SystemExit):
+        psautohint([path])
