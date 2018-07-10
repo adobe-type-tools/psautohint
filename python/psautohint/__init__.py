@@ -3,7 +3,12 @@ from __future__ import print_function, absolute_import
 import os
 import plistlib
 
-from ._psautohint import version as __version__
+from fontTools.misc.py23 import tobytes, tounicode
+
+from . import _psautohint
+
+
+__version__ = _psautohint.version
 
 
 def _font_is_ufo(path):
@@ -36,3 +41,22 @@ def get_font_format(font_file_path):
         if _font_is_ufo(font_file_path):
             return "UFO"
         return None
+
+
+def hint_bez_glyph(info, glyph, allow_edit=True, allow_hint_sub=True,
+                   round_coordinates=True):
+    hinted = _psautohint.autohint(tobytes(info),
+                                  tobytes(glyph),
+                                  allow_edit,
+                                  allow_hint_sub,
+                                  round_coordinates)
+
+    return tounicode(hinted)
+
+
+def hint_compatible_bez_glyphs(info, glyphs, masters):
+    hinted = _psautohint.autohintmm(tobytes(info),
+                                    [tobytes(g) for g in glyphs],
+                                    [tobytes(m) for m in masters])
+
+    return [tounicode(g) for g in hinted]

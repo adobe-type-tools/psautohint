@@ -38,11 +38,10 @@ import time
 
 from fontTools.ttLib import TTFont, getTableClass
 
-from .psautohint import autohint, autohintmm
 from .otfFont import CFFFontData
 from .ufoFont import UFOFontData, kAutohintName, kCheckOutlineName
 
-from . import get_font_format
+from . import get_font_format, hint_bez_glyph, hint_compatible_bez_glyphs
 
 
 log = logging.getLogger(__name__)
@@ -435,16 +434,17 @@ def hintFile(options, path, outpath, reference_master):
             newBezString = oldHintBezString
         else:
             if reference_master or not options.reference_font:
-                newBezString = autohint(fontInfo, bezString,
-                                        options.allowChanges,
-                                        not options.noHintSub,
-                                        options.allowDecimalCoords)
+                newBezString = hint_bez_glyph(fontInfo, bezString,
+                                              options.allowChanges,
+                                              not options.noHintSub,
+                                              options.allowDecimalCoords)
                 options.baseMaster[name] = newBezString
             else:
                 baseFontFileName = os.path.basename(options.reference_font)
                 masters = [baseFontFileName, fontFileName]
                 glyphs = [options.baseMaster[name], bezString]
-                newBezString = autohintmm(fontInfo, glyphs, masters)
+                newBezString = hint_compatible_bez_glyphs(fontInfo, glyphs,
+                                                          masters)
                 newBezString = newBezString[1]  # FIXME
 
         if not newBezString:
