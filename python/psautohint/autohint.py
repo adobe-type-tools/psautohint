@@ -426,10 +426,6 @@ def hintFile(options, path, outpath, reference_master):
             log.info("Hinting %s.", nameAliases.get(name, name))
 
         # Call auto-hint library on bez string.
-        # print("oldBezString", oldBezString)
-        # print("")
-        # print("bezString", bezString)
-
         if oldBezString != "" and oldBezString == bezString:
             newBezString = oldHintBezString
         else:
