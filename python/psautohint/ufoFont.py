@@ -114,6 +114,7 @@ from __future__ import print_function, absolute_import
 
 import ast
 import hashlib
+import logging
 import os
 import plistlib
 import re
@@ -126,6 +127,8 @@ except ImportError:
 from fontTools.misc.py23 import open, tobytes
 from . import fdTools
 
+
+log = logging.getLogger(__name__)
 
 _hintFormat1_ = """
 
@@ -504,10 +507,10 @@ class UFOFontData:
                 raise UFOParseError("Hash map version is newer than program. "
                                     "Please update the FDK")
             elif version[0] < kAdobHashMapVersion[0]:
-                print("Updating hash map: was older version")
+                log.info("Updating hash map: was older version")
                 newMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
         except KeyError:
-            print("Updating hash map: was older version")
+            log.info("Updating hash map: was older version")
             newMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
         self.hashMap = newMap
         return
@@ -662,9 +665,10 @@ class UFOFontData:
                         if programName in historyList:
                             foundMatch = True
                 if foundMatch:
-                    print("Error. Glyph '%s' has been edited. You must first "
-                          "run '%s' before running '%s'. Skipping." %
-                          (glyphName, self.requiredHistory, self.programName))
+                    log.error("Glyph '%s' has been edited. You must first "
+                              "run '%s' before running '%s'. Skipping.",
+                              glyphName, self.requiredHistory,
+                              self.programName)
                     skip = True
 
             # If the source hash has changed, we need to delete
@@ -690,9 +694,9 @@ class UFOFontData:
                 width = int(widthXML.get("width"))
             else:
                 width = 1000
-        except UFOParseError as e:
-            print("Error. skipping glyph '%s' because of parse error: %s" %
-                  (glyphFileName, e.message))
+        except UFOParseError:
+            log.exception("Skipping glyph '%s' because of parse error.",
+                          glyphFileName)
             return None, None, None
         return width, glifXML, outlineXML
 
@@ -917,7 +921,7 @@ class UFOFontData:
         if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1)):
             # dummy value that will allow PyAC to run
             vstems = [fdDict.OrigEmSqUnits]
-            print("WARNING: There is no value or 0 value for DominantV.")
+            log.warning("There is no value or 0 value for DominantV.")
         fdDict.DominantV = "[" + " ".join([str(v) for v in vstems]) + "]"
 
         hstems = self.fontInfo.get("postscriptStemSnapH", [])
@@ -928,14 +932,13 @@ class UFOFontData:
                 # the largest global stem width.
                 hstems = [fdDict.OrigEmSqUnits]
             else:
-                raise UFOParseError(
-                    "ERROR: Font does not have postscriptStemSnapH!")
+                raise UFOParseError("Font does not have postscriptStemSnapH!")
 
         hstems.sort()
         if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1)):
             # dummy value that will allow PyAC to run
             hstems = [fdDict.OrigEmSqUnits]
-            print("WARNING: There is no value or 0 value for DominantH.")
+            log.warning("There is no value or 0 value for DominantH.")
         fdDict.DominantH = "[" + " ".join([str(v) for v in hstems]) + "]"
 
         if noFlex:
@@ -1961,9 +1964,9 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                             # Just in case we see two moves in a row,
                             # delete the previous outlineItem if it has
                             # only the move-to
-                            print("Deleting moveto:",
-                                  xmlToString(newOutline[-1]),
-                                  "adding", xmlToString(outlineItem))
+                            log.info("Deleting moveto: %s adding %s",
+                                     xmlToString(newOutline[-1]),
+                                     xmlToString(outlineItem))
                             del newOutline[-1]
                         else:
                             # Fix the start/implied end path
