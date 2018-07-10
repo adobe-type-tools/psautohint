@@ -1197,10 +1197,6 @@ class CFFFontData:
             value = blueValues[i]
             setattr(fdDict, key, value)
 
-        # print(numBlueValues)
-        # for i in range(0, len(fontinfo),2):
-        #    print(fontinfo[i], fontinfo[i+1])
-
         if hasattr(privateDict, "OtherBlues"):
             # For all OtherBlues, the pairs are bottom zones, and
             # the first value of each pair is the overshoot position.

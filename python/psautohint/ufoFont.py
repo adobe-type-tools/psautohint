@@ -457,7 +457,6 @@ class UFOFontData:
 
         for glyphName, glifXML in self.newGlyphMap.items():
             glyphPath = self.getWriteGlyphPath(glyphName)
-            # print("Saving file", glyphPath)
             et = ET.ElementTree(glifXML)
             with open(glyphPath, "wb") as fp:
                 et.write(fp, encoding="UTF-8", xml_declaration=True)
@@ -1034,7 +1033,6 @@ class UFOFontData:
                                 dataList.append("%s%s%s" % (
                                     pointType, child.attrib["x"],
                                     child.attrib["y"]))
-                                # print(dataList[-3:])
                 elif childContour.tag == "component":
                     # append the component hash.
                     try:
@@ -2140,7 +2138,6 @@ def addWhiteSpace(parent, level):
     child = None
     childIndent = "\n" + ("  " * (level + 1))
     prentIndent = "\n" + ("  " * (level))
-    # print("parent Tag", parent.tag, repr(parent.text), repr(parent.tail))
     for child in parent:
         child.tail = childIndent
         addWhiteSpace(child, level + 1)
@@ -2148,8 +2145,6 @@ def addWhiteSpace(parent, level):
         if parent.text is None:
             parent.text = childIndent
         child.tail = prentIndent
-        # print("lastChild Tag", child.tag, repr(child.text), repr(child.tail),
-        #       "parent Tag", parent.tag)
 
 
 def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
@@ -2171,7 +2166,6 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
 
     newOutlineElement, hintInfoDict = convertBezToOutline(
         ufoFontData, glyphName, bezString)
-    # print(xmlToString(stemHints))
 
     if not hintsOnly:
         if outlineItem is None:
