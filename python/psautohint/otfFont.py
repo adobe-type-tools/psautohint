@@ -10,7 +10,6 @@ from __future__ import print_function, absolute_import
 import logging
 import os
 import re
-import sys
 
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import bytechr, byteord, open
@@ -1304,47 +1303,3 @@ class CFFFontData:
             else:
                 fdTools.mergeFDDicts([finalFDict], topDict.Private)
         return fdGlyphDict, fontDictList
-
-
-def test():
-    # Test program.
-    # Takes first argument font file path,
-    # optional second argument = glyph name.
-    # Use form "cid0769" for CID keys references.
-    from fontTools.ttLib import TTFont
-    path = sys.argv[1]
-    ttFont = TTFont(path)
-    if len(sys.argv) > 2:
-        glyphNames = sys.argv[2:]
-    else:
-        glyphNames = ttFont.getGlyphOrder()
-    cffTable = ttFont["CFF "]
-    topDict = cffTable.cff.topDictIndex[0]
-    charStrings = topDict.CharStrings
-
-    for glyphName in glyphNames:
-        print()
-        print(glyphName)
-        t2CharString = charStrings[glyphName]
-        bezString, t2Width = convertT2GlyphToBez(t2CharString)
-        # print(bezString)
-        t2Program = convertBezToT2(bezString)
-        if t2Width is not None:
-            t2Program.insert(0, t2Width)
-
-        # print(len(t2Program), ("t2Program", t2Program))
-
-
-def test2():
-    # Test program.
-    # Takes first argument = bez path, writes T2 string.
-    # Use form "cid0769" for CID keys references.
-    path = sys.argv[1]
-    with open(path, "rt", encoding="utf-8") as fp:
-        bezString = fp.read()
-
-    convertBezToT2(bezString)
-
-
-if __name__ == '__main__':
-    test2()
