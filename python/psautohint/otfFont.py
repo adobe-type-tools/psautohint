@@ -13,7 +13,7 @@ import re
 import sys
 
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
-from fontTools.misc.py23 import *
+from fontTools.misc.py23 import bytechr, byteord, open
 
 from . import fdTools
 
