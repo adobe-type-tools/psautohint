@@ -70,5 +70,5 @@ def test_cff(cff, tmpdir):
 def test_pfa(pfa, tmpdir):
     out = str(tmpdir / basename(pfa)) + ".out"
     options = Options(pfa, out)
-    with pytest.raises(ACFontError):
+    with pytest.raises(NotImplementedError):
         hintFiles(options)

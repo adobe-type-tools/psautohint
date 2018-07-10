@@ -712,6 +712,9 @@ def main(args=None):
 
     try:
         hintFiles(options)
+    except NotImplementedError as ex:
+        logging.error(ex)
+        sys.exit(1)
     except Exception:
         logging.exception("Unhandled exception occurred")
         raise
