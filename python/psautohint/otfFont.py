@@ -941,8 +941,7 @@ def convertBezToT2(bezString):
             if t2Op:
                 t2List.append([argList, t2Op])
             elif t2Op is None:
-                print("Unhandled operation", argList, token)
-                raise KeyError
+                raise KeyError("Unhandled operation %s %s" % (argList, token))
             argList = []
 
     # Add hints, if any. Must be done at the end of op processing to make sure
@@ -1002,8 +1001,7 @@ def convertBezToT2(bezString):
             t2Program.extend(entry[0])
             t2Program.append(entry[1])
         except Exception:
-            print("Failed to extend t2Program with entry", entry)
-            raise KeyError
+            raise KeyError("Failed to extend t2Program with entry %s" % entry)
 
     return t2Program
 

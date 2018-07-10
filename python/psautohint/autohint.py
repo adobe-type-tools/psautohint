@@ -450,7 +450,7 @@ def hintFile(options, path, outpath, reference_master):
 
         if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or
            ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
-            print("No hints added!")
+            log.info("No hints added!")
 
         if options.logOnly:
             continue
