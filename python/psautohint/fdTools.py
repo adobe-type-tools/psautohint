@@ -15,8 +15,12 @@ read/write enabled.
 
 from __future__ import print_function, absolute_import
 
+import logging
 import re
 import types
+
+
+log = logging.getLogger(__name__)
 
 # Tokens seen in font info file that are not
 # part of a FDDict or GlyphSet definition.
@@ -127,14 +131,14 @@ class FDDict:
 
     def buildBlueLists(self):
         if (self.BaselineOvershoot is None):
-            print("Error: FDDict definition %s is missing the BaselineYCoord/"
-                  "BaselineOvershoot values. These are required." %
-                  self.DictName)
+            log.error("FDDict definition %s is missing the BaselineYCoord/"
+                      "BaselineOvershoot values. These are required.",
+                      self.DictName)
         elif (int(self.BaselineOvershoot) > 0):
-            print("Error: The BaselineYCoord/BaselineOvershoot in FDDict "
-                  "definition %s must be a bottom zone - the "
-                  "BaselineOvershoot must be negative, not positive." %
-                  self.DictName)
+            log.error("The BaselineYCoord/BaselineOvershoot in FDDict "
+                      "definition %s must be a bottom zone - the "
+                      "BaselineOvershoot must be negative, not positive.",
+                      self.DictName)
 
         blueKeyList = [kBlueValueKeys, kOtherBlueValueKeys]
         bluePairListNames = [kFontDictBluePairsName,
@@ -173,19 +177,19 @@ class FDDict:
                             bottomPos = zonePos + width
                             isBottomZone = 1
                             if (i == 0) and (key != "BaselineOvershoot"):
-                                print("Error: FontDict %s. Zone %s is a top "
-                                      "zone, and the width (%s)  must be "
-                                      "positive." % (self.DictName, tempKey,
-                                                     width))
+                                log.error("FontDict %s. Zone %s is a top "
+                                          "zone, and the width (%s) must be "
+                                          "positive.",
+                                          self.DictName, tempKey, width)
                         else:
                             bottomPos = zonePos
                             topPos = zonePos + width
                             isBottomZone = 0
                             if (i == 1):
-                                print("Error: FontDict %s. Zone %s is a "
-                                      "bottom zone, and so the width (%s) "
-                                      "must be negative.." %
-                                      (self.DictName, tempKey, width))
+                                log.error("FontDict %s. Zone %s is a "
+                                          "bottom zone, and so the width (%s) "
+                                          "must be negative..",
+                                          self.DictName, tempKey, width)
                         bluePairList.append((topPos, bottomPos, tempKey,
                                             self.DictName, isBottomZone))
 
@@ -195,16 +199,16 @@ class FDDict:
                 zoneBuffer = 2 * self.BlueFuzz + 1
                 for pair in bluePairList[1:]:
                     if prevPair[0] > pair[1]:
-                        print("Error in FDDict %s. The top of zone %s at %s "
-                              "overlaps zone %s with the bottom at %s." %
-                              (self.DictName, prevPair[2], prevPair[0],
-                               pair[2], pair[1]))
+                        log.error("In FDDict %s. The top of zone %s at %s "
+                                  "overlaps zone %s with the bottom at %s.",
+                                  self.DictName, prevPair[2], prevPair[0],
+                                  pair[2], pair[1])
                     elif abs(pair[1] - prevPair[0]) <= zoneBuffer:
-                        print("Error in FDDict %s. The top of zone %s at %s "
-                              "is within the min spearation limit (%s units) "
-                              "of zone %s with the bottom at %s." %
-                              (self.DictName, prevPair[2], prevPair[0],
-                               zoneBuffer, pair[2], pair[1]))
+                        log.error("In FDDict %s. The top of zone %s at %s is "
+                                  "within the min spearation limit (%s units) "
+                                  "of zone %s with the bottom at %s.",
+                                  self.DictName, prevPair[2], prevPair[0],
+                                  zoneBuffer, pair[2], pair[1])
                     prevPair = pair
                 setattr(self, pairFieldName, bluePairList)
                 bluesList = []
@@ -213,8 +217,6 @@ class FDDict:
                     bluesList.append(pairEntry[0])
                 bluesList = [str(v) for v in bluesList]
                 bluesList = "[%s]" % (" ".join(bluesList))
-                # print(self.DictName, bluePairList)
-                # print("\t", bluesList)
                 setattr(self, fieldName, bluesList)
         return
 
@@ -223,7 +225,6 @@ class FDDict:
         keys = dir(self)
         for key in keys:
             val = getattr(self, key)
-            # print(key, type(val))
             if (val is None) or (
                isinstance(val, types.MethodType)) or key.startswith("_"):
                 continue
@@ -344,11 +345,11 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
                         "End FDDict  name \"%s\" does not match begin FDDict "
                         "name \"%s\"." % (tokenList[i + 1], dictName))
                 if fdDict.DominantH is None:
-                    print("Warning: the FDDict '%s' in fontinfo has no "
-                          "DominantH value" % dictName)
+                    log.warning("The FDDict '%s' in fontinfo has no "
+                                "DominantH value", dictName)
                 if fdDict.DominantV is None:
-                    print("Warning: the FDDict '%s' in fontinfo has no "
-                          "DominantV value" % dictName)
+                    log.warning("The FDDict '%s' in fontinfo has no "
+                                "DominantV value", dictName)
                 if (fdDict.BlueFuzz is None):
                     fdDict.BlueFuzz = blueFuzz
                 fdDict.buildBlueLists()
@@ -469,13 +470,13 @@ def mergeFDDicts(prevDictList, privateDict):
         fdDictName = ''
         for zone in zoneList[1:]:
             if (ki == 0) and (len(zoneList) >= 14):
-                print("Warning. For final FontDict, skipping BlueValues "
-                      "alignment zone %s from FDDict %s because there are "
-                      "already 7 zones." % (zoneName, fdDictName))
+                log.warning("For final FontDict, skipping BlueValues "
+                            "alignment zone %s from FDDict %s because there "
+                            "are already 7 zones.", zoneName, fdDictName)
             elif (ki == 1) and (len(zoneList) >= 5):
-                print("Warning. For final FontDict, skipping OtherBlues "
-                      "alignment zone %s from FDDict %s because there are "
-                      "already 5 zones." % (zoneName, fdDictName))
+                log.warning("For final FontDict, skipping OtherBlues "
+                            "alignment zone %s from FDDict %s because there "
+                            "are already 5 zones.", zoneName, fdDictName)
 
             if zone[1] < prevZone[0]:
                 curEntry = blueZoneDict[zone]
@@ -484,10 +485,9 @@ def mergeFDDicts(prevDictList, privateDict):
                 fdDictName = curEntry[2]
                 prevZoneName = prevEntry[1]
                 prevFDictName = prevEntry[2]
-                print("Warning. For final FontDict, skipping zone %s in "
-                      "FDDict %s because it overlaps with zone %s in FDDict "
-                      "%s." % (zoneName, fdDictName, prevZoneName,
-                               prevFDictName))
+                log.warning("For final FontDict, skipping zone %s in FDDict %s"
+                            " because it overlaps with zone %s in FDDict %s.",
+                            zoneName, fdDictName, prevZoneName, prevFDictName)
             elif abs(zone[1] - prevZone[0]) <= zoneBuffer:
                 curEntry = blueZoneDict[zone]
                 prevEntry = blueZoneDict[prevZone]
@@ -495,11 +495,11 @@ def mergeFDDicts(prevDictList, privateDict):
                 fdDictName = curEntry[2]
                 prevZoneName = prevEntry[1]
                 prevFDictName = prevEntry[2]
-                print("Warning. For final FontDict, skipping zone %s in "
-                      "FDDict %s because it is within the minimum separation "
-                      "allowed (%s units) of %s in FDDict %s." %
-                      (zoneName, fdDictName, zoneBuffer, prevZoneName,
-                       prevFDictName))
+                log.warning("For final FontDict, skipping zone %s in FDDict %s"
+                            " because it is within the minimum separation "
+                            "allowed (%s units) of %s in FDDict %s.",
+                            zoneName, fdDictName, zoneBuffer, prevZoneName,
+                            prevFDictName)
             else:
                 goodZoneList.append(zone[1])
                 goodZoneList.append(zone[0])
@@ -517,10 +517,10 @@ def mergeFDDicts(prevDictList, privateDict):
             if abs(stem - prevStem) < 2:
                 fdDictName = stemDict[stem]
                 prevFDictName = stemDict[prevStem]
-                print("Warning. For final FontDict, skipping stem width %s in "
-                      "FDDict %s because it overlaps in coverage with stem "
-                      "width %s in FDDict %s." %
-                      (stem, fdDictName, prevStem, prevFDictName))
+                log.warning("For final FontDict, skipping stem width %s in "
+                            "FDDict %s because it overlaps in coverage with "
+                            "stem width %s in FDDict %s.",
+                            stem, fdDictName, prevStem, prevFDictName)
             else:
                 goodStemList.append(stem)
             prevStem = stem
