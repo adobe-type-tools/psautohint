@@ -1019,8 +1019,7 @@ class CFFFontData:
             self.cffTable = ttFont["CFF "]
             topDict = self.cffTable.cff.topDictIndex[0]
         except KeyError:
-            raise ACFontError(
-                "Error: font is not a CFF font <%s>." % inputPath)
+            raise ACFontError("Font is not a CFF font <%s>." % inputPath)
 
         # for identifier in glyph-list:
         # Get charstring.
@@ -1090,10 +1089,9 @@ class CFFFontData:
                         os.remove(inputPath)
                         os.rename(tempPath, inputPath)
                     except (OSError, IOError):
-                        log.exception(
-                            "Error: could not overwrite original font file "
-                            "path '%s'. Hinted font file path is '%s'.",
-                            inputPath, tempPath)
+                        log.exception("Could not overwrite original font file "
+                                      "path '%s'. Hinted font file path is "
+                                      "'%s'.", inputPath, tempPath)
                         raise
             else:
                 ttFont.save(outFilePath)
@@ -1171,15 +1169,14 @@ class CFFFontData:
                     blueValues = inactiveAlignmentValues
                     numBlueValues = len(blueValues)
                 else:
-                    raise ACFontError(
-                        "Error: font must have at least four values in it's "
-                        "BlueValues array for AC to work!")
+                    raise ACFontError("Font must have at least four values in "
+                                      "its BlueValues array for AC to work!")
         else:
             if allow_no_blues:
                 blueValues = inactiveAlignmentValues
                 numBlueValues = len(blueValues)
             else:
-                raise ACFontError("Error: font has no BlueValues array!")
+                raise ACFontError("Font has no BlueValues array!")
 
         # The first pair only is a bottom zone, where the first value is the
         # overshoot position. The rest are top zones, and second value of the
@@ -1223,8 +1220,7 @@ class CFFFontData:
                 # the largest global stem width.
                 vstems = [upm]
             else:
-                raise ACFontError(
-                    "Error: font has neither StemSnapV nor StdVW!")
+                raise ACFontError("Font has neither StemSnapV nor StdVW!")
         vstems.sort()
         if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1)):
             vstems = [upm]  # dummy value that will allow PyAC to run
@@ -1242,8 +1238,7 @@ class CFFFontData:
                 # the largest global stem width.
                 hstems = [upm]
             else:
-                raise ACFontError(
-                    "Error: font has neither StemSnapH nor StdHW!")
+                raise ACFontError("Font has neither StemSnapH nor StdHW!")
         hstems.sort()
         if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1)):
             hstems = [upm]  # dummy value that will allow PyAC to run
