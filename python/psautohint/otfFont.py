@@ -1019,8 +1019,8 @@ class CFFFontData:
             self.cffTable = ttFont["CFF "]
             topDict = self.cffTable.cff.topDictIndex[0]
         except KeyError:
-            raise focusFontError(
-                "Error: font is not a CFF font <%s>." % fontFileName)
+            raise ACFontError(
+                "Error: font is not a CFF font <%s>." % inputPath)
 
         # for identifier in glyph-list:
         # Get charstring.
@@ -1068,7 +1068,7 @@ class CFFFontData:
             t2CharString.program = t2Program
         else:
             log.warning("Skipping %s: error in processing fixed outline." %
-                        aliasName(name))
+                        glyphName)
 
     def saveChanges(self):
         ttFont = self.ttFont
