@@ -65,8 +65,8 @@ def test_outpath_multi_unequal(tmpdir):
         psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
-@pytest.mark.parametrize("path", glob.glob("%s/*/*/font.pfa" % DATA_DIR))
-def test_pfa(path, tmpdir):
+@pytest.mark.parametrize("path", glob.glob("%s/*/*/font.pf[ab]" % DATA_DIR))
+def test_type1(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
     with pytest.raises(SystemExit):

@@ -7,7 +7,7 @@ import pytest
 from fontTools.misc.xmlWriter import XMLWriter
 from fontTools.cffLib import CFFFontSet
 from fontTools.ttLib import TTFont
-from psautohint.autohint import ACFontError, ACOptions, hintFiles
+from psautohint.autohint import ACOptions, hintFiles
 
 from .differ import main as differ
 from . import DATA_DIR
@@ -66,9 +66,9 @@ def test_cff(cff, tmpdir):
                    str(tmpdir / basename(out)) + ".xml"])
 
 
-@pytest.mark.parametrize("pfa", glob.glob("%s/*/*/font.pfa" % DATA_DIR))
-def test_pfa(pfa, tmpdir):
-    out = str(tmpdir / basename(pfa)) + ".out"
-    options = Options(pfa, out)
+@pytest.mark.parametrize("path", glob.glob("%s/*/*/font.pf[ab]" % DATA_DIR))
+def test_type1(path, tmpdir):
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
     with pytest.raises(NotImplementedError):
         hintFiles(options)
