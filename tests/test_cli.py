@@ -69,7 +69,7 @@ def test_outpath_multi_unequal(tmpdir):
 def test_pfa(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
-    with pytest.raises(ACFontError):
+    with pytest.raises(SystemExit):
         psautohint([path, '-o', out])
 
 

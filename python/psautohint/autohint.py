@@ -214,8 +214,11 @@ def openFile(path, outFilePath, options):
 
     if font_format == "UFO":
         font = openUFOFile(path, outFilePath, options)
-    else:
+    elif font_format in ("OTF", "CFF"):
         font = openOpenTypeFile(path, outFilePath, font_format, options)
+    else:
+        raise NotImplementedError("%s format is not supported yet, sorry." %
+                                  font_format)
 
     return font
 
