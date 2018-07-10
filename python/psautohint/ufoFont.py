@@ -124,7 +124,7 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
 from fontTools.misc.py23 import open, tobytes
-from psautohint import fdTools
+from . import fdTools
 
 
 _hintFormat1_ = """
