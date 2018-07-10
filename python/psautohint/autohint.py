@@ -252,7 +252,7 @@ def openOpenTypeFile(path, outFilePath, font_format, options):
     if font_format == "OTF":  # it is an OTF font, can process file directly
         ttFont = TTFont(path)
         if "CFF " not in ttFont:
-            raise ACFontError("Error: font is not a CFF font <%s>." % path)
+            raise ACFontError("Font is not a CFF font <%s>." % path)
     elif font_format == "CFF":
         # now package the CFF font as an OTF font.
         with open(path, "rb") as ff:
@@ -302,8 +302,8 @@ def hintFile(options, path, outpath, reference_master):
     fontGlyphList = fontData.getGlyphList()
     glyphList = filterGlyphList(options, fontGlyphList, fontFileName)
     if not glyphList:
-        raise ACFontError("Error: selected glyph list is empty for font "
-                          "<%s>." % fontFileName)
+        raise ACFontError("Selected glyph list is empty for font <%s>." %
+                          fontFileName)
 
     fontInfo = ""
 

@@ -872,7 +872,7 @@ class UFOFontData:
                 numBlueValues = len(blueValues)
             else:
                 raise UFOParseError(
-                    "ERROR: Font must have at least four values in its "
+                    "Font must have at least four values in its "
                     "BlueValues array for AC to work!")
         blueValues.sort()
         # The first pair only is a bottom zone, where the first value is the
@@ -914,8 +914,7 @@ class UFOFontData:
                 # the largest global stem width.
                 vstems = [fdDict.OrigEmSqUnits]
             else:
-                raise UFOParseError(
-                    "ERROR: Font does not have postscriptStemSnapV!")
+                raise UFOParseError("Font does not have postscriptStemSnapV!")
 
         vstems.sort()
         if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1)):
