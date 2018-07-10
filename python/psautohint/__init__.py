@@ -24,7 +24,7 @@ def get_font_format(font_file_path):
                 return 'OTF'
             elif head[0:2] == b'\x01\x00':
                 return 'CFF'
-            elif head == b'\x80\x01\xb6\x12':
+            elif head[0:2] == b'\x80\x01':
                 return 'PFB'
             elif head in (b'%!PS', b'%!Fo'):
                 for fullhead in (b'%!PS-AdobeFont', b'%!FontType1'):
