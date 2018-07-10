@@ -15,12 +15,9 @@ import textwrap
 
 from fontTools.misc.py23 import open
 
-from psautohint import get_font_format
-from psautohint._psautohint import version as PSAUTOHINT_VERSION
-from psautohint.autohint import ACOptions, hintFiles
-from psautohint.ufoFont import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
-
-__version__ = PSAUTOHINT_VERSION
+from . import __version__, get_font_format
+from .autohint import ACOptions, hintFiles
+from .ufoFont import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 
 
 FONTINFO_FILE_NAME = 'fontinfo'

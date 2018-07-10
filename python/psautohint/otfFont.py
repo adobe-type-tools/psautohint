@@ -15,7 +15,7 @@ import sys
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import *
 
-from psautohint import fdTools
+from . import fdTools
 
 
 log = logging.getLogger(__name__)
