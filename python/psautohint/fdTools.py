@@ -131,14 +131,15 @@ class FDDict:
 
     def buildBlueLists(self):
         if (self.BaselineOvershoot is None):
-            log.error("FDDict definition %s is missing the BaselineYCoord/"
-                      "BaselineOvershoot values. These are required.",
-                      self.DictName)
+            raise FontInfoParseError(
+                "FDDict definition %s is missing the BaselineYCoord/"
+                "BaselineOvershoot values. These are required." %
+                self.DictName)
         elif (int(self.BaselineOvershoot) > 0):
-            log.error("The BaselineYCoord/BaselineOvershoot in FDDict "
-                      "definition %s must be a bottom zone - the "
-                      "BaselineOvershoot must be negative, not positive.",
-                      self.DictName)
+            raise FontInfoParseError(
+                "The BaselineYCoord/BaselineOvershoot in FDDict definition %s "
+                "must be a bottom zone - the BaselineOvershoot must be "
+                "negative, not positive." % self.DictName)
 
         blueKeyList = [kBlueValueKeys, kOtherBlueValueKeys]
         bluePairListNames = [kFontDictBluePairsName,
@@ -177,19 +178,19 @@ class FDDict:
                             bottomPos = zonePos + width
                             isBottomZone = 1
                             if (i == 0) and (key != "BaselineOvershoot"):
-                                log.error("FontDict %s. Zone %s is a top "
-                                          "zone, and the width (%s) must be "
-                                          "positive.",
-                                          self.DictName, tempKey, width)
+                                raise FontInfoParseError(
+                                    "FontDict %s. Zone %s is a top zone, and "
+                                    "the width (%s) must be positive." %
+                                    (self.DictName, tempKey, width))
                         else:
                             bottomPos = zonePos
                             topPos = zonePos + width
                             isBottomZone = 0
                             if (i == 1):
-                                log.error("FontDict %s. Zone %s is a "
-                                          "bottom zone, and so the width (%s) "
-                                          "must be negative..",
-                                          self.DictName, tempKey, width)
+                                raise FontInfoParseError(
+                                    "FontDict %s. Zone %s is a bottom zone, "
+                                    "and so the width (%s) must be negative." %
+                                    (self.DictName, tempKey, width))
                         bluePairList.append((topPos, bottomPos, tempKey,
                                             self.DictName, isBottomZone))
 
@@ -199,16 +200,18 @@ class FDDict:
                 zoneBuffer = 2 * self.BlueFuzz + 1
                 for pair in bluePairList[1:]:
                     if prevPair[0] > pair[1]:
-                        log.error("In FDDict %s. The top of zone %s at %s "
-                                  "overlaps zone %s with the bottom at %s.",
-                                  self.DictName, prevPair[2], prevPair[0],
-                                  pair[2], pair[1])
+                        raise FontInfoParseError(
+                            "In FDDict %s. The top of zone %s at %s overlaps "
+                            "zone %s with the bottom at %s." %
+                            (self.DictName, prevPair[2], prevPair[0], pair[2],
+                             pair[1]))
                     elif abs(pair[1] - prevPair[0]) <= zoneBuffer:
-                        log.error("In FDDict %s. The top of zone %s at %s is "
-                                  "within the min spearation limit (%s units) "
-                                  "of zone %s with the bottom at %s.",
-                                  self.DictName, prevPair[2], prevPair[0],
-                                  zoneBuffer, pair[2], pair[1])
+                        raise FontInfoParseError(
+                            "In FDDict %s. The top of zone %s at %s is within "
+                            "the min spearation limit (%s units) of zone %s "
+                            "with the bottom at %s." %
+                            (self.DictName, prevPair[2], prevPair[0],
+                             zoneBuffer, pair[2], pair[1]))
                     prevPair = pair
                 setattr(self, pairFieldName, bluePairList)
                 bluesList = []
