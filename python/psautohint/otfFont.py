@@ -2,7 +2,6 @@
 
 """
 Utilities for converting between T2 charstrings and the bez data format.
-Used by AC and focus/CheckOutlines.
 """
 
 from __future__ import print_function, absolute_import
@@ -336,7 +335,7 @@ def optimizeT2Program(t2List):
     # entry is a list of [argList, opToken].
     # Matches logic in tx, and Adobe low level library.
     # Note that I am expecting only rlineto, vlineto, hlineto, vhcurveto,
-    # hvcurveto, rrcurveto from AC.
+    # hvcurveto, rrcurveto from psautohint.
     # The other optimized operators, rcurveline and rlinecurve are not
     # supported as input here.
     newT2List = []
@@ -643,7 +642,7 @@ def optimizeT2Program(t2List):
             if (dy3 == 0 == dy4):
                 if (dy1 == dy6 == 0) and (dy2 == -dy5):
                     # the device pixel threshold is always 50,
-                    # when coming back from AC.
+                    # when coming back from psautohint.
                     newT2List.append(
                         [[dx1, dx2, dy2, dx3, dx4, dx5, dx6], "hflex"])
                     noFlex = False
@@ -1122,7 +1121,7 @@ class CFFFontData:
 
     def getFontInfo(self, fontPSName, inputPath, allow_no_blues, noFlex,
                     vCounterGlyphs, hCounterGlyphs, fdIndex=0):
-        # The AC library needs the global font hint zones
+        # The psautohint library needs the global font hint zones
         # and standard stem widths.
         # Format them into a single text string.
         # The text format is arbitrary, inherited from very old software,
@@ -1169,7 +1168,8 @@ class CFFFontData:
                     numBlueValues = len(blueValues)
                 else:
                     raise ACFontError("Font must have at least four values in "
-                                      "its BlueValues array for AC to work!")
+                                      "its BlueValues array for PSAutoHint to "
+                                      "work!")
         else:
             if allow_no_blues:
                 blueValues = inactiveAlignmentValues

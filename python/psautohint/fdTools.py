@@ -2,7 +2,7 @@
 
 """
 Convert a Type 1 font to CID, given multiple hint dict defs in the
-"fontinfo" file. See AC.py help, with the "-hfd" option, or the MakeOTF
+"fontinfo" file. See "psautohint --doc-fddict", or the MakeOTF
 user guide for details on this format.
 
 The "fontinfo" file is expected to be in the same directory as the input
@@ -382,7 +382,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
         # e.g outside of the Font BBox. We do this becuase if there are
         # glyphs which are not assigned toa user specified font dict,
         # it is becuase it doesn't make sense to provide alignment zones
-        # for the glyph. Since AC does require at least one bottom zone
+        # for the glyph. Since psautohint does require at least one bottom zone
         # and one top zone, we add one bottom and one top zone that are
         # outside the font BBox, so that hinting won't be affected by them.
         defaultFDDict = fontDictList[0]

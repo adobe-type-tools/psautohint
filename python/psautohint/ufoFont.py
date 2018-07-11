@@ -873,7 +873,7 @@ class UFOFontData:
             else:
                 raise UFOParseError(
                     "Font must have at least four values in its "
-                    "BlueValues array for AC to work!")
+                    "BlueValues array for PSAutoHint to work!")
         blueValues.sort()
         # The first pair only is a bottom zone, where the first value is the
         # overshoot position; the rest are top zones, and second value of the
@@ -1434,8 +1434,8 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
             if point_type in ["curve", "line", "qccurve"]:
                 outlineItem = outlineItem[1:]
                 if point_type != "line":
-                    # I don't do this for line, as AC behaves differently
-                    # when a final line-to is explicit.
+                    # I don't do this for line, as psautohint behaves
+                    # differently when a final line-to is explicit.
                     outlineItem.append(lastItem)
                 x = float(lastItem.attrib["x"])
                 y = float(lastItem.attrib["y"])
