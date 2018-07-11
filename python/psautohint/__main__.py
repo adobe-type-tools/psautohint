@@ -651,7 +651,7 @@ def get_options(args):
     else:
         log_level = logging.DEBUG
 
-    logging.basicConfig(format="%(levelname)s:%(message)s", level=log_level,
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=log_level,
                         filename=parsed_args.log_path)
 
     if (parsed_args.output_paths and
