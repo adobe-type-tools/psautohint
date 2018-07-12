@@ -13,8 +13,9 @@ from . import DATA_DIR
 
 UFO_FONTS = glob.glob("%s/*/*/font.ufo" % DATA_DIR)
 OTF_FONTS = glob.glob("%s/*/*/font.otf" % DATA_DIR)
+CFF_FONTS = glob.glob("%s/*/*/font.cff" % DATA_DIR)
 FONTINFO = glob.glob("%s/*/*/fontinfo" % DATA_DIR)
-FONTS = (UFO_FONTS[0], OTF_FONTS[0])
+FONTS = (UFO_FONTS[0], OTF_FONTS[0], CFF_FONTS[0])
 
 
 @pytest.mark.parametrize("path", FONTS)
