@@ -1,16 +1,11 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-Convert a Type 1 font to CID, given multiple hint dict defs in the
-"fontinfo" file. See "psautohint --doc-fddict", or the MakeOTF
-user guide for details on this format.
+Tools for processing "fontinfo" files. See "psautohint --doc-fddict", or the
+MakeOTF user guide for details on this format.
 
 The "fontinfo" file is expected to be in the same directory as the input
 font file.
-
-Note that this file makes a lot of temporary files, using the input font
-path as the base file path, so the parent directory needs to be
-read/write enabled.
 """
 
 from __future__ import print_function, absolute_import
