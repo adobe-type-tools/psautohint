@@ -1068,45 +1068,13 @@ class CFFFontData:
                         glyphName)
 
     def saveChanges(self):
-        ttFont = self.ttFont
-        font_format = self.font_format
-        inputPath = self.inputPath
-        outFilePath = self.outFilePath
-
-        overwriteOriginal = False
-        if inputPath == outFilePath:
-            overwriteOriginal = True
-        tempPath = inputPath + ".temp.ac"
-
-        if font_format == "OTF":
-            if overwriteOriginal:
-                ttFont.save(tempPath)
-                ttFont.close()
-                if os.path.exists(inputPath):
-                    try:
-                        os.remove(inputPath)
-                        os.rename(tempPath, inputPath)
-                    except (OSError, IOError):
-                        log.exception("Could not overwrite original font file "
-                                      "path '%s'. Hinted font file path is "
-                                      "'%s'.", inputPath, tempPath)
-                        raise
-            else:
-                ttFont.save(outFilePath)
-                ttFont.close()
-
-        else:
-            data = ttFont["CFF "].compile(ttFont)
-            if font_format == "CFF":
-                if overwriteOriginal:
-                    with open(inputPath, "wb") as tf:
-                        tf.write(data)
-                else:
-                    with open(outFilePath, "wb") as tf:
-                        tf.write(data)
-
-            if os.path.exists(tempPath):
-                os.remove(tempPath)
+        if self.font_format == "OTF":
+            self.ttFont.save(self.outFilePath)
+            self.ttFont.close()
+        elif self.font_format == "CFF":
+            data = self.ttFont["CFF "].compile(self.ttFont)
+            with open(self.outFilePath, "wb") as tf:
+                tf.write(data)
 
     def close(self):
         self.ttFont.close()
