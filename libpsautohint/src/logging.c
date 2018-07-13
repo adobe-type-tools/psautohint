@@ -28,11 +28,15 @@ LogMsg(int16_t level, /* error, warning, info */
        char* format,  /* message string */
        ...)
 {
-    char str[MAXMSGLEN + 1];
+    /* "glyphname: message" */
+    char str[MAX_GLYPHNAME_LEN + 2 + MAXMSGLEN + 1];
     va_list va;
 
+    if (gGlyphName && strlen(gGlyphName) > 0)
+        snprintf(str, strlen(gGlyphName) + 3, "%s: ", gGlyphName);
+
     va_start(va, format);
-    vsnprintf(str, MAXMSGLEN, format, va);
+    vsnprintf(str + strlen(str), MAXMSGLEN, format, va);
     va_end(va);
 
     if (gLibReportCB != NULL)

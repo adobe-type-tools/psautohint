@@ -420,10 +420,10 @@ def hintFile(options, path, outpath, reference_master):
         oldHintBezString = ""
 
         if fdGlyphDict:
-            log.info("Hinting %s with fdDict %s.",
+            log.info("%s: Begin hinting (using fdDict %s).",
                      nameAliases.get(name, name), fdDict.DictName)
         else:
-            log.info("Hinting %s.", nameAliases.get(name, name))
+            log.info("%s: Begin hinting.", nameAliases.get(name, name))
 
         # Call auto-hint library on bez string.
         if oldBezString != "" and oldBezString == bezString:
