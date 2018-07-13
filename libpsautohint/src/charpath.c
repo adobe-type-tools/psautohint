@@ -1395,7 +1395,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
                   master */
         int16_t newhinttype = (hinttype == (RM + ESCVAL) ? RY : RB);
         if (*errormsg) {
-            LogMsg(WARNING, OK,
+            LogMsg(INFO, OK,
                    "Near miss for using operator: %s in character: "
                    "%s in '%s'. (min=%d..%d[delta=%d], "
                    "mid=%d..%d[delta=%d], max=%d..%d[delta=%d])\n",

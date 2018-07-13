@@ -373,10 +373,7 @@ void PickVVals(PClrVal gValList);
 void PickHVals(PClrVal gValList);
 void FindBestHVals(void);
 void FindBestVVals(void);
-void ReportSmoothError(Fixed x, Fixed y);
 void ReportAddFlex(void);
-void ReportClipSharpAngle(Fixed x, Fixed y);
-void ReportSharpAngle(Fixed x, Fixed y);
 void ReportLinearCurve(PPathElt e, Fixed x0, Fixed y0, Fixed x1, Fixed y1);
 void ReportNonHError(Fixed x0, Fixed y0, Fixed x1, Fixed y1);
 void ReportNonVError(Fixed x0, Fixed y0, Fixed x1, Fixed y1);
@@ -405,7 +402,6 @@ void ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg);
 void ReportCarry(Fixed l0, Fixed l1, Fixed loc, PClrVal clrs, bool vert);
 void ReportBestCP(PPathElt e, PPathElt cp);
 void LogColorInfo(PClrPoint pl);
-void ReportBandNearMiss(char* str, Fixed loc, Fixed blu);
 void ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t,
                         bool curve);
 void ReportColorConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch);

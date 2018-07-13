@@ -20,33 +20,12 @@ FixToDbl(Fixed f)
 }
 
 void
-ReportSmoothError(Fixed x, Fixed y)
-{
-    LogMsg(LOGERROR, OK, "Junction at %g %g may need smoothing.",
-           FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
-}
-
-void
 ReportAddFlex(void)
 {
     if (gHasFlex)
         return;
     gHasFlex = true;
     LogMsg(INFO, OK, "added flex operators to this character.");
-}
-
-void
-ReportClipSharpAngle(Fixed x, Fixed y)
-{
-    LogMsg(INFO, OK, "Too sharp angle at %g %g has been clipped.",
-           FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
-}
-
-void
-ReportSharpAngle(Fixed x, Fixed y)
-{
-    LogMsg(INFO, OK, "angle at %g %g is very sharp. Please check.",
-           FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
 }
 
 void
@@ -79,7 +58,7 @@ ReportNonHVError(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char* s)
     dy = y0 - y1;
     if (abs(dx) > FixInt(10) || abs(dy) > FixInt(10) ||
         FTrunc(dx * dx) + FTrunc(dy * dy) > FixInt(100)) {
-        LogMsg(LOGERROR, OK, "The line from %g %g to %g %g is not exactly %s.",
+        LogMsg(INFO, OK, "The line from %g %g to %g %g is not exactly %s.",
                FixToDbl(x0), FixToDbl(y0), FixToDbl(x1), FixToDbl(y1), s);
     }
 }
@@ -132,7 +111,7 @@ ReportMissingClosePath(void)
 void
 ReportTryFlexNearMiss(Fixed x0, Fixed y0, Fixed x2, Fixed y2)
 {
-    LogMsg(LOGERROR, OK,
+    LogMsg(WARNING, OK,
            "Curves from %g %g to %g %g near miss for adding flex.",
            FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x2)),
            FixToDbl(itfmy(y2)));
@@ -193,7 +172,7 @@ ReportConflictCheck(PPathElt e, PPathElt conflict, PPathElt cp)
     GetEndPoint(e, &ex, &ey);
     GetEndPoint(conflict, &cx, &cy);
     GetEndPoint(cp, &cpx, &cpy);
-    LogMsg(LOGERROR, OK, "Check e %g %g conflict %g %g cp %g %g.",
+    LogMsg(INFO, OK, "Check e %g %g conflict %g %g cp %g %g.",
            FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)), FixToDbl(itfmx(cx)),
            FixToDbl(itfmy(cy)), FixToDbl(itfmx(cpx)), FixToDbl(itfmy(cpy)));
 }
@@ -203,7 +182,7 @@ ReportConflictCnt(PPathElt e, int32_t cnt)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
-    LogMsg(LOGERROR, OK, "%g %g conflict count = %d", FixToDbl(itfmx(ex)),
+    LogMsg(INFO, OK, "%g %g conflict count = %d", FixToDbl(itfmx(ex)),
            FixToDbl(itfmy(ey)), cnt);
 }
 
@@ -213,7 +192,7 @@ ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i)
     Fixed ex1, ey1, ex2, ey2;
     GetEndPoint(e, &ex1, &ey1);
     GetEndPoint(e2, &ex2, &ey2);
-    LogMsg(LOGDEBUG, OK, "Removed %s flare at %g %g by %g %g : %d.",
+    LogMsg(INFO, OK, "Removed %s flare at %g %g by %g %g : %d.",
            hFlg ? "horizontal" : "vertical", FixToDbl(itfmx(ex1)),
            FixToDbl(itfmy(ey1)), FixToDbl(itfmx(ex2)), FixToDbl(itfmy(ey2)), i);
 }
@@ -223,7 +202,7 @@ ReportRemConflict(PPathElt e)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
-    LogMsg(LOGERROR, OK, "Removed conflicting hints at %g %g.",
+    LogMsg(INFO, OK, "Removed conflicting hints at %g %g.",
            FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
 }
 
@@ -232,14 +211,14 @@ ReportRotateSubpath(PPathElt e)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
-    LogMsg(LOGDEBUG, OK, "changed closepath to %g %g.", FixToDbl(itfmx(ex)),
+    LogMsg(INFO, OK, "changed closepath to %g %g.", FixToDbl(itfmx(ex)),
            FixToDbl(itfmy(ey)));
 }
 
 void
 ReportRemShortColors(Fixed ex, Fixed ey)
 {
-    LogMsg(LOGDEBUG, OK, "Removed hints from short element at %g %g.",
+    LogMsg(INFO, OK, "Removed hints from short element at %g %g.",
            FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
 }
 
@@ -465,16 +444,9 @@ ListClrInfo(void)
 }
 
 void
-ReportBandNearMiss(char* str, Fixed loc, Fixed blu)
-{
-    LogMsg(LOGERROR, OK, "Near miss %s horizontal zone at %g instead of %g.",
-           str, FixToDbl(loc), FixToDbl(blu));
-}
-
-void
 ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t, bool curve)
 {
-    LogMsg(LOGERROR, OK, "%s %s stem near miss: %g instead of %g at %g to %g.",
+    LogMsg(INFO, OK, "%s %s stem near miss: %g instead of %g at %g to %g.",
            vert ? "Vertical" : "Horizontal", curve ? "curve" : "linear",
            FixToDbl(w), FixToDbl(minW), FixToDbl(NUMMIN(b, t)),
            FixToDbl(NUMMAX(b, t)));
