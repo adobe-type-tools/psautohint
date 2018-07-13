@@ -143,8 +143,7 @@ AddAutoFlexProp(PPathElt e, bool yflag)
 {
     PPathElt e0 = e, e1 = e->next;
     if (e0->type != CURVETO || e1->type != CURVETO) {
-        LogMsg(LOGERROR, NONFATALERROR, "Illegal input in glyph: %s.\n",
-               gGlyphName);
+        LogMsg(LOGERROR, NONFATALERROR, "Illegal input.");
     }
     /* Don't add flex to linear curves. */
     if (yflag && e0->y3 == e1->y1 && e1->y1 == e1->y2 && e1->y2 == e1->y3)

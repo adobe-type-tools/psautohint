@@ -67,8 +67,7 @@ static Fixed
 Pop(void)
 {
     if (stkindex <= 0) {
-        LogMsg(LOGERROR, NONFATALERROR,
-               "Stack underflow while reading %s glyph.\n", gGlyphName);
+        LogMsg(LOGERROR, NONFATALERROR, "Stack underflow while reading glyph.");
     }
     stkindex--;
     return stk[stkindex];
@@ -78,8 +77,7 @@ static void
 Push(Fixed r)
 {
     if (stkindex >= STKMAX) {
-        LogMsg(LOGERROR, NONFATALERROR,
-               "Stack underflow while reading %s glyph.\n", gGlyphName);
+        LogMsg(LOGERROR, NONFATALERROR, "Stack underflow while reading glyph.");
     }
     stk[stkindex] = r;
     stkindex++;
@@ -380,10 +378,8 @@ ReadHintInfo(char nm, const char* str)
     if (sscanf(str, " %% %d %d", &elt1, &elt2) != 2) {
         LogMsg(WARNING, NONFATALERROR,
                "Extra hint information required for blended fonts is "
-               "not in\n  glyph: %s.  Please re-hint using "
-               "the latest software.\n  Hints will not be included "
-               "in this font.\n",
-               gGlyphName);
+               "not in glyph. Please re-hint using the latest software. "
+               "Hints will not be included in this font.");
         SetNoHints();
         includeHints = false;
     } else
@@ -595,9 +591,8 @@ badFile : {
     strncpy(op, nm, len);
     op[len] = 0;
 
-    LogMsg(LOGERROR, NONFATALERROR,
-           "Bad file format. Unknown operator: %s in %s character.\n", op,
-           gGlyphName);
+    LogMsg(LOGERROR, NONFATALERROR, "Bad file format. Unknown operator: %s.",
+           op);
 }
 }
 
@@ -639,8 +634,8 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                     else {
                         gGlyphName[MAX_GLYPHNAME_LEN - 1] = '\0';
                         LogMsg(LOGERROR, NONFATALERROR,
-                               "Bad input data. Glyph name %s is "
-                               "greater than %d chars.\n",
+                               "Bad input data. Glyph name is "
+                               "greater than %d chars.",
                                gGlyphName, MAX_GLYPHNAME_LEN);
                     }
                 }
@@ -659,9 +654,8 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
             case 0: /* end of file */
                 if (stkindex != 0) {
                     LogMsg(LOGERROR, NONFATALERROR,
-                           "Bad input data.  Numbers left on stack "
-                           "at end of %s file.\n",
-                           gGlyphName);
+                           "Bad input data. Numbers left on stack "
+                           "at end of glyph.");
                 }
                 return;
             default:
@@ -685,8 +679,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                         s--;
                     continue;
                 }
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Unexpected character in %s glyph.\n", gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Unexpected character.");
         }
     rdnum:
         isReal = false;
@@ -714,8 +707,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                 /* Push(r); */
                 if (stkindex >= STKMAX) {
                     LogMsg(LOGERROR, NONFATALERROR,
-                           "Stack overflow while reading %s glyph.\n",
-                           gGlyphName);
+                           "Stack overflow while reading glyph.");
                     return;
                 }
                 stk[stkindex] = r;
@@ -723,8 +715,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                 goto nxtChar;
             } else {
                 LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal number terminator while reading %s glyph.\n",
-                       gGlyphName);
+                       "Illegal number terminator while reading glyph.");
                 return;
             }
         } /*end while true */

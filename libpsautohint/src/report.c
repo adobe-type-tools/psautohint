@@ -94,25 +94,22 @@ ExpectedMoveTo(PPathElt e)
             return;
     }
     LogMsg(LOGERROR, NONFATALERROR,
-           "Path for %s character has a %s where a moveto was "
-           "expected.\n  The data are probably truncated.",
-           gGlyphName, s);
+           "Glyph path has a %s where a moveto was expected. "
+           "The data are probably truncated.",
+           s);
 }
 
 void
 ReportMissingClosePath(void)
 {
     LogMsg(LOGERROR, NONFATALERROR,
-           "Missing closepath in %s character.\n"
-           "  The data are probably truncated.",
-           gGlyphName);
+           "Missing closepath. The data are probably truncated.");
 }
 
 void
 ReportTryFlexNearMiss(Fixed x0, Fixed y0, Fixed x2, Fixed y2)
 {
-    LogMsg(WARNING, OK,
-           "Curves from %g %g to %g %g near miss for adding flex.",
+    LogMsg(WARNING, OK, "Curves from %g %g to %g %g near miss for adding flex.",
            FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x2)),
            FixToDbl(itfmy(y2)));
 }
@@ -202,8 +199,8 @@ ReportRemConflict(PPathElt e)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
-    LogMsg(INFO, OK, "Removed conflicting hints at %g %g.",
-           FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
+    LogMsg(INFO, OK, "Removed conflicting hints at %g %g.", FixToDbl(itfmx(ex)),
+           FixToDbl(itfmy(ey)));
 }
 
 void

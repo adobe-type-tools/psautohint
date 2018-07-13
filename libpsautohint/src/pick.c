@@ -238,8 +238,7 @@ PrevVal(PClrVal val, PClrVal vList)
     while (true) {
         vList = vList->vNxt;
         if (vList == NULL) {
-            LogMsg(LOGERROR, NONFATALERROR, "Malformed value list in %s.\n",
-                   gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Malformed value list.");
         }
 
         if (vList == val)

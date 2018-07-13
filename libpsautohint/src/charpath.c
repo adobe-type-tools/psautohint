@@ -128,8 +128,7 @@ GetCPIx(indx mIx, int32_t pathIx)
     for (ix = pathIx; ix < gPathEntries; ix++)
         if (pathlist[mIx].path[ix].type == CP)
             return ix;
-    LogMsg(LOGERROR, NONFATALERROR, "No closepath in character: %s.\n",
-           gGlyphName);
+    LogMsg(LOGERROR, NONFATALERROR, "No closepath.");
     return (-1);
 }
 
@@ -142,8 +141,7 @@ GetMTIx(indx mIx, indx pathIx)
     for (ix = pathIx; ix >= 0; ix--)
         if (pathlist[mIx].path[ix].type == RMT)
             return ix;
-    LogMsg(LOGERROR, NONFATALERROR, "No moveto in character: %s.\n",
-           gGlyphName);
+    LogMsg(LOGERROR, NONFATALERROR, "No moveto.");
     return (-1);
 }
 
@@ -181,12 +179,10 @@ retry:
                 if (pathElt->type == RMT)
                     goto retry;
             }
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Bad character description file: %s.\n", gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Bad description.");
             break;
         default:
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal operator in character file: %s.\n", gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Illegal operator.");
     }
 }
 
@@ -242,9 +238,7 @@ GetPathType(int16_t pathtype)
         case CP:
             return pathTypes[3];
         default:
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal path type: %d in character: %s.\n", pathtype,
-                   gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Illegal path type: %d.", pathtype);
             return NULL;
     }
 }
@@ -281,11 +275,10 @@ static void
 InconsistentPointCount(indx ix, int entries1, int entries2)
 {
     LogMsg(WARNING, OK,
-           "The character: %s will not be included in the font\n "
+           "Glyph will not be included in the font\n "
            "because the version in %s has a total of %d elements "
            "and\n  the one in %s has %d elements.\n",
-           gGlyphName, masterNames[0], (int)entries1, masterNames[ix],
-           (int)entries2);
+           masterNames[0], entries1, masterNames[ix], entries2);
 }
 
 static void
@@ -296,10 +289,10 @@ InconsistentPathType(indx ix, int16_t type1, int16_t type2, indx eltno)
     GetCoordFromType(type1, &coord1, 0, eltno);
     GetCoordFromType(type2, &coord2, ix, eltno);
     LogMsg(WARNING, OK,
-           "The character: %s will not be included in the font\n  "
+           "Glyph will not be included in the font\n  "
            "because the version in %s has path type %s at coord: %d "
            "%d\n  and the one in %s has type %s at coord %d %d.\n",
-           gGlyphName, masterNames[0], GetPathType(type1), coord1.x, coord1.y,
+           masterNames[0], GetPathType(type1), coord1.x, coord1.y,
            masterNames[ix], GetPathType(type2), coord2.x, coord2.y);
 }
 
@@ -358,8 +351,8 @@ AddLine(indx mIx, indx pathIx)
     if (pathlist[mIx].path[pathIx].type != RCT) {
         LogMsg(WARNING, OK,
                "Please convert the point closepath in master: "
-               "%s, character: %s to a line closepath.\n",
-               masterNames[mIx], gGlyphName);
+               "%s, to a line closepath.",
+               masterNames[mIx]);
         return;
     }
     i = GetMTIx(mIx, pathIx) + 1;
@@ -371,8 +364,8 @@ AddLine(indx mIx, indx pathIx)
         case RDT:
             LogMsg(WARNING, OK,
                    "Please convert the point closepath to a line "
-                   "closepath in master: %s, character: %s.\n",
-                   masterNames[mIx], gGlyphName);
+                   "closepath in master: %s.",
+                   masterNames[mIx]);
             return;
         case RCT:
             if ((abs(start->x1 - end->x2) < fixTwo) &&
@@ -390,16 +383,14 @@ AddLine(indx mIx, indx pathIx)
             else {
                 LogMsg(WARNING, OK,
                        "Could not modify point closepath in master "
-                       "'%s', character: %s near (%d, %d).\n",
-                       masterNames[mIx], gGlyphName, FTrunc8(end->x),
-                       FTrunc8(end->y));
+                       "'%s', near (%d, %d).",
+                       masterNames[mIx], FTrunc8(end->x), FTrunc8(end->y));
                 return;
             }
             break;
         default:
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Bad character description file: %s/%s.\n", masterNames[mIx],
-                   gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Bad description in master %s.",
+                   masterNames[mIx]);
     }
 
     thisone = &(pathlist[mIx].path[pathIx]);
@@ -434,8 +425,7 @@ BestLine(PCharPathElt start, PCharPathElt end, Fixed* dx, Fixed* dy)
     *dx = *dy = 0;
 
     if (cy == 0.0 && cx == 0.0) {
-        LogMsg(WARNING, OK, "Unexpected tangent in character path: %s.\n",
-               gGlyphName);
+        LogMsg(WARNING, OK, "Unexpected tangent.");
         return;
     }
 
@@ -495,8 +485,7 @@ AddLineCube(indx mIx, indx pathIx)
     if (pathlist[mIx].path[pathIx].type == RDT) {
         pathlist[mIx].path[pathIx].remove = true;
         if (pathlist[mIx].path[pathIx + 1].type != CP) {
-            LogMsg(LOGERROR, NONFATALERROR, "Expected CP in path: %s.\n",
-                   gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Expected CP.");
         }
 
         /* If there's another path in the character, we need to compensate */
@@ -509,8 +498,7 @@ AddLineCube(indx mIx, indx pathIx)
                 pathlist[mIx].path[pathIx + 2].ry +=
                   pathlist[mIx].path[pathIx].ry;
             } else {
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Expected second RMT in path: %s.\n", gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Expected second RMT.");
             }
         }
     } else if (pathlist[mIx].path[pathIx].type == RCT) {
@@ -537,8 +525,7 @@ AddLineCube(indx mIx, indx pathIx)
         pathlist[mIx].path[pathIx].ry2 += dy;
     } else {
         /* Not a RCT or RDT - error - unexpected path element type. */
-        LogMsg(LOGERROR, NONFATALERROR, "Bad character description file: %s.\n",
-               gGlyphName);
+        LogMsg(LOGERROR, NONFATALERROR, "Bad description.");
     }
 }
 
@@ -735,8 +722,7 @@ CurveBBox(indx mIx, int16_t hinttype, int32_t pathIx, Fixed* value)
             maxbx = &urx;
             break;
         default:
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal hint type in character: %s.\n", gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Illegal hint type.");
     }
     if (p1 - maxval >= FixOne || p2 - maxval >= FixOne ||
         p1 - minval <= FixOne || p2 - minval <= FixOne) {
@@ -879,8 +865,7 @@ retry:
 #endif
             break;
         default:
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal hint type in character: %s.\n", gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Illegal hint type.");
     }
 
     /* Check for exactly equal first, in case endval = startval + 1. jvz 1nov95
@@ -1085,9 +1070,9 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
                     pathElt = pathlist[ix].path[pathIx];
                     if (pathElt.type != RCT) {
                         LogMsg(LOGERROR, NONFATALERROR,
-                               "Malformed path list: %s, master: %s, "
+                               "Malformed path list in master: %s, "
                                "element: %d, type: %s != curveto.\n",
-                               gGlyphName, masterNames[ix], pathIx,
+                               masterNames[ix], pathIx,
                                GetPathType(pathElt.type));
                     }
                     if (!GetInflectionPoint(startPt.x, startPt.y, pathElt.x1,
@@ -1112,9 +1097,7 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
                                 : startPt.x);
                     break;
                 default:
-                    LogMsg(LOGERROR, NONFATALERROR,
-                           "Illegal point type in character: %s.\n",
-                           gGlyphName);
+                    LogMsg(LOGERROR, NONFATALERROR, "Illegal point type.");
             }
             /* Assign correct value for bottom band if first path element
              is a ghost band. */
@@ -1194,11 +1177,11 @@ CheckFlexOK(indx ix)
             if (!DoubleCheckFlexVals(i, ix, hintsMasterIx)) {
                 end = &pathlist[i].path[ix];
                 LogMsg(WARNING, OK,
-                       "Flex will not be included in character: %s "
+                       "Flex will not be included in the glyph, "
                        "in '%s' at element %d near (%d, %d) because "
                        "the character does not have flex in each "
                        "design.\n",
-                       gGlyphName, masterNames[i], (int)ix, FTrunc8(end->x),
+                       masterNames[i], (int)ix, FTrunc8(end->x),
                        FTrunc8(end->y));
                 return false;
             } else {
@@ -1269,8 +1252,8 @@ Hvct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
             default:
                 LogMsg(LOGERROR, NONFATALERROR,
                        "Invalid index value: %d defined for curveto "
-                       "command1 in character: %s.\n",
-                       (int)ix, gGlyphName);
+                       "command1.",
+                       (int)ix);
                 break;
         }
 }
@@ -1298,8 +1281,8 @@ Vhct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
             default:
                 LogMsg(LOGERROR, NONFATALERROR,
                        "Invalid index value: %d defined for curveto "
-                       "command2 in character:%s.\n",
-                       (int)ix, gGlyphName);
+                       "command2.",
+                       (int)ix);
                 break;
         }
 }
@@ -1334,8 +1317,8 @@ Ct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
             default:
                 LogMsg(LOGERROR, NONFATALERROR,
                        "Invalid index value: %d defined for curveto "
-                       "command3 in character: %s.\n",
-                       (int)ix, gGlyphName);
+                       "command3.",
+                       (int)ix);
                 break;
         }
 }
@@ -1366,16 +1349,16 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
             (*hintElt)->next->next == NULL) {
             LogMsg(LOGERROR, NONFATALERROR,
                    "Invalid format for hint operator: hstem3 or "
-                   "vstem3 in character: %s/%s.\n",
-                   masterNames[ix], gGlyphName);
+                   "vstem3 in master: %s.",
+                   masterNames[ix]);
         }
         if ((*hintElt)->type != hinttype ||
             (*hintElt)->next->type != hinttype ||
             (*hintElt)->next->next->type != hinttype) {
             LogMsg(LOGERROR, NONFATALERROR,
                    "Invalid format for hint operator: hstem3 or "
-                   "vstem3 in character: %s in '%s'.\n",
-                   gGlyphName, masterNames[ix]);
+                   "vstem3 in master: %s.",
+                   masterNames[ix]);
         }
         min = (*hintElt)->leftorbot;
         dmin = (*hintElt)->rightortop - min;
@@ -1396,11 +1379,11 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
         int16_t newhinttype = (hinttype == (RM + ESCVAL) ? RY : RB);
         if (*errormsg) {
             LogMsg(INFO, OK,
-                   "Near miss for using operator: %s in character: "
-                   "%s in '%s'. (min=%d..%d[delta=%d], "
-                   "mid=%d..%d[delta=%d], max=%d..%d[delta=%d])\n",
+                   "Near miss for using operator: %s in master '%s'. "
+                   "(min=%d..%d[delta=%d], mid=%d..%d[delta=%d], "
+                   "max=%d..%d[delta=%d])\n",
                    (hinttype == (RM + ESCVAL)) ? "vstem3" : "hstem3",
-                   gGlyphName, masterNames[ix], FTrunc8((*hintElt)->leftorbot),
+                   masterNames[ix], FTrunc8((*hintElt)->leftorbot),
                    FTrunc8((*hintElt)->rightortop),
                    FTrunc8((*hintElt)->rightortop - (*hintElt)->leftorbot),
                    FTrunc8((*hintElt)->next->leftorbot),
@@ -1730,9 +1713,8 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
                 WriteToBuffer("rm\n");
                 break;
             default:
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal hint type: %d in character: %s.\n", hinttype,
-                       gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Illegal hint type: %d",
+                       hinttype);
         }
 
         if (hintList->next == NULL)
@@ -1844,9 +1826,8 @@ WriteHints(indx pathEltIx)
                 WriteToBuffer("rm\n");
                 break;
             default:
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal hint type: %d in character: %s.\n", hinttype,
-                       gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Illegal hint type: %d.",
+                       hinttype);
         }
         for (ix = 0; ix < masterCount; ix++)
             hintArray[ix] =
@@ -1925,9 +1906,8 @@ WritePathElt(indx mIx, indx eltIx, int16_t pathType, indx startix,
         case CP:
             break;
         default: {
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal path operator %d found in character: %s.\n",
-                   (int)pathType, gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Illegal path operator %d found.",
+                   pathType);
         }
     }
 }
@@ -1989,10 +1969,10 @@ CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
         default:
             LogMsg(LOGERROR, NONFATALERROR,
                    "Invalid index value: %d defined for curveto "
-                   "command4 in character: %s. Op=%d, dir=%s near "
+                   "command4. Op=%d, dir=%s near "
                    "(%d %d).\n",
-                   (int)opIx, gGlyphName, (int)op, masterNames[dir1],
-                   FTrunc8(path1->x), FTrunc8(path1->y));
+                   (int)opIx, (int)op, masterNames[dir1], FTrunc8(path1->x),
+                   FTrunc8(path1->y));
             break;
     }
 
@@ -2122,8 +2102,7 @@ WritePaths(char** outBuffers, size_t* outLengths)
                     OptimizeCT(eltix);
                 break;
             default:
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Unknown operator in character: %s.\n", gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Unknown operator.");
         }
         op = pathlist[0].path[eltix].type;
         if (op != RCT && op != HVCT && op != VHCT && op != CP)
@@ -2208,8 +2187,7 @@ GetOperandCount(int16_t op)
                 count = 6;
                 break;
             default:
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Unknown operator in character: %s.\n", gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Unknown operator.");
                 break;
         }
     else /* handle escape operators */
@@ -2240,8 +2218,7 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
     else
         *length = opcount;
     if (((*length) * masterCount) > FONTSTKLIMIT) {
-        LogMsg(LOGERROR, NONFATALERROR,
-               "Font stack limit exceeded for character: %s.\n", gGlyphName);
+        LogMsg(LOGERROR, NONFATALERROR, "Font stack limit exceeded");
     }
     if (!cubeLibrary) {
         switch (*length) {
@@ -2261,9 +2238,7 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
                 *subrIx = 11;
                 break;
             default:
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal operand length for character: %s.\n",
-                       gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Illegal operand length.");
                 break;
         }
     } else { /* CUBE */
@@ -2287,8 +2262,7 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
                         break;
                     default:
                         LogMsg(LOGERROR, NONFATALERROR,
-                               "Illegal operand length for character: %s.\n",
-                               gGlyphName);
+                               "Illegal operand length.");
                         break;
                 }
                 break;
@@ -2309,8 +2283,7 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
                         break;
                     default:
                         LogMsg(LOGERROR, NONFATALERROR,
-                               "Illegal operand length for character: %s.\n",
-                               gGlyphName);
+                               "Illegal operand length.");
                         break;
                 }
                 break;
@@ -2325,8 +2298,7 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
                         break;
                     default:
                         LogMsg(LOGERROR, NONFATALERROR,
-                               "Illegal operand length for character: %s.\n",
-                               gGlyphName);
+                               "Illegal operand length.");
                         break;
                 }
                 break;
@@ -2338,8 +2310,7 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
                         break;
                     default:
                         LogMsg(LOGERROR, NONFATALERROR,
-                               "Illegal operand length for character: %s.\n",
-                               gGlyphName);
+                               "Illegal operand length.");
                         break;
                 }
                 break;
@@ -2391,8 +2362,7 @@ MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
         if (gAddHints && hintsMasterIx >= 0 && gPathEntries > 0) {
             if (!ReadandAssignHints()) {
                 LogMsg(LOGERROR, FATALERROR,
-                       "Path problem in ReadAndAssignHints, character %s.\n",
-                       gGlyphName);
+                       "Path problem in ReadAndAssignHints");
             }
             CheckHandVStem3();
         }
