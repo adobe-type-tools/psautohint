@@ -69,6 +69,8 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
 {
     float tmp;
 
+    gGlyphName[0] = '\0';
+
     switch (reason) {
         case STARTUP:
             gDMin = 50;
