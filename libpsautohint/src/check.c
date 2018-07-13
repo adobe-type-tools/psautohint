@@ -422,17 +422,11 @@ restart:
             goto Nxt;
         PrvForBend(nxt, &x0, &cy0);
         if (!CheckSmoothness(x0, cy0, x1, cy1, x2, y2, &smdiff))
-            ReportSmoothError(x1, cy1);
-        if (smdiff > FixInt(140)) { /* trim off sharp angle */
-            /* As of version 2.21 angle blunting will not occur. */
-            /*
-             if (editChar && ConsiderClipSharpPoint(x0, cy0, x1, cy1, x2, y2,
-             e)) {
-             ReportClipSharpAngle(x1, cy1); recheck = true; }
-             else */
-            if (smdiff > FixInt(160))
-                ReportSharpAngle(x1, cy1);
-        }
+            LogMsg(INFO, OK, "Junction at %g %g may need smoothing.",
+                   FixToDbl(itfmx(x1)), FixToDbl(itfmy(cy1)));
+        if (smdiff > FixInt(160))
+            LogMsg(INFO, OK, "Too sharp angle at %g %g has been clipped.",
+                   FixToDbl(itfmx(x1)), FixToDbl(itfmy(cy1)));
     Nxt:
         e = NxtE;
     }

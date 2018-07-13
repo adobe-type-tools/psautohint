@@ -334,7 +334,7 @@ UseCounter(PClrVal sLst, bool mclr)
     }
     if (abs(minDelta - maxDelta) < FixInt(3) &&
         abs((maxLoc - midLoc) - (midLoc - minLoc)) < FixInt(3)) {
-        LogMsg(LOGERROR, OK,
+        LogMsg(INFO, OK,
                mclr ? "Near miss for using V counter hinting."
                     : "Near miss for using H counter hinting.");
     }
@@ -584,8 +584,8 @@ Blues(const ACFontInfo* fontinfo)
             AddBBoxHV(true, true);
             gUseH = UseCounter(gHColoring, false);
             if (!gUseH) { /* still bad news */
-                LogMsg(LOGERROR, OK,
-                       "Note: Glyph is in list for using H counter hints, "
+                LogMsg(INFO, OK,
+                       "Glyph is in list for using H counter hints, "
                        "but didn't find any candidates.");
                 CounterFailed = true;
             }
@@ -692,8 +692,8 @@ Yellows(void)
             AddBBoxHV(false, true);
             gUseV = UseCounter(gVColoring, true);
             if (!gUseV) { /* still bad news */
-                LogMsg(LOGERROR, OK,
-                       "Note: Glyph is in list for using V counter hints, "
+                LogMsg(INFO, OK,
+                       "Glyph is in list for using V counter hints, "
                        "but didn't find any candidates.");
                 CounterFailed = true;
             }
