@@ -101,7 +101,7 @@ PreCheckForColoring(void)
         if (chk == 0)
             break;
         if (++cnt > 10) {
-            LogMsg(WARNING, OK, "Looping in PreCheckForHints!\n");
+            LogMsg(WARNING, OK, "Looping in PreCheckForHints!.");
             break;
         }
     }

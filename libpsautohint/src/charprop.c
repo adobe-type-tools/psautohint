@@ -109,8 +109,8 @@ AddCounterColorChars(char* charlist, char* ColorList[])
         if (ListEntries == (COUNTERLISTSIZE - 1)) {
             LogMsg(WARNING, OK,
                    "Exceeded counter hints list size. (maximum is "
-                   "%d.)\n  Cannot add %s or subsequent "
-                   "characters.\n",
+                   "%d.) Cannot add %s or subsequent "
+                   "characters.",
                    (int)COUNTERLISTSIZE, token);
             break;
         }

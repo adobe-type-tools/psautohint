@@ -229,7 +229,7 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
         clst = colorList;
         while (clst != NULL) {
             if (++cnt > 100) {
-                LogMsg(LOGDEBUG, OK, "Loop in hintlist for TestHint\n\007");
+                LogMsg(LOGDEBUG, OK, "Loop in hintlist for TestHint.");
                 return 0;
             }
             clst = clst->vNxt;
@@ -305,7 +305,7 @@ TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst)
             result = 1;
         lst = lst->next;
         if (++cnt > 100) {
-            LogMsg(WARNING, OK, "Looping in TestHintLst\007\n");
+            LogMsg(WARNING, OK, "Looping in TestHintLst.");
             return 0;
         }
     }
@@ -758,7 +758,7 @@ CopyClrs(PClrVal lst)
         v->vNxt = vlst;
         vlst = v;
         if (++cnt > 100) {
-            LogMsg(WARNING, OK, "Loop in CopyClrs\007\n");
+            LogMsg(WARNING, OK, "Loop in CopyClrs.");
             return vlst;
         }
         lst = lst->vNxt;

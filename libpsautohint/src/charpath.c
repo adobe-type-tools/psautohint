@@ -275,9 +275,9 @@ static void
 InconsistentPointCount(indx ix, int entries1, int entries2)
 {
     LogMsg(WARNING, OK,
-           "Glyph will not be included in the font\n "
+           "Glyph will not be included in the font "
            "because the version in %s has a total of %d elements "
-           "and\n  the one in %s has %d elements.\n",
+           "and the one in %s has %d elements.",
            masterNames[0], entries1, masterNames[ix], entries2);
 }
 
@@ -289,9 +289,9 @@ InconsistentPathType(indx ix, int16_t type1, int16_t type2, indx eltno)
     GetCoordFromType(type1, &coord1, 0, eltno);
     GetCoordFromType(type2, &coord2, ix, eltno);
     LogMsg(WARNING, OK,
-           "Glyph will not be included in the font\n  "
+           "Glyph will not be included in the font "
            "because the version in %s has path type %s at coord: %d "
-           "%d\n  and the one in %s has type %s at coord %d %d.\n",
+           "%d and the one in %s has type %s at coord %d %d.",
            masterNames[0], GetPathType(type1), coord1.x, coord1.y,
            masterNames[ix], GetPathType(type2), coord2.x, coord2.y);
 }
@@ -1071,7 +1071,7 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
                     if (pathElt.type != RCT) {
                         LogMsg(LOGERROR, NONFATALERROR,
                                "Malformed path list in master: %s, "
-                               "element: %d, type: %s != curveto.\n",
+                               "element: %d, type: %s != curveto.",
                                masterNames[ix], pathIx,
                                GetPathType(pathElt.type));
                     }
@@ -1180,7 +1180,7 @@ CheckFlexOK(indx ix)
                        "Flex will not be included in the glyph, "
                        "in '%s' at element %d near (%d, %d) because "
                        "the character does not have flex in each "
-                       "design.\n",
+                       "design.",
                        masterNames[i], (int)ix, FTrunc8(end->x),
                        FTrunc8(end->y));
                 return false;
@@ -1381,7 +1381,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
             LogMsg(INFO, OK,
                    "Near miss for using operator: %s in master '%s'. "
                    "(min=%d..%d[delta=%d], mid=%d..%d[delta=%d], "
-                   "max=%d..%d[delta=%d])\n",
+                   "max=%d..%d[delta=%d])",
                    (hinttype == (RM + ESCVAL)) ? "vstem3" : "hstem3",
                    masterNames[ix], FTrunc8((*hintElt)->leftorbot),
                    FTrunc8((*hintElt)->rightortop),
@@ -1970,7 +1970,7 @@ CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
             LogMsg(LOGERROR, NONFATALERROR,
                    "Invalid index value: %d defined for curveto "
                    "command4. Op=%d, dir=%s near "
-                   "(%d %d).\n",
+                   "(%d %d).",
                    (int)opIx, (int)op, masterNames[dir1], FTrunc8(path1->x),
                    FTrunc8(path1->y));
             break;
@@ -2316,7 +2316,7 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
                 break;
 
             default:
-                LogMsg(LOGERROR, NONFATALERROR, "Illegal masterCount.\n");
+                LogMsg(LOGERROR, NONFATALERROR, "Illegal masterCount.");
                 break;
         }
     }

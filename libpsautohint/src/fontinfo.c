@@ -237,7 +237,7 @@ GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
 
     if (!optional) {
         LogMsg(LOGERROR, NONFATALERROR,
-               "ERROR: Fontinfo: Couldn't find fontinfo for %s\n", keyword);
+               "Fontinfo: Couldn't find fontinfo for %s.", keyword);
     }
 
     return NULL;
@@ -282,14 +282,13 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
 
         if (count >= maxstems) {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "Cannot have more than %d values in fontinfo array:\n  %s\n",
+                   "Cannot have more than %d values in fontinfo array: %s",
                    (int)maxstems, initline);
         }
 
         if (val < 1) {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "Cannot have a value < 1 in fontinfo file array: \n  %s\n",
-                   line);
+                   "Cannot have a value < 1 in fontinfo file array: %s", line);
         }
 
         stems[count++] = val;
