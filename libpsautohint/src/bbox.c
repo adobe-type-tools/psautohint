@@ -72,8 +72,7 @@ FindPathBBox(void)
             case CLOSEPATH:
                 break;
             default: {
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Undefined operator in %s glyph.\n", gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Undefined operator.");
             }
         }
         e = e->next;
@@ -135,8 +134,7 @@ FindSubpathBBox(PPathElt e)
                 goto done;
 #endif
             default: {
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Undefined operator in %s glyph.\n", gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Undefined operator.");
             }
         }
         e = e->next;

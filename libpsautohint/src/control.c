@@ -69,8 +69,7 @@ PointListCheck(PClrPoint new, PClrPoint lst)
             break;
         }
         default: {
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal character in point list in %s.\n", gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Illegal character in point list.");
         }
     }
     if (n1 > n2) {
@@ -848,8 +847,7 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
             gReportRetryCB();
         }
         if (gPathStart == NULL || gPathStart == gPathEnd) {
-            LogMsg(LOGERROR, NONFATALERROR, "No glyph path in %s.\n",
-                   gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "No glyph path.");
         }
 
         /* SaveFile(); SaveFile is always called in AddColorsCleanup, so this is
@@ -877,9 +875,7 @@ AddColorsCleanup(const ACFontInfo* fontinfo)
 
         if (gPathStart == NULL || gPathStart == gPathEnd) {
             LogMsg(LOGERROR, NONFATALERROR,
-                   "The %s glyph path vanished while adding "
-                   "hints.\n",
-                   gGlyphName);
+                   "The glyph path vanished while adding hints.");
         } else {
             SaveFile(fontinfo);
         }
@@ -916,7 +912,7 @@ AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
 {
     int32_t lentop = gLenTopBands, lenbot = gLenBotBands;
     if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
-        LogMsg(LOGERROR, NONFATALERROR, "Cannot parse %s glyph.\n", gGlyphName);
+        LogMsg(LOGERROR, NONFATALERROR, "Cannot parse glyph.");
     }
     AddColors(fontinfo, srcglyph, extracolor);
     gLenTopBands = lentop;

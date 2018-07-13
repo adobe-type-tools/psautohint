@@ -42,8 +42,7 @@ static void
 WriteString(char* str)
 {
     if (!gBezOutput) {
-        LogMsg(LOGERROR, FATALERROR,
-               "NULL output buffer while writing glyph: %s", gGlyphName);
+        LogMsg(LOGERROR, FATALERROR, "NULL output buffer while writing glyph.");
         return;
     }
 
@@ -159,8 +158,7 @@ static void
 safestrcat(char* s1, char* s2)
 {
     if (strlen(s1) + strlen(s2) + 1 > HINTMAXSTR) {
-        LogMsg(LOGERROR, FATALERROR,
-               "ERROR: Hint information overflowing buffer: %s\n", gGlyphName);
+        LogMsg(LOGERROR, FATALERROR, "Hint information overflowing buffer.");
     } else {
         strcat(s1, s2);
     }
@@ -238,8 +236,7 @@ WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst)
             sws(((lst->c == 'y') ? "ry" : "rm"));
             break;
         default: {
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal point list data for glyph: %s.\n", gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Illegal point list data.");
         }
     }
     sws(" % ");
@@ -624,8 +621,7 @@ SaveFile(const ACFontInfo* fontinfo)
                 cp(fontinfo, e);
                 break;
             default: {
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal path list for glyph: %s.\n", gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Illegal path list.");
             }
         }
 #if WRTABS_COMMENT

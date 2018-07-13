@@ -58,8 +58,7 @@ Alloc(int32_t sz)
     vmfree += sz;
     if (vmfree > vmlast) /* Error! need to make VMSIZE bigger */
     {
-        LogMsg(LOGERROR, FATALERROR,
-               "Exceeded VM size for hints in glyph: %s.\n", gGlyphName);
+        LogMsg(LOGERROR, FATALERROR, "Exceeded VM size for hints.");
     }
     return s;
 }

@@ -63,13 +63,11 @@ retry:
         case CLOSEPATH:
             e = GetDest(e);
             if (e == NULL || e->type == CLOSEPATH) {
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Bad character description file: %s.\n", gGlyphName);
+                LogMsg(LOGERROR, NONFATALERROR, "Bad description.");
             }
             goto retry;
         default: {
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Illegal operator in character file: %s.\n", gGlyphName);
+            LogMsg(LOGERROR, NONFATALERROR, "Illegal operator.");
         }
     }
 }
