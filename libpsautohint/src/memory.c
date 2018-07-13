@@ -50,7 +50,7 @@ AllocateMem(size_t nelem, size_t elsize, const char* description)
 
     if (ptr == NULL) {
         LogMsg(LOGERROR, NONFATALERROR,
-               "Cannot allocate %d bytes of memory for %s.\n",
+               "Cannot allocate %d bytes of memory for %s.",
                (int)(nelem * elsize), description);
     }
     return (ptr);
@@ -64,7 +64,7 @@ ReallocateMem(void* ptr, size_t size, const char* description)
 
     if (newptr == NULL) {
         LogMsg(LOGERROR, NONFATALERROR,
-               "Cannot reallocate %d bytes of memory for %s.\n", (int)size,
+               "Cannot reallocate %d bytes of memory for %s.", (int)size,
                description);
     }
     return (newptr);

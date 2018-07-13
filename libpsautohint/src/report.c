@@ -90,7 +90,7 @@ ExpectedMoveTo(PPathElt e)
             s = (char*)"closepath";
             break;
         default:
-            LogMsg(LOGERROR, NONFATALERROR, "Malformed path list.\n");
+            LogMsg(LOGERROR, NONFATALERROR, "Malformed path list.");
             return;
     }
     LogMsg(LOGERROR, NONFATALERROR,
@@ -380,7 +380,7 @@ LogColorInfo(PClrPoint pl)
     if (c == 'y' || c == 'm') { /* vertical lines */
         Fixed lft = pl->x0;
         Fixed rht = pl->x1;
-        LogMsg(LOGDEBUG, OK, "%4g  %-30s%5g%5g\n", FixToDbl(rht - lft),
+        LogMsg(LOGDEBUG, OK, "%4g  %-30s%5g%5g", FixToDbl(rht - lft),
                gGlyphName, FixToDbl(lft), FixToDbl(rht));
     } else {
         Fixed bot = pl->y0;
@@ -388,7 +388,7 @@ LogColorInfo(PClrPoint pl)
         Fixed wdth = top - bot;
         if (wdth == -FixInt(21) || wdth == -FixInt(20))
             return; /* ghost pair */
-        LogMsg(LOGDEBUG, OK, "%4g  %-30s%5g%5g\n", FixToDbl(wdth), gGlyphName,
+        LogMsg(LOGDEBUG, OK, "%4g  %-30s%5g%5g", FixToDbl(wdth), gGlyphName,
                FixToDbl(bot), FixToDbl(top));
     }
 }

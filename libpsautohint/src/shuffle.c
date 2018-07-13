@@ -22,7 +22,7 @@ InitShuffleSubpaths(void)
         if (e->type == MOVETO)
             cnt++;
         if (e->type == MOVETO) {
-            LogMsg(LOGDEBUG, OK, "subpath %d starts at %g %g\n", cnt,
+            LogMsg(LOGDEBUG, OK, "subpath %d starts at %g %g.", cnt,
                    FixToDbl(itfmx(e->x)), FixToDbl(itfmy(e->y)));
         }
         e->count = (int16_t)cnt;
@@ -123,7 +123,7 @@ MarkLinks(PClrVal vL, bool hFlg)
             ShowHVal(vL);
         else
             ShowVVal(vL);
-        LogMsg(LOGDEBUG, OK, " : %d <-> %d\n", i, j);
+        LogMsg(LOGDEBUG, OK, " : %d <-> %d", i, j);
         links[rowcnt * i + j] = 1;
         links[rowcnt * j + i] = 1;
     }
@@ -142,7 +142,7 @@ Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
         e = e->next;
     }
     MoveSubpathToEnd(e);
-    LogMsg(LOGDEBUG, OK, "move subpath %d to end\n", bst);
+    LogMsg(LOGDEBUG, OK, "move subpath %d to end.", bst);
     output[bst] = 1;
     lnks = &links[bst * rowcnt];
     outlnks = outlinks;
