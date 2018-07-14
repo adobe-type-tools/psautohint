@@ -43,7 +43,7 @@ RoundPathCoords(void)
 }
 
 static int32_t
-CheckForClr(void)
+CheckForHint(void)
 {
     PPathElt mt, cp;
     mt = gPathStart;
@@ -95,7 +95,7 @@ PreCheckForHinting(void)
         e = e->next;
     }
     while (true) {
-        int32_t chk = CheckForClr();
+        int32_t chk = CheckForHint();
         if (chk == -1)
             return false;
         if (chk == 0)

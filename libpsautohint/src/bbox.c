@@ -176,7 +176,7 @@ FindCurveBBox(Fixed x0, Fixed y0, Fixed px1, Fixed py1, Fixed px2, Fixed py2,
 }
 
 void
-ClrVBnds(void)
+HintVBnds(void)
 {
     PPathElt p;
     if (gPathStart == NULL || VHintGlyph())
@@ -198,13 +198,13 @@ ClrVBnds(void)
 }
 
 void
-ReClrVBnds(void)
+ReHintVBnds(void)
 {
     AddHintPoint(vMn, 0, vMx, 0, 'y', pvMn, pvMx);
 }
 
 void
-ClrHBnds(void)
+HintHBnds(void)
 {
     if (gPathStart == NULL || HHintGlyph())
         return;
@@ -226,13 +226,13 @@ ClrHBnds(void)
 }
 
 void
-ReClrHBnds(void)
+ReHintHBnds(void)
 {
     AddHintPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
 }
 
 static bool
-CheckValOverlaps(Fixed lft, Fixed rht, PClrVal lst, bool xflg)
+CheckValOverlaps(Fixed lft, Fixed rht, PHintVal lst, bool xflg)
 {
     Fixed tmp;
     if (xflg) {
@@ -273,8 +273,8 @@ void
 AddBBoxHV(bool Hflg, bool subs)
 {
     PPathElt e;
-    PClrVal val;
-    PClrSeg seg1, seg2;
+    PHintVal val;
+    PHintSeg seg1, seg2;
     e = gPathStart;
     while (e != NULL) {
         if (subs)
@@ -285,8 +285,8 @@ AddBBoxHV(bool Hflg, bool subs)
         }
         if (!Hflg) {
             if (!CheckValOverlaps(xmin, xmax, gVHinting, true)) {
-                val = (PClrVal)Alloc(sizeof(ClrVal));
-                seg1 = (PClrSeg)Alloc(sizeof(ClrSeg));
+                val = (PHintVal)Alloc(sizeof(HintVal));
+                seg1 = (PHintSeg)Alloc(sizeof(HintSeg));
                 seg1->sLoc = xmin;
                 seg1->sElt = pxmn;
                 seg1->sBonus = 0;
@@ -295,7 +295,7 @@ AddBBoxHV(bool Hflg, bool subs)
                 seg1->sMax = ymax;
                 seg1->sNxt = NULL;
                 seg1->sLnk = NULL;
-                seg2 = (PClrSeg)Alloc(sizeof(ClrSeg));
+                seg2 = (PHintSeg)Alloc(sizeof(HintSeg));
                 seg2->sLoc = xmax;
                 seg2->sElt = pxmx;
                 seg2->sBonus = 0;
@@ -317,8 +317,8 @@ AddBBoxHV(bool Hflg, bool subs)
             }
         } else {
             if (!CheckValOverlaps(ymin, ymax, gHHinting, false)) {
-                val = (PClrVal)Alloc(sizeof(ClrVal));
-                seg1 = (PClrSeg)Alloc(sizeof(ClrSeg));
+                val = (PHintVal)Alloc(sizeof(HintVal));
+                seg1 = (PHintSeg)Alloc(sizeof(HintSeg));
                 seg1->sLoc = ymax;
                 seg1->sElt = pymx;
                 seg1->sBonus = 0;
@@ -327,7 +327,7 @@ AddBBoxHV(bool Hflg, bool subs)
                 seg1->sMax = xmax;
                 seg1->sNxt = NULL;
                 seg1->sLnk = NULL;
-                seg2 = (PClrSeg)Alloc(sizeof(ClrSeg));
+                seg2 = (PHintSeg)Alloc(sizeof(HintSeg));
                 seg2->sLoc = ymin;
                 seg2->sElt = pymn;
                 seg2->sBonus = 0;
@@ -352,7 +352,7 @@ AddBBoxHV(bool Hflg, bool subs)
 }
 
 void
-ClrBBox(void)
+HintBBox(void)
 {
     Fixed tmp;
     PPathElt p, p0, p1;

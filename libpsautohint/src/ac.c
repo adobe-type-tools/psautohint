@@ -23,12 +23,12 @@ Fixed gPruneA, gPruneB, gPruneC, gPruneD, gPruneValue, gBonus;
 float gTheta, gHBigDistR, gVBigDistR, gMaxVal, gMinVal;
 int32_t gLenTopBands, gLenBotBands, gNumSerifs, gDMin, gDelta, gCPpercent;
 int32_t gBendTan, gSCurveTan;
-PClrVal gVHinting, gHHinting, gVPrimary, gHPrimary, gValList;
-PClrSeg gSegLists[4];
+PHintVal gVHinting, gHHinting, gVPrimary, gHPrimary, gValList;
+PHintSeg gSegLists[4];
 Fixed gVStems[MAXSTEMS], gHStems[MAXSTEMS];
 int32_t gNumVStems, gNumHStems;
 Fixed gTopBands[MAXBLUES], gBotBands[MAXBLUES], gSerifs[MAXSERIFS];
-PClrPoint gPointList, *gPtLstArray;
+PHintPoint gPointList, *gPtLstArray;
 int32_t gPtLstIndex, gNumPtLsts, gMaxPtLsts;
 bool gWriteHintedBez = true;
 Fixed gBlueFuzz;
@@ -125,13 +125,13 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             /* ?? Does this cause a leak ?? */
             gPointList = NULL;
             gMaxPtLsts = 5;
-            gPtLstArray = (PClrPoint*)Alloc(gMaxPtLsts * sizeof(PClrPoint));
+            gPtLstArray = (PHintPoint*)Alloc(gMaxPtLsts * sizeof(PHintPoint));
             gPtLstIndex = 0;
             gPtLstArray[0] = NULL;
             gNumPtLsts = 1;
 
             /*     if (glyphName != NULL && glyphName[0] == 'g')
-                   showClrInfo = showHs = showVs = listClrInfo = true; */
+                   showHintInfo = showHs = showVs = listHintInfo = true; */
     }
 }
 

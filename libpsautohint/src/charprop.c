@@ -270,7 +270,7 @@ AddSolEol(void)
 }
 
 bool
-MoveToNewClrs(void)
+MoveToNewHints(void)
 {
     return StrEqual(gGlyphName, "percent") ||
            StrEqual(gGlyphName, "perthousand");

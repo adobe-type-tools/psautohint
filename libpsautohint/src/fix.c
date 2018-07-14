@@ -109,7 +109,7 @@ CheckForNearBands(Fixed loc, Fixed* blues, int32_t numblues)
 }
 
 bool
-FindLineSeg(Fixed loc, PClrSeg sL)
+FindLineSeg(Fixed loc, PHintSeg sL)
 {
     while (sL != NULL) {
         if (sL->sLoc == loc && sL->sType == sLINE)
@@ -124,9 +124,9 @@ FindLineSeg(Fixed loc, PClrSeg sL)
    the horizontal alignment zones. The list contains
    segments that may or may not have hints added. */
 void
-CheckTfmVal(PClrSeg hSegList, Fixed* bandList, int32_t length)
+CheckTfmVal(PHintSeg hSegList, Fixed* bandList, int32_t length)
 {
-    PClrSeg sList = hSegList;
+    PHintSeg sList = hSegList;
 
     while (sList != NULL) {
         Fixed tfmval = itfmy(sList->sLoc);
@@ -156,7 +156,7 @@ CheckTfmVal(Fixed b, Fixed t, bool vert)
 #endif
 
 void
-CheckVal(PClrVal val, bool vert)
+CheckVal(PHintVal val, bool vert)
 {
     Fixed* stems;
     int32_t numstems, i;
@@ -204,7 +204,7 @@ CheckVal(PClrVal val, bool vert)
 }
 
 void
-CheckVals(PClrVal vlst, bool vert)
+CheckVals(PHintVal vlst, bool vert)
 {
     while (vlst != NULL) {
         CheckVal(vlst, vert);
