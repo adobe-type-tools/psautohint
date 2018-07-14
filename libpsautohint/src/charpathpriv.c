@@ -29,17 +29,17 @@ CheckPath(void)
 {
 
     if (currPathList->path == NULL) {
-        currPathList->path = (CharPathElt*)AllocateMem(
-          maxPathEntries, sizeof(CharPathElt), "path element array");
+        currPathList->path = (GlyphPathElt*)AllocateMem(
+          maxPathEntries, sizeof(GlyphPathElt), "path element array");
     }
     if (gPathEntries >= maxPathEntries) {
         int i;
 
         maxPathEntries += MAXPATHELT;
-        currPathList->path = (PCharPathElt)ReallocateMem(
-          (char*)currPathList->path, maxPathEntries * sizeof(CharPathElt),
+        currPathList->path = (PGlyphPathElt)ReallocateMem(
+          (char*)currPathList->path, maxPathEntries * sizeof(GlyphPathElt),
           "path element array");
-        /* Initialize certain fields in CharPathElt, since realloc'ed memory */
+        /* Initialize certain fields in GlyphPathElt, since realloc'ed memory */
         /* may be non-zero. */
         for (i = gPathEntries; i < maxPathEntries; i++) {
             currPathList->path[i].hints = NULL;
@@ -51,8 +51,8 @@ CheckPath(void)
     }
 }
 
-PCharPathElt
-AppendCharPathElement(int pathtype)
+PGlyphPathElt
+AppendGlyphPathElement(int pathtype)
 {
 
     CheckPath();
@@ -61,7 +61,7 @@ AppendCharPathElement(int pathtype)
     return (&currPathList->path[gPathEntries - 1]);
 }
 
-/* Called from CompareCharPaths when a new glyph is being read. */
+/* Called from CompareGlyphPaths when a new glyph is being read. */
 void
 ResetMaxPathEntries(void)
 {

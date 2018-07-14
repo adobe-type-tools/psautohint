@@ -173,7 +173,7 @@ chkDT(Cd c)
             abs(cy1 - yflatendy) > SDELTA) {
             if ((ystart == goingUP && yflatstarty - yflatendy > SDELTA) ||
                 (ystart == goingDOWN && yflatendy - yflatstarty > SDELTA)) {
-                if (gEditChar && !forMultiMaster)
+                if (gEditGlyph && !forMultiMaster)
                     chkBad();
                 return;
             }
@@ -203,7 +203,7 @@ chkDT(Cd c)
             abs(x1 - xflatendx) > SDELTA) {
             if ((xstart == goingUP && xflatstartx - xflatendx > SDELTA) ||
                 (xstart == goingDOWN && xflatendx - xflatstartx > SDELTA)) {
-                if (gEditChar && !forMultiMaster)
+                if (gEditGlyph && !forMultiMaster)
                     chkBad();
                 return;
             }

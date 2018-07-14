@@ -102,10 +102,10 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     /* Check for counter coloring glyphs. */
     fontinfostr = GetFontInfo(fontinfo, "VCounterChars", ACOPTIONAL);
     if (fontinfostr != NULL)
-        gNumVColors = AddCounterColorChars(fontinfostr, gVColorList);
+        gNumVColors = AddCounterColorGlyphs(fontinfostr, gVColorList);
     fontinfostr = GetFontInfo(fontinfo, "HCounterChars", ACOPTIONAL);
     if (fontinfostr != NULL)
-        gNumHColors = AddCounterColorChars(fontinfostr, gHColorList);
+        gNumHColors = AddCounterColorGlyphs(fontinfostr, gHColorList);
 
     GetKeyValue(fontinfo, "AscenderHeight", ACOPTIONAL, &AscenderHeight);
     GetKeyValue(fontinfo, "AscenderOvershoot", ACOPTIONAL, &AscenderOvershoot);

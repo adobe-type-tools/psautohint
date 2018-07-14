@@ -18,10 +18,10 @@ char* gHColorList[] = {
     NULL,      NULL,          NULL,         NULL,     NULL, NULL
 };
 
-static char* UpperSpecialChars[] = { "questiondown", "exclamdown", "semicolon",
-                                     NULL };
+static char* UpperSpecialGlyphs[] = { "questiondown", "exclamdown", "semicolon",
+                                      NULL };
 
-static char* LowerSpecialChars[] = { "question", "exclam", "colon", NULL };
+static char* LowerSpecialGlyphs[] = { "question", "exclam", "colon", NULL };
 
 static char* NoBlueList[] = { "at",       "bullet",     "copyright",
                               "currency", "registered", NULL };
@@ -88,7 +88,7 @@ FindNameInList(char* nm, char** lst)
 
 /* Adds specified glyphs to CounterColorList array. */
 int
-AddCounterColorChars(char* charlist, char* ColorList[])
+AddCounterColorGlyphs(char* charlist, char* ColorList[])
 {
     const char* setList = "(), \t\n\r";
     char* token;
@@ -121,36 +121,36 @@ AddCounterColorChars(char* charlist, char* ColorList[])
 }
 
 int32_t
-SpecialCharType(void)
+SpecialGlyphType(void)
 {
     /* 1 = upper; -1 = lower; 0 = neither */
-    if (FindNameInList(gGlyphName, UpperSpecialChars))
+    if (FindNameInList(gGlyphName, UpperSpecialGlyphs))
         return 1;
-    if (FindNameInList(gGlyphName, LowerSpecialChars))
+    if (FindNameInList(gGlyphName, LowerSpecialGlyphs))
         return -1;
     return 0;
 }
 
 bool
-HColorChar(void)
+HColorGlyph(void)
 {
     return FindNameInList(gGlyphName, gHColorList);
 }
 
 bool
-VColorChar(void)
+VColorGlyph(void)
 {
     return FindNameInList(gGlyphName, gVColorList);
 }
 
 bool
-NoBlueChar(void)
+NoBlueGlyph(void)
 {
     return FindNameInList(gGlyphName, NoBlueList);
 }
 
 int32_t
-SolEolCharCode(void)
+SolEolGlyphCode(void)
 {
     if (FindNameInList(gGlyphName, SolEol0List))
         return 0;
@@ -166,7 +166,7 @@ SolEolCharCode(void)
 bool
 SpecialSolEol(void)
 {
-    int32_t code = SolEolCharCode();
+    int32_t code = SolEolGlyphCode();
     int32_t count;
     if (code == 2)
         return false;
@@ -256,7 +256,7 @@ AddSolEol(void)
         return;
     if (!SpecialSolEol())
         return;
-    switch (SolEolCharCode()) {
+    switch (SolEolGlyphCode()) {
         /* 1 means upper, -1 means lower, 0 means all */
         case 0:
             SolEolAll();

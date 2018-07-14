@@ -32,10 +32,10 @@ AddHStem(Fixed right, Fixed left, bool curved)
 }
 
 void
-AddCharExtremes(Fixed bot, Fixed top)
+AddGlyphExtremes(Fixed bot, Fixed top)
 {
-    if (gAddCharExtremesCB != NULL) {
-        gAddCharExtremesCB(top, bot, gGlyphName);
+    if (gAddGlyphExtremesCB != NULL) {
+        gAddGlyphExtremesCB(top, bot, gGlyphName);
     }
 }
 

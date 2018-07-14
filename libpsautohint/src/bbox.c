@@ -179,7 +179,7 @@ void
 ClrVBnds(void)
 {
     PPathElt p;
-    if (gPathStart == NULL || VColorChar())
+    if (gPathStart == NULL || VColorGlyph())
         return;
     FindPathBBox();
     vMn = itfmx(xmin);
@@ -206,7 +206,7 @@ ReClrVBnds(void)
 void
 ClrHBnds(void)
 {
-    if (gPathStart == NULL || HColorChar())
+    if (gPathStart == NULL || HColorGlyph())
         return;
     FindPathBBox();
     hMn = itfmy(ymin);

@@ -19,7 +19,7 @@ typedef struct _t_hintelt {
   int32_t pathix1, pathix2;
   } HintElt, *PHintElt;
   
-typedef struct _t_charpathelt {
+typedef struct _t_glyphpathelt {
   int16_t type; /* RMT, RDT, RCT, CP */
   /* the following fields must be cleared in charpathpriv.c/CheckPath */
   bool isFlex:1, sol:1, eol:1, remove:1;
@@ -27,10 +27,10 @@ typedef struct _t_charpathelt {
   PHintElt hints;
   Fixed x, y, x1, y1, x2, y2, x3, y3; /* absolute coordinates */
   int32_t rx, ry, rx1, ry1, rx2, ry2, rx3, ry3;  /* relative coordinates */
-  } CharPathElt, *PCharPathElt;
+  } GlyphPathElt, *PGlyphPathElt;
 
 typedef struct _t_pathlist {
-  PCharPathElt path;
+  PGlyphPathElt path;
   PHintElt mainhints;
   int32_t sb;
   int16_t width;
@@ -39,7 +39,7 @@ typedef struct _t_pathlist {
 extern int32_t gPathEntries;  /* number of elements in a glyph path */
 extern bool gAddHints;  /* whether to include hints in the font */
 
-PCharPathElt AppendCharPathElement(int);
+PGlyphPathElt AppendGlyphPathElement(int);
 
 void ResetMaxPathEntries(void);
 

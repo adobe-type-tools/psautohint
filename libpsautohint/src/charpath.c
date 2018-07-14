@@ -160,7 +160,7 @@ GetNextMTIx(indx mIx, indx pathIx)
 static void
 GetEndPoint1(indx mIx, int32_t pathIx, Fixed* ptX, Fixed* ptY)
 {
-    PCharPathElt pathElt = &pathlist[mIx].path[pathIx];
+    PGlyphPathElt pathElt = &pathlist[mIx].path[pathIx];
 
 retry:
     switch (pathElt->type) {
@@ -301,7 +301,7 @@ static bool
 ChangetoCurve(indx mIx, indx pathIx)
 {
     Cd start = { 0, 0 }, end = { 0, 0 }, ctl1, ctl2;
-    PCharPathElt pathElt = &pathlist[mIx].path[pathIx];
+    PGlyphPathElt pathElt = &pathlist[mIx].path[pathIx];
 
     if (pathElt->type == RCT)
         return true;
@@ -345,7 +345,7 @@ AddLine(indx mIx, indx pathIx)
     Fixed fixTwo = IntToFix(2);
     Fixed xoffset = 0, yoffset = 0;
     Fixed xoffsetr = 0, yoffsetr = 0;
-    PCharPathElt start, end, thisone;
+    PGlyphPathElt start, end, thisone;
     indx i, n;
 
     if (pathlist[mIx].path[pathIx].type != RCT) {
@@ -405,7 +405,7 @@ AddLine(indx mIx, indx pathIx)
     /* Now, fix up the following MT's rx1, ry1 values
      This fixes a LOOOONG-standing bug.    renner Wed Jul 16 09:33:50 1997*/
     if ((n = GetNextMTIx(mIx, pathIx)) > 0) {
-        PCharPathElt nxtone = &(pathlist[mIx].path[n]);
+        PGlyphPathElt nxtone = &(pathlist[mIx].path[n]);
         nxtone->rx += (-xoffsetr);
         nxtone->ry += (-yoffsetr);
     }
@@ -413,7 +413,7 @@ AddLine(indx mIx, indx pathIx)
 
 #define PI 3.1415926535
 static void
-BestLine(PCharPathElt start, PCharPathElt end, Fixed* dx, Fixed* dy)
+BestLine(PGlyphPathElt start, PGlyphPathElt end, Fixed* dx, Fixed* dy)
 {
     double angle;
     /* control point differences */
@@ -504,8 +504,8 @@ AddLineCube(indx mIx, indx pathIx)
     } else if (pathlist[mIx].path[pathIx].type == RCT) {
         Fixed dx = 0;
         Fixed dy = 0;
-        PCharPathElt start;
-        PCharPathElt end;
+        PGlyphPathElt start;
+        PGlyphPathElt end;
         indx mt; /* index of the moveto preceding this path */
 
         mt = GetMTIx(mIx, pathIx);
@@ -562,7 +562,7 @@ CheckForZeroLengthCP(void)
  number of points and in the same path order.  If this isn't the
  case the glyph is not included in the font. */
 static bool
-CompareCharPaths(const ACFontInfo* fontinfo, const char** glyphs)
+CompareGlyphPaths(const ACFontInfo* fontinfo, const char** glyphs)
 {
     indx mIx, ix, i;
     int32_t totalPathElt, minPathLen;
@@ -697,7 +697,7 @@ CurveBBox(indx mIx, int16_t hinttype, int32_t pathIx, Fixed* value)
     Cd startPt, endPt;
     Fixed llx, lly, urx, ury, minval = 0, maxval = 0;
     Fixed p1 = 0, p2 = 0, *minbx = 0, *maxbx = 0;
-    CharPathElt pathElt;
+    GlyphPathElt pathElt;
 
     *value = IntToFix(10000);
     pathElt = pathlist[mIx].path[pathIx];
@@ -986,7 +986,7 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
     indx ix, j;
     Cd startPt, endPt;
     PHintElt *hintElt, newEntry;
-    CharPathElt pathElt;
+    GlyphPathElt pathElt;
     int32_t pathIx;
     int16_t pathtype, hinttype = currHintElt->type;
     Fixed *value, ghostVal = 0, tempVal;
@@ -1168,7 +1168,7 @@ CheckFlexOK(indx ix)
 {
     indx i;
     bool flexOK = pathlist[hintsMasterIx].path[ix].isFlex;
-    PCharPathElt end;
+    PGlyphPathElt end;
 
     for (i = 0; i < masterCount; i++) {
         if (i == hintsMasterIx)
@@ -1843,7 +1843,7 @@ WritePathElt(indx mIx, indx eltIx, int16_t pathType, indx startix,
              int16_t length)
 {
     Cd c1, c2, c3;
-    PCharPathElt path, path0;
+    PGlyphPathElt path, path0;
 
     path = &pathlist[mIx].path[eltIx];
     path0 = &pathlist[0].path[eltIx];
@@ -1936,8 +1936,8 @@ OptimizeMtorDt(indx eltix, int16_t* op, bool* xequal, bool* yequal)
 static bool
 CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
 {
-    PCharPathElt path1 = &pathlist[dir1].path[eltIx],
-                 path2 = &pathlist[dir2].path[eltIx];
+    PGlyphPathElt path1 = &pathlist[dir1].path[eltIx],
+                  path2 = &pathlist[dir2].path[eltIx];
 
     switch (opIx) {
         case 0:
@@ -1986,7 +1986,7 @@ static bool
 SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
 {
     indx ix, mIx;
-    /*  PCharPathElt path0 = &pathlist[0].path[eltIx]; */
+    /*  PGlyphPathElt path0 = &pathlist[0].path[eltIx]; */
     bool same = true;
 
     for (ix = 0; ix < length; ix++) {
@@ -2023,7 +2023,7 @@ WritePaths(char** outBuffers, size_t* outLengths)
 
         WriteToBuffer("sc\n");
         for (eltix = 0; eltix < gPathEntries; eltix++) {
-            CharPathElt elt = path.path[eltix];
+            GlyphPathElt elt = path.path[eltix];
             op = elt.type;
 
             /* Use non-relative operators for easy comparison with input,
@@ -2346,8 +2346,9 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
  *************/
 
 bool
-MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
-               const char** masters, char** outbuffers, size_t* outlengths)
+MergeGlyphPaths(const ACFontInfo* fontinfo, const char** srcglyphs,
+                int nmasters, const char** masters, char** outbuffers,
+                size_t* outlengths)
 {
     bool ok;
     /* This requires that  master  hintsMasterIx has already been hinted with
@@ -2355,7 +2356,7 @@ MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs, int nmasters,
     masterCount = nmasters;
     masterNames = masters;
 
-    ok = CompareCharPaths(fontinfo, srcglyphs);
+    ok = CompareGlyphPaths(fontinfo, srcglyphs);
     if (ok) {
         CheckForZeroLengthCP();
         SetSbandWidth();
