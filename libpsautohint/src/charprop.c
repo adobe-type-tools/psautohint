@@ -9,14 +9,13 @@
 
 #include "ac.h"
 
-char* gVColorList[] = { "m",  "M",  "T",  "ellipsis", NULL, NULL, NULL,
-                        NULL, NULL, NULL, NULL,       NULL, NULL, NULL,
-                        NULL, NULL, NULL, NULL,       NULL, NULL };
-char* gHColorList[] = {
-    "element", "equivalence", "notelement", "divide", NULL, NULL, NULL,
-    NULL,      NULL,          NULL,         NULL,     NULL, NULL, NULL,
-    NULL,      NULL,          NULL,         NULL,     NULL, NULL
-};
+char* gVHintList[] = { "m",  "M",  "T",  "ellipsis", NULL, NULL, NULL,
+                       NULL, NULL, NULL, NULL,       NULL, NULL, NULL,
+                       NULL, NULL, NULL, NULL,       NULL, NULL };
+char* gHHintList[] = { "element", "equivalence", "notelement", "divide", NULL,
+                       NULL,      NULL,          NULL,         NULL,     NULL,
+                       NULL,      NULL,          NULL,         NULL,     NULL,
+                       NULL,      NULL,          NULL,         NULL,     NULL };
 
 static char* UpperSpecialGlyphs[] = { "questiondown", "exclamdown", "semicolon",
                                       NULL };
@@ -86,9 +85,9 @@ FindNameInList(char* nm, char** lst)
     }
 }
 
-/* Adds specified glyphs to CounterColorList array. */
+/* Adds specified glyphs to CounterHintList array. */
 int
-AddCounterColorGlyphs(char* charlist, char* ColorList[])
+AddCounterHintGlyphs(char* charlist, char* HintList[])
 {
     const char* setList = "(), \t\n\r";
     char* token;
@@ -103,9 +102,9 @@ AddCounterColorGlyphs(char* charlist, char* ColorList[])
             token = (char*)strtok(NULL, setList);
         if (token == NULL)
             break;
-        if (FindNameInList(token, ColorList))
+        if (FindNameInList(token, HintList))
             continue;
-        /* Currently, ColorList must end with a NULL pointer. */
+        /* Currently, HintList must end with a NULL pointer. */
         if (ListEntries == (COUNTERLISTSIZE - 1)) {
             LogMsg(WARNING, OK,
                    "Exceeded counter hints list size. (maximum is %d.) "
@@ -113,9 +112,9 @@ AddCounterColorGlyphs(char* charlist, char* ColorList[])
                    (int)COUNTERLISTSIZE, token);
             break;
         }
-        ColorList[ListEntries] =
+        HintList[ListEntries] =
           AllocateMem(1, strlen(token) + 1, "counter hints list");
-        strcpy(ColorList[ListEntries++], token);
+        strcpy(HintList[ListEntries++], token);
     }
     return (ListEntries - COUNTERDEFAULTENTRIES);
 }
@@ -132,15 +131,15 @@ SpecialGlyphType(void)
 }
 
 bool
-HColorGlyph(void)
+HHintGlyph(void)
 {
-    return FindNameInList(gGlyphName, gHColorList);
+    return FindNameInList(gGlyphName, gHHintList);
 }
 
 bool
-VColorGlyph(void)
+VHintGlyph(void)
 {
-    return FindNameInList(gGlyphName, gVColorList);
+    return FindNameInList(gGlyphName, gVHintList);
 }
 
 bool

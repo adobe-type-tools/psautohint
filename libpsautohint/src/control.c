@@ -81,7 +81,7 @@ PointListCheck(PClrPoint new, PClrPoint lst)
         if (lst == NULL) {
             return -1;
         }
-        if (lst->c == ch) { /* same kind of color */
+        if (lst->c == ch) { /* same kind of hint */
             switch (ch) {
                 case 'y':
                 case 'm': {
@@ -106,7 +106,7 @@ PointListCheck(PClrPoint new, PClrPoint lst)
             }
             /* Add this extra margin to the band to fix a problem in
              TimesEuropa/Italic/v,w,y where a main hstem hint was
-             being merged with newcolors. This main hstem caused
+             being merged with newhints. This main hstem caused
              problems in rasterization so it shouldn't be included. */
             l1 -= halfMargin;
             l2 += halfMargin;
@@ -119,7 +119,7 @@ PointListCheck(PClrPoint new, PClrPoint lst)
 }
 
 static bool
-SameColorLists(PClrPoint lst1, PClrPoint lst2)
+SameHintLists(PClrPoint lst1, PClrPoint lst2)
 {
     if (PtLstLen(lst1) != PtLstLen(lst2)) {
         return false;
@@ -134,16 +134,16 @@ SameColorLists(PClrPoint lst1, PClrPoint lst2)
 }
 
 bool
-SameColors(int32_t cn1, int32_t cn2)
+SameHints(int32_t cn1, int32_t cn2)
 {
     if (cn1 == cn2) {
         return true;
     }
-    return SameColorLists(gPtLstArray[cn1], gPtLstArray[cn2]);
+    return SameHintLists(gPtLstArray[cn1], gPtLstArray[cn2]);
 }
 
 void
-MergeFromMainColors(char ch)
+MergeFromMainHints(char ch)
 {
     PClrPoint lst;
     for (lst = gPtLstArray[0]; lst != NULL; lst = lst->next) {
@@ -152,17 +152,17 @@ MergeFromMainColors(char ch)
         }
         if (PointListCheck(lst, gPointList) == -1) {
             if (ch == 'b') {
-                AddColorPoint(0, lst->y0, 0, lst->y1, ch, lst->p0, lst->p1);
+                AddHintPoint(0, lst->y0, 0, lst->y1, ch, lst->p0, lst->p1);
             } else {
-                AddColorPoint(lst->x0, 0, lst->x1, 0, ch, lst->p0, lst->p1);
+                AddHintPoint(lst->x0, 0, lst->x1, 0, ch, lst->p0, lst->p1);
             }
         }
     }
 }
 
 void
-AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
-              PPathElt p1)
+AddHintPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
+             PPathElt p1)
 {
     PClrPoint pt;
     int32_t chk;
@@ -178,12 +178,12 @@ AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
     pt->p1 = p1;
     chk = PointListCheck(pt, gPointList);
     if (chk == 0) {
-        ReportColorConflict(x0, y0, x1, y1, ch);
+        ReportHintConflict(x0, y0, x1, y1, ch);
     }
     if (chk == -1) {
         pt->next = gPointList;
         gPointList = pt;
-        LogColorInfo(gPointList);
+        LogHintInfo(gPointList);
     }
 }
 
@@ -194,9 +194,9 @@ CopyClrFromLst(char clr, PClrPoint lst)
     while (lst != NULL) {
         if (lst->c == clr) {
             if (bvflg) {
-                AddColorPoint(0, lst->y0, 0, lst->y1, clr, lst->p0, lst->p1);
+                AddHintPoint(0, lst->y0, 0, lst->y1, clr, lst->p0, lst->p1);
             } else {
-                AddColorPoint(lst->x0, 0, lst->x1, 0, clr, lst->p0, lst->p1);
+                AddHintPoint(lst->x0, 0, lst->x1, 0, clr, lst->p0, lst->p1);
             }
         }
         lst = lst->next;
@@ -245,7 +245,7 @@ AddHPair(PClrVal v, char ch)
             bot = top + FixInt(21); /* width == -21 iff top seg is ghost */
         }
     }
-    AddColorPoint(0, bot, 0, top, ch, p0, p1);
+    AddHintPoint(0, bot, 0, top, ch, p0, p1);
 }
 
 void
@@ -265,7 +265,7 @@ AddVPair(PClrVal v, char ch)
         p0 = p1;
         p1 = p;
     }
-    AddColorPoint(lft, 0, rght, 0, ch, p0, p1);
+    AddHintPoint(lft, 0, rght, 0, ch, p0, p1);
 }
 
 static bool
@@ -325,9 +325,9 @@ UseCounter(PClrVal sLst, bool mclr)
     if (abs(minDelta - maxDelta) < th &&
         abs((maxLoc - midLoc) - (midLoc - minLoc)) < th) {
         if (mclr) {
-            gVColoring = newLst;
+            gVHinting = newLst;
         } else {
-            gHColoring = newLst;
+            gHHinting = newLst;
         }
         return true;
     }
@@ -362,13 +362,13 @@ GetNewPtLst(void)
 void
 XtraClrs(PPathElt e)
 {
-    /* this can be simplified for standalone coloring */
+    /* this can be simplified for standalone hinting */
     gPtLstArray[gPtLstIndex] = gPointList;
-    if (e->newcolors == 0) {
+    if (e->newhints == 0) {
         GetNewPtLst();
-        e->newcolors = (int16_t)gPtLstIndex;
+        e->newhints = (int16_t)gPtLstIndex;
     }
-    gPtLstIndex = e->newcolors;
+    gPtLstIndex = e->newhints;
     gPointList = gPtLstArray[gPtLstIndex];
 }
 
@@ -491,7 +491,7 @@ Blues(const ACFontInfo* fontinfo)
                             scale weight by  of *(largest stem hint in HStems)/
     dy)**3.
 
-     AddHValue() decides whether add a (bottom, top)  pair of color segments.
+     AddHValue() decides whether add a (bottom, top)  pair of hint segments.
      Do not add the pair if:
      if weight (val) is 0,
      if both are sBEND segments
@@ -508,8 +508,8 @@ Blues(const ACFontInfo* fontinfo)
      item->vSpc = spc; # priority
      item->vLoc1 = bot; # bottom Y value in Fixed 18.14
      item->vLoc2 = top; # top Y value in Fixed 18.14
-     item->vSeg1 = bSeg; # bottom color segment
-     item->vSeg2 = tSeg; # top color segment
+     item->vSeg1 = bSeg; # bottom hint segment
+     item->vSeg2 = tSeg; # top hint segment
      item->vGhst = ghst; # if it is a ghost segment.
      The new item is inserted after the first element where vlist->vLoc2 >= top
     and vlist->vLoc1 >= bottom
@@ -546,7 +546,7 @@ Blues(const ACFontInfo* fontinfo)
     }
     GenHPts();
     LogMsg(LOGDEBUG, OK, "evaluate");
-    if (!CounterFailed && HColorGlyph()) {
+    if (!CounterFailed && HHintGlyph()) {
         pv = gPruneValue;
         gPruneValue = (Fixed)gMinVal;
         pa = gPruneA;
@@ -569,19 +569,19 @@ Blues(const ACFontInfo* fontinfo)
     CheckVals(gValList, false);
     DoHStems(fontinfo, gValList); /* Report stems and alignment zones, if this
                                     has been requested. */
-    PickHVals(gValList); /* Moves best ClrVal items from valList to Hcoloring
+    PickHVals(gValList); /* Moves best ClrVal items from valList to Hhinting
                            list. (? Choose from set of ClrVals for the samte
                            stem values.) */
-    if (!CounterFailed && HColorGlyph()) {
+    if (!CounterFailed && HHintGlyph()) {
         gPruneValue = pv;
         gPruneD = pd;
         gPruneC = pc;
         gPruneB = pb;
         gPruneA = pa;
-        gUseH = UseCounter(gHColoring, false);
+        gUseH = UseCounter(gHHinting, false);
         if (!gUseH) { /* try to fix */
             AddBBoxHV(true, true);
-            gUseH = UseCounter(gHColoring, false);
+            gUseH = UseCounter(gHHinting, false);
             if (!gUseH) { /* still bad news */
                 LogMsg(INFO, OK,
                        "Glyph is in list for using H counter hints, "
@@ -592,16 +592,16 @@ Blues(const ACFontInfo* fontinfo)
     } else {
         gUseH = false;
     }
-    if (gHColoring == NULL) {
+    if (gHHinting == NULL) {
         AddBBoxHV(true, false);
     }
     LogMsg(LOGDEBUG, OK, "results");
     LogMsg(LOGDEBUG, OK, gUseH ? "rv" : "rb");
-    ShowHVals(gHColoring);
+    ShowHVals(gHHinting);
     if (gUseH) {
         LogMsg(INFO, OK, "Using H counter hints.");
     }
-    sLst = gHColoring;
+    sLst = gHHinting;
     while (sLst != NULL) {
         AddHPair(sLst, gUseH ? 'v' : 'b'); /* actually adds hint */
         sLst = sLst->vNxt;
@@ -658,7 +658,7 @@ Yellows(void)
     LogMsg(LOGDEBUG, OK, "generate yellows");
     GenVPts(SpecialGlyphType());
     LogMsg(LOGDEBUG, OK, "evaluate");
-    if (!CounterFailed && VColorGlyph()) {
+    if (!CounterFailed && VHintGlyph()) {
         pv = gPruneValue;
         gPruneValue = (Fixed)gMinVal;
         pa = gPruneA;
@@ -680,16 +680,16 @@ Yellows(void)
     CheckVals(gValList, true);
     DoVStems(gValList);
     PickVVals(gValList);
-    if (!CounterFailed && VColorGlyph()) {
+    if (!CounterFailed && VHintGlyph()) {
         gPruneValue = pv;
         gPruneD = pd;
         gPruneC = pc;
         gPruneB = pb;
         gPruneA = pa;
-        gUseV = UseCounter(gVColoring, true);
+        gUseV = UseCounter(gVHinting, true);
         if (!gUseV) { /* try to fix */
             AddBBoxHV(false, true);
-            gUseV = UseCounter(gVColoring, true);
+            gUseV = UseCounter(gVHinting, true);
             if (!gUseV) { /* still bad news */
                 LogMsg(INFO, OK,
                        "Glyph is in list for using V counter hints, "
@@ -700,16 +700,16 @@ Yellows(void)
     } else {
         gUseV = false;
     }
-    if (gVColoring == NULL) {
+    if (gVHinting == NULL) {
         AddBBoxHV(false, false);
     }
     LogMsg(LOGDEBUG, OK, "results");
     LogMsg(LOGDEBUG, OK, gUseV ? "rm" : "ry");
-    ShowVVals(gVColoring);
+    ShowVVals(gVHinting);
     if (gUseV) {
         LogMsg(INFO, OK, "Using V counter hints.");
     }
-    sLst = gVColoring;
+    sLst = gVHinting;
     while (sLst != NULL) {
         AddVPair(sLst, gUseV ? 'm' : 'y');
         sLst = sLst->vNxt;
@@ -740,16 +740,16 @@ DoVStems(PClrVal sLst)
 }
 
 static void
-RemoveRedundantFirstColors(void)
+RemoveRedundantFirstHints(void)
 {
     PPathElt e;
-    if (gNumPtLsts < 2 || !SameColors(0, 1)) {
+    if (gNumPtLsts < 2 || !SameHints(0, 1)) {
         return;
     }
     e = gPathStart;
     while (e != NULL) {
-        if (e->newcolors == 1) {
-            e->newcolors = 0;
+        if (e->newhints == 1) {
+            e->newhints = 0;
             return;
         }
         e = e->next;
@@ -757,7 +757,7 @@ RemoveRedundantFirstColors(void)
 }
 
 static void
-AddColorsSetup(void)
+AddHintsSetup(void)
 {
     int i;
     gVBigDist = 0;
@@ -791,13 +791,13 @@ AddColorsSetup(void)
     /* PreCheckForSolEol(); */
 }
 
-/* If extracolor is true then it is ok to have multi-level
- coloring. */
+/* If extrahint is true then it is ok to have multi-level
+ hinting. */
 static void
-AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
-                   bool extracolor)
+AddHintsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
+                  bool extrahint)
 {
-    int32_t solEolCode = 2, retryColoring = 0;
+    int32_t solEolCode = 2, retryHinting = 0;
     bool isSolEol = false;
     while (true) {
         PreGenPts();
@@ -810,34 +810,34 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
         if (gEditGlyph) {
             DoShuffleSubpaths();
         }
-        gHPrimary = CopyClrs(gHColoring);
-        gVPrimary = CopyClrs(gVColoring);
+        gHPrimary = CopyClrs(gHHinting);
+        gVPrimary = CopyClrs(gVHinting);
         /*
          isSolEol = SpecialSolEol() && !useV && !useH;
          solEolCode = isSolEol? SolEolGlyphCode() : 2;
          */
-        PruneElementColorSegs();
+        PruneElementHintSegs();
         ListClrInfo();
-        if (extracolor) {
-            AutoExtraColors(MoveToNewClrs(), isSolEol, solEolCode);
+        if (extrahint) {
+            AutoExtraHints(MoveToNewClrs(), isSolEol, solEolCode);
         }
         gPtLstArray[gPtLstIndex] = gPointList;
         if (isSolEol) {
             break;
         }
-        retryColoring++;
-        /* we want to retry coloring if
+        retryHinting++;
+        /* we want to retry hinting if
          `1) CounterFailed or
          2) doFixes changed something, but in both cases, only on the first
          pass.
          */
-        if (CounterFailed && retryColoring == 1) {
+        if (CounterFailed && retryHinting == 1) {
             goto retry;
         }
         if (!DoFixes()) {
             break;
         }
-        if (retryColoring > 1) {
+        if (retryHinting > 1) {
             break;
         }
     retry:
@@ -850,14 +850,14 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
             LogMsg(LOGERROR, NONFATALERROR, "No glyph path.");
         }
 
-        /* SaveFile(); SaveFile is always called in AddColorsCleanup, so this is
+        /* SaveFile(); SaveFile is always called in AddHintsCleanup, so this is
          * a duplciate */
         InitAll(fontinfo, RESTART);
-        if (gWriteColoredBez && !ReadGlyph(fontinfo, srcglyph, false, false)) {
+        if (gWriteHintedBez && !ReadGlyph(fontinfo, srcglyph, false, false)) {
             break;
         }
-        AddColorsSetup();
-        if (!PreCheckForColoring()) {
+        AddHintsSetup();
+        if (!PreCheckForHinting()) {
             break;
         }
         if (gFlexOK) {
@@ -868,10 +868,10 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
 }
 
 static void
-AddColorsCleanup(const ACFontInfo* fontinfo)
+AddHintsCleanup(const ACFontInfo* fontinfo)
 {
-    RemoveRedundantFirstColors();
-    if (gWriteColoredBez) {
+    RemoveRedundantFirstHints();
+    if (gWriteHintedBez) {
 
         if (gPathStart == NULL || gPathStart == gPathEnd) {
             LogMsg(LOGERROR, NONFATALERROR,
@@ -884,37 +884,36 @@ AddColorsCleanup(const ACFontInfo* fontinfo)
 }
 
 static void
-AddColors(const ACFontInfo* fontinfo, const char* srcglyph, bool extracolor)
+AddHints(const ACFontInfo* fontinfo, const char* srcglyph, bool extrahint)
 {
     if (gPathStart == NULL || gPathStart == gPathEnd) {
         LogMsg(INFO, OK, "No glyph path, so no hints.");
-        SaveFile(fontinfo); /* make sure it gets saved with no coloring */
+        SaveFile(fontinfo); /* make sure it gets saved with no hinting */
         return;
     }
     CounterFailed = gBandError = false;
     CheckPathBBox();
     CheckForDups();
-    AddColorsSetup();
-    if (!PreCheckForColoring()) {
+    AddHintsSetup();
+    if (!PreCheckForHinting()) {
         return;
     }
     if (gFlexOK) {
         gHasFlex = false;
         AutoAddFlex();
     }
-    AddColorsInnerLoop(fontinfo, srcglyph, extracolor);
-    AddColorsCleanup(fontinfo);
+    AddHintsInnerLoop(fontinfo, srcglyph, extrahint);
+    AddHintsCleanup(fontinfo);
 }
 
 bool
-AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
-               bool extracolor)
+AutoHintGlyph(const ACFontInfo* fontinfo, const char* srcglyph, bool extrahint)
 {
     int32_t lentop = gLenTopBands, lenbot = gLenBotBands;
     if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
         LogMsg(LOGERROR, NONFATALERROR, "Cannot parse glyph.");
     }
-    AddColors(fontinfo, srcglyph, extracolor);
+    AddHints(fontinfo, srcglyph, extrahint);
     gLenTopBands = lentop;
     gLenBotBands = lenbot;
     return true;

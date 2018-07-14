@@ -52,7 +52,7 @@ printHelp(void)
     fprintf(stdout, "   -u usage\n");
     fprintf(stdout, "   -h help message\n");
     fprintf(stdout, "   -e do not edit (change) the paths when hinting\n");
-    fprintf(stdout, "   -n no multiple layers of coloring\n");
+    fprintf(stdout, "   -n no multiple layers of hinting\n");
     fprintf(stdout, "   -q quiet\n");
     fprintf(stdout, "   -f <name> path to font info file\n");
     fprintf(stdout, "   -i <font info string> This can be used instead of "
@@ -419,7 +419,7 @@ main(int argc, char* argv[])
                 openReportFile(bezName, fileSuffix);
             }
 
-            result = AutoColorString(bezdata, fontinfo, &output, &outputsize,
+            result = AutoHintString(bezdata, fontinfo, &output, &outputsize,
                                      allowEdit, allowHintSub, roundCoords);
 
             if (reportFile != NULL) {
@@ -465,7 +465,7 @@ main(int argc, char* argv[])
             outGlyphs[i] = malloc(outputSizes[i]);
         }
 
-        result = AutoColorString(inGlyphs[0], fontinfo, &outGlyphs[0], &outputSizes[0],
+        result = AutoHintString(inGlyphs[0], fontinfo, &outGlyphs[0], &outputSizes[0],
                                  allowEdit, allowHintSub, roundCoords);
         if (result != AC_Success)
             exit(result);
@@ -473,7 +473,7 @@ main(int argc, char* argv[])
         free(inGlyphs[0]);
         inGlyphs[0] = malloc(sizeof(char*)*outputSizes[0]);
         strcpy(inGlyphs[0],outGlyphs[0] );
-        result = AutoColorStringMM((const char **)inGlyphs, fontinfo,
+        result = AutoHintStringMM((const char **)inGlyphs, fontinfo,
                                    total_files, (const char **)masters, outGlyphs, outputSizes);
 
         for (i = 0; i < total_files; i++)

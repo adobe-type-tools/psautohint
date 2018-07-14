@@ -14,7 +14,7 @@
 #define WRTABS_COMMENT (0)
 
 static Fixed currentx, currenty;
-static bool firstFlex, wrtColorInfo;
+static bool firstFlex, wrtHintInfo;
 static char S0[MAXBUFFLEN + 1];
 static PClrPoint bst;
 static char bch;
@@ -302,11 +302,11 @@ WrtPntLst(const ACFontInfo* fontinfo, PClrPoint lst)
 static void
 wrtnewclrs(const ACFontInfo* fontinfo, PPathElt e)
 {
-    if (!wrtColorInfo) {
+    if (!wrtHintInfo) {
         return;
     }
     hintmaskstr[0] = '\0';
-    WrtPntLst(fontinfo, gPtLstArray[e->newcolors]);
+    WrtPntLst(fontinfo, gPtLstArray[e->newhints]);
     if (strcmp(prevhintmaskstr, hintmaskstr)) {
         WriteString("beginsubr snc\n");
         WriteString(hintmaskstr);
@@ -332,7 +332,7 @@ IsFlex(PPathElt e)
 static void
 mt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
 {
-    if (e->newcolors != 0) {
+    if (e->newhints != 0) {
         wrtnewclrs(fontinfo, e);
     }
     if (writeAbsolute) {
@@ -362,7 +362,7 @@ mt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
 static void
 dt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
 {
-    if (e->newcolors != 0) {
+    if (e->newhints != 0) {
         wrtnewclrs(fontinfo, e);
     }
     if (writeAbsolute) {
@@ -505,7 +505,7 @@ wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e)
 static void
 ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PPathElt e)
 {
-    if (e->newcolors != 0) {
+    if (e->newhints != 0) {
         wrtnewclrs(fontinfo, e);
     }
     if (e->isFlex && IsFlex(e)) {
@@ -544,7 +544,7 @@ ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PPathElt e)
 static void
 cp(const ACFontInfo* fontinfo, PPathElt e)
 {
-    if (e->newcolors != 0) {
+    if (e->newhints != 0) {
         wrtnewclrs(fontinfo, e);
     }
     if (gIdInFile) {
@@ -583,10 +583,10 @@ SaveFile(const ACFontInfo* fontinfo)
     WriteString("% ");
     WriteString(gGlyphName);
     WriteString("\n");
-    wrtColorInfo = (gPathStart != NULL && gPathStart != gPathEnd);
+    wrtHintInfo = (gPathStart != NULL && gPathStart != gPathEnd);
     NumberPath();
     prevhintmaskstr[0] = '\0';
-    if (wrtColorInfo && (!e->newcolors)) {
+    if (wrtHintInfo && (!e->newhints)) {
         hintmaskstr[0] = '\0';
         WrtPntLst(fontinfo, gPtLstArray[0]);
         WriteString(hintmaskstr);

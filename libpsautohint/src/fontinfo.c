@@ -12,7 +12,7 @@
 
 #define UNDEFINED (INT32_MAX)
 
-int32_t gNumHColors, gNumVColors;
+int32_t gNumHHints, gNumVHints;
 
 static void ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
                           int32_t maxstems, int* stems, int32_t* pnum);
@@ -63,7 +63,7 @@ ReadFontInfo(const ACFontInfo* fontinfo)
       DescenderOvershoot, FigHeight, FigOvershoot, Height5, Height5Overshoot,
       Height6, Height6Overshoot, LcHeight, LcOvershoot, OrdinalBaseline,
       OrdinalOvershoot, SuperiorBaseline, SuperiorOvershoot;
-    bool ORDINARYCOLORING = !gScalingHints && gWriteColoredBez;
+    bool ORDINARYHINTING = !gScalingHints && gWriteHintedBez;
 
     AscenderHeight = AscenderOvershoot = BaselineYCoord = BaselineOvershoot =
       Baseline5 = Baseline5Overshoot = Baseline6 = Baseline6Overshoot =
@@ -73,7 +73,7 @@ ReadFontInfo(const ACFontInfo* fontinfo)
               OrdinalOvershoot = SuperiorBaseline = SuperiorOvershoot =
                 UNDEFINED; /* mark as undefined */
     gNumHStems = gNumVStems = 0;
-    gNumHColors = gNumVColors = 0;
+    gNumHHints = gNumVHints = 0;
     gLenBotBands = gLenTopBands = 0;
 
     /* check for FlexOK, AuxHStems, AuxVStems */
@@ -86,7 +86,7 @@ ReadFontInfo(const ACFontInfo* fontinfo)
             ParseStems(fontinfo, "DominantV", gVStems, &gNumVStems);
         }
     }
-    fontinfostr = GetFontInfo(fontinfo, "FlexOK", !ORDINARYCOLORING);
+    fontinfostr = GetFontInfo(fontinfo, "FlexOK", !ORDINARYHINTING);
     gFlexOK = (fontinfostr != NULL) && (fontinfostr[0] != '\0') &&
               strcmp(fontinfostr, "false");
 
@@ -99,18 +99,18 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     */
     GetKeyFixedValue(fontinfo, "BlueFuzz", ACOPTIONAL, &gBlueFuzz);
 
-    /* Check for counter coloring glyphs. */
+    /* Check for counter hinting glyphs. */
     fontinfostr = GetFontInfo(fontinfo, "VCounterChars", ACOPTIONAL);
     if (fontinfostr != NULL)
-        gNumVColors = AddCounterColorGlyphs(fontinfostr, gVColorList);
+        gNumVHints = AddCounterHintGlyphs(fontinfostr, gVHintList);
     fontinfostr = GetFontInfo(fontinfo, "HCounterChars", ACOPTIONAL);
     if (fontinfostr != NULL)
-        gNumHColors = AddCounterColorGlyphs(fontinfostr, gHColorList);
+        gNumHHints = AddCounterHintGlyphs(fontinfostr, gHHintList);
 
     GetKeyValue(fontinfo, "AscenderHeight", ACOPTIONAL, &AscenderHeight);
     GetKeyValue(fontinfo, "AscenderOvershoot", ACOPTIONAL, &AscenderOvershoot);
-    GetKeyValue(fontinfo, "BaselineYCoord", !ORDINARYCOLORING, &BaselineYCoord);
-    GetKeyValue(fontinfo, "BaselineOvershoot", !ORDINARYCOLORING,
+    GetKeyValue(fontinfo, "BaselineYCoord", !ORDINARYHINTING, &BaselineYCoord);
+    GetKeyValue(fontinfo, "BaselineOvershoot", !ORDINARYHINTING,
                 &BaselineOvershoot);
     GetKeyValue(fontinfo, "Baseline5", ACOPTIONAL, &Baseline5);
     GetKeyValue(fontinfo, "Baseline5Overshoot", ACOPTIONAL,
@@ -118,8 +118,8 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     GetKeyValue(fontinfo, "Baseline6", ACOPTIONAL, &Baseline6);
     GetKeyValue(fontinfo, "Baseline6Overshoot", ACOPTIONAL,
                 &Baseline6Overshoot);
-    GetKeyValue(fontinfo, "CapHeight", !ORDINARYCOLORING, &CapHeight);
-    GetKeyValue(fontinfo, "CapOvershoot", !ORDINARYCOLORING, &CapOvershoot);
+    GetKeyValue(fontinfo, "CapHeight", !ORDINARYHINTING, &CapHeight);
+    GetKeyValue(fontinfo, "CapOvershoot", !ORDINARYHINTING, &CapOvershoot);
     GetKeyValue(fontinfo, "DescenderHeight", ACOPTIONAL, &DescenderHeight);
     GetKeyValue(fontinfo, "DescenderOvershoot", ACOPTIONAL,
                 &DescenderOvershoot);

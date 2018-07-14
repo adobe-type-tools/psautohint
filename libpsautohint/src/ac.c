@@ -18,19 +18,19 @@ bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix, gEditGlyph;
 bool gHasFlex, gFlexOK, gFlexStrict, gBandError;
 Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth, gGhostLength,
   gBendLength, gBandMargin, gMaxFlare, gMaxBendMerge, gMaxMerge,
-  gMinColorElementLength, gFlexCand;
+  gMinHintElementLength, gFlexCand;
 Fixed gPruneA, gPruneB, gPruneC, gPruneD, gPruneValue, gBonus;
 float gTheta, gHBigDistR, gVBigDistR, gMaxVal, gMinVal;
 int32_t gLenTopBands, gLenBotBands, gNumSerifs, gDMin, gDelta, gCPpercent;
 int32_t gBendTan, gSCurveTan;
-PClrVal gVColoring, gHColoring, gVPrimary, gHPrimary, gValList;
+PClrVal gVHinting, gHHinting, gVPrimary, gHPrimary, gValList;
 PClrSeg gSegLists[4];
 Fixed gVStems[MAXSTEMS], gHStems[MAXSTEMS];
 int32_t gNumVStems, gNumHStems;
 Fixed gTopBands[MAXBLUES], gBotBands[MAXBLUES], gSerifs[MAXSERIFS];
 PClrPoint gPointList, *gPtLstArray;
 int32_t gPtLstIndex, gNumPtLsts, gMaxPtLsts;
-bool gWriteColoredBez = true;
+bool gWriteHintedBez = true;
 Fixed gBlueFuzz;
 bool gDoAligns = false, gDoStems = false;
 bool gIdInFile;
@@ -91,12 +91,12 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             /* pruneB must be <= .01 for Yakout/Light/heM */
             /* pruneValue must be <= .01 for Yakout/Light/heM */
             gCPpercent = 40;
-            /* must be < 46 for Americana-Bold d bowl vs stem coloring */
+            /* must be < 46 for Americana-Bold d bowl vs stem hinting */
             gBandMargin = PSDist(30);
             gMaxFlare = PSDist(10);
             gMaxBendMerge = PSDist(6);
             gMaxMerge = PSDist(2); /* must be < 3 for Cushing-BookItalic z */
-            gMinColorElementLength = PSDist(12);
+            gMinHintElementLength = PSDist(12);
             gFlexCand = PSDist(4);
             gSCurveTan = 25;
             gMaxVal = 8000000.0;
@@ -135,10 +135,10 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
     }
 }
 
-/* Returns whether coloring was successful. */
+/* Returns whether hinting was successful. */
 bool
-AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
-          bool extracolor, bool changeGlyph, bool roundCoords)
+AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
+         bool extrahint, bool changeGlyph, bool roundCoords)
 {
     InitAll(fontinfo, STARTUP);
 
@@ -151,7 +151,7 @@ AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
     if (gEditGlyph && fixStems)
         gAutoVFix = gAutoHFix = fixStems;
 
-    return AutoColorGlyph(fontinfo, srcbezdata, extracolor);
+    return AutoHintGlyph(fontinfo, srcbezdata, extrahint);
 }
 
 #if defined(_MSC_VER) && _MSC_VER < 1800

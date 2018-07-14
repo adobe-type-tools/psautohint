@@ -1777,7 +1777,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             pass
         elif token in ["snc"]:
             hintMask = HintMask(opIndex)
-            # If the new colors precedes any marking operator,
+            # If the new hints precedes any marking operator,
             # then we want throw away the initial hint mask we
             # made, and use the new one as the first hint mask.
             if opIndex == 0:

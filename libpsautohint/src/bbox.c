@@ -100,9 +100,9 @@ FindSubpathBBox(PPathElt e)
   e = GetDest(e); /* back up to moveto */
 #else
     /* This and the following change (in the next else clause) were made
-       to fix the coloring in glyphs in the SolEol lists.  These are
-       supposed to have subpath bbox colored, but were getting path bbox
-       colored instead. */
+       to fix the hinting in glyphs in the SolEol lists.  These are
+       supposed to have subpath bbox hinted, but were getting path bbox
+       hinted instead. */
     if (e->type != MOVETO)
         e = GetDest(e); /* back up to moveto */
 #endif
@@ -179,7 +179,7 @@ void
 ClrVBnds(void)
 {
     PPathElt p;
-    if (gPathStart == NULL || VColorGlyph())
+    if (gPathStart == NULL || VHintGlyph())
         return;
     FindPathBBox();
     vMn = itfmx(xmin);
@@ -194,19 +194,19 @@ ClrVBnds(void)
         pvMn = pvMx;
         pvMx = p;
     }
-    AddColorPoint(vMn, 0, vMx, 0, 'y', pvMn, pvMx);
+    AddHintPoint(vMn, 0, vMx, 0, 'y', pvMn, pvMx);
 }
 
 void
 ReClrVBnds(void)
 {
-    AddColorPoint(vMn, 0, vMx, 0, 'y', pvMn, pvMx);
+    AddHintPoint(vMn, 0, vMx, 0, 'y', pvMn, pvMx);
 }
 
 void
 ClrHBnds(void)
 {
-    if (gPathStart == NULL || HColorGlyph())
+    if (gPathStart == NULL || HHintGlyph())
         return;
     FindPathBBox();
     hMn = itfmy(ymin);
@@ -222,13 +222,13 @@ ClrHBnds(void)
         phMn = phMx;
         phMx = p;
     }
-    AddColorPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
+    AddHintPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
 }
 
 void
 ReClrHBnds(void)
 {
-    AddColorPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
+    AddHintPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
 }
 
 static bool
@@ -284,7 +284,7 @@ AddBBoxHV(bool Hflg, bool subs)
             e = NULL;
         }
         if (!Hflg) {
-            if (!CheckValOverlaps(xmin, xmax, gVColoring, true)) {
+            if (!CheckValOverlaps(xmin, xmax, gVHinting, true)) {
                 val = (PClrVal)Alloc(sizeof(ClrVal));
                 seg1 = (PClrSeg)Alloc(sizeof(ClrSeg));
                 seg1->sLoc = xmin;
@@ -311,12 +311,12 @@ AddBBoxHV(bool Hflg, bool subs)
                 val->vSeg1 = seg1;
                 val->vSeg2 = seg2;
                 val->vGhst = false;
-                val->vNxt = gVColoring;
+                val->vNxt = gVHinting;
                 val->vBst = val;
-                gVColoring = val;
+                gVHinting = val;
             }
         } else {
-            if (!CheckValOverlaps(ymin, ymax, gHColoring, false)) {
+            if (!CheckValOverlaps(ymin, ymax, gHHinting, false)) {
                 val = (PClrVal)Alloc(sizeof(ClrVal));
                 seg1 = (PClrSeg)Alloc(sizeof(ClrSeg));
                 seg1->sLoc = ymax;
@@ -343,9 +343,9 @@ AddBBoxHV(bool Hflg, bool subs)
                 val->vSeg1 = seg1;
                 val->vSeg2 = seg2;
                 val->vGhst = false;
-                val->vNxt = gHColoring;
+                val->vNxt = gHHinting;
                 val->vBst = val;
-                gHColoring = val;
+                gHHinting = val;
             }
         }
     }
@@ -369,7 +369,7 @@ ClrBBox(void)
             p0 = p1;
             p1 = p;
         }
-        AddColorPoint(llx, 0, urx, 0, 'y', p0, p1);
+        AddHintPoint(llx, 0, urx, 0, 'y', p0, p1);
     }
     if (!gUseH) {
         Fixed lly = itfmy(ymax);
@@ -384,7 +384,7 @@ ClrBBox(void)
             p0 = p1;
             p1 = p;
         }
-        AddColorPoint(0, lly, 0, ury, 'b', p0, p1);
+        AddHintPoint(0, lly, 0, ury, 'b', p0, p1);
     }
 }
 

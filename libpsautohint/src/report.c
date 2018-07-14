@@ -213,7 +213,7 @@ ReportRotateSubpath(PPathElt e)
 }
 
 void
-ReportRemShortColors(Fixed ex, Fixed ey)
+ReportRemShortHints(Fixed ex, Fixed ey)
 {
     LogMsg(INFO, OK, "Removed hints from short element at %g %g.",
            FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
@@ -374,7 +374,7 @@ ReportBestCP(PPathElt e, PPathElt cp)
 }
 
 void
-LogColorInfo(PClrPoint pl)
+LogHintInfo(PClrPoint pl)
 {
     char c = pl->c;
     if (c == 'y' || c == 'm') { /* vertical lines */
@@ -450,7 +450,7 @@ ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t, bool curve)
 }
 
 void
-ReportColorConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch)
+ReportHintConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch)
 {
     unsigned char s[2];
     s[0] = ch;

@@ -572,7 +572,7 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                     if (!isPrefix(nm, "beginsubr"))
                         goto badFile;
                     break;
-                case 'n': /* newcolors */
+                case 'n': /* newhints */
                     if (!isPrefix(nm, "newcolors"))
                         goto badFile;
                     break;

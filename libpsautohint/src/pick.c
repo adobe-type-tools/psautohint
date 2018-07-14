@@ -25,12 +25,12 @@ InitPick(int32_t reason)
 #define LtPruneB(val) ((val) < FixOne && ((val) << 10) < gPruneB)
 
 static bool
-ConsiderPicking(Fixed bestSpc, Fixed bestVal, PClrVal colorList,
+ConsiderPicking(Fixed bestSpc, Fixed bestVal, PClrVal hintList,
                 Fixed prevBestVal)
 {
     if (bestSpc > 0)
         return true;
-    if (colorList == NULL)
+    if (hintList == NULL)
         return bestVal >= gPruneD;
     if (bestVal > gPruneA)
         return true;
@@ -44,9 +44,9 @@ ConsiderPicking(Fixed bestSpc, Fixed bestVal, PClrVal colorList,
 void
 PickVVals(PClrVal valList)
 {
-    PClrVal colorList, rejectList, vlist, nxt;
+    PClrVal hintList, rejectList, vlist, nxt;
     Fixed bestVal = 0, prevBestVal;
-    colorList = rejectList = NULL;
+    hintList = rejectList = NULL;
     prevBestVal = 0;
     while (true) {
         PClrVal prev, bestPrev, best;
@@ -55,7 +55,7 @@ PickVVals(PClrVal valList)
         prev = bestPrev = best = NULL;
         while (vlist != NULL) {
             if ((best == NULL || CompareValues(vlist, best, spcBonus, 0)) &&
-                ConsiderPicking(vlist->vSpc, vlist->vVal, colorList,
+                ConsiderPicking(vlist->vSpc, vlist->vVal, hintList,
                                 prevBestVal)) {
                 best = vlist;
                 bestPrev = prev;
@@ -71,8 +71,8 @@ PickVVals(PClrVal valList)
         else
             bestPrev->vNxt = best->vNxt;
         /* have now removed best from valList */
-        best->vNxt = colorList; /* add best to front of list */
-        colorList = best;
+        best->vNxt = hintList; /* add best to front of list */
+        hintList = best;
         prevBestVal = bestVal;
         lft = best->vLoc1 - gBandMargin;
         rght = best->vLoc2 + gBandMargin;
@@ -104,9 +104,9 @@ PickVVals(PClrVal valList)
         rejectList = vlist;
         vlist = nxt;
     }
-    if (colorList == NULL)
+    if (hintList == NULL)
         ClrVBnds();
-    gVColoring = colorList;
+    gVHinting = hintList;
     Vrejects = rejectList;
 }
 
@@ -263,19 +263,19 @@ FindRealVal(PClrVal vlist, Fixed top, Fixed bot, PClrSeg* pseg1, PClrSeg* pseg2)
 void
 PickHVals(PClrVal valList)
 {
-    PClrVal vlist, colorList, rejectList, bestPrev, prev, best, nxt;
+    PClrVal vlist, hintList, rejectList, bestPrev, prev, best, nxt;
     Fixed bestVal, prevBestVal;
     Fixed bot, top, vtop, vbot;
     PClrVal newBst;
     PClrSeg seg1, seg2;
-    colorList = rejectList = NULL;
+    hintList = rejectList = NULL;
     prevBestVal = 0;
     while (true) {
         vlist = valList;
         prev = bestPrev = best = NULL;
         while (vlist != NULL) {
             if ((best == NULL || CompareValues(vlist, best, spcBonus, 0)) &&
-                ConsiderPicking(vlist->vSpc, vlist->vVal, colorList,
+                ConsiderPicking(vlist->vSpc, vlist->vVal, hintList,
                                 prevBestVal)) {
                 best = vlist;
                 bestPrev = prev;
@@ -318,8 +318,8 @@ PickHVals(PClrVal valList)
         else
             bestPrev->vNxt = best->vNxt;
         /* have now removed best from valList */
-        best->vNxt = colorList;
-        colorList = best; /* add best to front of list */
+        best->vNxt = hintList;
+        hintList = best; /* add best to front of list */
         bot = best->vLoc1;
         top = best->vLoc2;
         /* The next if statement was added so that ghost bands are given
@@ -377,9 +377,9 @@ noMore:
         rejectList = vlist;
         vlist = nxt;
     }
-    if (colorList == NULL)
+    if (hintList == NULL)
         ClrHBnds();
-    gHColoring = colorList;
+    gHHinting = hintList;
     Hrejects = rejectList;
 }
 

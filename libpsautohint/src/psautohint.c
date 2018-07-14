@@ -286,7 +286,7 @@ AC_SetReportRetryCB(AC_RETRYPTR retryCB)
  * is LOGERROR (see logging.c for the exact condition). The call to longjmp()
  * will transfer the control to the point where setjmp() is called below. So
  * effectively whenever LogMsg() is called for an error the execution of the
- * calling function will end and we will return back to AutoColorString().
+ * calling function will end and we will return back to AutoHintString().
  */
 static int
 error_handler(int16_t code)
@@ -300,9 +300,9 @@ error_handler(int16_t code)
 }
 
 ACLIB_API int
-AutoColorString(const char* srcbezdata, const char* fontinfodata,
-                char** dstbezdata, size_t* length, int allowEdit,
-                int allowHintSub, int roundCoords)
+AutoHintString(const char* srcbezdata, const char* fontinfodata,
+               char** dstbezdata, size_t* length, int allowEdit,
+               int allowHintSub, int roundCoords)
 {
     int value, result;
     ACFontInfo* fontinfo = NULL;
@@ -317,7 +317,7 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     value = setjmp(aclibmark);
 
     /* We will return here whenever an error occurs during the execution of
-     * AutoColor(), or after it finishes execution. See the error_handler
+     * AutoHint(), or after it finishes execution. See the error_handler
      * comments above and below. */
 
     if (value == -1) {
@@ -325,7 +325,7 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
         FreeFontInfo(fontinfo);
         return AC_FatalError;
     } else if (value == 1) {
-        /* AutoColor was called successfully */
+        /* AutoHint was called successfully */
         FreeFontInfo(fontinfo);
 
         if (gBezOutput->length >= *length)
@@ -346,12 +346,12 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
         return AC_MemoryError;
     }
 
-    result = AutoColor(fontinfo,     /* font info */
-                       srcbezdata,   /* input glyph */
-                       false,        /* fixStems */
-                       allowHintSub, /* extracolor */
-                       allowEdit,    /* changeGlyphs */
-                       roundCoords);
+    result = AutoHint(fontinfo,     /* font info */
+                      srcbezdata,   /* input glyph */
+                      false,        /* fixStems */
+                      allowHintSub, /* extrahint */
+                      allowEdit,    /* changeGlyphs */
+                      roundCoords);
     /* result == true is good */
 
     /* The following call to error_handler() always returns control to just
@@ -364,14 +364,14 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
 }
 
 ACLIB_API int
-AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
-                  int nmasters, const char** masters, char** dstbezdata,
-                  size_t* lengths)
+AutoHintStringMM(const char** srcbezdata, const char* fontinfodata,
+                 int nmasters, const char** masters, char** dstbezdata,
+                 size_t* lengths)
 {
     /* Only the master with index 'hintsMasterIx' needs to be hinted; this is
      * why only the fontinfo data for that master is needed. This function
      * expects that the master with index 'hintsMasterIx' has already been
-     * hinted with AutoColor().
+     * hinted with AutoHint().
      *
      * The hints for the others masters are derived a very simple process. When
      * the first master was hinted, the logic recorded the path element index
@@ -382,7 +382,7 @@ AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
      * uses the end or start point of that path element to set the edge in the
      * current master.
      *
-     * Some code notes: The original hinting pass in AutoColorString() on the
+     * Some code notes: The original hinting pass in AutoHintString() on the
      * first master records the path indicies for each path element that sets a
      * hint edge, and whether it is a start or end point; this stored in the
      * hintElt structures in the first master. There is a hintElt for the main
@@ -405,7 +405,7 @@ AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
     value = setjmp(aclibmark);
 
     /* We will return here whenever an error occurs during the execution of
-     * AutoColor(), or after it finishes execution. See the error_handler
+     * AutoHint(), or after it finishes execution. See the error_handler
      * comments above and below. */
 
     if (value == -1) {
@@ -413,7 +413,7 @@ AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
         FreeFontInfo(fontinfo);
         return AC_FatalError;
     } else if (value == 1) {
-        /* AutoColor was called successfully */
+        /* AutoHint was called successfully */
         FreeFontInfo(fontinfo);
         return AC_Success;
     }
