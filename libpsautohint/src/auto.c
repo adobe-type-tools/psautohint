@@ -669,11 +669,9 @@ ReHintBounds(PPathElt e)
 static void
 AddHintLst(PSegLnkLst lst, bool vert)
 {
-    PHintVal val;
-    PHintSeg seg;
     while (lst != NULL) {
-        seg = lst->lnk->seg;
-        val = seg->sLnk;
+        PHintSeg seg = lst->lnk->seg;
+        PHintVal val = seg->sLnk;
         if (vert)
             AddVHinting(val);
         else
