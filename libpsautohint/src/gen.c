@@ -808,8 +808,8 @@ InBlueBand(Fixed loc, int32_t n, Fixed* p)
         return false;
     y = itfmy(loc);
     /* Augment the blue band by bluefuzz in each direction.  This will
- result in "near misses" being colored and so adjusted by the
- PS interpreter. */
+       result in "near misses" being hinted and so adjusted by the
+       PS interpreter. */
     for (i = 0; i < n; i += 2)
         if ((p[i] - gBlueFuzz) <= y && (p[i + 1] + gBlueFuzz) >= y)
             return true;

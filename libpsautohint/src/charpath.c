@@ -2352,7 +2352,7 @@ MergeGlyphPaths(const ACFontInfo* fontinfo, const char** srcglyphs,
 {
     bool ok;
     /* This requires that  master  hintsMasterIx has already been hinted with
-     * AutoColor().  See comments in psautohint,c::AutoColorStringMM() */
+     * AutoHint().  See comments in psautohint,c::AutoHintStringMM() */
     masterCount = nmasters;
     masterNames = masters;
 

@@ -63,7 +63,7 @@ CheckForClr(void)
 }
 
 bool
-PreCheckForColoring(void)
+PreCheckForHinting(void)
 {
     PPathElt e;
     int32_t cnt = 0;

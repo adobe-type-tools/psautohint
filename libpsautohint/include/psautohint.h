@@ -125,7 +125,7 @@ typedef void (*AC_RETRYPTR)(void);
 ACLIB_API void AC_SetReportRetryCB(AC_RETRYPTR retryCB);
 
 /*
- * Function: AutoColorString
+ * Function: AutoHintString
  *
  * This function takes srcbezdata, a pointer to null terminated C string
  * containing glyph data in the bez format (see bez spec) and fontinfo, a
@@ -136,17 +136,17 @@ ACLIB_API void AC_SetReportRetryCB(AC_RETRYPTR retryCB);
  * pointer to its length passed as *length. If the space allocated is
  * insufficient for the target bezdata, it will be reallocated as needed.
  */
-ACLIB_API int AutoColorString(const char* srcbezdata, const char* fontinfo,
-                              char** dstbezdata, size_t* length, int allowEdit,
-                              int allowHintSub, int roundCoords);
+ACLIB_API int AutoHintString(const char* srcbezdata, const char* fontinfo,
+                             char** dstbezdata, size_t* length, int allowEdit,
+                             int allowHintSub, int roundCoords);
 
 /*
- * Function: AutoColorStringMM
+ * Function: AutoHintStringMM
  *
  */
-ACLIB_API int AutoColorStringMM(const char** srcbezdata, const char* fontinfo,
-                                int nmasters, const char** masters,
-                                char** dstbezdata, size_t* lengths);
+ACLIB_API int AutoHintStringMM(const char** srcbezdata, const char* fontinfo,
+                               int nmasters, const char** masters,
+                               char** dstbezdata, size_t* lengths);
 
 /*
  * Function: AC_initCallGlobals

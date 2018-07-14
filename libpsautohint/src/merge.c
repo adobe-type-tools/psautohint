@@ -134,7 +134,7 @@ PruneOne(PClrVal sLst, bool hFlg, PClrVal sL, int32_t i)
                                             : ((v) / VERYMUCHFCTR > (val)))
 
 /* The changes made here and in PruneHVals are to fix a bug in
- MinisterLight/E where the top left point was not getting colored. */
+ MinisterLight/E where the top left point was not getting hinted. */
 void
 PruneVVals(void)
 {
@@ -379,8 +379,8 @@ FindBestVals(PClrVal vL)
 }
 
 /* The following changes were made to fix a problem in Ryumin-Light and
- possibly other fonts as well.  The old version causes bogus coloring
- and extra newcolors. */
+ possibly other fonts as well.  The old version causes bogus hinting
+ and extra newhints. */
 static void
 ReplaceVals(Fixed oldB, Fixed oldT, Fixed newB, Fixed newT, PClrVal newBst,
             bool vert)

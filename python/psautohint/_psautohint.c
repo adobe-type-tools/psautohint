@@ -143,8 +143,8 @@ autohint(PyObject* self, PyObject* args)
             result = AC_MemoryError;
         } else {
             result =
-              AutoColorString(inData, fontInfo, &output, &outLen, allowEdit,
-                              allowHintSub, roundCoords);
+              AutoHintString(inData, fontInfo, &output, &outLen, allowEdit,
+                             allowHintSub, roundCoords);
 
             if (outLen != 0 && result == AC_Success)
                 outObj = PyBytes_FromString(output);
@@ -272,8 +272,8 @@ autohintmm(PyObject* self, PyObject* args)
             outGlyphs[i] = MEMNEW(outputSizes[i]);
         }
 
-        result = AutoColorStringMM(inGlyphs, fontInfo, mastersCount, masters,
-                                   outGlyphs, outputSizes);
+        result = AutoHintStringMM(inGlyphs, fontInfo, mastersCount, masters,
+                                  outGlyphs, outputSizes);
         if (result == AC_Success) {
             for (i = 0; i < inCount; i++) {
                 PyObject* outObj = PyBytes_FromString(outGlyphs[i]);

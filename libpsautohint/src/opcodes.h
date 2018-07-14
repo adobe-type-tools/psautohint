@@ -22,13 +22,13 @@
 /* Thu May 12 22:56:28 PDT 1994 jvz SETWV, COMPOSE */
 
 #define COURIERB 0
- /* y COURIERB - Courier coloring */
+ /* y COURIERB - Courier hinting */
 #define RB 1
- /* y dy RB -- add horizontal coloring pair at y and y+dy */
+ /* y dy RB -- add horizontal hinting pair at y and y+dy */
 #define COMPOSE 2
  /* subr# COMPOSE -- draw a library element. Pops only one arg from stack. */
 #define RY 3
- /* x dx RY -- add vertical coloring pair at x and x+dx */
+ /* x dx RY -- add vertical hinting pair at x and x+dx */
 #define VMT 4
  /* dy VMT -- equivalent to 0 dy RMT */
 #define RDT 5
@@ -110,9 +110,9 @@
  /* FL -- flip switch for "offset locking" - e.g. insuring > 0 pixel 
     separation between two paths of an i */
 #define RM 1
- /* x0 dx0 x1 dx1 x2 dx2 RM -- add 3 equal spaced vertical coloring pairs */
+ /* x0 dx0 x1 dx1 x2 dx2 RM -- add 3 equal spaced vertical hinting pairs */
 #define RV 2
- /* y0 dy0 y1 dy1 y2 dy2 RV -- add 3 equal spaced horizontal coloring pairs */
+ /* y0 dy0 y1 dy1 y2 dy2 RV -- add 3 equal spaced horizontal hinting pairs */
 #define FI 3
  /* FI -- fill  (graphics state operator) */ 
 #define ARC 4

@@ -92,7 +92,7 @@ CpyVClr(PPathElt e)
 }
 
 static void
-PruneColorSegs(PPathElt e, bool hFlg)
+PruneHintSegs(PPathElt e, bool hFlg)
 {
     PSegLnkLst lst, nxt, prv;
     PClrSeg seg;
@@ -124,13 +124,13 @@ PruneColorSegs(PPathElt e, bool hFlg)
 }
 
 void
-PruneElementColorSegs(void)
+PruneElementHintSegs(void)
 {
     PPathElt e;
     e = gPathStart;
     while (e != NULL) {
-        PruneColorSegs(e, true);
-        PruneColorSegs(e, false);
+        PruneHintSegs(e, true);
+        PruneHintSegs(e, false);
         e = e->next;
     }
 }
@@ -185,29 +185,29 @@ AutoHSeg(PClrVal sLst)
 }
 
 static void
-AddHColoring(PClrVal h)
+AddHHinting(PClrVal h)
 {
-    if (gUseH || AlreadyOnList(h, gHColoring))
+    if (gUseH || AlreadyOnList(h, gHHinting))
         return;
-    h->vNxt = gHColoring;
-    gHColoring = h;
+    h->vNxt = gHHinting;
+    gHHinting = h;
     AutoHSeg(h);
 }
 
 static void
-AddVColoring(PClrVal v)
+AddVHinting(PClrVal v)
 {
-    if (gUseV || AlreadyOnList(v, gVColoring))
+    if (gUseV || AlreadyOnList(v, gVHinting))
         return;
-    v->vNxt = gVColoring;
-    gVColoring = v;
+    v->vNxt = gVHinting;
+    gVHinting = v;
     AutoVSeg(v);
 }
 
 static int32_t
-TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
+TestHint(PClrSeg s, PClrVal hintList, bool flg, bool doLst)
 {
-    /* -1 means already in colorList; 0 means conflicts; 1 means ok to add */
+    /* -1 means already in hintList; 0 means conflicts; 1 means ok to add */
     PClrVal v, clst;
     Fixed top, bot, vT, vB, loc;
     if (s == NULL)
@@ -226,7 +226,7 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
     }
     {
         int32_t cnt = 0;
-        clst = colorList;
+        clst = hintList;
         while (clst != NULL) {
             if (++cnt > 100) {
                 LogMsg(LOGDEBUG, OK, "Loop in hintlist for TestHint.");
@@ -238,8 +238,8 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
     if (v->vGhst) {
         bool loc1;
         /* if best value for segment uses a ghost, and
-           segment loc is already in the colorList, then return -1 */
-        clst = colorList;
+           segment loc is already in the hintList, then return -1 */
+        clst = hintList;
         if (abs(loc - vT) < abs(loc - vB)) {
             loc1 = false;
             loc = vT;
@@ -262,14 +262,14 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
         top -= gBandMargin;
         bot += gBandMargin;
     }
-    while (colorList != NULL) { /* check for conflict */
-        Fixed cTop = colorList->vLoc2;
-        Fixed cBot = colorList->vLoc1;
+    while (hintList != NULL) { /* check for conflict */
+        Fixed cTop = hintList->vLoc2;
+        Fixed cBot = hintList->vLoc1;
         if (vB == cBot && vT == cTop) {
             return -1;
         }
-        if (colorList->vGhst) { /* collapse width for conflict test */
-            if (colorList->vSeg1->sType == sGHOST)
+        if (hintList->vGhst) { /* collapse width for conflict test */
+            if (hintList->vSeg1->sType == sGHOST)
                 cBot = cTop;
             else
                 cTop = cBot;
@@ -278,25 +278,25 @@ TestColor(PClrSeg s, PClrVal colorList, bool flg, bool doLst)
             (!flg && (cBot >= top) && (cTop <= bot))) {
             return 0;
         }
-        colorList = colorList->vNxt;
+        hintList = hintList->vNxt;
         if (!doLst)
             break;
     }
     return 1;
 }
 
-#define TestHColorLst(h) TestColorLst(h, gHColoring, gYgoesUp, true)
-#define TestVColorLst(v) TestColorLst(v, gVColoring, true, true)
+#define TestHHintLst(h) TestHintLst(h, gHHinting, gYgoesUp, true)
+#define TestVHintLst(v) TestHintLst(v, gVHinting, true, true)
 
 int
-TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst)
+TestHintLst(PSegLnkLst lst, PClrVal hintList, bool flg, bool doLst)
 {
-    /* -1 means already in colorList; 0 means conflicts; 1 means ok to add */
+    /* -1 means already in hintList; 0 means conflicts; 1 means ok to add */
     int result, cnt;
     result = -1;
     cnt = 0;
     while (lst != NULL) {
-        int i = TestColor(lst->lnk->seg, colorList, flg, doLst);
+        int i = TestHint(lst->lnk->seg, hintList, flg, doLst);
         if (i == 0) {
             result = 0;
             break;
@@ -405,7 +405,7 @@ RemDupLnks(PPathElt e, bool Hflg)
       !InBlueBand((loc), gLenBotBands, gBotBands)))
 
 /* The changes made here were to fix a problem in MinisterLight/E.
-   The top left point was not getting colored. */
+   The top left point was not getting hinted. */
 static bool
 TryResolveConflict(PPathElt e, bool Hflg)
 {
@@ -498,7 +498,7 @@ TryResolveConflict(PPathElt e, bool Hflg)
 }
 
 static bool
-CheckColorSegs(PPathElt e, bool flg, bool Hflg)
+CheckHintSegs(PPathElt e, bool flg, bool Hflg)
 {
     PSegLnkLst lst;
     PSegLnkLst lst2;
@@ -510,9 +510,9 @@ CheckColorSegs(PPathElt e, bool flg, bool Hflg)
         if (lst2 != NULL) {
             seg = lst->lnk->seg;
             val = seg->sLnk;
-            if (val != NULL && TestColorLst(lst2, val, flg, false) == 0) {
+            if (val != NULL && TestHintLst(lst2, val, flg, false) == 0) {
                 if (TryResolveConflict(e, Hflg))
-                    return CheckColorSegs(e, flg, Hflg);
+                    return CheckHintSegs(e, flg, Hflg);
                 AskForSplit(e);
                 if (Hflg)
                     e->Hs = NULL;
@@ -532,8 +532,8 @@ CheckElmntClrSegs(void)
     PPathElt e;
     e = gPathStart;
     while (e != NULL) {
-        if (!CheckColorSegs(e, gYgoesUp, true))
-            (void)CheckColorSegs(e, true, false);
+        if (!CheckHintSegs(e, gYgoesUp, true))
+            (void)CheckHintSegs(e, true, false);
         e = e->next;
     }
 }
@@ -546,7 +546,7 @@ ClrLstsClash(PSegLnkLst lst1, PSegLnkLst lst2, bool flg)
         if (val != NULL) {
             PSegLnkLst lst = lst2;
             while (lst != NULL) {
-                if (TestColorLst(lst, val, flg, false) == 0) {
+                if (TestHintLst(lst, val, flg, false) == 0) {
                     return true;
                 }
                 lst = lst->next;
@@ -610,8 +610,8 @@ ClrsClash(PPathElt e, PPathElt p, PSegLnkLst* hLst, PSegLnkLst* vLst,
 }
 
 static void
-GetColorLsts(PPathElt e, PSegLnkLst* phLst, PSegLnkLst* pvLst, int32_t* ph,
-             int32_t* pv)
+GetHintLsts(PPathElt e, PSegLnkLst* phLst, PSegLnkLst* pvLst, int32_t* ph,
+            int32_t* pv)
 {
     PSegLnkLst hLst, vLst;
     int32_t h, v;
@@ -623,7 +623,7 @@ GetColorLsts(PPathElt e, PSegLnkLst* phLst, PSegLnkLst* pvLst, int32_t* ph,
         if (hLst == NULL)
             h = -1;
         else
-            h = TestHColorLst(hLst);
+            h = TestHHintLst(hLst);
     }
     if (gUseV) {
         vLst = NULL;
@@ -633,7 +633,7 @@ GetColorLsts(PPathElt e, PSegLnkLst* phLst, PSegLnkLst* pvLst, int32_t* ph,
         if (vLst == NULL)
             v = -1;
         else
-            v = TestVColorLst(vLst);
+            v = TestVHintLst(vLst);
     }
     *pvLst = vLst;
     *phLst = hLst;
@@ -645,29 +645,29 @@ static void
 ReClrBounds(PPathElt e)
 {
     if (!gUseH) {
-        if (clrHBounds && gHColoring == NULL && !haveHBnds)
+        if (clrHBounds && gHHinting == NULL && !haveHBnds)
             ReClrHBnds();
         else if (!clrBBox) {
-            if (gHColoring == NULL)
+            if (gHHinting == NULL)
                 CpyHClr(e);
             if (mergeMain)
-                MergeFromMainColors('b');
+                MergeFromMainHints('b');
         }
     }
     if (!gUseV) {
-        if (clrVBounds && gVColoring == NULL && !haveVBnds)
+        if (clrVBounds && gVHinting == NULL && !haveVBnds)
             ReClrVBnds();
         else if (!clrBBox) {
-            if (gVColoring == NULL)
+            if (gVHinting == NULL)
                 CpyVClr(e);
             if (mergeMain)
-                MergeFromMainColors('y');
+                MergeFromMainHints('y');
         }
     }
 }
 
 static void
-AddColorLst(PSegLnkLst lst, bool vert)
+AddHintLst(PSegLnkLst lst, bool vert)
 {
     PClrVal val;
     PClrSeg seg;
@@ -675,18 +675,18 @@ AddColorLst(PSegLnkLst lst, bool vert)
         seg = lst->lnk->seg;
         val = seg->sLnk;
         if (vert)
-            AddVColoring(val);
+            AddVHinting(val);
         else
-            AddHColoring(val);
+            AddHHinting(val);
         lst = lst->next;
     }
 }
 
 static void
-StartNewColoring(PPathElt e, PSegLnkLst hLst, PSegLnkLst vLst)
+StartNewHinting(PPathElt e, PSegLnkLst hLst, PSegLnkLst vLst)
 {
     ReClrBounds(e);
-    if (e->newcolors != 0) {
+    if (e->newhints != 0) {
         LogMsg(LOGERROR, NONFATALERROR, "Uninitialized extra hints list.");
     }
     XtraClrs(e);
@@ -695,11 +695,11 @@ StartNewColoring(PPathElt e, PSegLnkLst hLst, PSegLnkLst vLst)
         CopyMainV();
     if (gUseH)
         CopyMainH();
-    gHColoring = gVColoring = NULL;
+    gHHinting = gVHinting = NULL;
     if (!gUseH)
-        AddColorLst(hLst, false);
+        AddHintLst(hLst, false);
     if (!gUseV)
-        AddColorLst(vLst, true);
+        AddHintLst(vLst, true);
 }
 
 static bool
@@ -716,17 +716,17 @@ IsOk(int32_t h, int32_t v)
 
 #define AddIfNeedV(v, vLst)                                                    \
     if (!gUseV && v == 1)                                                      \
-    AddColorLst(vLst, true)
+    AddHintLst(vLst, true)
 #define AddIfNeedH(h, hLst)                                                    \
     if (!gUseH && h == 1)                                                      \
-    AddColorLst(hLst, false)
+    AddHintLst(hLst, false)
 
 static void
-SetHColors(PClrVal lst)
+SetHHints(PClrVal lst)
 {
     if (gUseH)
         return;
-    gHColoring = lst;
+    gHHinting = lst;
     while (lst != NULL) {
         AutoHSeg(lst);
         lst = lst->vNxt;
@@ -734,11 +734,11 @@ SetHColors(PClrVal lst)
 }
 
 static void
-SetVColors(PClrVal lst)
+SetVHints(PClrVal lst)
 {
     if (gUseV)
         return;
-    gVColoring = lst;
+    gVHinting = lst;
     while (lst != NULL) {
         AutoVSeg(lst);
         lst = lst->vNxt;
@@ -767,7 +767,7 @@ CopyClrs(PClrVal lst)
 }
 
 static PPathElt
-ColorBBox(PPathElt e)
+HintBBox(PPathElt e)
 {
     e = FindSubpathBBox(e);
     ClrBBox();
@@ -945,15 +945,15 @@ CarryIfNeed(Fixed loc, bool vert, PClrVal clrs)
             seglnk = seg->sLnk;
             seg->sLnk = clrs;
             if (vert) {
-                if (TestColor(seg, gVColoring, true, true) == 1) {
+                if (TestHint(seg, gVHinting, true, true) == 1) {
                     ReportCarry(l0, l1, loc, clrs, vert);
-                    AddVColoring(clrs);
+                    AddVHinting(clrs);
                     seg->sLnk = seglnk;
                     break;
                 }
-            } else if (TestColor(seg, gHColoring, gYgoesUp, true) == 1) {
+            } else if (TestHint(seg, gHHinting, gYgoesUp, true) == 1) {
                 ReportCarry(l0, l1, loc, clrs, vert);
-                AddHColoring(clrs);
+                AddHHinting(clrs);
                 seg->sLnk = seglnk;
                 break;
             }
@@ -1000,7 +1000,7 @@ ProClrs(PPathElt e, bool hFlg, Fixed loc)
 }
 
 static void
-PromoteColors(void)
+PromoteHints(void)
 {
     PPathElt e;
     e = gPathStart;
@@ -1032,9 +1032,9 @@ RemPromotedClrs(void)
 }
 
 static void
-RemShortColors(void)
+RemShortHints(void)
 {
-    /* Must not change colors at a short element. */
+    /* Must not change hints at a short element. */
     PPathElt e;
     Fixed cx, cy, ex, ey;
     e = gPathStart;
@@ -1042,9 +1042,9 @@ RemShortColors(void)
     cy = 0;
     while (e != NULL) {
         GetEndPoint(e, &ex, &ey);
-        if (abs(cx - ex) < gMinColorElementLength &&
-            abs(cy - ey) < gMinColorElementLength) {
-            ReportRemShortColors(ex, ey);
+        if (abs(cx - ex) < gMinHintElementLength &&
+            abs(cy - ey) < gMinHintElementLength) {
+            ReportRemShortHints(ex, ey);
             e->Hs = NULL;
             e->Vs = NULL;
         }
@@ -1055,7 +1055,7 @@ RemShortColors(void)
 }
 
 void
-AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
+AutoExtraHints(bool movetoNewClrs, bool soleol, int32_t solWhere)
 {
     int32_t h, v, ph, pv;
     PPathElt e, cp, p;
@@ -1074,75 +1074,75 @@ AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
     RemFlares(false);
     LogMsg(LOGDEBUG, OK, "CheckElmntClrSegs");
     CheckElmntClrSegs();
-    LogMsg(LOGDEBUG, OK, "PromoteColors");
-    PromoteColors();
-    LogMsg(LOGDEBUG, OK, "RemShortColors");
-    RemShortColors();
+    LogMsg(LOGDEBUG, OK, "PromoteHints");
+    PromoteHints();
+    LogMsg(LOGDEBUG, OK, "RemShortHints");
+    RemShortHints();
     haveVBnds = clrVBounds;
     haveHBnds = clrHBounds;
     p = NULL;
-    Tst = IsOk; /* it is ok to add to primary coloring */
-    LogMsg(LOGDEBUG, OK, "color loop");
+    Tst = IsOk; /* it is ok to add to primary hinting */
+    LogMsg(LOGDEBUG, OK, "hint loop");
     mtVclrs = mtHclrs = NULL;
     while (e != NULL) {
         int32_t etype = e->type;
         if (movetoNewClrs && etype == MOVETO) {
-            StartNewColoring(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
+            StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
             Tst = IsOk;
         }
-        if (soleol && etype == MOVETO) { /* start new coloring on soleol mt */
+        if (soleol && etype == MOVETO) { /* start new hinting on soleol mt */
             if ((solWhere == 1 && IsUpper(e)) ||
                 (solWhere == -1 && IsLower(e)) ||
-                (solWhere == 0)) { /* color bbox of next subpath */
-                StartNewColoring(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
+                (solWhere == 0)) { /* hint bbox of next subpath */
+                StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
                 Tst = IsOk;
                 haveHBnds = haveVBnds = isSpc = true;
-                e = ColorBBox(e);
+                e = HintBBox(e);
                 continue;
-            } else if (isSpc) { /* new coloring after the special */
-                StartNewColoring(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
+            } else if (isSpc) { /* new hinting after the special */
+                StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
                 Tst = IsOk;
                 haveHBnds = haveVBnds = isSpc = false;
             }
         }
         if (newClrs && e == p) {
-            StartNewColoring(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
-            SetHColors(mtHclrs);
-            SetVColors(mtVclrs);
+            StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
+            SetHHints(mtHclrs);
+            SetVHints(mtVclrs);
             Tst = IsIn;
         }
-        GetColorLsts(e, &hLst, &vLst, &h, &v);
+        GetHintLsts(e, &hLst, &vLst, &h, &v);
         if (etype == MOVETO && IsShort(cp = GetClosedBy(e))) {
-            GetColorLsts(p = cp->prev, &phLst, &pvLst, &ph, &pv);
+            GetHintLsts(p = cp->prev, &phLst, &pvLst, &ph, &pv);
             if (ClrsClash(e, p, &hLst, &vLst, &phLst, &pvLst)) {
-                GetColorLsts(e, &hLst, &vLst, &h, &v);
-                GetColorLsts(p, &phLst, &pvLst, &ph, &pv);
+                GetHintLsts(e, &hLst, &vLst, &h, &v);
+                GetHintLsts(p, &phLst, &pvLst, &ph, &pv);
             }
             if (!(*Tst)(ph, pv) || !(*Tst)(h, v)) {
-                StartNewColoring(e, hLst, vLst);
+                StartNewHinting(e, hLst, vLst);
                 Tst = IsOk;
-                ph = pv = 1; /* force add of colors for p also */
+                ph = pv = 1; /* force add of hints for p also */
             } else {
                 AddIfNeedH(h, hLst);
                 AddIfNeedV(v, vLst);
             }
             AddIfNeedH(ph, phLst);
             AddIfNeedV(pv, pvLst);
-            newClrs = false; /* so can tell if added new colors in subpath */
-        } else if (!(*Tst)(h, v)) { /* e needs new coloring */
+            newClrs = false; /* so can tell if added new hints in subpath */
+        } else if (!(*Tst)(h, v)) { /* e needs new hinting */
             if (etype ==
-                CLOSEPATH) { /* do not attach extra colors to closepath */
+                CLOSEPATH) { /* do not attach extra hints to closepath */
                 e = e->prev;
-                GetColorLsts(e, &hLst, &vLst, &h, &v);
+                GetHintLsts(e, &hLst, &vLst, &h, &v);
             }
-            prvHclrs = CopyClrs(gHColoring);
-            prvVclrs = CopyClrs(gVColoring);
+            prvHclrs = CopyClrs(gHHinting);
+            prvVclrs = CopyClrs(gVHinting);
             if (!newClrs) { /* this is the first extra since mt */
                 newClrs = true;
                 mtVclrs = CopyClrs(prvVclrs);
                 mtHclrs = CopyClrs(prvHclrs);
             }
-            StartNewColoring(e, hLst, vLst);
+            StartNewHinting(e, hLst, vLst);
             Tst = IsOk;
             if (etype == CURVETO) {
                 x = e->x1;
@@ -1151,7 +1151,7 @@ AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
                 GetEndPoint(e, &x, &y);
             CarryIfNeed(y, false, prvHclrs);
             CarryIfNeed(x, true, prvVclrs);
-        } else { /* do not need to start new coloring */
+        } else { /* do not need to start new hinting */
             AddIfNeedH(h, hLst);
             AddIfNeedV(v, vLst);
         }
@@ -1160,5 +1160,5 @@ AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere)
     ReClrBounds(gPathEnd);
     LogMsg(LOGDEBUG, OK, "RemPromotedClrs");
     RemPromotedClrs();
-    LogMsg(LOGDEBUG, OK, "done autoextracolors");
+    LogMsg(LOGDEBUG, OK, "done AutoExtraHints");
 }

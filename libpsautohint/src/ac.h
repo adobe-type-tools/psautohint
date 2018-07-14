@@ -23,7 +23,7 @@
 
 /* widely used definitions */
 
-/* number of default entries in counter color glyph list. */
+/* number of default entries in counter hint glyph list. */
 #define COUNTERDEFAULTENTRIES 4
 #define COUNTERLISTSIZE 64
 
@@ -156,7 +156,7 @@ typedef struct _pthelt {
   PSegLnkLst Hs, Vs;
   bool Hcopy:1, Vcopy:1, isFlex:1, yFlex:1, newCP:1, sol:1, eol:1;
   int unused:9;
-  int16_t count, newcolors;
+  int16_t count, newhints;
   Fixed x, y, x1, y1, x2, y2, x3, y3;
   } PathElt, *PPathElt;
 
@@ -168,7 +168,7 @@ typedef struct _clrpnt {
   PPathElt p0, p1;
     /* p0 is source of x0,y0; p1 is source of x1,y1 */
   char c;
-    /* tells what kind of coloring: 'b' 'y' 'm' or 'v' */
+    /* tells what kind of hinting: 'b' 'y' 'm' or 'v' */
   bool done;
   } ClrPoint, *PClrPoint;
 
@@ -199,11 +199,11 @@ extern bool gBandError;
 extern bool gHasFlex, gFlexOK, gFlexStrict;
 extern Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth,
   gGhostLength, gBendLength, gBandMargin, gMaxFlare,
-  gMaxBendMerge, gMaxMerge, gMinColorElementLength, gFlexCand;
+  gMaxBendMerge, gMaxMerge, gMinHintElementLength, gFlexCand;
 extern Fixed gPruneA, gPruneB, gPruneC, gPruneD, gPruneValue, gBonus;
 extern float gTheta, gHBigDistR, gVBigDistR, gMaxVal, gMinVal;
 extern int32_t gDMin, gDelta, gCPpercent, gBendTan, gSCurveTan;
-extern PClrVal gVColoring, gHColoring, gVPrimary, gHPrimary, gValList;
+extern PClrVal gVHinting, gHHinting, gVPrimary, gHPrimary, gValList;
 extern PClrSeg gSegLists[4]; /* left, right, top, bot */
 extern PClrPoint gPointList, *gPtLstArray;
 extern int32_t gPtLstIndex, gNumPtLsts, gMaxPtLsts;
@@ -237,9 +237,9 @@ extern int32_t gLenTopBands, gLenBotBands, gNumSerifs;
 #define MAXSTEMS (20)
 extern Fixed gVStems[MAXSTEMS], gHStems[MAXSTEMS];
 extern int32_t gNumVStems, gNumHStems;
-extern char *gHColorList[], *gVColorList[];
-extern int32_t gNumHColors, gNumVColors;
-extern bool gWriteColoredBez;
+extern char *gHHintList[], *gVHintList[];
+extern int32_t gNumHHints, gNumVHints;
+extern bool gWriteHintedBez;
 extern Fixed gBlueFuzz;
 extern bool gDoAligns, gDoStems;
 extern bool gIdInFile;
@@ -300,15 +300,15 @@ Fixed acpflttofix(float* pf);
 
 unsigned char* Alloc(int32_t sz); /* Sub-allocator */
 
-int AddCounterColorGlyphs(char* charlist, char* ColorList[]);
+int AddCounterHintGlyphs(char* charlist, char* HintList[]);
 bool FindNameInList(char* nm, char** lst);
-void PruneElementColorSegs(void);
-int TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst);
+void PruneElementHintSegs(void);
+int TestHintLst(PSegLnkLst lst, PClrVal hintList, bool flg, bool doLst);
 PClrVal CopyClrs(PClrVal lst);
-void AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere);
+void AutoExtraHints(bool movetoNewClrs, bool soleol, int32_t solWhere);
 int32_t SpecialGlyphType(void);
-bool VColorGlyph(void);
-bool HColorGlyph(void);
+bool VHintGlyph(void);
+bool HHintGlyph(void);
 bool NoBlueGlyph(void);
 int32_t SolEolGlyphCode(void);
 bool SpecialSolEol(void);
@@ -319,13 +319,13 @@ void CheckBBoxEdge(PPathElt e, bool vrt, Fixed lc, Fixed* pf, Fixed* pl);
 bool CheckSmoothness(Fixed x0, Fixed cy0, Fixed x1, Fixed cy1, Fixed x2,
                      Fixed y2, Fixed* pd);
 void CheckForDups(void);
-void AddColorPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
+void AddHintPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
                    PPathElt p1);
 void AddHPair(PClrVal v, char ch);
 void AddVPair(PClrVal v, char ch);
 void XtraClrs(PPathElt e);
-bool AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
-                    bool extracolor);
+bool AutoHintGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
+                    bool extrahint);
 void EvalV(void);
 void EvalH(void);
 void GenVPts(int32_t specialGlyphType);
@@ -356,7 +356,7 @@ void DoPrune(void);
 void PruneVVals(void);
 void PruneHVals(void);
 void MergeVals(bool vert);
-void MergeFromMainColors(char ch);
+void MergeFromMainHints(char ch);
 void RoundPathCoords(void);
 void MoveSubpathToEnd(PPathElt e);
 void AddSolEol(void);
@@ -366,8 +366,8 @@ void InitFix(int32_t reason);
 void InitGen(int32_t reason);
 void InitPick(int32_t reason);
 void AutoAddFlex(void);
-bool SameColors(int32_t cn1, int32_t cn2);
-bool PreCheckForColoring(void);
+bool SameHints(int32_t cn1, int32_t cn2);
+bool PreCheckForHinting(void);
 int32_t CountSubPaths(void);
 void PickVVals(PClrVal gValList);
 void PickHVals(PClrVal gValList);
@@ -388,7 +388,7 @@ void ReportConflictCnt(PPathElt e, int32_t cnt);
 void ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i);
 void ReportRemConflict(PPathElt e);
 void ReportRotateSubpath(PPathElt e);
-void ReportRemShortColors(Fixed ex, Fixed ey);
+void ReportRemShortHints(Fixed ex, Fixed ey);
 bool ResolveConflictBySplit(PPathElt e, bool Hflg, PSegLnkLst lnk1,
                             PSegLnkLst lnk2);
 void ReportPossibleLoop(PPathElt e);
@@ -401,10 +401,10 @@ void ReportAddVVal(PClrVal val);
 void ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg);
 void ReportCarry(Fixed l0, Fixed l1, Fixed loc, PClrVal clrs, bool vert);
 void ReportBestCP(PPathElt e, PPathElt cp);
-void LogColorInfo(PClrPoint pl);
+void LogHintInfo(PClrPoint pl);
 void ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t,
                         bool curve);
-void ReportColorConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch);
+void ReportHintConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch);
 void ReportDuplicates(Fixed x, Fixed y);
 void ReportBBoxBogus(Fixed llx, Fixed lly, Fixed urx, Fixed ury);
 void ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
@@ -445,8 +445,8 @@ void AddHStem(Fixed right, Fixed left, bool curved);
 
 void AddGlyphExtremes(Fixed bot, Fixed top);
 
-bool AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata,
-               bool fixStems, bool extracolor, bool changeGlyph,
+bool AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata,
+               bool fixStems, bool extrahint, bool changeGlyph,
                bool roundCoords);
 
 bool MergeGlyphPaths(const ACFontInfo* fontinfo, const char** srcglyphs,
