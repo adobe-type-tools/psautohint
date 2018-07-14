@@ -153,7 +153,7 @@ Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
 
 /* The intent of this code is to order the subpaths so that
  the hints will not need to change constantly because it
- is jumping from one subpath to another.  Kanji characters
+ is jumping from one subpath to another.  Kanji glyphs
  had the most problems with this which caused huge files
  to be created. */
 void

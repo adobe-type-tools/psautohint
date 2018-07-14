@@ -86,7 +86,7 @@ FindNameInList(char* nm, char** lst)
     }
 }
 
-/* Adds specified characters to CounterColorList array. */
+/* Adds specified glyphs to CounterColorList array. */
 int
 AddCounterColorChars(char* charlist, char* ColorList[])
 {
@@ -108,9 +108,8 @@ AddCounterColorChars(char* charlist, char* ColorList[])
         /* Currently, ColorList must end with a NULL pointer. */
         if (ListEntries == (COUNTERLISTSIZE - 1)) {
             LogMsg(WARNING, OK,
-                   "Exceeded counter hints list size. (maximum is "
-                   "%d.) Cannot add %s or subsequent "
-                   "characters.",
+                   "Exceeded counter hints list size. (maximum is %d.) "
+                   "Cannot add %s or subsequent characters.",
                    (int)COUNTERLISTSIZE, token);
             break;
         }

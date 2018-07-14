@@ -23,7 +23,7 @@
 
 /* widely used definitions */
 
-/* number of default entries in counter color character list. */
+/* number of default entries in counter color glyph list. */
 #define COUNTERDEFAULTENTRIES 4
 #define COUNTERLISTSIZE 64
 
@@ -51,13 +51,13 @@
 
 /* structures */
 
-/* character bounding box */
+/* glyph bounding box */
 typedef struct Bbox
    {
    int32_t llx, lly, urx, ury;
    } Bbox, *BboxPtr;
 
-/* character point coordinates */
+/* glyph point coordinates */
 typedef struct
    {
    int32_t x, y;
@@ -182,7 +182,7 @@ typedef struct {
 } ACFontInfo;
 
 typedef struct {
-  char* data;       /* character data held in the buffer */
+  char* data;       /* glyph data held in the buffer */
   size_t length;    /* actual length of the data */
   size_t capacity;  /* allocated memory size */
 } ACBuffer;
@@ -194,7 +194,7 @@ extern ACBuffer* gBezOutput;
 extern PPathElt gPathStart, gPathEnd;
 extern bool gYgoesUp;
 extern bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix;
-extern bool gEditChar; /* whether character can be modified when adding hints */
+extern bool gEditChar; /* whether glyph can be modified when adding hints */
 extern bool gBandError;
 extern bool gHasFlex, gFlexOK, gFlexStrict;
 extern Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth,
