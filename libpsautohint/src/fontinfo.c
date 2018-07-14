@@ -99,7 +99,7 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     */
     GetKeyFixedValue(fontinfo, "BlueFuzz", ACOPTIONAL, &gBlueFuzz);
 
-    /* Check for counter coloring characters. */
+    /* Check for counter coloring glyphs. */
     fontinfostr = GetFontInfo(fontinfo, "VCounterChars", ACOPTIONAL);
     if (fontinfostr != NULL)
         gNumVColors = AddCounterColorChars(fontinfostr, gVColorList);

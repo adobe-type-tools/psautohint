@@ -36,7 +36,7 @@ typedef struct _t_pathlist {
   int16_t width;
 } PathList, *PPathList;
 
-extern int32_t gPathEntries;  /* number of elements in a character path */
+extern int32_t gPathEntries;  /* number of elements in a glyph path */
 extern bool gAddHints;  /* whether to include hints in the font */
 
 PCharPathElt AppendCharPathElement(int);

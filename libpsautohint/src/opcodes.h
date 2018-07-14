@@ -10,7 +10,7 @@
 /* opcodes for PS operators */
 /* The assignment of mnemonics to constants in this file has two purposes:
    1) establish the value of encoded operators that are put in the 
-      CharString of a character.  This purpose requires that the values 
+      CharString of a glyph.  This purpose requires that the values 
       of such operators must correspond to the values in fontbuild.c in 
       the PS interpreter.
    2) provide an index into a lookup table for buildfont's use.

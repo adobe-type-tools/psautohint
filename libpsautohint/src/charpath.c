@@ -253,7 +253,7 @@ FreePathElements(indx startix, indx stopix)
         if (pathlist[j].path != NULL) {
             /* Before we can free hint elements will need to know gPathEntries
              value for char in each master because this proc can be
-             called when characters are inconsistent.
+             called when glyphs are inconsistent.
              */
             for (i = 0; i < gPathEntries; i++) {
                 hintElt = pathlist[j].path[i].hints;
@@ -488,7 +488,7 @@ AddLineCube(indx mIx, indx pathIx)
             LogMsg(LOGERROR, NONFATALERROR, "Expected CP.");
         }
 
-        /* If there's another path in the character, we need to compensate */
+        /* If there's another path in the glyph, we need to compensate */
         /* because CP does not update currentpoint. */
 
         if (pathIx + 2 < gPathEntries) {
@@ -536,7 +536,7 @@ AddLineCube(indx mIx, indx pathIx)
  accumulation of such errors might cause the path to not end
  up at the same point where it started.  This can cause a sharp
  angle segment that may cause spike problems in old rasterizers,
- and in the qreducer (used for filling very large size characters).
+ and in the qreducer (used for filling very large size glyphs).
  The one unit line, which is drawn by the closepath, takes up the
  slack for the arithmetic errors and avoids the spike problem.
  */
@@ -558,9 +558,9 @@ CheckForZeroLengthCP(void)
     }
 }
 
-/* Checks that character paths for multiple masters have the same
+/* Checks that glyph paths for multiple masters have the same
  number of points and in the same path order.  If this isn't the
- case the character is not included in the font. */
+ case the glyph is not included in the font. */
 static bool
 CompareCharPaths(const ACFontInfo* fontinfo, const char** glyphs)
 {
@@ -572,7 +572,7 @@ CompareCharPaths(const ACFontInfo* fontinfo, const char** glyphs)
     totalPathElt = minPathLen = MAXINT;
     if (pathlist == NULL) {
         pathlist = (PPathList)AllocateMem(masterCount, sizeof(PathList),
-                                          "character path list");
+                                          "glyph path list");
     }
 
     for (mIx = 0; mIx < masterCount; mIx++) {
@@ -820,7 +820,7 @@ nearlyequal_(Fixed a, Fixed b, Fixed tolerance)
 /* Returns whether the hint values are derived from the start,
  average, end or flattened curve with an inflection point of
  the specified path element. Since path element numbers in
- character files start from one and the path array starts
+ glyph files start from one and the path array starts
  from zero we need to subtract one from the path index. */
 static int16_t
 GetPointType(int16_t hinttype, Fixed value, int32_t* pathEltIx)
@@ -1136,7 +1136,7 @@ ReadandAssignHints(void)
 {
     indx ix;
 
-    /* Check for main hints first, i.e. global to character. */
+    /* Check for main hints first, i.e. global to glyph. */
     if (pathlist[hintsMasterIx].mainhints != NULL)
         ReadHints(pathlist[hintsMasterIx].mainhints, MAINHINTS);
     /* Now check for local hint values. */
@@ -1179,7 +1179,7 @@ CheckFlexOK(indx ix)
                 LogMsg(WARNING, OK,
                        "Flex will not be included in the glyph, "
                        "in '%s' at element %d near (%d, %d) because "
-                       "the character does not have flex in each "
+                       "the glyph does not have flex in each "
                        "design.",
                        masterNames[i], (int)ix, FTrunc8(end->x),
                        FTrunc8(end->y));
@@ -1998,7 +1998,7 @@ SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
     return true;
 }
 
-/* Takes multiple path descriptions for the same character name and
+/* Takes multiple path descriptions for the same glyph name and
  combines them into a single path description using new subroutine
  calls 7 - 11. */
 static void
@@ -2325,7 +2325,7 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
 /**********
  Normal MM fonts have their dimensionality wired into the subrs.
  That is, the contents of subr 7-11 are computed on a per-font basis.
- Cube fonts can be of 1-4 dimensions on a per-character basis.
+ Cube fonts can be of 1-4 dimensions on a per-glyph basis.
  But there are only a few possible combinations of these numbers
  because we are limited by the stack size:
 

@@ -25,7 +25,7 @@ ReportAddFlex(void)
     if (gHasFlex)
         return;
     gHasFlex = true;
-    LogMsg(INFO, OK, "added flex operators to this character.");
+    LogMsg(INFO, OK, "added flex operators to this glyph.");
 }
 
 void
@@ -469,7 +469,7 @@ ReportDuplicates(Fixed x, Fixed y)
 void
 ReportBBoxBogus(Fixed llx, Fixed lly, Fixed urx, Fixed ury)
 {
-    LogMsg(LOGERROR, OK, "Character bounding box looks bogus: %g %g %g %g.",
+    LogMsg(LOGERROR, OK, "Glyph bounding box looks bogus: %g %g %g %g.",
            FixToDbl(llx), FixToDbl(lly), FixToDbl(urx), FixToDbl(ury));
 }
 

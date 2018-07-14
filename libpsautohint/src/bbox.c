@@ -100,7 +100,7 @@ FindSubpathBBox(PPathElt e)
   e = GetDest(e); /* back up to moveto */
 #else
     /* This and the following change (in the next else clause) were made
-       to fix the coloring in characters in the SolEol lists.  These are
+       to fix the coloring in glyphs in the SolEol lists.  These are
        supposed to have subpath bbox colored, but were getting path bbox
        colored instead. */
     if (e->type != MOVETO)

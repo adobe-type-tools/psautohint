@@ -14,7 +14,7 @@
 #include "charpath.h"
 #include "memory.h"
 
-int32_t gPathEntries = 0; /* number of elements in a character path */
+int32_t gPathEntries = 0; /* number of elements in a glyph path */
 bool gAddHints = true;    /* whether to include hints in the font */
 
 #define MAXPATHELT 100 /* initial maximum number of path elements */
@@ -61,7 +61,7 @@ AppendCharPathElement(int pathtype)
     return (&currPathList->path[gPathEntries - 1]);
 }
 
-/* Called from CompareCharPaths when a new character is being read. */
+/* Called from CompareCharPaths when a new glyph is being read. */
 void
 ResetMaxPathEntries(void)
 {
@@ -83,7 +83,7 @@ SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2,
 
     if (!gAddHints)
         return;
-    if (mainhints) /* define main hints for character */
+    if (mainhints) /* define main hints for glyph */
         hintEntry = &currPathList->mainhints;
     else {
         CheckPath();
@@ -103,7 +103,7 @@ SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2,
         (*hintEntry)->next = lastHintEntry;
 }
 
-/* Called when character file contains hinting operators, but
+/* Called when glyph file contains hinting operators, but
    not the path element information needed for making blended
    fonts. */
 void
@@ -114,7 +114,7 @@ SetNoHints(void)
 
 /* According to Bill Paxton the offset locking commands should
    be replaced by hint substitution and is not necessary to
-   use for blended fonts.  This means characters that should
+   use for blended fonts.  This means glyphs that should
    have these commands may not look as good on Classic LW's. */
 /*
 void SetOffsetLocking(locktype)

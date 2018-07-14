@@ -887,7 +887,7 @@ static void
 AddColors(const ACFontInfo* fontinfo, const char* srcglyph, bool extracolor)
 {
     if (gPathStart == NULL || gPathStart == gPathEnd) {
-        LogMsg(INFO, OK, "No character path, so no hints.");
+        LogMsg(INFO, OK, "No glyph path, so no hints.");
         SaveFile(fontinfo); /* make sure it gets saved with no coloring */
         return;
     }
