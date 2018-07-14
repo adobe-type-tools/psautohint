@@ -379,7 +379,7 @@ ReadHintInfo(char nm, const char* str)
         LogMsg(WARNING, NONFATALERROR,
                "Extra hint information required for blended fonts is "
                "not in glyph. Please re-hint using the latest software. "
-               "Hints will not be included in this font.");
+               "Hints will not be included in this glyph.");
         SetNoHints();
         includeHints = false;
     } else

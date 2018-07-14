@@ -95,7 +95,7 @@ ExpectedMoveTo(PPathElt e)
     }
     LogMsg(LOGERROR, NONFATALERROR,
            "Glyph path has a %s where a moveto was expected. "
-           "The data are probably truncated.",
+           "The data is probably truncated.",
            s);
 }
 
@@ -103,7 +103,7 @@ void
 ReportMissingClosePath(void)
 {
     LogMsg(LOGERROR, NONFATALERROR,
-           "Missing closepath. The data are probably truncated.");
+           "Missing closepath. The data is probably truncated.");
 }
 
 void
