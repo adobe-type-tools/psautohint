@@ -10,7 +10,7 @@
 #include "ac.h"
 #include "bbox.h"
 
-static bool clrBBox, clrHBounds, clrVBounds, haveHBnds, haveVBnds, mergeMain;
+static bool hintBBox, hintHBounds, hintVBounds, haveHBnds, haveVBnds, mergeMain;
 
 void
 InitAuto(int32_t reason)
@@ -18,7 +18,7 @@ InitAuto(int32_t reason)
     switch (reason) {
         case STARTUP:
         case RESTART:
-            clrBBox = clrHBounds = clrVBounds = haveHBnds = haveVBnds = false;
+            hintBBox = hintHBounds = hintVBounds = haveHBnds = haveVBnds = false;
     }
 }
 
@@ -38,11 +38,11 @@ GetSubPathPrv(PPathElt e)
     return e->prev;
 }
 
-static PClrVal
-FindClosestVal(PClrVal sLst, Fixed loc)
+static PHintVal
+FindClosestVal(PHintVal sLst, Fixed loc)
 {
     Fixed dist = FixInt(10000);
-    PClrVal best = NULL;
+    PHintVal best = NULL;
     while (sLst != NULL) {
         Fixed bot, top, d;
         bot = sLst->vLoc1;
@@ -70,10 +70,10 @@ FindClosestVal(PClrVal sLst, Fixed loc)
 }
 
 static void
-CpyHClr(PPathElt e)
+CpyHHint(PPathElt e)
 {
     Fixed x1, y1;
-    PClrVal best;
+    PHintVal best;
     GetEndPoint(e, &x1, &y1);
     best = FindClosestVal(gHPrimary, y1);
     if (best != NULL)
@@ -81,10 +81,10 @@ CpyHClr(PPathElt e)
 }
 
 static void
-CpyVClr(PPathElt e)
+CpyVHint(PPathElt e)
 {
     Fixed x1, y1;
-    PClrVal best;
+    PHintVal best;
     GetEndPoint(e, &x1, &y1);
     best = FindClosestVal(gVPrimary, x1);
     if (best != NULL)
@@ -95,11 +95,11 @@ static void
 PruneHintSegs(PPathElt e, bool hFlg)
 {
     PSegLnkLst lst, nxt, prv;
-    PClrSeg seg;
+    PHintSeg seg;
     lst = hFlg ? e->Hs : e->Vs;
     prv = NULL;
     while (lst != NULL) {
-        PClrVal val = NULL;
+        PHintVal val = NULL;
         PSegLnk lnk = lst->lnk;
         if (lnk != NULL) {
             seg = lnk->seg;
@@ -135,7 +135,7 @@ PruneElementHintSegs(void)
     }
 }
 
-#define ElmntClrSegLst(e, hFlg) (hFlg) ? (e)->Hs : (e)->Vs
+#define ElmntHintSegLst(e, hFlg) (hFlg) ? (e)->Hs : (e)->Vs
 
 static void
 RemLnk(PPathElt e, bool hFlg, PSegLnkLst rm)
@@ -162,7 +162,7 @@ RemLnk(PPathElt e, bool hFlg, PSegLnkLst rm)
 }
 
 static bool
-AlreadyOnList(PClrVal v, PClrVal lst)
+AlreadyOnList(PHintVal v, PHintVal lst)
 {
     while (lst != NULL) {
         if (v == lst)
@@ -173,19 +173,19 @@ AlreadyOnList(PClrVal v, PClrVal lst)
 }
 
 static void
-AutoVSeg(PClrVal sLst)
+AutoVSeg(PHintVal sLst)
 {
     AddVPair(sLst, 'y');
 }
 
 static void
-AutoHSeg(PClrVal sLst)
+AutoHSeg(PHintVal sLst)
 {
     AddHPair(sLst, 'b');
 }
 
 static void
-AddHHinting(PClrVal h)
+AddHHinting(PHintVal h)
 {
     if (gUseH || AlreadyOnList(h, gHHinting))
         return;
@@ -195,7 +195,7 @@ AddHHinting(PClrVal h)
 }
 
 static void
-AddVHinting(PClrVal v)
+AddVHinting(PHintVal v)
 {
     if (gUseV || AlreadyOnList(v, gVHinting))
         return;
@@ -205,10 +205,10 @@ AddVHinting(PClrVal v)
 }
 
 static int32_t
-TestHint(PClrSeg s, PClrVal hintList, bool flg, bool doLst)
+TestHint(PHintSeg s, PHintVal hintList, bool flg, bool doLst)
 {
     /* -1 means already in hintList; 0 means conflicts; 1 means ok to add */
-    PClrVal v, clst;
+    PHintVal v, clst;
     Fixed top, bot, vT, vB, loc;
     if (s == NULL)
         return -1;
@@ -289,7 +289,7 @@ TestHint(PClrSeg s, PClrVal hintList, bool flg, bool doLst)
 #define TestVHintLst(v) TestHintLst(v, gVHinting, true, true)
 
 int
-TestHintLst(PSegLnkLst lst, PClrVal hintList, bool flg, bool doLst)
+TestHintLst(PSegLnkLst lst, PHintVal hintList, bool flg, bool doLst)
 {
     /* -1 means already in hintList; 0 means conflicts; 1 means ok to add */
     int result, cnt;
@@ -411,8 +411,8 @@ TryResolveConflict(PPathElt e, bool Hflg)
 {
     int32_t typ;
     PSegLnkLst lst, lnk1, lnk2;
-    PClrSeg seg, seg1, seg2;
-    PClrVal val1, val2;
+    PHintSeg seg, seg1, seg2;
+    PHintVal val1, val2;
     Fixed lc1, lc2, loc0, loc1, loc2, loc3, x0, y0, x1, y1;
     RemDupLnks(e, Hflg);
     typ = e->type;
@@ -502,8 +502,8 @@ CheckHintSegs(PPathElt e, bool flg, bool Hflg)
 {
     PSegLnkLst lst;
     PSegLnkLst lst2;
-    PClrSeg seg;
-    PClrVal val;
+    PHintSeg seg;
+    PHintVal val;
     lst = Hflg ? e->Hs : e->Vs;
     while (lst != NULL) {
         lst2 = lst->next;
@@ -527,7 +527,7 @@ CheckHintSegs(PPathElt e, bool flg, bool Hflg)
 }
 
 static void
-CheckElmntClrSegs(void)
+CheckElmntHintSegs(void)
 {
     PPathElt e;
     e = gPathStart;
@@ -538,11 +538,11 @@ CheckElmntClrSegs(void)
     }
 }
 static bool
-ClrLstsClash(PSegLnkLst lst1, PSegLnkLst lst2, bool flg)
+HintLstsClash(PSegLnkLst lst1, PSegLnkLst lst2, bool flg)
 {
     while (lst1 != NULL) {
-        PClrSeg seg = lst1->lnk->seg;
-        PClrVal val = seg->sLnk;
+        PHintSeg seg = lst1->lnk->seg;
+        PHintVal val = seg->sLnk;
         if (val != NULL) {
             PSegLnkLst lst = lst2;
             while (lst != NULL) {
@@ -566,8 +566,8 @@ BestFromLsts(PSegLnkLst lst1, PSegLnkLst lst2)
     for (i = 0; i < 2; i++) {
         PSegLnkLst lst = i ? lst1 : lst2;
         while (lst != NULL) {
-            PClrSeg seg = lst->lnk->seg;
-            PClrVal val = seg->sLnk;
+            PHintSeg seg = lst->lnk->seg;
+            PHintVal val = seg->sLnk;
             if (val != NULL && val->vVal > bstval) {
                 bst = lst;
                 bstval = val->vVal;
@@ -579,12 +579,12 @@ BestFromLsts(PSegLnkLst lst1, PSegLnkLst lst2)
 }
 
 static bool
-ClrsClash(PPathElt e, PPathElt p, PSegLnkLst* hLst, PSegLnkLst* vLst,
+HintsClash(PPathElt e, PPathElt p, PSegLnkLst* hLst, PSegLnkLst* vLst,
           PSegLnkLst* phLst, PSegLnkLst* pvLst)
 {
     bool clash = false;
     PSegLnkLst bst, new;
-    if (ClrLstsClash(*hLst, *phLst, gYgoesUp)) {
+    if (HintLstsClash(*hLst, *phLst, gYgoesUp)) {
         clash = true;
         bst = BestFromLsts(*hLst, *phLst);
         if (bst) {
@@ -595,7 +595,7 @@ ClrsClash(PPathElt e, PPathElt p, PSegLnkLst* hLst, PSegLnkLst* vLst,
             new = NULL;
         e->Hs = p->Hs = *hLst = *phLst = new;
     }
-    if (ClrLstsClash(*vLst, *pvLst, true)) {
+    if (HintLstsClash(*vLst, *pvLst, true)) {
         clash = true;
         bst = BestFromLsts(*vLst, *pvLst);
         if (bst) {
@@ -642,24 +642,24 @@ GetHintLsts(PPathElt e, PSegLnkLst* phLst, PSegLnkLst* pvLst, int32_t* ph,
 }
 
 static void
-ReClrBounds(PPathElt e)
+ReHintBounds(PPathElt e)
 {
     if (!gUseH) {
-        if (clrHBounds && gHHinting == NULL && !haveHBnds)
-            ReClrHBnds();
-        else if (!clrBBox) {
+        if (hintHBounds && gHHinting == NULL && !haveHBnds)
+            ReHintHBnds();
+        else if (!hintBBox) {
             if (gHHinting == NULL)
-                CpyHClr(e);
+                CpyHHint(e);
             if (mergeMain)
                 MergeFromMainHints('b');
         }
     }
     if (!gUseV) {
-        if (clrVBounds && gVHinting == NULL && !haveVBnds)
-            ReClrVBnds();
-        else if (!clrBBox) {
+        if (hintVBounds && gVHinting == NULL && !haveVBnds)
+            ReHintVBnds();
+        else if (!hintBBox) {
             if (gVHinting == NULL)
-                CpyVClr(e);
+                CpyVHint(e);
             if (mergeMain)
                 MergeFromMainHints('y');
         }
@@ -669,8 +669,8 @@ ReClrBounds(PPathElt e)
 static void
 AddHintLst(PSegLnkLst lst, bool vert)
 {
-    PClrVal val;
-    PClrSeg seg;
+    PHintVal val;
+    PHintSeg seg;
     while (lst != NULL) {
         seg = lst->lnk->seg;
         val = seg->sLnk;
@@ -685,12 +685,12 @@ AddHintLst(PSegLnkLst lst, bool vert)
 static void
 StartNewHinting(PPathElt e, PSegLnkLst hLst, PSegLnkLst vLst)
 {
-    ReClrBounds(e);
+    ReHintBounds(e);
     if (e->newhints != 0) {
         LogMsg(LOGERROR, NONFATALERROR, "Uninitialized extra hints list.");
     }
-    XtraClrs(e);
-    clrBBox = false;
+    XtraHints(e);
+    hintBBox = false;
     if (gUseV)
         CopyMainV();
     if (gUseH)
@@ -722,7 +722,7 @@ IsOk(int32_t h, int32_t v)
     AddHintLst(hLst, false)
 
 static void
-SetHHints(PClrVal lst)
+SetHHints(PHintVal lst)
 {
     if (gUseH)
         return;
@@ -734,7 +734,7 @@ SetHHints(PClrVal lst)
 }
 
 static void
-SetVHints(PClrVal lst)
+SetVHints(PHintVal lst)
 {
     if (gUseV)
         return;
@@ -745,20 +745,20 @@ SetVHints(PClrVal lst)
     }
 }
 
-PClrVal
-CopyClrs(PClrVal lst)
+PHintVal
+CopyHints(PHintVal lst)
 {
-    PClrVal vlst;
+    PHintVal vlst;
     int cnt;
     vlst = NULL;
     cnt = 0;
     while (lst != NULL) {
-        PClrVal v = (PClrVal)Alloc(sizeof(ClrVal));
+        PHintVal v = (PHintVal)Alloc(sizeof(HintVal));
         *v = *lst;
         v->vNxt = vlst;
         vlst = v;
         if (++cnt > 100) {
-            LogMsg(WARNING, OK, "Loop in CopyClrs.");
+            LogMsg(WARNING, OK, "Loop in CopyHints.");
             return vlst;
         }
         lst = lst->vNxt;
@@ -767,11 +767,11 @@ CopyClrs(PClrVal lst)
 }
 
 static PPathElt
-HintBBox(PPathElt e)
+_HintBBox(PPathElt e)
 {
     e = FindSubpathBBox(e);
-    ClrBBox();
-    clrBBox = true;
+    HintBBox();
+    hintBBox = true;
     return e;
 }
 
@@ -806,7 +806,7 @@ RemFlareLnk(PPathElt e, bool hFlg, PSegLnkLst rm, PPathElt e2, int32_t i)
 }
 
 bool
-CompareValues(PClrVal val1, PClrVal val2, int32_t factor, int32_t ghstshift)
+CompareValues(PHintVal val1, PHintVal val2, int32_t factor, int32_t ghstshift)
 {
     Fixed v1 = val1->vVal, v2 = val2->vVal, mx;
     mx = v1 > v2 ? v1 : v2;
@@ -837,8 +837,8 @@ RemFlares(bool Hflg)
 {
     PSegLnkLst lst1, lst2, nxt1, nxt2;
     PPathElt e, n;
-    PClrSeg seg1, seg2;
-    PClrVal val1, val2;
+    PHintSeg seg1, seg2;
+    PHintVal val1, val2;
     Fixed diff;
     bool nxtE;
     bool Nm1, Nm2;
@@ -860,11 +860,11 @@ RemFlares(bool Hflg)
         nxtE = false;
         while (n != e && !nxtE) {
             if (Nm1 ? n->Hs != NULL : n->Vs != NULL) {
-                lst1 = ElmntClrSegLst(e, Nm1);
+                lst1 = ElmntHintSegLst(e, Nm1);
                 while (lst1 != NULL) {
                     seg1 = lst1->lnk->seg;
                     nxt1 = lst1->next;
-                    lst2 = ElmntClrSegLst(n, Nm1);
+                    lst2 = ElmntHintSegLst(n, Nm1);
                     while (lst2 != NULL) {
                         seg2 = lst2->lnk->seg;
                         nxt2 = lst2->next;
@@ -914,10 +914,10 @@ RemFlares(bool Hflg)
 }
 
 static void
-CarryIfNeed(Fixed loc, bool vert, PClrVal clrs)
+CarryIfNeed(Fixed loc, bool vert, PHintVal hints)
 {
-    PClrSeg seg;
-    PClrVal seglnk;
+    PHintSeg seg;
+    PHintVal seglnk;
     Fixed l0, l1, tmp, halfMargin;
     if ((vert && gUseV) || (!vert && gUseH))
         return;
@@ -926,14 +926,14 @@ CarryIfNeed(Fixed loc, bool vert, PClrVal clrs)
      * system */
     if (halfMargin > FixInt(20))
         halfMargin = FixInt(20);
-    while (clrs != NULL) {
-        seg = clrs->vSeg1;
-        if (clrs->vGhst && seg->sType == sGHOST)
-            seg = clrs->vSeg2;
+    while (hints != NULL) {
+        seg = hints->vSeg1;
+        if (hints->vGhst && seg->sType == sGHOST)
+            seg = hints->vSeg2;
         if (seg == NULL)
             goto Nxt;
-        l0 = clrs->vLoc2;
-        l1 = clrs->vLoc1;
+        l0 = hints->vLoc2;
+        l1 = hints->vLoc1;
         if (l0 > l1) {
             tmp = l1;
             l1 = l0;
@@ -943,24 +943,24 @@ CarryIfNeed(Fixed loc, bool vert, PClrVal clrs)
         l1 += halfMargin;
         if (loc > l0 && loc < l1) {
             seglnk = seg->sLnk;
-            seg->sLnk = clrs;
+            seg->sLnk = hints;
             if (vert) {
                 if (TestHint(seg, gVHinting, true, true) == 1) {
-                    ReportCarry(l0, l1, loc, clrs, vert);
-                    AddVHinting(clrs);
+                    ReportCarry(l0, l1, loc, hints, vert);
+                    AddVHinting(hints);
                     seg->sLnk = seglnk;
                     break;
                 }
             } else if (TestHint(seg, gHHinting, gYgoesUp, true) == 1) {
-                ReportCarry(l0, l1, loc, clrs, vert);
-                AddHHinting(clrs);
+                ReportCarry(l0, l1, loc, hints, vert);
+                AddHHinting(hints);
                 seg->sLnk = seglnk;
                 break;
             }
             seg->sLnk = seglnk;
         }
     Nxt:
-        clrs = clrs->vNxt;
+        hints = hints->vNxt;
     }
 }
 
@@ -968,11 +968,11 @@ CarryIfNeed(Fixed loc, bool vert, PClrVal clrs)
     (FixInt(100)) /* DEBUG 8 BIT. Needed to double test from 50 to 100 for     \
                      change in coordinate system */
 static void
-ProClrs(PPathElt e, bool hFlg, Fixed loc)
+ProHints(PPathElt e, bool hFlg, Fixed loc)
 {
     PSegLnkLst lst;
     PPathElt prv;
-    lst = ElmntClrSegLst(e, hFlg);
+    lst = ElmntHintSegLst(e, hFlg);
     if (lst == NULL)
         return;
     if (hFlg ? e->Hcopy : e->Vcopy)
@@ -982,7 +982,7 @@ ProClrs(PPathElt e, bool hFlg, Fixed loc)
         Fixed cx, cy, dst;
         PSegLnkLst plst;
         prv = GetSubPathPrv(prv);
-        plst = ElmntClrSegLst(prv, hFlg);
+        plst = ElmntHintSegLst(prv, hFlg);
         if (plst != NULL)
             return;
         GetEndPoint(prv, &cx, &cy);
@@ -1007,14 +1007,14 @@ PromoteHints(void)
     while (e != NULL) {
         Fixed cx, cy;
         GetEndPoint(e, &cx, &cy);
-        ProClrs(e, true, cy);
-        ProClrs(e, false, cx);
+        ProHints(e, true, cy);
+        ProHints(e, false, cx);
         e = e->next;
     }
 }
 
 static void
-RemPromotedClrs(void)
+RemPromotedHints(void)
 {
     PPathElt e;
     e = gPathStart;
@@ -1055,38 +1055,38 @@ RemShortHints(void)
 }
 
 void
-AutoExtraHints(bool movetoNewClrs, bool soleol, int32_t solWhere)
+AutoExtraHints(bool movetoNewHints, bool soleol, int32_t solWhere)
 {
     int32_t h, v, ph, pv;
     PPathElt e, cp, p;
     PSegLnkLst hLst, vLst, phLst, pvLst;
-    PClrVal mtVclrs, mtHclrs, prvHclrs, prvVclrs;
+    PHintVal mtVhints, mtHhints, prvHhints, prvVhints;
 
-    bool (*Tst)(int32_t, int32_t), newClrs = true;
+    bool (*Tst)(int32_t, int32_t), newHints = true;
     bool isSpc;
     Fixed x, y;
 
-    isSpc = clrBBox = clrVBounds = clrHBounds = false;
+    isSpc = hintBBox = hintVBounds = hintHBounds = false;
     mergeMain = (CountSubPaths() <= 5);
     e = gPathStart;
     LogMsg(LOGDEBUG, OK, "RemFlares");
     RemFlares(true);
     RemFlares(false);
-    LogMsg(LOGDEBUG, OK, "CheckElmntClrSegs");
-    CheckElmntClrSegs();
+    LogMsg(LOGDEBUG, OK, "CheckElmntHintSegs");
+    CheckElmntHintSegs();
     LogMsg(LOGDEBUG, OK, "PromoteHints");
     PromoteHints();
     LogMsg(LOGDEBUG, OK, "RemShortHints");
     RemShortHints();
-    haveVBnds = clrVBounds;
-    haveHBnds = clrHBounds;
+    haveVBnds = hintVBounds;
+    haveHBnds = hintHBounds;
     p = NULL;
     Tst = IsOk; /* it is ok to add to primary hinting */
     LogMsg(LOGDEBUG, OK, "hint loop");
-    mtVclrs = mtHclrs = NULL;
+    mtVhints = mtHhints = NULL;
     while (e != NULL) {
         int32_t etype = e->type;
-        if (movetoNewClrs && etype == MOVETO) {
+        if (movetoNewHints && etype == MOVETO) {
             StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
             Tst = IsOk;
         }
@@ -1097,7 +1097,7 @@ AutoExtraHints(bool movetoNewClrs, bool soleol, int32_t solWhere)
                 StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
                 Tst = IsOk;
                 haveHBnds = haveVBnds = isSpc = true;
-                e = HintBBox(e);
+                e = _HintBBox(e);
                 continue;
             } else if (isSpc) { /* new hinting after the special */
                 StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
@@ -1105,16 +1105,16 @@ AutoExtraHints(bool movetoNewClrs, bool soleol, int32_t solWhere)
                 haveHBnds = haveVBnds = isSpc = false;
             }
         }
-        if (newClrs && e == p) {
+        if (newHints && e == p) {
             StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
-            SetHHints(mtHclrs);
-            SetVHints(mtVclrs);
+            SetHHints(mtHhints);
+            SetVHints(mtVhints);
             Tst = IsIn;
         }
         GetHintLsts(e, &hLst, &vLst, &h, &v);
         if (etype == MOVETO && IsShort(cp = GetClosedBy(e))) {
             GetHintLsts(p = cp->prev, &phLst, &pvLst, &ph, &pv);
-            if (ClrsClash(e, p, &hLst, &vLst, &phLst, &pvLst)) {
+            if (HintsClash(e, p, &hLst, &vLst, &phLst, &pvLst)) {
                 GetHintLsts(e, &hLst, &vLst, &h, &v);
                 GetHintLsts(p, &phLst, &pvLst, &ph, &pv);
             }
@@ -1128,19 +1128,19 @@ AutoExtraHints(bool movetoNewClrs, bool soleol, int32_t solWhere)
             }
             AddIfNeedH(ph, phLst);
             AddIfNeedV(pv, pvLst);
-            newClrs = false; /* so can tell if added new hints in subpath */
+            newHints = false; /* so can tell if added new hints in subpath */
         } else if (!(*Tst)(h, v)) { /* e needs new hinting */
             if (etype ==
                 CLOSEPATH) { /* do not attach extra hints to closepath */
                 e = e->prev;
                 GetHintLsts(e, &hLst, &vLst, &h, &v);
             }
-            prvHclrs = CopyClrs(gHHinting);
-            prvVclrs = CopyClrs(gVHinting);
-            if (!newClrs) { /* this is the first extra since mt */
-                newClrs = true;
-                mtVclrs = CopyClrs(prvVclrs);
-                mtHclrs = CopyClrs(prvHclrs);
+            prvHhints = CopyHints(gHHinting);
+            prvVhints = CopyHints(gVHinting);
+            if (!newHints) { /* this is the first extra since mt */
+                newHints = true;
+                mtVhints = CopyHints(prvVhints);
+                mtHhints = CopyHints(prvHhints);
             }
             StartNewHinting(e, hLst, vLst);
             Tst = IsOk;
@@ -1149,16 +1149,16 @@ AutoExtraHints(bool movetoNewClrs, bool soleol, int32_t solWhere)
                 y = e->y1;
             } else
                 GetEndPoint(e, &x, &y);
-            CarryIfNeed(y, false, prvHclrs);
-            CarryIfNeed(x, true, prvVclrs);
+            CarryIfNeed(y, false, prvHhints);
+            CarryIfNeed(x, true, prvVhints);
         } else { /* do not need to start new hinting */
             AddIfNeedH(h, hLst);
             AddIfNeedV(v, vLst);
         }
         e = e->next;
     }
-    ReClrBounds(gPathEnd);
-    LogMsg(LOGDEBUG, OK, "RemPromotedClrs");
-    RemPromotedClrs();
+    ReHintBounds(gPathEnd);
+    LogMsg(LOGDEBUG, OK, "RemPromotedHints");
+    RemPromotedHints();
     LogMsg(LOGDEBUG, OK, "done AutoExtraHints");
 }

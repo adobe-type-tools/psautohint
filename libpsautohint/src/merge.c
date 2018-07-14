@@ -55,7 +55,7 @@ CloseElements(PPathElt e1, PPathElt e2, Fixed loc1, Fixed loc2, bool vert)
 }
 
 bool
-CloseSegs(PClrSeg s1, PClrSeg s2, bool vert)
+CloseSegs(PHintSeg s1, PHintSeg s2, bool vert)
 {
     /* true if the elements for these segs are "close" in the path */
     PPathElt e1, e2;
@@ -81,7 +81,7 @@ DoPrune(void)
     that to be the head of the list. Then remove from the list
     any subsequent element for which 'pruned' is true.
     */
-    PClrVal vL = gValList, vPrv;
+    PHintVal vL = gValList, vPrv;
     while (vL != NULL && vL->pruned)
         vL = vL->vNxt;
     gValList = vL;
@@ -99,8 +99,8 @@ DoPrune(void)
     }
 }
 
-static PClrVal
-PruneOne(PClrVal sLst, bool hFlg, PClrVal sL, int32_t i)
+static PHintVal
+PruneOne(PHintVal sLst, bool hFlg, PHintVal sL, int32_t i)
 {
     /* Simply set the 'pruned' field to True for sLst. */
     if (hFlg)
@@ -138,8 +138,8 @@ PruneOne(PClrVal sLst, bool hFlg, PClrVal sL, int32_t i)
 void
 PruneVVals(void)
 {
-    PClrVal sLst, sL;
-    PClrSeg seg1, seg2, sg1, sg2;
+    PHintVal sLst, sL;
+    PHintSeg seg1, seg2, sg1, sg2;
     Fixed lft, rht, l, r, prndist;
     Fixed val, v;
     bool flg, otherLft, otherRht;
@@ -214,8 +214,8 @@ PruneVVals(void)
 void
 PruneHVals(void)
 {
-    PClrVal sLst, sL;
-    PClrSeg seg1, seg2, sg1, sg2;
+    PHintVal sLst, sL;
+    PHintSeg seg1, seg2, sg1, sg2;
     Fixed bot, top, t, b;
     Fixed val, v, prndist;
     bool flg, otherTop, otherBot, topInBlue, botInBlue, ghst;
@@ -344,11 +344,11 @@ PruneHVals(void)
 }
 
 static void
-FindBestVals(PClrVal vL)
+FindBestVals(PHintVal vL)
 {
     Fixed bV, bS;
     Fixed t, b;
-    PClrVal vL2, vPrv, bstV;
+    PHintVal vL2, vPrv, bstV;
     for (; vL != NULL; vL = vL->vNxt) {
         if (vL->vBst != NULL)
             continue; /* already assigned */
@@ -382,10 +382,10 @@ FindBestVals(PClrVal vL)
  possibly other fonts as well.  The old version causes bogus hinting
  and extra newhints. */
 static void
-ReplaceVals(Fixed oldB, Fixed oldT, Fixed newB, Fixed newT, PClrVal newBst,
+ReplaceVals(Fixed oldB, Fixed oldT, Fixed newB, Fixed newT, PHintVal newBst,
             bool vert)
 {
-    PClrVal vL;
+    PHintVal vL;
     for (vL = gValList; vL != NULL; vL = vL->vNxt) {
         if (vL->vLoc1 != oldB || vL->vLoc2 != oldT || vL->merge)
             continue;
@@ -407,9 +407,9 @@ ReplaceVals(Fixed oldB, Fixed oldT, Fixed newB, Fixed newT, PClrVal newBst,
 void
 MergeVals(bool vert)
 {
-    PClrVal vLst, vL;
-    PClrVal bstV, bV;
-    PClrSeg seg1, seg2, sg1, sg2;
+    PHintVal vLst, vL;
+    PHintVal bstV, bV;
+    PHintSeg seg1, seg2, sg1, sg2;
     Fixed bot, top, b, t;
     Fixed val, v, spc, s;
     bool ghst;

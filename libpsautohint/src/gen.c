@@ -29,7 +29,7 @@ InitGen(int32_t reason)
 }
 
 static void
-LinkSegment(PPathElt e, bool Hflg, PClrSeg seg)
+LinkSegment(PPathElt e, bool Hflg, PHintSeg seg)
 {
     PSegLnk newlnk;
     PSegLnkLst newlst, globlst;
@@ -73,9 +73,9 @@ static void
 AddSegment(Fixed from, Fixed to, Fixed loc, int32_t lftLstNm, int32_t rghtLstNm,
            PPathElt e1, PPathElt e2, bool Hflg, int32_t typ)
 {
-    PClrSeg seg, segList, prevSeg;
+    PHintSeg seg, segList, prevSeg;
     int32_t segNm;
-    seg = (PClrSeg)Alloc(sizeof(ClrSeg));
+    seg = (PHintSeg)Alloc(sizeof(HintSeg));
     seg->sLoc = loc;
     if (from > to) {
         seg->sMax = from;
@@ -351,7 +351,7 @@ DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 }
 
 static void
-MergeLnkSegs(PClrSeg seg1, PClrSeg seg2, PSegLnkLst lst)
+MergeLnkSegs(PHintSeg seg1, PHintSeg seg2, PSegLnkLst lst)
 {
     /* replace lnk refs to seg1 by seg2 */
     while (lst != NULL) {
@@ -363,19 +363,19 @@ MergeLnkSegs(PClrSeg seg1, PClrSeg seg2, PSegLnkLst lst)
 }
 
 static void
-MergeHSegs(PClrSeg seg1, PClrSeg seg2)
+MergeHSegs(PHintSeg seg1, PHintSeg seg2)
 {
     MergeLnkSegs(seg1, seg2, Hlnks);
 }
 
 static void
-MergeVSegs(PClrSeg seg1, PClrSeg seg2)
+MergeVSegs(PHintSeg seg1, PHintSeg seg2)
 {
     MergeLnkSegs(seg1, seg2, Vlnks);
 }
 
 static void
-ReportRemSeg(int32_t l, PClrSeg lst)
+ReportRemSeg(int32_t l, PHintSeg lst)
 {
     Fixed from = 0, to = 0, loc = 0;
     /* this assumes !YgoesUp */
@@ -412,15 +412,15 @@ ReportRemSeg(int32_t l, PClrSeg lst)
 static void
 RemExtraBends(int32_t l0, int32_t l1)
 {
-    PClrSeg lst0 = gSegLists[l0];
-    PClrSeg prv = NULL;
+    PHintSeg lst0 = gSegLists[l0];
+    PHintSeg prv = NULL;
     while (lst0 != NULL) {
-        PClrSeg nxt = lst0->sNxt;
+        PHintSeg nxt = lst0->sNxt;
         Fixed loc0 = lst0->sLoc;
-        PClrSeg lst = gSegLists[l1];
-        PClrSeg p = NULL;
+        PHintSeg lst = gSegLists[l1];
+        PHintSeg p = NULL;
         while (lst != NULL) {
-            PClrSeg n = lst->sNxt;
+            PHintSeg n = lst->sNxt;
             Fixed loc = lst->sLoc;
             if (loc > loc0)
                 break; /* list in increasing order by sLoc */
@@ -459,14 +459,14 @@ RemExtraBends(int32_t l0, int32_t l1)
 }
 
 static void
-CompactList(int32_t i, void (*nm)(PClrSeg, PClrSeg))
+CompactList(int32_t i, void (*nm)(PHintSeg, PHintSeg))
 {
-    PClrSeg lst = gSegLists[i];
-    PClrSeg prv = NULL;
+    PHintSeg lst = gSegLists[i];
+    PHintSeg prv = NULL;
     while (lst != NULL) {
         bool flg;
-        PClrSeg nxt = lst->sNxt;
-        PClrSeg nxtprv = lst;
+        PHintSeg nxt = lst->sNxt;
+        PHintSeg nxtprv = lst;
         while (true) {
             Fixed lstmin, lstmax, nxtmin, nxtmax;
             if ((nxt == NULL) || (nxt->sLoc > lst->sLoc)) {

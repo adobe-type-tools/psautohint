@@ -16,7 +16,7 @@
 static Fixed currentx, currenty;
 static bool firstFlex, wrtHintInfo;
 static char S0[MAXBUFFLEN + 1];
-static PClrPoint bst;
+static PHintPoint bst;
 static char bch;
 static Fixed bx, by;
 static bool bstB;
@@ -179,7 +179,7 @@ safestrcat(char* s1, char* s2)
     }
 
 static void
-NewBest(PClrPoint lst)
+NewBest(PHintPoint lst)
 {
     bst = lst;
     bch = lst->c;
@@ -220,7 +220,7 @@ WriteOne(const ACFontInfo* fontinfo, Fixed s)
 }
 
 static void
-WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst)
+WritePointItem(const ACFontInfo* fontinfo, PHintPoint lst)
 {
     switch (lst->c) {
         case 'b':
@@ -246,9 +246,9 @@ WritePointItem(const ACFontInfo* fontinfo, PClrPoint lst)
 }
 
 static void
-WrtPntLst(const ACFontInfo* fontinfo, PClrPoint lst)
+WrtPntLst(const ACFontInfo* fontinfo, PHintPoint lst)
 {
-    PClrPoint ptLst;
+    PHintPoint ptLst;
     char ch;
     Fixed x0, x1, y0, y1;
     ptLst = lst;
@@ -300,7 +300,7 @@ WrtPntLst(const ACFontInfo* fontinfo, PClrPoint lst)
 }
 
 static void
-wrtnewclrs(const ACFontInfo* fontinfo, PPathElt e)
+wrtnewhints(const ACFontInfo* fontinfo, PPathElt e)
 {
     if (!wrtHintInfo) {
         return;
@@ -333,7 +333,7 @@ static void
 mt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
 {
     if (e->newhints != 0) {
-        wrtnewclrs(fontinfo, e);
+        wrtnewhints(fontinfo, e);
     }
     if (writeAbsolute) {
         wrtcda(c);
@@ -363,7 +363,7 @@ static void
 dt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
 {
     if (e->newhints != 0) {
-        wrtnewclrs(fontinfo, e);
+        wrtnewhints(fontinfo, e);
     }
     if (writeAbsolute) {
         wrtcda(c);
@@ -506,7 +506,7 @@ static void
 ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PPathElt e)
 {
     if (e->newhints != 0) {
-        wrtnewclrs(fontinfo, e);
+        wrtnewhints(fontinfo, e);
     }
     if (e->isFlex && IsFlex(e)) {
         wrtflex(c1, c2, c3, e);
@@ -545,7 +545,7 @@ static void
 cp(const ACFontInfo* fontinfo, PPathElt e)
 {
     if (e->newhints != 0) {
-        wrtnewclrs(fontinfo, e);
+        wrtnewhints(fontinfo, e);
     }
     if (gIdInFile) {
         WRTNUM(subpathcount++);

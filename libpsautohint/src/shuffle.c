@@ -93,10 +93,10 @@ PrintOutLinks(unsigned char* outlinks)
 }
 
 void
-MarkLinks(PClrVal vL, bool hFlg)
+MarkLinks(PHintVal vL, bool hFlg)
 {
     int32_t i, j;
-    PClrSeg seg;
+    PHintSeg seg;
     PPathElt e;
     if (links == NULL)
         return;

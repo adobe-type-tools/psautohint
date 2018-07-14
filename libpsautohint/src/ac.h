@@ -27,7 +27,7 @@
 #define COUNTERDEFAULTENTRIES 4
 #define COUNTERLISTSIZE 64
 
-/* values for ClrSeg.sType */
+/* values for HintSeg.sType */
 #define sLINE (0)
 #define sBEND (1)
 #define sCURVE (2)
@@ -71,9 +71,9 @@ typedef struct {
   Fixed llx, lly;
   } FltnRec, *PFltnRec;
 
-typedef struct _clrseg {
-  struct _clrseg *sNxt;
-    /* points to next ClrSeg in list */
+typedef struct _hintseg {
+  struct _hintseg *sNxt;
+    /* points to next HintSeg in list */
     /* separate lists for top, bottom, left, and right segments */
   Fixed sLoc, sMax, sMin;
     /* sLoc is X loc for vertical seg, Y loc for horizontal seg */
@@ -82,18 +82,18 @@ typedef struct _clrseg {
   Fixed sBonus;
     /* nonzero for segments in sol-eol subpaths */
     /* (probably a leftover that is no longer needed) */
-  struct _clrval *sLnk;
-    /* points to the best ClrVal that uses this ClrSeg */
+  struct _hintval *sLnk;
+    /* points to the best HintVal that uses this HintSeg */
     /* set by FindBestValForSegs in pick.c */
   struct _pthelt *sElt;
-    /* points to the path element that generated this ClrSeg */
+    /* points to the path element that generated this HintSeg */
     /* set by AddSegment in gen.c */
   int16_t sType;
     /* tells what type of segment this is: sLINE sBEND sCURVE or sGHOST */
-  } ClrSeg, *PClrSeg;
+  } HintSeg, *PHintSeg;
 
 typedef struct _seglnk {
-  PClrSeg seg;
+  PHintSeg seg;
   } SegLnk, *PSegLnk;
 
 typedef struct _seglnklst {
@@ -104,50 +104,50 @@ typedef struct _seglnklst {
 typedef SegLnkLst *PSegLnkLst;
 
 #if 0
-typedef struct _clrrep {
+typedef struct _hintrep {
   Fixed vVal, vSpc, vLoc1, vLoc2;
-  struct _clrval *vBst;
-  } ClrRep, *PClrRep;
+  struct _hintval *vBst;
+  } HintRep, *PHintRep;
 
-typedef struct _clrval {
-  struct _clrval *vNxt;
+typedef struct _hintval {
+  struct _hintval *vNxt;
   Fixed vVal, vSpc, initVal;
   Fixed vLoc1, vLoc2;
     /* vBot=vLoc1, vTop=vLoc2, vLft=vLoc1, vRght=vLoc2 */ 
   int16_t vGhst:8;
   int16_t pruned:8;
-  PClrSeg vSeg1, vSeg2;
-  struct _clrval *vBst;
-  PClrRep vRep;
-  } ClrVal, *PClrVal;
+  PHintSeg vSeg1, vSeg2;
+  struct _hintval *vBst;
+  PHintRep vRep;
+  } HintVal, *PHintVal;
 #else
-typedef struct _clrval {
-  struct _clrval *vNxt;
-    /* points to next ClrVal in list */
+typedef struct _hintval {
+  struct _hintval *vNxt;
+    /* points to next HintVal in list */
   Fixed vVal, vSpc, initVal;
     /* vVal is value given in eval.c */
-    /* vSpc is nonzero for "special" ClrVals */
+    /* vSpc is nonzero for "special" HintVals */
        /* such as those with a segment in a blue zone */
     /* initVal is the initially assigned value */
        /* used by FndBstVal in pick.c */
   Fixed vLoc1, vLoc2;
     /* vLoc1 is location corresponding to vSeg1 */
     /* vLoc2 is location corresponding to vSeg2 */
-    /* for horizontal ClrVal, vBot=vLoc1 and vTop=vLoc2 */
-    /* for vertical ClrVal, vLft=vLoc1 and vRght=vLoc2 */
-  unsigned int vGhst:1;  /* true iff one of the ClrSegs is a sGHOST seg */
+    /* for horizontal HintVal, vBot=vLoc1 and vTop=vLoc2 */
+    /* for vertical HintVal, vLft=vLoc1 and vRght=vLoc2 */
+  unsigned int vGhst:1;  /* true iff one of the HintSegs is a sGHOST seg */
   unsigned int pruned:1;
     /* flag used by FindBestHVals and FindBestVVals */ 
     /* and by PruneVVals and PruneHVals */
   unsigned int merge:1;
     /* flag used by ReplaceVals in merge.c */
   unsigned int unused:13;
-  PClrSeg vSeg1, vSeg2;
-    /* vSeg1 points to the left ClrSeg in a vertical, bottom in a horizontal */
-    /* vSeg2 points to the right ClrSeg in a vertical, top in a horizontal */
-  struct _clrval *vBst;
-    /* points to another ClrVal if this one has been merged or replaced */
-  } ClrVal, *PClrVal;
+  PHintSeg vSeg1, vSeg2;
+    /* vSeg1 points to the left HintSeg in a vertical, bottom in a horizontal */
+    /* vSeg2 points to the right HintSeg in a vertical, top in a horizontal */
+  struct _hintval *vBst;
+    /* points to another HintVal if this one has been merged or replaced */
+  } HintVal, *PHintVal;
 #endif
 
 typedef struct _pthelt {
@@ -160,8 +160,8 @@ typedef struct _pthelt {
   Fixed x, y, x1, y1, x2, y2, x3, y3;
   } PathElt, *PPathElt;
 
-typedef struct _clrpnt {
-  struct _clrpnt *next;
+typedef struct _hintpnt {
+  struct _hintpnt *next;
   Fixed x0, y0, x1, y1;
     /* for vstem, only interested in x0 and x1 */
     /* for hstem, only interested in y0 and y1 */
@@ -170,7 +170,7 @@ typedef struct _clrpnt {
   char c;
     /* tells what kind of hinting: 'b' 'y' 'm' or 'v' */
   bool done;
-  } ClrPoint, *PClrPoint;
+  } HintPoint, *PHintPoint;
 
 typedef struct {
 	char *key, *value;
@@ -203,9 +203,9 @@ extern Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth,
 extern Fixed gPruneA, gPruneB, gPruneC, gPruneD, gPruneValue, gBonus;
 extern float gTheta, gHBigDistR, gVBigDistR, gMaxVal, gMinVal;
 extern int32_t gDMin, gDelta, gCPpercent, gBendTan, gSCurveTan;
-extern PClrVal gVHinting, gHHinting, gVPrimary, gHPrimary, gValList;
-extern PClrSeg gSegLists[4]; /* left, right, top, bot */
-extern PClrPoint gPointList, *gPtLstArray;
+extern PHintVal gVHinting, gHHinting, gVPrimary, gHPrimary, gValList;
+extern PHintSeg gSegLists[4]; /* left, right, top, bot */
+extern PHintPoint gPointList, *gPtLstArray;
 extern int32_t gPtLstIndex, gNumPtLsts, gMaxPtLsts;
 extern bool gScalingHints;
 
@@ -303,16 +303,16 @@ unsigned char* Alloc(int32_t sz); /* Sub-allocator */
 int AddCounterHintGlyphs(char* charlist, char* HintList[]);
 bool FindNameInList(char* nm, char** lst);
 void PruneElementHintSegs(void);
-int TestHintLst(PSegLnkLst lst, PClrVal hintList, bool flg, bool doLst);
-PClrVal CopyClrs(PClrVal lst);
-void AutoExtraHints(bool movetoNewClrs, bool soleol, int32_t solWhere);
+int TestHintLst(PSegLnkLst lst, PHintVal hintList, bool flg, bool doLst);
+PHintVal CopyHints(PHintVal lst);
+void AutoExtraHints(bool movetoNewHints, bool soleol, int32_t solWhere);
 int32_t SpecialGlyphType(void);
 bool VHintGlyph(void);
 bool HHintGlyph(void);
 bool NoBlueGlyph(void);
 int32_t SolEolGlyphCode(void);
 bool SpecialSolEol(void);
-bool MoveToNewClrs(void);
+bool MoveToNewHints(void);
 bool GetInflectionPoint(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *);
 void CheckSmooth(void);
 void CheckBBoxEdge(PPathElt e, bool vrt, Fixed lc, Fixed* pf, Fixed* pl);
@@ -321,19 +321,19 @@ bool CheckSmoothness(Fixed x0, Fixed cy0, Fixed x1, Fixed cy1, Fixed x2,
 void CheckForDups(void);
 void AddHintPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
                    PPathElt p1);
-void AddHPair(PClrVal v, char ch);
-void AddVPair(PClrVal v, char ch);
-void XtraClrs(PPathElt e);
+void AddHPair(PHintVal v, char ch);
+void AddVPair(PHintVal v, char ch);
+void XtraHints(PPathElt e);
 bool AutoHintGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
                     bool extrahint);
 void EvalV(void);
 void EvalH(void);
 void GenVPts(int32_t specialGlyphType);
-void CheckVal(PClrVal val, bool vert);
-void CheckTfmVal(PClrSeg hSegList, Fixed* bandList, int32_t length);
-void CheckVals(PClrVal vlst, bool vert);
+void CheckVal(PHintVal val, bool vert);
+void CheckTfmVal(PHintSeg hSegList, Fixed* bandList, int32_t length);
+void CheckVals(PHintVal vlst, bool vert);
 bool DoFixes(void);
-bool FindLineSeg(Fixed loc, PClrSeg sL);
+bool FindLineSeg(Fixed loc, PHintSeg sL);
 void FltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr);
 bool InBlueBand(Fixed loc, int32_t n, Fixed* p);
 void GenHPts(void);
@@ -350,7 +350,7 @@ PPathElt NxtForBend(PPathElt p, Fixed* px2, Fixed* py2, Fixed* px3, Fixed* py3);
 PPathElt PrvForBend(PPathElt p, Fixed* px2, Fixed* py2);
 bool IsLower(PPathElt p);
 bool IsUpper(PPathElt p);
-bool CloseSegs(PClrSeg s1, PClrSeg s2, bool vert);
+bool CloseSegs(PHintSeg s1, PHintSeg s2, bool vert);
 
 void DoPrune(void);
 void PruneVVals(void);
@@ -369,8 +369,8 @@ void AutoAddFlex(void);
 bool SameHints(int32_t cn1, int32_t cn2);
 bool PreCheckForHinting(void);
 int32_t CountSubPaths(void);
-void PickVVals(PClrVal gValList);
-void PickHVals(PClrVal gValList);
+void PickVVals(PHintVal gValList);
+void PickHVals(PHintVal gValList);
 void FindBestHVals(void);
 void FindBestVVals(void);
 void ReportAddFlex(void);
@@ -392,16 +392,16 @@ void ReportRemShortHints(Fixed ex, Fixed ey);
 bool ResolveConflictBySplit(PPathElt e, bool Hflg, PSegLnkLst lnk1,
                             PSegLnkLst lnk2);
 void ReportPossibleLoop(PPathElt e);
-void ShowHVal(PClrVal val);
-void ShowHVals(PClrVal lst);
-void ReportAddHVal(PClrVal val);
-void ShowVVal(PClrVal val);
-void ShowVVals(PClrVal lst);
-void ReportAddVVal(PClrVal val);
-void ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg);
-void ReportCarry(Fixed l0, Fixed l1, Fixed loc, PClrVal clrs, bool vert);
+void ShowHVal(PHintVal val);
+void ShowHVals(PHintVal lst);
+void ReportAddHVal(PHintVal val);
+void ShowVVal(PHintVal val);
+void ShowVVals(PHintVal lst);
+void ReportAddVVal(PHintVal val);
+void ReportFndBstVal(PHintSeg seg, PHintVal val, bool hFlg);
+void ReportCarry(Fixed l0, Fixed l1, Fixed loc, PHintVal hints, bool vert);
 void ReportBestCP(PPathElt e, PPathElt cp);
-void LogHintInfo(PClrPoint pl);
+void LogHintInfo(PHintPoint pl);
 void ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t,
                         bool curve);
 void ReportHintConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch);
@@ -411,12 +411,12 @@ void ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
                      Fixed v1, Fixed s1);
 void ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
                      Fixed v1, Fixed s1);
-void ReportPruneHVal(PClrVal val, PClrVal v, int32_t i);
-void ReportPruneVVal(PClrVal val, PClrVal v, int32_t i);
+void ReportPruneHVal(PHintVal val, PHintVal v, int32_t i);
+void ReportPruneVVal(PHintVal val, PHintVal v, int32_t i);
 Fixed ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled);
 Fixed UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled);
 void InitShuffleSubpaths(void);
-void MarkLinks(PClrVal vL, bool hFlg);
+void MarkLinks(PHintVal vL, bool hFlg);
 void DoShuffleSubpaths(void);
 void CopyMainH(void);
 void CopyMainV(void);
@@ -429,14 +429,14 @@ void Delete(PPathElt e);
 bool ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
                bool forBlendData, bool readHints);
 double FixToDbl(Fixed f);
-bool CompareValues(PClrVal val1, PClrVal val2, int32_t factor,
+bool CompareValues(PHintVal val1, PHintVal val2, int32_t factor,
                    int32_t ghstshift);
 void SaveFile(const ACFontInfo* fontinfo);
 void CheckForMultiMoveTo(void);
 #define STARTUP (0)
 #define RESTART (1)
 
-void ListClrInfo(void);
+void ListHintInfo(void);
 
 void InitAll(const ACFontInfo* fontinfo, int32_t reason);
 

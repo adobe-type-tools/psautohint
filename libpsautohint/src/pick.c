@@ -10,7 +10,7 @@
 #include "ac.h"
 #include "bbox.h"
 
-static PClrVal Vrejects, Hrejects;
+static PHintVal Vrejects, Hrejects;
 
 void
 InitPick(int32_t reason)
@@ -25,7 +25,7 @@ InitPick(int32_t reason)
 #define LtPruneB(val) ((val) < FixOne && ((val) << 10) < gPruneB)
 
 static bool
-ConsiderPicking(Fixed bestSpc, Fixed bestVal, PClrVal hintList,
+ConsiderPicking(Fixed bestSpc, Fixed bestVal, PHintVal hintList,
                 Fixed prevBestVal)
 {
     if (bestSpc > 0)
@@ -42,14 +42,14 @@ ConsiderPicking(Fixed bestSpc, Fixed bestVal, PClrVal hintList,
 }
 
 void
-PickVVals(PClrVal valList)
+PickVVals(PHintVal valList)
 {
-    PClrVal hintList, rejectList, vlist, nxt;
+    PHintVal hintList, rejectList, vlist, nxt;
     Fixed bestVal = 0, prevBestVal;
     hintList = rejectList = NULL;
     prevBestVal = 0;
     while (true) {
-        PClrVal prev, bestPrev, best;
+        PHintVal prev, bestPrev, best;
         Fixed lft, rght;
         vlist = valList;
         prev = bestPrev = best = NULL;
@@ -105,7 +105,7 @@ PickVVals(PClrVal valList)
         vlist = nxt;
     }
     if (hintList == NULL)
-        ClrVBnds();
+        HintVBnds();
     gVHinting = hintList;
     Vrejects = rejectList;
 }
@@ -130,7 +130,7 @@ InSerifBand(Fixed y0, Fixed y1, int32_t n, Fixed* p)
 }
 
 static bool
-ConsiderValForSeg(PClrVal val, PClrSeg seg, Fixed loc, int32_t nb, Fixed* b,
+ConsiderValForSeg(PHintVal val, PHintSeg seg, Fixed loc, int32_t nb, Fixed* b,
                   int32_t ns, Fixed* s, bool primary)
 {
     if (primary && val->vSpc > 0.0)
@@ -144,18 +144,18 @@ ConsiderValForSeg(PClrVal val, PClrSeg seg, Fixed loc, int32_t nb, Fixed* b,
     return true;
 }
 
-static PClrVal
-FndBstVal(PClrSeg seg, bool seg1Flg, PClrVal cList, PClrVal rList, int32_t nb,
+static PHintVal
+FndBstVal(PHintSeg seg, bool seg1Flg, PHintVal cList, PHintVal rList, int32_t nb,
           Fixed* b, int32_t ns, Fixed* s, bool locFlg, bool hFlg)
 {
     Fixed loc, vloc;
-    PClrVal best, vList;
-    PClrSeg vseg;
+    PHintVal best, vList;
+    PHintSeg vseg;
     best = NULL;
     loc = seg->sLoc;
     vList = cList;
     while (true) {
-        PClrVal initLst = vList;
+        PHintVal initLst = vList;
         while (vList != NULL) {
             if (seg1Flg) {
                 vseg = vList->vSeg1;
@@ -188,11 +188,11 @@ FndBstVal(PClrSeg seg, bool seg1Flg, PClrVal cList, PClrVal rList, int32_t nb,
 }
 
 #define FixSixteenth (0x10)
-static PClrVal
-FindBestValForSeg(PClrSeg seg, bool seg1Flg, PClrVal cList, PClrVal rList,
+static PHintVal
+FindBestValForSeg(PHintSeg seg, bool seg1Flg, PHintVal cList, PHintVal rList,
                   int32_t nb, Fixed* b, int32_t ns, Fixed* s, bool hFlg)
 {
-    PClrVal best, nonghst, ghst = NULL;
+    PHintVal best, nonghst, ghst = NULL;
     best = FndBstVal(seg, seg1Flg, cList, rList, nb, b, ns, s, false, hFlg);
     if (best != NULL && best->vGhst) {
         nonghst =
@@ -218,7 +218,7 @@ FindBestValForSeg(PClrSeg seg, bool seg1Flg, PClrVal cList, PClrVal rList,
 }
 
 static bool
-MembValList(PClrVal val, PClrVal vList)
+MembValList(PHintVal val, PHintVal vList)
 {
     while (vList != NULL) {
         if (val == vList)
@@ -228,10 +228,10 @@ MembValList(PClrVal val, PClrVal vList)
     return false;
 }
 
-static PClrVal
-PrevVal(PClrVal val, PClrVal vList)
+static PHintVal
+PrevVal(PHintVal val, PHintVal vList)
 {
-    PClrVal prev;
+    PHintVal prev;
     if (val == vList)
         return NULL;
     prev = vList;
@@ -248,7 +248,7 @@ PrevVal(PClrVal val, PClrVal vList)
 }
 
 static void
-FindRealVal(PClrVal vlist, Fixed top, Fixed bot, PClrSeg* pseg1, PClrSeg* pseg2)
+FindRealVal(PHintVal vlist, Fixed top, Fixed bot, PHintSeg* pseg1, PHintSeg* pseg2)
 {
     while (vlist != NULL) {
         if (vlist->vLoc2 == top && vlist->vLoc1 == bot && !vlist->vGhst) {
@@ -261,13 +261,13 @@ FindRealVal(PClrVal vlist, Fixed top, Fixed bot, PClrSeg* pseg1, PClrSeg* pseg2)
 }
 
 void
-PickHVals(PClrVal valList)
+PickHVals(PHintVal valList)
 {
-    PClrVal vlist, hintList, rejectList, bestPrev, prev, best, nxt;
+    PHintVal vlist, hintList, rejectList, bestPrev, prev, best, nxt;
     Fixed bestVal, prevBestVal;
     Fixed bot, top, vtop, vbot;
-    PClrVal newBst;
-    PClrSeg seg1, seg2;
+    PHintVal newBst;
+    PHintSeg seg1, seg2;
     hintList = rejectList = NULL;
     prevBestVal = 0;
     while (true) {
@@ -292,7 +292,7 @@ PickHVals(PClrVal valList)
             }
             if (seg1->sType == sGHOST) {
                 /*newBst = FindBestValForSeg(seg2, false, valList,
-                 (PClrVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, true);*/
+                 (PHintVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, true);*/
                 newBst = seg2->sLnk;
                 if (newBst != NULL && newBst != best &&
                     MembValList(newBst, valList)) {
@@ -301,7 +301,7 @@ PickHVals(PClrVal valList)
                 }
             } else if (seg2->sType == sGHOST) {
                 /*newBst = FindBestValForSeg(seg1, true, valList,
-                 (PClrVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, true); */
+                 (PHintVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, true); */
                 newBst = seg2->sLnk;
                 if (newBst != NULL && newBst != best &&
                     MembValList(newBst, valList)) {
@@ -378,16 +378,16 @@ noMore:
         vlist = nxt;
     }
     if (hintList == NULL)
-        ClrHBnds();
+        HintHBnds();
     gHHinting = hintList;
     Hrejects = rejectList;
 }
 
 static void
-FindBestValForSegs(PClrSeg sList, bool seg1Flg, PClrVal cList, PClrVal rList,
+FindBestValForSegs(PHintSeg sList, bool seg1Flg, PHintVal cList, PHintVal rList,
                    int32_t nb, Fixed* b, int32_t ns, Fixed* s, bool hFlg)
 {
-    PClrVal best;
+    PHintVal best;
     while (sList != NULL) {
         best =
           FindBestValForSeg(sList, seg1Flg, cList, rList, nb, b, ns, s, hFlg);
@@ -399,7 +399,7 @@ FindBestValForSegs(PClrSeg sList, bool seg1Flg, PClrVal cList, PClrVal rList,
 static void
 SetPruned(void)
 {
-    PClrVal vL = gValList;
+    PHintVal vL = gValList;
     while (vL != NULL) {
         vL->pruned = true;
         vL = vL->vNxt;

@@ -229,7 +229,7 @@ PrintDebugVal(Fixed v)
 }
 
 static void
-ShwHV(PClrVal val)
+ShwHV(PHintVal val)
 {
     Fixed bot, top;
     bot = itfmy(val->vLoc1);
@@ -242,10 +242,10 @@ ShwHV(PClrVal val)
 }
 
 void
-ShowHVal(PClrVal val)
+ShowHVal(PHintVal val)
 {
     Fixed l, r;
-    PClrSeg seg;
+    PHintSeg seg;
     ShwHV(val);
     seg = val->vSeg1;
     if (seg == NULL)
@@ -260,7 +260,7 @@ ShowHVal(PClrVal val)
 }
 
 void
-ShowHVals(PClrVal lst)
+ShowHVals(PHintVal lst)
 {
     while (lst != NULL) {
         ShowHVal(lst);
@@ -269,13 +269,13 @@ ShowHVals(PClrVal lst)
 }
 
 void
-ReportAddHVal(PClrVal val)
+ReportAddHVal(PHintVal val)
 {
     ShowHVal(val);
 }
 
 static void
-ShwVV(PClrVal val)
+ShwVV(PHintVal val)
 {
     Fixed lft, rht;
     lft = itfmx(val->vLoc1);
@@ -286,10 +286,10 @@ ShwVV(PClrVal val)
 }
 
 void
-ShowVVal(PClrVal val)
+ShowVVal(PHintVal val)
 {
     Fixed b, t;
-    PClrSeg seg;
+    PHintSeg seg;
     ShwVV(val);
     seg = val->vSeg1;
     if (seg == NULL)
@@ -304,7 +304,7 @@ ShowVVal(PClrVal val)
 }
 
 void
-ShowVVals(PClrVal lst)
+ShowVVals(PHintVal lst)
 {
     while (lst != NULL) {
         ShowVVal(lst);
@@ -313,13 +313,13 @@ ShowVVals(PClrVal lst)
 }
 
 void
-ReportAddVVal(PClrVal val)
+ReportAddVVal(PHintVal val)
 {
     ShowVVal(val);
 }
 
 void
-ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg)
+ReportFndBstVal(PHintSeg seg, PHintVal val, bool hFlg)
 {
     if (hFlg) {
         LogMsg(LOGDEBUG, OK, "FndBstVal: sLoc %g sLft %g sRght %g ",
@@ -341,15 +341,15 @@ ReportFndBstVal(PClrSeg seg, PClrVal val, bool hFlg)
 }
 
 void
-ReportCarry(Fixed l0, Fixed l1, Fixed loc, PClrVal clrs, bool vert)
+ReportCarry(Fixed l0, Fixed l1, Fixed loc, PHintVal hints, bool vert)
 {
     if (vert) {
-        ShowVVal(clrs);
+        ShowVVal(hints);
         loc = itfmx(loc);
         l0 = itfmx(l0);
         l1 = itfmx(l1);
     } else {
-        ShowHVal(clrs);
+        ShowHVal(hints);
         loc = itfmy(loc);
         l0 = itfmy(l0);
         l1 = itfmy(l1);
@@ -374,7 +374,7 @@ ReportBestCP(PPathElt e, PPathElt cp)
 }
 
 void
-LogHintInfo(PClrPoint pl)
+LogHintInfo(PHintPoint pl)
 {
     char c = pl->c;
     if (c == 'y' || c == 'm') { /* vertical lines */
@@ -394,7 +394,7 @@ LogHintInfo(PClrPoint pl)
 }
 
 static void
-LstHVal(PClrVal val)
+LstHVal(PHintVal val)
 {
     LogMsg(LOGDEBUG, OK, "\t");
     ShowHVal(val);
@@ -402,7 +402,7 @@ LstHVal(PClrVal val)
 }
 
 static void
-LstVVal(PClrVal val)
+LstVVal(PHintVal val)
 {
     LogMsg(LOGDEBUG, OK, "\t");
     ShowVVal(val);
@@ -410,11 +410,11 @@ LstVVal(PClrVal val)
 }
 
 void
-ListClrInfo(void)
+ListHintInfo(void)
 { /* debugging routine */
     PPathElt e;
     PSegLnkLst hLst, vLst;
-    PClrSeg seg;
+    PHintSeg seg;
     Fixed x, y;
     e = gPathStart;
     while (e != NULL) {
@@ -502,7 +502,7 @@ ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
 }
 
 void
-ReportPruneHVal(PClrVal val, PClrVal v, int32_t i)
+ReportPruneHVal(PHintVal val, PHintVal v, int32_t i)
 {
     LogMsg(LOGDEBUG, OK, "PruneHVal: %d\n\t", i);
     ShowHVal(val);
@@ -511,7 +511,7 @@ ReportPruneHVal(PClrVal val, PClrVal v, int32_t i)
 }
 
 void
-ReportPruneVVal(PClrVal val, PClrVal v, int32_t i)
+ReportPruneVVal(PHintVal val, PHintVal v, int32_t i)
 {
     LogMsg(LOGDEBUG, OK, "PruneVVal: %d\n\t", i);
     ShowVVal(val);

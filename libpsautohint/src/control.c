@@ -10,8 +10,8 @@
 #include "ac.h"
 #include "bbox.h"
 
-static void DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1);
-static void DoVStems(PClrVal sLst);
+static void DoHStems(const ACFontInfo* fontinfo, PHintVal sLst1);
+static void DoVStems(PHintVal sLst);
 
 static bool CounterFailed;
 
@@ -26,7 +26,7 @@ InitAll(const ACFontInfo* fontinfo, int32_t reason)
 }
 
 static int32_t
-PtLstLen(PClrPoint lst)
+PtLstLen(PHintPoint lst)
 {
     int32_t cnt = 0;
     while (lst != NULL) {
@@ -37,7 +37,7 @@ PtLstLen(PClrPoint lst)
 }
 
 static int32_t
-PointListCheck(PClrPoint new, PClrPoint lst)
+PointListCheck(PHintPoint new, PHintPoint lst)
 {
     /* -1 means not a member, 1 means already a member, 0 means conflicts */
     Fixed l1 = 0, l2 = 0, n1 = 0, n2 = 0, tmp, halfMargin;
@@ -119,7 +119,7 @@ PointListCheck(PClrPoint new, PClrPoint lst)
 }
 
 static bool
-SameHintLists(PClrPoint lst1, PClrPoint lst2)
+SameHintLists(PHintPoint lst1, PHintPoint lst2)
 {
     if (PtLstLen(lst1) != PtLstLen(lst2)) {
         return false;
@@ -145,7 +145,7 @@ SameHints(int32_t cn1, int32_t cn2)
 void
 MergeFromMainHints(char ch)
 {
-    PClrPoint lst;
+    PHintPoint lst;
     for (lst = gPtLstArray[0]; lst != NULL; lst = lst->next) {
         if (lst->c != ch) {
             continue;
@@ -164,9 +164,9 @@ void
 AddHintPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
              PPathElt p1)
 {
-    PClrPoint pt;
+    PHintPoint pt;
     int32_t chk;
-    pt = (PClrPoint)Alloc(sizeof(ClrPoint));
+    pt = (PHintPoint)Alloc(sizeof(HintPoint));
     pt->x0 = x0;
     pt->y0 = y0;
     pt->x1 = x1;
@@ -188,15 +188,15 @@ AddHintPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
 }
 
 static void
-CopyClrFromLst(char clr, PClrPoint lst)
+CopyHintFromLst(char hint, PHintPoint lst)
 {
-    bool bvflg = (clr == 'b' || clr == 'v');
+    bool bvflg = (hint == 'b' || hint == 'v');
     while (lst != NULL) {
-        if (lst->c == clr) {
+        if (lst->c == hint) {
             if (bvflg) {
-                AddHintPoint(0, lst->y0, 0, lst->y1, clr, lst->p0, lst->p1);
+                AddHintPoint(0, lst->y0, 0, lst->y1, hint, lst->p0, lst->p1);
             } else {
-                AddHintPoint(lst->x0, 0, lst->x1, 0, clr, lst->p0, lst->p1);
+                AddHintPoint(lst->x0, 0, lst->x1, 0, hint, lst->p0, lst->p1);
             }
         }
         lst = lst->next;
@@ -206,17 +206,17 @@ CopyClrFromLst(char clr, PClrPoint lst)
 void
 CopyMainV(void)
 {
-    CopyClrFromLst('m', gPtLstArray[0]);
+    CopyHintFromLst('m', gPtLstArray[0]);
 }
 
 void
 CopyMainH(void)
 {
-    CopyClrFromLst('v', gPtLstArray[0]);
+    CopyHintFromLst('v', gPtLstArray[0]);
 }
 
 void
-AddHPair(PClrVal v, char ch)
+AddHPair(PHintVal v, char ch)
 {
     Fixed bot, top;
     PPathElt p0, p1, p;
@@ -249,7 +249,7 @@ AddHPair(PClrVal v, char ch)
 }
 
 void
-AddVPair(PClrVal v, char ch)
+AddVPair(PHintVal v, char ch)
 {
     Fixed lft, rght;
     PPathElt p0, p1, p;
@@ -269,12 +269,12 @@ AddVPair(PClrVal v, char ch)
 }
 
 static bool
-UseCounter(PClrVal sLst, bool mclr)
+UseCounter(PHintVal sLst, bool mhint)
 {
     int32_t cnt = 0;
     Fixed minLoc, midLoc, maxLoc, prevBstVal, bestVal;
     Fixed minDelta, midDelta, maxDelta, th;
-    PClrVal lst, newLst;
+    PHintVal lst, newLst;
     minLoc = midLoc = maxLoc = FixInt(20000);
     minDelta = midDelta = maxDelta = 0;
     lst = sLst;
@@ -324,7 +324,7 @@ UseCounter(PClrVal sLst, bool mclr)
     th = FixInt(5) / 100;
     if (abs(minDelta - maxDelta) < th &&
         abs((maxLoc - midLoc) - (midLoc - minLoc)) < th) {
-        if (mclr) {
+        if (mhint) {
             gVHinting = newLst;
         } else {
             gHHinting = newLst;
@@ -334,7 +334,7 @@ UseCounter(PClrVal sLst, bool mclr)
     if (abs(minDelta - maxDelta) < FixInt(3) &&
         abs((maxLoc - midLoc) - (midLoc - minLoc)) < FixInt(3)) {
         LogMsg(INFO, OK,
-               mclr ? "Near miss for using V counter hinting."
+               mhint ? "Near miss for using V counter hinting."
                     : "Near miss for using H counter hinting.");
     }
     return false;
@@ -344,10 +344,10 @@ static void
 GetNewPtLst(void)
 {
     if (gNumPtLsts >= gMaxPtLsts) { /* increase size */
-        PClrPoint* newArray;
+        PHintPoint* newArray;
         int32_t i;
         gMaxPtLsts += 5;
-        newArray = (PClrPoint*)Alloc(gMaxPtLsts * sizeof(PClrPoint));
+        newArray = (PHintPoint*)Alloc(gMaxPtLsts * sizeof(PHintPoint));
         for (i = 0; i < gMaxPtLsts - 5; i++) {
             newArray[i] = gPtLstArray[i];
         }
@@ -360,7 +360,7 @@ GetNewPtLst(void)
 }
 
 void
-XtraClrs(PPathElt e)
+XtraHints(PPathElt e)
 {
     /* this can be simplified for standalone hinting */
     gPtLstArray[gPtLstIndex] = gPointList;
@@ -376,7 +376,7 @@ static void
 Blues(const ACFontInfo* fontinfo)
 {
     Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
-    PClrVal sLst;
+    PHintVal sLst;
 
     /*
      Top alignment zones are in the global 'topBands', bottom in 'botBands'.
@@ -390,7 +390,7 @@ Blues(const ACFontInfo* fontinfo)
 
      HStems, Vstems are global lists of Fixed 24.8 numbers..
 
-     segLists is an array of 4  ClrSeg linked lists. list 0 and 1 are
+     segLists is an array of 4  HintSeg linked lists. list 0 and 1 are
     respectively up and down vertical segments. Lists 2 and 3 are
      respectively left pointing and right pointing horizontal segments. On a
     counter-clockwise path, this is the same as selecting
@@ -415,7 +415,7 @@ Blues(const ACFontInfo* fontinfo)
     segment end point,
      called H/VBends (segment type sBend=1). I have no idea what these are for.
 
-     AddSegment is pretty simple. It creates a new hint segment 'ClrSeg' for the
+     AddSegment is pretty simple. It creates a new hint segment 'HintSeg' for the
     parent path elt , fills it in,
      adds it to appropriate  list of the 4 segLists, and then sorts by hstem
     location.
@@ -502,7 +502,7 @@ Blues(const ACFontInfo* fontinfo)
     skip
 
      else add it with eval.c:InsertHValue()
-     add new ClrVal to global valList.
+     add new HintVal to global valList.
      item->vVal = val; # weight
      item->initVal = val; # originl weight from EvalHPair()
      item->vSpc = spc; # priority
@@ -569,8 +569,8 @@ Blues(const ACFontInfo* fontinfo)
     CheckVals(gValList, false);
     DoHStems(fontinfo, gValList); /* Report stems and alignment zones, if this
                                     has been requested. */
-    PickHVals(gValList); /* Moves best ClrVal items from valList to Hhinting
-                           list. (? Choose from set of ClrVals for the samte
+    PickHVals(gValList); /* Moves best HintVal items from valList to Hhinting
+                           list. (? Choose from set of HintVals for the samte
                            stem values.) */
     if (!CounterFailed && HHintGlyph()) {
         gPruneValue = pv;
@@ -609,7 +609,7 @@ Blues(const ACFontInfo* fontinfo)
 }
 
 static void
-DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1)
+DoHStems(const ACFontInfo* fontinfo, PHintVal sLst1)
 {
     Fixed glyphTop = INT32_MIN, glyphBot = INT32_MAX;
     bool curved;
@@ -654,7 +654,7 @@ static void
 Yellows(void)
 {
     Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
-    PClrVal sLst;
+    PHintVal sLst;
     LogMsg(LOGDEBUG, OK, "generate yellows");
     GenVPts(SpecialGlyphType());
     LogMsg(LOGDEBUG, OK, "evaluate");
@@ -717,7 +717,7 @@ Yellows(void)
 }
 
 static void
-DoVStems(PClrVal sLst)
+DoVStems(PHintVal sLst)
 {
     if (!gDoAligns && !gDoStems) {
         return;
@@ -810,16 +810,16 @@ AddHintsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
         if (gEditGlyph) {
             DoShuffleSubpaths();
         }
-        gHPrimary = CopyClrs(gHHinting);
-        gVPrimary = CopyClrs(gVHinting);
+        gHPrimary = CopyHints(gHHinting);
+        gVPrimary = CopyHints(gVHinting);
         /*
          isSolEol = SpecialSolEol() && !useV && !useH;
          solEolCode = isSolEol? SolEolGlyphCode() : 2;
          */
         PruneElementHintSegs();
-        ListClrInfo();
+        ListHintInfo();
         if (extrahint) {
-            AutoExtraHints(MoveToNewClrs(), isSolEol, solEolCode);
+            AutoExtraHints(MoveToNewHints(), isSolEol, solEolCode);
         }
         gPtLstArray[gPtLstIndex] = gPointList;
         if (isSolEol) {
