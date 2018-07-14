@@ -396,7 +396,7 @@ Blues(const ACFontInfo* fontinfo)
     counter-clockwise path, this is the same as selecting
      top and bottom stem locations.
 
-     NoBlueChar() consults a hard-coded list of glyph names, If the glyph is in
+     NoBlueGlyph() consults a hard-coded list of glyph names, If the glyph is in
     this list, set the alignment zones (top and botBands) to empty.
 
      1) gen.c:GenHPts() . Buid the raw list of stem segments in global 'topList'
@@ -541,12 +541,12 @@ Blues(const ACFontInfo* fontinfo)
      When a hint segment    */
 
     LogMsg(LOGDEBUG, OK, "generate blues");
-    if (NoBlueChar()) {
+    if (NoBlueGlyph()) {
         gLenTopBands = gLenBotBands = 0;
     }
     GenHPts();
     LogMsg(LOGDEBUG, OK, "evaluate");
-    if (!CounterFailed && HColorChar()) {
+    if (!CounterFailed && HColorGlyph()) {
         pv = gPruneValue;
         gPruneValue = (Fixed)gMinVal;
         pa = gPruneA;
@@ -572,7 +572,7 @@ Blues(const ACFontInfo* fontinfo)
     PickHVals(gValList); /* Moves best ClrVal items from valList to Hcoloring
                            list. (? Choose from set of ClrVals for the samte
                            stem values.) */
-    if (!CounterFailed && HColorChar()) {
+    if (!CounterFailed && HColorGlyph()) {
         gPruneValue = pv;
         gPruneD = pd;
         gPruneC = pc;
@@ -611,7 +611,7 @@ Blues(const ACFontInfo* fontinfo)
 static void
 DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1)
 {
-    Fixed charTop = INT32_MIN, charBot = INT32_MAX;
+    Fixed glyphTop = INT32_MIN, glyphBot = INT32_MAX;
     bool curved;
     if (!gDoAligns && !gDoStems) {
         return;
@@ -624,11 +624,11 @@ DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1)
             top = bot;
             bot = tmp;
         }
-        if (top > charTop) {
-            charTop = top;
+        if (top > glyphTop) {
+            glyphTop = top;
         }
-        if (bot < charBot) {
-            charBot = bot;
+        if (bot < glyphBot) {
+            glyphBot = bot;
         }
         /* skip if ghost or not a line on top or bottom */
         if (sLst1->vGhst) {
@@ -644,9 +644,9 @@ DoHStems(const ACFontInfo* fontinfo, PClrVal sLst1)
                             UnScaleAbs(fontinfo, top));
         }
     }
-    if (charTop != INT32_MIN || charBot != INT32_MAX) {
-        AddCharExtremes(UnScaleAbs(fontinfo, charBot),
-                        UnScaleAbs(fontinfo, charTop));
+    if (glyphTop != INT32_MIN || glyphBot != INT32_MAX) {
+        AddGlyphExtremes(UnScaleAbs(fontinfo, glyphBot),
+                         UnScaleAbs(fontinfo, glyphTop));
     }
 }
 
@@ -656,9 +656,9 @@ Yellows(void)
     Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
     PClrVal sLst;
     LogMsg(LOGDEBUG, OK, "generate yellows");
-    GenVPts(SpecialCharType());
+    GenVPts(SpecialGlyphType());
     LogMsg(LOGDEBUG, OK, "evaluate");
-    if (!CounterFailed && VColorChar()) {
+    if (!CounterFailed && VColorGlyph()) {
         pv = gPruneValue;
         gPruneValue = (Fixed)gMinVal;
         pa = gPruneA;
@@ -680,7 +680,7 @@ Yellows(void)
     CheckVals(gValList, true);
     DoVStems(gValList);
     PickVVals(gValList);
-    if (!CounterFailed && VColorChar()) {
+    if (!CounterFailed && VColorGlyph()) {
         gPruneValue = pv;
         gPruneD = pd;
         gPruneC = pc;
@@ -807,14 +807,14 @@ AddColorsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
         if (!gDoAligns) {
             Yellows();
         }
-        if (gEditChar) {
+        if (gEditGlyph) {
             DoShuffleSubpaths();
         }
         gHPrimary = CopyClrs(gHColoring);
         gVPrimary = CopyClrs(gVColoring);
         /*
          isSolEol = SpecialSolEol() && !useV && !useH;
-         solEolCode = isSolEol? SolEolCharCode() : 2;
+         solEolCode = isSolEol? SolEolGlyphCode() : 2;
          */
         PruneElementColorSegs();
         ListClrInfo();

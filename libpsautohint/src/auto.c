@@ -491,7 +491,7 @@ TryResolveConflict(PPathElt e, bool Hflg)
         ReportRemConflict(e);
         return true;
     }
-    if (gEditChar && ResolveConflictBySplit(e, Hflg, lnk1, lnk2))
+    if (gEditGlyph && ResolveConflictBySplit(e, Hflg, lnk1, lnk2))
         return true;
     else
         return false;

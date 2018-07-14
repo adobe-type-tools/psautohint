@@ -14,7 +14,7 @@
 
 PPathElt gPathStart, gPathEnd;
 bool gYgoesUp;
-bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix, gEditChar;
+bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix, gEditGlyph;
 bool gHasFlex, gFlexOK, gFlexStrict, gBandError;
 Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth, gGhostLength,
   gBendLength, gBandMargin, gMaxFlare, gMaxBendMerge, gMaxMerge,
@@ -41,7 +41,7 @@ static int maxStemDist = MAXSTEMDIST;
 unsigned int gAllStems = false;
 AC_REPORTSTEMPTR gAddHStemCB = NULL;
 AC_REPORTSTEMPTR gAddVStemCB = NULL;
-AC_REPORTZONEPTR gAddCharExtremesCB = NULL;
+AC_REPORTZONEPTR gAddGlyphExtremesCB = NULL;
 AC_REPORTZONEPTR gAddStemExtremesCB = NULL;
 AC_RETRYPTR gReportRetryCB = NULL;
 
@@ -102,7 +102,7 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             gMaxVal = 8000000.0;
             gMinVal = 1.0 / (float)(FixOne);
             gAutoHFix = gAutoVFix = false;
-            gEditChar = true;
+            gEditGlyph = true;
             gRoundToInt = true;
             /* Default is to change a curve with collinear points into a line.
              */
@@ -138,17 +138,17 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
 /* Returns whether coloring was successful. */
 bool
 AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
-          bool extracolor, bool changeChar, bool roundCoords)
+          bool extracolor, bool changeGlyph, bool roundCoords)
 {
     InitAll(fontinfo, STARTUP);
 
     if (!ReadFontInfo(fontinfo))
         return false;
 
-    gEditChar = changeChar;
+    gEditGlyph = changeGlyph;
     gRoundToInt = roundCoords;
-    gAutoLinearCurveFix = gEditChar;
-    if (gEditChar && fixStems)
+    gAutoLinearCurveFix = gEditGlyph;
+    if (gEditGlyph && fixStems)
         gAutoVFix = gAutoHFix = fixStems;
 
     return AutoColorGlyph(fontinfo, srcbezdata, extracolor);

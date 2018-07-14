@@ -24,7 +24,7 @@ static int32_t stkindex;
 static bool flex, startchar;
 static bool forMultiMaster, includeHints;
 /* Reading file for comparison of multiple master data and hint information.
-   Reads into PCharPathElt structure instead of PPathElt. */
+   Reads into PGlyphPathElt structure instead of PPathElt. */
 
 static float origEmSquare = 0.0;
 
@@ -142,8 +142,8 @@ RDcurveto(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
         new->x3 = tfmx(ScaleAbs(fontinfo, c3.x));
         new->y3 = tfmy(ScaleAbs(fontinfo, c3.y));
     } else {
-        PCharPathElt new;
-        new = AppendCharPathElement(RCT);
+        PGlyphPathElt new;
+        new = AppendGlyphPathElement(RCT);
         new->x = tempx;
         new->y = tempy;
         new->x1 = c1.x;
@@ -173,8 +173,8 @@ RDmtlt(const ACFontInfo* fontinfo, int32_t etype)
         new->y = tfmy(ScaleAbs(fontinfo, currenty));
         return;
     } else {
-        PCharPathElt new;
-        new = AppendCharPathElement(etype == LINETO ? RDT : RMT);
+        PGlyphPathElt new;
+        new = AppendGlyphPathElement(etype == LINETO ? RDT : RMT);
         new->x = currentx;
         new->y = currenty;
         new->rx = tempx;
@@ -306,7 +306,7 @@ psCP(void)
     if (!forMultiMaster)
         AppendElement(CLOSEPATH);
     else
-        AppendCharPathElement(CP);
+        AppendGlyphPathElement(CP);
 }
 
 static void

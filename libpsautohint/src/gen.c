@@ -634,9 +634,9 @@ NxtSameDir(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 }
 
 void
-GenVPts(int32_t specialCharType)
+GenVPts(int32_t specialGlyphType)
 {
-    /* specialCharType 1 = upper; -1 = lower; 0 = neither */
+    /* specialGlyphType 1 = upper; -1 = lower; 0 = neither */
     PPathElt p, fl;
     bool isVert, flex1, flex2;
     Fixed flx0, fly0, llx, lly, urx, ury, yavg, yend, ydist, q, q2;
@@ -760,10 +760,10 @@ GenVPts(int32_t specialCharType)
             }
         } else if (p->type == MOVETO) {
             gBonus = 0;
-            if (specialCharType == -1) {
+            if (specialGlyphType == -1) {
                 if (IsLower(p))
                     gBonus = FixInt(200);
-            } else if (specialCharType == 1) {
+            } else if (specialGlyphType == 1) {
                 if (IsUpper(p))
                     gBonus = FixInt(200);
             }

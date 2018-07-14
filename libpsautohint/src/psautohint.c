@@ -258,15 +258,15 @@ AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB,
     gAddVStemCB = vstemCB;
     gDoStems = true;
 
-    gAddCharExtremesCB = NULL;
+    gAddGlyphExtremesCB = NULL;
     gAddStemExtremesCB = NULL;
     gDoAligns = false;
 }
 
 ACLIB_API void
-AC_SetReportZonesCB(AC_REPORTZONEPTR charCB, AC_REPORTZONEPTR stemCB)
+AC_SetReportZonesCB(AC_REPORTZONEPTR glyphCB, AC_REPORTZONEPTR stemCB)
 {
-    gAddCharExtremesCB = charCB;
+    gAddGlyphExtremesCB = glyphCB;
     gAddStemExtremesCB = stemCB;
     gDoAligns = true;
 
@@ -349,8 +349,8 @@ AutoColorString(const char* srcbezdata, const char* fontinfodata,
     result = AutoColor(fontinfo,     /* font info */
                        srcbezdata,   /* input glyph */
                        false,        /* fixStems */
-                       allowHintSub, /* extracolor*/
-                       allowEdit,    /* editChars */
+                       allowHintSub, /* extracolor */
+                       allowEdit,    /* changeGlyphs */
                        roundCoords);
     /* result == true is good */
 
@@ -389,7 +389,7 @@ AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
      * (default) hints at the start of the charstring, and there is hintElt
      * structure attached to each path element which triggers a new hint set.
      * The function charpath.c::ReadandAssignHints(), called from
-     * charpath.c::MergeCharPaths(), then copies all the hintElts to the
+     * charpath.c::MergeGlyphPaths(), then copies all the hintElts to the
      * current master main or path elements. (This actually happens in
      * charpath.c::InsertHint().) */
     int value, result;
@@ -419,8 +419,8 @@ AutoColorStringMM(const char** srcbezdata, const char* fontinfodata,
     }
 
     /* result == true is good */
-    result = MergeCharPaths(fontinfo, srcbezdata, nmasters, masters, dstbezdata,
-                            lengths);
+    result = MergeGlyphPaths(fontinfo, srcbezdata, nmasters, masters,
+                             dstbezdata, lengths);
 
     /* The following call to error_handler() always returns control to just
      * after the setjmp() function call above, but with value set to 1 if
@@ -435,7 +435,7 @@ ACLIB_API void
 AC_initCallGlobals(void)
 {
     gLibReportCB = NULL;
-    gAddCharExtremesCB = NULL;
+    gAddGlyphExtremesCB = NULL;
     gAddStemExtremesCB = NULL;
     gDoAligns = false;
     gAddHStemCB = NULL;

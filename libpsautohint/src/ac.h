@@ -194,7 +194,7 @@ extern ACBuffer* gBezOutput;
 extern PPathElt gPathStart, gPathEnd;
 extern bool gYgoesUp;
 extern bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix;
-extern bool gEditChar; /* whether glyph can be modified when adding hints */
+extern bool gEditGlyph; /* whether glyph can be modified when adding hints */
 extern bool gBandError;
 extern bool gHasFlex, gFlexOK, gFlexStrict;
 extern Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth,
@@ -217,7 +217,7 @@ extern unsigned int gAllStems;
 extern AC_REPORTSTEMPTR gAddHStemCB;
 extern AC_REPORTSTEMPTR gAddVStemCB;
 
-extern AC_REPORTZONEPTR gAddCharExtremesCB;
+extern AC_REPORTZONEPTR gAddGlyphExtremesCB;
 extern AC_REPORTZONEPTR gAddStemExtremesCB;
 
 void AddStemExtremes(Fixed bot, Fixed top);
@@ -300,17 +300,17 @@ Fixed acpflttofix(float* pf);
 
 unsigned char* Alloc(int32_t sz); /* Sub-allocator */
 
-int AddCounterColorChars(char* charlist, char* ColorList[]);
+int AddCounterColorGlyphs(char* charlist, char* ColorList[]);
 bool FindNameInList(char* nm, char** lst);
 void PruneElementColorSegs(void);
 int TestColorLst(PSegLnkLst lst, PClrVal colorList, bool flg, bool doLst);
 PClrVal CopyClrs(PClrVal lst);
 void AutoExtraColors(bool movetoNewClrs, bool soleol, int32_t solWhere);
-int32_t SpecialCharType(void);
-bool VColorChar(void);
-bool HColorChar(void);
-bool NoBlueChar(void);
-int32_t SolEolCharCode(void);
+int32_t SpecialGlyphType(void);
+bool VColorGlyph(void);
+bool HColorGlyph(void);
+bool NoBlueGlyph(void);
+int32_t SolEolGlyphCode(void);
 bool SpecialSolEol(void);
 bool MoveToNewClrs(void);
 bool GetInflectionPoint(Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed, Fixed *);
@@ -328,7 +328,7 @@ bool AutoColorGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
                     bool extracolor);
 void EvalV(void);
 void EvalH(void);
-void GenVPts(int32_t specialCharType);
+void GenVPts(int32_t specialGlyphType);
 void CheckVal(PClrVal val, bool vert);
 void CheckTfmVal(PClrSeg hSegList, Fixed* bandList, int32_t length);
 void CheckVals(PClrVal vlst, bool vert);
@@ -443,13 +443,13 @@ void InitAll(const ACFontInfo* fontinfo, int32_t reason);
 void AddVStem(Fixed top, Fixed bottom, bool curved);
 void AddHStem(Fixed right, Fixed left, bool curved);
 
-void AddCharExtremes(Fixed bot, Fixed top);
+void AddGlyphExtremes(Fixed bot, Fixed top);
 
 bool AutoColor(const ACFontInfo* fontinfo, const char* srcbezdata,
-               bool fixStems, bool extracolor, bool changeChar,
+               bool fixStems, bool extracolor, bool changeGlyph,
                bool roundCoords);
 
-bool MergeCharPaths(const ACFontInfo* fontinfo, const char** srcglyphs,
+bool MergeGlyphPaths(const ACFontInfo* fontinfo, const char** srcglyphs,
                     int nmasters, const char** masters, char** outbuffers,
                     size_t* outlengths);
 
