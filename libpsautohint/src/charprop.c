@@ -231,14 +231,14 @@ SolEolUpperOrLower(bool upper)
         return;
     e = s1 = gPathStart->next;
     GetEndPoint(e, &x1, &y1);
-    s1y = itfmy(y1);
+    s1y = -y1;
     e = SubpathEnd(e);
     e = e->next;
     if (e == NULL)
         return;
     s2 = e;
     GetEndPoint(e, &x1, &y1);
-    s2y = itfmy(y1);
+    s2y = -y1;
     s1Upper = (s1y > s2y);
     if ((upper && s1Upper) || (!upper && !s1Upper))
         (void)SolEol(s1);

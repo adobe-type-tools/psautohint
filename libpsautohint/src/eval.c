@@ -146,8 +146,7 @@ EvalHPair(PHintSeg botSeg, PHintSeg topSeg, Fixed* pspc, Fixed* pv)
     dist = NUMMAX(dist, mndist);
     if (gNumHStems > 0) {
         int i;
-        Fixed w = idtfmy(dy);
-        w = abs(w);
+        Fixed w = abs(dy);
         for (i = 0; i < gNumHStems; i++)
             if (w == gHStems[i]) {
                 *pspc += FixOne;
@@ -190,8 +189,8 @@ HStemMiss(PHintSeg botSeg, PHintSeg topSeg)
         return;
     minDiff = FixInt(1000);
     minW = 0;
-    b = itfmy(bloc);
-    t = itfmy(tloc);
+    b = -bloc;
+    t = -tloc;
     w = t - b;
     /* don't check ghost bands for near misses */
     if (((w = t - b) == botGhst) || (w == topGhst))
@@ -256,8 +255,7 @@ EvalVPair(PHintSeg leftSeg, PHintSeg rightSeg, Fixed* pspc, Fixed* pv)
     *pspc = (bonus > 0) ? FixInt(2) : 0; /* this is for sol-eol characters */
     if (gNumVStems > 0) {
         int i;
-        Fixed w = idtfmx(dx);
-        w = abs(w);
+        Fixed w = abs(dx);
         for (i = 0; i < gNumVStems; i++)
             if (w == gVStems[i]) {
                 *pspc = *pspc + FixOne;
@@ -297,8 +295,8 @@ VStemMiss(PHintSeg leftSeg, PHintSeg rightSeg)
         return;
     mndist = FixTwoMul(gMinDist);
     dist = NUMMAX(dist, mndist);
-    l = itfmx(lloc);
-    r = itfmx(rloc);
+    l = lloc;
+    r = rloc;
     w = abs(r - l);
     minDiff = FixInt(1000);
     minW = 0;

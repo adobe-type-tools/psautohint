@@ -191,7 +191,7 @@ chkDT(Cd c)
                                 sCURVE, 13);
                 } else {
                     inflPtFound = true;
-                    fltnvalue = itfmy(loc);
+                    fltnvalue = -loc;
                 }
             }
         }
@@ -223,7 +223,7 @@ chkDT(Cd c)
                                 sCURVE, 13);
                 } else {
                     inflPtFound = true;
-                    fltnvalue = itfmx(loc);
+                    fltnvalue = loc;
                 }
             }
         }
@@ -306,14 +306,14 @@ GetInflectionPoint(Fixed px, Fixed py, Fixed px1, Fixed pcy1, Fixed px2,
     Cd c0, c1, c2, c3;
 
     fltnrec.report = chkDT;
-    c0.x = tfmx(px);
-    c0.y = tfmy(py);
-    c1.x = tfmx(px1);
-    c1.y = tfmy(pcy1);
-    c2.x = tfmx(px2);
-    c2.y = tfmy(py2);
-    c3.x = tfmx(px3);
-    c3.y = tfmy(py3);
+    c0.x = px;
+    c0.y = -py;
+    c1.x = px1;
+    c1.y = -pcy1;
+    c2.x = px2;
+    c2.y = -py2;
+    c3.x = px3;
+    c3.y = -py3;
     xstate = ystate = STARTING;
     xdone = ydone = xflat = yflat = inflPtFound = false;
     x0 = c0.x;
@@ -422,10 +422,10 @@ restart:
         PrvForBend(nxt, &x0, &cy0);
         if (!CheckSmoothness(x0, cy0, x1, cy1, x2, y2, &smdiff))
             LogMsg(INFO, OK, "Junction at %g %g may need smoothing.",
-                   FixToDbl(itfmx(x1)), FixToDbl(itfmy(cy1)));
+                   FixToDbl(x1), FixToDbl(-cy1));
         if (smdiff > FixInt(160))
             LogMsg(INFO, OK, "Too sharp angle at %g %g has been clipped.",
-                   FixToDbl(itfmx(x1)), FixToDbl(itfmy(cy1)));
+                   FixToDbl(x1), FixToDbl(-cy1));
     Nxt:
         e = NxtE;
     }
@@ -614,8 +614,7 @@ CheckForDups(void)
     }
     return;
 foundMatch:
-    x = itfmx(x);
-    y = itfmy(y);
+    y = -y;
     ReportDuplicates(x, y);
 }
 

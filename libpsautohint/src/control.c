@@ -220,8 +220,8 @@ AddHPair(PHintVal v, char ch)
 {
     Fixed bot, top;
     PPathElt p0, p1, p;
-    bot = itfmy(v->vLoc1);
-    top = itfmy(v->vLoc2);
+    bot = -v->vLoc1;
+    top = -v->vLoc2;
     p0 = v->vBst->vSeg1->sElt;
     p1 = v->vBst->vSeg2->sElt;
     if (top < bot) {
@@ -253,8 +253,8 @@ AddVPair(PHintVal v, char ch)
 {
     Fixed lft, rght;
     PPathElt p0, p1, p;
-    lft = itfmx(v->vLoc1);
-    rght = itfmx(v->vLoc2);
+    lft = v->vLoc1;
+    rght = v->vLoc2;
     p0 = v->vBst->vSeg1->sElt;
     p1 = v->vBst->vSeg2->sElt;
     if (lft > rght) {
@@ -335,7 +335,7 @@ UseCounter(PHintVal sLst, bool mhint)
         abs((maxLoc - midLoc) - (midLoc - minLoc)) < FixInt(3)) {
         LogMsg(INFO, OK,
                mhint ? "Near miss for using V counter hinting."
-                    : "Near miss for using H counter hinting.");
+                     : "Near miss for using H counter hinting.");
     }
     return false;
 }
@@ -415,11 +415,9 @@ Blues(const ACFontInfo* fontinfo)
     segment end point,
      called H/VBends (segment type sBend=1). I have no idea what these are for.
 
-     AddSegment is pretty simple. It creates a new hint segment 'HintSeg' for the
-    parent path elt , fills it in,
-     adds it to appropriate  list of the 4 segLists, and then sorts by hstem
-    location.
-     seg->sElt is the parent elt
+     AddSegment is pretty simple. It creates a new hint segment 'HintSeg' for
+    the parent path elt , fills it in, adds it to appropriate  list of the 4
+    segLists, and then sorts by hstem location. seg->sElt is the parent elt
      seg->sType is the type
      seg->sLoc is the location in Fixed 18.14: right shift 7 to get integer
     value.
@@ -617,8 +615,8 @@ DoHStems(const ACFontInfo* fontinfo, PHintVal sLst1)
         return;
     }
     while (sLst1 != NULL) {
-        Fixed bot = itfmy(sLst1->vLoc1);
-        Fixed top = itfmy(sLst1->vLoc2);
+        Fixed bot = -sLst1->vLoc1;
+        Fixed top = -sLst1->vLoc2;
         if (top < bot) {
             Fixed tmp = top;
             top = bot;
@@ -727,8 +725,8 @@ DoVStems(PHintVal sLst)
         bool curved;
         curved = !FindLineSeg(sLst->vLoc1, leftList) &&
                  !FindLineSeg(sLst->vLoc2, rightList);
-        lft = itfmx(sLst->vLoc1);
-        rght = itfmx(sLst->vLoc2);
+        lft = sLst->vLoc1;
+        rght = sLst->vLoc2;
         if (lft > rght) {
             Fixed tmp = lft;
             lft = rght;
@@ -766,7 +764,7 @@ AddHintsSetup(void)
             gVBigDist = gVStems[i];
         }
     }
-    gVBigDist = dtfmx(gVBigDist);
+    gVBigDist = gVBigDist;
     if (gVBigDist < gInitBigDist) {
         gVBigDist = gInitBigDist;
     }
@@ -778,7 +776,7 @@ AddHintsSetup(void)
             gHBigDist = gHStems[i];
         }
     }
-    gHBigDist = abs(dtfmy(gHBigDist));
+    gHBigDist = abs(gHBigDist);
     if (gHBigDist < gInitBigDist) {
         gHBigDist = gInitBigDist;
     }

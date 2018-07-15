@@ -116,8 +116,8 @@ InSerifBand(Fixed y0, Fixed y1, int32_t n, Fixed* p)
     int32_t i;
     if (n <= 0)
         return false;
-    y0 = itfmy(y0);
-    y1 = itfmy(y1);
+    y0 = -y0;
+    y1 = -y1;
     if (y0 > y1) {
         Fixed tmp = y1;
         y1 = y0;
@@ -145,8 +145,8 @@ ConsiderValForSeg(PHintVal val, PHintSeg seg, Fixed loc, int32_t nb, Fixed* b,
 }
 
 static PHintVal
-FndBstVal(PHintSeg seg, bool seg1Flg, PHintVal cList, PHintVal rList, int32_t nb,
-          Fixed* b, int32_t ns, Fixed* s, bool locFlg, bool hFlg)
+FndBstVal(PHintSeg seg, bool seg1Flg, PHintVal cList, PHintVal rList,
+          int32_t nb, Fixed* b, int32_t ns, Fixed* s, bool locFlg, bool hFlg)
 {
     Fixed loc, vloc;
     PHintVal best, vList;
@@ -248,7 +248,8 @@ PrevVal(PHintVal val, PHintVal vList)
 }
 
 static void
-FindRealVal(PHintVal vlist, Fixed top, Fixed bot, PHintSeg* pseg1, PHintSeg* pseg2)
+FindRealVal(PHintVal vlist, Fixed top, Fixed bot, PHintSeg* pseg1,
+            PHintSeg* pseg2)
 {
     while (vlist != NULL) {
         if (vlist->vLoc2 == top && vlist->vLoc1 == bot && !vlist->vGhst) {

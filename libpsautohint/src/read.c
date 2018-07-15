@@ -135,12 +135,12 @@ RDcurveto(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
     if (!forMultiMaster) {
         PPathElt new;
         new = AppendElement(CURVETO);
-        new->x1 = tfmx(ScaleAbs(fontinfo, c1.x));
-        new->y1 = tfmy(ScaleAbs(fontinfo, c1.y));
-        new->x2 = tfmx(ScaleAbs(fontinfo, c2.x));
-        new->y2 = tfmy(ScaleAbs(fontinfo, c2.y));
-        new->x3 = tfmx(ScaleAbs(fontinfo, c3.x));
-        new->y3 = tfmy(ScaleAbs(fontinfo, c3.y));
+        new->x1 = ScaleAbs(fontinfo, c1.x);
+        new->y1 = -ScaleAbs(fontinfo, c1.y);
+        new->x2 = ScaleAbs(fontinfo, c2.x);
+        new->y2 = -ScaleAbs(fontinfo, c2.y);
+        new->x3 = ScaleAbs(fontinfo, c3.x);
+        new->y3 = -ScaleAbs(fontinfo, c3.y);
     } else {
         PGlyphPathElt new;
         new = AppendGlyphPathElement(RCT);
@@ -169,8 +169,8 @@ RDmtlt(const ACFontInfo* fontinfo, int32_t etype)
     if (!forMultiMaster) {
         PPathElt new;
         new = AppendElement(etype);
-        new->x = tfmx(ScaleAbs(fontinfo, currentx));
-        new->y = tfmy(ScaleAbs(fontinfo, currenty));
+        new->x = ScaleAbs(fontinfo, currentx);
+        new->y = -ScaleAbs(fontinfo, currenty);
         return;
     } else {
         PGlyphPathElt new;

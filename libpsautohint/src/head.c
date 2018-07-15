@@ -271,10 +271,10 @@ CheckHeight(bool upperFlag, PPathElt p)
     PPathElt ee;
     Fixed y, yy;
     ee = gPathStart;
-    y = itfmy(p->y);
+    y = -p->y;
     while (ee != NULL) {
         if (ee->type == MOVETO && ee != p) {
-            yy = itfmy(ee->y);
+            yy = -ee->y;
             if ((upperFlag && yy > y) || (!upperFlag && yy < y))
                 return false;
         }

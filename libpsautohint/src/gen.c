@@ -128,8 +128,8 @@ void
 AddVSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
             int32_t typ, int32_t i)
 {
-    LogMsg(LOGDEBUG, OK, "add vseg %g %g to %g %g %d", FixToDbl(itfmx(loc)),
-           FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)), FixToDbl(itfmy(to)), i);
+    LogMsg(LOGDEBUG, OK, "add vseg %g %g to %g %g %d", FixToDbl(loc),
+           FixToDbl(-from), FixToDbl(loc), FixToDbl(-to), i);
 
     AddSegment(from, to, loc, 1, 0, p1, p2, false, typ);
 }
@@ -138,8 +138,8 @@ void
 AddHSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
             int32_t typ, int32_t i)
 {
-    LogMsg(LOGDEBUG, OK, "add hseg %g %g to %g %g %d", FixToDbl(itfmx(from)),
-           FixToDbl(itfmy(loc)), FixToDbl(itfmx(to)), FixToDbl(itfmy(loc)), i);
+    LogMsg(LOGDEBUG, OK, "add hseg %g %g to %g %g %d", FixToDbl(from),
+           FixToDbl(-loc), FixToDbl(to), FixToDbl(-loc), i);
 
     AddSegment(from, to, loc, 2, 3, p1, p2, true, typ);
 }
@@ -382,15 +382,13 @@ ReportRemSeg(int32_t l, PHintSeg lst)
     switch (l) {
         case 0:
         case 1:
-            LogMsg(LOGDEBUG, OK, "rem vseg %g %g to %g %g",
-                   FixToDbl(itfmx(loc)), FixToDbl(itfmy(from)),
-                   FixToDbl(itfmx(loc)), FixToDbl(itfmy(to)));
+            LogMsg(LOGDEBUG, OK, "rem vseg %g %g to %g %g", FixToDbl(loc),
+                   FixToDbl(-from), FixToDbl(loc), FixToDbl(-to));
             break;
         case 2:
         case 3:
-            LogMsg(LOGDEBUG, OK, "rem hseg %g %g to %g %g",
-                   FixToDbl(itfmx(from)), FixToDbl(itfmy(loc)),
-                   FixToDbl(itfmx(to)), FixToDbl(itfmy(loc)));
+            LogMsg(LOGDEBUG, OK, "rem hseg %g %g to %g %g", FixToDbl(from),
+                   FixToDbl(-loc), FixToDbl(to), FixToDbl(-loc));
             break;
     }
 }
@@ -793,7 +791,7 @@ InBlueBand(Fixed loc, int32_t n, Fixed* p)
     Fixed y;
     if (n <= 0)
         return false;
-    y = itfmy(loc);
+    y = -loc;
     /* Augment the blue band by bluefuzz in each direction.  This will
        result in "near misses" being hinted and so adjusted by the
        PS interpreter. */

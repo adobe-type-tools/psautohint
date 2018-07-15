@@ -129,7 +129,7 @@ CheckTfmVal(PHintSeg hSegList, Fixed* bandList, int32_t length)
     PHintSeg sList = hSegList;
 
     while (sList != NULL) {
-        Fixed tfmval = itfmy(sList->sLoc);
+        Fixed tfmval = -sList->sLoc;
         if ((length >= 2) && !gBandError &&
             !CheckForInsideBands(tfmval, bandList, length))
             CheckForNearBands(tfmval, bandList, length);
@@ -164,13 +164,13 @@ CheckVal(PHintVal val, bool vert)
     if (vert) {
         stems = gVStems;
         numstems = gNumVStems;
-        b = itfmx(val->vLoc1);
-        t = itfmx(val->vLoc2);
+        b = val->vLoc1;
+        t = val->vLoc2;
     } else {
         stems = gHStems;
         numstems = gNumHStems;
-        b = itfmy(val->vLoc1);
-        t = itfmy(val->vLoc2);
+        b = -val->vLoc1;
+        t = -val->vLoc2;
     }
     w = abs(t - b);
     minDiff = FixInt(1000);
@@ -233,8 +233,8 @@ FixHs(Fixed fixy, Fixed fixdy)
 { /* y dy in user space */
     PPathElt e;
     Fixed xlst = 0, ylst = 0, xinit = 0, yinit = 0;
-    fixy = tfmy(fixy);
-    fixdy = dtfmy(fixdy);
+    fixy = -fixy;
+    fixdy = -fixdy;
     e = gPathStart;
     while (e != NULL) {
         switch (e->type) {
@@ -286,8 +286,6 @@ FixVs(Fixed fixx, Fixed fixdx)
 { /* x dx in user space */
     PPathElt e;
     Fixed xlst = 0, ylst = 0, xinit = 0, yinit = 0;
-    fixx = tfmx(fixx);
-    fixdx = dtfmx(fixdx);
     e = gPathStart;
     while (e != NULL) {
         switch (e->type) {

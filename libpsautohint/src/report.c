@@ -36,13 +36,11 @@ ReportLinearCurve(PPathElt e, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
         e->x = e->x3;
         e->y = e->y3;
         LogMsg(INFO, OK, "Curve from %g %g to %g %g was changed to a line.",
-               FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-               FixToDbl(itfmy(y1)));
+               FixToDbl(x0), FixToDbl(-y0), FixToDbl(x1), FixToDbl(-y1));
     } else {
         LogMsg(INFO, OK,
                "Curve from %g %g to %g %g should be changed to a line.",
-               FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-               FixToDbl(itfmy(y1)));
+               FixToDbl(x0), FixToDbl(-y0), FixToDbl(x1), FixToDbl(-y1));
     }
 }
 
@@ -50,10 +48,10 @@ static void
 ReportNonHVError(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char* s)
 {
     Fixed dx, dy;
-    x0 = itfmx(x0);
-    y0 = itfmy(y0);
-    x1 = itfmx(x1);
-    y1 = itfmy(y1);
+    x0 = x0;
+    y0 = -y0;
+    x1 = x1;
+    y1 = -y1;
     dx = x0 - x1;
     dy = y0 - y1;
     if (abs(dx) > FixInt(10) || abs(dy) > FixInt(10) ||
@@ -110,8 +108,7 @@ void
 ReportTryFlexNearMiss(Fixed x0, Fixed y0, Fixed x2, Fixed y2)
 {
     LogMsg(WARNING, OK, "Curves from %g %g to %g %g near miss for adding flex.",
-           FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x2)),
-           FixToDbl(itfmy(y2)));
+           FixToDbl(x0), FixToDbl(-y0), FixToDbl(x2), FixToDbl(-y2));
 }
 
 void
@@ -121,7 +118,7 @@ ReportTryFlexError(bool CPflg, Fixed x, Fixed y)
            CPflg
              ? "Please move closepath from %g %g so can add flex."
              : "Please remove zero length element at %g %g so can add flex.",
-           FixToDbl(itfmx(x)), FixToDbl(itfmy(y)));
+           FixToDbl(x), FixToDbl(-y));
 }
 
 void
@@ -131,8 +128,7 @@ ReportSplit(PPathElt e)
     GetEndPoints(e, &x0, &y0, &x1, &y1);
     LogMsg(INFO, OK,
            "the element that goes from %g %g to %g %g has been split.",
-           FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-           FixToDbl(itfmy(y1)));
+           FixToDbl(x0), FixToDbl(-y0), FixToDbl(x1), FixToDbl(-y1));
 }
 
 void
@@ -144,8 +140,7 @@ AskForSplit(PPathElt e)
     GetEndPoints(e, &x0, &y0, &x1, &y1);
     LogMsg(LOGERROR, OK,
            "Please split the element that goes from %g %g to %g %g.",
-           FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-           FixToDbl(itfmy(y1)));
+           FixToDbl(x0), FixToDbl(-y0), FixToDbl(x1), FixToDbl(-y1));
 }
 
 void
@@ -158,8 +153,7 @@ ReportPossibleLoop(PPathElt e)
     LogMsg(LOGERROR, OK,
            "Possible loop in element that goes from %g %g to %g %g."
            " Please check.",
-           FixToDbl(itfmx(x0)), FixToDbl(itfmy(y0)), FixToDbl(itfmx(x1)),
-           FixToDbl(itfmy(y1)));
+           FixToDbl(x0), FixToDbl(-y0), FixToDbl(x1), FixToDbl(-y1));
 }
 
 void
@@ -169,9 +163,9 @@ ReportConflictCheck(PPathElt e, PPathElt conflict, PPathElt cp)
     GetEndPoint(e, &ex, &ey);
     GetEndPoint(conflict, &cx, &cy);
     GetEndPoint(cp, &cpx, &cpy);
-    LogMsg(INFO, OK, "Check e %g %g conflict %g %g cp %g %g.",
-           FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)), FixToDbl(itfmx(cx)),
-           FixToDbl(itfmy(cy)), FixToDbl(itfmx(cpx)), FixToDbl(itfmy(cpy)));
+    LogMsg(INFO, OK, "Check e %g %g conflict %g %g cp %g %g.", FixToDbl(ex),
+           FixToDbl(-ey), FixToDbl(cx), FixToDbl(-cy), FixToDbl(cpx),
+           FixToDbl(-cpy));
 }
 
 void
@@ -179,8 +173,8 @@ ReportConflictCnt(PPathElt e, int32_t cnt)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
-    LogMsg(INFO, OK, "%g %g conflict count = %d", FixToDbl(itfmx(ex)),
-           FixToDbl(itfmy(ey)), cnt);
+    LogMsg(INFO, OK, "%g %g conflict count = %d", FixToDbl(ex), FixToDbl(-ey),
+           cnt);
 }
 
 void
@@ -190,8 +184,8 @@ ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i)
     GetEndPoint(e, &ex1, &ey1);
     GetEndPoint(e2, &ex2, &ey2);
     LogMsg(INFO, OK, "Removed %s flare at %g %g by %g %g : %d.",
-           hFlg ? "horizontal" : "vertical", FixToDbl(itfmx(ex1)),
-           FixToDbl(itfmy(ey1)), FixToDbl(itfmx(ex2)), FixToDbl(itfmy(ey2)), i);
+           hFlg ? "horizontal" : "vertical", FixToDbl(ex1), FixToDbl(-ey1),
+           FixToDbl(ex2), FixToDbl(-ey2), i);
 }
 
 void
@@ -199,8 +193,8 @@ ReportRemConflict(PPathElt e)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
-    LogMsg(INFO, OK, "Removed conflicting hints at %g %g.", FixToDbl(itfmx(ex)),
-           FixToDbl(itfmy(ey)));
+    LogMsg(INFO, OK, "Removed conflicting hints at %g %g.", FixToDbl(ex),
+           FixToDbl(-ey));
 }
 
 void
@@ -208,15 +202,15 @@ ReportRotateSubpath(PPathElt e)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
-    LogMsg(INFO, OK, "changed closepath to %g %g.", FixToDbl(itfmx(ex)),
-           FixToDbl(itfmy(ey)));
+    LogMsg(INFO, OK, "changed closepath to %g %g.", FixToDbl(ex),
+           FixToDbl(-ey));
 }
 
 void
 ReportRemShortHints(Fixed ex, Fixed ey)
 {
-    LogMsg(INFO, OK, "Removed hints from short element at %g %g.",
-           FixToDbl(itfmx(ex)), FixToDbl(itfmy(ey)));
+    LogMsg(INFO, OK, "Removed hints from short element at %g %g.", FixToDbl(ex),
+           FixToDbl(-ey));
 }
 
 static void
@@ -232,8 +226,8 @@ static void
 ShwHV(PHintVal val)
 {
     Fixed bot, top;
-    bot = itfmy(val->vLoc1);
-    top = itfmy(val->vLoc2);
+    bot = -val->vLoc1;
+    top = -val->vLoc2;
     LogMsg(LOGDEBUG, OK, "b %g t %g v ", FixToDbl(bot), FixToDbl(top));
     PrintDebugVal(val->vVal);
     LogMsg(LOGDEBUG, OK, " s %g", FixToDbl(val->vSpc));
@@ -250,12 +244,12 @@ ShowHVal(PHintVal val)
     seg = val->vSeg1;
     if (seg == NULL)
         return;
-    l = itfmx(seg->sMin);
-    r = itfmx(seg->sMax);
+    l = seg->sMin;
+    r = seg->sMax;
     LogMsg(LOGDEBUG, OK, " l1 %g r1 %g ", FixToDbl(l), FixToDbl(r));
     seg = val->vSeg2;
-    l = itfmx(seg->sMin);
-    r = itfmx(seg->sMax);
+    l = seg->sMin;
+    r = seg->sMax;
     LogMsg(LOGDEBUG, OK, " l2 %g r2 %g", FixToDbl(l), FixToDbl(r));
 }
 
@@ -278,8 +272,8 @@ static void
 ShwVV(PHintVal val)
 {
     Fixed lft, rht;
-    lft = itfmx(val->vLoc1);
-    rht = itfmx(val->vLoc2);
+    lft = val->vLoc1;
+    rht = val->vLoc2;
     LogMsg(LOGDEBUG, OK, "l %g r %g v ", FixToDbl(lft), FixToDbl(rht));
     PrintDebugVal(val->vVal);
     LogMsg(LOGDEBUG, OK, " s %g", FixToDbl(val->vSpc));
@@ -294,12 +288,12 @@ ShowVVal(PHintVal val)
     seg = val->vSeg1;
     if (seg == NULL)
         return;
-    b = itfmy(seg->sMin);
-    t = itfmy(seg->sMax);
+    b = -seg->sMin;
+    t = -seg->sMax;
     LogMsg(LOGDEBUG, OK, " b1 %g t1 %g ", FixToDbl(b), FixToDbl(t));
     seg = val->vSeg2;
-    b = itfmy(seg->sMin);
-    t = itfmy(seg->sMax);
+    b = -seg->sMin;
+    t = -seg->sMax;
     LogMsg(LOGDEBUG, OK, " b2 %g t2 %g", FixToDbl(b), FixToDbl(t));
 }
 
@@ -323,16 +317,14 @@ ReportFndBstVal(PHintSeg seg, PHintVal val, bool hFlg)
 {
     if (hFlg) {
         LogMsg(LOGDEBUG, OK, "FndBstVal: sLoc %g sLft %g sRght %g ",
-               FixToDbl(itfmy(seg->sLoc)), FixToDbl(itfmx(seg->sMin)),
-               FixToDbl(itfmx(seg->sMax)));
+               FixToDbl(-seg->sLoc), FixToDbl(seg->sMin), FixToDbl(seg->sMax));
         if (val)
             ShwHV(val);
         else
             LogMsg(LOGDEBUG, OK, "NULL");
     } else {
         LogMsg(LOGDEBUG, OK, "FndBstVal: sLoc %g sBot %g sTop %g ",
-               FixToDbl(itfmx(seg->sLoc)), FixToDbl(itfmy(seg->sMin)),
-               FixToDbl(itfmy(seg->sMax)));
+               FixToDbl(seg->sLoc), FixToDbl(-seg->sMin), FixToDbl(-seg->sMax));
         if (val)
             ShwVV(val);
         else
@@ -345,14 +337,14 @@ ReportCarry(Fixed l0, Fixed l1, Fixed loc, PHintVal hints, bool vert)
 {
     if (vert) {
         ShowVVal(hints);
-        loc = itfmx(loc);
-        l0 = itfmx(l0);
-        l1 = itfmx(l1);
+        loc = loc;
+        l0 = l0;
+        l1 = l1;
     } else {
         ShowHVal(hints);
-        loc = itfmy(loc);
-        l0 = itfmy(l0);
-        l1 = itfmy(l1);
+        loc = -loc;
+        l0 = -l0;
+        l1 = -l1;
     }
     LogMsg(LOGDEBUG, OK, " carry to %g in [%g..%g]", FixToDbl(loc),
            FixToDbl(l0), FixToDbl(l1));
@@ -365,11 +357,10 @@ ReportBestCP(PPathElt e, PPathElt cp)
     GetEndPoint(e, &ex, &ey);
     if (cp != NULL) {
         GetEndPoint(cp, &px, &py);
-        LogMsg(INFO, OK, "%g %g best cp at %g %g", FixToDbl(itfmx(ex)),
-               FixToDbl(itfmy(ey)), FixToDbl(itfmx(px)), FixToDbl(itfmy(py)));
+        LogMsg(INFO, OK, "%g %g best cp at %g %g", FixToDbl(ex), FixToDbl(-ey),
+               FixToDbl(px), FixToDbl(-py));
     } else {
-        LogMsg(INFO, OK, "%g %g no best cp", FixToDbl(itfmx(ex)),
-               FixToDbl(itfmy(ey)));
+        LogMsg(INFO, OK, "%g %g no best cp", FixToDbl(ex), FixToDbl(-ey));
     }
 }
 
@@ -422,8 +413,8 @@ ListHintInfo(void)
         vLst = e->Vs;
         if ((hLst != NULL) || (vLst != NULL)) {
             GetEndPoint(e, &x, &y);
-            x = itfmx(x);
-            y = itfmy(y);
+            x = x;
+            y = -y;
             LogMsg(LOGDEBUG, OK, "x %g y %g ", FixToDbl(x), FixToDbl(y));
             while (hLst != NULL) {
                 seg = hLst->lnk->seg;
@@ -480,8 +471,7 @@ ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
     LogMsg(LOGDEBUG, OK,
 
            "Replace H hints pair at %g %g by %g %g\n\told value ",
-           FixToDbl(itfmy(b0)), FixToDbl(itfmy(t0)), FixToDbl(itfmy(b1)),
-           FixToDbl(itfmy(t1)));
+           FixToDbl(-b0), FixToDbl(-t0), FixToDbl(-b1), FixToDbl(-t1));
     PrintDebugVal(v0);
     LogMsg(LOGDEBUG, OK, " %g new value ", FixToDbl(s0));
     PrintDebugVal(v1);
@@ -493,8 +483,7 @@ ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
                 Fixed v1, Fixed s1)
 {
     LogMsg(LOGDEBUG, OK, "Replace V hints pair at %g %g by %g %g\n\told value ",
-           FixToDbl(itfmx(l0)), FixToDbl(itfmx(r0)), FixToDbl(itfmx(l1)),
-           FixToDbl(itfmx(r1)));
+           FixToDbl(l0), FixToDbl(r0), FixToDbl(l1), FixToDbl(r1));
     PrintDebugVal(v0);
     LogMsg(LOGDEBUG, OK, " %g new value ", FixToDbl(s0));
     PrintDebugVal(v1);

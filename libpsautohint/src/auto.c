@@ -18,7 +18,8 @@ InitAuto(int32_t reason)
     switch (reason) {
         case STARTUP:
         case RESTART:
-            hintBBox = hintHBounds = hintVBounds = haveHBnds = haveVBnds = false;
+            hintBBox = hintHBounds = hintVBounds = haveHBnds = haveVBnds =
+              false;
     }
 }
 

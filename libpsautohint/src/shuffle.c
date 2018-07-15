@@ -23,7 +23,7 @@ InitShuffleSubpaths(void)
             cnt++;
         if (e->type == MOVETO) {
             LogMsg(LOGDEBUG, OK, "subpath %d starts at %g %g.", cnt,
-                   FixToDbl(itfmx(e->x)), FixToDbl(itfmy(e->y)));
+                   FixToDbl(e->x), FixToDbl(-e->y));
         }
         e->count = (int16_t)cnt;
         e = e->next;

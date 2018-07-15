@@ -182,8 +182,8 @@ HintVBnds(void)
     if (gPathStart == NULL || VHintGlyph())
         return;
     FindPathBBox();
-    vMn = itfmx(xmin);
-    vMx = itfmx(xmax);
+    vMn = xmin;
+    vMx = xmax;
     pvMn = pxmn;
     pvMx = pxmx;
     if (vMn > vMx) {
@@ -209,8 +209,8 @@ HintHBnds(void)
     if (gPathStart == NULL || HHintGlyph())
         return;
     FindPathBBox();
-    hMn = itfmy(ymin);
-    hMx = itfmy(ymax);
+    hMn = -ymin;
+    hMx = -ymax;
     phMn = pymn;
     phMx = pymx;
     if (hMn > hMx) {
@@ -235,12 +235,9 @@ static bool
 CheckValOverlaps(Fixed lft, Fixed rht, PHintVal lst, bool xflg)
 {
     Fixed tmp;
-    if (xflg) {
-        lft = itfmx(lft);
-        rht = itfmx(rht);
-    } else {
-        lft = itfmy(lft);
-        rht = itfmy(rht);
+    if (!xflg) {
+        lft = -lft;
+        rht = -rht;
     }
     if (lft > rht) {
         tmp = lft;
@@ -250,12 +247,9 @@ CheckValOverlaps(Fixed lft, Fixed rht, PHintVal lst, bool xflg)
     while (lst != NULL) {
         Fixed lft2 = lst->vLoc1;
         Fixed rht2 = lst->vLoc2;
-        if (xflg) {
-            lft2 = itfmx(lft2);
-            rht2 = itfmx(rht2);
-        } else {
-            lft2 = itfmy(lft2);
-            rht2 = itfmy(rht2);
+        if (!xflg) {
+            lft2 = -lft2;
+            rht2 = -rht2;
         }
         if (lft2 > rht2) {
             tmp = lft2;
@@ -357,8 +351,8 @@ HintBBox(void)
     Fixed tmp;
     PPathElt p, p0, p1;
     if (!gUseV) {
-        Fixed llx = itfmx(xmin);
-        Fixed urx = itfmx(xmax);
+        Fixed llx = xmin;
+        Fixed urx = xmax;
         p0 = pxmn;
         p1 = pxmx;
         if (llx > urx) {
@@ -372,8 +366,8 @@ HintBBox(void)
         AddHintPoint(llx, 0, urx, 0, 'y', p0, p1);
     }
     if (!gUseH) {
-        Fixed lly = itfmy(ymax);
-        Fixed ury = itfmy(ymin);
+        Fixed lly = -ymax;
+        Fixed ury = -ymin;
         p0 = pymx;
         p1 = pymn;
         if (lly > ury) {
@@ -393,15 +387,15 @@ CheckPathBBox(void)
 {
     Fixed llx, lly, urx, ury, tmp;
     FindPathBBox();
-    llx = itfmx(xmin);
-    urx = itfmx(xmax);
+    llx = xmin;
+    urx = xmax;
     if (llx > urx) {
         tmp = llx;
         llx = urx;
         urx = tmp;
     }
-    lly = itfmy(ymax);
-    ury = itfmy(ymin);
+    lly = -ymax;
+    ury = -ymin;
     if (lly > ury) {
         tmp = lly;
         lly = ury;

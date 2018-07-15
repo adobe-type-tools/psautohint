@@ -599,22 +599,22 @@ SaveFile(const ACFontInfo* fontinfo)
     while (e != NULL) {
         switch (e->type) {
             case CURVETO:
-                c1.x = UnScaleAbs(fontinfo, itfmx(e->x1));
-                c1.y = UnScaleAbs(fontinfo, itfmy(e->y1));
-                c2.x = UnScaleAbs(fontinfo, itfmx(e->x2));
-                c2.y = UnScaleAbs(fontinfo, itfmy(e->y2));
-                c3.x = UnScaleAbs(fontinfo, itfmx(e->x3));
-                c3.y = UnScaleAbs(fontinfo, itfmy(e->y3));
+                c1.x = UnScaleAbs(fontinfo, e->x1);
+                c1.y = UnScaleAbs(fontinfo, -e->y1);
+                c2.x = UnScaleAbs(fontinfo, e->x2);
+                c2.y = UnScaleAbs(fontinfo, -e->y2);
+                c3.x = UnScaleAbs(fontinfo, e->x3);
+                c3.y = UnScaleAbs(fontinfo, -e->y3);
                 ct(fontinfo, c1, c2, c3, e);
                 break;
             case LINETO:
-                c1.x = UnScaleAbs(fontinfo, itfmx(e->x));
-                c1.y = UnScaleAbs(fontinfo, itfmy(e->y));
+                c1.x = UnScaleAbs(fontinfo, e->x);
+                c1.y = UnScaleAbs(fontinfo, -e->y);
                 dt(fontinfo, c1, e);
                 break;
             case MOVETO:
-                c1.x = UnScaleAbs(fontinfo, itfmx(e->x));
-                c1.y = UnScaleAbs(fontinfo, itfmy(e->y));
+                c1.x = UnScaleAbs(fontinfo, e->x);
+                c1.y = UnScaleAbs(fontinfo, -e->y);
                 mt(fontinfo, c1, e);
                 break;
             case CLOSEPATH:
