@@ -48,7 +48,7 @@ matrix:
       install:
         - pip install tox
       script:
-        - tox -e coverage-c
+        - tox -e coverage-codecov-c
       after_success: false
     - os: osx
       language: generic
