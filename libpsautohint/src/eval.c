@@ -543,7 +543,7 @@ EvalH(void)
             Fixed bot, top;
             bot = bList->sLoc;
             top = tList->sLoc;
-            if ((bot < top && gYgoesUp) || (bot > top && !gYgoesUp)) {
+            if (bot > top) {
                 EvalHPair(bList, tList, &spc, &val);
                 HStemMiss(bList, tList);
                 AddHValue(bot, top, val, spc, bList, tList);
@@ -561,11 +561,7 @@ EvalH(void)
     while (lst != NULL) {
         lstLoc = lst->sLoc;
         if (InBlueBand(lstLoc, gLenBotBands, gBotBands)) {
-            tempLoc = lstLoc;
-            if (gYgoesUp)
-                tempLoc += gGhostWidth;
-            else
-                tempLoc -= gGhostWidth;
+            tempLoc = lstLoc - gGhostWidth;
             ghostSeg->sLoc = tempLoc;
             cntr = (lst->sMax + lst->sMin) / 2;
             ghostSeg->sMax = cntr + gGhostLength / 2;
@@ -582,11 +578,7 @@ EvalH(void)
     while (lst != NULL) {
         lstLoc = lst->sLoc;
         if (InBlueBand(lstLoc, gLenTopBands, gTopBands)) {
-            tempLoc = lstLoc;
-            if (!gYgoesUp)
-                tempLoc += gGhostWidth;
-            else
-                tempLoc -= gGhostWidth;
+            tempLoc = lstLoc + gGhostWidth;
             ghostSeg->sLoc = tempLoc;
             cntr = (lst->sMin + lst->sMax) / 2;
             ghostSeg->sMax = cntr + gGhostLength / 2;

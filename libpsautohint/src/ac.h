@@ -192,7 +192,6 @@ typedef struct {
 extern ACBuffer* gBezOutput;
 
 extern PPathElt gPathStart, gPathEnd;
-extern bool gYgoesUp;
 extern bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix;
 extern bool gEditGlyph; /* whether glyph can be modified when adding hints */
 extern bool gBandError;

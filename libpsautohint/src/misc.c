@@ -203,10 +203,7 @@ TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
         if (ProdLt0(y4 - y0, y1 - y0))
             return; /* y1 and y4 not on same side of y0 */
         top = (x0 > x1) ? true : false;
-        if (gYgoesUp)
-            dwn = (y1 < y0) ? true : false;
-        else
-            dwn = (y1 > y0) ? true : false;
+        dwn = (y1 > y0) ? true : false;
         if ((top && !dwn) || (!top && dwn))
             return; /* concave */
     }
@@ -265,10 +262,7 @@ TryXFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
         GetEndPoint(p->prev, &x4, &y4);
         if (ProdLt0(x4 - x0, x1 - x0))
             return; /* x1 and x4 not on same side of x0 */
-        if (gYgoesUp)
-            lft = (y0 > y2) ? true : false;
-        else
-            lft = (y0 < y2) ? true : false;
+        lft = (y0 < y2) ? true : false;
         if ((lft && x0 > x1) || (!lft && x0 < x1))
             return; /* concave */
     }

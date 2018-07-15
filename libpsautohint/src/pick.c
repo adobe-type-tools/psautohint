@@ -331,13 +331,8 @@ PickHVals(PHintVal valList)
             else
                 top = bot;
         }
-        if (gYgoesUp) {
-            bot -= gBandMargin;
-            top += gBandMargin;
-        } else {
-            bot += gBandMargin;
-            top -= gBandMargin;
-        }
+        bot += gBandMargin;
+        top -= gBandMargin;
         /* remove segments from valList that overlap bot..top */
         vlist = valList;
         prev = NULL;
@@ -353,8 +348,7 @@ PickHVals(PHintVal valList)
                 else
                     vtop = vbot;
             }
-            if ((gYgoesUp && (vbot <= top) && (vtop >= bot)) ||
-                ((!gYgoesUp && (vbot >= top) && (vtop <= bot)))) {
+            if ((vbot >= top) && (vtop <= bot)) {
                 nxt = vlist->vNxt;
                 vlist->vNxt = rejectList;
                 rejectList = vlist;

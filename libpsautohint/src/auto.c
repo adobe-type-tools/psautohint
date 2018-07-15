@@ -285,7 +285,7 @@ TestHint(PHintSeg s, PHintVal hintList, bool flg, bool doLst)
     return 1;
 }
 
-#define TestHHintLst(h) TestHintLst(h, gHHinting, gYgoesUp, true)
+#define TestHHintLst(h) TestHintLst(h, gHHinting, false, true)
 #define TestVHintLst(v) TestHintLst(v, gVHinting, true, true)
 
 int
@@ -532,7 +532,7 @@ CheckElmntHintSegs(void)
     PPathElt e;
     e = gPathStart;
     while (e != NULL) {
-        if (!CheckHintSegs(e, gYgoesUp, true))
+        if (!CheckHintSegs(e, false, true))
             (void)CheckHintSegs(e, true, false);
         e = e->next;
     }
@@ -580,11 +580,11 @@ BestFromLsts(PSegLnkLst lst1, PSegLnkLst lst2)
 
 static bool
 HintsClash(PPathElt e, PPathElt p, PSegLnkLst* hLst, PSegLnkLst* vLst,
-          PSegLnkLst* phLst, PSegLnkLst* pvLst)
+           PSegLnkLst* phLst, PSegLnkLst* pvLst)
 {
     bool clash = false;
     PSegLnkLst bst, new;
-    if (HintLstsClash(*hLst, *phLst, gYgoesUp)) {
+    if (HintLstsClash(*hLst, *phLst, false)) {
         clash = true;
         bst = BestFromLsts(*hLst, *phLst);
         if (bst) {
@@ -949,7 +949,7 @@ CarryIfNeed(Fixed loc, bool vert, PHintVal hints)
                     seg->sLnk = seglnk;
                     break;
                 }
-            } else if (TestHint(seg, gHHinting, gYgoesUp, true) == 1) {
+            } else if (TestHint(seg, gHHinting, false, true) == 1) {
                 ReportCarry(l0, l1, loc, hints, vert);
                 AddHHinting(hints);
                 seg->sLnk = seglnk;

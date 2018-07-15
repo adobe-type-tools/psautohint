@@ -13,7 +13,6 @@
 #define MAXSTEMDIST 150 /* initial maximum stem width allowed for hints */
 
 PPathElt gPathStart, gPathEnd;
-bool gYgoesUp;
 bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix, gEditGlyph;
 bool gHasFlex, gFlexOK, gFlexStrict, gBandError;
 Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth, gGhostLength,
@@ -74,7 +73,6 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
         case STARTUP:
             gDMin = 50;
             gDelta = 0;
-            gYgoesUp = (dtfmy(FixOne) > 0) ? true : false;
             gInitBigDist = PSDist(maxStemDist);
             /* must be <= 168 for ITC Garamond Book Italic p, q, thorn */
             gMinDist = PSDist(7);

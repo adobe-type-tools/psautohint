@@ -255,11 +255,9 @@ PruneHVals(void)
 
             if (/* Prune sLst if the following are all true */
                 PruneGt(val, v) && /*  v is more than 3* val */
-
-                ((gYgoesUp && top + prndist >= t && bot - prndist <= b) ||
-                 (!gYgoesUp && top - prndist <= t &&
-                  bot + prndist >=
-                    b)) && /* The sL hint is within the sLst hint */
+                (top - prndist <= t &&
+                 bot + prndist >=
+                   b) && /* The sL hint is within the sLst hint */
 
                 (val < FixInt(100) && PruneMuchGt(val, v)
                    ? (CloseSegs(seg1, sg1, false) ||
@@ -469,10 +467,10 @@ MergeVals(bool vert)
                   (b == bot || !InBlueBand(bot, gLenBotBands, gBotBands))))) {
                 if (s == spc && val == v && !vert) {
                     if (InBlueBand(t, gLenTopBands, gTopBands)) {
-                        if ((gYgoesUp && t > top) || (!gYgoesUp && t < top))
+                        if (t < top)
                             goto replace;
                     } else if (InBlueBand(b, gLenBotBands, gBotBands)) {
-                        if ((gYgoesUp && b < bot) || (!gYgoesUp && b > bot))
+                        if (b > bot)
                             goto replace;
                     }
                 } else

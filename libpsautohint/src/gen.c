@@ -131,10 +131,7 @@ AddVSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
     LogMsg(LOGDEBUG, OK, "add vseg %g %g to %g %g %d", FixToDbl(itfmx(loc)),
            FixToDbl(itfmy(from)), FixToDbl(itfmx(loc)), FixToDbl(itfmy(to)), i);
 
-    if (gYgoesUp)
-        AddSegment(from, to, loc, 0, 1, p1, p2, false, typ);
-    else
-        AddSegment(from, to, loc, 1, 0, p1, p2, false, typ);
+    AddSegment(from, to, loc, 1, 0, p1, p2, false, typ);
 }
 
 void
@@ -195,13 +192,9 @@ IsCCW(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed x2, Fixed y2)
     int32_t dx0, dy0, dx1, dy1;
     bool ccw;
     dx0 = FRound(x1 - x0);
-    dy0 = FRound(y1 - y0);
+    dy0 = -FRound(y1 - y0);
     dx1 = FRound(x2 - x1);
-    dy1 = FRound(y2 - y1);
-    if (!gYgoesUp) {
-        dy0 = -dy0;
-        dy1 = -dy1;
-    }
+    dy1 = -FRound(y2 - y1);
     ccw = (dx0 * dy1) >= (dx1 * dy0);
     return ccw;
 }
@@ -227,9 +220,7 @@ DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
             delta = -delta;
         else if (ysame) {
             bool ccw;
-            bool above = y0 > y1;
-            if (!gYgoesUp)
-                above = !above;
+            bool above = y0 < y1;
             ccw = IsCCW(x0, y0, x1, y1, x2, y2);
             if (above != ccw)
                 delta = -delta;
@@ -264,9 +255,7 @@ DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
             delta = -delta;
         else if (ysame) {
             bool ccw;
-            bool above = (y2 > y0);
-            if (!gYgoesUp)
-                above = !above;
+            bool above = y2 < y0;
             ccw = IsCCW(x2, y2, x0, y0, x1, y1);
             if (above != ccw)
                 delta = -delta;
@@ -303,8 +292,7 @@ DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
             bool ccw = IsCCW(x0, y0, x1, y1, x2, y2);
             if (right != ccw)
                 delta = -delta;
-            if (!gYgoesUp)
-                delta = -delta;
+            delta = -delta;
         } else
             doboth = true;
         strt = y1 - delta;
@@ -339,8 +327,7 @@ DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
             bool ccw = IsCCW(x2, y2, x0, y0, x1, y1);
             if (right != ccw)
                 delta = -delta;
-            if (!gYgoesUp)
-                delta = -delta;
+            delta = -delta;
         }
         strt = y0 - delta;
         end = y0 + delta;
@@ -845,16 +832,11 @@ PickHSpot(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed xdist, Fixed px1,
     if (inBlue0 && inBlue1) {
         Fixed upper, lower;
         if (y0 > y1) {
-            upper = y0;
-            lower = y1;
-        } else {
             upper = y1;
             lower = y0;
-        }
-        if (!gYgoesUp) {
-            Fixed tmp = lower;
-            lower = upper;
-            upper = tmp;
+        } else {
+            upper = y0;
+            lower = y1;
         }
         return topSeg ? upper : lower;
     }
