@@ -55,22 +55,6 @@ static char* SolEol1List[] = { "i", "j", "questiondown", "semicolon", NULL };
 
 static char* SolEolNeg1List[] = { "question", NULL };
 
-static bool
-StrEqual(char* s1, char* s2)
-{
-    while (true) {
-        unsigned char c1, c2;
-        c1 = *s1++;
-        c2 = *s2++;
-        if (c1 != c2)
-            return false;
-        if (c1 == 0 && c2 == 0)
-            return true;
-        if (c1 == 0 || c2 == 0)
-            return false;
-    }
-}
-
 bool
 FindNameInList(char* nm, char** lst)
 {
@@ -79,7 +63,7 @@ FindNameInList(char* nm, char** lst)
         char* lnm = *l;
         if (lnm == NULL)
             return false;
-        if (StrEqual(lnm, nm))
+        if (strcmp(lnm, nm) == 0)
             return true;
         l++;
     }
@@ -272,6 +256,6 @@ AddSolEol(void)
 bool
 MoveToNewHints(void)
 {
-    return StrEqual(gGlyphName, "percent") ||
-           StrEqual(gGlyphName, "perthousand");
+    return strcmp(gGlyphName, "percent") == 0 ||
+           strcmp(gGlyphName, "perthousand") == 0;
 }
