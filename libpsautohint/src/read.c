@@ -86,8 +86,8 @@ Push(Fixed r)
 static void
 Pop2(void)
 {
-    (void)Pop();
-    (void)Pop();
+    Pop();
+    Pop();
 }
 
 static void
@@ -353,7 +353,7 @@ psFLX(const ACFontInfo* fontinfo)
     Cd c0, c1, c2, c3, c4, c5;
     int32_t i;
     for (i = 0; i < 5; i++)
-        (void)Pop();
+        Pop();
     PopPCd(&c5);
     PopPCd(&c4);
     PopPCd(&c3);

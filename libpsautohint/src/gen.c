@@ -206,7 +206,7 @@ DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
     bool ysame;
     if (y0 == y1)
         return;
-    (void)NxtForBend(p, &x2, &y2, &x3, &y3);
+    NxtForBend(p, &x2, &y2, &x3, &y3);
     ysame = ProdLt0(y2 - y1, y1 - y0); /* y0 and y2 on same side of y1 */
     if (ysame ||
         (TestTan(x1 - x2, y1 - y2) &&
@@ -241,7 +241,7 @@ DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
     bool ysame;
     if (y0 == y1)
         return;
-    (void)PrvForBend(p, &x2, &y2);
+    PrvForBend(p, &x2, &y2);
     ysame = ProdLt0(y2 - y0, y0 - y1);
     if (ysame ||
         (TestTan(x0 - x2, y0 - y2) &&
@@ -275,7 +275,7 @@ DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
     bool xsame;
     if (x0 == x1)
         return;
-    (void)NxtForBend(p, &x2, &y2, &x3, &y3);
+    NxtForBend(p, &x2, &y2, &x3, &y3);
     xsame = ProdLt0(x2 - x1, x1 - x0);
     if (xsame ||
         (TestTan(y1 - y2, x1 - x2) &&
@@ -310,7 +310,7 @@ DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
     bool xsame;
     if (x0 == x1)
         return;
-    (void)PrvForBend(p, &x2, &y2);
+    PrvForBend(p, &x2, &y2);
     xsame = ProdLt0(x2 - x0, x0 - x1);
     if (xsame ||
         (TestTan(y0 - y2, x0 - x2) &&
@@ -557,7 +557,7 @@ static bool
 NxtHorz(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2, x3, y3;
-    (void)NxtForBend(p, &x2, &y2, &x3, &y3);
+    NxtForBend(p, &x2, &y2, &x3, &y3);
     return TstFlat(y2 - y, x2 - x);
 }
 
@@ -565,7 +565,7 @@ static bool
 PrvHorz(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2;
-    (void)PrvForBend(p, &x2, &y2);
+    PrvForBend(p, &x2, &y2);
     return TstFlat(y2 - y, x2 - x);
 }
 
@@ -573,7 +573,7 @@ static bool
 NxtVert(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2, x3, y3;
-    (void)NxtForBend(p, &x2, &y2, &x3, &y3);
+    NxtForBend(p, &x2, &y2, &x3, &y3);
     return TstFlat(x2 - x, y2 - y);
 }
 
@@ -581,7 +581,7 @@ static bool
 PrvVert(Fixed x, Fixed y, PPathElt p)
 {
     Fixed x2, y2;
-    (void)PrvForBend(p, &x2, &y2);
+    PrvForBend(p, &x2, &y2);
     return TstFlat(x2 - x, y2 - y);
 }
 
@@ -699,8 +699,8 @@ GenVPts(int32_t specialGlyphType)
                             ReportLinearCurve(p, x0, y0, x1, y1);
                         ydist = FixHalfMul(yd2);
                         yavg = FixHalfMul(y0 + y1);
-                        (void)PrvForBend(p, &prvx, &prvy);
-                        (void)NxtForBend(p, &nxtx, &nxty, &xx, &yy);
+                        PrvForBend(p, &prvx, &prvy);
+                        NxtForBend(p, &nxtx, &nxty, &xx, &yy);
                         AddVSegment(yavg - ydist, yavg + ydist,
                                     PickVSpot(x0, y0, x1, y1, px1, py1, px2,
                                               py2, prvx, prvy, nxtx, nxty),
@@ -759,8 +759,8 @@ GenVPts(int32_t specialGlyphType)
                         q = FixQuarter;
                     ydist = FixHalfMul(AdjDist(y1 - y0, q));
                     yavg = FixHalfMul(y0 + y1);
-                    (void)PrvForBend(p, &prvx, &prvy);
-                    (void)NxtForBend(p, &nxtx, &nxty, &xx, &yy);
+                    PrvForBend(p, &prvx, &prvy);
+                    NxtForBend(p, &nxtx, &nxty, &xx, &yy);
                     AddVSegment(yavg - ydist, yavg + ydist,
                                 PickVSpot(x0, y0, x1, y1, x0, y0, x1, y1, prvx,
                                           prvy, nxtx, nxty),
@@ -926,8 +926,8 @@ GenHPts(void)
                         Fixed hspot;
                         if (y0 == py1 && py1 == py2 && py2 == y1)
                             ReportLinearCurve(p, x0, y0, x1, y1);
-                        (void)PrvForBend(p, &prvx, &prvy);
-                        (void)NxtForBend(p, &nxtx, &nxty, &xx, &yy);
+                        PrvForBend(p, &prvx, &prvy);
+                        NxtForBend(p, &nxtx, &nxty, &xx, &yy);
                         xdist = FixHalfMul(xd2);
                         xavg = FixHalfMul(x0 + x1);
                         hspot = PickHSpot(x0, y0, x1, y1, xdist, px1, py1, px2,
@@ -979,8 +979,8 @@ GenHPts(void)
                         q = FixQuarter;
                     xdist = FixHalfMul(AdjDist(x1 - x0, q));
                     xavg = FixHalfMul(x0 + x1);
-                    (void)PrvForBend(p, &prvx, &prvy);
-                    (void)NxtForBend(p, &nxtx, &nxty, &xx, &yy);
+                    PrvForBend(p, &prvx, &prvy);
+                    NxtForBend(p, &nxtx, &nxty, &xx, &yy);
                     yy = PickHSpot(x0, y0, x1, y1, xdist, x0, y0, x1, y1, prvx,
                                    prvy, nxtx, nxty);
                     AddHSegment(xavg - xdist, xavg + xdist, yy, p->prev, p,

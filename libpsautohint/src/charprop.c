@@ -241,9 +241,9 @@ SolEolUpperOrLower(bool upper)
     s2y = -y1;
     s1Upper = (s1y > s2y);
     if ((upper && s1Upper) || (!upper && !s1Upper))
-        (void)SolEol(s1);
+        SolEol(s1);
     else
-        (void)SolEol(s2);
+        SolEol(s2);
 }
 
 /* This change was made to prevent bogus sol-eol's.  And to prevent
