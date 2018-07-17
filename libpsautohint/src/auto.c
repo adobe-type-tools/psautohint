@@ -1086,26 +1086,26 @@ AutoExtraHints(bool movetoNewHints, bool soleol, int32_t solWhere)
     while (e != NULL) {
         int32_t etype = e->type;
         if (movetoNewHints && etype == MOVETO) {
-            StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
+            StartNewHinting(e, NULL, NULL);
             Tst = IsOk;
         }
         if (soleol && etype == MOVETO) { /* start new hinting on soleol mt */
             if ((solWhere == 1 && IsUpper(e)) ||
                 (solWhere == -1 && IsLower(e)) ||
                 (solWhere == 0)) { /* hint bbox of next subpath */
-                StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
+                StartNewHinting(e, NULL, NULL);
                 Tst = IsOk;
                 haveHBnds = haveVBnds = isSpc = true;
                 e = _HintBBox(e);
                 continue;
             } else if (isSpc) { /* new hinting after the special */
-                StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
+                StartNewHinting(e, NULL, NULL);
                 Tst = IsOk;
                 haveHBnds = haveVBnds = isSpc = false;
             }
         }
         if (newHints && e == p) {
-            StartNewHinting(e, (PSegLnkLst)NULL, (PSegLnkLst)NULL);
+            StartNewHinting(e, NULL, NULL);
             SetHHints(mtHhints);
             SetVHints(mtVhints);
             Tst = IsIn;

@@ -228,9 +228,9 @@ DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
             doboth = true;
         strt = x1 - delta;
         end = x1 + delta;
-        AddHSegment(strt, end, y1, p, (PPathElt)NULL, sBEND, 0);
+        AddHSegment(strt, end, y1, p, NULL, sBEND, 0);
         if (doboth)
-            AddHSegment(end, strt, y1, p, (PPathElt)NULL, sBEND, 1);
+            AddHSegment(end, strt, y1, p, NULL, sBEND, 1);
     }
 }
 
@@ -262,9 +262,9 @@ DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
         }
         strt = x0 - delta;
         end = x0 + delta;
-        AddHSegment(strt, end, y0, p->prev, (PPathElt)NULL, sBEND, 2);
+        AddHSegment(strt, end, y0, p->prev, NULL, sBEND, 2);
         if (doboth)
-            AddHSegment(end, strt, y0, p->prev, (PPathElt)NULL, sBEND, 3);
+            AddHSegment(end, strt, y0, p->prev, NULL, sBEND, 3);
     }
 }
 
@@ -297,9 +297,9 @@ DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
             doboth = true;
         strt = y1 - delta;
         end = y1 + delta;
-        AddVSegment(strt, end, x1, p, (PPathElt)NULL, sBEND, 0);
+        AddVSegment(strt, end, x1, p, NULL, sBEND, 0);
         if (doboth)
-            AddVSegment(end, strt, x1, p, (PPathElt)NULL, sBEND, 1);
+            AddVSegment(end, strt, x1, p, NULL, sBEND, 1);
     }
 }
 
@@ -331,9 +331,9 @@ DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
         }
         strt = y0 - delta;
         end = y0 + delta;
-        AddVSegment(strt, end, x0, p->prev, (PPathElt)NULL, sBEND, 2);
+        AddVSegment(strt, end, x0, p->prev, NULL, sBEND, 2);
         if (doboth)
-            AddVSegment(end, strt, x0, p->prev, (PPathElt)NULL, sBEND, 3);
+            AddVSegment(end, strt, x0, p->prev, NULL, sBEND, 3);
     }
 }
 
@@ -704,7 +704,7 @@ GenVPts(int32_t specialGlyphType)
                         AddVSegment(yavg - ydist, yavg + ydist,
                                     PickVSpot(x0, y0, x1, y1, px1, py1, px2,
                                               py2, prvx, prvy, nxtx, nxty),
-                                    p, (PPathElt)NULL, sCURVE, 7);
+                                    p, NULL, sCURVE, 7);
                     } else {
                         q2 = VertQuo(px1, py1, x1, y1);
                         if (q2 > 0 && ProdGe0(py1 - y1, py2 - y1) &&
@@ -712,11 +712,9 @@ GenVPts(int32_t specialGlyphType)
                             yend = AdjDist(y1 - CPFrom(py1, py2), q2);
                             if (abs(yend) > abs(ydist))
                                 ydist = yend;
-                            AddVSegment(y1 - ydist, y1, x1, p, (PPathElt)NULL,
-                                        sCURVE, 8);
+                            AddVSegment(y1 - ydist, y1, x1, p, NULL, sCURVE, 8);
                         } else
-                            AddVSegment(y1 - ydist, y1, x1, p, (PPathElt)NULL,
-                                        sCURVE, 9);
+                            AddVSegment(y1 - ydist, y1, x1, p, NULL, sCURVE, 9);
                     }
                 }
             }
@@ -738,8 +736,8 @@ GenVPts(int32_t specialGlyphType)
                         if (abs(ydist) < gBendLength)
                             ydist = (ydist > 0) ? FixHalfMul(gBendLength)
                                                 : FixHalfMul(-gBendLength);
-                        AddVSegment(yavg - ydist, yavg + ydist, loc, p,
-                                    (PPathElt)NULL, sCURVE, 10);
+                        AddVSegment(yavg - ydist, yavg + ydist, loc, p, NULL,
+                                    sCURVE, 10);
                     }
                 }
             }
@@ -766,7 +764,7 @@ GenVPts(int32_t specialGlyphType)
                     AddVSegment(yavg - ydist, yavg + ydist,
                                 PickVSpot(x0, y0, x1, y1, x0, y0, x1, y1, prvx,
                                           prvy, nxtx, nxty),
-                                p, (PPathElt)NULL, sLINE, 12);
+                                p, NULL, sLINE, 12);
                     if (abs(x0 - x1) <= FixTwo)
                         ReportNonVError(x0, y0, x1, y1);
                 }
@@ -934,8 +932,8 @@ GenHPts(void)
                         xavg = FixHalfMul(x0 + x1);
                         hspot = PickHSpot(x0, y0, x1, y1, xdist, px1, py1, px2,
                                           py2, prvx, prvy, nxtx, nxty);
-                        AddHSegment(xavg - xdist, xavg + xdist, hspot, p,
-                                    (PPathElt)NULL, sCURVE, 7);
+                        AddHSegment(xavg - xdist, xavg + xdist, hspot, p, NULL,
+                                    sCURVE, 7);
                     } else {
                         q2 = HorzQuo(px1, py1, x1, y1);
                         if (q2 > 0 && ProdGe0(px1 - x1, px2 - x1) &&
@@ -943,11 +941,9 @@ GenHPts(void)
                             xend = AdjDist(x1 - CPFrom(px1, px2), q2);
                             if (abs(xend) > abs(xdist))
                                 xdist = xend;
-                            AddHSegment(x1 - xdist, x1, y1, p, (PPathElt)NULL,
-                                        sCURVE, 8);
+                            AddHSegment(x1 - xdist, x1, y1, p, NULL, sCURVE, 8);
                         } else
-                            AddHSegment(x1 - xdist, x1, y1, p, (PPathElt)NULL,
-                                        sCURVE, 9);
+                            AddHSegment(x1 - xdist, x1, y1, p, NULL, sCURVE, 9);
                     }
                 }
             }
@@ -969,8 +965,8 @@ GenHPts(void)
                         if (abs(xdist) < gBendLength)
                             xdist = (xdist > 0.0) ? FixHalfMul(gBendLength)
                                                   : FixHalfMul(-gBendLength);
-                        AddHSegment(xavg - xdist, xavg + xdist, loc, p,
-                                    (PPathElt)NULL, sCURVE, 10);
+                        AddHSegment(xavg - xdist, xavg + xdist, loc, p, NULL,
+                                    sCURVE, 10);
                     }
                 }
             }
