@@ -534,7 +534,7 @@ CheckElmntHintSegs(void)
     e = gPathStart;
     while (e != NULL) {
         if (!CheckHintSegs(e, false, true))
-            (void)CheckHintSegs(e, true, false);
+            CheckHintSegs(e, true, false);
         e = e->next;
     }
 }
