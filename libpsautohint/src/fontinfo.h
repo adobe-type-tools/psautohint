@@ -17,8 +17,8 @@
 #include "ac.h"
 #include "basic.h"
 
-#define		ACOPTIONAL		1
-#define		MANDATORY		0
+#define		OPTIONAL		true
+#define		MANDATORY		false
 
 /* Default value used by PS interpreter and Adobe's fonts to extend the range
  * of alignment zones. */

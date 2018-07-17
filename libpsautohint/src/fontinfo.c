@@ -20,7 +20,7 @@ static void
 ParseStems(const ACFontInfo* fontinfo, char* kw, Fixed* stems, int32_t* pnum)
 {
     int istems[MAXSTEMS], i;
-    ParseIntStems(fontinfo, kw, ACOPTIONAL, MAXSTEMS, istems, pnum);
+    ParseIntStems(fontinfo, kw, OPTIONAL, MAXSTEMS, istems, pnum);
     for (i = 0; i < *pnum; i++)
         stems[i] = FixInt(istems[i]);
 }
@@ -97,44 +97,41 @@ ReadFontInfo(const ACFontInfo* fontinfo)
     /* get bluefuzz. It is already set to its default value in ac.c::InitData().
     GetKeyFixedValue does not change the value if it's not present in fontinfo.
     */
-    GetKeyFixedValue(fontinfo, "BlueFuzz", ACOPTIONAL, &gBlueFuzz);
+    GetKeyFixedValue(fontinfo, "BlueFuzz", OPTIONAL, &gBlueFuzz);
 
     /* Check for counter hinting glyphs. */
-    fontinfostr = GetFontInfo(fontinfo, "VCounterChars", ACOPTIONAL);
+    fontinfostr = GetFontInfo(fontinfo, "VCounterChars", OPTIONAL);
     if (fontinfostr != NULL)
         gNumVHints = AddCounterHintGlyphs(fontinfostr, gVHintList);
-    fontinfostr = GetFontInfo(fontinfo, "HCounterChars", ACOPTIONAL);
+    fontinfostr = GetFontInfo(fontinfo, "HCounterChars", OPTIONAL);
     if (fontinfostr != NULL)
         gNumHHints = AddCounterHintGlyphs(fontinfostr, gHHintList);
 
-    GetKeyValue(fontinfo, "AscenderHeight", ACOPTIONAL, &AscenderHeight);
-    GetKeyValue(fontinfo, "AscenderOvershoot", ACOPTIONAL, &AscenderOvershoot);
+    GetKeyValue(fontinfo, "AscenderHeight", OPTIONAL, &AscenderHeight);
+    GetKeyValue(fontinfo, "AscenderOvershoot", OPTIONAL, &AscenderOvershoot);
     GetKeyValue(fontinfo, "BaselineYCoord", !ORDINARYHINTING, &BaselineYCoord);
     GetKeyValue(fontinfo, "BaselineOvershoot", !ORDINARYHINTING,
                 &BaselineOvershoot);
-    GetKeyValue(fontinfo, "Baseline5", ACOPTIONAL, &Baseline5);
-    GetKeyValue(fontinfo, "Baseline5Overshoot", ACOPTIONAL,
-                &Baseline5Overshoot);
-    GetKeyValue(fontinfo, "Baseline6", ACOPTIONAL, &Baseline6);
-    GetKeyValue(fontinfo, "Baseline6Overshoot", ACOPTIONAL,
-                &Baseline6Overshoot);
+    GetKeyValue(fontinfo, "Baseline5", OPTIONAL, &Baseline5);
+    GetKeyValue(fontinfo, "Baseline5Overshoot", OPTIONAL, &Baseline5Overshoot);
+    GetKeyValue(fontinfo, "Baseline6", OPTIONAL, &Baseline6);
+    GetKeyValue(fontinfo, "Baseline6Overshoot", OPTIONAL, &Baseline6Overshoot);
     GetKeyValue(fontinfo, "CapHeight", !ORDINARYHINTING, &CapHeight);
     GetKeyValue(fontinfo, "CapOvershoot", !ORDINARYHINTING, &CapOvershoot);
-    GetKeyValue(fontinfo, "DescenderHeight", ACOPTIONAL, &DescenderHeight);
-    GetKeyValue(fontinfo, "DescenderOvershoot", ACOPTIONAL,
-                &DescenderOvershoot);
-    GetKeyValue(fontinfo, "FigHeight", ACOPTIONAL, &FigHeight);
-    GetKeyValue(fontinfo, "FigOvershoot", ACOPTIONAL, &FigOvershoot);
-    GetKeyValue(fontinfo, "Height5", ACOPTIONAL, &Height5);
-    GetKeyValue(fontinfo, "Height5Overshoot", ACOPTIONAL, &Height5Overshoot);
-    GetKeyValue(fontinfo, "Height6", ACOPTIONAL, &Height6);
-    GetKeyValue(fontinfo, "Height6Overshoot", ACOPTIONAL, &Height6Overshoot);
-    GetKeyValue(fontinfo, "LcHeight", ACOPTIONAL, &LcHeight);
-    GetKeyValue(fontinfo, "LcOvershoot", ACOPTIONAL, &LcOvershoot);
-    GetKeyValue(fontinfo, "OrdinalBaseline", ACOPTIONAL, &OrdinalBaseline);
-    GetKeyValue(fontinfo, "OrdinalOvershoot", ACOPTIONAL, &OrdinalOvershoot);
-    GetKeyValue(fontinfo, "SuperiorBaseline", ACOPTIONAL, &SuperiorBaseline);
-    GetKeyValue(fontinfo, "SuperiorOvershoot", ACOPTIONAL, &SuperiorOvershoot);
+    GetKeyValue(fontinfo, "DescenderHeight", OPTIONAL, &DescenderHeight);
+    GetKeyValue(fontinfo, "DescenderOvershoot", OPTIONAL, &DescenderOvershoot);
+    GetKeyValue(fontinfo, "FigHeight", OPTIONAL, &FigHeight);
+    GetKeyValue(fontinfo, "FigOvershoot", OPTIONAL, &FigOvershoot);
+    GetKeyValue(fontinfo, "Height5", OPTIONAL, &Height5);
+    GetKeyValue(fontinfo, "Height5Overshoot", OPTIONAL, &Height5Overshoot);
+    GetKeyValue(fontinfo, "Height6", OPTIONAL, &Height6);
+    GetKeyValue(fontinfo, "Height6Overshoot", OPTIONAL, &Height6Overshoot);
+    GetKeyValue(fontinfo, "LcHeight", OPTIONAL, &LcHeight);
+    GetKeyValue(fontinfo, "LcOvershoot", OPTIONAL, &LcOvershoot);
+    GetKeyValue(fontinfo, "OrdinalBaseline", OPTIONAL, &OrdinalBaseline);
+    GetKeyValue(fontinfo, "OrdinalOvershoot", OPTIONAL, &OrdinalOvershoot);
+    GetKeyValue(fontinfo, "SuperiorBaseline", OPTIONAL, &SuperiorBaseline);
+    GetKeyValue(fontinfo, "SuperiorOvershoot", OPTIONAL, &SuperiorOvershoot);
 
     gLenBotBands = gLenTopBands = 0;
     if (BaselineYCoord != UNDEFINED && BaselineOvershoot != UNDEFINED) {
