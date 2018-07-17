@@ -293,7 +293,7 @@ PickHVals(PHintVal valList)
             }
             if (seg1->sType == sGHOST) {
                 /*newBst = FindBestValForSeg(seg2, false, valList,
-                 (PHintVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, true);*/
+                 NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, true);*/
                 newBst = seg2->sLnk;
                 if (newBst != NULL && newBst != best &&
                     MembValList(newBst, valList)) {
@@ -302,7 +302,7 @@ PickHVals(PHintVal valList)
                 }
             } else if (seg2->sType == sGHOST) {
                 /*newBst = FindBestValForSeg(seg1, true, valList,
-                 (PHintVal)NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, true); */
+                 NULL, 0, (Fixed *)NIL, 0, (Fixed *)NIL, true); */
                 newBst = seg2->sLnk;
                 if (newBst != NULL && newBst != best &&
                     MembValList(newBst, valList)) {
@@ -406,9 +406,9 @@ FindBestHVals(void)
 {
     SetPruned();
     FindBestValForSegs(topList, false, gValList, NULL, gLenTopBands, gTopBands,
-                       0, (Fixed*)NULL, true);
+                       0, NULL, true);
     FindBestValForSegs(botList, true, gValList, NULL, gLenBotBands, gBotBands,
-                       0, (Fixed*)NULL, true);
+                       0, NULL, true);
     DoPrune();
 }
 
@@ -416,9 +416,9 @@ void
 FindBestVVals(void)
 {
     SetPruned();
-    FindBestValForSegs(leftList, true, gValList, NULL, 0, (Fixed*)NULL,
-                       gNumSerifs, gSerifs, false);
-    FindBestValForSegs(rightList, false, gValList, NULL, 0, (Fixed*)NULL,
-                       gNumSerifs, gSerifs, false);
+    FindBestValForSegs(leftList, true, gValList, NULL, 0, NULL, gNumSerifs,
+                       gSerifs, false);
+    FindBestValForSegs(rightList, false, gValList, NULL, 0, NULL, gNumSerifs,
+                       gSerifs, false);
     DoPrune();
 }

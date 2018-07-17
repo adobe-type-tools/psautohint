@@ -187,8 +187,8 @@ chkDT(Cd c)
                 DEBUG_ROUND(loc);
 
                 if (!forMultiMaster) {
-                    AddHSegment(yflatstartx, yflatendx, loc, e, (PPathElt)NULL,
-                                sCURVE, 13);
+                    AddHSegment(yflatstartx, yflatendx, loc, e, NULL, sCURVE,
+                                13);
                 } else {
                     inflPtFound = true;
                     fltnvalue = -loc;
@@ -219,8 +219,8 @@ chkDT(Cd c)
                 if (!forMultiMaster)
 
                 {
-                    AddVSegment(xflatstarty, xflatendy, loc, e, (PPathElt)NULL,
-                                sCURVE, 13);
+                    AddVSegment(xflatstarty, xflatendy, loc, e, NULL, sCURVE,
+                                13);
                 } else {
                     inflPtFound = true;
                     fltnvalue = loc;
