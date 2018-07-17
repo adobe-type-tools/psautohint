@@ -48,7 +48,7 @@ def test_otf(otf, tmpdir):
                    str(tmpdir / basename(out)) + ".xml"])
 
 
-@pytest.mark.parametrize("cff", glob.glob("%s/*/*/font.cff" % DATA_DIR))
+@pytest.mark.parametrize("cff", glob.glob("%s/dummy/*.cff" % DATA_DIR))
 def test_cff(cff, tmpdir):
     out = str(tmpdir / basename(cff)) + ".out"
     options = Options(cff, out)
@@ -66,7 +66,7 @@ def test_cff(cff, tmpdir):
                    str(tmpdir / basename(out)) + ".xml"])
 
 
-@pytest.mark.parametrize("path", glob.glob("%s/*/*/font.pf[ab]" % DATA_DIR))
+@pytest.mark.parametrize("path", glob.glob("%s/dummy/*.pf[ab]" % DATA_DIR))
 def test_type1(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)

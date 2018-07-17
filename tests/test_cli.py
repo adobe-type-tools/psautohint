@@ -11,9 +11,9 @@ from psautohint.__main__ import main as psautohint
 from . import DATA_DIR
 
 
-UFO_FONTS = glob.glob("%s/*/*/font.ufo" % DATA_DIR)
-OTF_FONTS = glob.glob("%s/*/*/font.otf" % DATA_DIR)
-CFF_FONTS = glob.glob("%s/*/*/font.cff" % DATA_DIR)
+UFO_FONTS = glob.glob("%s/dummy/*.ufo" % DATA_DIR)
+OTF_FONTS = glob.glob("%s/dummy/*.otf" % DATA_DIR)
+CFF_FONTS = glob.glob("%s/dummy/*.cff" % DATA_DIR)
 FONTINFO = glob.glob("%s/*/*/fontinfo" % DATA_DIR)
 FONTS = (UFO_FONTS[0], OTF_FONTS[0], CFF_FONTS[0])
 
@@ -37,7 +37,7 @@ def test_outpath(path, tmpdir):
 
 def test_outpath_multi(tmpdir):
     """Test handling multiple output paths."""
-    base = glob.glob("%s/*/*Masters" % DATA_DIR)[0]
+    base = glob.glob("%s/dummy/mm0" % DATA_DIR)[0]
     paths = sorted(glob.glob(base + "/*.ufo"))
     # the reference font is modified in-place, make a temp copy first
     referenceSrc = py.path.local(paths[0])
@@ -52,7 +52,7 @@ def test_outpath_multi(tmpdir):
 
 def test_outpath_multi_unequal(tmpdir):
     """Test that we exit if output paths don't match number of input paths."""
-    base = glob.glob("%s/*/*Masters" % DATA_DIR)[0]
+    base = glob.glob("%s/dummy/mm0" % DATA_DIR)[0]
     paths = sorted(glob.glob(base + "/*.ufo"))
     # the reference font is modified in-place, make a temp copy first
     referenceSrc = py.path.local(paths[0])
@@ -66,7 +66,7 @@ def test_outpath_multi_unequal(tmpdir):
         psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
-@pytest.mark.parametrize("path", glob.glob("%s/*/*/font.pf[ab]" % DATA_DIR))
+@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.pf[ab]" % DATA_DIR))
 def test_type1(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
