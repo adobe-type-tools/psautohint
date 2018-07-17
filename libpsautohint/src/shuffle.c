@@ -101,8 +101,6 @@ MarkLinks(PHintVal vL, bool hFlg)
     if (links == NULL)
         return;
     for (; vL != NULL; vL = vL->vNxt) {
-        if (vL == NULL)
-            continue;
         seg = vL->vSeg1;
         if (seg == NULL)
             continue;
