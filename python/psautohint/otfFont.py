@@ -655,21 +655,7 @@ def optimizeT2Program(t2List):
                         noFlex = False
 
             if noFlex:
-                if 0:
-                    dx = dx1 + dx2 + dx3 + dx4 + dx5
-                    dy = dy1 + dy2 + dy3 + dy4 + dy5
-
-                    if ((dy + dy6) == 0) or ((dx + dx6) == 0):
-                        if abs(dx) > abs(dy):
-                            lastArg = dx6
-                        else:
-                            lastArg = dy6
-
-                        newT2List.append([args[:10] + [lastArg], "flex1"])
-                    else:
-                        newT2List.append([args, "flex"])
-                else:
-                    newT2List.append([args, "flex"])
+                newT2List.append([args, "flex"])
 
             arglist = []
             pendingOp = sequenceOp = kNoOp
