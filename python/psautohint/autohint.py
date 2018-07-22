@@ -82,21 +82,10 @@ class ACHintError(Exception):
 
 
 def getGlyphID(glyphTag, fontGlyphList):
-    # FIXME: This is unnecessarily convoluted
-    glyphID = None
-    try:
-        glyphID = int(glyphTag)
-        fontGlyphList[glyphID]
-    except IndexError:
-        pass
-    except ValueError:
-        try:
-            glyphID = fontGlyphList.index(glyphTag)
-        except IndexError:
-            pass
-        except ValueError:
-            pass
-    return glyphID
+    if glyphTag in fontGlyphList:
+        return fontGlyphList.index(glyphTag)
+
+    return None
 
 
 def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
