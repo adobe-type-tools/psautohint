@@ -81,6 +81,13 @@ def test_glyph_list(tmpdir):
     psautohint([path, '-o', out, '-g', 'a,b,c'])
 
 
+def test_glyph_range(tmpdir):
+    path = "%s/dummy/font.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+
+    psautohint([path, '-o', out, '-g', 'a-z'])
+
+
 def test_filter_glyph_list(tmpdir):
     """Test that we don't fail if some glyphs in the list do not exist."""
     path = "%s/dummy/font.ufo" % DATA_DIR
