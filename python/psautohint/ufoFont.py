@@ -385,7 +385,7 @@ class UFOFontData:
         self.processedLayerGlyphMap = {}
         self.newGlyphMap = {}
         self.glyphList = []
-        self.fontInfo = None
+        self._fontInfo = None
         # if False, will skip reading has map
         # and testing to see if glyph can be skipped.
         self.useHashMap = useHashMap
@@ -417,22 +417,13 @@ class UFOFontData:
         # if true, do NOT round x,y values when processing.
         self.allowDecimalCoords = allow_decimal_coords
 
+        self.loadGlyphMap()
+
     def getUnitsPerEm(self):
-        unitsPerEm = "1000"
-        if self.fontInfo is None:
-            self.loadFontInfo()
-        if self.fontInfo:
-            unitsPerEm = int(self.fontInfo["unitsPerEm"])
-        unitsPerEm = int(unitsPerEm)
-        return unitsPerEm
+        return int(self.fontInfo.get("unitsPerEm", 1000))
 
     def getPSName(self):
-        psName = "PSName-Undefined"
-        if self.fontInfo is None:
-            self.loadFontInfo()
-        if self.fontInfo:
-            psName = self.fontInfo.get("postscriptFontName", psName)
-        return psName
+        return self.fontInfo.get("postscriptFontName", "PSName-Undefined")
 
     @staticmethod
     def isCID():
@@ -473,24 +464,13 @@ class UFOFontData:
         self.updateLayerGlyphContents(glyphContentsFilePath, self.newGlyphMap)
 
     def getWriteGlyphPath(self, glyphName):
-        if len(self.glyphMap) == 0:
-            self.loadGlyphMap()
-
         glyphFileName = self.glyphMap[glyphName]
-        if not self.writeToDefaultLayer:
-            if self.processedLayerGlyphMap:
-                try:
-                    glyphFileName = self.processedLayerGlyphMap[glyphName]
-                except KeyError:
-                    pass
+        if not self.writeToDefaultLayer and \
+                glyphName in self.processedLayerGlyphMap:
+            glyphFileName = self.processedLayerGlyphMap[glyphName]
 
         glifFilePath = os.path.join(self.glyphWriteDir, glyphFileName)
         return glifFilePath
-
-    def getGlyphMap(self):
-        if len(self.glyphMap) == 0:
-            self.loadGlyphMap()
-        return self.glyphMap
 
     def readHashMap(self):
         hashPath = os.path.join(self.parentPath, "data", kAdobHashMapName)
@@ -536,32 +516,17 @@ class UFOFontData:
         with open(hashPath, "wb") as fp:
             fp.write(tobytes(data, encoding="utf-8"))
 
-    def getCurGlyphPath(self, glyphName):
-        if self.curSrcDir is None:
-            self.curSrcDir = self.glyphDefaultDir
-
-        # Get the glyph file name.
-        if len(self.glyphMap) == 0:
-            self.loadGlyphMap()
-        glyphFileName = self.glyphMap[glyphName]
-        path = os.path.join(self.curSrcDir, glyphFileName)
-        return path
-
     def getGlyphSrcPath(self, glyphName):
-        if len(self.glyphMap) == 0:
-            self.loadGlyphMap()
         glyphFileName = self.glyphMap[glyphName]
 
         # Try for processed layer first.
-        if self.useProcessedLayer and self.processedLayerGlyphMap:
-            try:
-                glyphFileName = self.processedLayerGlyphMap[glyphName]
-                self.curSrcDir = self.glyphLayerDir
-                glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
-                if os.path.exists(glyphPath):
-                    return glyphPath
-            except KeyError:
-                pass
+        if self.useProcessedLayer and self.processedLayerGlyphMap and \
+                glyphName in self.processedLayerGlyphMap:
+            glyphFileName = self.processedLayerGlyphMap[glyphName]
+            self.curSrcDir = self.glyphLayerDir
+            glyphPath = os.path.join(self.curSrcDir, glyphFileName)
+            if os.path.exists(glyphPath):
+                return glyphPath
 
         self.curSrcDir = self.glyphDefaultDir
         glyphPath = os.path.join(self.curSrcDir, glyphFileName)
@@ -569,24 +534,17 @@ class UFOFontData:
         return glyphPath
 
     def getGlyphDefaultPath(self, glyphName):
-        if len(self.glyphMap) == 0:
-            self.loadGlyphMap()
         glyphFileName = self.glyphMap[glyphName]
         glyphPath = os.path.join(self.glyphDefaultDir, glyphFileName)
         return glyphPath
 
     def getGlyphProcessedPath(self, glyphName):
-        if len(self.glyphMap) == 0:
-            self.loadGlyphMap()
-        if not self.processedLayerGlyphMap:
-            return None
-
-        try:
+        if self.processedLayerGlyphMap and \
+                glyphName in self.processedLayerGlyphMap:
             glyphFileName = self.processedLayerGlyphMap[glyphName]
-            glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
-        except KeyError:
-            glyphPath = None
-        return glyphPath
+            return os.path.join(self.glyphLayerDir, glyphFileName)
+
+        return None
 
     def updateHashEntry(self, glyphName, changed):
         # srcHarsh has already been set: we are fixing the history list.
@@ -605,12 +563,9 @@ class UFOFontData:
         # then reset the history.
         if (not self.useProcessedLayer) and changed:
             self.hashMap[glyphName] = [srcHash, [self.programName]]
-            return
         else:
-            try:
-                historyList.index(self.programName)
-            except ValueError:
-                # If the program is not in the history list, add it.
+            # If the program is not in the history list, add it.
+            if self.programName not in historyList:
                 historyList.append(self.programName)
 
     def checkSkipGlyph(self, glyphName, newSrcHash, doAll):
@@ -705,8 +660,6 @@ class UFOFontData:
         # has been edited since this program was last run.
         # If the program name is in the history list, and the srcHash
         # matches the default glyph layer data, we can skip.
-        if len(self.glyphMap) == 0:
-            self.loadGlyphMap()
         glyphFileName = self.glyphMap[glyphName]
         width, glifXML, outlineXML = self.getGlyphXML(
             self.glyphDefaultDir, glyphFileName)
@@ -723,10 +676,8 @@ class UFOFontData:
         # If self.useProcessedLayer and there is a glyph
         # in the processed layer, get the outline from that.
         if self.useProcessedLayer and self.processedLayerGlyphMap:
-            try:
+            if glyphName in self.processedLayerGlyphMap:
                 glyphFileName = self.processedLayerGlyphMap[glyphName]
-            except KeyError:
-                pass
             glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
             if os.path.exists(glyphPath):
                 width, glifXML, outlineXML = self.getGlyphXML(
@@ -738,8 +689,6 @@ class UFOFontData:
         return width, outlineXML, skip
 
     def getGlyphList(self):
-        if len(self.glyphMap) == 0:
-            self.loadGlyphMap()
         return self.glyphList
 
     def loadGlyphMap(self):
@@ -769,10 +718,7 @@ class UFOFontData:
                     self.orderMap[glyphName] = orderIndex
                     orderIndex += 1
                 orderList.append(entry)
-            orderList.sort()
-            self.glyphList = []
-            for entry in orderList:
-                self.glyphList.append(entry[1])
+            self.glyphList = [entry[1] for entry in sorted(orderList)]
         else:
             self.orderMap = {}
             numGlyphs = len(self.glyphList)
@@ -788,11 +734,15 @@ class UFOFontData:
             self.processedLayerGlyphMap, self.processedLayerGlyphList = \
                 parsePList(contentsPath)
 
-    def loadFontInfo(self):
-        fontInfoPath = os.path.join(self.parentPath, "fontinfo.plist")
-        if not os.path.exists(fontInfoPath):
-            return
-        self.fontInfo, _ = parsePList(fontInfoPath)
+    @property
+    def fontInfo(self):
+        if self._fontInfo is None:
+            fontInfoPath = os.path.join(self.parentPath, "fontinfo.plist")
+            if os.path.exists(fontInfoPath):
+                self._fontInfo, _ = parsePList(fontInfoPath)
+            else:
+                self._fontInfo = {}
+        return self._fontInfo
 
     @staticmethod
     def updateLayerContents(contentsFilePath):
@@ -832,10 +782,10 @@ class UFOFontData:
         for glyphName in newGlyphData.keys():
             # Try for processed layer first.
             if self.useProcessedLayer and self.processedLayerGlyphMap:
-                try:
+                if glyphName in self.processedLayerGlyphMap:
                     contentsDict[glyphName] = \
                         self.processedLayerGlyphMap[glyphName]
-                except KeyError:
+                else:
                     contentsDict[glyphName] = self.glyphMap[glyphName]
             else:
                 contentsDict[glyphName] = self.glyphMap[glyphName]
@@ -845,9 +795,6 @@ class UFOFontData:
                     vCounterGlyphs, hCounterGlyphs, fdIndex=0):
         if self.fontDict is not None:
             return self.fontDict
-
-        if self.fontInfo is None:
-            self.loadFontInfo()
 
         fdDict = fdTools.FDDict()
         # should be 1 if the glyphs are ideographic, else 0.
@@ -1163,16 +1110,6 @@ class UFOFontData:
             self.writeHashMap()
             self.hashMapChanged = False
         return
-
-    def clearHashMap(self):
-        self.hashMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
-        hashDir = os.path.join(self.parentPath, "data")
-        if not os.path.exists(hashDir):
-            return
-
-        hashPath = os.path.join(hashDir, kAdobHashMapName)
-        if os.path.exists(hashPath):
-            os.remove(hashPath)
 
     def setWriteToDefault(self):
         self.useProcessedLayer = False
