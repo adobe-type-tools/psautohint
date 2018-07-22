@@ -81,3 +81,12 @@ def test_unsupported_format(tmpdir):
 
     with pytest.raises(ACFontError):
         hintFiles(options)
+
+
+def test_missing_cff_table(tmpdir):
+    path = "%s/dummy/nocff.otf" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    with pytest.raises(ACFontError):
+        hintFiles(options)
