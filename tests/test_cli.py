@@ -11,11 +11,9 @@ from psautohint.__main__ import main as psautohint
 from . import DATA_DIR
 
 
-UFO_FONTS = glob.glob("%s/dummy/*.ufo" % DATA_DIR)
-OTF_FONTS = glob.glob("%s/dummy/*.otf" % DATA_DIR)
-CFF_FONTS = glob.glob("%s/dummy/*.cff" % DATA_DIR)
+# font.otf, font.cff, font.ufo
+FONTS = glob.glob("%s/dummy/font.[ocu][tf][fo]" % DATA_DIR)
 FONTINFO = glob.glob("%s/*/*/fontinfo" % DATA_DIR)
-FONTS = (UFO_FONTS[0], OTF_FONTS[0], CFF_FONTS[0])
 
 
 @pytest.mark.parametrize("path", FONTS)
@@ -144,3 +142,11 @@ def test_write_to_default_layer(tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
     psautohint([path, '-o', out, '-w'])
+
+
+def test_missing_cff_table(tmpdir):
+    path = "%s/dummy/nocff.otf" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+
+    with pytest.raises(ACFontError):
+        psautohint([path, '-o', out])
