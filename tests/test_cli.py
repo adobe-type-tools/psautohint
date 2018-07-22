@@ -164,3 +164,8 @@ def test_missing_cff_table(tmpdir):
 
     with pytest.raises(ACFontError):
         psautohint([path, '-o', out])
+
+
+def test_report_only(tmpdir):
+    path = "%s/dummy/font.ufo" % DATA_DIR
+    psautohint([path, '--report-only'])
