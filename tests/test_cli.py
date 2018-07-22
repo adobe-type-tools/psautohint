@@ -74,24 +74,24 @@ def test_type1(path, tmpdir):
         psautohint([path, '-o', out])
 
 
-@pytest.mark.parametrize("path", FONTS)
-def test_glyph_list(path, tmpdir):
+def test_glyph_list(tmpdir):
+    path = "%s/dummy/font.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
     psautohint([path, '-o', out, '-g', 'a,b,c'])
 
 
-@pytest.mark.parametrize("path", FONTS)
-def test_filter_glyph_list(path, tmpdir):
+def test_filter_glyph_list(tmpdir):
     """Test that we don't fail if some glyphs in the list do not exist."""
+    path = "%s/dummy/font.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
     psautohint([path, '-o', out, '-g', 'FOO,BAR,a'])
 
 
-@pytest.mark.parametrize("path", FONTS)
-def test_missing_glyph_list(path, tmpdir):
+def test_missing_glyph_list(tmpdir):
     """Test that we raise if all glyph in the list do not exist."""
+    path = "%s/dummy/font.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
     with pytest.raises(ACFontError):
