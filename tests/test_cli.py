@@ -102,3 +102,10 @@ def test_missing_glyph_list(path, tmpdir):
 def test_unsupported_format(path, tmpdir):
     with pytest.raises(SystemExit):
         psautohint([path])
+
+
+def test_write_to_default_layer(tmpdir):
+    path = "%s/dummy/defaultlayer.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+
+    psautohint([path, '-o', out, '-w'])
