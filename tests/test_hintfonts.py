@@ -7,7 +7,7 @@ import pytest
 from fontTools.misc.xmlWriter import XMLWriter
 from fontTools.cffLib import CFFFontSet
 from fontTools.ttLib import TTFont
-from psautohint.autohint import ACOptions, hintFiles
+from psautohint.autohint import ACFontError, ACOptions, hintFiles
 
 from .differ import main as differ
 from . import DATA_DIR
@@ -71,4 +71,13 @@ def test_type1(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
     with pytest.raises(NotImplementedError):
+        hintFiles(options)
+
+
+def test_unsupported_format(tmpdir):
+    path = "%s/dummy/fontinfo" % DATA_DIR
+    out = str(tmpdir / basename(path))
+    options = Options(path, out)
+
+    with pytest.raises(ACFontError):
         hintFiles(options)
