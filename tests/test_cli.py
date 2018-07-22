@@ -114,6 +114,20 @@ def test_cid_prefixed_glyph_range(tmpdir):
     psautohint([path, '-o', out, '-g', 'cid0-cid10'])
 
 
+def test_exclude_glyph_list(tmpdir):
+    path = "%s/dummy/font.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+
+    psautohint([path, '-o', out, '-x', 'a,b,c'])
+
+
+def test_exclude_glyph_range(tmpdir):
+    path = "%s/dummy/font.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+
+    psautohint([path, '-o', out, '-x', 'a-z'])
+
+
 def test_filter_glyph_list(tmpdir):
     """Test that we don't fail if some glyphs in the list do not exist."""
     path = "%s/dummy/font.ufo" % DATA_DIR
