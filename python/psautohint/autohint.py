@@ -307,7 +307,7 @@ def hintFile(options, path, outpath, reference_master):
                       "not in font: %s", missingList)
 
     # Build alignment zone string
-    if (options.printDefaultFDDict):
+    if options.printDefaultFDDict:
         print("Showing default FDDict Values:")
         fdDict = fontData.getFontInfo(psName, path,
                                       options.allow_no_blues,
@@ -393,7 +393,7 @@ def hintFile(options, path, outpath, reference_master):
                                               fdIndex)
                 fontInfo = fdDict.getFontInfo()
         else:
-            if (fdGlyphDict is not None):
+            if fdGlyphDict is not None:
                 try:
                     fdIndex = fdGlyphDict[name][0]
                 except KeyError:
