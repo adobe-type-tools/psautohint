@@ -259,16 +259,6 @@ def openOpenTypeFile(path, outFilePath, font_format, options):
     return fontData
 
 
-def cmpFDDictEntries(entry1, entry2):
-    # entry = [glyphName, [fdIndex, glyphListIndex] ]
-    if entry1[1][1] > entry2[1][1]:
-        return 1
-    elif entry1[1][1] < entry2[1][1]:
-        return -1
-    else:
-        return 0
-
-
 def hintFiles(options):
     if options.reference_font:
         hintFile(options, options.reference_font, None, reference_master=True)
@@ -328,14 +318,13 @@ def hintFile(options, path, outpath, reference_master):
     if options.printFDDictList:
         # Print the user defined FontDicts, and exit.
         if fdGlyphDict:
-            print("Showing user-defined FontDict Values:")
-            for fi in enumerate(fontDictList):
-                fontDict = fontDictList[fi]
+            print("Showing user-defined FontDict Values:\n")
+            for fi, fontDict in enumerate(fontDictList):
                 print(fontDict.DictName)
                 printFontInfo(str(fontDict))
                 gnameList = []
-                itemList = fdGlyphDict.items()
-                itemList.sort(cmpFDDictEntries)
+                # item = [glyphName, [fdIndex, glyphListIndex]]
+                itemList = sorted(fdGlyphDict.items(), key=lambda x: x[1][1])
                 for gName, entry in itemList:
                     if entry[0] == fi:
                         gnameList.append(gName)
@@ -344,7 +333,7 @@ def hintFile(options, path, outpath, reference_master):
                     gTxt = " ".join(gnameList)
                 else:
                     gTxt = "None"
-                print(gTxt)
+                print(gTxt + "\n")
         else:
             print("There are no user-defined FontDict Values.")
         fontData.close()
