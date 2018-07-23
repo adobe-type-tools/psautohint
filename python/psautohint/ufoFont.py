@@ -589,8 +589,8 @@ class UFOFontData:
             # Glyph is as yet untouched by any program.
             pass
 
-        if (srcHash == newSrcHash):
-            if (programHistoryIndex >= 0):
+        if srcHash == newSrcHash:
+            if programHistoryIndex >= 0:
                 # The glyph has already been processed by this program,
                 # and there have been no changes since.
                 skip = True and (not doAll)
@@ -602,7 +602,7 @@ class UFOFontData:
                     if glyphPath and os.path.exists(glyphPath):
                         os.remove(glyphPath)
                 else:
-                    if (programHistoryIndex < 0):
+                    if programHistoryIndex < 0:
                         historyList.append(self.programName)
         else:
             if self.useProcessedLayer:  # case for autohint
@@ -749,9 +749,9 @@ class UFOFontData:
             seenPublicDefault = False
             seenProcessedGlyph = False
             for _, layerPath in contentsList:
-                if (layerPath == kProcessedGlyphsLayer):
+                if layerPath == kProcessedGlyphsLayer:
                     seenProcessedGlyph = True
-                if (layerPath == kDefaultGlyphsLayer):
+                if layerPath == kDefaultGlyphsLayer:
                     seenPublicDefault = True
             update = False
             if not seenPublicDefault:
@@ -1375,11 +1375,11 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                 if transform is not None:
                     x, y = transform.apply(x, y)
 
-                if (not allowDecimals):
+                if not allowDecimals:
                     x = int(round(x))
                     y = int(round(y))
 
-                if (allowDecimals):
+                if allowDecimals:
                     op = "%.3f %.3f mt" % (x, y)
                 else:
                     op = "%s %s mt" % (x, y)
@@ -1408,13 +1408,13 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                     if transform is not None:
                         x, y = transform.apply(x, y)
 
-                    if (not allowDecimals):
+                    if not allowDecimals:
                         x = int(round(x))
                         y = int(round(y))
 
                     if lastType == "line":
 
-                        if (allowDecimals):
+                        if allowDecimals:
                             op = "%.3f %.3f mt" % (x, y)
                         else:
                             op = "%s %s mt" % (x, y)
@@ -1423,7 +1423,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                         outlineItem = outlineItem[:-1]
                     elif lastType == "curve":
 
-                        if (allowDecimals):
+                        if allowDecimals:
                             op = "%.3f %.3f mt" % (x, y)
                         else:
                             op = "%s %s mt" % (x, y)
@@ -1446,7 +1446,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                 if transform is not None:
                     x, y = transform.apply(x, y)
 
-                if (not allowDecimals):
+                if not allowDecimals:
                     x = int(round(x))
                     y = int(round(y))
 
@@ -1459,14 +1459,14 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                     argStack.append(x)
                     argStack.append(y)
                 elif point_type == "move":
-                    if (allowDecimals):
+                    if allowDecimals:
                         op = "%.3f %.3f mt" % (x, y)
                     else:
                         op = "%s %s mt" % (x, y)
                     bezStringList.append(op)
                     argStack = []
                 elif point_type == "line":
-                    if (allowDecimals):
+                    if allowDecimals:
                         op = "%.3f %.3f dt" % (x, y)
                     else:
                         op = "%s %s dt" % (x, y)
@@ -1477,7 +1477,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                         raise UFOParseError(
                             "Argument stack error seen for curve point '%s'." %
                             xmlToString(contourItem))
-                    if (allowDecimals):
+                    if allowDecimals:
                         op = "%.3f %.3f %.3f %.3f %.3f %.3f ct" % \
                              (argStack[0], argStack[1], argStack[2],
                               argStack[3], x, y)
@@ -1802,7 +1802,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 i += 1
             # attach the point name to the first point of the first curve.
             outlineItem[-6].set(kPointName, flexPointName)
-            if (newHintMaskName is not None):
+            if newHintMaskName is not None:
                 # We have a hint mask that we want to attach to the first
                 # point of the flex op. However, there is already a flex
                 # name in that attribute. What we do is set the flex point
@@ -1846,7 +1846,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 i += 1
             # attach the point name to the first point of the first curve.
             outlineItem[-6].set(kPointName, flexPointName)
-            if (newHintMaskName is not None):
+            if newHintMaskName is not None:
                 # We have a hint mask that we want to attach to the first
                 # point of the flex op. However, there is already a flex
                 # name in that attribute. What we do is set the flex point
@@ -1908,7 +1908,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                     outlineItem = XMLElement('contour')
                     newOutline.append(outlineItem)
 
-                if (newHintMaskName is not None):
+                if newHintMaskName is not None:
                     newPoint.set(kPointName, newHintMaskName)
                     newHintMaskName = None
                 outlineItem.append(newPoint)
@@ -1991,7 +1991,7 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                             "point", {"x": "%s" % showX, "y": "%s" % showY,
                                       "type": "%s" % opName})
                         outlineItem.append(newPoint)
-                if (newHintMaskName is not None):
+                if newHintMaskName is not None:
                     # attach the pointName to the first point of the curve.
                     outlineItem[-3].set(kPointName, newHintMaskName)
                     newHintMaskName = None
@@ -2120,7 +2120,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
     # glyph.
     ufoFontData.updateHashEntry(glyphName, changed=True)
     # Add the stem hints.
-    if (hintInfoDict is not None):
+    if hintInfoDict is not None:
         widthXML = glifXML.find("advance")
         if widthXML is not None:
             width = int(widthXML.get("width"))

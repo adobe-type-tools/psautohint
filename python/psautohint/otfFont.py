@@ -73,7 +73,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         log.debug("moveto %s, curpos %s", point, self.currentPoint)
         x = point[0]
         y = point[1]
-        if (not self.allowDecimals):
+        if not self.allowDecimals:
             x = int(round(x))
             y = int(round(y))
             self.bezProgram.append("%s %s mt\n" % (x, y))
@@ -92,7 +92,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
             self.rMoveTo((0, 0))
         x = point[0]
         y = point[1]
-        if (not self.allowDecimals):
+        if not self.allowDecimals:
             x = int(round(x))
             y = int(round(y))
             self.bezProgram.append("%s %s dt\n" % (x, y))
@@ -111,7 +111,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
                   self.currentPoint)
         if not self.sawMoveTo:
             self.rMoveTo((0, 0))
-        if (not self.allowDecimals):
+        if not self.allowDecimals:
             for pt in [pt1, pt2, pt3]:
                 pt[0] = int(round(pt[0]))
                 pt[1] = int(round(pt[1]))
@@ -639,7 +639,7 @@ def optimizeT2Program(t2List):
                 newT2List.append([arglist, pendingOp])
                 arglist = []
             noFlex = True
-            if (dy3 == 0 == dy4):
+            if dy3 == 0 == dy4:
                 if (dy1 == dy6 == 0) and (dy2 == -dy5):
                     # the device pixel threshold is always 50,
                     # when coming back from psautohint.
@@ -687,12 +687,12 @@ def checkStem3ArgsOverlap(argList, hintList):
         x1 = x0 + x1
         for y0, y1 in hintList:
             y1 = y0 + y1
-            if (x0 == y0):
-                if (x1 == y1):
+            if x0 == y0:
+                if x1 == y1:
                     status = kHintArgsMatch
                 else:
                     return kHintArgsOverLap
-            elif (x1 == y1):
+            elif x1 == y1:
                 return kHintArgsOverLap
             else:
                 if (x0 > y0) and (x0 < y1):
@@ -995,7 +995,7 @@ class CFFFontData:
                  font_format):
         self.ttFont = ttFont
         self.inputPath = inputPath
-        if (outFilePath is None):
+        if outFilePath is None:
             outFilePath = inputPath
         self.outFilePath = outFilePath
         self.font_format = font_format

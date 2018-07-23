@@ -125,12 +125,12 @@ class FDDict:
         return " ".join(fiList)
 
     def buildBlueLists(self):
-        if (self.BaselineOvershoot is None):
+        if self.BaselineOvershoot is None:
             raise FontInfoParseError(
                 "FDDict definition %s is missing the BaselineYCoord/"
                 "BaselineOvershoot values. These are required." %
                 self.DictName)
-        elif (int(self.BaselineOvershoot) > 0):
+        elif int(self.BaselineOvershoot) > 0:
             raise FontInfoParseError(
                 "The BaselineYCoord/BaselineOvershoot in FDDict definition %s "
                 "must be a bottom zone - the BaselineOvershoot must be "
@@ -181,7 +181,7 @@ class FDDict:
                             bottomPos = zonePos
                             topPos = zonePos + width
                             isBottomZone = 0
-                            if (i == 1):
+                            if i == 1:
                                 raise FontInfoParseError(
                                     "FontDict %s. Zone %s is a bottom zone, "
                                     "and so the width (%s) must be negative." %
@@ -348,7 +348,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
                 if fdDict.DominantV is None:
                     log.warning("The FDDict '%s' in fontinfo has no "
                                 "DominantV value", dictName)
-                if (fdDict.BlueFuzz is None):
+                if fdDict.BlueFuzz is None:
                     fdDict.BlueFuzz = blueFuzz
                 fdDict.buildBlueLists()
                 if fdDict.FontName is None:
