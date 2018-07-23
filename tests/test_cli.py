@@ -151,13 +151,6 @@ def test_unsupported_format(path, tmpdir):
         psautohint([path])
 
 
-def test_write_to_default_layer(tmpdir):
-    path = "%s/dummy/defaultlayer.ufo" % DATA_DIR
-    out = str(tmpdir / basename(path)) + ".out"
-
-    psautohint([path, '-o', out, '-w'])
-
-
 def test_missing_cff_table(tmpdir):
     path = "%s/dummy/nocff.otf" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
@@ -166,6 +159,51 @@ def test_missing_cff_table(tmpdir):
         psautohint([path, '-o', out])
 
 
-def test_report_only(tmpdir):
-    path = "%s/dummy/font.ufo" % DATA_DIR
-    psautohint([path, '--report-only'])
+@pytest.mark.parametrize("option,argument", [
+    ("--exclude-glyphs-file", "glyphs.txt"),
+    ("--fontinfo-file", "fontinfo"),
+    ("--glyphs-file", "glyphs.txt"),
+])
+@pytest.mark.parametrize("path", ["font.ufo", "font.otf"])
+def test_option(path, option, argument, tmpdir):
+    path = "%s/dummy/%s" % (DATA_DIR, path)
+    out = str(tmpdir / basename(path)) + ".out"
+
+    argument = "%s/dummy/%s" % (DATA_DIR, argument)
+
+    psautohint([path, '-o', out, option, argument])
+
+
+@pytest.mark.parametrize("option", [
+    "--all",
+    "--allow-changes",
+    "--decimal",
+    "--no-flex",
+    "--no-hint-sub",
+    "--no-zones-stems",
+    "--print-dflt-fddict",
+    "--print-list-fddict",
+    "--report-only",
+    "--verbose",
+    "--write-to-default-layer",
+    "-vv",
+])
+@pytest.mark.parametrize("path", ["font.ufo", "font.otf"])
+def test_argumentless_option(path, option, tmpdir):
+    path = "%s/dummy/%s" % (DATA_DIR, path)
+    out = str(tmpdir / basename(path)) + ".out"
+
+    psautohint([path, '-o', out, option])
+
+
+@pytest.mark.parametrize("option", [
+    "--doc-fddict",
+    "--help",
+    "--info",
+    "--version",
+])
+def test_doc_option(option, tmpdir):
+    with pytest.raises(SystemExit) as e:
+        psautohint([option])
+    assert e.type == SystemExit
+    assert e.value.code == 0
