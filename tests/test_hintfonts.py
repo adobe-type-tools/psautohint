@@ -66,7 +66,7 @@ def test_cff(cff, tmpdir):
                    str(tmpdir / basename(out)) + ".xml"])
 
 
-@pytest.mark.parametrize("path", glob.glob("%s/dummy/*.pf[ab]" % DATA_DIR))
+@pytest.mark.parametrize("path", glob.glob("%s/dummy/*.p*" % DATA_DIR))
 def test_type1(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
