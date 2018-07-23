@@ -551,11 +551,7 @@ class UFOFontData:
         if not self.useHashMap:
             return
         # Get hash entry for glyph
-        try:
-            hashEntry = self.hashMap[glyphName]
-            srcHash, historyList = hashEntry
-        except KeyError:
-            hashEntry = None
+        srcHash, historyList = self.hashMap[glyphName]
 
         self.hashMapChanged = True
         # If the program always reads data from the default layer,
