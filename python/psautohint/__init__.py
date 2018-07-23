@@ -36,6 +36,10 @@ def get_font_format(font_file_path):
                     f.seek(0)
                     if f.read(len(fullhead)) == fullhead:
                         return 'PFA'
+                for fullhead in (b'%!PS-Adobe-3.0 Resource-CIDFont', ):
+                    f.seek(0)
+                    if f.read(len(fullhead)) == fullhead:
+                        return 'PFC'
         return None
     else:
         if _font_is_ufo(font_file_path):
