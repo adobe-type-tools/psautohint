@@ -145,53 +145,30 @@ class T2ToBezExtractor(T2OutlineExtractor):
             self.bezProgram.append("cp\n")
         self.bezProgram.append("ed\n")
 
-    def updateHints(self, args, hintList, bezCommand, writeHints=True):
+    def updateHints(self, args, hintList, bezCommand):
         self.countHints(args)
 
         # first hint value is absolute hint coordinate, second is hint width
         if self.removeHints:
-            writeHints = False
-
-        if not writeHints:
             return
 
         lastval = args[0]
-        if isinstance(lastval, int):
-            lastval = float(lastval) / 0x10000
-            arg = "%s 100 div " % lastval
-        else:
-            arg = str(lastval)
+        arg = str(lastval)
         hintList.append(arg)
-        self.bezProgram.append(arg)
+        self.bezProgram.append(arg + " ")
 
         for i in range(len(args))[1:]:
             val = args[i]
-            if isinstance(val, int):
-                val = float(val) / 0x10000
-            newVal = lastval + val
-            lastval = newVal
+            lastval += val
 
             if i % 2:
-                if isinstance(val, float):
-                    if int(val) != val:
-                        arg = "%d 100 div " % (val * 100)
-                    else:
-                        arg = str(int(val))
-                else:
-                    arg = str(val)
+                arg = str(val)
                 hintList.append(arg)
-                self.bezProgram.append(arg)
-                self.bezProgram.append(bezCommand + "\n")
+                self.bezProgram.append("%s %s\n" % (arg, bezCommand))
             else:
-                if isinstance(newVal, float):
-                    if int(newVal) != newVal:
-                        arg = "%d 100 div " % (newVal * 100)
-                    else:
-                        arg = str(int(newVal))
-                else:
-                    arg = str(newVal)
+                arg = str(lastval)
                 hintList.append(arg)
-                self.bezProgram.append(arg)
+                self.bezProgram.append(arg + " ")
 
     def op_hstem(self, index):
         args = self.popallWidth()
