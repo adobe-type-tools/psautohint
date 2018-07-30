@@ -1,0 +1,8 @@
+% square
+sc
+560 500 mt
+560 0 dt
+60 0 dt
+60 500 dt
+cp
+ed
