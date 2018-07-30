@@ -103,7 +103,7 @@ def test_bez(unhinted, hinted):
     bez_info = get_font_info(bez_font, unhinted_base + ".bez")
     otf_info = get_font_info(otf_font, unhinted_base + ".otf")
     ufo_info = get_font_info(ufo_font, unhinted_base + ".ufo")
-    assert otf_info == bez_info #== ufo_info
+    assert otf_info == bez_info == ufo_info
 
     names = sorted(otf_font.getGlyphList())
     assert all(sorted(f.getGlyphList()) == names for f in [bez_font,

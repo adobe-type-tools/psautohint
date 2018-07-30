@@ -6,7 +6,6 @@ CapOvershoot 0
 DominantH [10]
 DominantV [10]
 FlexOK true
-FontMatrix [0.001, 0, 0, 0.001, 0, 0]
 FontName BasicShapes-Regular
 LanguageGroup 0
 OrigEmSqUnits 1000

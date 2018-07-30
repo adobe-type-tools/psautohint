@@ -97,6 +97,10 @@ kFDDictKeys = (kOtherFDDictKeys +
                kBlueValueKeys +
                kOtherBlueValueKeys +
                kRunTimeFDDictKeys)
+kFontInfoKeys = (kOtherFDDictKeys +
+                 kBlueValueKeys +
+                 kOtherBlueValueKeys +
+                 ["StemSnapH", "StemSnapV"])
 
 
 class FontInfoParseError(ValueError):
@@ -114,7 +118,7 @@ class FDDict:
         keys = dir(self)
         fiList = []
         for key in keys:
-            if key.startswith("_") or (key in kRunTimeFDDictKeys):
+            if key not in kFontInfoKeys:
                 continue
             value = getattr(self, key)
             if isinstance(value, types.MethodType):
