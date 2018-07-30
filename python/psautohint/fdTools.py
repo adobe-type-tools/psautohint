@@ -122,7 +122,7 @@ class FDDict:
 
             if value is not None:
                 fiList.append("%s %s" % (key, value))
-        return " ".join(fiList)
+        return "\n".join(fiList)
 
     def buildBlueLists(self):
         if self.BaselineOvershoot is None:
