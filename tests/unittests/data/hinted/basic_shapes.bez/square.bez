@@ -1,0 +1,10 @@
+% square
+0 500 rb
+60 500 ry
+sc
+560 500 mt
+560 0 dt
+60 0 dt
+60 500 dt
+cp
+ed

@@ -1,0 +1,9 @@
+% triangle
+0 500 rb
+60 500 ry
+sc
+310 500 mt
+560 0 dt
+60 0 dt
+cp
+ed

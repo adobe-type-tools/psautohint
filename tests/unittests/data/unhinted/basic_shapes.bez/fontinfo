@@ -1,0 +1,12 @@
+BaselineOvershoot -20
+BaselineYCoord 0
+BlueFuzz 1
+CapHeight 500
+CapOvershoot 0
+DominantH [10]
+DominantV [10]
+FlexOK true
+FontMatrix [0.001, 0, 0, 0.001, 0, 0]
+FontName BasicShapes-Regular
+LanguageGroup 0
+OrigEmSqUnits 1000
