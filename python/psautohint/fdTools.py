@@ -12,7 +12,6 @@ from __future__ import print_function, absolute_import
 
 import logging
 import re
-import types
 
 
 log = logging.getLogger(__name__)
@@ -115,18 +114,12 @@ class FDDict:
         self.FlexOK = "true"
 
     def getFontInfo(self):
-        keys = dir(self)
-        fiList = []
-        for key in keys:
-            if key not in kFontInfoKeys:
+        fontinfo = []
+        for key, value in vars(self).items():
+            if key not in kFontInfoKeys or value is None:
                 continue
-            value = getattr(self, key)
-            if isinstance(value, types.MethodType):
-                continue
-
-            if value is not None:
-                fiList.append("%s %s" % (key, value))
-        return "\n".join(fiList)
+            fontinfo.append("%s %s" % (key, value))
+        return "\n".join(fontinfo)
 
     def buildBlueLists(self):
         if self.BaselineOvershoot is None:
@@ -223,16 +216,13 @@ class FDDict:
         return
 
     def __repr__(self):
-        printStr = []
-        keys = dir(self)
-        for key in keys:
-            val = getattr(self, key)
-            if (val is None) or (
-               isinstance(val, types.MethodType)) or key.startswith("_"):
+        fddict = {}
+        for key, val in vars(self).items():
+            if val is None:
                 continue
-            printStr.append(key)
-            printStr.append("%s" % (val))
-        return " ".join(printStr)
+            fddict[key] = val
+        return "<%s '%s' %s>" % (
+            self.__class__.__name__, fddict.get('DictName', 'no name'), fddict)
 
 
 def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
