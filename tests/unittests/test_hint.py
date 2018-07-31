@@ -55,7 +55,9 @@ def open_font(path):
 
 def get_font_info(font, path):
     info = font.getFontInfo(font.getPSName(), path, False, False, [], [])
-    return info.getFontInfo()
+    # Sort to normalize the order.
+    info = sorted(info.getFontInfo().split("\n"))
+    return "\n".join(info)
 
 
 def normalize_glyph(glyph, name):
