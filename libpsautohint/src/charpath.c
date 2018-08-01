@@ -969,13 +969,13 @@ GetRelativePosition(Fixed currEnd, Fixed currStart, Fixed end, Fixed start,
     }
 }
 
-/* For each base design, excluding HintsDir, include the
+/* For each base design, excluding hints master, include the
  hint information at the specified path element. type1
  and type2 indicates whether to use the start, end, avg.,
  curvebbox or flattened curve.  If a curve is to be flattened
  check if this is an "s" curve and use the inflection point.  If not
  then use the same relative position between the two endpoints as
- in the main hints dir.
+ in the main hints master.
  hinttype is either RB, RY, RM or RV. pathEltIx
  is the index into the path array where the new hint should
  be stored.  pathIx is the index of the path segment used to
@@ -1150,16 +1150,16 @@ ReadandAssignHints(void)
 }
 
 static bool
-DoubleCheckFlexVals(indx dirnum, indx eltix, indx hintdirnum)
+DoubleCheckFlexVals(indx masternum, indx eltix, indx hintmasternum)
 {
-    bool vert = (pathlist[hintdirnum].path[eltix].x ==
-                 pathlist[hintdirnum].path[eltix + 1].x3);
+    bool vert = (pathlist[hintmasternum].path[eltix].x ==
+                 pathlist[hintmasternum].path[eltix + 1].x3);
     if (vert) {
-        return (pathlist[dirnum].path[eltix].x ==
-                pathlist[dirnum].path[eltix + 1].x3);
+        return (pathlist[masternum].path[eltix].x ==
+                pathlist[masternum].path[eltix + 1].x3);
     } else {
-        return (pathlist[dirnum].path[eltix].y ==
-                pathlist[dirnum].path[eltix + 1].y3);
+        return (pathlist[masternum].path[eltix].y ==
+                pathlist[masternum].path[eltix + 1].y3);
     }
 }
 
@@ -1934,10 +1934,10 @@ OptimizeMtorDt(indx eltix, int16_t* op, bool* xequal, bool* yequal)
 }
 
 static bool
-CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
+CoordsEqual(indx master1, indx master2, indx opIx, indx eltIx, int16_t op)
 {
-    PGlyphPathElt path1 = &pathlist[dir1].path[eltIx],
-                  path2 = &pathlist[dir2].path[eltIx];
+    PGlyphPathElt path1 = &pathlist[master1].path[eltIx],
+                  path2 = &pathlist[master2].path[eltIx];
 
     switch (opIx) {
         case 0:
@@ -1969,9 +1969,9 @@ CoordsEqual(indx dir1, indx dir2, indx opIx, indx eltIx, int16_t op)
         default:
             LogMsg(LOGERROR, NONFATALERROR,
                    "Invalid index value: %d defined for curveto "
-                   "command4. Op=%d, dir=%s near "
+                   "command4. Op=%d, master=%s near "
                    "(%d %d).",
-                   (int)opIx, (int)op, masterNames[dir1], FTrunc8(path1->x),
+                   (int)opIx, (int)op, masterNames[master1], FTrunc8(path1->x),
                    FTrunc8(path1->y));
             break;
     }
