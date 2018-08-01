@@ -16,7 +16,7 @@
 static Fixed currentx, currenty;
 static bool firstFlex, wrtHintInfo;
 static char S0[MAXBUFFLEN + 1];
-static PHintPoint bst;
+static HintPoint* bst;
 static char bch;
 static Fixed bx, by;
 static bool bstB;
@@ -179,7 +179,7 @@ safestrcat(char* s1, char* s2)
     }
 
 static void
-NewBest(PHintPoint lst)
+NewBest(HintPoint* lst)
 {
     bst = lst;
     bch = lst->c;
@@ -220,7 +220,7 @@ WriteOne(const ACFontInfo* fontinfo, Fixed s)
 }
 
 static void
-WritePointItem(const ACFontInfo* fontinfo, PHintPoint lst)
+WritePointItem(const ACFontInfo* fontinfo, HintPoint* lst)
 {
     switch (lst->c) {
         case 'b':
@@ -246,9 +246,9 @@ WritePointItem(const ACFontInfo* fontinfo, PHintPoint lst)
 }
 
 static void
-WrtPntLst(const ACFontInfo* fontinfo, PHintPoint lst)
+WrtPntLst(const ACFontInfo* fontinfo, HintPoint* lst)
 {
-    PHintPoint ptLst;
+    HintPoint* ptLst;
     char ch;
     Fixed x0, x1, y0, y1;
     ptLst = lst;
@@ -300,7 +300,7 @@ WrtPntLst(const ACFontInfo* fontinfo, PHintPoint lst)
 }
 
 static void
-wrtnewhints(const ACFontInfo* fontinfo, PPathElt e)
+wrtnewhints(const ACFontInfo* fontinfo, PathElt* e)
 {
     if (!wrtHintInfo) {
         return;
@@ -316,9 +316,9 @@ wrtnewhints(const ACFontInfo* fontinfo, PPathElt e)
 }
 
 static bool
-IsFlex(PPathElt e)
+IsFlex(PathElt* e)
 {
-    PPathElt e0, e1;
+    PathElt *e0, *e1;
     if (firstFlex) {
         e0 = e;
         e1 = e->next;
@@ -330,7 +330,7 @@ IsFlex(PPathElt e)
 }
 
 static void
-mt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
+mt(const ACFontInfo* fontinfo, Cd c, PathElt* e)
 {
     if (e->newhints != 0) {
         wrtnewhints(fontinfo, e);
@@ -360,7 +360,7 @@ mt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
 }
 
 static void
-dt(const ACFontInfo* fontinfo, Cd c, PPathElt e)
+dt(const ACFontInfo* fontinfo, Cd c, PathElt* e)
 {
     if (e->newhints != 0) {
         wrtnewhints(fontinfo, e);
@@ -400,7 +400,7 @@ static Cd fc1, fc2, fc3;
     WriteString("rmt\npreflx2a\n")
 
 static void
-wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e)
+wrtflex(Cd c1, Cd c2, Cd c3, PathElt* e)
 {
     int32_t dmin, delta;
     bool yflag;
@@ -503,7 +503,7 @@ wrtflex(Cd c1, Cd c2, Cd c3, PPathElt e)
 }
 
 static void
-ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PPathElt e)
+ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PathElt* e)
 {
     if (e->newhints != 0) {
         wrtnewhints(fontinfo, e);
@@ -542,7 +542,7 @@ ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PPathElt e)
 }
 
 static void
-cp(const ACFontInfo* fontinfo, PPathElt e)
+cp(const ACFontInfo* fontinfo, PathElt* e)
 {
     if (e->newhints != 0) {
         wrtnewhints(fontinfo, e);
@@ -564,7 +564,7 @@ static void
 NumberPath(void)
 {
     int16_t cnt;
-    PPathElt e;
+    PathElt* e;
     e = gPathStart;
     cnt = 1;
     while (e != NULL) {
@@ -576,7 +576,7 @@ NumberPath(void)
 void
 SaveFile(const ACFontInfo* fontinfo)
 {
-    PPathElt e = gPathStart;
+    PathElt* e = gPathStart;
     Cd c1, c2, c3;
 
     /* AddSolEol(); */

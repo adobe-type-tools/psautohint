@@ -19,7 +19,7 @@ static Fixed yflatstartx, yflatstarty, yflatendx, yflatendy;
 static Fixed xflatstarty, xflatstartx, xflatendx, xflatendy;
 static bool vert, started, reCheckSmooth;
 static Fixed loc, frst, lst, fltnvalue;
-static PPathElt e;
+static PathElt* e;
 static bool forMultiMaster = false, inflPtFound = false;
 
 #define STARTING (0)
@@ -250,7 +250,7 @@ CPDirection(Fixed x1, Fixed cy1, Fixed x2, Fixed y2, Fixed x3, Fixed y3)
 }
 
 void
-RMovePoint(Fixed dx, Fixed dy, int32_t whichcp, PPathElt e)
+RMovePoint(Fixed dx, Fixed dy, int32_t whichcp, PathElt* e)
 {
     if (whichcp == cpStart) {
         e = e->prev;
@@ -282,9 +282,9 @@ RMovePoint(Fixed dx, Fixed dy, int32_t whichcp, PPathElt e)
 }
 
 void
-Delete(PPathElt e)
+Delete(PathElt* e)
 {
-    PPathElt nxt, prv;
+    PathElt *nxt, *prv;
     nxt = e->next;
     prv = e->prev;
     if (nxt != NULL)
@@ -331,7 +331,7 @@ GetInflectionPoint(Fixed px, Fixed py, Fixed px1, Fixed pcy1, Fixed px2,
 }
 
 static void
-CheckSCurve(PPathElt ee)
+CheckSCurve(PathElt* ee)
 {
     FltnRec fr;
     Cd c0, c1, c2, c3;
@@ -363,7 +363,7 @@ CheckSCurve(PPathElt ee)
 static void
 CheckZeroLength(void)
 {
-    PPathElt e, NxtE;
+    PathElt *e, *NxtE;
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3;
     e = gPathStart;
     while (e != NULL) { /* delete zero length elements */
@@ -392,7 +392,7 @@ CheckZeroLength(void)
 void
 CheckSmooth(void)
 {
-    PPathElt e, nxt, NxtE;
+    PathElt *e, *nxt, *NxtE;
     bool recheck;
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3, smdiff, xx, yy;
     CheckZeroLength();
@@ -468,7 +468,7 @@ chkBBDT(Cd c)
 void
 CheckForMultiMoveTo(void)
 {
-    PPathElt e = gPathStart;
+    PathElt* e = gPathStart;
     bool moveto;
     moveto = false;
     while (e != NULL) {
@@ -483,7 +483,7 @@ CheckForMultiMoveTo(void)
 }
 
 void
-CheckBBoxEdge(PPathElt e, bool vrt, Fixed lc, Fixed* pf, Fixed* pl)
+CheckBBoxEdge(PathElt* e, bool vrt, Fixed lc, Fixed* pf, Fixed* pl)
 {
     FltnRec fr;
     Cd c0, c1, c2, c3;
@@ -596,7 +596,7 @@ CheckSmoothness(Fixed x0, Fixed cy0, Fixed x1, Fixed cy1, Fixed x2, Fixed y2,
 void
 CheckForDups(void)
 {
-    PPathElt ob, nxt;
+    PathElt *ob, *nxt;
     Fixed x, y;
     ob = gPathStart;
     while (ob != NULL) {
@@ -620,9 +620,9 @@ foundMatch:
 }
 
 void
-MoveSubpathToEnd(PPathElt e)
+MoveSubpathToEnd(PathElt* e)
 {
-    PPathElt subEnd, subStart, subNext, subPrev;
+    PathElt *subEnd, *subStart, *subNext, *subPrev;
     subEnd = (e->type == CLOSEPATH) ? e : GetClosedBy(e);
     subStart = GetDest(subEnd);
     if (subEnd == gPathEnd)

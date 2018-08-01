@@ -12,7 +12,7 @@
 int32_t
 CountSubPaths(void)
 {
-    PPathElt e = gPathStart;
+    PathElt* e = gPathStart;
     int32_t cnt = 0;
     while (e != NULL) {
         if (e->type == MOVETO)
@@ -24,7 +24,7 @@ CountSubPaths(void)
 void
 RoundPathCoords(void)
 {
-    PPathElt e;
+    PathElt* e;
     e = gPathStart;
     while (e != NULL) {
         if (e->type == CURVETO) {
@@ -45,7 +45,7 @@ RoundPathCoords(void)
 static int32_t
 CheckForHint(void)
 {
-    PPathElt mt, cp;
+    PathElt *mt, *cp;
     mt = gPathStart;
     while (mt != NULL) {
         if (mt->type != MOVETO) {
@@ -65,7 +65,7 @@ CheckForHint(void)
 bool
 PreCheckForHinting(void)
 {
-    PPathElt e;
+    PathElt* e;
     int32_t cnt = 0;
     while (gPathEnd != NULL) {
         if (gPathEnd->type == MOVETO)
@@ -79,7 +79,7 @@ PreCheckForHinting(void)
     e = gPathStart;
     while (e != NULL) {
         if (e->type == CLOSEPATH) {
-            PPathElt nxt;
+            PathElt* nxt;
             if (e == gPathEnd)
                 break;
             nxt = e->next;
@@ -108,8 +108,8 @@ PreCheckForHinting(void)
     return true;
 }
 
-static PPathElt
-GetSubpathNext(PPathElt e)
+static PathElt*
+GetSubpathNext(PathElt* e)
 {
     while (true) {
         e = e->next;
@@ -123,8 +123,8 @@ GetSubpathNext(PPathElt e)
     return e;
 }
 
-static PPathElt
-GetSubpathPrev(PPathElt e)
+static PathElt*
+GetSubpathPrev(PathElt* e)
 {
     while (true) {
         e = e->prev;
@@ -139,9 +139,9 @@ GetSubpathPrev(PPathElt e)
 }
 
 static bool
-AddAutoFlexProp(PPathElt e, bool yflag)
+AddAutoFlexProp(PathElt* e, bool yflag)
 {
-    PPathElt e0 = e, e1 = e->next;
+    PathElt *e0 = e, *e1 = e->next;
     if (e0->type != CURVETO || e1->type != CURVETO) {
         LogMsg(LOGERROR, NONFATALERROR, "Illegal input.");
     }
@@ -162,7 +162,7 @@ AddAutoFlexProp(PPathElt e, bool yflag)
             better */
 
 static void
-TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
+TryYFlex(PathElt* e, PathElt* n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     Fixed x2, y2, x3, y3, x4, y4;
     double d0sq, d1sq, quot, dx, dy;
@@ -193,7 +193,7 @@ TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 
     if (gFlexStrict) {
         bool top, dwn;
-        PPathElt p, q;
+        PathElt *p, *q;
         q = GetSubpathNext(n);
         GetEndPoint(q, &x3, &y3);
         if (ProdLt0(y3 - y2, y1 - y2))
@@ -221,7 +221,7 @@ TryYFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 }
 
 static void
-TryXFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
+TryXFlex(PathElt* e, PathElt* n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     Fixed x2, y2, x3, y3, x4, y4;
     double d0sq, d1sq, quot, dx, dy;
@@ -252,7 +252,7 @@ TryXFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
         return;
 
     if (gFlexStrict) {
-        PPathElt p, q;
+        PathElt *p, *q;
         bool lft;
         q = GetSubpathNext(n);
         GetEndPoint(q, &x3, &y3);
@@ -282,7 +282,7 @@ TryXFlex(PPathElt e, PPathElt n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 void
 AutoAddFlex(void)
 {
-    PPathElt e, n;
+    PathElt *e, *n;
     Fixed x0, y0, x1, y1;
     e = gPathStart;
     while (e != NULL) {

@@ -109,7 +109,7 @@ CheckForNearBands(Fixed loc, Fixed* blues, int32_t numblues)
 }
 
 bool
-FindLineSeg(Fixed loc, PHintSeg sL)
+FindLineSeg(Fixed loc, HintSeg* sL)
 {
     while (sL != NULL) {
         if (sL->sLoc == loc && sL->sType == sLINE)
@@ -124,9 +124,9 @@ FindLineSeg(Fixed loc, PHintSeg sL)
    the horizontal alignment zones. The list contains
    segments that may or may not have hints added. */
 void
-CheckTfmVal(PHintSeg hSegList, Fixed* bandList, int32_t length)
+CheckTfmVal(HintSeg* hSegList, Fixed* bandList, int32_t length)
 {
-    PHintSeg sList = hSegList;
+    HintSeg* sList = hSegList;
 
     while (sList != NULL) {
         Fixed tfmval = -sList->sLoc;
@@ -156,7 +156,7 @@ CheckTfmVal(Fixed b, Fixed t, bool vert)
 #endif
 
 void
-CheckVal(PHintVal val, bool vert)
+CheckVal(HintVal* val, bool vert)
 {
     Fixed* stems;
     int32_t numstems, i;
@@ -204,7 +204,7 @@ CheckVal(PHintVal val, bool vert)
 }
 
 void
-CheckVals(PHintVal vlst, bool vert)
+CheckVals(HintVal* vlst, bool vert)
 {
     while (vlst != NULL) {
         CheckVal(vlst, vert);
@@ -213,9 +213,9 @@ CheckVals(PHintVal vlst, bool vert)
 }
 
 static void
-FixH(PPathElt e, Fixed fixy, Fixed fixdy)
+FixH(PathElt* e, Fixed fixy, Fixed fixdy)
 {
-    PPathElt prev, nxt;
+    PathElt *prev, *nxt;
     RMovePoint(0, fixdy, cpStart, e);
     RMovePoint(0, fixdy, cpEnd, e);
     prev = e->prev;
@@ -231,7 +231,7 @@ FixH(PPathElt e, Fixed fixy, Fixed fixdy)
 static void
 FixHs(Fixed fixy, Fixed fixdy)
 { /* y dy in user space */
-    PPathElt e;
+    PathElt* e;
     Fixed xlst = 0, ylst = 0, xinit = 0, yinit = 0;
     fixy = -fixy;
     fixdy = -fixdy;
@@ -266,9 +266,9 @@ FixHs(Fixed fixy, Fixed fixdy)
 }
 
 static void
-FixV(PPathElt e, Fixed fixx, Fixed fixdx)
+FixV(PathElt* e, Fixed fixx, Fixed fixdx)
 {
-    PPathElt prev, nxt;
+    PathElt *prev, *nxt;
     RMovePoint(fixdx, 0, cpStart, e);
     RMovePoint(fixdx, 0, cpEnd, e);
     prev = e->prev;
@@ -284,7 +284,7 @@ FixV(PPathElt e, Fixed fixx, Fixed fixdx)
 static void
 FixVs(Fixed fixx, Fixed fixdx)
 { /* x dx in user space */
-    PPathElt e;
+    PathElt* e;
     Fixed xlst = 0, ylst = 0, xinit = 0, yinit = 0;
     e = gPathStart;
     while (e != NULL) {

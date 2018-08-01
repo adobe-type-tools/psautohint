@@ -9,8 +9,8 @@
 
 #include "ac.h"
 
-PPathElt
-GetDest(PPathElt cldest)
+PathElt*
+GetDest(PathElt* cldest)
 {
     if (cldest == NULL)
         return NULL;
@@ -23,8 +23,8 @@ GetDest(PPathElt cldest)
     }
 }
 
-PPathElt
-GetClosedBy(PPathElt clsdby)
+PathElt*
+GetClosedBy(PathElt* clsdby)
 {
     if (clsdby == NULL)
         return NULL;
@@ -42,7 +42,7 @@ GetClosedBy(PPathElt clsdby)
 }
 
 void
-GetEndPoint(PPathElt e, Fixed* x1p, Fixed* y1p)
+GetEndPoint(PathElt* e, Fixed* x1p, Fixed* y1p)
 {
     if (e == NULL) {
         *x1p = 0;
@@ -73,7 +73,7 @@ retry:
 }
 
 void
-GetEndPoints(PPathElt p, Fixed* px0, Fixed* py0, Fixed* px1, Fixed* py1)
+GetEndPoints(PathElt* p, Fixed* px0, Fixed* py0, Fixed* px1, Fixed* py1)
 {
     GetEndPoint(p, px1, py1);
     GetEndPoint(p->prev, px0, py0);
@@ -155,7 +155,7 @@ HorzQuo(Fixed xk, Fixed yk, Fixed xl, Fixed yl)
 }
 
 bool
-IsTiny(PPathElt e)
+IsTiny(PathElt* e)
 {
     Fixed x0 = 0, y0 = 0, x1 = 0, y1 = 0;
     GetEndPoints(e, &x0, &y0, &x1, &y1);
@@ -163,7 +163,7 @@ IsTiny(PPathElt e)
 }
 
 bool
-IsShort(PPathElt e)
+IsShort(PathElt* e)
 {
     Fixed x0 = 0, y0 = 0, x1 = 0, y1 = 0, dx = 0, dy = 0, mn = 0, mx = 0;
     GetEndPoints(e, &x0, &y0, &x1, &y1);
@@ -182,10 +182,10 @@ IsShort(PPathElt e)
                          change in coordinare system. */
 }
 
-PPathElt
-NxtForBend(PPathElt p, Fixed* px2, Fixed* py2, Fixed* px3, Fixed* py3)
+PathElt*
+NxtForBend(PathElt* p, Fixed* px2, Fixed* py2, Fixed* px3, Fixed* py3)
 {
-    PPathElt nxt, nxtMT = NULL;
+    PathElt *nxt, *nxtMT = NULL;
     Fixed x = 0, y = 0;
     nxt = p;
     GetEndPoint(p, &x, &y);
@@ -224,10 +224,10 @@ NxtForBend(PPathElt p, Fixed* px2, Fixed* py2, Fixed* px3, Fixed* py3)
     return nxt;
 }
 
-PPathElt
-PrvForBend(PPathElt p, Fixed* px2, Fixed* py2)
+PathElt*
+PrvForBend(PathElt* p, Fixed* px2, Fixed* py2)
 {
-    PPathElt prv, prvCP = NULL;
+    PathElt *prv, *prvCP = NULL;
     Fixed x2, y2;
     prv = p;
     while (true) {
@@ -266,9 +266,9 @@ Bogus:
 }
 
 static bool
-CheckHeight(bool upperFlag, PPathElt p)
+CheckHeight(bool upperFlag, PathElt* p)
 {
-    PPathElt ee;
+    PathElt* ee;
     Fixed y, yy;
     ee = gPathStart;
     y = -p->y;
@@ -284,13 +284,13 @@ CheckHeight(bool upperFlag, PPathElt p)
 }
 
 bool
-IsLower(PPathElt p)
+IsLower(PathElt* p)
 {
     return CheckHeight(false, p);
 }
 
 bool
-IsUpper(PPathElt p)
+IsUpper(PathElt* p)
 {
     return CheckHeight(true, p);
 }

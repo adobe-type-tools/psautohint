@@ -10,7 +10,7 @@
 #include "ac.h"
 #include "bbox.h"
 
-static PHintVal Vrejects, Hrejects;
+static HintVal *Vrejects, *Hrejects;
 
 void
 InitPick(int32_t reason)
@@ -25,7 +25,7 @@ InitPick(int32_t reason)
 #define LtPruneB(val) ((val) < FixOne && ((val) << 10) < gPruneB)
 
 static bool
-ConsiderPicking(Fixed bestSpc, Fixed bestVal, PHintVal hintList,
+ConsiderPicking(Fixed bestSpc, Fixed bestVal, HintVal* hintList,
                 Fixed prevBestVal)
 {
     if (bestSpc > 0)
@@ -42,14 +42,14 @@ ConsiderPicking(Fixed bestSpc, Fixed bestVal, PHintVal hintList,
 }
 
 void
-PickVVals(PHintVal valList)
+PickVVals(HintVal* valList)
 {
-    PHintVal hintList, rejectList, vlist, nxt;
+    HintVal *hintList, *rejectList, *vlist, *nxt;
     Fixed bestVal = 0, prevBestVal;
     hintList = rejectList = NULL;
     prevBestVal = 0;
     while (true) {
-        PHintVal prev, bestPrev, best;
+        HintVal *prev, *bestPrev, *best;
         Fixed lft, rght;
         vlist = valList;
         prev = bestPrev = best = NULL;
@@ -130,7 +130,7 @@ InSerifBand(Fixed y0, Fixed y1, int32_t n, Fixed* p)
 }
 
 static bool
-ConsiderValForSeg(PHintVal val, PHintSeg seg, Fixed loc, int32_t nb, Fixed* b,
+ConsiderValForSeg(HintVal* val, HintSeg* seg, Fixed loc, int32_t nb, Fixed* b,
                   int32_t ns, Fixed* s, bool primary)
 {
     if (primary && val->vSpc > 0.0)
@@ -144,18 +144,18 @@ ConsiderValForSeg(PHintVal val, PHintSeg seg, Fixed loc, int32_t nb, Fixed* b,
     return true;
 }
 
-static PHintVal
-FndBstVal(PHintSeg seg, bool seg1Flg, PHintVal cList, PHintVal rList,
+static HintVal*
+FndBstVal(HintSeg* seg, bool seg1Flg, HintVal* cList, HintVal* rList,
           int32_t nb, Fixed* b, int32_t ns, Fixed* s, bool locFlg, bool hFlg)
 {
     Fixed loc, vloc;
-    PHintVal best, vList;
-    PHintSeg vseg;
+    HintVal *best, *vList;
+    HintSeg* vseg;
     best = NULL;
     loc = seg->sLoc;
     vList = cList;
     while (true) {
-        PHintVal initLst = vList;
+        HintVal* initLst = vList;
         while (vList != NULL) {
             if (seg1Flg) {
                 vseg = vList->vSeg1;
@@ -188,11 +188,11 @@ FndBstVal(PHintSeg seg, bool seg1Flg, PHintVal cList, PHintVal rList,
 }
 
 #define FixSixteenth (0x10)
-static PHintVal
-FindBestValForSeg(PHintSeg seg, bool seg1Flg, PHintVal cList, PHintVal rList,
+static HintVal*
+FindBestValForSeg(HintSeg* seg, bool seg1Flg, HintVal* cList, HintVal* rList,
                   int32_t nb, Fixed* b, int32_t ns, Fixed* s, bool hFlg)
 {
-    PHintVal best, nonghst, ghst = NULL;
+    HintVal *best, *nonghst, *ghst = NULL;
     best = FndBstVal(seg, seg1Flg, cList, rList, nb, b, ns, s, false, hFlg);
     if (best != NULL && best->vGhst) {
         nonghst =
@@ -218,7 +218,7 @@ FindBestValForSeg(PHintSeg seg, bool seg1Flg, PHintVal cList, PHintVal rList,
 }
 
 static bool
-MembValList(PHintVal val, PHintVal vList)
+MembValList(HintVal* val, HintVal* vList)
 {
     while (vList != NULL) {
         if (val == vList)
@@ -228,10 +228,10 @@ MembValList(PHintVal val, PHintVal vList)
     return false;
 }
 
-static PHintVal
-PrevVal(PHintVal val, PHintVal vList)
+static HintVal*
+PrevVal(HintVal* val, HintVal* vList)
 {
-    PHintVal prev;
+    HintVal* prev;
     if (val == vList)
         return NULL;
     prev = vList;
@@ -248,8 +248,8 @@ PrevVal(PHintVal val, PHintVal vList)
 }
 
 static void
-FindRealVal(PHintVal vlist, Fixed top, Fixed bot, PHintSeg* pseg1,
-            PHintSeg* pseg2)
+FindRealVal(HintVal* vlist, Fixed top, Fixed bot, HintSeg** pseg1,
+            HintSeg** pseg2)
 {
     while (vlist != NULL) {
         if (vlist->vLoc2 == top && vlist->vLoc1 == bot && !vlist->vGhst) {
@@ -262,13 +262,13 @@ FindRealVal(PHintVal vlist, Fixed top, Fixed bot, PHintSeg* pseg1,
 }
 
 void
-PickHVals(PHintVal valList)
+PickHVals(HintVal* valList)
 {
-    PHintVal vlist, hintList, rejectList, bestPrev, prev, best, nxt;
+    HintVal *vlist, *hintList, *rejectList, *bestPrev, *prev, *best, *nxt;
     Fixed bestVal, prevBestVal;
     Fixed bot, top, vtop, vbot;
-    PHintVal newBst;
-    PHintSeg seg1, seg2;
+    HintVal* newBst;
+    HintSeg *seg1, *seg2;
     hintList = rejectList = NULL;
     prevBestVal = 0;
     while (true) {
@@ -379,10 +379,10 @@ noMore:
 }
 
 static void
-FindBestValForSegs(PHintSeg sList, bool seg1Flg, PHintVal cList, PHintVal rList,
+FindBestValForSegs(HintSeg* sList, bool seg1Flg, HintVal* cList, HintVal* rList,
                    int32_t nb, Fixed* b, int32_t ns, Fixed* s, bool hFlg)
 {
-    PHintVal best;
+    HintVal* best;
     while (sList != NULL) {
         best =
           FindBestValForSeg(sList, seg1Flg, cList, rList, nb, b, ns, s, hFlg);
@@ -394,7 +394,7 @@ FindBestValForSegs(PHintSeg sList, bool seg1Flg, PHintVal cList, PHintVal rList,
 static void
 SetPruned(void)
 {
-    PHintVal vL = gValList;
+    HintVal* vL = gValList;
     while (vL != NULL) {
         vL->pruned = true;
         vL = vL->vNxt;

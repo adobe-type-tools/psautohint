@@ -10,8 +10,8 @@
 #include "ac.h"
 #include "bbox.h"
 
-static void DoHStems(const ACFontInfo* fontinfo, PHintVal sLst1);
-static void DoVStems(PHintVal sLst);
+static void DoHStems(const ACFontInfo* fontinfo, HintVal* sLst1);
+static void DoVStems(HintVal* sLst);
 
 static bool CounterFailed;
 
@@ -26,7 +26,7 @@ InitAll(const ACFontInfo* fontinfo, int32_t reason)
 }
 
 static int32_t
-PtLstLen(PHintPoint lst)
+PtLstLen(HintPoint* lst)
 {
     int32_t cnt = 0;
     while (lst != NULL) {
@@ -37,7 +37,7 @@ PtLstLen(PHintPoint lst)
 }
 
 static int32_t
-PointListCheck(PHintPoint new, PHintPoint lst)
+PointListCheck(HintPoint* new, HintPoint* lst)
 {
     /* -1 means not a member, 1 means already a member, 0 means conflicts */
     Fixed l1 = 0, l2 = 0, n1 = 0, n2 = 0, tmp, halfMargin;
@@ -119,7 +119,7 @@ PointListCheck(PHintPoint new, PHintPoint lst)
 }
 
 static bool
-SameHintLists(PHintPoint lst1, PHintPoint lst2)
+SameHintLists(HintPoint* lst1, HintPoint* lst2)
 {
     if (PtLstLen(lst1) != PtLstLen(lst2)) {
         return false;
@@ -145,7 +145,7 @@ SameHints(int32_t cn1, int32_t cn2)
 void
 MergeFromMainHints(char ch)
 {
-    PHintPoint lst;
+    HintPoint* lst;
     for (lst = gPtLstArray[0]; lst != NULL; lst = lst->next) {
         if (lst->c != ch) {
             continue;
@@ -161,12 +161,12 @@ MergeFromMainHints(char ch)
 }
 
 void
-AddHintPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
-             PPathElt p1)
+AddHintPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PathElt* p0,
+             PathElt* p1)
 {
-    PHintPoint pt;
+    HintPoint* pt;
     int32_t chk;
-    pt = (PHintPoint)Alloc(sizeof(HintPoint));
+    pt = (HintPoint*)Alloc(sizeof(HintPoint));
     pt->x0 = x0;
     pt->y0 = y0;
     pt->x1 = x1;
@@ -188,7 +188,7 @@ AddHintPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PPathElt p0,
 }
 
 static void
-CopyHintFromLst(char hint, PHintPoint lst)
+CopyHintFromLst(char hint, HintPoint* lst)
 {
     bool bvflg = (hint == 'b' || hint == 'v');
     while (lst != NULL) {
@@ -216,10 +216,10 @@ CopyMainH(void)
 }
 
 void
-AddHPair(PHintVal v, char ch)
+AddHPair(HintVal* v, char ch)
 {
     Fixed bot, top;
-    PPathElt p0, p1, p;
+    PathElt *p0, *p1, *p;
     bot = -v->vLoc1;
     top = -v->vLoc2;
     p0 = v->vBst->vSeg1->sElt;
@@ -249,10 +249,10 @@ AddHPair(PHintVal v, char ch)
 }
 
 void
-AddVPair(PHintVal v, char ch)
+AddVPair(HintVal* v, char ch)
 {
     Fixed lft, rght;
-    PPathElt p0, p1, p;
+    PathElt *p0, *p1, *p;
     lft = v->vLoc1;
     rght = v->vLoc2;
     p0 = v->vBst->vSeg1->sElt;
@@ -269,12 +269,12 @@ AddVPair(PHintVal v, char ch)
 }
 
 static bool
-UseCounter(PHintVal sLst, bool mhint)
+UseCounter(HintVal* sLst, bool mhint)
 {
     int32_t cnt = 0;
     Fixed minLoc, midLoc, maxLoc, prevBstVal, bestVal;
     Fixed minDelta, midDelta, maxDelta, th;
-    PHintVal lst, newLst;
+    HintVal *lst, *newLst;
     minLoc = midLoc = maxLoc = FixInt(20000);
     minDelta = midDelta = maxDelta = 0;
     lst = sLst;
@@ -344,10 +344,10 @@ static void
 GetNewPtLst(void)
 {
     if (gNumPtLsts >= gMaxPtLsts) { /* increase size */
-        PHintPoint* newArray;
+        HintPoint** newArray;
         int32_t i;
         gMaxPtLsts += 5;
-        newArray = (PHintPoint*)Alloc(gMaxPtLsts * sizeof(PHintPoint));
+        newArray = (HintPoint**)Alloc(gMaxPtLsts * sizeof(HintPoint*));
         for (i = 0; i < gMaxPtLsts - 5; i++) {
             newArray[i] = gPtLstArray[i];
         }
@@ -360,7 +360,7 @@ GetNewPtLst(void)
 }
 
 void
-XtraHints(PPathElt e)
+XtraHints(PathElt* e)
 {
     /* this can be simplified for standalone hinting */
     gPtLstArray[gPtLstIndex] = gPointList;
@@ -376,7 +376,7 @@ static void
 Blues(const ACFontInfo* fontinfo)
 {
     Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
-    PHintVal sLst;
+    HintVal* sLst;
 
     /*
      Top alignment zones are in the global 'topBands', bottom in 'botBands'.
@@ -607,7 +607,7 @@ Blues(const ACFontInfo* fontinfo)
 }
 
 static void
-DoHStems(const ACFontInfo* fontinfo, PHintVal sLst1)
+DoHStems(const ACFontInfo* fontinfo, HintVal* sLst1)
 {
     Fixed glyphTop = INT32_MIN, glyphBot = INT32_MAX;
     bool curved;
@@ -652,7 +652,7 @@ static void
 Yellows(void)
 {
     Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
-    PHintVal sLst;
+    HintVal* sLst;
     LogMsg(LOGDEBUG, OK, "generate yellows");
     GenVPts(SpecialGlyphType());
     LogMsg(LOGDEBUG, OK, "evaluate");
@@ -715,7 +715,7 @@ Yellows(void)
 }
 
 static void
-DoVStems(PHintVal sLst)
+DoVStems(HintVal* sLst)
 {
     if (!gDoAligns && !gDoStems) {
         return;
@@ -740,7 +740,7 @@ DoVStems(PHintVal sLst)
 static void
 RemoveRedundantFirstHints(void)
 {
-    PPathElt e;
+    PathElt* e;
     if (gNumPtLsts < 2 || !SameHints(0, 1)) {
         return;
     }

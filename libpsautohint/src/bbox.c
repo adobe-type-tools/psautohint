@@ -11,7 +11,7 @@
 #include "ac.h"
 
 static Fixed xmin, ymin, xmax, ymax, vMn, vMx, hMn, hMx;
-static PPathElt pxmn, pxmx, pymn, pymx, pe, pvMn, pvMx, phMn, phMx;
+static PathElt *pxmn, *pxmx, *pymn, *pymx, *pe, *pvMn, *pvMx, *phMn, *phMx;
 
 static void
 FPBBoxPt(Cd c)
@@ -38,7 +38,7 @@ static void
 FindPathBBox(void)
 {
     FltnRec fr;
-    PPathElt e;
+    PathElt* e;
     Cd c0, c1, c2, c3;
     if (gPathStart == NULL) {
         xmin = ymin = xmax = ymax = 0;
@@ -83,8 +83,8 @@ FindPathBBox(void)
     ymax = FHalfRnd(ymax);
 }
 
-PPathElt
-FindSubpathBBox(PPathElt e)
+PathElt*
+FindSubpathBBox(PathElt* e)
 {
     FltnRec fr;
     Cd c0, c1, c2, c3;
@@ -178,7 +178,7 @@ FindCurveBBox(Fixed x0, Fixed y0, Fixed px1, Fixed py1, Fixed px2, Fixed py2,
 void
 HintVBnds(void)
 {
-    PPathElt p;
+    PathElt* p;
     if (gPathStart == NULL || VHintGlyph())
         return;
     FindPathBBox();
@@ -214,7 +214,7 @@ HintHBnds(void)
     phMn = pymn;
     phMx = pymx;
     if (hMn > hMx) {
-        PPathElt p;
+        PathElt* p;
         Fixed tmp = hMn;
         hMn = hMx;
         hMx = tmp;
@@ -232,7 +232,7 @@ ReHintHBnds(void)
 }
 
 static bool
-CheckValOverlaps(Fixed lft, Fixed rht, PHintVal lst, bool xflg)
+CheckValOverlaps(Fixed lft, Fixed rht, HintVal* lst, bool xflg)
 {
     Fixed tmp;
     if (!xflg) {
@@ -266,9 +266,9 @@ CheckValOverlaps(Fixed lft, Fixed rht, PHintVal lst, bool xflg)
 void
 AddBBoxHV(bool Hflg, bool subs)
 {
-    PPathElt e;
-    PHintVal val;
-    PHintSeg seg1, seg2;
+    PathElt* e;
+    HintVal* val;
+    HintSeg *seg1, *seg2;
     e = gPathStart;
     while (e != NULL) {
         if (subs)
@@ -279,8 +279,8 @@ AddBBoxHV(bool Hflg, bool subs)
         }
         if (!Hflg) {
             if (!CheckValOverlaps(xmin, xmax, gVHinting, true)) {
-                val = (PHintVal)Alloc(sizeof(HintVal));
-                seg1 = (PHintSeg)Alloc(sizeof(HintSeg));
+                val = (HintVal*)Alloc(sizeof(HintVal));
+                seg1 = (HintSeg*)Alloc(sizeof(HintSeg));
                 seg1->sLoc = xmin;
                 seg1->sElt = pxmn;
                 seg1->sBonus = 0;
@@ -289,7 +289,7 @@ AddBBoxHV(bool Hflg, bool subs)
                 seg1->sMax = ymax;
                 seg1->sNxt = NULL;
                 seg1->sLnk = NULL;
-                seg2 = (PHintSeg)Alloc(sizeof(HintSeg));
+                seg2 = (HintSeg*)Alloc(sizeof(HintSeg));
                 seg2->sLoc = xmax;
                 seg2->sElt = pxmx;
                 seg2->sBonus = 0;
@@ -311,8 +311,8 @@ AddBBoxHV(bool Hflg, bool subs)
             }
         } else {
             if (!CheckValOverlaps(ymin, ymax, gHHinting, false)) {
-                val = (PHintVal)Alloc(sizeof(HintVal));
-                seg1 = (PHintSeg)Alloc(sizeof(HintSeg));
+                val = (HintVal*)Alloc(sizeof(HintVal));
+                seg1 = (HintSeg*)Alloc(sizeof(HintSeg));
                 seg1->sLoc = ymax;
                 seg1->sElt = pymx;
                 seg1->sBonus = 0;
@@ -321,7 +321,7 @@ AddBBoxHV(bool Hflg, bool subs)
                 seg1->sMax = xmax;
                 seg1->sNxt = NULL;
                 seg1->sLnk = NULL;
-                seg2 = (PHintSeg)Alloc(sizeof(HintSeg));
+                seg2 = (HintSeg*)Alloc(sizeof(HintSeg));
                 seg2->sLoc = ymin;
                 seg2->sElt = pymn;
                 seg2->sBonus = 0;
@@ -349,7 +349,7 @@ void
 HintBBox(void)
 {
     Fixed tmp;
-    PPathElt p, p0, p1;
+    PathElt *p, *p0, *p1;
     if (!gUseV) {
         Fixed llx = xmin;
         Fixed urx = xmax;
@@ -407,7 +407,7 @@ CheckPathBBox(void)
 }
 
 bool
-CheckBBoxes(PPathElt e1, PPathElt e2)
+CheckBBoxes(PathElt* e1, PathElt* e2)
 {
     /* return true if e1 and e2 in same subpath or i
        the bbox for one is inside the bbox of the other */

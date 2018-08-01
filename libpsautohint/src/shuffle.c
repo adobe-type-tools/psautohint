@@ -17,7 +17,7 @@ void
 InitShuffleSubpaths(void)
 {
     int32_t cnt = -1;
-    PPathElt e = gPathStart;
+    PathElt* e = gPathStart;
     while (e != NULL) { /* every element is marked with its subpath count */
         if (e->type == MOVETO)
             cnt++;
@@ -93,11 +93,11 @@ PrintOutLinks(unsigned char* outlinks)
 }
 
 void
-MarkLinks(PHintVal vL, bool hFlg)
+MarkLinks(HintVal* vL, bool hFlg)
 {
     int32_t i, j;
-    PHintSeg seg;
-    PPathElt e;
+    HintSeg* seg;
+    PathElt* e;
     if (links == NULL)
         return;
     for (; vL != NULL; vL = vL->vNxt) {
@@ -133,7 +133,7 @@ Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
 {
     unsigned char *lnks, *outlnks;
     int32_t i = bst;
-    PPathElt e = gPathStart;
+    PathElt* e = gPathStart;
     while (e != NULL) {
         if (e->count == i)
             break;

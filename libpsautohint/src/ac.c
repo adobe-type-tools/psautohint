@@ -12,7 +12,7 @@
 
 #define MAXSTEMDIST 150 /* initial maximum stem width allowed for hints */
 
-PPathElt gPathStart, gPathEnd;
+PathElt *gPathStart, *gPathEnd;
 bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix, gEditGlyph;
 bool gHasFlex, gFlexOK, gFlexStrict, gBandError;
 Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth, gGhostLength,
@@ -22,12 +22,12 @@ Fixed gPruneA, gPruneB, gPruneC, gPruneD, gPruneValue, gBonus;
 float gTheta, gHBigDistR, gVBigDistR, gMaxVal, gMinVal;
 int32_t gLenTopBands, gLenBotBands, gNumSerifs, gDMin, gDelta, gCPpercent;
 int32_t gBendTan, gSCurveTan;
-PHintVal gVHinting, gHHinting, gVPrimary, gHPrimary, gValList;
-PHintSeg gSegLists[4];
+HintVal *gVHinting, *gHHinting, *gVPrimary, *gHPrimary, *gValList;
+HintSeg* gSegLists[4];
 Fixed gVStems[MAXSTEMS], gHStems[MAXSTEMS];
 int32_t gNumVStems, gNumHStems;
 Fixed gTopBands[MAXBLUES], gBotBands[MAXBLUES], gSerifs[MAXSERIFS];
-PHintPoint gPointList, *gPtLstArray;
+HintPoint *gPointList, **gPtLstArray;
 int32_t gPtLstIndex, gNumPtLsts, gMaxPtLsts;
 bool gWriteHintedBez = true;
 Fixed gBlueFuzz;
@@ -123,7 +123,7 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             /* ?? Does this cause a leak ?? */
             gPointList = NULL;
             gMaxPtLsts = 5;
-            gPtLstArray = (PHintPoint*)Alloc(gMaxPtLsts * sizeof(PHintPoint));
+            gPtLstArray = (HintPoint**)Alloc(gMaxPtLsts * sizeof(HintPoint*));
             gPtLstIndex = 0;
             gPtLstArray[0] = NULL;
             gNumPtLsts = 1;
