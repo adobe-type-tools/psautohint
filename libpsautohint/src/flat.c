@@ -10,7 +10,7 @@
 #include "ac.h"
 
 static void
-FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, PFltnRec pfr, bool inside)
+FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr, bool inside)
 {
 /* Like FFltnCurve, but assumes abs(deltas) <= 127 pixels */
 /* 8 bits of fraction gives enough precision for splitting curves */
@@ -291,7 +291,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, PFltnRec pfr, bool inside)
 /* abs values of coords must be < 2^14 so will not overflow when
    find midpoint by add and shift */
 static void
-FFltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr, bool inrect)
+FFltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, FltnRec* pfr, bool inrect)
 {
     Cd d0, d1, d2, d3;
     Fixed llx, lly, urx, ury;
@@ -383,7 +383,7 @@ ReportC3:
 }
 
 void
-FltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, PFltnRec pfr)
+FltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, FltnRec* pfr)
 {
     pfr->limit = 6; /* limit on how many times a bez curve can be split in half
                        by recursive calls to FFltnCurve() */

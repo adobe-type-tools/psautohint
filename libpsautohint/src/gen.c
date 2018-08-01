@@ -12,7 +12,7 @@
 #include "ac.h"
 #include "bbox.h"
 
-static PSegLnkLst Hlnks, Vlnks;
+static SegLnkLst *Hlnks, *Vlnks;
 static int32_t cpFrom, cpTo;
 
 void
@@ -29,14 +29,14 @@ InitGen(int32_t reason)
 }
 
 static void
-LinkSegment(PPathElt e, bool Hflg, PHintSeg seg)
+LinkSegment(PathElt* e, bool Hflg, HintSeg* seg)
 {
-    PSegLnk newlnk;
-    PSegLnkLst newlst, globlst;
-    newlnk = (PSegLnk)Alloc(sizeof(SegLnk));
+    SegLnk* newlnk;
+    SegLnkLst *newlst, *globlst;
+    newlnk = (SegLnk*)Alloc(sizeof(SegLnk));
     newlnk->seg = seg;
-    newlst = (PSegLnkLst)Alloc(sizeof(SegLnkLst));
-    globlst = (PSegLnkLst)Alloc(sizeof(SegLnkLst));
+    newlst = (SegLnkLst*)Alloc(sizeof(SegLnkLst));
+    globlst = (SegLnkLst*)Alloc(sizeof(SegLnkLst));
     globlst->lnk = newlnk;
     newlst->lnk = newlnk;
     if (Hflg) {
@@ -53,11 +53,11 @@ LinkSegment(PPathElt e, bool Hflg, PHintSeg seg)
 }
 
 static void
-CopySegmentLink(PPathElt e1, PPathElt e2, bool Hflg)
+CopySegmentLink(PathElt* e1, PathElt* e2, bool Hflg)
 {
     /* copy reference to first link from e1 to e2 */
-    PSegLnkLst newlst;
-    newlst = (PSegLnkLst)Alloc(sizeof(SegLnkLst));
+    SegLnkLst* newlst;
+    newlst = (SegLnkLst*)Alloc(sizeof(SegLnkLst));
     if (Hflg) {
         newlst->lnk = e1->Hs->lnk;
         newlst->next = e2->Hs;
@@ -71,11 +71,11 @@ CopySegmentLink(PPathElt e1, PPathElt e2, bool Hflg)
 
 static void
 AddSegment(Fixed from, Fixed to, Fixed loc, int32_t lftLstNm, int32_t rghtLstNm,
-           PPathElt e1, PPathElt e2, bool Hflg, int32_t typ)
+           PathElt* e1, PathElt* e2, bool Hflg, int32_t typ)
 {
-    PHintSeg seg, segList, prevSeg;
+    HintSeg *seg, *segList, *prevSeg;
     int32_t segNm;
-    seg = (PHintSeg)Alloc(sizeof(HintSeg));
+    seg = (HintSeg*)Alloc(sizeof(HintSeg));
     seg->sLoc = loc;
     if (from > to) {
         seg->sMax = from;
@@ -125,7 +125,7 @@ AddSegment(Fixed from, Fixed to, Fixed loc, int32_t lftLstNm, int32_t rghtLstNm,
 }
 
 void
-AddVSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
+AddVSegment(Fixed from, Fixed to, Fixed loc, PathElt* p1, PathElt* p2,
             int32_t typ, int32_t i)
 {
     LogMsg(LOGDEBUG, OK, "add vseg %g %g to %g %g %d", FixToDbl(loc),
@@ -135,7 +135,7 @@ AddVSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
 }
 
 void
-AddHSegment(Fixed from, Fixed to, Fixed loc, PPathElt p1, PPathElt p2,
+AddHSegment(Fixed from, Fixed to, Fixed loc, PathElt* p1, PathElt* p2,
             int32_t typ, int32_t i)
 {
     LogMsg(LOGDEBUG, OK, "add hseg %g %g to %g %g %d", FixToDbl(from),
@@ -200,7 +200,7 @@ IsCCW(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed x2, Fixed y2)
 }
 
 static void
-DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
+DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PathElt* p)
 {
     Fixed x2, y2, x3, y3;
     bool ysame;
@@ -235,7 +235,7 @@ DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 }
 
 static void
-DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
+DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PathElt* p)
 {
     Fixed x2, y2;
     bool ysame;
@@ -269,7 +269,7 @@ DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 }
 
 static void
-DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
+DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PathElt* p)
 {
     Fixed x2, y2, x3, y3;
     bool xsame;
@@ -304,7 +304,7 @@ DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 }
 
 static void
-DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
+DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PathElt* p)
 {
     Fixed x2, y2;
     bool xsame;
@@ -338,11 +338,11 @@ DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 }
 
 static void
-MergeLnkSegs(PHintSeg seg1, PHintSeg seg2, PSegLnkLst lst)
+MergeLnkSegs(HintSeg* seg1, HintSeg* seg2, SegLnkLst* lst)
 {
     /* replace lnk refs to seg1 by seg2 */
     while (lst != NULL) {
-        PSegLnk lnk = lst->lnk;
+        SegLnk* lnk = lst->lnk;
         if (lnk->seg == seg1)
             lnk->seg = seg2;
         lst = lst->next;
@@ -350,19 +350,19 @@ MergeLnkSegs(PHintSeg seg1, PHintSeg seg2, PSegLnkLst lst)
 }
 
 static void
-MergeHSegs(PHintSeg seg1, PHintSeg seg2)
+MergeHSegs(HintSeg* seg1, HintSeg* seg2)
 {
     MergeLnkSegs(seg1, seg2, Hlnks);
 }
 
 static void
-MergeVSegs(PHintSeg seg1, PHintSeg seg2)
+MergeVSegs(HintSeg* seg1, HintSeg* seg2)
 {
     MergeLnkSegs(seg1, seg2, Vlnks);
 }
 
 static void
-ReportRemSeg(int32_t l, PHintSeg lst)
+ReportRemSeg(int32_t l, HintSeg* lst)
 {
     Fixed from = 0, to = 0, loc = 0;
     /* this assumes !YgoesUp */
@@ -397,15 +397,15 @@ ReportRemSeg(int32_t l, PHintSeg lst)
 static void
 RemExtraBends(int32_t l0, int32_t l1)
 {
-    PHintSeg lst0 = gSegLists[l0];
-    PHintSeg prv = NULL;
+    HintSeg* lst0 = gSegLists[l0];
+    HintSeg* prv = NULL;
     while (lst0 != NULL) {
-        PHintSeg nxt = lst0->sNxt;
+        HintSeg* nxt = lst0->sNxt;
         Fixed loc0 = lst0->sLoc;
-        PHintSeg lst = gSegLists[l1];
-        PHintSeg p = NULL;
+        HintSeg* lst = gSegLists[l1];
+        HintSeg* p = NULL;
         while (lst != NULL) {
-            PHintSeg n = lst->sNxt;
+            HintSeg* n = lst->sNxt;
             Fixed loc = lst->sLoc;
             if (loc > loc0)
                 break; /* list in increasing order by sLoc */
@@ -444,14 +444,14 @@ RemExtraBends(int32_t l0, int32_t l1)
 }
 
 static void
-CompactList(int32_t i, void (*nm)(PHintSeg, PHintSeg))
+CompactList(int32_t i, void (*nm)(HintSeg*, HintSeg*))
 {
-    PHintSeg lst = gSegLists[i];
-    PHintSeg prv = NULL;
+    HintSeg* lst = gSegLists[i];
+    HintSeg* prv = NULL;
     while (lst != NULL) {
         bool flg;
-        PHintSeg nxt = lst->sNxt;
-        PHintSeg nxtprv = lst;
+        HintSeg* nxt = lst->sNxt;
+        HintSeg* nxtprv = lst;
         while (true) {
             Fixed lstmin, lstmax, nxtmin, nxtmax;
             if ((nxt == NULL) || (nxt->sLoc > lst->sLoc)) {
@@ -554,7 +554,7 @@ TstFlat(Fixed dmn, Fixed dmx)
 }
 
 static bool
-NxtHorz(Fixed x, Fixed y, PPathElt p)
+NxtHorz(Fixed x, Fixed y, PathElt* p)
 {
     Fixed x2, y2, x3, y3;
     NxtForBend(p, &x2, &y2, &x3, &y3);
@@ -562,7 +562,7 @@ NxtHorz(Fixed x, Fixed y, PPathElt p)
 }
 
 static bool
-PrvHorz(Fixed x, Fixed y, PPathElt p)
+PrvHorz(Fixed x, Fixed y, PathElt* p)
 {
     Fixed x2, y2;
     PrvForBend(p, &x2, &y2);
@@ -570,7 +570,7 @@ PrvHorz(Fixed x, Fixed y, PPathElt p)
 }
 
 static bool
-NxtVert(Fixed x, Fixed y, PPathElt p)
+NxtVert(Fixed x, Fixed y, PathElt* p)
 {
     Fixed x2, y2, x3, y3;
     NxtForBend(p, &x2, &y2, &x3, &y3);
@@ -578,7 +578,7 @@ NxtVert(Fixed x, Fixed y, PPathElt p)
 }
 
 static bool
-PrvVert(Fixed x, Fixed y, PPathElt p)
+PrvVert(Fixed x, Fixed y, PathElt* p)
 {
     Fixed x2, y2;
     PrvForBend(p, &x2, &y2);
@@ -597,7 +597,7 @@ TstSameDir(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed x2, Fixed y2)
 }
 
 static bool
-PrvSameDir(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
+PrvSameDir(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PathElt* p)
 {
     Fixed x2, y2;
     p = PrvForBend(p, &x2, &y2);
@@ -607,7 +607,7 @@ PrvSameDir(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
 }
 
 static bool
-NxtSameDir(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PPathElt p)
+NxtSameDir(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PathElt* p)
 {
     Fixed x2, y2, x3, y3;
     p = NxtForBend(p, &x2, &y2, &x3, &y3);
@@ -622,7 +622,7 @@ void
 GenVPts(int32_t specialGlyphType)
 {
     /* specialGlyphType 1 = upper; -1 = lower; 0 = neither */
-    PPathElt p, fl;
+    PathElt *p, *fl;
     bool isVert, flex1, flex2;
     Fixed flx0, fly0, llx, lly, urx, ury, yavg, yend, ydist, q, q2;
     Fixed prvx, prvy, nxtx, nxty, xx, yy, yd2;
@@ -851,7 +851,7 @@ PickHSpot(Fixed x0, Fixed y0, Fixed x1, Fixed y1, Fixed xdist, Fixed px1,
 void
 GenHPts(void)
 {
-    PPathElt p, fl;
+    PathElt *p, *fl;
     bool isHoriz, flex1, flex2;
     Fixed flx0, fly0, llx, lly, urx, ury, xavg, xend, xdist, q, q2;
     Fixed prvx, prvy, nxtx, nxty, xx, yy, xd2;

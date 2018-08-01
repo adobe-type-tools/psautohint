@@ -161,8 +161,8 @@ SpecialSolEol(void)
     return true;
 }
 
-static PPathElt
-SubpathEnd(PPathElt e)
+static PathElt*
+SubpathEnd(PathElt* e)
 {
     while (true) {
         e = e->next;
@@ -173,8 +173,8 @@ SubpathEnd(PPathElt e)
     }
 }
 
-static PPathElt
-SubpathStart(PPathElt e)
+static PathElt*
+SubpathStart(PathElt* e)
 {
     while (e != gPathStart) {
         if (e->type == MOVETO)
@@ -184,8 +184,8 @@ SubpathStart(PPathElt e)
     return e;
 }
 
-static PPathElt
-SolEol(PPathElt e)
+static PathElt*
+SolEol(PathElt* e)
 {
     e = SubpathStart(e);
     e->sol = true;
@@ -197,7 +197,7 @@ SolEol(PPathElt e)
 static void
 SolEolAll(void)
 {
-    PPathElt e;
+    PathElt* e;
     e = gPathStart->next;
     while (e != NULL) {
         e = SolEol(e);
@@ -208,7 +208,7 @@ SolEolAll(void)
 static void
 SolEolUpperOrLower(bool upper)
 {
-    PPathElt e, s1, s2;
+    PathElt *e, *s1, *s2;
     Fixed x1, y1, s1y, s2y;
     bool s1Upper;
     if (gPathStart == NULL)

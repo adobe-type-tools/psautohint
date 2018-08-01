@@ -29,7 +29,7 @@ ReportAddFlex(void)
 }
 
 void
-ReportLinearCurve(PPathElt e, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
+ReportLinearCurve(PathElt* e, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 {
     if (gAutoLinearCurveFix) {
         e->type = LINETO;
@@ -72,7 +72,7 @@ ReportNonVError(Fixed x0, Fixed y0, Fixed x1, Fixed y1)
 }
 
 void
-ExpectedMoveTo(PPathElt e)
+ExpectedMoveTo(PathElt* e)
 {
     char* s;
     switch (e->type) {
@@ -120,7 +120,7 @@ ReportTryFlexError(bool CPflg, Fixed x, Fixed y)
 }
 
 void
-ReportSplit(PPathElt e)
+ReportSplit(PathElt* e)
 {
     Fixed x0, y0, x1, y1;
     GetEndPoints(e, &x0, &y0, &x1, &y1);
@@ -130,7 +130,7 @@ ReportSplit(PPathElt e)
 }
 
 void
-AskForSplit(PPathElt e)
+AskForSplit(PathElt* e)
 {
     Fixed x0, y0, x1, y1;
     if (e->type == MOVETO)
@@ -142,7 +142,7 @@ AskForSplit(PPathElt e)
 }
 
 void
-ReportPossibleLoop(PPathElt e)
+ReportPossibleLoop(PathElt* e)
 {
     Fixed x0, y0, x1, y1;
     if (e->type == MOVETO)
@@ -155,7 +155,7 @@ ReportPossibleLoop(PPathElt e)
 }
 
 void
-ReportConflictCheck(PPathElt e, PPathElt conflict, PPathElt cp)
+ReportConflictCheck(PathElt* e, PathElt* conflict, PathElt* cp)
 {
     Fixed ex, ey, cx, cy, cpx, cpy;
     GetEndPoint(e, &ex, &ey);
@@ -167,7 +167,7 @@ ReportConflictCheck(PPathElt e, PPathElt conflict, PPathElt cp)
 }
 
 void
-ReportConflictCnt(PPathElt e, int32_t cnt)
+ReportConflictCnt(PathElt* e, int32_t cnt)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
@@ -176,7 +176,7 @@ ReportConflictCnt(PPathElt e, int32_t cnt)
 }
 
 void
-ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i)
+ReportRemFlare(PathElt* e, PathElt* e2, bool hFlg, int32_t i)
 {
     Fixed ex1, ey1, ex2, ey2;
     GetEndPoint(e, &ex1, &ey1);
@@ -187,7 +187,7 @@ ReportRemFlare(PPathElt e, PPathElt e2, bool hFlg, int32_t i)
 }
 
 void
-ReportRemConflict(PPathElt e)
+ReportRemConflict(PathElt* e)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
@@ -196,7 +196,7 @@ ReportRemConflict(PPathElt e)
 }
 
 void
-ReportRotateSubpath(PPathElt e)
+ReportRotateSubpath(PathElt* e)
 {
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
@@ -221,7 +221,7 @@ PrintDebugVal(Fixed v)
 }
 
 static void
-ShwHV(PHintVal val)
+ShwHV(HintVal* val)
 {
     Fixed bot, top;
     bot = -val->vLoc1;
@@ -234,10 +234,10 @@ ShwHV(PHintVal val)
 }
 
 void
-ShowHVal(PHintVal val)
+ShowHVal(HintVal* val)
 {
     Fixed l, r;
-    PHintSeg seg;
+    HintSeg* seg;
     ShwHV(val);
     seg = val->vSeg1;
     if (seg == NULL)
@@ -252,7 +252,7 @@ ShowHVal(PHintVal val)
 }
 
 void
-ShowHVals(PHintVal lst)
+ShowHVals(HintVal* lst)
 {
     while (lst != NULL) {
         ShowHVal(lst);
@@ -261,13 +261,13 @@ ShowHVals(PHintVal lst)
 }
 
 void
-ReportAddHVal(PHintVal val)
+ReportAddHVal(HintVal* val)
 {
     ShowHVal(val);
 }
 
 static void
-ShwVV(PHintVal val)
+ShwVV(HintVal* val)
 {
     Fixed lft, rht;
     lft = val->vLoc1;
@@ -278,10 +278,10 @@ ShwVV(PHintVal val)
 }
 
 void
-ShowVVal(PHintVal val)
+ShowVVal(HintVal* val)
 {
     Fixed b, t;
-    PHintSeg seg;
+    HintSeg* seg;
     ShwVV(val);
     seg = val->vSeg1;
     if (seg == NULL)
@@ -296,7 +296,7 @@ ShowVVal(PHintVal val)
 }
 
 void
-ShowVVals(PHintVal lst)
+ShowVVals(HintVal* lst)
 {
     while (lst != NULL) {
         ShowVVal(lst);
@@ -305,13 +305,13 @@ ShowVVals(PHintVal lst)
 }
 
 void
-ReportAddVVal(PHintVal val)
+ReportAddVVal(HintVal* val)
 {
     ShowVVal(val);
 }
 
 void
-ReportFndBstVal(PHintSeg seg, PHintVal val, bool hFlg)
+ReportFndBstVal(HintSeg* seg, HintVal* val, bool hFlg)
 {
     if (hFlg) {
         LogMsg(LOGDEBUG, OK, "FndBstVal: sLoc %g sLft %g sRght %g ",
@@ -331,7 +331,7 @@ ReportFndBstVal(PHintSeg seg, PHintVal val, bool hFlg)
 }
 
 void
-ReportCarry(Fixed l0, Fixed l1, Fixed loc, PHintVal hints, bool vert)
+ReportCarry(Fixed l0, Fixed l1, Fixed loc, HintVal* hints, bool vert)
 {
     if (vert) {
         ShowVVal(hints);
@@ -346,7 +346,7 @@ ReportCarry(Fixed l0, Fixed l1, Fixed loc, PHintVal hints, bool vert)
 }
 
 void
-ReportBestCP(PPathElt e, PPathElt cp)
+ReportBestCP(PathElt* e, PathElt* cp)
 {
     Fixed ex, ey, px, py;
     GetEndPoint(e, &ex, &ey);
@@ -360,7 +360,7 @@ ReportBestCP(PPathElt e, PPathElt cp)
 }
 
 void
-LogHintInfo(PHintPoint pl)
+LogHintInfo(HintPoint* pl)
 {
     char c = pl->c;
     if (c == 'y' || c == 'm') { /* vertical lines */
@@ -380,7 +380,7 @@ LogHintInfo(PHintPoint pl)
 }
 
 static void
-LstHVal(PHintVal val)
+LstHVal(HintVal* val)
 {
     LogMsg(LOGDEBUG, OK, "\t");
     ShowHVal(val);
@@ -388,7 +388,7 @@ LstHVal(PHintVal val)
 }
 
 static void
-LstVVal(PHintVal val)
+LstVVal(HintVal* val)
 {
     LogMsg(LOGDEBUG, OK, "\t");
     ShowVVal(val);
@@ -398,9 +398,9 @@ LstVVal(PHintVal val)
 void
 ListHintInfo(void)
 { /* debugging routine */
-    PPathElt e;
-    PSegLnkLst hLst, vLst;
-    PHintSeg seg;
+    PathElt* e;
+    SegLnkLst *hLst, *vLst;
+    HintSeg* seg;
     Fixed x, y;
     e = gPathStart;
     while (e != NULL) {
@@ -485,7 +485,7 @@ ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
 }
 
 void
-ReportPruneHVal(PHintVal val, PHintVal v, int32_t i)
+ReportPruneHVal(HintVal* val, HintVal* v, int32_t i)
 {
     LogMsg(LOGDEBUG, OK, "PruneHVal: %d\n\t", i);
     ShowHVal(val);
@@ -494,7 +494,7 @@ ReportPruneHVal(PHintVal val, PHintVal v, int32_t i)
 }
 
 void
-ReportPruneVVal(PHintVal val, PHintVal v, int32_t i)
+ReportPruneVVal(HintVal* val, HintVal* v, int32_t i)
 {
     LogMsg(LOGDEBUG, OK, "PruneVVal: %d\n\t", i);
     ShowVVal(val);

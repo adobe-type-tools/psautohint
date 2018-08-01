@@ -24,7 +24,7 @@ static int32_t stkindex;
 static bool flex, startchar;
 static bool forMultiMaster, includeHints;
 /* Reading file for comparison of multiple master data and hint information.
-   Reads into PGlyphPathElt structure instead of PPathElt. */
+   Reads into GlyphPathElt structure instead of PathElt. */
 
 static float origEmSquare = 0.0;
 
@@ -101,11 +101,11 @@ PopPCd(Cd* pcd)
     currentx += (dx);                                                          \
     currenty += (dy)
 
-static PPathElt
+static PathElt*
 AppendElement(int32_t etype)
 {
-    PPathElt e;
-    e = (PPathElt)Alloc(sizeof(PathElt));
+    PathElt* e;
+    e = (PathElt*)Alloc(sizeof(PathElt));
     e->type = (int16_t)etype;
     if (gPathEnd != NULL) {
         gPathEnd->next = e;
@@ -133,7 +133,7 @@ static void
 RDcurveto(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
 {
     if (!forMultiMaster) {
-        PPathElt new;
+        PathElt* new;
         new = AppendElement(CURVETO);
         new->x1 = ScaleAbs(fontinfo, c1.x);
         new->y1 = -ScaleAbs(fontinfo, c1.y);
@@ -142,7 +142,7 @@ RDcurveto(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
         new->x3 = ScaleAbs(fontinfo, c3.x);
         new->y3 = -ScaleAbs(fontinfo, c3.y);
     } else {
-        PGlyphPathElt new;
+        GlyphPathElt* new;
         new = AppendGlyphPathElement(RCT);
         new->x = tempx;
         new->y = tempy;
@@ -167,13 +167,13 @@ static void
 RDmtlt(const ACFontInfo* fontinfo, int32_t etype)
 {
     if (!forMultiMaster) {
-        PPathElt new;
+        PathElt* new;
         new = AppendElement(etype);
         new->x = ScaleAbs(fontinfo, currentx);
         new->y = -ScaleAbs(fontinfo, currenty);
         return;
     } else {
-        PGlyphPathElt new;
+        GlyphPathElt* new;
         new = AppendGlyphPathElement(etype == LINETO ? RDT : RMT);
         new->x = currentx;
         new->y = currenty;

@@ -20,7 +20,7 @@ bool gAddHints = true;    /* whether to include hints in the font */
 #define MAXPATHELT 100 /* initial maximum number of path elements */
 
 static int32_t maxPathEntries = 0;
-static PPathList currPathList = NULL;
+static PathList* currPathList = NULL;
 
 static void CheckPath(void);
 
@@ -36,7 +36,7 @@ CheckPath(void)
         int i;
 
         maxPathEntries += MAXPATHELT;
-        currPathList->path = (PGlyphPathElt)ReallocateMem(
+        currPathList->path = (GlyphPathElt*)ReallocateMem(
           (char*)currPathList->path, maxPathEntries * sizeof(GlyphPathElt),
           "path element array");
         /* Initialize certain fields in GlyphPathElt, since realloc'ed memory */
@@ -51,7 +51,7 @@ CheckPath(void)
     }
 }
 
-PGlyphPathElt
+GlyphPathElt*
 AppendGlyphPathElement(int pathtype)
 {
 
@@ -69,17 +69,17 @@ ResetMaxPathEntries(void)
 }
 
 void
-SetCurrPathList(PPathList plist)
+SetCurrPathList(PathList* plist)
 {
     currPathList = plist;
 }
 
 void
-SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2,
+SetHintsElt(int16_t hinttype, Cd* coord, int32_t elt1, int32_t elt2,
             bool mainhints)
 {
-    PHintElt* hintEntry;
-    PHintElt lastHintEntry = NULL;
+    HintElt** hintEntry;
+    HintElt* lastHintEntry = NULL;
 
     if (!gAddHints)
         return;
@@ -89,7 +89,7 @@ SetHintsElt(int16_t hinttype, CdPtr coord, int32_t elt1, int32_t elt2,
         CheckPath();
         hintEntry = &currPathList->path[gPathEntries].hints;
     }
-    lastHintEntry = (PHintElt)AllocateMem(1, sizeof(HintElt), "hint element");
+    lastHintEntry = (HintElt*)AllocateMem(1, sizeof(HintElt), "hint element");
     lastHintEntry->type = hinttype;
     lastHintEntry->leftorbot = coord->x;
     lastHintEntry->rightortop = coord->y; /* absolute coordinates */

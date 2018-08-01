@@ -17,11 +17,11 @@
  * band is expanded by CLSMRG in each direction
  */
 static bool
-CloseElements(PPathElt e1, PPathElt e2, Fixed loc1, Fixed loc2, bool vert)
+CloseElements(PathElt* e1, PathElt* e2, Fixed loc1, Fixed loc2, bool vert)
 {
     Fixed tmp;
     Fixed x, y;
-    PPathElt e;
+    PathElt* e;
     if (e1 == e2)
         return true;
     if (loc1 < loc2) {
@@ -55,10 +55,10 @@ CloseElements(PPathElt e1, PPathElt e2, Fixed loc1, Fixed loc2, bool vert)
 }
 
 bool
-CloseSegs(PHintSeg s1, PHintSeg s2, bool vert)
+CloseSegs(HintSeg* s1, HintSeg* s2, bool vert)
 {
     /* true if the elements for these segs are "close" in the path */
-    PPathElt e1, e2;
+    PathElt *e1, *e2;
     Fixed loc1, loc2;
     if (s1 == s2)
         return true;
@@ -81,7 +81,7 @@ DoPrune(void)
     that to be the head of the list. Then remove from the list
     any subsequent element for which 'pruned' is true.
     */
-    PHintVal vL = gValList, vPrv;
+    HintVal *vL = gValList, *vPrv;
     while (vL != NULL && vL->pruned)
         vL = vL->vNxt;
     gValList = vL;
@@ -99,8 +99,8 @@ DoPrune(void)
     }
 }
 
-static PHintVal
-PruneOne(PHintVal sLst, bool hFlg, PHintVal sL, int32_t i)
+static HintVal*
+PruneOne(HintVal* sLst, bool hFlg, HintVal* sL, int32_t i)
 {
     /* Simply set the 'pruned' field to True for sLst. */
     if (hFlg)
@@ -138,8 +138,8 @@ PruneOne(PHintVal sLst, bool hFlg, PHintVal sL, int32_t i)
 void
 PruneVVals(void)
 {
-    PHintVal sLst, sL;
-    PHintSeg seg1, seg2, sg1, sg2;
+    HintVal *sLst, *sL;
+    HintSeg *seg1, *seg2, *sg1, *sg2;
     Fixed lft, rht, l, r, prndist;
     Fixed val, v;
     bool flg, otherLft, otherRht;
@@ -214,8 +214,8 @@ PruneVVals(void)
 void
 PruneHVals(void)
 {
-    PHintVal sLst, sL;
-    PHintSeg seg1, seg2, sg1, sg2;
+    HintVal *sLst, *sL;
+    HintSeg *seg1, *seg2, *sg1, *sg2;
     Fixed bot, top, t, b;
     Fixed val, v, prndist;
     bool flg, otherTop, otherBot, topInBlue, botInBlue, ghst;
@@ -342,11 +342,11 @@ PruneHVals(void)
 }
 
 static void
-FindBestVals(PHintVal vL)
+FindBestVals(HintVal* vL)
 {
     Fixed bV, bS;
     Fixed t, b;
-    PHintVal vL2, vPrv, bstV;
+    HintVal *vL2, *vPrv, *bstV;
     for (; vL != NULL; vL = vL->vNxt) {
         if (vL->vBst != NULL)
             continue; /* already assigned */
@@ -380,10 +380,10 @@ FindBestVals(PHintVal vL)
  possibly other fonts as well.  The old version causes bogus hinting
  and extra newhints. */
 static void
-ReplaceVals(Fixed oldB, Fixed oldT, Fixed newB, Fixed newT, PHintVal newBst,
+ReplaceVals(Fixed oldB, Fixed oldT, Fixed newB, Fixed newT, HintVal* newBst,
             bool vert)
 {
-    PHintVal vL;
+    HintVal* vL;
     for (vL = gValList; vL != NULL; vL = vL->vNxt) {
         if (vL->vLoc1 != oldB || vL->vLoc2 != oldT || vL->merge)
             continue;
@@ -405,9 +405,9 @@ ReplaceVals(Fixed oldB, Fixed oldT, Fixed newB, Fixed newT, PHintVal newBst,
 void
 MergeVals(bool vert)
 {
-    PHintVal vLst, vL;
-    PHintVal bstV, bV;
-    PHintSeg seg1, seg2, sg1, sg2;
+    HintVal *vLst, *vL;
+    HintVal *bstV, *bV;
+    HintSeg *seg1, *seg2, *sg1, *sg2;
     Fixed bot, top, b, t;
     Fixed val, v, spc, s;
     bool ghst;

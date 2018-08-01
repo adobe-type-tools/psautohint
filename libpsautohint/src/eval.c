@@ -94,7 +94,7 @@ CalcOverlapDist(Fixed d, Fixed overlaplen, Fixed minlen)
  */
 
 static void
-EvalHPair(PHintSeg botSeg, PHintSeg topSeg, Fixed* pspc, Fixed* pv)
+EvalHPair(HintSeg* botSeg, HintSeg* topSeg, Fixed* pspc, Fixed* pv)
 {
     Fixed brght, blft, bloc, tloc, trght, tlft;
     Fixed mndist, dist, dy;
@@ -157,7 +157,7 @@ EvalHPair(PHintSeg botSeg, PHintSeg topSeg, Fixed* pspc, Fixed* pv)
 }
 
 static void
-HStemMiss(PHintSeg botSeg, PHintSeg topSeg)
+HStemMiss(HintSeg* botSeg, HintSeg* topSeg)
 {
     Fixed brght, blft, bloc, tloc, trght, tlft;
     Fixed mndist, dist, dy;
@@ -213,7 +213,7 @@ HStemMiss(PHintSeg botSeg, PHintSeg topSeg)
 }
 
 static void
-EvalVPair(PHintSeg leftSeg, PHintSeg rightSeg, Fixed* pspc, Fixed* pv)
+EvalVPair(HintSeg* leftSeg, HintSeg* rightSeg, Fixed* pspc, Fixed* pv)
 {
     Fixed ltop, lbot, lloc, rloc, rtop, rbot;
     Fixed mndist, dx, dist;
@@ -266,7 +266,7 @@ EvalVPair(PHintSeg leftSeg, PHintSeg rightSeg, Fixed* pspc, Fixed* pv)
 }
 
 static void
-VStemMiss(PHintSeg leftSeg, PHintSeg rightSeg)
+VStemMiss(HintSeg* leftSeg, HintSeg* rightSeg)
 {
     Fixed ltop, lbot, lloc, rloc, rtop, rbot;
     Fixed mndist, dx, dist;
@@ -318,11 +318,11 @@ VStemMiss(PHintSeg leftSeg, PHintSeg rightSeg)
 }
 
 static void
-InsertVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PHintSeg lSeg,
-             PHintSeg rSeg)
+InsertVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, HintSeg* lSeg,
+             HintSeg* rSeg)
 {
-    PHintVal item, vlist, vprev;
-    item = (PHintVal)Alloc(sizeof(HintVal));
+    HintVal *item, *vlist, *vprev;
+    item = (HintVal*)Alloc(sizeof(HintVal));
     item->vVal = val;
     item->initVal = val;
     item->vLoc1 = lft;
@@ -356,8 +356,8 @@ InsertVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PHintSeg lSeg,
 #define LePruneValue(val) ((val) < FixOne && ((val) << 10) <= gPruneValue)
 
 static void
-AddVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PHintSeg lSeg,
-          PHintSeg rSeg)
+AddVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, HintSeg* lSeg,
+          HintSeg* rSeg)
 {
     if (val == 0)
         return;
@@ -375,10 +375,10 @@ AddVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, PHintSeg lSeg,
 }
 
 static void
-InsertHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, PHintSeg bSeg,
-             PHintSeg tSeg, bool ghst)
+InsertHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, HintSeg* bSeg,
+             HintSeg* tSeg, bool ghst)
 {
-    PHintVal item, vlist, vprev, vl;
+    HintVal *item, *vlist, *vprev, *vl;
     vlist = gValList;
     vprev = NULL;
     while (vlist != NULL) {
@@ -403,7 +403,7 @@ InsertHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, PHintSeg bSeg,
             return;
         vl = vl->vNxt;
     }
-    item = (PHintVal)Alloc(sizeof(HintVal));
+    item = (HintVal*)Alloc(sizeof(HintVal));
     item->vVal = val;
     item->initVal = val;
     item->vSpc = spc;
@@ -421,8 +421,8 @@ InsertHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, PHintSeg bSeg,
 }
 
 static void
-AddHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, PHintSeg bSeg,
-          PHintSeg tSeg)
+AddHValue(Fixed bot, Fixed top, Fixed val, Fixed spc, HintSeg* bSeg,
+          HintSeg* tSeg)
 {
     bool ghst;
     if (val == 0)
@@ -476,9 +476,9 @@ CombVals(Fixed v1, Fixed v2)
 static void
 CombineValues(void)
 { /* works for both H and V */
-    PHintVal vlist = gValList;
+    HintVal* vlist = gValList;
     while (vlist != NULL) {
-        PHintVal v1 = vlist->vNxt;
+        HintVal* v1 = vlist->vNxt;
         Fixed loc1 = vlist->vLoc1;
         Fixed loc2 = vlist->vLoc2;
         Fixed val = vlist->vVal;
@@ -505,7 +505,7 @@ CombineValues(void)
 void
 EvalV(void)
 {
-    PHintSeg lList, rList;
+    HintSeg *lList, *rList;
     Fixed lft, rght;
     Fixed val, spc;
     gValList = NULL;
@@ -530,7 +530,7 @@ EvalV(void)
 void
 EvalH(void)
 {
-    PHintSeg bList, tList, lst, ghostSeg;
+    HintSeg *bList, *tList, *lst, *ghostSeg;
     Fixed lstLoc, tempLoc, cntr;
     Fixed val, spc;
     gValList = NULL;
@@ -550,7 +550,7 @@ EvalH(void)
         }
         bList = bList->sNxt;
     }
-    ghostSeg = (PHintSeg)Alloc(sizeof(HintSeg));
+    ghostSeg = (HintSeg*)Alloc(sizeof(HintSeg));
     ghostSeg->sType = sGHOST;
     ghostSeg->sElt = NULL;
     if (gLenBotBands < 2 && gLenTopBands < 2)

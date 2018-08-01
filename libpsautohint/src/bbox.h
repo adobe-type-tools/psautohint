@@ -12,7 +12,7 @@
 
 #include "ac.h"
 
-PPathElt FindSubpathBBox(PPathElt e);
+PathElt* FindSubpathBBox(PathElt* e);
 void FindCurveBBox(Fixed x0, Fixed y0, Fixed px1, Fixed py1, Fixed px2,
                    Fixed py2, Fixed x1, Fixed y1, Fixed* pllx, Fixed* plly,
                    Fixed* purx, Fixed* pury);
@@ -23,6 +23,6 @@ void ReHintHBnds(void);
 void AddBBoxHV(bool Hflg, bool subs);
 void HintBBox(void);
 void CheckPathBBox(void);
-bool CheckBBoxes(PPathElt e1, PPathElt e2);
+bool CheckBBoxes(PathElt* e1, PathElt* e2);
 
 #endif /* AC_BBOX_H_ */

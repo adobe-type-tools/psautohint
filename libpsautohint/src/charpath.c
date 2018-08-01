@@ -41,7 +41,7 @@ static char* outbuff;
 static int16_t masterCount;
 static const char** masterNames;
 static size_t byteCount, buffSize;
-static PPathList pathlist = NULL;
+static PathList* pathlist = NULL;
 static indx hintsMasterIx = 0; /* The index of the master we read hints from */
 
 /* Prototypes */
@@ -160,7 +160,7 @@ GetNextMTIx(indx mIx, indx pathIx)
 static void
 GetEndPoint1(indx mIx, int32_t pathIx, Fixed* ptX, Fixed* ptY)
 {
-    PGlyphPathElt pathElt = &pathlist[mIx].path[pathIx];
+    GlyphPathElt* pathElt = &pathlist[mIx].path[pathIx];
 
 retry:
     switch (pathElt->type) {
@@ -249,7 +249,7 @@ FreePathElements(indx startix, indx stopix)
     indx i, j;
 
     for (j = startix; j < stopix; j++) {
-        PHintElt hintElt, next;
+        HintElt *hintElt, *next;
         if (pathlist[j].path != NULL) {
             /* Before we can free hint elements will need to know gPathEntries
              value for char in each master because this proc can be
@@ -301,7 +301,7 @@ static bool
 ChangetoCurve(indx mIx, indx pathIx)
 {
     Cd start = { 0, 0 }, end = { 0, 0 }, ctl1, ctl2;
-    PGlyphPathElt pathElt = &pathlist[mIx].path[pathIx];
+    GlyphPathElt* pathElt = &pathlist[mIx].path[pathIx];
 
     if (pathElt->type == RCT)
         return true;
@@ -345,7 +345,7 @@ AddLine(indx mIx, indx pathIx)
     Fixed fixTwo = IntToFix(2);
     Fixed xoffset = 0, yoffset = 0;
     Fixed xoffsetr = 0, yoffsetr = 0;
-    PGlyphPathElt start, end, thisone;
+    GlyphPathElt *start, *end, *thisone;
     indx i, n;
 
     if (pathlist[mIx].path[pathIx].type != RCT) {
@@ -405,7 +405,7 @@ AddLine(indx mIx, indx pathIx)
     /* Now, fix up the following MT's rx1, ry1 values
      This fixes a LOOOONG-standing bug.    renner Wed Jul 16 09:33:50 1997*/
     if ((n = GetNextMTIx(mIx, pathIx)) > 0) {
-        PGlyphPathElt nxtone = &(pathlist[mIx].path[n]);
+        GlyphPathElt* nxtone = &(pathlist[mIx].path[n]);
         nxtone->rx += (-xoffsetr);
         nxtone->ry += (-yoffsetr);
     }
@@ -413,7 +413,7 @@ AddLine(indx mIx, indx pathIx)
 
 #define PI 3.1415926535
 static void
-BestLine(PGlyphPathElt start, PGlyphPathElt end, Fixed* dx, Fixed* dy)
+BestLine(GlyphPathElt* start, GlyphPathElt* end, Fixed* dx, Fixed* dy)
 {
     double angle;
     /* control point differences */
@@ -504,8 +504,8 @@ AddLineCube(indx mIx, indx pathIx)
     } else if (pathlist[mIx].path[pathIx].type == RCT) {
         Fixed dx = 0;
         Fixed dy = 0;
-        PGlyphPathElt start;
-        PGlyphPathElt end;
+        GlyphPathElt* start;
+        GlyphPathElt* end;
         indx mt; /* index of the moveto preceding this path */
 
         mt = GetMTIx(mIx, pathIx);
@@ -571,7 +571,7 @@ CompareGlyphPaths(const ACFontInfo* fontinfo, const char** glyphs)
 
     totalPathElt = minPathLen = MAXINT;
     if (pathlist == NULL) {
-        pathlist = (PPathList)AllocateMem(masterCount, sizeof(PathList),
+        pathlist = (PathList*)AllocateMem(masterCount, sizeof(PathList),
                                           "glyph path list");
     }
 
@@ -981,11 +981,11 @@ GetRelativePosition(Fixed currEnd, Fixed currStart, Fixed end, Fixed start,
  be stored.  pathIx is the index of the path segment used to
  calculate this particular hint. */
 static void
-InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
+InsertHint(HintElt* currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
 {
     indx ix, j;
     Cd startPt, endPt;
-    PHintElt *hintElt, newEntry;
+    HintElt **hintElt, *newEntry;
     GlyphPathElt pathElt;
     int32_t pathIx;
     int16_t pathtype, hinttype = currHintElt->type;
@@ -1023,7 +1023,7 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
     for (ix = 0; ix < masterCount; ix++) {
         if (ix == hintsMasterIx)
             continue;
-        newEntry = (PHintElt)AllocateMem(1, sizeof(HintElt), "hint element");
+        newEntry = (HintElt*)AllocateMem(1, sizeof(HintElt), "hint element");
         newEntry->type = hinttype;
         hintElt =
           (pathEltIx == MAINHINTS ? &pathlist[ix].mainhints
@@ -1108,9 +1108,9 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
 }
 
 static void
-ReadHints(PHintElt hintElt, indx pathEltIx)
+ReadHints(HintElt* hintElt, indx pathEltIx)
 {
-    PHintElt currElt = hintElt;
+    HintElt* currElt = hintElt;
     int16_t pointtype1, pointtype2;
 
     while (currElt != NULL) {
@@ -1168,7 +1168,7 @@ CheckFlexOK(indx ix)
 {
     indx i;
     bool flexOK = pathlist[hintsMasterIx].path[ix].isFlex;
-    PGlyphPathElt end;
+    GlyphPathElt* end;
 
     for (i = 0; i < masterCount; i++) {
         if (i == hintsMasterIx)
@@ -1328,7 +1328,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
                     bool* errormsg)
 {
     indx ix;
-    PHintElt* hintElt = NULL;
+    HintElt** hintElt = NULL;
     int16_t count;
     bool ok = true;
     Fixed min, dmin, mid, dmid, max, dmax;
@@ -1417,7 +1417,7 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
 /* Go through each hint element and check that all rm's and rv's
  meet the necessary criteria. */
 static void
-FindHandVStem3(PHintElt* hintElt, indx pathIx, bool* errormsg)
+FindHandVStem3(HintElt** hintElt, indx pathIx, bool* errormsg)
 {
     int16_t count = 1;
 
@@ -1674,11 +1674,11 @@ WriteFlex(indx eltix)
 static void
 WriteUnmergedHints(indx pathEltIx, indx mIx)
 {
-    PHintElt hintList;
+    HintElt* hintList;
 
     /* hintArray contains the pointers to the beginning of the linked list of
      * hints for each design at pathEltIx. */
-    hintList = (PHintElt)AllocateMem(1, sizeof(HintElt*), "hint element array");
+    hintList = (HintElt*)AllocateMem(1, sizeof(HintElt*), "hint element array");
     /* Initialize hint list. */
     if (pathEltIx == MAINHINTS)
         hintList = pathlist[mIx].mainhints;
@@ -1734,13 +1734,13 @@ WriteHints(indx pathEltIx)
 {
     indx ix, opix;
     int16_t opcount, subrIx, length;
-    PHintElt* hintArray;
+    HintElt** hintArray;
     bool writeSubrOnce;
 
     /* hintArray contains the pointers to the beginning of the linked list of
      hints for
      each design at pathEltIx. */
-    hintArray = (PHintElt*)AllocateMem(masterCount, sizeof(HintElt*),
+    hintArray = (HintElt**)AllocateMem(masterCount, sizeof(HintElt*),
                                        "hint element array");
     /* Initialize hint array. */
     for (ix = 0; ix < masterCount; ix++)
@@ -1843,7 +1843,7 @@ WritePathElt(indx mIx, indx eltIx, int16_t pathType, indx startix,
              int16_t length)
 {
     Cd c1, c2, c3;
-    PGlyphPathElt path, path0;
+    GlyphPathElt *path, *path0;
 
     path = &pathlist[mIx].path[eltIx];
     path0 = &pathlist[0].path[eltIx];
@@ -1936,8 +1936,8 @@ OptimizeMtorDt(indx eltix, int16_t* op, bool* xequal, bool* yequal)
 static bool
 CoordsEqual(indx master1, indx master2, indx opIx, indx eltIx, int16_t op)
 {
-    PGlyphPathElt path1 = &pathlist[master1].path[eltIx],
-                  path2 = &pathlist[master2].path[eltIx];
+    GlyphPathElt *path1 = &pathlist[master1].path[eltIx],
+                 *path2 = &pathlist[master2].path[eltIx];
 
     switch (opIx) {
         case 0:
@@ -1986,7 +1986,7 @@ static bool
 SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
 {
     indx ix, mIx;
-    /*  PGlyphPathElt path0 = &pathlist[0].path[eltIx]; */
+    /*  GlyphPathElt* path0 = &pathlist[0].path[eltIx]; */
     bool same = true;
 
     for (ix = 0; ix < length; ix++) {

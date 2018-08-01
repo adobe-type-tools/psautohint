@@ -17,35 +17,35 @@ typedef struct _t_hintelt {
   int16_t type; /* RB, RY, RM, RV */
   Fixed leftorbot, rightortop;
   int32_t pathix1, pathix2;
-  } HintElt, *PHintElt;
+  } HintElt;
   
-typedef struct _t_glyphpathelt {
+typedef struct {
   int16_t type; /* RMT, RDT, RCT, CP */
   /* the following fields must be cleared in charpathpriv.c/CheckPath */
   bool isFlex:1, sol:1, eol:1, remove:1;
   int unused:12;
-  PHintElt hints;
+  HintElt* hints;
   Fixed x, y, x1, y1, x2, y2, x3, y3; /* absolute coordinates */
   int32_t rx, ry, rx1, ry1, rx2, ry2, rx3, ry3;  /* relative coordinates */
-  } GlyphPathElt, *PGlyphPathElt;
+  } GlyphPathElt;
 
-typedef struct _t_pathlist {
-  PGlyphPathElt path;
-  PHintElt mainhints;
+typedef struct {
+  GlyphPathElt* path;
+  HintElt* mainhints;
   int32_t sb;
   int16_t width;
-} PathList, *PPathList;
+} PathList;
 
 extern int32_t gPathEntries;  /* number of elements in a glyph path */
 extern bool gAddHints;  /* whether to include hints in the font */
 
-PGlyphPathElt AppendGlyphPathElement(int);
+GlyphPathElt* AppendGlyphPathElement(int);
 
 void ResetMaxPathEntries(void);
 
-void SetCurrPathList(PPathList);
+void SetCurrPathList(PathList*);
 
-void SetHintsElt(int16_t, CdPtr, int32_t, int32_t, bool);
+void SetHintsElt(int16_t, Cd*, int32_t, int32_t, bool);
 
 void SetNoHints(void);
 
