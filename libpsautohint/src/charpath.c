@@ -431,7 +431,7 @@ BestLine(PGlyphPathElt start, PGlyphPathElt end, Fixed* dx, Fixed* dy)
 
     angle = atan2(cy, cx);
 
-#if FOUR_WAY
+#ifdef FOUR_WAY
     /* Judy's non-Cube code only moves vertically or horizontally. */
     /* This code produces similar results. */
     if (angle < (-PI * 0.75)) {
@@ -744,7 +744,7 @@ CurveBBox(indx mIx, int16_t hinttype, int32_t pathIx, Fixed* value)
     }
     return false;
 }
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
 static char*
 _HintType_(int typ)
 {
@@ -831,7 +831,7 @@ GetPointType(int16_t hinttype, Fixed value, int32_t* pathEltIx)
     bool tryAgain = true;
     int32_t pathIx = *pathEltIx - 1;
 
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
     if (TRACE) {
         fprintf(stderr,
                 "Enter GetPointType: Hinttype=%s @(%.2f) curr "
@@ -848,7 +848,7 @@ retry:
         case RV + ESCVAL:
             startval = startPt.y;
             endval = endPt.y;
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
             if (TRACE)
                 fprintf(stderr, "Startval Y=%.2f EndVal Y=%.2f ",
                         FIXED2FLOAT(startval), FIXED2FLOAT(endval));
@@ -858,7 +858,7 @@ retry:
         case RM + ESCVAL:
             startval = startPt.x;
             endval = endPt.x;
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
             if (TRACE)
                 fprintf(stderr, "Startval X=%.2f EndVal X=%.2f ",
                         FIXED2FLOAT(startval), FIXED2FLOAT(endval));
@@ -873,32 +873,32 @@ retry:
     /* Certain cases are still ambiguous. */
 
     if (value == startval) {
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
         if (TRACE)
             fprintf(stderr, "==> StartPt\n");
 #endif
         return STARTPT;
     } else if (value == endval) {
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
         if (TRACE)
             fprintf(stderr, "==> EndPt\n");
 #endif
         return ENDPT;
     } else if (nearlyequal_(value, startval, FixOne)) {
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
         if (TRACE)
             fprintf(stderr, "==> ~StartPt\n");
 #endif
         return STARTPT;
     } else if (nearlyequal_(value, endval, FixOne)) {
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
         if (TRACE)
             fprintf(stderr, "==> ~EndPt\n");
 #endif
         return ENDPT;
     } else if (value == (loc = FixHalfMul(startval + endval)) ||
                nearlyequal_(value, loc, FixOne)) {
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
         if (TRACE)
             fprintf(stderr, "==> Average\n");
 #endif
@@ -911,7 +911,7 @@ retry:
         pathIx++;
         *pathEltIx += 1;
         tryAgain = false;
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
         if (TRACE)
             fprintf(stderr, " (Retry w/PathEltix=%d) ", *pathEltIx);
 #endif
@@ -919,20 +919,20 @@ retry:
     }
     if (!tryAgain) /* reset pathEltIx to original value */ {
         *pathEltIx -= 1;
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
         if (TRACE)
             fprintf(stderr, " (reset PathEltix to %d) ", *pathEltIx);
 #endif
     }
     if (CurveBBox(hintsMasterIx, hinttype, *pathEltIx - 1, &loc) &&
         nearlyequal_(value, loc, FixOne)) {
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
         if (TRACE)
             fprintf(stderr, "==> Curvebbox\n");
 #endif
         return CURVEBBOX;
     }
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
     if (TRACE)
         fprintf(stderr, "==> Flatten fallout\n");
 #endif
@@ -991,7 +991,7 @@ InsertHint(PHintElt currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
     int16_t pathtype, hinttype = currHintElt->type;
     Fixed *value, ghostVal = 0, tempVal;
 
-#if __CENTERLINE__
+#ifdef __CENTERLINE__
     if (TRACE) {
         fprintf(stderr, "InsertHint: ");
         fprintf(stderr, "Type1=%s Type2=%s", _HintType_(type1),
