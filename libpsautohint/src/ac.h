@@ -51,12 +51,6 @@
 
 /* structures */
 
-/* glyph bounding box */
-typedef struct Bbox
-   {
-   int32_t llx, lly, urx, ury;
-   } Bbox, *BboxPtr;
-
 /* glyph point coordinates */
 typedef struct
    {
