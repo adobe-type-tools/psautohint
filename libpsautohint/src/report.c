@@ -437,7 +437,7 @@ ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t, bool curve)
 void
 ReportHintConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch)
 {
-    unsigned char s[2];
+    char s[2];
     s[0] = ch;
     s[1] = 0;
     LogMsg(LOGERROR, OK, "  Conflicts with current hints: %g %g %g %g %s.",
