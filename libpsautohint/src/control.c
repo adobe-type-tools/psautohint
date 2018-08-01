@@ -764,7 +764,6 @@ AddHintsSetup(void)
             gVBigDist = gVStems[i];
         }
     }
-    gVBigDist = gVBigDist;
     if (gVBigDist < gInitBigDist) {
         gVBigDist = gInitBigDist;
     }

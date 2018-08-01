@@ -48,9 +48,7 @@ static void
 ReportNonHVError(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char* s)
 {
     Fixed dx, dy;
-    x0 = x0;
     y0 = -y0;
-    x1 = x1;
     y1 = -y1;
     dx = x0 - x1;
     dy = y0 - y1;
@@ -337,9 +335,6 @@ ReportCarry(Fixed l0, Fixed l1, Fixed loc, PHintVal hints, bool vert)
 {
     if (vert) {
         ShowVVal(hints);
-        loc = loc;
-        l0 = l0;
-        l1 = l1;
     } else {
         ShowHVal(hints);
         loc = -loc;
@@ -413,7 +408,6 @@ ListHintInfo(void)
         vLst = e->Vs;
         if ((hLst != NULL) || (vLst != NULL)) {
             GetEndPoint(e, &x, &y);
-            x = x;
             y = -y;
             LogMsg(LOGDEBUG, OK, "x %g y %g ", FixToDbl(x), FixToDbl(y));
             while (hLst != NULL) {
