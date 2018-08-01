@@ -163,7 +163,8 @@ chkDT(Cd c)
 {
     Fixed loc;
 
-    x = c.x, y = c.y;
+    x = c.x;
+    y = c.y;
     ynxt = y;
     xnxt = x;
     if (!ydone) {
