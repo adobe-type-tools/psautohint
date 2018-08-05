@@ -100,3 +100,13 @@ def test_write_to_default_layer(tmpdir):
     hintFiles(options)
 
     assert differ([path, out])
+
+
+@pytest.mark.parametrize("path",
+                         glob.glob("%s/dummy/*_metainfo.ufo" % DATA_DIR))
+def test_ufo_bad(path, tmpdir):
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    with pytest.raises(ACFontError):
+        hintFiles(options)
