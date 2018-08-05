@@ -661,9 +661,6 @@ def get_options(args):
             len(parsed_args.font_paths) != len(parsed_args.output_paths)):
         parser.error("number of input and output fonts differ")
 
-    if len(parsed_args.font_paths) > 1 and parsed_args.fontinfo_file:
-        parser.error("--fontinfo-file can't be used with multiple font inputs")
-
     if parsed_args.reference_font in parsed_args.font_paths:
         parser.error("the reference font cannot also be a font input")
 
