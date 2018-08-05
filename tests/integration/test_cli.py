@@ -28,10 +28,9 @@ def test_outpath(path, tmpdir):
     psautohint([path, '-o', out])
 
 
-def test_outpath_multi(tmpdir):
+def test_multi_outpath(tmpdir):
     """Test handling multiple output paths."""
-    base = glob.glob("%s/dummy/mm0" % DATA_DIR)[0]
-    paths = sorted(glob.glob(base + "/*.ufo"))
+    paths = sorted(glob.glob("%s/dummy/mm0/*.ufo" % DATA_DIR))
     # the reference font is modified in-place, make a temp copy first
     reference = make_temp_copy(tmpdir, paths[0])
     inpaths = paths[1:]
@@ -40,10 +39,9 @@ def test_outpath_multi(tmpdir):
     psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
-def test_outpath_multi_unequal(tmpdir):
+def test_multi_outpath_unequal(tmpdir):
     """Test that we exit if output paths don't match number of input paths."""
-    base = glob.glob("%s/dummy/mm0" % DATA_DIR)[0]
-    paths = sorted(glob.glob(base + "/*.ufo"))
+    paths = sorted(glob.glob("%s/dummy/mm0/*.ufo" % DATA_DIR))
     # the reference font is modified in-place, make a temp copy first
     reference = make_temp_copy(tmpdir, paths[0])
     inpaths = paths[1:]
@@ -53,8 +51,8 @@ def test_outpath_multi_unequal(tmpdir):
         psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
-def test_outpath_multi_different_formats(tmpdir):
-    """Test that we exit if output paths don't match number of input paths."""
+def test_multi_different_formats(tmpdir):
+    """Test that we exit if input paths are of different formats."""
     base = "%s/dummy/mm0" % DATA_DIR
     paths = sorted(glob.glob(base + "/*.ufo"))
     otfs = sorted(glob.glob(base + "/*.otf"))
