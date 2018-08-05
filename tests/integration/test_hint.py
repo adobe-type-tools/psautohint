@@ -90,3 +90,13 @@ def test_missing_cff_table(tmpdir):
 
     with pytest.raises(ACFontError):
         hintFiles(options)
+
+
+def test_write_to_default_layer(tmpdir):
+    path = "%s/dummy/defaultlayer.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+    options.writeToDefaultLayer = True
+    hintFiles(options)
+
+    assert differ([path, out])

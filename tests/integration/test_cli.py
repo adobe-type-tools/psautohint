@@ -158,7 +158,6 @@ def test_missing_cff_table(tmpdir):
     with pytest.raises(ACFontError):
         psautohint([path, '-o', out])
 
-
 @pytest.mark.parametrize("option,argument", [
     ("--exclude-glyphs-file", "glyphs.txt"),
     ("--fontinfo-file", "fontinfo"),
