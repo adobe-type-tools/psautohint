@@ -206,3 +206,22 @@ def test_doc_option(option, tmpdir):
         psautohint([option])
     assert e.type == SystemExit
     assert e.value.code == 0
+
+
+@pytest.mark.parametrize("path", [
+    "%s/dummy/font.ufo" % DATA_DIR,
+    "%s/dummy/font.otf" % DATA_DIR,
+    "%s/dummy/font.cff" % DATA_DIR,
+])
+def test_overwrite_font(path, tmpdir):
+    out = str(tmpdir / basename(path)) + ".out"
+
+    psautohint([path, '-o', out, '-g', 'a,b,c'])
+    psautohint([path, '-o', out, '-g', 'a,b,c'])
+
+
+def test_invalid_save_path(tmpdir):
+    path = "%s/dummy/font.otf" % DATA_DIR
+    out = str(tmpdir / basename(path) / "foo") + ".out"
+    with pytest.raises(SystemExit):
+        psautohint([path, '-o', out])
