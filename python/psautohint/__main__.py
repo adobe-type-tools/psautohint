@@ -398,12 +398,15 @@ def _split_comma_sequence(comma_str):
 def _check_save_path(path_str):
     test_path = os.path.abspath(os.path.realpath(path_str))
     del_test_file = True
+    check_path = test_path
+    if os.path.isdir(test_path):
+        check_path = os.path.join(test_path, "dummy")
     try:
-        if os.path.exists(test_path):
+        if os.path.exists(check_path):
             del_test_file = False
-        open(test_path, 'a').close()
+        open(check_path, 'a').close()
         if del_test_file:
-            os.remove(test_path)
+            os.remove(check_path)
     except (IOError, OSError):
         raise argparse.ArgumentTypeError(
             "{} is not a valid path to write to.".format(test_path))
