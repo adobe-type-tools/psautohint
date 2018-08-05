@@ -33,14 +33,14 @@ def get_font_format(font_file_path):
             elif head[0:2] == b'\x80\x01':
                 return 'PFB'
             elif head in (b'%!PS', b'%!Fo'):
-                for fullhead in (b'%!PS-AdobeFont', b'%!FontType1'):
+                for fullhead in (b'%!PS-AdobeFont', b'%!FontType1',
+                                 b'%!PS-Adobe-3.0 Resource-CIDFont'):
                     f.seek(0)
                     if f.read(len(fullhead)) == fullhead:
-                        return 'PFA'
-                for fullhead in (b'%!PS-Adobe-3.0 Resource-CIDFont', ):
-                    f.seek(0)
-                    if f.read(len(fullhead)) == fullhead:
-                        return 'PFC'
+                        if b"CID" not in fullhead:
+                            return 'PFA'
+                        else:
+                            return 'PFC'
         return None
     else:
         if _font_is_ufo(font_file_path):
