@@ -362,13 +362,12 @@ def hintFile(options, path, outpath, reference_master):
         # Convert to bez format
         bezString, width = fontData.convertToBez(name, removeHints,
                                                  options.hintAll)
-        processedGlyphCount += 1
-        if bezString is None:
-            continue
-
-        if "mt" not in bezString:
+        if bezString is None or "mt" not in bezString:
             # skip empty glyphs.
             continue
+
+        processedGlyphCount += 1
+
         # get new fontinfo string if FDarray index has changed,
         # as each FontDict has different alignment zones.
         gid = fontData.getGlyphID(name)
