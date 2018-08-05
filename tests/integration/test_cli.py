@@ -65,6 +65,18 @@ def test_multi_different_formats(tmpdir):
         psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
+def test_multi_reference_is_input(tmpdir):
+    """Test that we exit if reference font is also one of the input paths."""
+    paths = sorted(glob.glob("%s/dummy/mm0/*.ufo" % DATA_DIR))
+    # the reference font is modified in-place, make a temp copy first
+    reference = make_temp_copy(tmpdir, paths[0])
+    inpaths = [reference] + paths[1:]
+    outpaths = [str(tmpdir / basename(p)) for p in inpaths]
+
+    with pytest.raises(SystemExit):
+        psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
+
+
 @pytest.mark.parametrize("path", glob.glob("%s/dummy/font.pf[ab]" % DATA_DIR))
 def test_type1(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
