@@ -16,7 +16,8 @@ def _font_is_ufo(path):
         meta_path = os.path.join(path, 'metainfo.plist')
         if os.path.isfile(meta_path):
             metainfo = plistlib.readPlist(meta_path)
-            if all([key in metainfo for key in ('creator', 'formatVersion')]):
+            keys = ('creator', 'formatVersion')
+            if metainfo and all([key in metainfo for key in keys]):
                 return True
     return False
 
