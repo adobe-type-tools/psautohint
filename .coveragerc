@@ -28,9 +28,6 @@ exclude_lines =
     if 0:
     if __name__ == .__main__.:
 
-# Don't include files that are 100% covered
-skip_covered = True
-
 # ignore source code that can’t be found
 ignore_errors = True
 
