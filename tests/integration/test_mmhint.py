@@ -2,12 +2,11 @@ from __future__ import print_function, division, absolute_import
 
 import glob
 import pytest
-import py.path
 
 from psautohint.autohint import ACOptions, hintFiles
 
 from .differ import main as differ
-from . import DATA_DIR
+from . import make_temp_copy, DATA_DIR
 
 
 class Options(ACOptions):
@@ -25,10 +24,7 @@ class Options(ACOptions):
 def test_mmufo(base, tmpdir):
     paths = sorted(glob.glob(base + "/*.ufo"))
     # the reference font is modified in-place, make a temp copy first
-    referenceSrc = py.path.local(paths[0])
-    referenceDst = tmpdir / referenceSrc.basename
-    referenceSrc.copy(referenceDst)
-    reference = str(referenceDst)
+    reference = make_temp_copy(tmpdir, paths[0])
     inpaths = paths[1:]
     outpaths = [str(tmpdir / p) for p in inpaths]
 

@@ -2,13 +2,12 @@ from __future__ import print_function, division, absolute_import
 
 import glob
 from os.path import basename
-import py.path
 import pytest
 
 from psautohint.autohint import ACFontError
 from psautohint.__main__ import main as psautohint
 
-from . import DATA_DIR
+from . import make_temp_copy, DATA_DIR
 
 
 # font.otf, font.cff, font.ufo
@@ -19,11 +18,7 @@ FONTINFO = glob.glob("%s/*/*/fontinfo" % DATA_DIR)
 @pytest.mark.parametrize("path", FONTS)
 def test_basic(path, tmpdir):
     # the input font is modified in-place, make a temp copy first
-    pathSrc = py.path.local(path)
-    pathDst = tmpdir / pathSrc.basename
-    pathSrc.copy(pathDst)
-
-    psautohint([str(pathDst)])
+    psautohint([make_temp_copy(tmpdir, path)])
 
 
 @pytest.mark.parametrize("path", FONTS)
@@ -38,10 +33,7 @@ def test_outpath_multi(tmpdir):
     base = glob.glob("%s/dummy/mm0" % DATA_DIR)[0]
     paths = sorted(glob.glob(base + "/*.ufo"))
     # the reference font is modified in-place, make a temp copy first
-    referenceSrc = py.path.local(paths[0])
-    referenceDst = tmpdir / referenceSrc.basename
-    referenceSrc.copy(referenceDst)
-    reference = str(referenceDst)
+    reference = make_temp_copy(tmpdir, paths[0])
     inpaths = paths[1:]
     outpaths = [str(tmpdir / basename(p)) for p in inpaths]
 
@@ -53,10 +45,7 @@ def test_outpath_multi_unequal(tmpdir):
     base = glob.glob("%s/dummy/mm0" % DATA_DIR)[0]
     paths = sorted(glob.glob(base + "/*.ufo"))
     # the reference font is modified in-place, make a temp copy first
-    referenceSrc = py.path.local(paths[0])
-    referenceDst = tmpdir / referenceSrc.basename
-    referenceSrc.copy(referenceDst)
-    reference = str(referenceDst)
+    reference = make_temp_copy(tmpdir, paths[0])
     inpaths = paths[1:]
     outpaths = [str(tmpdir / basename(p)) for p in inpaths][1:]
 
