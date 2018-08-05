@@ -220,6 +220,12 @@ def test_overwrite_font(path, tmpdir):
     psautohint([path, '-o', out, '-g', 'a,b,c'])
 
 
+def test_invalid_input_path(tmpdir):
+    path = str(tmpdir / "foo") + ".otf"
+    with pytest.raises(SystemExit):
+        psautohint([path])
+
+
 def test_invalid_save_path(tmpdir):
     path = "%s/dummy/font.otf" % DATA_DIR
     out = str(tmpdir / basename(path) / "foo") + ".out"
