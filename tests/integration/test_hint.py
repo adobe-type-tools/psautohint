@@ -66,7 +66,7 @@ def test_cff(cff, tmpdir):
                    str(tmpdir / basename(out)) + ".xml"])
 
 
-@pytest.mark.parametrize("path", glob.glob("%s/dummy/*.p*" % DATA_DIR))
+@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.p*" % DATA_DIR))
 def test_type1(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
@@ -105,6 +105,15 @@ def test_write_to_default_layer(tmpdir):
 @pytest.mark.parametrize("path",
                          glob.glob("%s/dummy/*_metainfo.ufo" % DATA_DIR))
 def test_ufo_bad(path, tmpdir):
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    with pytest.raises(ACFontError):
+        hintFiles(options)
+
+
+@pytest.mark.parametrize("path", glob.glob("%s/dummy/bad_*.p*" % DATA_DIR))
+def test_type1_bad(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
 
