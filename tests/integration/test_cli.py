@@ -53,6 +53,20 @@ def test_outpath_multi_unequal(tmpdir):
         psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
+def test_outpath_multi_different_formats(tmpdir):
+    """Test that we exit if output paths don't match number of input paths."""
+    base = "%s/dummy/mm0" % DATA_DIR
+    paths = sorted(glob.glob(base + "/*.ufo"))
+    otfs = sorted(glob.glob(base + "/*.otf"))
+    # the reference font is modified in-place, make a temp copy first
+    reference = make_temp_copy(tmpdir, otfs[0])
+    inpaths = paths[1:]
+    outpaths = [str(tmpdir / basename(p)) for p in inpaths]
+
+    with pytest.raises(SystemExit):
+        psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
+
+
 @pytest.mark.parametrize("path", glob.glob("%s/dummy/font.pf[ab]" % DATA_DIR))
 def test_type1(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
