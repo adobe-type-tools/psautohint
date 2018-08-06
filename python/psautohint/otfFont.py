@@ -1055,13 +1055,13 @@ def convertBezToT2(bezString):
 
 class CFFFontData:
     def __init__(self, ttFont, inputPath, outFilePath, allow_decimal_coords,
-                 font_format):
+                 is_otf):
         self.ttFont = ttFont
         self.inputPath = inputPath
         if outFilePath is None:
             outFilePath = inputPath
         self.outFilePath = outFilePath
-        self.font_format = font_format
+        self.is_otf = is_otf
         try:
             self.cffTable = ttFont["CFF "]
             topDict = self.cffTable.cff.topDictIndex[0]
@@ -1118,10 +1118,10 @@ class CFFFontData:
                         glyphName)
 
     def saveChanges(self):
-        if self.font_format == "OTF":
+        if self.is_otf:
             self.ttFont.save(self.outFilePath)
             self.ttFont.close()
-        elif self.font_format == "CFF":
+        else:
             data = self.ttFont["CFF "].compile(self.ttFont)
             with open(self.outFilePath, "wb") as tf:
                 tf.write(data)

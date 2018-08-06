@@ -379,7 +379,7 @@ class BezParseError(ValueError):
 
 class UFOFontData:
     def __init__(self, parentPath, useHashMap, allow_decimal_coords,
-                 programName):
+                 write_to_default_layer, programName):
         self.parentPath = parentPath
         self.glyphMap = {}
         self.processedLayerGlyphMap = {}
@@ -418,6 +418,9 @@ class UFOFontData:
         self.allowDecimalCoords = allow_decimal_coords
 
         self.loadGlyphMap()
+
+        if write_to_default_layer:
+            self.setWriteToDefault()
 
     def getUnitsPerEm(self):
         return int(self.fontInfo.get("unitsPerEm", 1000))

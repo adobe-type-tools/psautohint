@@ -195,15 +195,15 @@ def printFontInfo(fontInfoString):
             pass
 
 
-def openFile(path, outFilePath, options):
+def openFile(path, out_path, options):
     font_format = get_font_format(path)
     if font_format is None:
         raise ACFontError("{} is not a supported font format".format(path))
 
     if font_format == "UFO":
-        font = openUFOFile(path, outFilePath, options)
+        font = _open_ufo_file(path, out_path, options)
     elif font_format in ("OTF", "CFF"):
-        font = openOpenTypeFile(path, outFilePath, font_format, options)
+        font = _open_otf_file(path, out_path, font_format == "OTF", options)
     else:
         raise NotImplementedError("%s format is not supported yet, sorry." %
                                   font_format)
@@ -211,52 +211,48 @@ def openFile(path, outFilePath, options):
     return font
 
 
-def openUFOFile(path, outFilePath, options):
+def _open_ufo_file(path, out_path, options):
     # If user has specified a path other than the source font path,
     # then copy the entire UFO font, and operate on the copy.
-    if (outFilePath is not None) and (
-       os.path.abspath(path) != os.path.abspath(outFilePath)):
+    if (out_path is not None) and (
+       os.path.abspath(path) != os.path.abspath(out_path)):
         log.info("Copying from source UFO font to output UFO font "
                  "before processing...")
-        if os.path.exists(outFilePath):
-            shutil.rmtree(outFilePath)
-        shutil.copytree(path, outFilePath)
-        path = outFilePath
+        if os.path.exists(out_path):
+            shutil.rmtree(out_path)
+        shutil.copytree(path, out_path)
+        path = out_path
     # We always use the hash map to skip glyphs that have been previously
     # processed, unless the user has report only, not make changes.
     useHashMap = not options.logOnly
-    font = UFOFontData(path, useHashMap, options.allowDecimalCoords,
-                       kAutohintName)
-    font.useProcessedLayer = True
-    if options.writeToDefaultLayer:
-        font.setWriteToDefault()
+    font_data = UFOFontData(path, useHashMap, options.allowDecimalCoords,
+                            options.writeToDefaultLayer, kAutohintName)
+    font_data.useProcessedLayer = True
     # Programs in this list must be run before autohint,
     # if the outlines have been edited.
-    font.requiredHistory.append(kCheckOutlineName)
-    return font
+    font_data.requiredHistory.append(kCheckOutlineName)
+    return font_data
 
 
-def openOpenTypeFile(path, outFilePath, font_format, options):
+def _open_otf_file(path, out_path, is_otf, options):
     # If input font is CFF, build a dummy ttFont in memory.
-    if font_format == "OTF":  # it is an OTF font, can process file directly
-        ttFont = TTFont(path)
-        if "CFF " not in ttFont:
+    if is_otf:
+        # It is an OTF font, we can process it directly.
+        font = TTFont(path)
+        if "CFF " not in font:
             raise ACFontError("Font is not a CFF font <%s>." % path)
-    elif font_format == "CFF":
-        # now package the CFF font as an OTF font.
-        with open(path, "rb") as ff:
-            data = ff.read()
-
-        ttFont = TTFont()
-        cffClass = getTableClass('CFF ')
-        ttFont['CFF '] = cffClass('CFF ')
-        ttFont['CFF '].decompile(data, ttFont)
     else:
-        raise ACFontError("Font file must be CFF or OTF file: %s." % path)
+        # It is s CFF font, package it in an OTF font.
+        with open(path, "rb") as fp:
+            data = fp.read()
 
-    fontData = CFFFontData(ttFont, path, outFilePath,
-                           options.allowDecimalCoords, font_format)
-    return fontData
+        font = TTFont()
+        cff_class = getTableClass('CFF ')
+        font['CFF '] = cff_class('CFF ')
+        font['CFF '].decompile(data, font)
+
+    return CFFFontData(font, path, out_path, options.allowDecimalCoords,
+                       is_otf)
 
 
 def hintFiles(options):
