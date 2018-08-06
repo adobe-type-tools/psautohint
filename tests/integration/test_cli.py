@@ -12,7 +12,6 @@ from . import make_temp_copy, DATA_DIR
 
 # font.otf, font.cff, font.ufo
 FONTS = glob.glob("%s/dummy/font.[ocu][tf][fo]" % DATA_DIR)
-FONTINFO = glob.glob("%s/*/*/fontinfo" % DATA_DIR)
 
 
 @pytest.mark.parametrize("path", FONTS)
@@ -147,7 +146,7 @@ def test_missing_glyph_list(glyphs, tmpdir):
         psautohint([path, '-o', out, '-g', glyphs])
 
 
-@pytest.mark.parametrize("path", [FONTINFO[0], DATA_DIR])
+@pytest.mark.parametrize("path", ["%s/dummy/fontinfo" % DATA_DIR, DATA_DIR])
 def test_unsupported_format(path, tmpdir):
     with pytest.raises(SystemExit):
         psautohint([path])
