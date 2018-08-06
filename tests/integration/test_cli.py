@@ -147,7 +147,7 @@ def test_missing_glyph_list(glyphs, tmpdir):
 
 
 @pytest.mark.parametrize("path", ["%s/dummy/fontinfo" % DATA_DIR, DATA_DIR])
-def test_unsupported_format(path, tmpdir):
+def test_unsupported_format(path):
     with pytest.raises(SystemExit):
         psautohint([path])
 
@@ -202,7 +202,7 @@ def test_argumentless_option(path, option, tmpdir):
     "--info",
     "--version",
 ])
-def test_doc_option(option, tmpdir):
+def test_doc_option(option):
     with pytest.raises(SystemExit) as e:
         psautohint([option])
     assert e.type == SystemExit
