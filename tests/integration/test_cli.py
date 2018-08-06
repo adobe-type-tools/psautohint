@@ -135,6 +135,9 @@ def test_exclude_glyph_list(glyphs, tmpdir):
 
 @pytest.mark.parametrize("glyphs", [
     'FOO,BAR',
+    'FOO-BAR',
+    'FOO-a',
+    'a-BAR',
 ])
 def test_missing_glyph_list(glyphs, tmpdir):
     path = "%s/dummy/font.ufo" % DATA_DIR
