@@ -97,77 +97,51 @@ def test_type1(path, tmpdir):
         psautohint([path, '-o', out])
 
 
-def test_glyph_list(tmpdir):
+@pytest.mark.parametrize("glyphs", [
+    'a,b,c',     # Glyph List
+    'a-z',       # Glyph range
+    'FOO,BAR,a', # Some glyphs in the list do not exist.
+])
+def test_glyph_list(glyphs, tmpdir):
     path = "%s/dummy/font.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    psautohint([path, '-o', out, '-g', 'a,b,c'])
+    psautohint([path, '-o', out, '-g', glyphs])
 
 
-def test_glyph_range(tmpdir):
-    path = "%s/dummy/font.ufo" % DATA_DIR
-    out = str(tmpdir / basename(path)) + ".out"
-
-    psautohint([path, '-o', out, '-g', 'a-z'])
-
-
-def test_cid_glyph_list(tmpdir):
+@pytest.mark.parametrize("glyphs", [
+    '/0,/1,/2',
+    '/0-/10',
+    'cid0,cid1,cid2',
+    'cid0-cid10',
+])
+def test_cid_glyph_list(glyphs, tmpdir):
     path = "%s/source-code-pro/CID/font.otf" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    psautohint([path, '-o', out, '-g', '/0,/1,/2'])
+    psautohint([path, '-o', out, '-g', glyphs])
 
 
-def test_cid_glyph_range(tmpdir):
-    path = "%s/source-code-pro/CID/font.otf" % DATA_DIR
-    out = str(tmpdir / basename(path)) + ".out"
-
-    psautohint([path, '-o', out, '-g', '/0-/10'])
-
-
-def test_cid_prefixed_glyph_list(tmpdir):
-    path = "%s/source-code-pro/CID/font.otf" % DATA_DIR
-    out = str(tmpdir / basename(path)) + ".out"
-
-    psautohint([path, '-o', out, '-g', 'cid0,cid1,cid2'])
-
-
-def test_cid_prefixed_glyph_range(tmpdir):
-    path = "%s/source-code-pro/CID/font.otf" % DATA_DIR
-    out = str(tmpdir / basename(path)) + ".out"
-
-    psautohint([path, '-o', out, '-g', 'cid0-cid10'])
-
-
-def test_exclude_glyph_list(tmpdir):
+@pytest.mark.parametrize("glyphs", [
+    'a,b,c',
+    'a-z',
+])
+def test_exclude_glyph_list(glyphs, tmpdir):
     path = "%s/dummy/font.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    psautohint([path, '-o', out, '-x', 'a,b,c'])
+    psautohint([path, '-o', out, '-x', glyphs])
 
 
-def test_exclude_glyph_range(tmpdir):
-    path = "%s/dummy/font.ufo" % DATA_DIR
-    out = str(tmpdir / basename(path)) + ".out"
-
-    psautohint([path, '-o', out, '-x', 'a-z'])
-
-
-def test_filter_glyph_list(tmpdir):
-    """Test that we don't fail if some glyphs in the list do not exist."""
-    path = "%s/dummy/font.ufo" % DATA_DIR
-    out = str(tmpdir / basename(path)) + ".out"
-
-    psautohint([path, '-o', out, '-g', 'FOO,BAR,a'])
-
-
-def test_missing_glyph_list(tmpdir):
-    """Test that we raise if all glyph in the list do not exist."""
+@pytest.mark.parametrize("glyphs", [
+    'FOO,BAR',
+])
+def test_missing_glyph_list(glyphs, tmpdir):
     path = "%s/dummy/font.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
     with pytest.raises(ACFontError):
-        psautohint([path, '-o', out, '-g', 'FOO,BAR'])
+        psautohint([path, '-o', out, '-g', glyphs])
 
 
 @pytest.mark.parametrize("path", [FONTINFO[0], DATA_DIR])
