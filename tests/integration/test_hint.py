@@ -119,3 +119,11 @@ def test_type1_bad(path, tmpdir):
 
     with pytest.raises(ACFontError):
         hintFiles(options)
+
+
+def test_counter_glyphs(tmpdir):
+    path = "%s/dummy/font.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+    options.vCounterGlyphs = ["m", "M", "T"]
+    hintFiles(options)

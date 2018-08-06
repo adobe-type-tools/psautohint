@@ -285,12 +285,12 @@ def hintFile(options, path, outpath, reference_master):
     psName = fontData.getPSName()
 
     # Check counter glyphs, if any.
-    if options.hCounterGlyphs or options.vCounterGlyphs:
-        missingList = filter(lambda name: name not in fontGlyphList,
-                             options.hCounterGlyphs + options.vCounterGlyphs)
-        if missingList:
+    counter_glyphs = options.hCounterGlyphs + options.vCounterGlyphs
+    if counter_glyphs:
+        missing = [n for n in counter_glyphs if n not in fontGlyphList]
+        if missing:
             log.error("H/VCounterChars glyph named in fontinfo is "
-                      "not in font: %s", missingList)
+                      "not in font: %s", missing)
 
     # Build alignment zone string
     if options.printDefaultFDDict:
