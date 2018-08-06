@@ -380,11 +380,7 @@ def hintFile(options, path, outpath, reference_master):
                 fontInfo = fdDict.getFontInfo()
         else:
             if fdGlyphDict is not None:
-                try:
-                    fdIndex = fdGlyphDict[name][0]
-                except KeyError:
-                    # use default dict.
-                    fdIndex = 0
+                fdIndex = fdGlyphDict[name][0]
                 if lastFDIndex != fdIndex:
                     lastFDIndex = fdIndex
                     fdDict = fontDictList[fdIndex]
