@@ -92,7 +92,7 @@ def test_missing_cff_table(tmpdir):
         hintFiles(options)
 
 
-def test_write_to_default_layer(tmpdir):
+def test_ufo_write_to_default_layer(tmpdir):
     path = "%s/dummy/defaultlayer.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
