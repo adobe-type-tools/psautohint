@@ -39,7 +39,7 @@ import time
 from fontTools.ttLib import TTFont, getTableClass
 
 from .otfFont import CFFFontData
-from .ufoFont import UFOFontData, kAutohintName, kCheckOutlineName
+from .ufoFont import UFOFontData, kCheckOutlineName
 
 from . import get_font_format, hint_bez_glyph, hint_compatible_bez_glyphs
 
@@ -226,7 +226,7 @@ def _open_ufo_file(path, out_path, options):
     # processed, unless the user has report only, not make changes.
     useHashMap = not options.logOnly
     font_data = UFOFontData(path, useHashMap, options.allowDecimalCoords,
-                            options.writeToDefaultLayer, kAutohintName)
+                            options.writeToDefaultLayer)
     font_data.useProcessedLayer = True
     # Programs in this list must be run before autohint,
     # if the outlines have been edited.

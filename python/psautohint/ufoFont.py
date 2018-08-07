@@ -379,7 +379,7 @@ class BezParseError(ValueError):
 
 class UFOFontData:
     def __init__(self, parentPath, useHashMap, allow_decimal_coords,
-                 write_to_default_layer, programName):
+                 write_to_default_layer):
         self.parentPath = parentPath
         self.glyphMap = {}
         self.processedLayerGlyphMap = {}
@@ -395,7 +395,6 @@ class UFOFontData:
         # matches hash of current glyph data.
         self.hashMap = {}
         self.fontDict = None
-        self.programName = programName
         self.curSrcDir = None
         self.hashMapChanged = False
         self.glyphDefaultDir = os.path.join(parentPath, "glyphs")
@@ -561,11 +560,11 @@ class UFOFontData:
         # and we have just created a new glyph in the processed layer,
         # then reset the history.
         if (not self.useProcessedLayer) and changed:
-            self.hashMap[glyphName] = [srcHash, [self.programName]]
+            self.hashMap[glyphName] = [srcHash, [kAutohintName]]
         else:
             # If the program is not in the history list, add it.
-            if self.programName not in historyList:
-                historyList.append(self.programName)
+            if kAutohintName not in historyList:
+                historyList.append(kAutohintName)
 
     def checkSkipGlyph(self, glyphName, newSrcHash, doAll):
         skip = False
@@ -585,7 +584,7 @@ class UFOFontData:
             hashEntry = self.hashMap[glyphName]
             srcHash, historyList = hashEntry
             try:
-                programHistoryIndex = historyList.index(self.programName)
+                programHistoryIndex = historyList.index(kAutohintName)
             except ValueError:
                 pass
         except KeyError:
@@ -600,13 +599,13 @@ class UFOFontData:
             if not skip:
                 if not self.useProcessedLayer:  # case for Checkoutlines
                     self.hashMapChanged = True
-                    self.hashMap[glyphName] = [newSrcHash, [self.programName]]
+                    self.hashMap[glyphName] = [newSrcHash, [kAutohintName]]
                     glyphPath = self.getGlyphProcessedPath(glyphName)
                     if glyphPath and os.path.exists(glyphPath):
                         os.remove(glyphPath)
                 else:
                     if programHistoryIndex < 0:
-                        historyList.append(self.programName)
+                        historyList.append(kAutohintName)
         else:
             if self.useProcessedLayer:  # case for autohint
                 # default layer glyph and stored glyph hash differ, and
@@ -622,13 +621,13 @@ class UFOFontData:
                     log.error("Glyph '%s' has been edited. You must first "
                               "run '%s' before running '%s'. Skipping.",
                               glyphName, self.requiredHistory,
-                              self.programName)
+                              kAutohintName)
                     skip = True
 
             # If the source hash has changed, we need to delete
             # the processed layer glyph.
             self.hashMapChanged = True
-            self.hashMap[glyphName] = [newSrcHash, [self.programName]]
+            self.hashMap[glyphName] = [newSrcHash, [kAutohintName]]
             glyphPath = self.getGlyphProcessedPath(glyphName)
             if glyphPath and os.path.exists(glyphPath):
                 os.remove(glyphPath)
