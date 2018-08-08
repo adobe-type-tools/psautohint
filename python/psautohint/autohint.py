@@ -36,7 +36,7 @@ import re
 import time
 
 from .otfFont import CFFFontData
-from .ufoFont import UFOFontData, kCheckOutlineName
+from .ufoFont import UFOFontData
 from ._psautohint import error as PsAutoHintCError
 
 from . import (get_font_format, hint_bez_glyph, hint_compatible_bez_glyphs,
@@ -195,7 +195,9 @@ def openFile(path, options):
         raise FontParseError("{} is not a supported font format".format(path))
 
     if font_format == "UFO":
-        font = _open_ufo_file(path, options)
+        font = UFOFontData(path, options.logOnly,
+                           options.allowDecimalCoords,
+                           options.writeToDefaultLayer)
     elif font_format in ("OTF", "CFF"):
         is_otf = font_format == "OTF"
         font = CFFFontData(path, options.allowDecimalCoords, is_otf)
@@ -204,20 +206,6 @@ def openFile(path, options):
                                   font_format)
 
     return font
-
-
-def _open_ufo_file(path, options):
-    # We always use the hash map to skip glyphs that have been previously
-    # processed, unless the user has report only, not make changes.
-    useHashMap = not options.logOnly
-    font_data = UFOFontData(path, useHashMap,
-                            options.allowDecimalCoords,
-                            options.writeToDefaultLayer)
-    font_data.useProcessedLayer = True
-    # Programs in this list must be run before autohint,
-    # if the outlines have been edited.
-    font_data.requiredHistory.append(kCheckOutlineName)
-    return font_data
 
 
 def hintFiles(options):

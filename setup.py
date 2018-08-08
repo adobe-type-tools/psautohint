@@ -102,6 +102,7 @@ setup(name="psautohint",
       setup_requires=["setuptools_scm"],
       install_requires=[
           'fonttools>=3.1.2',
+          'ufoLib',
       ],
       extras_require={
           "testing": [
