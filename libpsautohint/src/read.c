@@ -186,37 +186,6 @@ RDmtlt(const ACFontInfo* fontinfo, int32_t etype)
 #define RDmoveto() RDmtlt(fontinfo, MOVETO)
 
 static void
-psRDT(const ACFontInfo* fontinfo)
-{
-    Cd c;
-    PopPCd(&c);
-    tempx = c.x;
-    tempy = c.y;
-    DoDelta(c.x, c.y);
-    RDlineto();
-}
-
-static void
-psHDT(const ACFontInfo* fontinfo)
-{
-    Fixed dx;
-    tempy = 0;
-    dx = tempx = Pop();
-    currentx += dx;
-    RDlineto();
-}
-
-static void
-psVDT(const ACFontInfo* fontinfo)
-{
-    Fixed dy;
-    tempx = 0;
-    dy = tempy = Pop();
-    currenty += dy;
-    RDlineto();
-}
-
-static void
 psRMT(const ACFontInfo* fontinfo)
 {
     Cd c;
@@ -226,26 +195,6 @@ psRMT(const ACFontInfo* fontinfo)
     tempx = c.x;
     tempy = c.y;
     DoDelta(c.x, c.y);
-    RDmoveto();
-}
-
-static void
-psHMT(const ACFontInfo* fontinfo)
-{
-    Fixed dx;
-    tempy = 0;
-    dx = tempx = Pop();
-    currentx += dx;
-    RDmoveto();
-}
-
-static void
-psVMT(const ACFontInfo* fontinfo)
-{
-    Fixed dy;
-    tempx = 0;
-    dy = tempy = Pop();
-    currenty += dy;
     RDmoveto();
 }
 
@@ -264,40 +213,6 @@ Rct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
     c3.x = currentx;
     c3.y = currenty;
     RDcurveto(fontinfo, c1, c2, c3);
-}
-
-static void
-psRCT(const ACFontInfo* fontinfo)
-{
-    Cd c1, c2, c3;
-    PopPCd(&c3);
-    PopPCd(&c2);
-    PopPCd(&c1);
-    Rct(fontinfo, c1, c2, c3);
-}
-
-static void
-psVHCT(const ACFontInfo* fontinfo)
-{
-    Cd c1, c2, c3;
-    c3.y = 0;
-    c3.x = Pop();
-    PopPCd(&c2);
-    c1.y = Pop();
-    c1.x = 0;
-    Rct(fontinfo, c1, c2, c3);
-}
-
-static void
-psHVCT(const ACFontInfo* fontinfo)
-{
-    Cd c1, c2, c3;
-    c3.y = Pop();
-    c3.x = 0;
-    PopPCd(&c2);
-    c1.y = 0;
-    c1.x = Pop();
-    Rct(fontinfo, c1, c2, c3);
 }
 
 static void
@@ -455,50 +370,10 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
             break;
         case 3:
             switch (nm[0]) {
-                case 'r': /* rdt, rmt, rct */
-                    if (nm[2] != 't')
+                case 'r': /* rmt */
+                    if (nm[1] != 'm' || nm[2] != 't')
                         goto badFile;
-                    switch (nm[1]) {
-                        case 'd':
-                            psRDT(fontinfo);
-                            break;
-                        case 'm':
-                            psRMT(fontinfo);
-                            break;
-                        case 'c':
-                            psRCT(fontinfo);
-                            break;
-                        default:
-                            goto badFile;
-                    }
-                    break;
-                case 'h': /* hdt, hmt */
-                    if (nm[2] != 't')
-                        goto badFile;
-                    switch (nm[1]) {
-                        case 'd':
-                            psHDT(fontinfo);
-                            break;
-                        case 'm':
-                            psHMT(fontinfo);
-                            break;
-                        default:
-                            goto badFile;
-                    }
-                    break;
-                case 'v': /* vdt, vmt */
-                    if (nm[2] != 't')
-                        goto badFile;
-                    switch (nm[1]) {
-                        case 'd':
-                            psVDT(fontinfo);
-                            break;
-                        case 'm':
-                            psVMT(fontinfo);
-                            break;
-                        default:
-                            goto badFile;
-                    }
+                    psRMT(fontinfo);
                     break;
                 case 's': /* sol, snc */
                 case 'e': /* eol, enc */
@@ -526,24 +401,6 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                         psDIV();
                     else
                         goto badFile;
-                    break;
-                default:
-                    goto badFile;
-            }
-            break;
-        case 4:
-            if (nm[2] != 'c' || nm[3] != 't')
-                goto badFile;
-            switch (nm[0]) {
-                case 'v': /* vhct */
-                    if (nm[1] != 'h')
-                        goto badFile;
-                    psVHCT(fontinfo);
-                    break;
-                case 'h': /* hvct */
-                    if (nm[1] != 'v')
-                        goto badFile;
-                    psHVCT(fontinfo);
                     break;
                 default:
                     goto badFile;

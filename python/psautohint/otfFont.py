@@ -377,17 +377,8 @@ def makeHintList(hints, needHintMasks, isH):
 bezToT2 = {
     "mt": 'rmoveto',
     "rmt": 'rmoveto',
-    "hmt": 'hmoveto',
-    "vmt": 'vmoveto',
     "dt": 'rlineto',
-    "rdt": 'rlineto',
-    "hdt": 'hlineto',
-    "vdt": 'vlineto',
     "ct": 'rrcurveto',
-    "rct": 'rrcurveto',
-    "rcv": 'rrcurveto',  # Morisawa's alternate name for 'rct'.
-    "vhct": 'vhcurveto',
-    "hvct": 'hvcurveto',
     "cp": '',
     "ed": 'endchar'
 }
@@ -949,21 +940,16 @@ def convertBezToT2(bezString):
             argList = []
             lastPathOp = token
         elif token == "preflx1":
-            # The preflx1/preflx2 sequence provides the same 'i' as the flex
-            # sequence. The difference is that the preflx1/preflx2 sequence
+            # The preflx1/preflx2a sequence provides the same 'i' as the flex
+            # sequence. The difference is that the preflx1/preflx2a sequence
             # provides the argument values needed for building a Type1 string
             # while the flex sequence is simply the 6 rrcurveto points.
             # Both sequences are always provided.
             lastPathOp = token
             argList = []
-        elif token in ["preflx2", "preflx2a"]:
+        elif token == "preflx2a":
             lastPathOp = token
             del t2List[-1]
-            argList = []
-        elif token == "flx":
-            lastPathOp = token
-            argList = argList[:12]
-            t2List.append([argList + [50], "flex"])
             argList = []
         elif token == "flxa":
             lastPathOp = token
@@ -975,7 +961,7 @@ def convertBezToT2(bezString):
         elif token == "sc":
             lastPathOp = token
         else:
-            if token[-2:] in ["mt", "dt", "ct", "cv"]:
+            if token in ["rmt", "mt", "dt", "ct"]:
                 lastPathOp = token
             t2Op = bezToT2.get(token, None)
             if token in ["mt", "dt"]:
@@ -983,7 +969,7 @@ def convertBezToT2(bezString):
                 curX = argList[0]
                 curY = argList[1]
                 argList = newList
-            elif token in ["ct", "cv"]:
+            elif token == "ct":
                 argList, curX, curY = makeRelativeCTArgs(argList, curX, curY)
             if t2Op:
                 t2List.append([argList, t2Op])

@@ -1635,17 +1635,8 @@ def fixStartPoint(outlineItem, opList):
 bezToUFOPoint = {
     "mt": 'move',
     "rmt": 'move',
-    "hmt": 'move',
-    "vmt": 'move',
-    "rdt": 'line',
     "dt": 'line',
-    "hdt": "line",
-    "vdt": "line",
-    "rct": 'curve',
     "ct": 'curve',
-    "rcv": 'curve',  # Morisawa's alternate name for 'rct'.
-    "vhct": 'curve',
-    "hvct": 'curve',
 }
 
 
@@ -1756,8 +1747,8 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 hStem3Args = []
 
         elif token == "preflx1":
-            # the preflx1/preflx2 sequence provides the same i as the flex
-            # sequence; the difference is that the preflx1/preflx2 sequence
+            # the preflx1/preflx2a sequence provides the same i as the flex
+            # sequence; the difference is that the preflx1/preflx2a sequence
             # provides the argument values needed for building a Type1 string
             # while the flex sequence is simply the 6 rcurveto points. Both
             # sequences are always provided.
@@ -1765,8 +1756,6 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
             # need to skip all move-tos until we see the "flex" operator.
             inPreFlex = True
         elif token == "preflx2a":
-            argList = []
-        elif token == "preflx2":
             argList = []
         elif token == "flxa":  # flex with absolute coords.
             inPreFlex = False
@@ -1812,50 +1801,6 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                 hintMask.pointName = flexPointName
                 newHintMaskName = None
             argList = []
-        elif token == "flx":
-            inPreFlex = False
-            flexPointName = kBaseFlexName + str(opIndex).zfill(4)
-            flexList.append(flexPointName)
-            curveCnt = 2
-            i = 0
-            # The first 12 args are the 6 args for each of
-            # the two curves that make up the flex feature.
-            while i < curveCnt:
-                curX += argList[0]
-                curY += argList[1]
-                showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement(
-                    "point", {"x": "%s" % showX, "y": "%s" % showY})
-                outlineItem.append(newPoint)
-                curX += argList[2]
-                curY += argList[3]
-                showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement(
-                    "point", {"x": "%s" % showX, "y": "%s" % showY})
-                outlineItem.append(newPoint)
-                curX += argList[4]
-                curY += argList[5]
-                showX, showY = convertCoords(curX, curY)
-                opName = 'curve'
-                newPoint = XMLElement(
-                    "point", {"x": "%s" % showX, "y": "%s" % showY,
-                              "type": opName})
-                outlineItem.append(newPoint)
-                opList.append([opName, curX, curY])
-                opIndex += 1
-                if i == 0:
-                    argList = argList[6:12]
-                i += 1
-            # attach the point name to the first point of the first curve.
-            outlineItem[-6].set(kPointName, flexPointName)
-            if newHintMaskName is not None:
-                # We have a hint mask that we want to attach to the first
-                # point of the flex op. However, there is already a flex
-                # name in that attribute. What we do is set the flex point
-                # name into the hint mask.
-                hintMask.pointName = flexPointName
-                newHintMaskName = None
-            argList = []
         elif token == "sc":
             pass
         elif token == "cp":
@@ -1863,30 +1808,22 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
         elif token == "ed":
             pass
         else:
-            if inPreFlex and (token[-2:] == "mt"):
+            if inPreFlex and token in ["rmt", "mt"]:
                 continue
 
-            if token[-2:] in ["mt", "dt", "ct", "cv"]:
+            if token in ["rmt", "mt", "dt", "ct"]:
                 opIndex += 1
             else:
                 raise BezParseError(
                     "Unhandled operation: '%s' '%s'." % (argList, token))
-            dx = dy = 0
             opName = bezToUFOPoint[token]
-            if token[-2:] in ["mt", "dt"]:
+            if token in ["rmt", "mt", "dt"]:
                 if token in ["mt", "dt"]:
                     curX = argList[0]
                     curY = argList[1]
                 else:
-                    if token in ["rmt", "rdt"]:
-                        dx = argList[0]
-                        dy = argList[1]
-                    elif token in ["hmt", "hdt"]:
-                        dx = argList[0]
-                    elif token in ["vmt", "vdt"]:
-                        dy = argList[0]
-                    curX += dx
-                    curY += dy
+                    curX += argList[0]
+                    curY += argList[1]
                 showX, showY = convertCoords(curX, curY)
                 newPoint = XMLElement(
                     "point", {"x": "%s" % showX, "y": "%s" % showY,
@@ -1915,84 +1852,26 @@ def convertBezToOutline(ufoFontData, glyphName, bezString):
                     newHintMaskName = None
                 outlineItem.append(newPoint)
                 opList.append([opName, curX, curY])
-            else:
-                if token in ["ct", "cv"]:
-                    curX = argList[0]
-                    curY = argList[1]
-                    showX, showY = convertCoords(curX, curY)
-                    newPoint = XMLElement(
-                        "point", {"x": "%s" % showX, "y": "%s" % showY})
-                    outlineItem.append(newPoint)
-                    curX = argList[2]
-                    curY = argList[3]
-                    showX, showY = convertCoords(curX, curY)
-                    newPoint = XMLElement(
-                        "point", {"x": "%s" % showX, "y": "%s" % showY})
-                    outlineItem.append(newPoint)
-                    curX = argList[4]
-                    curY = argList[5]
-                    showX, showY = convertCoords(curX, curY)
-                    newPoint = XMLElement(
-                        "point", {"x": "%s" % showX, "y": "%s" % showY,
-                                  "type": "%s" % opName})
-                    outlineItem.append(newPoint)
-                else:
-                    if token in ["rct", "rcv"]:
-                        curX += argList[0]
-                        curY += argList[1]
-                        showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement(
-                            "point", {"x": "%s" % showX, "y": "%s" % showY})
-                        outlineItem.append(newPoint)
-                        curX += argList[2]
-                        curY += argList[3]
-                        showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement(
-                            "point", {"x": "%s" % showX, "y": "%s" % showY})
-                        outlineItem.append(newPoint)
-                        curX += argList[4]
-                        curY += argList[5]
-                        showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement(
-                            "point", {"x": "%s" % showX, "y": "%s" % showY,
-                                      "type": "%s" % opName})
-                        outlineItem.append(newPoint)
-                    elif token == "vhct":
-                        curY += argList[0]
-                        showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement(
-                            "point", {"x": "%s" % showX, "y": "%s" % showY})
-                        outlineItem.append(newPoint)
-                        curX += argList[1]
-                        curY += argList[2]
-                        showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement(
-                            "point", {"x": "%s" % showX, "y": "%s" % showY})
-                        outlineItem.append(newPoint)
-                        curX += argList[3]
-                        showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement(
-                            "point", {"x": "%s" % showX, "y": "%s" % showY,
-                                      "type": "%s" % opName})
-                        outlineItem.append(newPoint)
-                    elif token == "hvct":
-                        curX += argList[0]
-                        showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement(
-                            "point", {"x": "%s" % showX, "y": "%s" % showY})
-                        outlineItem.append(newPoint)
-                        curX += argList[1]
-                        curY += argList[2]
-                        showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement(
-                            "point", {"x": "%s" % showX, "y": "%s" % showY})
-                        outlineItem.append(newPoint)
-                        curY += argList[3]
-                        showX, showY = convertCoords(curX, curY)
-                        newPoint = XMLElement(
-                            "point", {"x": "%s" % showX, "y": "%s" % showY,
-                                      "type": "%s" % opName})
-                        outlineItem.append(newPoint)
+            else:  # "ct"
+                curX = argList[0]
+                curY = argList[1]
+                showX, showY = convertCoords(curX, curY)
+                newPoint = XMLElement(
+                    "point", {"x": "%s" % showX, "y": "%s" % showY})
+                outlineItem.append(newPoint)
+                curX = argList[2]
+                curY = argList[3]
+                showX, showY = convertCoords(curX, curY)
+                newPoint = XMLElement(
+                    "point", {"x": "%s" % showX, "y": "%s" % showY})
+                outlineItem.append(newPoint)
+                curX = argList[4]
+                curY = argList[5]
+                showX, showY = convertCoords(curX, curY)
+                newPoint = XMLElement(
+                    "point", {"x": "%s" % showX, "y": "%s" % showY,
+                              "type": "%s" % opName})
+                outlineItem.append(newPoint)
                 if newHintMaskName is not None:
                     # attach the pointName to the first point of the curve.
                     outlineItem[-3].set(kPointName, newHintMaskName)

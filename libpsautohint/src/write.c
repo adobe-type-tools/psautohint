@@ -22,8 +22,6 @@ static Fixed bx, by;
 static bool bstB;
 static int16_t subpathcount;
 
-static int writeAbsolute = 1;
-
 int32_t
 FRnd(int32_t x)
 {
@@ -74,25 +72,6 @@ WriteString(char* str)
     }
 
 static void
-wrtx(Fixed x)
-{
-    Fixed i;
-    if ((gRoundToInt) || (FracPart(x) == 0)) {
-        Fixed dx;
-        i = FRnd(x);
-        dx = i - currentx;
-        WRTNUM(FTrunc(dx));
-        currentx = i;
-    } else {
-        float r;
-        i = x - currentx;
-        currentx = x;
-        r = (float)FIXED2FLOAT(i);
-        WRTRNUM(r);
-    }
-}
-
-static void
 wrtxa(Fixed x)
 {
     if ((gRoundToInt) || (FracPart(x) == 0)) {
@@ -103,25 +82,6 @@ wrtxa(Fixed x)
         float r;
         currentx = x;
         r = (float)FIXED2FLOAT(x);
-        WRTRNUM(r);
-    }
-}
-
-static void
-wrty(Fixed y)
-{
-    Fixed i;
-    if ((gRoundToInt) || (FracPart(y) == 0)) {
-        Fixed dy;
-        i = FRnd(y);
-        dy = i - currenty;
-        WRTNUM(FTrunc(dy));
-        currenty = i;
-    } else {
-        float r;
-        i = y - currenty;
-        currenty = y;
-        r = (float)FIXED2FLOAT(i);
         WRTRNUM(r);
     }
 }
@@ -140,10 +100,6 @@ wrtya(Fixed y)
         WRTRNUM(r);
     }
 }
-
-#define wrtcd(c)                                                               \
-    wrtx(c.x);                                                                 \
-    wrty(c.y)
 
 #define wrtcda(c)                                                              \
     wrtxa(c.x);                                                                \
@@ -209,13 +165,7 @@ WriteOne(const ACFontInfo* fontinfo, Fixed s)
         SWRTNUM(FTrunc(r))
     } else {
         float d = (float)FIXED2FLOAT(r);
-        if (writeAbsolute) {
-            SWRTNUMA(d);
-        } else {
-            d = (float)((d + 0.005) * 100);
-            SWRTNUM(d);
-            sws("100 div ");
-        }
+        SWRTNUMA(d);
     }
 }
 
@@ -335,22 +285,8 @@ mt(const ACFontInfo* fontinfo, Cd c, PathElt* e)
     if (e->newhints != 0) {
         wrtnewhints(fontinfo, e);
     }
-    if (writeAbsolute) {
-        wrtcda(c);
-        WriteString("mt\n");
-    } else {
-
-        if (FRnd(c.y) == currenty) {
-            wrtx(c.x);
-            WriteString("hmt\n");
-        } else if (FRnd(c.x) == currentx) {
-            wrty(c.y);
-            WriteString("vmt\n");
-        } else {
-            wrtcd(c);
-            WriteString("rmt\n");
-        }
-    }
+    wrtcda(c);
+    WriteString("mt\n");
     if (e->eol) {
         WriteString("eol\n");
     }
@@ -365,21 +301,8 @@ dt(const ACFontInfo* fontinfo, Cd c, PathElt* e)
     if (e->newhints != 0) {
         wrtnewhints(fontinfo, e);
     }
-    if (writeAbsolute) {
-        wrtcda(c);
-        WriteString("dt\n");
-    } else {
-        if (FRnd(c.y) == currenty) {
-            wrtx(c.x);
-            WriteString("hdt\n");
-        } else if (FRnd(c.x) == currentx) {
-            wrty(c.y);
-            WriteString("vdt\n");
-        } else {
-            wrtcd(c);
-            WriteString("rdt\n");
-        }
-    }
+    wrtcda(c);
+    WriteString("dt\n");
     if (e->eol) {
         WriteString("eol\n");
     }
@@ -390,10 +313,6 @@ dt(const ACFontInfo* fontinfo, Cd c, PathElt* e)
 
 static Fixed flX, flY;
 static Cd fc1, fc2, fc3;
-
-#define wrtpreflx2(c)                                                          \
-    wrtcd(c);                                                                  \
-    WriteString("rmt\npreflx2\n")
 
 #define wrtpreflx2a(c)                                                         \
     wrtcda(c);                                                                 \
@@ -453,52 +372,27 @@ wrtflex(Cd c1, Cd c2, Cd c3, PathElt* e)
         c13.y = fc3.y;
     }
 
-    if (writeAbsolute) {
-        wrtpreflx2a(c13);
-        wrtpreflx2a(fc1);
-        wrtpreflx2a(fc2);
-        wrtpreflx2a(fc3);
-        wrtpreflx2a(c1);
-        wrtpreflx2a(c2);
-        wrtpreflx2a(c3);
-        currentx = flX;
-        currenty = flY;
-        wrtcda(fc1);
-        wrtcda(fc2);
-        wrtcda(fc3);
-        wrtcda(c1);
-        wrtcda(c2);
-        wrtcda(c3);
-        WRTNUM(dmin);
-        WRTNUM(delta);
-        WRTNUM(yflag);
-        WRTNUM(FTrunc(FRnd(currentx)));
-        WRTNUM(FTrunc(FRnd(currenty)));
-        WriteString("flxa\n");
-    } else {
-
-        wrtpreflx2(c13);
-        wrtpreflx2(fc1);
-        wrtpreflx2(fc2);
-        wrtpreflx2(fc3);
-        wrtpreflx2(c1);
-        wrtpreflx2(c2);
-        wrtpreflx2(c3);
-        currentx = flX;
-        currenty = flY;
-        wrtcd(fc1);
-        wrtcd(fc2);
-        wrtcd(fc3);
-        wrtcd(c1);
-        wrtcd(c2);
-        wrtcd(c3);
-        WRTNUM(dmin);
-        WRTNUM(delta);
-        WRTNUM(yflag);
-        WRTNUM(FTrunc(FRnd(currentx)));
-        WRTNUM(FTrunc(FRnd(currenty)));
-        WriteString("flx\n");
-    }
+    wrtpreflx2a(c13);
+    wrtpreflx2a(fc1);
+    wrtpreflx2a(fc2);
+    wrtpreflx2a(fc3);
+    wrtpreflx2a(c1);
+    wrtpreflx2a(c2);
+    wrtpreflx2a(c3);
+    currentx = flX;
+    currenty = flY;
+    wrtcda(fc1);
+    wrtcda(fc2);
+    wrtcda(fc3);
+    wrtcda(c1);
+    wrtcda(c2);
+    wrtcda(c3);
+    WRTNUM(dmin);
+    WRTNUM(delta);
+    WRTNUM(yflag);
+    WRTNUM(FTrunc(FRnd(currentx)));
+    WRTNUM(FTrunc(FRnd(currenty)));
+    WriteString("flxa\n");
     firstFlex = true;
 }
 
@@ -510,28 +404,11 @@ ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PathElt* e)
     }
     if (e->isFlex && IsFlex(e)) {
         wrtflex(c1, c2, c3, e);
-    } else if (writeAbsolute) {
+    } else {
         wrtcda(c1);
         wrtcda(c2);
         wrtcda(c3);
         WriteString("ct\n");
-    } else {
-        if ((FRnd(c1.x) == currentx) && (c2.y == c3.y)) {
-            wrty(c1.y);
-            wrtcd(c2);
-            wrtx(c3.x);
-            WriteString("vhct\n");
-        } else if ((FRnd(c1.y) == currenty) && (c2.x == c3.x)) {
-            wrtx(c1.x);
-            wrtcd(c2);
-            wrty(c3.y);
-            WriteString("hvct\n");
-        } else {
-            wrtcd(c1);
-            wrtcd(c2);
-            wrtcd(c3);
-            WriteString("rct\n");
-        }
     }
     if (e->eol) {
         WriteString("eol\n");
