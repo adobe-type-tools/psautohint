@@ -1065,13 +1065,6 @@ class CFFFontData:
         fontGlyphList = self.ttFont.getGlyphOrder()
         return fontGlyphList
 
-    def getUnitsPerEm(self):
-        unitsPerEm = "1000"
-        if hasattr(self.topDict, "FontMatrix"):
-            matrix = self.topDict.FontMatrix
-            unitsPerEm = "%s" % (int(round(1.0 / matrix[0])))
-        return unitsPerEm
-
     def getPSName(self):
         psName = self.cffTable.cff.fontNames[0]
         return psName
