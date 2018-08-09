@@ -1650,7 +1650,7 @@ def convertCoords(curX, curY):
     return showX, showY
 
 
-def convertBezToOutline(ufoFontData, glyphName, bezString):
+def convertBezToOutline(bezString):
     """
     Since the UFO outline element as no attributes to preserve,
     I can just make a new one.
@@ -1963,7 +1963,7 @@ def addWhiteSpace(parent, level):
         child.tail = prentIndent
 
 
-def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
+def convertBezToGLIF(ufoFontData, glyphName, bezString):
     # I need to replace the contours with data from the bez string.
     glyphPath = ufoFontData.getGlyphSrcPath(glyphName)
     glifXML = ET.parse(glyphPath).getroot()
@@ -1980,20 +1980,18 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString, hintsOnly=False):
             libIndex = childIndex
         childIndex += 1
 
-    newOutlineElement, hintInfoDict = convertBezToOutline(
-        ufoFontData, glyphName, bezString)
+    newOutlineElement, hintInfoDict = convertBezToOutline(bezString)
 
-    if not hintsOnly:
-        if outlineItem is None:
-            # need to add it. Add it before the lib item, if any.
-            if libIndex > 0:
-                glifXML.insert(libIndex, newOutlineElement)
-            else:
-                glifXML.append(newOutlineElement)
+    if outlineItem is None:
+        # need to add it. Add it before the lib item, if any.
+        if libIndex > 0:
+            glifXML.insert(libIndex, newOutlineElement)
         else:
-            # remove the old one and add the new one.
-            glifXML.remove(outlineItem)
-            glifXML.insert(outlineIndex, newOutlineElement)
+            glifXML.append(newOutlineElement)
+    else:
+        # remove the old one and add the new one.
+        glifXML.remove(outlineItem)
+        glifXML.insert(outlineIndex, newOutlineElement)
 
     # convertBezToGLIF is called only if the GLIF has been edited by a tool.
     # We need to update the edit status in the has map entry. I assume that
