@@ -13,17 +13,13 @@ import re
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import bytechr, byteord, open
 
-from . import fdTools
+from . import fdTools, FontParseError
 
 
 log = logging.getLogger(__name__)
 
 kStackLimit = 46
 kStemLimit = 96
-
-
-class ACFontError(Exception):
-    pass
 
 
 class SEACError(Exception):
@@ -1052,7 +1048,7 @@ class CFFFontData:
             self.cffTable = ttFont["CFF "]
             topDict = self.cffTable.cff.topDictIndex[0]
         except KeyError:
-            raise ACFontError("Font is not a CFF font <%s>." % inputPath)
+            raise FontParseError("Font is not a CFF font <%s>." % inputPath)
 
         # for identifier in glyph-list:
         # Get charstring.
@@ -1150,9 +1146,9 @@ class CFFFontData:
                 blueValues = inactiveAlignmentValues
                 numBlueValues = len(blueValues)
             else:
-                raise ACFontError("Font must have at least four values in "
-                                  "its BlueValues array for PSAutoHint to "
-                                  "work!")
+                raise FontParseError("Font must have at least four values in "
+                                     "its BlueValues array for PSAutoHint to "
+                                     "work!")
         blueValues.sort()
 
         # The first pair only is a bottom zone, where the first value is the
@@ -1197,7 +1193,7 @@ class CFFFontData:
                 # the largest global stem width.
                 vstems = [upm]
             else:
-                raise ACFontError("Font has neither StemSnapV nor StdVW!")
+                raise FontParseError("Font has neither StemSnapV nor StdVW!")
         vstems.sort()
         if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1)):
             vstems = [upm]  # dummy value that will allow PyAC to run
@@ -1215,7 +1211,7 @@ class CFFFontData:
                 # the largest global stem width.
                 hstems = [upm]
             else:
-                raise ACFontError("Font has neither StemSnapH nor StdHW!")
+                raise FontParseError("Font has neither StemSnapH nor StdHW!")
         hstems.sort()
         if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1)):
             hstems = [upm]  # dummy value that will allow PyAC to run

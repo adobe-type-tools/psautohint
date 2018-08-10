@@ -125,7 +125,7 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
 from fontTools.misc.py23 import open, tobytes
-from . import fdTools
+from . import fdTools, FontParseError
 
 
 log = logging.getLogger(__name__)
@@ -369,10 +369,6 @@ kDefaultFMNDBPath = "FontMenuNameDB"
 kDefaultGOADBPath = "GlyphOrderAndAliasDB"
 
 
-class UFOParseError(ValueError):
-    pass
-
-
 class BezParseError(ValueError):
     pass
 
@@ -486,8 +482,8 @@ class UFOFontData:
         try:
             version = newMap[kAdobHashMapVersionName]
             if version[0] > kAdobHashMapVersion[0]:
-                raise UFOParseError("Hash map version is newer than program. "
-                                    "Please update the FDK")
+                raise FontParseError("Hash map version is newer than program. "
+                                     "Please update the FDK")
             elif version[0] < kAdobHashMapVersion[0]:
                 log.info("Updating hash map: was older version")
                 newMap = {kAdobHashMapVersionName: kAdobHashMapVersion}
@@ -795,7 +791,7 @@ class UFOFontData:
                 blueValues = inactiveAlignmentValues
                 numBlueValues = len(blueValues)
             else:
-                raise UFOParseError(
+                raise FontParseError(
                     "Font must have at least four values in its "
                     "BlueValues array for PSAutoHint to work!")
         blueValues.sort()
@@ -838,7 +834,7 @@ class UFOFontData:
                 # the largest global stem width.
                 vstems = [fdDict.OrigEmSqUnits]
             else:
-                raise UFOParseError("Font does not have postscriptStemSnapV!")
+                raise FontParseError("Font does not have postscriptStemSnapV!")
 
         vstems.sort()
         if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1)):
@@ -855,7 +851,7 @@ class UFOFontData:
                 # the largest global stem width.
                 hstems = [fdDict.OrigEmSqUnits]
             else:
-                raise UFOParseError("Font does not have postscriptStemSnapH!")
+                raise FontParseError("Font does not have postscriptStemSnapH!")
 
         hstems.sort()
         if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1)):
@@ -922,7 +918,7 @@ class UFOFontData:
         try:
             gid = self.orderMap[glyphName]
         except IndexError:
-            raise UFOParseError(
+            raise FontParseError(
                 "Could not find glyph name '%s' in UFO font contents plist. "
                 "'%s'. " % (glyphName, self.parentPath))
         return gid
@@ -935,7 +931,7 @@ class UFOFontData:
         """
         dataList = ["w%s" % (str(width))]
         if level > 10:
-            raise UFOParseError(
+            raise FontParseError(
                 "In parsing component, exceeded 10 levels of reference. '%s'."
                 % (glyphName))
         # <outline> tag is optional per spec., e.g. space glyph
@@ -961,7 +957,7 @@ class UFOFontData:
                         compGlyphName = childContour.attrib["base"]
                         dataList.append("%s%s" % ("base:", compGlyphName))
                     except KeyError:
-                        raise UFOParseError(
+                        raise FontParseError(
                             "'%s' is missing the 'base' attribute in a "
                             "component. glyph '%s'." % glyphName)
 
@@ -970,7 +966,7 @@ class UFOFontData:
                             componentPath = self.getGlyphDefaultPath(
                                 compGlyphName)
                         except KeyError:
-                            raise UFOParseError(
+                            raise FontParseError(
                                 "'%s' component glyph is missing from "
                                 "contents.plist." % compGlyphName)
                     else:
@@ -989,12 +985,12 @@ class UFOFontData:
                                 componentPath = self.getGlyphDefaultPath(
                                     compGlyphName)
                             except KeyError:
-                                raise UFOParseError(
+                                raise FontParseError(
                                     "'%s' component glyph is missing from "
                                     "contents.plist." % compGlyphName)
 
                     if not os.path.exists(componentPath):
-                        raise UFOParseError(
+                        raise FontParseError(
                             "'%s' component file is missing: '%s'." %
                             (compGlyphName, componentPath))
 
@@ -1035,7 +1031,7 @@ class UFOFontData:
         try:
             compGlyphName = componentItem.attrib["base"]
         except KeyError:
-            raise UFOParseError(
+            raise FontParseError(
                 "'%s' attribute missing from component '%s'." %
                 ("base", xmlToString(componentItem)))
 
@@ -1043,7 +1039,7 @@ class UFOFontData:
             try:
                 compGlyphFilePath = self.getGlyphDefaultPath(compGlyphName)
             except KeyError:
-                raise UFOParseError(
+                raise FontParseError(
                     "'%s' component glyph is missing from contents.plist." %
                     compGlyphName)
         else:
@@ -1059,12 +1055,12 @@ class UFOFontData:
                 try:
                     compGlyphFilePath = self.getGlyphDefaultPath(compGlyphName)
                 except KeyError:
-                    raise UFOParseError(
+                    raise FontParseError(
                         "'%s' component glyph is missing from contents.plist."
                         % compGlyphName)
 
         if not os.path.exists(compGlyphFilePath):
-            raise UFOParseError(
+            raise FontParseError(
                 "'%s' component file is missing: '%s'." %
                 (compGlyphName, compGlyphFilePath))
 
@@ -1111,12 +1107,12 @@ def parsePList(filePath, dictKey=None):
     contents = ET.parse(filePath).getroot()
     ufo_dict = contents.find("dict")
     if ufo_dict is None:
-        raise UFOParseError("In '%s', failed to find dict. '%s'." % (filePath))
+        raise FontParseError("In '%s', failed to find dict. '%s'." % filePath)
     lastTag = "string"
     for child in ufo_dict:
         if child.tag == "key":
             if lastTag == "key":
-                raise UFOParseError(
+                raise FontParseError(
                     "In contents.plist, key name '%s' followed another key "
                     "name '%s'." % (xmlToString(child), lastTag))
             skipKeyData = False
@@ -1127,7 +1123,7 @@ def parsePList(filePath, dictKey=None):
                     skipKeyData = True
         elif child.tag != "key":
             if lastTag != "key":
-                raise UFOParseError(
+                raise FontParseError(
                     "In contents.plist, key value '%s' followed a non-key "
                     "tag '%s'." % (xmlToString(child), lastTag))
             lastTag = child.tag
@@ -1136,7 +1132,7 @@ def parsePList(filePath, dictKey=None):
                 continue
 
             if lastName in plistDict:
-                raise UFOParseError(
+                raise FontParseError(
                     "Encountered duplicate key name '%s' in '%s'." %
                     (lastName, filePath))
             if child.tag == "array":
@@ -1150,7 +1146,7 @@ def parsePList(filePath, dictKey=None):
                     elif listChild.tag == "string":
                         pass
                     else:
-                        raise UFOParseError(
+                        raise FontParseError(
                             "In plist file, encountered unhandled key type "
                             "'%s' in '%s' for parent key %s. %s." %
                             (listChild.tag, child.tag, lastName, filePath))
@@ -1166,12 +1162,12 @@ def parsePList(filePath, dictKey=None):
             elif child.tag == "string":
                 plistDict[lastName] = child.text
             else:
-                raise UFOParseError(
+                raise FontParseError(
                     "In plist file, encountered unhandled key type '%s' for "
                     "key %s. %s." % (child.tag, lastName, filePath))
             plistKeys.append(lastName)
         else:
-            raise UFOParseError(
+            raise FontParseError(
                 "In plist file, encountered unexpected element '%s'. %s." %
                 (xmlToString(child), filePath))
     if len(plistDict) == 0:
@@ -1210,7 +1206,7 @@ class UFOTransform:
                         elif tag in ["xOffset", "yOffset"]:
                             hasOffset = True
                         else:
-                            raise UFOParseError(
+                            raise FontParseError(
                                 "Unknown tag '%s' in component '%s'." %
                                 (tag, xmlToString(componentXML)))
 
@@ -1293,7 +1289,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
     """
 
     if level > 10:
-        raise UFOParseError(
+        raise FontParseError(
             "In parsing component, exceeded 10 levels of reference. '%s'. " %
             outlineXML)
 
@@ -1403,11 +1399,11 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                         bezStringList.append(op)
 
                 except KeyError:
-                    raise UFOParseError(
+                    raise FontParseError(
                         "Unhandled case for first and last points in outline "
                         "'%s'." % xmlToString(outlineItem))
             else:
-                raise UFOParseError(
+                raise FontParseError(
                     "Unhandled case for first point in outline '%s'." %
                     xmlToString(outlineItem))
 
@@ -1447,7 +1443,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                     argStack = []
                 elif point_type == "curve":
                     if len(argStack) != 4:
-                        raise UFOParseError(
+                        raise FontParseError(
                             "Argument stack error seen for curve point '%s'." %
                             xmlToString(contourItem))
                     if allowDecimals:
@@ -1461,11 +1457,11 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
                     argStack = []
                     bezStringList.append(op)
                 elif point_type == "qccurve":
-                    raise UFOParseError(
+                    raise FontParseError(
                         "Point type not supported '%s'." %
                         xmlToString(contourItem))
                 else:
-                    raise UFOParseError(
+                    raise FontParseError(
                         "Unknown Point type not supported '%s'." %
                         xmlToString(contourItem))
 
