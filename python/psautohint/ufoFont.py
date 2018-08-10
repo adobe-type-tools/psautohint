@@ -883,10 +883,6 @@ class UFOFontData:
         self.fontDict = fdDict
         return fdDict
 
-    @staticmethod
-    def getfdIndex(gid):
-        return 0
-
     def getfdInfo(self, psName, inputPath, allow_no_blues, noFlex,
                   vCounterGlyphs, hCounterGlyphs, glyphList, fdIndex=0):
         fontDictList = []
