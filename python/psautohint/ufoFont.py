@@ -684,33 +684,23 @@ class UFOFontData:
         # in lib.py, if it exists, else it is taken from the contents.plist
         # file. Any glyphs in contents.plist which are not named in the
         # public.glyphOrder are sorted after all glyphs which are named
-        # in the public.glyphOrder,, in the order that they occured in
+        # in the public.glyphOrder,, in the order that they occurred in
         # contents.plist.
         contentsPath = os.path.join(self.parentPath, "glyphs", kContentsName)
         self.glyphMap, self.glyphList = parsePList(contentsPath)
+        self.orderMap = {}
         orderPath = os.path.join(self.parentPath, kLibName)
-        self.orderMap = parseGlyphOrder(orderPath)
-        if self.orderMap is not None:
-            orderIndex = len(self.orderMap)
-            orderList = []
+        glyphOrder = getGlyphOrder(orderPath, self.glyphList)
+        for i, name in enumerate(glyphOrder):
+            self.orderMap[name] = i
 
-            # If there are glyphs in the font which are not named in the
-            # public.glyphOrder entry, add then in the order of the
-            # contents.plist file.
-            for glyphName in self.glyphList:
-                try:
-                    entry = [self.orderMap[glyphName], glyphName]
-                except KeyError:
-                    entry = [orderIndex, glyphName]
-                    self.orderMap[glyphName] = orderIndex
-                    orderIndex += 1
-                orderList.append(entry)
-            self.glyphList = [entry[1] for entry in sorted(orderList)]
-        else:
-            self.orderMap = {}
-            numGlyphs = len(self.glyphList)
-            for i in range(numGlyphs):
-                self.orderMap[self.glyphList[i]] = i
+        # If there are glyphs in the font which are not named in the
+        # public.glyphOrder entry, add then in the order of the
+        # contents.plist file.
+        for name in self.glyphList:
+            if name not in self.orderMap:
+                self.orderMap[name] = len(self.orderMap)
+        self.glyphList = sorted(list(self.orderMap.keys()))
 
         # I also need to get the glyph map for the processed layer,
         # and use this when the glyph is read from the processed layer.
@@ -1104,17 +1094,13 @@ class UFOFontData:
         self.glyphWriteDir = self.glyphDefaultDir
 
 
-def parseGlyphOrder(filePath):
-    orderMap = None
+def getGlyphOrder(filePath, default):
+    glyphOrder = default
     if os.path.exists(filePath):
         publicOrderDict, _ = parsePList(filePath, kPublicGlyphOrderKey)
         if publicOrderDict is not None:
-            orderMap = {}
-            glyphList = publicOrderDict[kPublicGlyphOrderKey]
-            numGlyphs = len(glyphList)
-            for i in range(numGlyphs):
-                orderMap[glyphList[i]] = i
-    return orderMap
+            glyphOrder = publicOrderDict[kPublicGlyphOrderKey]
+    return glyphOrder
 
 
 def parsePList(filePath, dictKey=None):
