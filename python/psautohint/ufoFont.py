@@ -646,7 +646,7 @@ class UFOFontData:
             width = int(widthXML.get("width"))
         else:
             width = 1000
-        return width, glifXML, outlineXML
+        return width, outlineXML
 
     def getOrSkipGlyphXML(self, glyphName, doAll=False):
         # Get default glyph layer data, so we can check if the glyph
@@ -654,7 +654,7 @@ class UFOFontData:
         # If the program name is in the history list, and the srcHash
         # matches the default glyph layer data, we can skip.
         glyphFileName = self.glyphMap[glyphName]
-        width, glifXML, outlineXML = self.getGlyphXML(
+        width, outlineXML = self.getGlyphXML(
             self.glyphDefaultDir, glyphFileName)
 
         # Hash is always from the default glyph layer.
@@ -670,7 +670,7 @@ class UFOFontData:
                 glyphFileName = self.processedLayerGlyphMap[glyphName]
             glyphPath = os.path.join(self.glyphLayerDir, glyphFileName)
             if os.path.exists(glyphPath):
-                width, glifXML, outlineXML = self.getGlyphXML(
+                width, outlineXML = self.getGlyphXML(
                     self.glyphLayerDir, glyphFileName)
 
         return width, outlineXML, skip
