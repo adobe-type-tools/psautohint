@@ -1125,10 +1125,7 @@ class CFFFontData:
         privateDict = pDict.Private
 
         fdDict = fdTools.FDDict()
-        if hasattr(privateDict, "LanguageGroup"):
-            fdDict.LanguageGroup = privateDict.LanguageGroup
-        else:
-            fdDict.LanguageGroup = "0"
+        fdDict.LanguageGroup = getattr(privateDict, "LanguageGroup", "0")
 
         if hasattr(pDict, "FontMatrix"):
             fdDict.FontMatrix = pDict.FontMatrix
@@ -1137,10 +1134,7 @@ class CFFFontData:
         upm = int(1 / fdDict.FontMatrix[0])
         fdDict.OrigEmSqUnits = str(upm)
 
-        if hasattr(pTopDict, "FontName"):
-            fdDict.FontName = pDict.FontName  # FontName
-        else:
-            fdDict.FontName = fontPSName
+        fdDict.FontName = getattr(pTopDict, "FontName", fontPSName)
 
         low = min(-upm * 0.25, pTopDict.FontBBox[1] - 200)
         high = max(upm * 1.25, pTopDict.FontBBox[3] + 200)
@@ -1149,24 +1143,17 @@ class CFFFontData:
         # no BlueValues or has invalid BlueValues. Some fonts have bad BBox
         # values, so I don't let this be smaller than -upm*0.25, upm*1.25.
         inactiveAlignmentValues = [low, low, high, high]
-        if hasattr(privateDict, "BlueValues"):
-            blueValues = privateDict.BlueValues[:]
-            numBlueValues = len(privateDict.BlueValues)
-            blueValues.sort()
-            if numBlueValues < 4:
-                if allow_no_blues:
-                    blueValues = inactiveAlignmentValues
-                    numBlueValues = len(blueValues)
-                else:
-                    raise ACFontError("Font must have at least four values in "
-                                      "its BlueValues array for PSAutoHint to "
-                                      "work!")
-        else:
+        blueValues = getattr(privateDict, "BlueValues", [])[:]
+        numBlueValues = len(blueValues)
+        if numBlueValues < 4:
             if allow_no_blues:
                 blueValues = inactiveAlignmentValues
                 numBlueValues = len(blueValues)
             else:
-                raise ACFontError("Font has no BlueValues array!")
+                raise ACFontError("Font must have at least four values in "
+                                  "its BlueValues array for PSAutoHint to "
+                                  "work!")
+        blueValues.sort()
 
         # The first pair only is a bottom zone, where the first value is the
         # overshoot position. The rest are top zones, and second value of the
@@ -1248,10 +1235,7 @@ class CFFFontData:
             temp = " ".join(hCounterGlyphs)
             fdDict.HCounterChars = "( %s )" % (temp)
 
-        if hasattr(privateDict, "BlueFuzz"):
-            fdDict.BlueFuzz = privateDict.BlueFuzz
-        else:
-            fdDict.BlueFuzz = 1
+        fdDict.BlueFuzz = getattr(privateDict, "BlueFuzz", 1)
 
         return fdDict
 
