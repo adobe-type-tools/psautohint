@@ -127,3 +127,14 @@ def test_counter_glyphs(tmpdir):
     options = Options(path, out)
     options.vCounterGlyphs = ["m", "M", "T"]
     hintFiles(options)
+
+
+def test_seac_op(tmpdir, caplog):
+    path = "%s/dummy/seac.otf" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    hintFiles(options)
+
+    msgs = [r.getMessage() for r in caplog.records]
+    assert "Skipping Aacute: can't process SEAC composite glyphs." in msgs
