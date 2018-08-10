@@ -641,16 +641,11 @@ class UFOFontData:
         etRoot = ET.ElementTree()
         glifXML = etRoot.parse(glyphPath)
         outlineXML = glifXML.find("outline")
-        try:
-            widthXML = glifXML.find("advance")
-            if widthXML is not None:
-                width = int(widthXML.get("width"))
-            else:
-                width = 1000
-        except UFOParseError:
-            log.exception("Skipping glyph '%s' because of parse error.",
-                          glyphFileName)
-            return None, None, None
+        widthXML = glifXML.find("advance")
+        if widthXML is not None:
+            width = int(widthXML.get("width"))
+        else:
+            width = 1000
         return width, glifXML, outlineXML
 
     def getOrSkipGlyphXML(self, glyphName, doAll=False):
