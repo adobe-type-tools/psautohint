@@ -109,7 +109,7 @@ static char autohint_doc[] =
   "  Autohinted glyph data in bez format.\n"
   "\n"
   "Raises:\n"
-  "  psautohint.error: If authinting fails.\n";
+  "  psautohint.error: If autohinting fails.\n";
 
 static PyObject*
 autohint(PyObject* self, PyObject* args)
@@ -195,7 +195,7 @@ static char autohintmm_doc[] =
   "  Sequence of autohinted glyph data in bez format.\n"
   "\n"
   "Raises:\n"
-  "  psautohint.error: If authinting fails.\n";
+  "  psautohint.error: If autohinting fails.\n";
 
 static PyObject*
 autohintmm(PyObject* self, PyObject* args)
