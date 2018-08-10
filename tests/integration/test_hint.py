@@ -7,7 +7,8 @@ import pytest
 from fontTools.misc.xmlWriter import XMLWriter
 from fontTools.cffLib import CFFFontSet
 from fontTools.ttLib import TTFont
-from psautohint.autohint import ACFontError, ACOptions, hintFiles
+from psautohint.autohint import ACOptions, hintFiles
+from psautohint import FontParseError
 
 from .differ import main as differ
 from . import DATA_DIR
@@ -79,7 +80,7 @@ def test_unsupported_format(tmpdir):
     out = str(tmpdir / basename(path))
     options = Options(path, out)
 
-    with pytest.raises(ACFontError):
+    with pytest.raises(FontParseError):
         hintFiles(options)
 
 
@@ -88,7 +89,7 @@ def test_missing_cff_table(tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
 
-    with pytest.raises(ACFontError):
+    with pytest.raises(FontParseError):
         hintFiles(options)
 
 
@@ -108,7 +109,7 @@ def test_ufo_bad(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
 
-    with pytest.raises(ACFontError):
+    with pytest.raises(FontParseError):
         hintFiles(options)
 
 
@@ -117,7 +118,7 @@ def test_type1_bad(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
 
-    with pytest.raises(ACFontError):
+    with pytest.raises(FontParseError):
         hintFiles(options)
 
 

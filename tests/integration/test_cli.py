@@ -4,7 +4,7 @@ import glob
 from os.path import basename
 import pytest
 
-from psautohint.autohint import ACFontError
+from psautohint import FontParseError
 from psautohint.__main__ import main as psautohint
 
 from . import make_temp_copy, DATA_DIR
@@ -142,7 +142,7 @@ def test_missing_glyph_list(glyphs, tmpdir):
     path = "%s/dummy/font.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    with pytest.raises(ACFontError):
+    with pytest.raises(FontParseError):
         psautohint([path, '-o', out, '-g', glyphs])
 
 
@@ -156,7 +156,7 @@ def test_missing_cff_table(tmpdir):
     path = "%s/dummy/nocff.otf" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    with pytest.raises(ACFontError):
+    with pytest.raises(FontParseError):
         psautohint([path, '-o', out])
 
 @pytest.mark.parametrize("option,argument", [

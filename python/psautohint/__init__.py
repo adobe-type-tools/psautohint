@@ -11,6 +11,10 @@ from . import _psautohint
 __version__ = _psautohint.version
 
 
+class FontParseError(Exception):
+    pass
+
+
 def _font_is_ufo(path):
     if os.path.isdir(path) and path.lower().endswith('.ufo'):
         meta_path = os.path.join(path, 'metainfo.plist')

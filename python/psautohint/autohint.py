@@ -41,7 +41,8 @@ from fontTools.ttLib import TTFont, getTableClass
 from .otfFont import CFFFontData
 from .ufoFont import UFOFontData, kCheckOutlineName
 
-from . import get_font_format, hint_bez_glyph, hint_compatible_bez_glyphs
+from . import (get_font_format, hint_bez_glyph, hint_compatible_bez_glyphs,
+               FontParseError)
 
 
 log = logging.getLogger(__name__)
@@ -71,10 +72,6 @@ class ACOptions(object):
         self.writeToDefaultLayer = False
         self.baseMaster = {}
         self.font_format = None
-
-
-class ACFontError(Exception):
-    pass
 
 
 class ACHintError(Exception):
@@ -198,7 +195,7 @@ def printFontInfo(fontInfoString):
 def openFile(path, out_path, options):
     font_format = get_font_format(path)
     if font_format is None:
-        raise ACFontError("{} is not a supported font format".format(path))
+        raise FontParseError("{} is not a supported font format".format(path))
 
     if font_format == "UFO":
         font = _open_ufo_file(path, out_path, options)
@@ -240,7 +237,7 @@ def _open_otf_file(path, out_path, is_otf, options):
         # It is an OTF font, we can process it directly.
         font = TTFont(path)
         if "CFF " not in font:
-            raise ACFontError("Font is not a CFF font <%s>." % path)
+            raise FontParseError("Font is not a CFF font <%s>." % path)
     else:
         # It is s CFF font, package it in an OTF font.
         with open(path, "rb") as fp:
@@ -277,8 +274,8 @@ def hintFile(options, path, outpath, reference_master):
     fontGlyphList = fontData.getGlyphList()
     glyphList = filterGlyphList(options, fontGlyphList, fontFileName)
     if not glyphList:
-        raise ACFontError("Selected glyph list is empty for font <%s>." %
-                          fontFileName)
+        raise FontParseError("Selected glyph list is empty for font <%s>." %
+                             fontFileName)
 
     fontInfo = ""
 
