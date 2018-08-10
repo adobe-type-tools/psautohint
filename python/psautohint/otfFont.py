@@ -1088,13 +1088,9 @@ class CFFFontData:
 
     def updateFromBez(self, bezData, glyphName, width):
         t2Program = [width] + convertBezToT2(bezData)
-        if t2Program:
-            gid = self.charStrings.charStrings[glyphName]
-            t2CharString = self.charStringIndex[gid]
-            t2CharString.program = t2Program
-        else:
-            log.warning("Skipping %s: error in processing fixed outline." %
-                        glyphName)
+        gid = self.charStrings.charStrings[glyphName]
+        t2CharString = self.charStringIndex[gid]
+        t2CharString.program = t2Program
 
     def saveChanges(self):
         if self.is_otf:
