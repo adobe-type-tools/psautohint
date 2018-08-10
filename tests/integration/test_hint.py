@@ -139,3 +139,37 @@ def test_seac_op(tmpdir, caplog):
 
     msgs = [r.getMessage() for r in caplog.records]
     assert "Skipping Aacute: can't process SEAC composite glyphs." in msgs
+
+
+@pytest.mark.parametrize("path",
+                         glob.glob("%s/dummy/bad_privatedict_*" % DATA_DIR))
+def test_bad_privatedict(path, tmpdir):
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    with pytest.raises(FontParseError):
+        hintFiles(options)
+
+
+@pytest.mark.parametrize("path",
+                         glob.glob("%s/dummy/bad_privatedict_*" % DATA_DIR))
+def test_bad_privatedict_accept(path, tmpdir):
+    """Same as above test, but PrivateDict is accepted because of
+       `allow_no_blues` option."""
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+    options.allow_no_blues = True
+
+    hintFiles(options)
+
+
+@pytest.mark.parametrize("path",
+                         glob.glob("%s/dummy/ok_privatedict_*" % DATA_DIR))
+def test_ok_privatedict_accept(path, tmpdir, caplog):
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    hintFiles(options)
+
+    msg = "There is no value or 0 value for Dominant"
+    assert any(r.getMessage().startswith(msg) for r in caplog.records)
