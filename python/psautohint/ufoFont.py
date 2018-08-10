@@ -429,7 +429,7 @@ class UFOFontData:
 
     @staticmethod
     def isCID():
-        return 0
+        return False
 
     def convertToBez(self, glyphName, removeHints, doAll=False):
         # convertGLIFToBez does not yet support hints;
