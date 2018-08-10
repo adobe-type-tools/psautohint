@@ -30,7 +30,7 @@ Alternatively to install them for the current user:
 
     pip install -r requirements.txt --user .
 
-The authinter can be used by running:
+The autohinter can be used by running:
 
     psautohint
 
