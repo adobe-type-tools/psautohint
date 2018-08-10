@@ -656,9 +656,6 @@ class UFOFontData:
         glyphFileName = self.glyphMap[glyphName]
         width, glifXML, outlineXML = self.getGlyphXML(
             self.glyphDefaultDir, glyphFileName)
-        if glifXML is None:
-            skip = True
-            return None, None, skip
 
         # Hash is always from the default glyph layer.
         useDefaultGlyphDir = True
@@ -675,9 +672,6 @@ class UFOFontData:
             if os.path.exists(glyphPath):
                 width, glifXML, outlineXML = self.getGlyphXML(
                     self.glyphLayerDir, glyphFileName)
-                if glifXML is None:
-                    skip = True
-                    return None, None, skip
 
         return width, outlineXML, skip
 
