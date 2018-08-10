@@ -200,12 +200,12 @@ class T2ToBezExtractor(T2OutlineExtractor):
         curvhints = []
         numhhints = len(self.hhints)
 
-        for i in range(int(numhhints/2)):
+        for i in range(int(numhhints / 2)):
             if hintOn(i, hintMaskBytes):
                 curhhints.extend(self.hhints[2 * i:2 * i + 2])
         numvhints = len(self.vhints)
-        for i in range(int(numvhints/2)):
-            if hintOn(i + int(numhhints/2), hintMaskBytes):
+        for i in range(int(numvhints / 2)):
+            if hintOn(i + int(numhhints / 2), hintMaskBytes):
                 curvhints.extend(self.vhints[2 * i:2 * i + 2])
         return curhhints, curvhints
 
@@ -1109,12 +1109,10 @@ class CFFFontData:
         self.ttFont.close()
 
     def getGlyphID(self, name):
-        gid = self.ttFont.getGlyphID(name)
-        return gid
+        return self.ttFont.getGlyphID(name)
 
     def isCID(self):
-        isCID = hasattr(self.topDict, "FDSelect")
-        return isCID
+        return hasattr(self.topDict, "FDSelect")
 
     def getFontInfo(self, fontPSName, inputPath, allow_no_blues, noFlex,
                     vCounterGlyphs, hCounterGlyphs, fdIndex=0):
