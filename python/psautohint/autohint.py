@@ -33,7 +33,6 @@ from __future__ import print_function, absolute_import
 import logging
 import os
 import re
-import shutil
 import time
 
 from fontTools.ttLib import TTFont, getTableClass
@@ -209,20 +208,11 @@ def openFile(path, out_path, options):
 
 
 def _open_ufo_file(path, out_path, options):
-    # If user has specified a path other than the source font path,
-    # then copy the entire UFO font, and operate on the copy.
-    if (out_path is not None) and (
-       os.path.abspath(path) != os.path.abspath(out_path)):
-        log.info("Copying from source UFO font to output UFO font "
-                 "before processing...")
-        if os.path.exists(out_path):
-            shutil.rmtree(out_path)
-        shutil.copytree(path, out_path)
-        path = out_path
     # We always use the hash map to skip glyphs that have been previously
     # processed, unless the user has report only, not make changes.
     useHashMap = not options.logOnly
-    font_data = UFOFontData(path, useHashMap, options.allowDecimalCoords,
+    font_data = UFOFontData(path, out_path, useHashMap,
+                            options.allowDecimalCoords,
                             options.writeToDefaultLayer)
     font_data.useProcessedLayer = True
     # Programs in this list must be run before autohint,
@@ -259,6 +249,7 @@ def hintFiles(options):
         outpath = None
         if options.outputPaths is not None and i < len(options.outputPaths):
             outpath = options.outputPaths[i]
+            assert outpath is not None
         hintFile(options, path, outpath, reference_master=False)
 
 
