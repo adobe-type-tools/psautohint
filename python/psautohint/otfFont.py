@@ -1036,13 +1036,9 @@ def convertBezToT2(bezString):
 
 
 class CFFFontData:
-    def __init__(self, ttFont, inputPath, outFilePath, allow_decimal_coords,
-                 is_otf):
+    def __init__(self, ttFont, inputPath, allow_decimal_coords, is_otf):
         self.ttFont = ttFont
         self.inputPath = inputPath
-        if outFilePath is None:
-            outFilePath = inputPath
-        self.outFilePath = outFilePath
         self.is_otf = is_otf
         try:
             self.cffTable = ttFont["CFF "]
@@ -1086,13 +1082,16 @@ class CFFFontData:
         t2CharString = self.charStringIndex[gid]
         t2CharString.program = t2Program
 
-    def saveChanges(self):
+    def saveChanges(self, out_path):
+        if out_path is None:
+            out_path = self.inputPath
+
         if self.is_otf:
-            self.ttFont.save(self.outFilePath)
+            self.ttFont.save(out_path)
             self.ttFont.close()
         else:
             data = self.ttFont["CFF "].compile(self.ttFont)
-            with open(self.outFilePath, "wb") as tf:
+            with open(out_path, "wb") as tf:
                 tf.write(data)
 
     def close(self):

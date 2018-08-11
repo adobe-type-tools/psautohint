@@ -7,7 +7,7 @@ from . import DATA_DIR
 
 def test_incomplete_glyphorder():
     path = "%s/dummy/incomplete_glyphorder.ufo" % DATA_DIR
-    font = UFOFontData(path, None, False, False, True)
+    font = UFOFontData(path, False, False, True)
 
     assert len(font.getGlyphList()) == 95
     assert "ampersand" in font.getGlyphList()

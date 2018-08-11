@@ -46,7 +46,7 @@ class BezFontData:
 
 def open_font(path):
     if not path.endswith(".bez"):
-        font = openFile(path, None, ACOptions())
+        font = openFile(path, ACOptions())
     else:
         font = BezFontData(path)
 

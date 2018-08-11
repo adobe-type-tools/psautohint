@@ -191,15 +191,15 @@ def printFontInfo(fontInfoString):
             pass
 
 
-def openFile(path, out_path, options):
+def openFile(path, options):
     font_format = get_font_format(path)
     if font_format is None:
         raise FontParseError("{} is not a supported font format".format(path))
 
     if font_format == "UFO":
-        font = _open_ufo_file(path, out_path, options)
+        font = _open_ufo_file(path, options)
     elif font_format in ("OTF", "CFF"):
-        font = _open_otf_file(path, out_path, font_format == "OTF", options)
+        font = _open_otf_file(path, font_format == "OTF", options)
     else:
         raise NotImplementedError("%s format is not supported yet, sorry." %
                                   font_format)
@@ -207,11 +207,11 @@ def openFile(path, out_path, options):
     return font
 
 
-def _open_ufo_file(path, out_path, options):
+def _open_ufo_file(path, options):
     # We always use the hash map to skip glyphs that have been previously
     # processed, unless the user has report only, not make changes.
     useHashMap = not options.logOnly
-    font_data = UFOFontData(path, out_path, useHashMap,
+    font_data = UFOFontData(path, useHashMap,
                             options.allowDecimalCoords,
                             options.writeToDefaultLayer)
     font_data.useProcessedLayer = True
@@ -221,7 +221,7 @@ def _open_ufo_file(path, out_path, options):
     return font_data
 
 
-def _open_otf_file(path, out_path, is_otf, options):
+def _open_otf_file(path, is_otf, options):
     # If input font is CFF, build a dummy ttFont in memory.
     if is_otf:
         # It is an OTF font, we can process it directly.
@@ -238,7 +238,7 @@ def _open_otf_file(path, out_path, is_otf, options):
         font['CFF '] = cff_class('CFF ')
         font['CFF '].decompile(data, font)
 
-    return CFFFontData(font, path, out_path, options.allowDecimalCoords,
+    return CFFFontData(font, path, options.allowDecimalCoords,
                        is_otf)
 
 
@@ -249,7 +249,6 @@ def hintFiles(options):
         outpath = None
         if options.outputPaths is not None and i < len(options.outputPaths):
             outpath = options.outputPaths[i]
-            assert outpath is not None
         hintFile(options, path, outpath, reference_master=False)
 
 
@@ -259,7 +258,7 @@ def hintFile(options, path, outpath, reference_master):
     fontFileName = os.path.basename(path)
     log.info("Hinting font %s. Start time: %s.", path, time.asctime())
 
-    fontData = openFile(path, outpath, options)
+    fontData = openFile(path, options)
 
     # filter specified list, if any, with font list.
     fontGlyphList = fontData.getGlyphList()
@@ -416,7 +415,7 @@ def hintFile(options, path, outpath, reference_master):
     if not options.logOnly:
         if anyGlyphChanged:
             log.info("Saving font file with new hints..." + time.asctime())
-            fontData.saveChanges()
+            fontData.saveChanges(outpath)
         else:
             fontData.close()
             log.info("No glyphs were hinted.")
