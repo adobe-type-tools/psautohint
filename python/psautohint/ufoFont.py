@@ -1069,11 +1069,6 @@ class UFOFontData:
         outlineXML = glifXML.find("outline")
         return outlineXML
 
-    @staticmethod
-    def copyTo(dstPath):
-        """ Copy UFO font to target path"""
-        return
-
     def close(self):
         if self.hashMapChanged:
             self.writeHashMap()
