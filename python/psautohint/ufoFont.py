@@ -118,6 +118,7 @@ import logging
 import os
 import plistlib
 import re
+import shutil
 
 try:
     import xml.etree.cElementTree as ET
@@ -374,9 +375,10 @@ class BezParseError(ValueError):
 
 
 class UFOFontData:
-    def __init__(self, parentPath, useHashMap, allow_decimal_coords,
+    def __init__(self, path, out_path, useHashMap, allow_decimal_coords,
                  write_to_default_layer):
-        self.parentPath = parentPath
+        self.input_path = path
+        self.out_path = out_path
         self.glyphMap = {}
         self.processedLayerGlyphMap = {}
         self.newGlyphMap = {}
@@ -393,9 +395,10 @@ class UFOFontData:
         self.fontDict = None
         self.curSrcDir = None
         self.hashMapChanged = False
-        self.glyphDefaultDir = os.path.join(parentPath, "glyphs")
-        self.glyphLayerDir = os.path.join(parentPath, kProcessedGlyphsLayer)
-        self.glyphWriteDir = self.glyphLayerDir
+        self.glyphDefaultDir = os.path.join(self.input_path,
+                                            kDefaultGlyphsLayer)
+        self.glyphLayerDir = os.path.join(self.input_path,
+                                          kProcessedGlyphsLayer)
         self.historyList = []
         # See documentation above.
         self.requiredHistory = []
@@ -406,9 +409,6 @@ class UFOFontData:
         self.writeToDefaultLayer = False
         # if True, then do not skip any glyphs.
         self.doAll = False
-        # track whether checkSkipGLyph has deleted an
-        # out of date glyph from the processed glyph layer
-        self.deletedGlyph = False
         # if true, do NOT round x,y values when processing.
         self.allowDecimalCoords = allow_decimal_coords
 
@@ -440,38 +440,53 @@ class UFOFontData:
         self.newGlyphMap[glyphName] = glifXML
 
     def saveChanges(self):
+        if self.out_path is None:
+            self.out_path = self.input_path
+
+        if os.path.abspath(self.input_path) != os.path.abspath(self.out_path):
+            # If user has specified a path other than the source font path,
+            # then copy the entire UFO font, and operate on the copy.
+            log.info("Copying from source UFO font to output UFO font before "
+                     "processing...")
+            if os.path.exists(self.out_path):
+                shutil.rmtree(self.out_path)
+            shutil.copytree(self.input_path, self.out_path)
+
+        glyphWriteDir = os.path.join(self.out_path, kProcessedGlyphsLayer)
+        if self.writeToDefaultLayer:
+            glyphWriteDir = os.path.join(self.out_path, kDefaultGlyphsLayer)
+
         if self.hashMapChanged:
-            self.writeHashMap()
+            self.writeHashMap(self.out_path)
         self.hashMapChanged = False
 
-        if not os.path.exists(self.glyphWriteDir):
-            os.makedirs(self.glyphWriteDir)
+        if not os.path.exists(glyphWriteDir):
+            os.makedirs(glyphWriteDir)
 
         for glyphName, glifXML in self.newGlyphMap.items():
-            glyphPath = self.getWriteGlyphPath(glyphName)
+            glyphPath = self.getWriteGlyphPath(glyphName, glyphWriteDir)
             et = ET.ElementTree(glifXML)
             with open(glyphPath, "wb") as fp:
                 et.write(fp, encoding="UTF-8", xml_declaration=True)
 
         # Update the layer contents.plist file
-        layerContentsFilePath = os.path.join(self.parentPath,
+        layerContentsFilePath = os.path.join(self.out_path,
                                              "layercontents.plist")
         self.updateLayerContents(layerContentsFilePath)
-        glyphContentsFilePath = os.path.join(self.glyphWriteDir,
-                                             "contents.plist")
+        glyphContentsFilePath = os.path.join(glyphWriteDir, "contents.plist")
         self.updateLayerGlyphContents(glyphContentsFilePath, self.newGlyphMap)
 
-    def getWriteGlyphPath(self, glyphName):
+    def getWriteGlyphPath(self, glyphName, glyphWriteDir):
         glyphFileName = self.glyphMap[glyphName]
         if not self.writeToDefaultLayer and \
                 glyphName in self.processedLayerGlyphMap:
             glyphFileName = self.processedLayerGlyphMap[glyphName]
 
-        glifFilePath = os.path.join(self.glyphWriteDir, glyphFileName)
+        glifFilePath = os.path.join(glyphWriteDir, glyphFileName)
         return glifFilePath
 
     def readHashMap(self):
-        hashPath = os.path.join(self.parentPath, "data", kAdobHashMapName)
+        hashPath = os.path.join(self.input_path, "data", kAdobHashMapName)
         if os.path.exists(hashPath):
             with open(hashPath, "rt", encoding="utf-8") as fp:
                 data = fp.read()
@@ -493,12 +508,12 @@ class UFOFontData:
         self.hashMap = newMap
         return
 
-    def writeHashMap(self):
+    def writeHashMap(self, out_path):
         hashMap = self.hashMap
         if len(hashMap) == 0:
             return  # no glyphs were processed.
 
-        hashDir = os.path.join(self.parentPath, "data")
+        hashDir = os.path.join(out_path, "data")
         if not os.path.exists(hashDir):
             os.makedirs(hashDir)
         hashPath = os.path.join(hashDir, kAdobHashMapName)
@@ -624,10 +639,8 @@ class UFOFontData:
             # the processed layer glyph.
             self.hashMapChanged = True
             self.hashMap[glyphName] = [newSrcHash, [kAutohintName]]
-            glyphPath = self.getGlyphProcessedPath(glyphName)
-            if glyphPath and os.path.exists(glyphPath):
-                os.remove(glyphPath)
-                self.deletedGlyph = True
+            if glyphName in self.processedLayerGlyphMap:
+                del self.processedLayerGlyphMap[glyphName]
 
         return skip
 
@@ -682,10 +695,11 @@ class UFOFontData:
         # public.glyphOrder are sorted after all glyphs which are named
         # in the public.glyphOrder,, in the order that they occurred in
         # contents.plist.
-        contentsPath = os.path.join(self.parentPath, "glyphs", kContentsName)
+        contentsPath = os.path.join(self.input_path, kDefaultGlyphsLayer,
+                                    kContentsName)
         self.glyphMap, self.glyphList = parsePList(contentsPath)
         self.orderMap = {}
-        orderPath = os.path.join(self.parentPath, kLibName)
+        orderPath = os.path.join(self.input_path, kLibName)
         glyphOrder = getGlyphOrder(orderPath, self.glyphList)
         for i, name in enumerate(glyphOrder):
             self.orderMap[name] = i
@@ -710,7 +724,7 @@ class UFOFontData:
     @property
     def fontInfo(self):
         if self._fontInfo is None:
-            fontInfoPath = os.path.join(self.parentPath, "fontinfo.plist")
+            fontInfoPath = os.path.join(self.input_path, "fontinfo.plist")
             if os.path.exists(fontInfoPath):
                 self._fontInfo, _ = parsePList(fontInfoPath)
             else:
@@ -920,7 +934,7 @@ class UFOFontData:
         except IndexError:
             raise FontParseError(
                 "Could not find glyph name '%s' in UFO font contents plist. "
-                "'%s'. " % (glyphName, self.parentPath))
+                "'%s'. " % (glyphName, self.input_path))
         return gid
 
     def buildGlyphHashValue(self, width, outlineXML, glyphName,
@@ -1076,7 +1090,6 @@ class UFOFontData:
     def setWriteToDefault(self):
         self.useProcessedLayer = False
         self.writeToDefaultLayer = True
-        self.glyphWriteDir = self.glyphDefaultDir
 
 
 def getGlyphOrder(filePath, default):
