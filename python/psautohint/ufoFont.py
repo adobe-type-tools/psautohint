@@ -557,7 +557,7 @@ class UFOFontData:
 
         return None
 
-    def updateHashEntry(self, glyphName, changed):
+    def updateHashEntry(self, glyphName):
         # srcHarsh has already been set: we are fixing the history list.
         if not self.useHashMap:
             return
@@ -568,7 +568,7 @@ class UFOFontData:
         # If the program always reads data from the default layer,
         # and we have just created a new glyph in the processed layer,
         # then reset the history.
-        if (not self.useProcessedLayer) and changed:
+        if not self.useProcessedLayer:
             self.hashMap[glyphName] = [srcHash, [kAutohintName]]
         else:
             # If the program is not in the history list, add it.
@@ -1968,7 +1968,7 @@ def convertBezToGLIF(ufoFontData, glyphName, bezString):
     # We need to update the edit status in the has map entry. I assume that
     # convertGLIFToBez has ben run before, which will add an entry for this
     # glyph.
-    ufoFontData.updateHashEntry(glyphName, changed=True)
+    ufoFontData.updateHashEntry(glyphName)
     # Add the stem hints.
     if hintInfoDict is not None:
         widthXML = glifXML.find("advance")
