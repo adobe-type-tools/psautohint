@@ -438,7 +438,7 @@ class UFOFontData:
         glifXML = convertBezToGLIF(self, glyphName, bezData)
         self.newGlyphMap[glyphName] = glifXML
 
-    def saveChanges(self, out_path):
+    def save(self, out_path):
         if out_path is None:
             out_path = self.input_path
 

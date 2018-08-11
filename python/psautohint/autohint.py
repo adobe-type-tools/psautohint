@@ -393,7 +393,7 @@ def hintFile(options, path, outpath, reference_master):
     if not options.logOnly:
         if anyGlyphChanged:
             log.info("Saving font file with new hints..." + time.asctime())
-            fontData.saveChanges(outpath)
+            fontData.save(outpath)
         else:
             fontData.close()
             log.info("No glyphs were hinted.")

@@ -1095,7 +1095,7 @@ class CFFFontData:
         t2CharString = self.charStringIndex[gid]
         t2CharString.program = t2Program
 
-    def saveChanges(self, out_path):
+    def save(self, out_path):
         if out_path is None:
             out_path = self.inputPath
 
