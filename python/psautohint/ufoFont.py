@@ -406,8 +406,6 @@ class UFOFontData:
         self.useProcessedLayer = False
         # If True, then write data to the default layer
         self.writeToDefaultLayer = False
-        # if True, then do not skip any glyphs.
-        self.doAll = False
         # if true, do NOT round x,y values when processing.
         self.allowDecimalCoords = allow_decimal_coords
 
