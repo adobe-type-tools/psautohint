@@ -8,7 +8,7 @@ from psautohint.autohint import ACOptions, openFile
 
 
 def open_font(path):
-    font = openFile(path, None, ACOptions())
+    font = openFile(path, ACOptions())
     return font
 
 

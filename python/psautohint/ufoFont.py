@@ -375,10 +375,9 @@ class BezParseError(ValueError):
 
 
 class UFOFontData:
-    def __init__(self, path, out_path, useHashMap, allow_decimal_coords,
+    def __init__(self, path, useHashMap, allow_decimal_coords,
                  write_to_default_layer):
         self.input_path = path
-        self.out_path = out_path
         self.glyphMap = {}
         self.processedLayerGlyphMap = {}
         self.newGlyphMap = {}
@@ -439,25 +438,25 @@ class UFOFontData:
         glifXML = convertBezToGLIF(self, glyphName, bezData)
         self.newGlyphMap[glyphName] = glifXML
 
-    def saveChanges(self):
-        if self.out_path is None:
-            self.out_path = self.input_path
+    def saveChanges(self, out_path):
+        if out_path is None:
+            out_path = self.input_path
 
-        if os.path.abspath(self.input_path) != os.path.abspath(self.out_path):
+        if os.path.abspath(self.input_path) != os.path.abspath(out_path):
             # If user has specified a path other than the source font path,
             # then copy the entire UFO font, and operate on the copy.
             log.info("Copying from source UFO font to output UFO font before "
                      "processing...")
-            if os.path.exists(self.out_path):
-                shutil.rmtree(self.out_path)
-            shutil.copytree(self.input_path, self.out_path)
+            if os.path.exists(out_path):
+                shutil.rmtree(out_path)
+            shutil.copytree(self.input_path, out_path)
 
-        glyphWriteDir = os.path.join(self.out_path, kProcessedGlyphsLayer)
+        glyphWriteDir = os.path.join(out_path, kProcessedGlyphsLayer)
         if self.writeToDefaultLayer:
-            glyphWriteDir = os.path.join(self.out_path, kDefaultGlyphsLayer)
+            glyphWriteDir = os.path.join(out_path, kDefaultGlyphsLayer)
 
         if self.hashMapChanged:
-            self.writeHashMap(self.out_path)
+            self.writeHashMap(out_path)
         self.hashMapChanged = False
 
         if not os.path.exists(glyphWriteDir):
@@ -470,8 +469,7 @@ class UFOFontData:
                 et.write(fp, encoding="UTF-8", xml_declaration=True)
 
         # Update the layer contents.plist file
-        layerContentsFilePath = os.path.join(self.out_path,
-                                             "layercontents.plist")
+        layerContentsFilePath = os.path.join(out_path, "layercontents.plist")
         self.updateLayerContents(layerContentsFilePath)
         glyphContentsFilePath = os.path.join(glyphWriteDir, "contents.plist")
         self.updateLayerGlyphContents(glyphContentsFilePath, self.newGlyphMap)
