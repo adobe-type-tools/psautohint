@@ -1069,11 +1069,9 @@ class UFOFontData:
         outlineXML = glifXML.find("outline")
         return outlineXML
 
-    def close(self):
-        if self.hashMapChanged:
-            self.writeHashMap()
-            self.hashMapChanged = False
-        return
+    @staticmethod
+    def close():
+        pass
 
     def setWriteToDefault(self):
         self.useProcessedLayer = False
