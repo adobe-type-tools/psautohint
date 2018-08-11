@@ -604,7 +604,7 @@ class UFOFontData:
             if programHistoryIndex >= 0:
                 # The glyph has already been processed by this program,
                 # and there have been no changes since.
-                skip = True and (not doAll)
+                skip = not doAll
             if not skip:
                 if not self.useProcessedLayer:  # case for Checkoutlines
                     self.hashMapChanged = True
