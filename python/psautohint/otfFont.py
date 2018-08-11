@@ -12,6 +12,7 @@ import re
 
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import bytechr, byteord, open
+from fontTools.ttLib import TTFont, getTableClass
 
 from . import fdTools, FontParseError
 
@@ -1036,20 +1037,32 @@ def convertBezToT2(bezString):
 
 
 class CFFFontData:
-    def __init__(self, ttFont, inputPath, allow_decimal_coords, is_otf):
-        self.ttFont = ttFont
-        self.inputPath = inputPath
+    def __init__(self, path, allow_decimal_coords, is_otf):
+        self.inputPath = path
         self.is_otf = is_otf
-        try:
-            self.cffTable = ttFont["CFF "]
-            topDict = self.cffTable.cff.topDictIndex[0]
-        except KeyError:
-            raise FontParseError("Font is not a CFF font <%s>." % inputPath)
+
+        if is_otf:
+            # It is an OTF font, we can process it directly.
+            font = TTFont(path)
+            if "CFF " not in font:
+                raise FontParseError("OTF font has no CFF table <%s>." % path)
+        else:
+            # It is s CFF font, package it in an OTF font.
+            with open(path, "rb") as fp:
+                data = fp.read()
+
+            font = TTFont()
+            cff_class = getTableClass('CFF ')
+            font['CFF '] = cff_class('CFF ')
+            font['CFF '].decompile(data, font)
+
+        self.ttFont = font
+        self.cffTable = font["CFF "]
 
         # for identifier in glyph-list:
         # Get charstring.
-        self.topDict = topDict
-        self.charStrings = topDict.CharStrings
+        self.topDict = self.cffTable.cff.topDictIndex[0]
+        self.charStrings = self.topDict.CharStrings
         self.charStringIndex = self.charStrings.charStringsIndex
         self.allowDecimalCoords = allow_decimal_coords
 
