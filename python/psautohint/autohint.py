@@ -35,8 +35,6 @@ import os
 import re
 import time
 
-from fontTools.ttLib import TTFont, getTableClass
-
 from .otfFont import CFFFontData
 from .ufoFont import UFOFontData, kCheckOutlineName
 
@@ -199,7 +197,8 @@ def openFile(path, options):
     if font_format == "UFO":
         font = _open_ufo_file(path, options)
     elif font_format in ("OTF", "CFF"):
-        font = _open_otf_file(path, font_format == "OTF", options)
+        is_otf = font_format == "OTF"
+        font = CFFFontData(path, options.allowDecimalCoords, is_otf)
     else:
         raise NotImplementedError("%s format is not supported yet, sorry." %
                                   font_format)
@@ -219,27 +218,6 @@ def _open_ufo_file(path, options):
     # if the outlines have been edited.
     font_data.requiredHistory.append(kCheckOutlineName)
     return font_data
-
-
-def _open_otf_file(path, is_otf, options):
-    # If input font is CFF, build a dummy ttFont in memory.
-    if is_otf:
-        # It is an OTF font, we can process it directly.
-        font = TTFont(path)
-        if "CFF " not in font:
-            raise FontParseError("Font is not a CFF font <%s>." % path)
-    else:
-        # It is s CFF font, package it in an OTF font.
-        with open(path, "rb") as fp:
-            data = fp.read()
-
-        font = TTFont()
-        cff_class = getTableClass('CFF ')
-        font['CFF '] = cff_class('CFF ')
-        font['CFF '].decompile(data, font)
-
-    return CFFFontData(font, path, options.allowDecimalCoords,
-                       is_otf)
 
 
 def hintFiles(options):
