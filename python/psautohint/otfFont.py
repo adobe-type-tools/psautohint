@@ -1058,12 +1058,10 @@ class CFFFontData:
         self.allowDecimalCoords = allow_decimal_coords
 
     def getGlyphList(self):
-        fontGlyphList = self.ttFont.getGlyphOrder()
-        return fontGlyphList
+        return self.ttFont.getGlyphOrder()
 
     def getPSName(self):
-        psName = self.cffTable.cff.fontNames[0]
-        return psName
+        return self.cffTable.cff.fontNames[0]
 
     def convertToBez(self, glyphName, removeHints, doAll=False):
         t2Wdth = None
