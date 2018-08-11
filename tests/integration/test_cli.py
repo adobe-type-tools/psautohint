@@ -14,17 +14,21 @@ from . import make_temp_copy, DATA_DIR
 FONTS = glob.glob("%s/dummy/font.[ocu][tf][fo]" % DATA_DIR)
 
 
+def autohint(args):
+    return psautohint(["--all"] + args)
+
+
 @pytest.mark.parametrize("path", FONTS)
 def test_basic(path, tmpdir):
     # the input font is modified in-place, make a temp copy first
-    psautohint([make_temp_copy(tmpdir, path)])
+    autohint([make_temp_copy(tmpdir, path)])
 
 
 @pytest.mark.parametrize("path", FONTS)
 def test_outpath(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
-    psautohint([path, '-o', out])
+    autohint([path, '-o', out])
 
 
 def test_multi_outpath(tmpdir):
@@ -35,7 +39,7 @@ def test_multi_outpath(tmpdir):
     inpaths = paths[1:]
     outpaths = [str(tmpdir / basename(p)) for p in inpaths]
 
-    psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
+    autohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
 def test_multi_outpath_unequal(tmpdir):
@@ -47,7 +51,7 @@ def test_multi_outpath_unequal(tmpdir):
     outpaths = [str(tmpdir / basename(p)) for p in inpaths][1:]
 
     with pytest.raises(SystemExit):
-        psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
+        autohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
 def test_multi_different_formats(tmpdir):
@@ -61,7 +65,7 @@ def test_multi_different_formats(tmpdir):
     outpaths = [str(tmpdir / basename(p)) for p in inpaths]
 
     with pytest.raises(SystemExit):
-        psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
+        autohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
 def test_multi_reference_is_input(tmpdir):
@@ -73,7 +77,7 @@ def test_multi_reference_is_input(tmpdir):
     outpaths = [str(tmpdir / basename(p)) for p in inpaths]
 
     with pytest.raises(SystemExit):
-        psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
+        autohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
 def test_multi_reference_is_duplicated(tmpdir):
@@ -85,7 +89,7 @@ def test_multi_reference_is_duplicated(tmpdir):
     outpaths = [str(tmpdir / basename(p)) for p in inpaths]
 
     with pytest.raises(SystemExit):
-        psautohint(inpaths + ['-o'] + outpaths + ['-r', reference])
+        autohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
 @pytest.mark.parametrize("path", glob.glob("%s/dummy/font.pf[ab]" % DATA_DIR))
@@ -93,7 +97,7 @@ def test_type1(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
     with pytest.raises(SystemExit):
-        psautohint([path, '-o', out])
+        autohint([path, '-o', out])
 
 
 @pytest.mark.parametrize("glyphs", [
@@ -105,7 +109,7 @@ def test_glyph_list(glyphs, tmpdir):
     path = "%s/dummy/font.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    psautohint([path, '-o', out, '-g', glyphs])
+    autohint([path, '-o', out, '-g', glyphs])
 
 
 @pytest.mark.parametrize("glyphs", [
@@ -118,7 +122,7 @@ def test_cid_glyph_list(glyphs, tmpdir):
     path = "%s/source-code-pro/CID/font.otf" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    psautohint([path, '-o', out, '-g', glyphs])
+    autohint([path, '-o', out, '-g', glyphs])
 
 
 @pytest.mark.parametrize("glyphs", [
@@ -129,7 +133,7 @@ def test_exclude_glyph_list(glyphs, tmpdir):
     path = "%s/dummy/font.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    psautohint([path, '-o', out, '-x', glyphs])
+    autohint([path, '-o', out, '-x', glyphs])
 
 
 @pytest.mark.parametrize("glyphs", [
@@ -143,13 +147,13 @@ def test_missing_glyph_list(glyphs, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
     with pytest.raises(FontParseError):
-        psautohint([path, '-o', out, '-g', glyphs])
+        autohint([path, '-o', out, '-g', glyphs])
 
 
 @pytest.mark.parametrize("path", ["%s/dummy/fontinfo" % DATA_DIR, DATA_DIR])
 def test_unsupported_format(path):
     with pytest.raises(SystemExit):
-        psautohint([path])
+        autohint([path])
 
 
 def test_missing_cff_table(tmpdir):
@@ -157,7 +161,7 @@ def test_missing_cff_table(tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
     with pytest.raises(FontParseError):
-        psautohint([path, '-o', out])
+        autohint([path, '-o', out])
 
 @pytest.mark.parametrize("option,argument", [
     ("--exclude-glyphs-file", "glyphs.txt"),
@@ -171,11 +175,10 @@ def test_option(path, option, argument, tmpdir):
 
     argument = "%s/dummy/%s" % (DATA_DIR, argument)
 
-    psautohint([path, '-o', out, option, argument])
+    autohint([path, '-o', out, option, argument])
 
 
 @pytest.mark.parametrize("option", [
-    "--all",
     "--allow-changes",
     "--decimal",
     "--no-flex",
@@ -193,7 +196,7 @@ def test_argumentless_option(path, option, tmpdir):
     path = "%s/dummy/%s" % (DATA_DIR, path)
     out = str(tmpdir / basename(path)) + ".out"
 
-    psautohint([path, '-o', out, option])
+    autohint([path, '-o', out, option])
 
 
 @pytest.mark.parametrize("option", [
@@ -204,7 +207,7 @@ def test_argumentless_option(path, option, tmpdir):
 ])
 def test_doc_option(option):
     with pytest.raises(SystemExit) as e:
-        psautohint([option])
+        autohint([option])
     assert e.type == SystemExit
     assert e.value.code == 0
 
@@ -213,7 +216,7 @@ def test_no_fddict(tmpdir):
     path = "%s/dummy/mm0/font0.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    psautohint([path, '-o', out, "--print-list-fddict"])
+    autohint([path, '-o', out, "--print-list-fddict"])
 
 
 @pytest.mark.parametrize("path", [
@@ -224,18 +227,18 @@ def test_no_fddict(tmpdir):
 def test_overwrite_font(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
-    psautohint([path, '-o', out, '-g', 'a,b,c'])
-    psautohint([path, '-o', out, '-g', 'a,b,c'])
+    autohint([path, '-o', out, '-g', 'a,b,c'])
+    autohint([path, '-o', out, '-g', 'a,b,c'])
 
 
 def test_invalid_input_path(tmpdir):
     path = str(tmpdir / "foo") + ".otf"
     with pytest.raises(SystemExit):
-        psautohint([path])
+        autohint([path])
 
 
 def test_invalid_save_path(tmpdir):
     path = "%s/dummy/font.otf" % DATA_DIR
     out = str(tmpdir / basename(path) / "foo") + ".out"
     with pytest.raises(SystemExit):
-        psautohint([path, '-o', out])
+        autohint([path, '-o', out])
