@@ -232,7 +232,6 @@ extern int32_t gNumHHints, gNumVHints;
 extern bool gWriteHintedBez;
 extern Fixed gBlueFuzz;
 extern bool gDoAligns, gDoStems;
-extern bool gIdInFile;
 extern bool gRoundToInt;
 
 #define MAX_GLYPHNAME_LEN 64

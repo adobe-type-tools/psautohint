@@ -345,12 +345,6 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                     else
                         Pop2();
                     break;
-                case 'i': /* id */
-                    if (nm[1] != 'd')
-                        goto badFile;
-                    Pop();
-                    gIdInFile = true;
-                    break;
                 default:
                     goto badFile;
             }
@@ -560,7 +554,7 @@ ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph, bool forBlendData,
         return false;
 
     currentx = currenty = tempx = tempy = stkindex = 0;
-    flex = gIdInFile = startchar = false;
+    flex = startchar = false;
     forMultiMaster = forBlendData;
     includeHints = readHints;
 

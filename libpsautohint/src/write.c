@@ -20,7 +20,6 @@ static HintPoint* bst;
 static char bch;
 static Fixed bx, by;
 static bool bstB;
-static int16_t subpathcount;
 
 int32_t
 FRnd(int32_t x)
@@ -423,10 +422,6 @@ cp(const ACFontInfo* fontinfo, PathElt* e)
 {
     if (e->newhints != 0) {
         wrtnewhints(fontinfo, e);
-    }
-    if (gIdInFile) {
-        WRTNUM(subpathcount++);
-        WriteString("id\n");
     }
     WriteString("cp\n");
     if (e->eol) {
