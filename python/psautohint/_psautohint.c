@@ -164,11 +164,12 @@ autohint(PyObject* self, PyObject* args)
                 case AC_MemoryError:
                     PyErr_NoMemory();
                     break;
-                case AC_UnknownError:
-                    PyErr_SetString(PsAutoHintError, "Hinting failed");
-                    break;
                 case AC_InvalidParameterError:
                     PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
+                    break;
+                case AC_UnknownError:
+                default:
+                    PyErr_SetString(PsAutoHintError, "Hinting failed");
                     break;
             }
         }
@@ -304,11 +305,12 @@ autohintmm(PyObject* self, PyObject* args)
                 case AC_MemoryError:
                     PyErr_NoMemory();
                     break;
-                case AC_UnknownError:
-                    PyErr_SetString(PsAutoHintError, "Hinting failed");
-                    break;
                 case AC_InvalidParameterError:
                     PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
+                    break;
+                case AC_UnknownError:
+                default:
+                    PyErr_SetString(PsAutoHintError, "Hinting failed");
                     break;
             }
         }
