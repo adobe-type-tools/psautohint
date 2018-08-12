@@ -200,10 +200,8 @@ static PyObject*
 autohintmm(PyObject* self, PyObject* args)
 {
     PyObject* inObj = NULL;
-    PyObject* inSeq = NULL;
     Py_ssize_t inCount = 0;
     PyObject* mastersObj = NULL;
-    PyObject* mastersSeq = NULL;
     Py_ssize_t mastersCount = 0;
     PyObject* fontObj = NULL;
     PyObject* outSeq = NULL;
@@ -212,18 +210,12 @@ autohintmm(PyObject* self, PyObject* args)
     bool error = true;
     Py_ssize_t i;
 
-    if (!PyArg_ParseTuple(args, "O!OO", &PyBytes_Type, &fontObj, &inObj,
-                          &mastersObj))
+    if (!PyArg_ParseTuple(args, "O!O!O!", &PyBytes_Type, &fontObj,
+                          &PyTuple_Type, &inObj, &PyTuple_Type, &mastersObj))
         return NULL;
 
-    inSeq = PySequence_Fast(inObj, "argument must be sequence");
-    mastersSeq = PySequence_Fast(mastersObj, "argument must be sequence");
-
-    if (!inSeq || !mastersSeq)
-        return NULL;
-
-    inCount = PySequence_Fast_GET_SIZE(inSeq);
-    mastersCount = PySequence_Fast_GET_SIZE(mastersSeq);
+    inCount = PyTuple_GET_SIZE(inObj);
+    mastersCount = PyTuple_GET_SIZE(mastersObj);
     if (inCount != mastersCount) {
         PyErr_SetString(
           PyExc_TypeError,
@@ -243,7 +235,7 @@ autohintmm(PyObject* self, PyObject* args)
     }
 
     for (i = 0; i < mastersCount; i++) {
-        PyObject* obj = PySequence_Fast_GET_ITEM(mastersSeq, i);
+        PyObject* obj = PyTuple_GET_ITEM(mastersObj, i);
         masters[i] = PyBytes_AsString(obj);
         if (!masters[i])
             goto done;
@@ -269,7 +261,7 @@ autohintmm(PyObject* self, PyObject* args)
         }
 
         for (i = 0; i < inCount; i++) {
-            PyObject* glyphObj = PySequence_Fast_GET_ITEM(inSeq, i);
+            PyObject* glyphObj = PyTuple_GET_ITEM(inObj, i);
             inGlyphs[i] = PyBytes_AsString(glyphObj);
             if (!inGlyphs[i])
                 goto finish;
@@ -292,6 +284,7 @@ autohintmm(PyObject* self, PyObject* args)
             for (i = 0; i < inCount; i++)
                 MEMFREE(outGlyphs[i]);
         }
+
         MEMFREE(inGlyphs);
         MEMFREE(outGlyphs);
         MEMFREE(outputSizes);
@@ -323,9 +316,6 @@ autohintmm(PyObject* self, PyObject* args)
 
 done:
     MEMFREE(masters);
-
-    Py_XDECREF(inSeq);
-    Py_XDECREF(mastersSeq);
 
     if (error) {
         Py_XDECREF(outSeq);
