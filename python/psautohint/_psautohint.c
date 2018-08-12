@@ -225,13 +225,13 @@ autohintmm(PyObject* self, PyObject* args)
     mastersCount = PySequence_Fast_GET_SIZE(mastersSeq);
     if (inCount != mastersCount) {
         PyErr_SetString(
-          PsAutoHintError,
+          PyExc_TypeError,
           "Length of \"glyphs\" must equal length of \"masters\".");
         return NULL;
     }
 
     if (inCount <= 1) {
-        PyErr_SetString(PsAutoHintError, "Length of input glyphs must be > 1");
+        PyErr_SetString(PyExc_TypeError, "Length of input glyphs must be > 1");
         return NULL;
     }
 
