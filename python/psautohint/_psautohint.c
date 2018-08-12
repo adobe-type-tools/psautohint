@@ -200,8 +200,10 @@ static char autohintmm_doc[] =
 static PyObject*
 autohintmm(PyObject* self, PyObject* args)
 {
+    PyObject* inObj = NULL;
     PyObject* inSeq = NULL;
     Py_ssize_t inCount = 0;
+    PyObject* mastersObj = NULL;
     PyObject* mastersSeq = NULL;
     Py_ssize_t mastersCount = 0;
     PyObject* fontObj = NULL;
@@ -211,12 +213,12 @@ autohintmm(PyObject* self, PyObject* args)
     bool error = false;
     Py_ssize_t i;
 
-    if (!PyArg_ParseTuple(args, "O!OO", &PyBytes_Type, &fontObj, &inSeq,
-                          &mastersSeq))
+    if (!PyArg_ParseTuple(args, "O!OO", &PyBytes_Type, &fontObj, &inObj,
+                          &mastersObj))
         return NULL;
 
-    inSeq = PySequence_Fast(inSeq, "argument must be sequence");
-    mastersSeq = PySequence_Fast(mastersSeq, "argument must be sequence");
+    inSeq = PySequence_Fast(inObj, "argument must be sequence");
+    mastersSeq = PySequence_Fast(mastersObj, "argument must be sequence");
 
     if (!inSeq || !mastersSeq)
         return NULL;
