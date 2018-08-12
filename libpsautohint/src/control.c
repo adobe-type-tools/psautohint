@@ -809,10 +809,6 @@ AddHintsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
         }
         gHPrimary = CopyHints(gHHinting);
         gVPrimary = CopyHints(gVHinting);
-        /*
-         isSolEol = SpecialSolEol() && !useV && !useH;
-         solEolCode = isSolEol? SolEolGlyphCode() : 2;
-         */
         PruneElementHintSegs();
         ListHintInfo();
         if (extrahint) {
