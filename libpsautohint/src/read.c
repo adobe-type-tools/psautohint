@@ -542,14 +542,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                         val = -val;
                     r = FixInt(val); /* convert to Fixed */
                 }
-                /* Push(r); */
-                if (stkindex >= STKMAX) {
-                    LogMsg(LOGERROR, NONFATALERROR,
-                           "Stack overflow while reading glyph.");
-                    return;
-                }
-                stk[stkindex] = r;
-                stkindex++;
+                Push(r);
                 goto nxtChar;
             } else {
                 LogMsg(LOGERROR, NONFATALERROR,
