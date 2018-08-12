@@ -40,10 +40,10 @@ reportCB(char* msg, int level)
     if (logger == NULL) {
         PyObject* logging = PyImport_ImportModule("logging");
         if (logging == NULL)
-          return;
+            return;
         logger = PyObject_CallMethod(logging, "getLogger", "s", "_psautohint");
         if (logger == NULL)
-          return;
+            return;
     }
 
     switch (level) {
@@ -123,8 +123,8 @@ autohint(PyObject* self, PyObject* args)
     bool error = false;
 
     if (!PyArg_ParseTuple(args, "O!O!|iii", &PyBytes_Type, &fontObj,
-                          &PyBytes_Type, &inObj, &allowEdit,
-                          &allowHintSub, &roundCoords))
+                          &PyBytes_Type, &inObj, &allowEdit, &allowHintSub,
+                          &roundCoords))
         return NULL;
 
     AC_SetMemManager(NULL, memoryManager);
@@ -138,13 +138,12 @@ autohint(PyObject* self, PyObject* args)
         int result;
 
         size_t outLen = 4 * strlen(inData);
-        char*  output = MEMNEW(outLen);
+        char* output = MEMNEW(outLen);
         if (!output) {
             result = AC_MemoryError;
         } else {
-            result =
-              AutoHintString(inData, fontInfo, &output, &outLen, allowEdit,
-                             allowHintSub, roundCoords);
+            result = AutoHintString(inData, fontInfo, &output, &outLen,
+                                    allowEdit, allowHintSub, roundCoords);
 
             if (outLen != 0 && result == AC_Success)
                 outObj = PyBytes_FromString(output);
