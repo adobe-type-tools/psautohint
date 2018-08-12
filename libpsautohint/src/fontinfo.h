@@ -24,6 +24,9 @@
  * of alignment zones. */
 #define DEFAULTBLUEFUZZ FixOne
 
+ACFontInfo* ParseFontInfo(const char* data);
+void FreeFontInfo(ACFontInfo* fontinfo);
+
 bool ReadFontInfo(const ACFontInfo* fontinfo);
 
 /* Looks up the value of the specified keyword in the fontinfo

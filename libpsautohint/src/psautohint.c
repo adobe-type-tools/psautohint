@@ -7,9 +7,10 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include "setjmp.h"
+#include <setjmp.h>
 
 #include "ac.h"
+#include "fontinfo.h"
 #include "psautohint.h"
 #include "version.h"
 
@@ -18,77 +19,6 @@ ACBuffer* gBezOutput = NULL;
 bool gScalingHints = false;
 
 static jmp_buf aclibmark; /* to handle exit() calls in the library version*/
-
-#define skipblanks()                                                           \
-    while (*current == '\t' || *current == '\n' || *current == ' ' ||          \
-           *current == '\r')                                                   \
-    current++
-#define skipnonblanks()                                                        \
-    while (*current != '\t' && *current != '\n' && *current != ' ' &&          \
-           *current != '\r' && *current != '\0')                               \
-    current++
-#define skipmatrix()                                                           \
-    while (*current != '\0' && *current != ']')                                \
-    current++
-
-static void
-skippsstring(const char** current)
-{
-    int parencount = 0;
-
-    do {
-        if (**current == '(')
-            parencount++;
-        else if (**current == ')')
-            parencount--;
-        else if (**current == '\0')
-            return;
-
-        (*current)++;
-
-    } while (parencount > 0);
-}
-
-static void
-FreeFontInfo(ACFontInfo* fontinfo)
-{
-    size_t i;
-
-    if (!fontinfo)
-        return;
-
-    for (i = 0; i < fontinfo->length; i++) {
-        if (fontinfo->entries[i].value[0]) {
-            UnallocateMem(fontinfo->entries[i].value);
-        }
-    }
-    UnallocateMem(fontinfo->entries);
-    UnallocateMem(fontinfo);
-}
-
-static ACFontInfo*
-NewFontInfo(size_t length)
-{
-    ACFontInfo* fontinfo;
-
-    if (length == 0)
-        return NULL;
-
-    fontinfo = (ACFontInfo*)AllocateMem(1, sizeof(ACFontInfo), "fontinfo");
-    if (!fontinfo)
-        return NULL;
-
-    fontinfo->entries =
-      (FFEntry*)AllocateMem(length, sizeof(FFEntry), "fontinfo entry");
-    if (!fontinfo->entries) {
-        UnallocateMem(fontinfo);
-        return NULL;
-    }
-
-    fontinfo->length = length;
-
-    return fontinfo;
-}
 
 static ACBuffer*
 NewBuffer(size_t size)
@@ -123,118 +53,6 @@ FreeBuffer(ACBuffer* buffer)
 
     UnallocateMem(buffer->data);
     UnallocateMem(buffer);
-}
-
-static ACFontInfo*
-ParseFontInfo(const char* data)
-{
-    const char* current;
-    size_t i;
-
-    ACFontInfo* info = NewFontInfo(34);
-    if (!info)
-        return NULL;
-
-    info->entries[0].key = "OrigEmSqUnits";
-    info->entries[1].key = "FontName";
-    info->entries[2].key = "FlexOK";
-    /* Blue Values */
-    info->entries[3].key = "BaselineOvershoot";
-    info->entries[4].key = "BaselineYCoord";
-    info->entries[5].key = "CapHeight";
-    info->entries[6].key = "CapOvershoot";
-    info->entries[7].key = "LcHeight";
-    info->entries[8].key = "LcOvershoot";
-    info->entries[9].key = "AscenderHeight";
-    info->entries[10].key = "AscenderOvershoot";
-    info->entries[11].key = "FigHeight";
-    info->entries[12].key = "FigOvershoot";
-    info->entries[13].key = "Height5";
-    info->entries[14].key = "Height5Overshoot";
-    info->entries[15].key = "Height6";
-    info->entries[16].key = "Height6Overshoot";
-    /* Other Values */
-    info->entries[17].key = "Baseline5Overshoot";
-    info->entries[18].key = "Baseline5";
-    info->entries[19].key = "Baseline6Overshoot";
-    info->entries[20].key = "Baseline6";
-    info->entries[21].key = "SuperiorOvershoot";
-    info->entries[22].key = "SuperiorBaseline";
-    info->entries[23].key = "OrdinalOvershoot";
-    info->entries[24].key = "OrdinalBaseline";
-    info->entries[25].key = "DescenderOvershoot";
-    info->entries[26].key = "DescenderHeight";
-
-    info->entries[27].key = "DominantV";
-    info->entries[28].key = "StemSnapV";
-    info->entries[29].key = "DominantH";
-    info->entries[30].key = "StemSnapH";
-    info->entries[31].key = "VCounterChars";
-    info->entries[32].key = "HCounterChars";
-    /* later addenda */
-    info->entries[33].key = "BlueFuzz";
-
-    for (i = 0; i < info->length; i++) {
-        info->entries[i].value = "";
-    }
-
-    if (!data)
-        return info;
-
-    current = data;
-    while (*current) {
-        size_t kwLen;
-        const char *kwstart, *kwend, *tkstart;
-        skipblanks();
-        kwstart = current;
-        skipnonblanks();
-        kwend = current;
-        skipblanks();
-        tkstart = current;
-
-        if (*tkstart == '(') {
-            skippsstring(&current);
-            if (*tkstart)
-                current++;
-        } else if (*tkstart == '[') {
-            skipmatrix();
-            if (*tkstart)
-                current++;
-        } else
-            skipnonblanks();
-
-        kwLen = (size_t)(kwend - kwstart);
-        for (i = 0; i < info->length; i++) {
-            size_t matchLen = NUMMAX(kwLen, strlen(info->entries[i].key));
-            if (!strncmp(info->entries[i].key, kwstart, matchLen)) {
-                info->entries[i].value =
-                  AllocateMem(current - tkstart + 1, 1, "fontinfo entry value");
-                if (!info->entries[i].value) {
-                    FreeFontInfo(info);
-                    return NULL;
-                }
-                strncpy(info->entries[i].value, tkstart, current - tkstart);
-                info->entries[i].value[current - tkstart] = '\0';
-                break;
-            }
-        }
-
-        if (i == info->length) {
-            char* temp;
-            temp = AllocateMem(tkstart - kwstart + 1, 1, "no idea!");
-            if (!temp) {
-                FreeFontInfo(info);
-                return NULL;
-            }
-            strncpy(temp, kwstart, tkstart - kwstart);
-            temp[tkstart - kwstart] = '\0';
-            /*fprintf(stderr, "Ignoring fileinfo %s...\n", temp);*/
-            UnallocateMem(temp);
-        }
-        skipblanks();
-    }
-
-    return info;
 }
 
 ACLIB_API void
