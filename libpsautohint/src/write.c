@@ -451,7 +451,6 @@ SaveFile(const ACFontInfo* fontinfo)
     PathElt* e = gPathStart;
     Cd c1, c2, c3;
 
-    /* AddSolEol(); */
     WriteString("% ");
     WriteString(gGlyphName);
     WriteString("\n");
