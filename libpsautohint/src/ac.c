@@ -32,7 +32,6 @@ int32_t gPtLstIndex, gNumPtLsts, gMaxPtLsts;
 bool gWriteHintedBez = true;
 Fixed gBlueFuzz;
 bool gDoAligns = false, gDoStems = false;
-bool gIdInFile;
 bool gRoundToInt;
 static int maxStemDist = MAXSTEMDIST;
 
