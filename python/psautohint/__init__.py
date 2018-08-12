@@ -65,7 +65,7 @@ def hint_bez_glyph(info, glyph, allow_edit=True, allow_hint_sub=True,
 
 def hint_compatible_bez_glyphs(info, glyphs, masters):
     hinted = _psautohint.autohintmm(tobytes(info),
-                                    [tobytes(g) for g in glyphs],
-                                    [tobytes(m) for m in masters])
+                                    tuple(tobytes(g) for g in glyphs),
+                                    tuple(tobytes(m) for m in masters))
 
     return [tounicode(g) for g in hinted]
