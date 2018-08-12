@@ -23,10 +23,6 @@
 
 /* widely used definitions */
 
-/* number of default entries in counter hint glyph list. */
-#define COUNTERDEFAULTENTRIES 4
-#define COUNTERLISTSIZE 64
-
 /* values for HintSeg.sType */
 #define sLINE (0)
 #define sBEND (1)
