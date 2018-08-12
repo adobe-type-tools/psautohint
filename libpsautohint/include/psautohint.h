@@ -43,7 +43,6 @@ extern "C" {
 enum
 {
     AC_Success,
-    AC_FontinfoParseFail,
     AC_FatalError,
     AC_MemoryError,
     AC_UnknownError,

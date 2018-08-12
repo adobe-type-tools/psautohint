@@ -125,15 +125,15 @@ FreeBuffer(ACBuffer* buffer)
     UnallocateMem(buffer);
 }
 
-static int
-ParseFontInfo(const char* data, ACFontInfo** fontinfo)
+static ACFontInfo*
+ParseFontInfo(const char* data)
 {
     const char* current;
     size_t i;
 
-    ACFontInfo* info = *fontinfo = NewFontInfo(34);
+    ACFontInfo* info = NewFontInfo(34);
     if (!info)
-        return AC_MemoryError;
+        return NULL;
 
     info->entries[0].key = "OrigEmSqUnits";
     info->entries[1].key = "FontName";
@@ -179,7 +179,7 @@ ParseFontInfo(const char* data, ACFontInfo** fontinfo)
     }
 
     if (!data)
-        return AC_Success;
+        return info;
 
     current = data;
     while (*current) {
@@ -211,7 +211,7 @@ ParseFontInfo(const char* data, ACFontInfo** fontinfo)
                   AllocateMem(current - tkstart + 1, 1, "fontinfo entry value");
                 if (!info->entries[i].value) {
                     FreeFontInfo(info);
-                    return AC_MemoryError;
+                    return NULL;
                 }
                 strncpy(info->entries[i].value, tkstart, current - tkstart);
                 info->entries[i].value[current - tkstart] = '\0';
@@ -224,7 +224,7 @@ ParseFontInfo(const char* data, ACFontInfo** fontinfo)
             temp = AllocateMem(tkstart - kwstart + 1, 1, "no idea!");
             if (!temp) {
                 FreeFontInfo(info);
-                return AC_MemoryError;
+                return NULL;
             }
             strncpy(temp, kwstart, tkstart - kwstart);
             temp[tkstart - kwstart] = '\0';
@@ -234,7 +234,7 @@ ParseFontInfo(const char* data, ACFontInfo** fontinfo)
         skipblanks();
     }
 
-    return AC_Success;
+    return info;
 }
 
 ACLIB_API void
@@ -310,8 +310,9 @@ AutoHintString(const char* srcbezdata, const char* fontinfodata,
     if (!srcbezdata)
         return AC_InvalidParameterError;
 
-    if (ParseFontInfo(fontinfodata, &fontinfo))
-        return AC_FontinfoParseFail;
+    fontinfo = ParseFontInfo(fontinfodata);
+    if (!fontinfo)
+        return AC_MemoryError;
 
     set_errorproc(error_handler);
     value = setjmp(aclibmark);
@@ -398,8 +399,9 @@ AutoHintStringMM(const char** srcbezdata, const char* fontinfodata,
     if (!srcbezdata)
         return AC_InvalidParameterError;
 
-    if (ParseFontInfo(fontinfodata, &fontinfo))
-        return AC_FontinfoParseFail;
+    fontinfo = ParseFontInfo(fontinfodata);
+    if (!fontinfo)
+        return AC_MemoryError;
 
     set_errorproc(error_handler);
     value = setjmp(aclibmark);

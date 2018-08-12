@@ -154,10 +154,6 @@ autohint(PyObject* self, PyObject* args)
                 case -1:
                     /* Do nothing, we already called PyErr_* */
                     break;
-                case AC_FontinfoParseFail:
-                    PyErr_SetString(PsAutoHintError,
-                                    "Parsing font info failed");
-                    break;
                 case AC_FatalError:
                     PyErr_SetString(PsAutoHintError, "Fatal error");
                     break;
@@ -294,10 +290,6 @@ autohintmm(PyObject* self, PyObject* args)
             switch (result) {
                 case -1:
                     /* Do nothing, we already called PyErr_* */
-                    break;
-                case AC_FontinfoParseFail:
-                    PyErr_SetString(PsAutoHintError,
-                                    "Parsing font info failed");
                     break;
                 case AC_FatalError:
                     PyErr_SetString(PsAutoHintError, "Fatal error");
