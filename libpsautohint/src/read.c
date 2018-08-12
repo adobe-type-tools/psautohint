@@ -77,7 +77,7 @@ static void
 Push(Fixed r)
 {
     if (stkindex >= STKMAX) {
-        LogMsg(LOGERROR, NONFATALERROR, "Stack underflow while reading glyph.");
+        LogMsg(LOGERROR, NONFATALERROR, "Stack overflow while reading glyph.");
     }
     stk[stkindex] = r;
     stkindex++;
