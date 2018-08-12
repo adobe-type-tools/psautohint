@@ -120,7 +120,7 @@ autohint(PyObject* self, PyObject* args)
     PyObject* outObj = NULL;
     char* inData = NULL;
     char* fontInfo = NULL;
-    bool error = false;
+    bool error = true;
 
     if (!PyArg_ParseTuple(args, "O!O!|iii", &PyBytes_Type, &fontObj,
                           &PyBytes_Type, &inObj, &allowEdit, &allowHintSub,
@@ -132,27 +132,28 @@ autohint(PyObject* self, PyObject* args)
 
     fontInfo = PyBytes_AsString(fontObj);
     inData = PyBytes_AsString(inObj);
-    if (!inData || !fontInfo) {
-        error = true;
-    } else {
-        int result;
+    if (inData && fontInfo) {
+        int result = -1;
 
         size_t outLen = 4 * strlen(inData);
         char* output = MEMNEW(outLen);
-        if (!output) {
-            result = AC_MemoryError;
-        } else {
+        if (output) {
             result = AutoHintString(inData, fontInfo, &output, &outLen,
                                     allowEdit, allowHintSub, roundCoords);
 
-            if (outLen != 0 && result == AC_Success)
+            if (result == AC_Success) {
+                error = false;
                 outObj = PyBytes_FromString(output);
+            }
 
             MEMFREE(output);
         }
 
         if (result != AC_Success) {
             switch (result) {
+                case -1:
+                    /* Do nothing, we already called PyErr_* */
+                    break;
                 case AC_FontinfoParseFail:
                     PyErr_SetString(PsAutoHintError,
                                     "Parsing font info failed");
@@ -170,7 +171,6 @@ autohint(PyObject* self, PyObject* args)
                     PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
                     break;
             }
-            error = true;
         }
     }
 
@@ -209,7 +209,7 @@ autohintmm(PyObject* self, PyObject* args)
     PyObject* outSeq = NULL;
     char* fontInfo = NULL;
     const char** masters;
-    bool error = false;
+    bool error = true;
     Py_ssize_t i;
 
     if (!PyArg_ParseTuple(args, "O!OO", &PyBytes_Type, &fontObj, &inObj,
@@ -245,30 +245,34 @@ autohintmm(PyObject* self, PyObject* args)
     for (i = 0; i < mastersCount; i++) {
         PyObject* obj = PySequence_Fast_GET_ITEM(mastersSeq, i);
         masters[i] = PyBytes_AsString(obj);
+        if (!masters[i])
+            goto done;
     }
 
     fontInfo = PyBytes_AsString(fontObj);
+    if (!fontInfo)
+        goto done;
 
     AC_SetMemManager(NULL, memoryManager);
     AC_SetReportCB(reportCB);
 
     outSeq = PyTuple_New(inCount);
-    if (!outSeq) {
-        error = true;
-    } else {
-        int result;
+    if (outSeq) {
+        int result = -1;
 
         const char** inGlyphs = MEMNEW(inCount * sizeof(char*));
         char** outGlyphs = MEMNEW(inCount * sizeof(char*));
         size_t* outputSizes = MEMNEW(inCount * sizeof(size_t*));
         if (!inGlyphs || !outGlyphs || !outputSizes) {
-            result = AC_MemoryError;
-            goto done;
+            PyErr_NoMemory();
+            goto finish;
         }
 
         for (i = 0; i < inCount; i++) {
             PyObject* glyphObj = PySequence_Fast_GET_ITEM(inSeq, i);
             inGlyphs[i] = PyBytes_AsString(glyphObj);
+            if (!inGlyphs[i])
+                goto finish;
             outputSizes[i] = 4 * strlen(inGlyphs[i]);
             outGlyphs[i] = MEMNEW(outputSizes[i]);
         }
@@ -276,13 +280,14 @@ autohintmm(PyObject* self, PyObject* args)
         result = AutoHintStringMM(inGlyphs, fontInfo, mastersCount, masters,
                                   outGlyphs, outputSizes);
         if (result == AC_Success) {
+            error = false;
             for (i = 0; i < inCount; i++) {
                 PyObject* outObj = PyBytes_FromString(outGlyphs[i]);
                 PyTuple_SET_ITEM(outSeq, i, outObj);
             }
         }
 
-    done:
+    finish:
         if (outGlyphs) {
             for (i = 0; i < inCount; i++)
                 MEMFREE(outGlyphs[i]);
@@ -293,6 +298,9 @@ autohintmm(PyObject* self, PyObject* args)
 
         if (result != AC_Success) {
             switch (result) {
+                case -1:
+                    /* Do nothing, we already called PyErr_* */
+                    break;
                 case AC_FontinfoParseFail:
                     PyErr_SetString(PsAutoHintError,
                                     "Parsing font info failed");
@@ -310,10 +318,10 @@ autohintmm(PyObject* self, PyObject* args)
                     PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
                     break;
             }
-            error = true;
         }
     }
 
+done:
     MEMFREE(masters);
 
     Py_XDECREF(inSeq);
