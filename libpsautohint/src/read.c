@@ -466,16 +466,15 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                            (s[end] != '\n'))
                         end++;
 
-                    strncpy(gGlyphName, s, end);
-                    if (end < MAX_GLYPHNAME_LEN)
-                        gGlyphName[end] = '\0';
-                    else {
-                        gGlyphName[MAX_GLYPHNAME_LEN - 1] = '\0';
+                    if (end >= MAX_GLYPHNAME_LEN) {
                         LogMsg(LOGERROR, NONFATALERROR,
-                               "Bad input data. Glyph name is "
-                               "greater than %d chars.",
-                               gGlyphName, MAX_GLYPHNAME_LEN);
+                               "Bad input data. Glyph name is greater than "
+                               "%d chars.",
+                               MAX_GLYPHNAME_LEN);
                     }
+
+                    strncpy(gGlyphName, s, end);
+                    gGlyphName[end] = '\0';
                 }
                 while ((*s != '\n') && (*s != '\r')) {
                     s++;
