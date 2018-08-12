@@ -117,19 +117,6 @@ AppendElement(int32_t etype)
 }
 
 static void
-psDIV(void)
-{
-    Fixed x, y;
-    y = Pop();
-    x = Pop();
-    if (y == FixInt(100))
-        x /= 100; /* this will usually be the case */
-    else
-        x = (x * FixOne) / y;
-    Push(x);
-}
-
-static void
 RDcurveto(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
 {
     if (!forMultiMaster) {
@@ -393,12 +380,6 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                 case 'f': /* flx */
                     if (nm[1] == 'l' && nm[2] == 'x')
                         psFLX(fontinfo);
-                    else
-                        goto badFile;
-                    break;
-                case 'd': /* div */
-                    if (nm[1] == 'i' && nm[2] == 'v')
-                        psDIV();
                     else
                         goto badFile;
                     break;
