@@ -9,6 +9,10 @@
 
 #include "ac.h"
 
+/* number of default entries in counter hint glyph list. */
+#define COUNTERDEFAULTENTRIES 4
+#define COUNTERLISTSIZE 20
+
 char* gVHintList[] = { "m",  "M",  "T",  "ellipsis", NULL, NULL, NULL,
                        NULL, NULL, NULL, NULL,       NULL, NULL, NULL,
                        NULL, NULL, NULL, NULL,       NULL, NULL };
