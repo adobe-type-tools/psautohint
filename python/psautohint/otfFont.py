@@ -1251,14 +1251,13 @@ class CFFFontData:
     def getfdInfo(self, fontPSName, inputPath, allow_no_blues, noFlex,
                   vCounterGlyphs, hCounterGlyphs, glyphList, fdIndex=0):
         topDict = self.topDict
-        fontDictList = []
         fdGlyphDict = None
 
         # Get the default fontinfo from the font's top dict.
         fdDict = self.getFontInfo(
             fontPSName, inputPath, allow_no_blues, noFlex, vCounterGlyphs,
             hCounterGlyphs, fdIndex)
-        fontDictList.append(fdDict)
+        fontDictList = [fdDict]
 
         # Check the fontinfo file, and add any other font dicts
         srcFontInfo = os.path.dirname(inputPath)

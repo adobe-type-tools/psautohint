@@ -891,11 +891,10 @@ class UFOFontData:
 
     def getfdInfo(self, psName, inputPath, allow_no_blues, noFlex,
                   vCounterGlyphs, hCounterGlyphs, glyphList, fdIndex=0):
-        fontDictList = []
         fdGlyphDict = None
         fdDict = self.getFontInfo(psName, inputPath, allow_no_blues, noFlex,
                                   vCounterGlyphs, hCounterGlyphs, fdIndex)
-        fontDictList.append(fdDict)
+        fontDictList = [fdDict]
 
         # Check the fontinfo file, and add any other font dicts
         srcFontInfo = os.path.dirname(inputPath)
