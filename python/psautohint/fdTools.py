@@ -189,7 +189,7 @@ class FDDict:
             if bluePairList:
                 bluePairList = sorted(bluePairList)
                 prevPair = bluePairList[0]
-                zoneBuffer = 2 * self.BlueFuzz + 1
+                zoneBuffer = 2 * int(self.BlueFuzz) + 1
                 for pair in bluePairList[1:]:
                     if prevPair[0] > pair[1]:
                         raise FontInfoParseError(
