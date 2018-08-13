@@ -29,7 +29,7 @@ LogMsg(int16_t level, /* error, warning, info */
        ...)
 {
     /* "glyphname: message" */
-    char str[MAX_GLYPHNAME_LEN + 2 + MAXMSGLEN + 1];
+    char str[MAX_GLYPHNAME_LEN + 2 + MAXMSGLEN + 1] = { 0 };
     va_list va;
 
     if (strlen(gGlyphName) > 0)
