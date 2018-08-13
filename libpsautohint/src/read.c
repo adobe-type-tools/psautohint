@@ -510,7 +510,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                         s--;
                     continue;
                 }
-                LogMsg(LOGERROR, NONFATALERROR, "Unexpected character.");
+                LogMsg(LOGERROR, NONFATALERROR, "Unexpected character: %c", c);
         }
     rdnum:
         isReal = false;
