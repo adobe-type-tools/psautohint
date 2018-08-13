@@ -225,8 +225,7 @@ class FDDict:
             self.__class__.__name__, fddict.get('DictName', 'no name'), fddict)
 
 
-def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
-                      blueFuzz):
+def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
     # fontDictList may or may not already contain a
     # font dict taken from the source font top FontDict.
     # The map of glyph names to font dict: the index into fontDictList.
@@ -234,6 +233,8 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName,
     # The user-specified set of blue values to write into the output font,
     # some sort of merge of the individual font dicts. May not be supplied.
     finalFDict = None
+
+    blueFuzz = fontDictList[0].BlueFuzz
 
     # Get rid of comments.
     data = re.sub(r"#[^\r\n]+[\r\n]", "", data)

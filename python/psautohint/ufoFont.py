@@ -908,12 +908,10 @@ class UFOFontData:
             fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
 
             if "FDDict" in fontInfoData:
-
-                blueFuzz = fdDict.BlueFuzz
                 fdGlyphDict, fontDictList, finalFDict = \
                     fdTools.parseFontInfoFile(
                         fontDictList, fontInfoData, glyphList, maxY, minY,
-                        psName, blueFuzz)
+                        psName)
                 if finalFDict is None:
                     # If a font dict was not explicitly specified for the
                     # output font, use the first user-specified font dict.
