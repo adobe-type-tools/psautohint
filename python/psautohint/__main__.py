@@ -318,8 +318,7 @@ def _expand_cid_name(glyph_name, name_aliases):
 
 
 def _process_glyph_list_arg(glyph_list, name_aliases):
-    glyph_list = [_expand_cid_name(n, name_aliases) for n in glyph_list]
-    return filter(None, glyph_list)
+    return [_expand_cid_name(n, name_aliases) for n in glyph_list]
 
 
 class Options(ACOptions):
