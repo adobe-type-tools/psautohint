@@ -1116,7 +1116,7 @@ class CFFFontData:
     def isCID(self):
         return hasattr(self.topDict, "FDSelect")
 
-    def getFontInfo(self, fontPSName, inputPath, allow_no_blues, noFlex,
+    def getFontInfo(self, allow_no_blues, noFlex,
                     vCounterGlyphs, hCounterGlyphs, fdIndex=0):
         # The psautohint library needs the global font hint zones
         # and standard stem widths.
@@ -1140,7 +1140,7 @@ class CFFFontData:
         upm = int(1 / fdDict.FontMatrix[0])
         fdDict.OrigEmSqUnits = str(upm)
 
-        fdDict.FontName = getattr(pTopDict, "FontName", fontPSName)
+        fdDict.FontName = getattr(pTopDict, "FontName", self.getPSName())
 
         low = min(-upm * 0.25, pTopDict.FontBBox[1] - 200)
         high = max(upm * 1.25, pTopDict.FontBBox[3] + 200)
@@ -1248,19 +1248,18 @@ class CFFFontData:
     def getfdIndex(self, gid):
         return self.topDict.FDSelect[gid]
 
-    def getfdInfo(self, fontPSName, inputPath, allow_no_blues, noFlex,
-                  vCounterGlyphs, hCounterGlyphs, glyphList, fdIndex=0):
+    def getfdInfo(self, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs,
+                  glyphList, fdIndex=0):
         topDict = self.topDict
         fdGlyphDict = None
 
         # Get the default fontinfo from the font's top dict.
         fdDict = self.getFontInfo(
-            fontPSName, inputPath, allow_no_blues, noFlex, vCounterGlyphs,
-            hCounterGlyphs, fdIndex)
+            allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs, fdIndex)
         fontDictList = [fdDict]
 
         # Check the fontinfo file, and add any other font dicts
-        srcFontInfo = os.path.dirname(inputPath)
+        srcFontInfo = os.path.dirname(self.inputPath)
         srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
         if os.path.exists(srcFontInfo):
             with open(srcFontInfo, "r", encoding="utf-8") as fi:
@@ -1273,7 +1272,8 @@ class CFFFontData:
             maxY = topDict.FontBBox[3]
             minY = topDict.FontBBox[1]
             fdGlyphDict, fontDictList, finalFDict = fdTools.parseFontInfoFile(
-                fontDictList, fontInfoData, glyphList, maxY, minY, fontPSName)
+                fontDictList, fontInfoData, glyphList, maxY, minY,
+                self.getPSName())
             if finalFDict is None:
                 # If a font dict was not explicitly specified for the
                 # output font, use the first user-specified font dict.

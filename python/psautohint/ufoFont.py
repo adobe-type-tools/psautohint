@@ -774,7 +774,7 @@ class UFOFontData:
                 contentsDict[glyphName] = self.glyphMap[glyphName]
         plistlib.writePlist(contentsDict, contentsFilePath)
 
-    def getFontInfo(self, fontPSName, inputPath, allow_no_blues, noFlex,
+    def getFontInfo(self, allow_no_blues, noFlex,
                     vCounterGlyphs, hCounterGlyphs, fdIndex=0):
         if self.fontDict is not None:
             return self.fontDict
@@ -889,15 +889,15 @@ class UFOFontData:
         self.fontDict = fdDict
         return fdDict
 
-    def getfdInfo(self, psName, inputPath, allow_no_blues, noFlex,
-                  vCounterGlyphs, hCounterGlyphs, glyphList, fdIndex=0):
+    def getfdInfo(self, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs,
+                  glyphList, fdIndex=0):
         fdGlyphDict = None
-        fdDict = self.getFontInfo(psName, inputPath, allow_no_blues, noFlex,
+        fdDict = self.getFontInfo(allow_no_blues, noFlex,
                                   vCounterGlyphs, hCounterGlyphs, fdIndex)
         fontDictList = [fdDict]
 
         # Check the fontinfo file, and add any other font dicts
-        srcFontInfo = os.path.dirname(inputPath)
+        srcFontInfo = os.path.dirname(self.input_path)
         srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
         maxX = self.getUnitsPerEm() * 2
         maxY = maxX
@@ -911,7 +911,7 @@ class UFOFontData:
                 fdGlyphDict, fontDictList, finalFDict = \
                     fdTools.parseFontInfoFile(
                         fontDictList, fontInfoData, glyphList, maxY, minY,
-                        psName)
+                        self.getPSName())
                 if finalFDict is None:
                     # If a font dict was not explicitly specified for the
                     # output font, use the first user-specified font dict.
