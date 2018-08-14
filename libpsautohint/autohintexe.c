@@ -458,7 +458,7 @@ main(int argc, char* argv[])
         {
             argi++;
             bezName = argv[argi];
-            masters[i] = malloc(strlen(bezName));
+            masters[i] = malloc(strlen(bezName) + 1);
             strcpy(masters[i],bezName);
             inGlyphs[i] = getFileData(bezName);
             outputSizes[i] = 4 * strlen(inGlyphs[i]);
