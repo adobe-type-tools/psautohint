@@ -126,6 +126,7 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             gPtLstIndex = 0;
             gPtLstArray[0] = NULL;
             gNumPtLsts = 1;
+            gAddHints = true;
 
             /*     if (glyphName != NULL && glyphName[0] == 'g')
                    showHintInfo = showHs = showVs = listHintInfo = true; */

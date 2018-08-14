@@ -233,6 +233,7 @@ extern bool gWriteHintedBez;
 extern Fixed gBlueFuzz;
 extern bool gDoAligns, gDoStems;
 extern bool gRoundToInt;
+extern bool gAddHints;
 
 #define MAX_GLYPHNAME_LEN 64
 /* defined in read.c; set from the glyph name at the start of the bex file. */

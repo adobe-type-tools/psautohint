@@ -282,7 +282,7 @@ ReadHintInfo(char nm, const char* str)
                "Extra hint information required for blended fonts is "
                "not in glyph. Please re-hint using the latest software. "
                "Hints will not be included in this glyph.");
-        SetNoHints();
+        gAddHints = false;
         includeHints = false;
     } else
         SetHintsElt(hinttype, &c0, elt1, elt2, (bool)!startchar);
