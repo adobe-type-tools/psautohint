@@ -244,27 +244,32 @@ GetPathType(int16_t pathtype)
 }
 
 static void
+FreeHints(HintElt *hints)
+{
+    HintElt *next;
+
+    while (hints != NULL) {
+        next = hints->next;
+        UnallocateMem(hints);
+        hints = next;
+    }
+}
+
+static void
 FreePathElements(indx stopix)
 {
     indx i, j;
 
     for (j = 0; j < stopix; j++) {
-        HintElt *hintElt, *next;
         if (pathlist[j].path != NULL) {
             /* Before we can free hint elements will need to know gPathEntries
              value for char in each master because this proc can be
              called when glyphs are inconsistent.
              */
-            for (i = 0; i < gPathEntries; i++) {
-                hintElt = pathlist[j].path[i].hints;
-                while (hintElt != NULL) {
-                    next = hintElt->next;
-                    UnallocateMem(hintElt);
-                    hintElt = next;
-                }
-            }
+            for (i = 0; i < gPathEntries; i++)
+                FreeHints(pathlist[j].path[i].hints);
         }
-        UnallocateMem(pathlist[j].mainhints);
+        FreeHints(pathlist[j].mainhints);
         UnallocateMem(pathlist[j].path);
     }
     UnallocateMem(pathlist);
