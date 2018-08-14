@@ -466,15 +466,6 @@ def mergeFDDicts(prevDictList, privateDict):
             prevZoneName = prevEntry[1]
             prevFDictName = prevEntry[2]
 
-            if (ki == 0) and (len(zoneList) >= 14):
-                log.warning("For final FontDict, skipping BlueValues "
-                            "alignment zone %s from FDDict %s because there "
-                            "are already 7 zones.", zoneName, fdDictName)
-            elif (ki == 1) and (len(zoneList) >= 5):
-                log.warning("For final FontDict, skipping OtherBlues "
-                            "alignment zone %s from FDDict %s because there "
-                            "are already 5 zones.", zoneName, fdDictName)
-
             if zone[1] < prevZone[0]:
                 log.warning("For final FontDict, skipping zone %s in FDDict %s"
                             " because it overlaps with zone %s in FDDict %s.",
