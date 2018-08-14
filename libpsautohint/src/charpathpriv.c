@@ -103,15 +103,6 @@ SetHintsElt(int16_t hinttype, Cd* coord, int32_t elt1, int32_t elt2,
         (*hintEntry)->next = lastHintEntry;
 }
 
-/* Called when glyph file contains hinting operators, but
-   not the path element information needed for making blended
-   fonts. */
-void
-SetNoHints(void)
-{
-    gAddHints = false;
-}
-
 /* According to Bill Paxton the offset locking commands should
    be replaced by hint substitution and is not necessary to
    use for blended fonts.  This means glyphs that should
