@@ -388,10 +388,10 @@ main(int argc, char* argv[])
                 "Error. Illegal command line. Must provide bez file name.\n");
         badParam = true;
     }
-    if (fontInfoFileName == NULL) {
+    if (fontinfo == NULL) {
         fprintf(
           stdout,
-          "Error. Illegal command line. Must provide font info file name.\n");
+          "Error. Illegal command line. Must provide font info.\n");
         badParam = true;
     }
 
