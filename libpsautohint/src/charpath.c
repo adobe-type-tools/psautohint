@@ -244,11 +244,11 @@ GetPathType(int16_t pathtype)
 }
 
 static void
-FreePathElements(indx startix, indx stopix)
+FreePathElements(indx stopix)
 {
     indx i, j;
 
-    for (j = startix; j < stopix; j++) {
+    for (j = 0; j < stopix; j++) {
         HintElt *hintElt, *next;
         if (pathlist[j].path != NULL) {
             /* Before we can free hint elements will need to know gPathEntries
@@ -2368,7 +2368,7 @@ MergeGlyphPaths(const ACFontInfo* fontinfo, const char** srcglyphs,
         }
         WritePaths(outbuffers, outlengths);
     }
-    FreePathElements(0, masterCount);
+    FreePathElements(masterCount);
 
     return ok;
 }
