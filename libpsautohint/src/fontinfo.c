@@ -485,19 +485,6 @@ ParseFontInfo(const char* data)
                 break;
             }
         }
-
-        if (i == info->length) {
-            char* temp;
-            temp = AllocateMem(tkstart - kwstart + 1, 1, "no idea!");
-            if (!temp) {
-                FreeFontInfo(info);
-                return NULL;
-            }
-            strncpy(temp, kwstart, tkstart - kwstart);
-            temp[tkstart - kwstart] = '\0';
-            /*fprintf(stderr, "Ignoring fileinfo %s...\n", temp);*/
-            UnallocateMem(temp);
-        }
         skipblanks();
     }
 
