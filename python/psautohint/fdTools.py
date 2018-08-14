@@ -458,9 +458,14 @@ def mergeFDDicts(prevDictList, privateDict):
         goodZoneList.append(prevZone[1])
         goodZoneList.append(prevZone[0])
         zoneBuffer = 2 * prefDDict.BlueFuzz + 1
-        zoneName = ''
-        fdDictName = ''
         for zone in zoneList[1:]:
+            curEntry = blueZoneDict[zone]
+            prevEntry = blueZoneDict[prevZone]
+            zoneName = curEntry[1]
+            fdDictName = curEntry[2]
+            prevZoneName = prevEntry[1]
+            prevFDictName = prevEntry[2]
+
             if (ki == 0) and (len(zoneList) >= 14):
                 log.warning("For final FontDict, skipping BlueValues "
                             "alignment zone %s from FDDict %s because there "
@@ -471,22 +476,10 @@ def mergeFDDicts(prevDictList, privateDict):
                             "are already 5 zones.", zoneName, fdDictName)
 
             if zone[1] < prevZone[0]:
-                curEntry = blueZoneDict[zone]
-                prevEntry = blueZoneDict[prevZone]
-                zoneName = curEntry[1]
-                fdDictName = curEntry[2]
-                prevZoneName = prevEntry[1]
-                prevFDictName = prevEntry[2]
                 log.warning("For final FontDict, skipping zone %s in FDDict %s"
                             " because it overlaps with zone %s in FDDict %s.",
                             zoneName, fdDictName, prevZoneName, prevFDictName)
             elif abs(zone[1] - prevZone[0]) <= zoneBuffer:
-                curEntry = blueZoneDict[zone]
-                prevEntry = blueZoneDict[prevZone]
-                zoneName = curEntry[1]
-                fdDictName = curEntry[2]
-                prevZoneName = prevEntry[1]
-                prevFDictName = prevEntry[2]
                 log.warning("For final FontDict, skipping zone %s in FDDict %s"
                             " because it is within the minimum separation "
                             "allowed (%s units) of %s in FDDict %s.",
