@@ -160,11 +160,8 @@ typedef struct _hintpnt {
   } HintPoint;
 
 typedef struct {
-	char *key, *value;
-} FFEntry;
-
-typedef struct {
-  FFEntry *entries; /* font information entries */
+  char** keys;      /* font information keys */
+  char** values;    /* font information values */
   size_t length;    /* number of the entries */
 } ACFontInfo;
 
