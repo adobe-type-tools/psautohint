@@ -12,8 +12,8 @@ def open_font(path):
     return font
 
 
-def get_font_info(font, path):
-    info = font.getFontInfo(font.getPSName(), path, False, False, [], [])
+def get_font_info(font):
+    info = font.getFontInfo(False, False, [], [])
     return info.getFontInfo()
 
 
@@ -53,7 +53,7 @@ def main():
         names = font.getGlyphList()
 
     if not args.no_fontinfo:
-        info = get_font_info(font, path)
+        info = get_font_info(font)
         with open(os.path.join(outpath, "fontinfo"), "x") as fp:
             fp.write(info)
 

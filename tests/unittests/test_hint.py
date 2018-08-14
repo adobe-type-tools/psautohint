@@ -21,8 +21,8 @@ class BezFontData:
         def getFontInfo(self):
             return self._info
 
-    def getFontInfo(self, PSName, inputPath, allow_no_blues, noFlex,
-                    vCounterGlyphs, hCounterGlyphs):
+    def getFontInfo(self, allow_no_blues, noFlex, vCounterGlyphs,
+                    hCounterGlyphs):
         if self._info is None:
             with open(os.path.join(self._path, "fontinfo")) as fp:
                 self._info = self.FontInfo(fp.read())
@@ -33,10 +33,6 @@ class BezFontData:
             with open(os.path.join(self._path, glyphName + ".bez")) as fp:
                 self._glyphs[glyphName] = fp.read()
         return (self._glyphs[glyphName], 0)
-
-    @staticmethod
-    def getPSName():
-        return ""
 
     def getGlyphList(self):
         files = glob.glob(self._path + "/*.bez")
@@ -54,7 +50,7 @@ def open_font(path):
 
 
 def get_font_info(font, path):
-    info = font.getFontInfo(font.getPSName(), path, False, False, [], [])
+    info = font.getFontInfo(False, False, [], [])
     # Sort to normalize the order.
     info = sorted(info.getFontInfo().split("\n"))
     return "\n".join(info)

@@ -247,8 +247,6 @@ def hintFile(options, path, outpath, reference_master):
 
     fontInfo = ""
 
-    psName = fontData.getPSName()
-
     # Check counter glyphs, if any.
     counter_glyphs = options.hCounterGlyphs + options.vCounterGlyphs
     if counter_glyphs:
@@ -260,8 +258,7 @@ def hintFile(options, path, outpath, reference_master):
     # Build alignment zone string
     if options.printDefaultFDDict:
         print("Showing default FDDict Values:")
-        fdDict = fontData.getFontInfo(psName, path,
-                                      options.allow_no_blues,
+        fdDict = fontData.getFontInfo(options.allow_no_blues,
                                       options.noFlex,
                                       options.vCounterGlyphs,
                                       options.hCounterGlyphs)
@@ -269,8 +266,7 @@ def hintFile(options, path, outpath, reference_master):
         fontData.close()
         return
 
-    fdGlyphDict, fontDictList = fontData.getfdInfo(psName, path,
-                                                   options.allow_no_blues,
+    fdGlyphDict, fontDictList = fontData.getfdInfo(options.allow_no_blues,
                                                    options.noFlex,
                                                    options.vCounterGlyphs,
                                                    options.hCounterGlyphs,
@@ -336,8 +332,7 @@ def hintFile(options, path, outpath, reference_master):
             fdIndex = fontData.getfdIndex(gid)
             if not fdIndex == lastFDIndex:
                 lastFDIndex = fdIndex
-                fdDict = fontData.getFontInfo(psName, path,
-                                              options.allow_no_blues,
+                fdDict = fontData.getFontInfo(options.allow_no_blues,
                                               options.noFlex,
                                               options.vCounterGlyphs,
                                               options.hCounterGlyphs,
