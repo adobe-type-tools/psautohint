@@ -1678,7 +1678,6 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
 
     /* hintArray contains the pointers to the beginning of the linked list of
      * hints for each design at pathEltIx. */
-    hintList = (HintElt*)AllocateMem(1, sizeof(HintElt*), "hint element array");
     /* Initialize hint list. */
     if (pathEltIx == MAINHINTS)
         hintList = pathlist[mIx].mainhints;
