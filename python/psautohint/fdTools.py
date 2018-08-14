@@ -491,12 +491,10 @@ def mergeFDDicts(prevDictList, privateDict):
         goodStemList.append(prevStem)
         for stem in stemList[1:]:
             if abs(stem - prevStem) < 2:
-                fdDictName = stemDict[stem]
-                prevFDictName = stemDict[prevStem]
                 log.warning("For final FontDict, skipping stem width %s in "
                             "FDDict %s because it overlaps in coverage with "
                             "stem width %s in FDDict %s.",
-                            stem, fdDictName, prevStem, prevFDictName)
+                            stem, stemDict[stem], prevStem, stemDict[prevStem])
             else:
                 goodStemList.append(stem)
             prevStem = stem
