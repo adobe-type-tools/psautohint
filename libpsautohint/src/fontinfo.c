@@ -226,9 +226,9 @@ GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
     }
 
     for (i = 0; i < fontinfo->length; i++) {
-        if (fontinfo->entries[i].key &&
-            !strcmp(fontinfo->entries[i].key, keyword)) {
-            return fontinfo->entries[i].value;
+        if (fontinfo->keys[i] &&
+            !strcmp(fontinfo->keys[i], keyword)) {
+            return fontinfo->values[i];
         }
     }
 
@@ -330,34 +330,58 @@ FreeFontInfo(ACFontInfo* fontinfo)
         return;
 
     for (i = 0; i < fontinfo->length; i++) {
-        if (fontinfo->entries[i].value[0]) {
-            UnallocateMem(fontinfo->entries[i].value);
+        if (fontinfo->values[i][0]) {
+            UnallocateMem(fontinfo->values[i]);
         }
     }
-    UnallocateMem(fontinfo->entries);
+    UnallocateMem(fontinfo->values);
     UnallocateMem(fontinfo);
 }
 
-static ACFontInfo*
-NewFontInfo(size_t length)
-{
-    ACFontInfo* fontinfo;
+static char* fontinfo_keys[] = {
+    "OrigEmSqUnits", "FontName", "FlexOK",
+    /* Blue Values */
+    "BaselineOvershoot", "BaselineYCoord", "CapHeight", "CapOvershoot",
+    "LcHeight", "LcOvershoot", "AscenderHeight", "AscenderOvershoot",
+    "FigHeight", "FigOvershoot", "Height5", "Height5Overshoot", "Height6",
+    "Height6Overshoot",
+    /* Other Values */
+    "Baseline5Overshoot", "Baseline5", "Baseline6Overshoot", "Baseline6",
+    "SuperiorOvershoot", "SuperiorBaseline", "OrdinalOvershoot",
+    "OrdinalBaseline", "DescenderOvershoot", "DescenderHeight",
 
-    if (length == 0)
-        return NULL;
+    "DominantV", "StemSnapV", "DominantH", "StemSnapH", "VCounterChars",
+    "HCounterChars",
+    /* later addenda */
+    "BlueFuzz",
+
+    NULL
+};
+
+static ACFontInfo*
+NewFontInfo(void)
+{
+    size_t i;
+    ACFontInfo* fontinfo;
 
     fontinfo = (ACFontInfo*)AllocateMem(1, sizeof(ACFontInfo), "fontinfo");
     if (!fontinfo)
         return NULL;
 
-    fontinfo->entries =
-      (FFEntry*)AllocateMem(length, sizeof(FFEntry), "fontinfo entry");
-    if (!fontinfo->entries) {
+    fontinfo->length = 0;
+    while (fontinfo_keys[fontinfo->length] != NULL)
+        fontinfo->length++;
+
+    fontinfo->values = (char**)AllocateMem(fontinfo->length, sizeof(char*),
+                                              "fontinfo values");
+    if (!fontinfo->values) {
         UnallocateMem(fontinfo);
         return NULL;
     }
 
-    fontinfo->length = length;
+    fontinfo->keys = fontinfo_keys;
+    for (i = 0; i < fontinfo->length; i++)
+        fontinfo->values[i] = "";
 
     return fontinfo;
 }
@@ -398,52 +422,9 @@ ParseFontInfo(const char* data)
     const char* current;
     size_t i;
 
-    ACFontInfo* info = NewFontInfo(34);
+    ACFontInfo* info = NewFontInfo();
     if (!info)
         return NULL;
-
-    info->entries[0].key = "OrigEmSqUnits";
-    info->entries[1].key = "FontName";
-    info->entries[2].key = "FlexOK";
-    /* Blue Values */
-    info->entries[3].key = "BaselineOvershoot";
-    info->entries[4].key = "BaselineYCoord";
-    info->entries[5].key = "CapHeight";
-    info->entries[6].key = "CapOvershoot";
-    info->entries[7].key = "LcHeight";
-    info->entries[8].key = "LcOvershoot";
-    info->entries[9].key = "AscenderHeight";
-    info->entries[10].key = "AscenderOvershoot";
-    info->entries[11].key = "FigHeight";
-    info->entries[12].key = "FigOvershoot";
-    info->entries[13].key = "Height5";
-    info->entries[14].key = "Height5Overshoot";
-    info->entries[15].key = "Height6";
-    info->entries[16].key = "Height6Overshoot";
-    /* Other Values */
-    info->entries[17].key = "Baseline5Overshoot";
-    info->entries[18].key = "Baseline5";
-    info->entries[19].key = "Baseline6Overshoot";
-    info->entries[20].key = "Baseline6";
-    info->entries[21].key = "SuperiorOvershoot";
-    info->entries[22].key = "SuperiorBaseline";
-    info->entries[23].key = "OrdinalOvershoot";
-    info->entries[24].key = "OrdinalBaseline";
-    info->entries[25].key = "DescenderOvershoot";
-    info->entries[26].key = "DescenderHeight";
-
-    info->entries[27].key = "DominantV";
-    info->entries[28].key = "StemSnapV";
-    info->entries[29].key = "DominantH";
-    info->entries[30].key = "StemSnapH";
-    info->entries[31].key = "VCounterChars";
-    info->entries[32].key = "HCounterChars";
-    /* later addenda */
-    info->entries[33].key = "BlueFuzz";
-
-    for (i = 0; i < info->length; i++) {
-        info->entries[i].value = "";
-    }
 
     if (!data)
         return info;
@@ -472,16 +453,16 @@ ParseFontInfo(const char* data)
 
         kwLen = (size_t)(kwend - kwstart);
         for (i = 0; i < info->length; i++) {
-            size_t matchLen = NUMMAX(kwLen, strlen(info->entries[i].key));
-            if (!strncmp(info->entries[i].key, kwstart, matchLen)) {
-                info->entries[i].value =
+            size_t matchLen = NUMMAX(kwLen, strlen(info->keys[i]));
+            if (!strncmp(info->keys[i], kwstart, matchLen)) {
+                info->values[i] =
                   AllocateMem(current - tkstart + 1, 1, "fontinfo entry value");
-                if (!info->entries[i].value) {
+                if (!info->values[i]) {
                     FreeFontInfo(info);
                     return NULL;
                 }
-                strncpy(info->entries[i].value, tkstart, current - tkstart);
-                info->entries[i].value[current - tkstart] = '\0';
+                strncpy(info->values[i], tkstart, current - tkstart);
+                info->values[i][current - tkstart] = '\0';
                 break;
             }
         }
