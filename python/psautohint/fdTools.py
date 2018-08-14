@@ -155,11 +155,10 @@ class FDDict:
                         else:
                             for posSuffix in ["", "Height", "Baseline"]:
                                 tempKey = "%s%s" % (baseName, posSuffix)
-                                try:
-                                    zonePos = int(getattr(self, tempKey))
+                                value = getattr(self, tempKey, None)
+                                if value is not None:
+                                    zonePos = int(value)
                                     break
-                                except AttributeError:
-                                    continue
                         if zonePos is None:
                             raise FontInfoParseError(
                                 "Failed to find fontinfo FDDict %s top/bottom "
