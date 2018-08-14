@@ -76,6 +76,8 @@ def test_autohintmm_unicode(args):
     b"% foo\nsc ed",     # separating tokens with space
     b"% foo\nsc\ned",    # separating tokens with newline
     b"% foo\nsc\red",    # separating tokens with linefeed
+    b"% foo",            # glyph name only
+    b"% foo bar",        # extra data after glyph name
 ])
 def test_autohint_good_glyph(glyph):
     result = _psautohint.autohint(INFO, glyph)

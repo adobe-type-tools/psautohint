@@ -456,7 +456,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                     while (*s == ' ')
                         s++;
 
-                    while ((s[end] != ' ') && (s[end] != '\r') &&
+                    while (s[end] && (s[end] != ' ') && (s[end] != '\r') &&
                            (s[end] != '\n'))
                         end++;
 
@@ -470,7 +470,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                     strncpy(gGlyphName, s, end);
                     gGlyphName[end] = '\0';
                 }
-                while ((*s != '\n') && (*s != '\r')) {
+                while (*s && (*s != '\n') && (*s != '\r')) {
                     s++;
                 }
                 continue;
