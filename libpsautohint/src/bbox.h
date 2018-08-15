@@ -21,7 +21,6 @@ void ReHintVBnds(void);
 void HintHBnds(void);
 void ReHintHBnds(void);
 void AddBBoxHV(bool Hflg, bool subs);
-void HintBBox(void);
 void CheckPathBBox(void);
 bool CheckBBoxes(PathElt* e1, PathElt* e2);
 

@@ -794,8 +794,7 @@ static void
 AddHintsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
                   bool extrahint)
 {
-    int32_t solEolCode = 2, retryHinting = 0;
-    bool isSolEol = false;
+    int32_t retryHinting = 0;
     while (true) {
         PreGenPts();
         CheckSmooth();
@@ -812,12 +811,9 @@ AddHintsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
         PruneElementHintSegs();
         ListHintInfo();
         if (extrahint) {
-            AutoExtraHints(MoveToNewHints(), isSolEol, solEolCode);
+            AutoExtraHints(MoveToNewHints());
         }
         gPtLstArray[gPtLstIndex] = gPointList;
-        if (isSolEol) {
-            break;
-        }
         retryHinting++;
         /* we want to retry hinting if
          `1) CounterFailed or

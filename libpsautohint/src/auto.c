@@ -765,15 +765,6 @@ CopyHints(HintVal* lst)
     return vlst;
 }
 
-static PathElt*
-_HintBBox(PathElt* e)
-{
-    e = FindSubpathBBox(e);
-    HintBBox();
-    hintBBox = true;
-    return e;
-}
-
 static bool
 IsFlare(Fixed loc, PathElt* e, PathElt* n, bool Hflg)
 {
@@ -1054,7 +1045,7 @@ RemShortHints(void)
 }
 
 void
-AutoExtraHints(bool movetoNewHints, bool soleol, int32_t solWhere)
+AutoExtraHints(bool movetoNewHints)
 {
     int32_t h, v, ph, pv;
     PathElt *e, *cp, *p;
@@ -1062,10 +1053,9 @@ AutoExtraHints(bool movetoNewHints, bool soleol, int32_t solWhere)
     HintVal *mtVhints, *mtHhints, *prvHhints, *prvVhints;
 
     bool (*Tst)(int32_t, int32_t), newHints = true;
-    bool isSpc;
     Fixed x, y;
 
-    isSpc = hintBBox = hintVBounds = hintHBounds = false;
+    hintBBox = hintVBounds = hintHBounds = false;
     mergeMain = (CountSubPaths() <= 5);
     e = gPathStart;
     LogMsg(LOGDEBUG, OK, "RemFlares");
@@ -1088,21 +1078,6 @@ AutoExtraHints(bool movetoNewHints, bool soleol, int32_t solWhere)
         if (movetoNewHints && etype == MOVETO) {
             StartNewHinting(e, NULL, NULL);
             Tst = IsOk;
-        }
-        if (soleol && etype == MOVETO) { /* start new hinting on soleol mt */
-            if ((solWhere == 1 && IsUpper(e)) ||
-                (solWhere == -1 && IsLower(e)) ||
-                (solWhere == 0)) { /* hint bbox of next subpath */
-                StartNewHinting(e, NULL, NULL);
-                Tst = IsOk;
-                haveHBnds = haveVBnds = isSpc = true;
-                e = _HintBBox(e);
-                continue;
-            } else if (isSpc) { /* new hinting after the special */
-                StartNewHinting(e, NULL, NULL);
-                Tst = IsOk;
-                haveHBnds = haveVBnds = isSpc = false;
-            }
         }
         if (newHints && e == p) {
             StartNewHinting(e, NULL, NULL);
