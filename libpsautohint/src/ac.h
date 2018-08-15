@@ -355,11 +355,8 @@ void ReportTryFlexNearMiss(Fixed x0, Fixed y0, Fixed x2, Fixed y2);
 void ReportTryFlexError(bool CPflg, Fixed x, Fixed y);
 void AskForSplit(PathElt* e);
 void ReportSplit(PathElt* e);
-void ReportConflictCheck(PathElt* e, PathElt* conflict, PathElt* cp);
-void ReportConflictCnt(PathElt* e, int32_t cnt);
 void ReportRemFlare(PathElt* e, PathElt* e2, bool hFlg, int32_t i);
 void ReportRemConflict(PathElt* e);
-void ReportRotateSubpath(PathElt* e);
 void ReportRemShortHints(Fixed ex, Fixed ey);
 bool ResolveConflictBySplit(PathElt* e, bool Hflg, SegLnkLst* lnk1,
                             SegLnkLst* lnk2);
@@ -372,7 +369,6 @@ void ShowVVals(HintVal* lst);
 void ReportAddVVal(HintVal* val);
 void ReportFndBstVal(HintSeg* seg, HintVal* val, bool hFlg);
 void ReportCarry(Fixed l0, Fixed l1, Fixed loc, HintVal* hints, bool vert);
-void ReportBestCP(PathElt* e, PathElt* cp);
 void LogHintInfo(HintPoint* pl);
 void ReportStemNearMiss(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t,
                         bool curve);
