@@ -155,27 +155,6 @@ ReportPossibleLoop(PathElt* e)
 }
 
 void
-ReportConflictCheck(PathElt* e, PathElt* conflict, PathElt* cp)
-{
-    Fixed ex, ey, cx, cy, cpx, cpy;
-    GetEndPoint(e, &ex, &ey);
-    GetEndPoint(conflict, &cx, &cy);
-    GetEndPoint(cp, &cpx, &cpy);
-    LogMsg(INFO, OK, "Check e %g %g conflict %g %g cp %g %g.", FixToDbl(ex),
-           FixToDbl(-ey), FixToDbl(cx), FixToDbl(-cy), FixToDbl(cpx),
-           FixToDbl(-cpy));
-}
-
-void
-ReportConflictCnt(PathElt* e, int32_t cnt)
-{
-    Fixed ex, ey;
-    GetEndPoint(e, &ex, &ey);
-    LogMsg(INFO, OK, "%g %g conflict count = %d", FixToDbl(ex), FixToDbl(-ey),
-           cnt);
-}
-
-void
 ReportRemFlare(PathElt* e, PathElt* e2, bool hFlg, int32_t i)
 {
     Fixed ex1, ey1, ex2, ey2;
@@ -192,15 +171,6 @@ ReportRemConflict(PathElt* e)
     Fixed ex, ey;
     GetEndPoint(e, &ex, &ey);
     LogMsg(INFO, OK, "Removed conflicting hints at %g %g.", FixToDbl(ex),
-           FixToDbl(-ey));
-}
-
-void
-ReportRotateSubpath(PathElt* e)
-{
-    Fixed ex, ey;
-    GetEndPoint(e, &ex, &ey);
-    LogMsg(INFO, OK, "changed closepath to %g %g.", FixToDbl(ex),
            FixToDbl(-ey));
 }
 
@@ -343,20 +313,6 @@ ReportCarry(Fixed l0, Fixed l1, Fixed loc, HintVal* hints, bool vert)
     }
     LogMsg(LOGDEBUG, OK, " carry to %g in [%g..%g]", FixToDbl(loc),
            FixToDbl(l0), FixToDbl(l1));
-}
-
-void
-ReportBestCP(PathElt* e, PathElt* cp)
-{
-    Fixed ex, ey, px, py;
-    GetEndPoint(e, &ex, &ey);
-    if (cp != NULL) {
-        GetEndPoint(cp, &px, &py);
-        LogMsg(INFO, OK, "%g %g best cp at %g %g", FixToDbl(ex), FixToDbl(-ey),
-               FixToDbl(px), FixToDbl(-py));
-    } else {
-        LogMsg(INFO, OK, "%g %g no best cp", FixToDbl(ex), FixToDbl(-ey));
-    }
 }
 
 void
