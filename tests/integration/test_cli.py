@@ -101,9 +101,9 @@ def test_type1(path, tmpdir):
 
 
 @pytest.mark.parametrize("glyphs", [
-    'a,b,c',     # Glyph List
-    'a-z',       # Glyph range
-    'FOO,BAR,a', # Some glyphs in the list do not exist.
+    'a,b,c',      # Glyph List
+    'a-z',        # Glyph range
+    'FOO,BAR,a',  # Some glyphs in the list do not exist.
 ])
 def test_glyph_list(glyphs, tmpdir):
     path = "%s/dummy/font.ufo" % DATA_DIR
@@ -162,6 +162,7 @@ def test_missing_cff_table(tmpdir):
 
     with pytest.raises(FontParseError):
         autohint([path, '-o', out])
+
 
 @pytest.mark.parametrize("option,argument", [
     ("--exclude-glyphs-file", "glyphs.txt"),
