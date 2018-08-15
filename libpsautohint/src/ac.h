@@ -280,7 +280,7 @@ bool FindNameInList(char* nm, char** lst);
 void PruneElementHintSegs(void);
 int TestHintLst(SegLnkLst* lst, HintVal* hintList, bool flg, bool doLst);
 HintVal* CopyHints(HintVal* lst);
-void AutoExtraHints(bool movetoNewHints, bool soleol, int32_t solWhere);
+void AutoExtraHints(bool movetoNewHints);
 int32_t SpecialGlyphType(void);
 bool VHintGlyph(void);
 bool HHintGlyph(void);

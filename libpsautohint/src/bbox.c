@@ -346,43 +346,6 @@ AddBBoxHV(bool Hflg, bool subs)
 }
 
 void
-HintBBox(void)
-{
-    Fixed tmp;
-    PathElt *p, *p0, *p1;
-    if (!gUseV) {
-        Fixed llx = xmin;
-        Fixed urx = xmax;
-        p0 = pxmn;
-        p1 = pxmx;
-        if (llx > urx) {
-            tmp = llx;
-            llx = urx;
-            urx = tmp;
-            p = p0;
-            p0 = p1;
-            p1 = p;
-        }
-        AddHintPoint(llx, 0, urx, 0, 'y', p0, p1);
-    }
-    if (!gUseH) {
-        Fixed lly = -ymax;
-        Fixed ury = -ymin;
-        p0 = pymx;
-        p1 = pymn;
-        if (lly > ury) {
-            tmp = lly;
-            lly = ury;
-            ury = tmp;
-            p = p0;
-            p0 = p1;
-            p1 = p;
-        }
-        AddHintPoint(0, lly, 0, ury, 'b', p0, p1);
-    }
-}
-
-void
 CheckPathBBox(void)
 {
     Fixed llx, lly, urx, ury, tmp;
