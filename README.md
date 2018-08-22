@@ -10,8 +10,6 @@ PSAutoHint
 A standalone version of [AFDKO](https://github.com/adobe-type-tools/afdko)’s
 autohinter.
 
-Still a work in progress. Use at your own risk!
-
 Building and running
 --------------------
 
