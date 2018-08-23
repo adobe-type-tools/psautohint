@@ -54,6 +54,7 @@ class ACOptions(object):
         self.nameAliases = {}
         self.excludeGlyphList = False
         self.hintAll = False
+        self.read_hints = False
         self.allowChanges = False
         self.noFlex = False
         self.noHintSub = False
@@ -302,7 +303,6 @@ def hintFile(options, path, outpath, reference_master):
                  "file for some glyphs.")
 
     # Get charstring for identifier in glyph-list
-    removeHints = True
     isCID = fontData.isCID()
     lastFDIndex = None
     anyGlyphChanged = False
@@ -315,7 +315,7 @@ def hintFile(options, path, outpath, reference_master):
         seenGlyphCount += 1
 
         # Convert to bez format
-        bezString, width = fontData.convertToBez(name, removeHints,
+        bezString, width = fontData.convertToBez(name, options.read_hints,
                                                  options.hintAll)
         if bezString is None or "mt" not in bezString:
             # skip empty glyphs.

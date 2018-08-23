@@ -43,13 +43,13 @@ class T2ToBezExtractor(T2OutlineExtractor):
     # Note: flex is converted to regular rrcurveto's.
     # cntrmasks just map to hint replacement blocks with the specified stems.
     def __init__(self, localSubrs, globalSubrs, nominalWidthX, defaultWidthX,
-                 removeHints=False, allowDecimals=False):
+                 read_hints=True, allowDecimals=False):
         T2OutlineExtractor.__init__(self, None, localSubrs, globalSubrs,
                                     nominalWidthX, defaultWidthX)
         self.vhints = []
         self.hhints = []
         self.bezProgram = []
-        self.removeHints = removeHints
+        self.read_hints = read_hints
         self.firstMarkingOpSeen = False
         self.closePathSeen = False
         self.subrLevel = 0
@@ -146,7 +146,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         self.countHints(args)
 
         # first hint value is absolute hint coordinate, second is hint width
-        if self.removeHints:
+        if not self.read_hints:
             return
 
         lastval = args[0]
@@ -218,7 +218,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         self.hintMaskString, index = self.callingStack[-1].getBytes(
             index, self.hintMaskBytes)
 
-        if not self.removeHints:
+        if self.read_hints:
             curhhints, curvhints = self.getCurHints(self.hintMaskString)
             strout = ""
             mask = [strout + hex(byteord(ch)) for ch in self.hintMaskString]
@@ -253,7 +253,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         self.hintCount = self.hintCount + int(len(args) / 2)
 
 
-def convertT2GlyphToBez(t2CharString, removeHints=False, allowDecimals=False):
+def convertT2GlyphToBez(t2CharString, read_hints=True, allowDecimals=False):
     # wrapper for T2ToBezExtractor which
     # applies it to the supplied T2 charstring
     subrs = getattr(t2CharString.private, "Subrs", [])
@@ -261,7 +261,7 @@ def convertT2GlyphToBez(t2CharString, removeHints=False, allowDecimals=False):
                                  t2CharString.globalSubrs,
                                  t2CharString.private.nominalWidthX,
                                  t2CharString.private.defaultWidthX,
-                                 removeHints,
+                                 read_hints,
                                  allowDecimals)
     extractor.execute(t2CharString)
     if extractor.gotWidth:
@@ -727,13 +727,13 @@ class CFFFontData:
     def getPSName(self):
         return self.cffTable.cff.fontNames[0]
 
-    def convertToBez(self, glyphName, removeHints, doAll=False):
+    def convertToBez(self, glyphName, read_hints, doAll=False):
         t2Wdth = None
         gid = self.charStrings.charStrings[glyphName]
         t2CharString = self.charStringIndex[gid]
         try:
             bezString, t2Wdth = convertT2GlyphToBez(t2CharString,
-                                                    removeHints,
+                                                    read_hints,
                                                     self.allowDecimalCoords)
             # Note: the glyph name is important, as it is used by autohintexe
             # for various heuristics, including [hv]stem3 derivation.

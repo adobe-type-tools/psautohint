@@ -28,7 +28,7 @@ class BezFontData:
                 self._info = self.FontInfo(fp.read())
         return self._info
 
-    def convertToBez(self, glyphName, removeHints, doAll=False):
+    def convertToBez(self, glyphName, read_hints, doAll=False):
         if glyphName not in self._glyphs:
             with open(os.path.join(self._path, glyphName + ".bez")) as fp:
                 self._glyphs[glyphName] = fp.read()
@@ -80,7 +80,7 @@ def normalize_glyph(glyph, name):
 
 
 def get_glyph(font, name):
-    glyph = font.convertToBez(name, False, True)[0]
+    glyph = font.convertToBez(name, True, True)[0]
     return normalize_glyph(glyph, name)
 
 
