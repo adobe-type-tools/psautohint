@@ -44,8 +44,6 @@ CheckPath(void)
         for (i = gPathEntries; i < maxPathEntries; i++) {
             currPathList->path[i].hints = NULL;
             currPathList->path[i].isFlex = false;
-            currPathList->path[i].sol = false;
-            currPathList->path[i].eol = false;
             currPathList->path[i].remove = false;
         }
     }
@@ -102,18 +100,3 @@ SetHintsElt(int16_t hinttype, Cd* coord, int32_t elt1, int32_t elt2,
     else
         (*hintEntry)->next = lastHintEntry;
 }
-
-/* According to Bill Paxton the offset locking commands should
-   be replaced by hint substitution and is not necessary to
-   use for blended fonts.  This means glyphs that should
-   have these commands may not look as good on Classic LW's. */
-/*
-void SetOffsetLocking(locktype)
-char *locktype;
-{
-  if (strcmp(locktype, "sol") == 0)
-    currPathList[gPathEntries-1].sol = true;
-  else
-    currPathList[gPathEntries-1].eol = true;
-}
-*/

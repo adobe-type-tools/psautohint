@@ -286,12 +286,6 @@ mt(const ACFontInfo* fontinfo, Cd c, PathElt* e)
     }
     wrtcda(c);
     WriteString("mt\n");
-    if (e->eol) {
-        WriteString("eol\n");
-    }
-    if (e->sol) {
-        WriteString("sol\n");
-    }
 }
 
 static void
@@ -302,12 +296,6 @@ dt(const ACFontInfo* fontinfo, Cd c, PathElt* e)
     }
     wrtcda(c);
     WriteString("dt\n");
-    if (e->eol) {
-        WriteString("eol\n");
-    }
-    if (e->sol) {
-        WriteString("sol\n");
-    }
 }
 
 static Fixed flX, flY;
@@ -409,12 +397,6 @@ ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PathElt* e)
         wrtcda(c3);
         WriteString("ct\n");
     }
-    if (e->eol) {
-        WriteString("eol\n");
-    }
-    if (e->sol) {
-        WriteString("sol\n");
-    }
 }
 
 static void
@@ -424,12 +406,6 @@ cp(const ACFontInfo* fontinfo, PathElt* e)
         wrtnewhints(fontinfo, e);
     }
     WriteString("cp\n");
-    if (e->eol) {
-        WriteString("eol\n");
-    }
-    if (e->sol) {
-        WriteString("sol\n");
-    }
 }
 
 static void

@@ -22,7 +22,7 @@ typedef struct _t_hintelt {
 typedef struct {
   int16_t type; /* RMT, RDT, RCT, CP */
   /* the following fields must be cleared in charpathpriv.c/CheckPath */
-  bool isFlex:1, sol:1, eol:1, remove:1;
+  bool isFlex:1, remove:1;
   int unused:12;
   HintElt* hints;
   Fixed x, y, x1, y1, x2, y2, x3, y3; /* absolute coordinates */

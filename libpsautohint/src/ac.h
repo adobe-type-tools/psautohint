@@ -141,7 +141,7 @@ typedef struct _pthelt {
   struct _pthelt *prev, *next, *conflict;
   int16_t type;
   SegLnkLst *Hs, *Vs;
-  bool Hcopy:1, Vcopy:1, isFlex:1, yFlex:1, newCP:1, sol:1, eol:1;
+  bool Hcopy:1, Vcopy:1, isFlex:1, yFlex:1, newCP:1;
   int unused:9;
   int16_t count, newhints;
   Fixed x, y, x1, y1, x2, y2, x3, y3;
