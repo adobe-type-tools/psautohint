@@ -626,72 +626,6 @@ CurveBBox(indx mIx, int16_t hinttype, int32_t pathIx, Fixed* value)
     }
     return false;
 }
-#ifdef __CENTERLINE__
-static char*
-_HintType_(int typ)
-{
-    switch (typ) {
-        case GHOST:
-            return ("Ghost");
-            break;
-        case AVERAGE:
-            return ("Average");
-            break;
-        case CURVEBBOX:
-            return ("Curvebbox");
-            break;
-        case ENDPT:
-            return ("Endpt");
-            break;
-        case STARTPT:
-            return ("Startpt");
-            break;
-        case FLATTEN:
-            return ("Flatten");
-            break;
-    }
-    return ("Unknown");
-}
-static char*
-_HintKind_(int hinttype)
-{
-    switch (hinttype) {
-        case RB:
-            return ("RB");
-            break;
-        case RV + ESCVAL:
-            return ("RV");
-            break;
-        case RY:
-            return ("RY");
-            break;
-        case RM + ESCVAL:
-            return ("RM");
-            break;
-    }
-    return ("??");
-}
-static char*
-_elttype_(int indx)
-{
-    switch (pathlist[hintsMasterIx].path[indx].type) {
-        case RMT:
-            return ("Moveto");
-            break;
-        case RDT:
-            return ("Lineto");
-            break;
-        case RCT:
-            return ("Curveto");
-            break;
-        case CP:
-            return ("Closepath");
-            break;
-    }
-    return ("Unknown");
-}
-
-#endif
 
 static bool
 nearlyequal_(Fixed a, Fixed b, Fixed tolerance)
@@ -713,16 +647,6 @@ GetPointType(int16_t hinttype, Fixed value, int32_t* pathEltIx)
     bool tryAgain = true;
     int32_t pathIx = *pathEltIx - 1;
 
-#ifdef __CENTERLINE__
-    if (TRACE) {
-        fprintf(stderr,
-                "Enter GetPointType: Hinttype=%s @(%.2f) curr "
-                "patheltix=%d pathIx=%d  <%s>",
-                _HintKind_(hinttype), FIXED2FLOAT(value), *pathEltIx, pathIx,
-                _elttype_(pathIx));
-    }
-#endif
-
 retry:
     GetEndPoints1(hintsMasterIx, pathIx, &startPt, &endPt);
     switch (hinttype) {
@@ -730,94 +654,48 @@ retry:
         case RV + ESCVAL:
             startval = startPt.y;
             endval = endPt.y;
-#ifdef __CENTERLINE__
-            if (TRACE)
-                fprintf(stderr, "Startval Y=%.2f EndVal Y=%.2f ",
-                        FIXED2FLOAT(startval), FIXED2FLOAT(endval));
-#endif
             break;
         case RY:
         case RM + ESCVAL:
             startval = startPt.x;
             endval = endPt.x;
-#ifdef __CENTERLINE__
-            if (TRACE)
-                fprintf(stderr, "Startval X=%.2f EndVal X=%.2f ",
-                        FIXED2FLOAT(startval), FIXED2FLOAT(endval));
-#endif
             break;
         default:
             LogMsg(LOGERROR, NONFATALERROR, "Illegal hint type.");
     }
 
-    /* Check for exactly equal first, in case endval = startval + 1. jvz 1nov95
-     */
-    /* Certain cases are still ambiguous. */
+    /* Check for exactly equal first, in case endval = startval + 1.
+     * Certain cases are still ambiguous. */
 
-    if (value == startval) {
-#ifdef __CENTERLINE__
-        if (TRACE)
-            fprintf(stderr, "==> StartPt\n");
-#endif
+    if (value == startval)
         return STARTPT;
-    } else if (value == endval) {
-#ifdef __CENTERLINE__
-        if (TRACE)
-            fprintf(stderr, "==> EndPt\n");
-#endif
+    else if (value == endval)
         return ENDPT;
-    } else if (nearlyequal_(value, startval, FixOne)) {
-#ifdef __CENTERLINE__
-        if (TRACE)
-            fprintf(stderr, "==> ~StartPt\n");
-#endif
+    else if (nearlyequal_(value, startval, FixOne))
         return STARTPT;
-    } else if (nearlyequal_(value, endval, FixOne)) {
-#ifdef __CENTERLINE__
-        if (TRACE)
-            fprintf(stderr, "==> ~EndPt\n");
-#endif
+    else if (nearlyequal_(value, endval, FixOne))
         return ENDPT;
-    } else if (value == (loc = FixHalfMul(startval + endval)) ||
-               nearlyequal_(value, loc, FixOne)) {
-#ifdef __CENTERLINE__
-        if (TRACE)
-            fprintf(stderr, "==> Average\n");
-#endif
+    else if (value == (loc = FixHalfMul(startval + endval)) ||
+             nearlyequal_(value, loc, FixOne))
         return AVERAGE;
-    }
 
     pathtype = pathlist[hintsMasterIx].path[pathIx].type;
-    if (tryAgain && (pathIx + 1 < gPathEntries) &&
-        (pathtype != CP)) { /* try looking at other end of line or curve */
+    /* try looking at other end of line or curve */
+    if (tryAgain && (pathIx + 1 < gPathEntries) && (pathtype != CP)) {
         pathIx++;
         *pathEltIx += 1;
         tryAgain = false;
-#ifdef __CENTERLINE__
-        if (TRACE)
-            fprintf(stderr, " (Retry w/PathEltix=%d) ", *pathEltIx);
-#endif
         goto retry;
     }
-    if (!tryAgain) /* reset pathEltIx to original value */ {
+
+    /* reset pathEltIx to original value */
+    if (!tryAgain)
         *pathEltIx -= 1;
-#ifdef __CENTERLINE__
-        if (TRACE)
-            fprintf(stderr, " (reset PathEltix to %d) ", *pathEltIx);
-#endif
-    }
+
     if (CurveBBox(hintsMasterIx, hinttype, *pathEltIx - 1, &loc) &&
-        nearlyequal_(value, loc, FixOne)) {
-#ifdef __CENTERLINE__
-        if (TRACE)
-            fprintf(stderr, "==> Curvebbox\n");
-#endif
+        nearlyequal_(value, loc, FixOne))
         return CURVEBBOX;
-    }
-#ifdef __CENTERLINE__
-    if (TRACE)
-        fprintf(stderr, "==> Flatten fallout\n");
-#endif
+
     return FLATTEN;
 }
 
@@ -872,32 +750,6 @@ InsertHint(HintElt* currHintElt, indx pathEltIx, int16_t type1, int16_t type2)
     int32_t pathIx;
     int16_t pathtype, hinttype = currHintElt->type;
     Fixed *value, ghostVal = 0, tempVal;
-
-#ifdef __CENTERLINE__
-    if (TRACE) {
-        fprintf(stderr, "InsertHint: ");
-        fprintf(stderr, "Type1=%s Type2=%s", _HintType_(type1),
-                _HintType_(type2));
-        fprintf(stderr, " PathEltIndex= ");
-        if (pathEltIx == MAINHINTS) {
-            fprintf(stderr, "MainHints ");
-        } else {
-            Fixed tx, ty;
-            fprintf(stderr, "%d ", pathEltIx);
-            if (type1 != GHOST) {
-                GetEndPoint1(hintsMasterIx, currHintElt->pathix1 - 1, &tx, &ty);
-                fprintf(stderr, "Start attached to (%.2f %.2f)",
-                        FIXED2FLOAT(tx), FIXED2FLOAT(ty));
-            }
-            if (type2 != GHOST) {
-                GetEndPoint1(hintsMasterIx, currHintElt->pathix2 - 1, &tx, &ty);
-                fprintf(stderr, "End attached to (%.2f %.2f)", FIXED2FLOAT(tx),
-                        FIXED2FLOAT(ty));
-            }
-        }
-        fprintf(stderr, "\n");
-    }
-#endif
 
     if (type1 == GHOST || type2 == GHOST)
         /* ghostVal should be -20 or -21 */
