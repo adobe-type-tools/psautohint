@@ -108,6 +108,7 @@
 				BD2C115F203DF50800D922B6 /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 0;
 		};
 		BD2C115F203DF50800D922B6 /* Products */ = {
 			isa = PBXGroup;
