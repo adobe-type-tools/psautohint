@@ -3,7 +3,7 @@ PROPOSAL FOR BEZIER FILE FORMATS (revised)
 The Standard Bezier format is an file consisting of the following
 operators:
   (width) -- character width (* this may be added at a later date)
-   sc 	-- start of character outline
+   sc   -- start of character outline
    rmt  -- relative move (same as T1 rmoveto operator)
    vmt  -- relative move (same as T1 vmoveto operator)
    hmt  -- relative move (same as T1 hmoveto operator)
