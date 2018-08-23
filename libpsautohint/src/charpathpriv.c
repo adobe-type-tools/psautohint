@@ -44,7 +44,6 @@ CheckPath(void)
         for (i = gPathEntries; i < maxPathEntries; i++) {
             currPathList->path[i].hints = NULL;
             currPathList->path[i].isFlex = false;
-            currPathList->path[i].remove = false;
         }
     }
 }

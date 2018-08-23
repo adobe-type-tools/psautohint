@@ -33,8 +33,6 @@
 #define FLATTEN 4
 #define GHOST 5
 
-static bool cubeLibrary = false;
-
 static bool firstMT;
 static Cd* refPtArray = NULL;
 static char* outbuff;
@@ -244,9 +242,9 @@ GetPathType(int16_t pathtype)
 }
 
 static void
-FreeHints(HintElt *hints)
+FreeHints(HintElt* hints)
 {
-    HintElt *next;
+    HintElt* next;
 
     while (hints != NULL) {
         next = hints->next;
@@ -416,124 +414,6 @@ AddLine(indx mIx, indx pathIx)
     }
 }
 
-#define PI 3.1415926535
-static void
-BestLine(GlyphPathElt* start, GlyphPathElt* end, Fixed* dx, Fixed* dy)
-{
-    double angle;
-    /* control point differences */
-    double cx = FixedToDouble(end->x2 - end->x3);
-    double cy = FixedToDouble(end->y2 - end->y3);
-
-    (void)start;
-
-    *dx = *dy = 0;
-
-    if (cy == 0.0 && cx == 0.0) {
-        LogMsg(WARNING, OK, "Unexpected tangent.");
-        return;
-    }
-
-    angle = atan2(cy, cx);
-
-#ifdef FOUR_WAY
-    /* Judy's non-Cube code only moves vertically or horizontally. */
-    /* This code produces similar results. */
-    if (angle < (-PI * 0.75)) {
-        *dx = -FixOne;
-    } else if (angle < (-PI * 0.25)) {
-        *dy = -FixOne;
-    } else if (angle < (PI * 0.25)) {
-        *dx = FixOne;
-    } else if (angle < (PI * 0.75)) {
-        *dy = FixOne;
-    } else {
-        *dx = -FixOne;
-    }
-#else  /*FOUR_WAY*/
-
-    if (angle < (-PI * 0.875)) {
-        *dx = -FixOne;
-    } else if (angle < (-PI * 0.625)) {
-        *dy = -FixOne;
-        *dx = -FixOne;
-    } else if (angle < (-PI * 0.375)) {
-        *dy = -FixOne;
-    } else if (angle < (-PI * 0.125)) {
-        *dy = -FixOne;
-        *dx = FixOne;
-    } else if (angle < (PI * 0.125)) {
-        *dx = FixOne;
-    } else if (angle < (PI * 0.375)) {
-        *dx = FixOne;
-        *dy = FixOne;
-    } else if (angle < (PI * 0.625)) {
-        *dy = FixOne;
-    } else if (angle < (PI * 0.875)) {
-        *dy = FixOne;
-        *dx = -FixOne;
-    } else {
-        *dx = -FixOne;
-    }
-#endif /*FOUR_WAY*/
-}
-
-/* CUBE VERSION 17-Apr-94 jvz */
-/* Curves: subtracts or adds one unit from the segment at pathIx. */
-/* Lines: flags the segment at pathIx to be removed later; CP follows it. */
-static void
-AddLineCube(indx mIx, indx pathIx)
-{
-    /* Path element types have already been coordinated by ChangeToCurve. */
-    /* Hints are only present in the hintsMasterIx. */
-
-    if (pathlist[mIx].path[pathIx].type == RDT) {
-        pathlist[mIx].path[pathIx].remove = true;
-        if (pathlist[mIx].path[pathIx + 1].type != CP) {
-            LogMsg(LOGERROR, NONFATALERROR, "Expected CP.");
-        }
-
-        /* If there's another path in the glyph, we need to compensate */
-        /* because CP does not update currentpoint. */
-
-        if (pathIx + 2 < gPathEntries) {
-            if (pathlist[mIx].path[pathIx + 2].type == RMT) {
-                pathlist[mIx].path[pathIx + 2].rx +=
-                  pathlist[mIx].path[pathIx].rx;
-                pathlist[mIx].path[pathIx + 2].ry +=
-                  pathlist[mIx].path[pathIx].ry;
-            } else {
-                LogMsg(LOGERROR, NONFATALERROR, "Expected second RMT.");
-            }
-        }
-    } else if (pathlist[mIx].path[pathIx].type == RCT) {
-        Fixed dx = 0;
-        Fixed dy = 0;
-        GlyphPathElt* start;
-        GlyphPathElt* end;
-        indx mt; /* index of the moveto preceding this path */
-
-        mt = GetMTIx(mIx, pathIx);
-        start = &pathlist[mIx].path[mt + 1];
-        end = &pathlist[mIx].path[pathIx];
-
-        /* find nearest grid point we can move to */
-        BestLine(start, end, &dx, &dy);
-
-        /* note that moving rx2, ry2 will also move rx3, ry3 */
-        pathlist[mIx].path[pathIx].x2 += dx;
-        pathlist[mIx].path[pathIx].x3 += dx;
-        pathlist[mIx].path[pathIx].rx2 += dx;
-
-        pathlist[mIx].path[pathIx].y2 += dy;
-        pathlist[mIx].path[pathIx].y3 += dy;
-        pathlist[mIx].path[pathIx].ry2 += dy;
-    } else {
-        /* Not a RCT or RDT - error - unexpected path element type. */
-        LogMsg(LOGERROR, NONFATALERROR, "Bad description.");
-    }
-}
-
 /*
  Look for zero length closepaths.  If true then add a small
  one unit line to each design.  Because blending can cause
@@ -554,10 +434,7 @@ CheckForZeroLengthCP(void)
         for (pathIx = 0; pathIx < gPathEntries; pathIx++) {
             if (pathlist[ix].path[pathIx].type == CP &&
                 ZeroLengthCP(ix, pathIx)) {
-                if (cubeLibrary)
-                    AddLineCube(ix, pathIx - 1);
-                else
-                    AddLine(ix, pathIx - 1);
+                AddLine(ix, pathIx - 1);
             }
         }
     }
@@ -1695,7 +1572,7 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
     while (hintList != NULL) {
         int16_t hinttype = hintList->type;
         hintList->rightortop -= hintList->leftorbot; /* relativize */
-        if ((hinttype == RY || hinttype == (RM + ESCVAL)) && !cubeLibrary)
+        if ((hinttype == RY || hinttype == (RM + ESCVAL)))
             /* If it is a cube library, sidebearings are considered to be
              * zero. for normal fonts, translate vstem hints left by
              * sidebearing. */
@@ -1760,7 +1637,7 @@ WriteHints(indx pathEltIx)
         for (ix = 0; ix < masterCount; ix++) {
             hintArray[ix]->rightortop -=
               hintArray[ix]->leftorbot; /* relativize */
-            if ((hinttype == RY || hinttype == (RM + ESCVAL)) && !cubeLibrary)
+            if ((hinttype == RY || hinttype == (RM + ESCVAL)))
                 /* if it is a cube library, sidebearings are considered to be
                  * zero */
                 /* for normal fonts, translate vstem hints left by sidebearing
@@ -2063,29 +1940,23 @@ WritePaths(char** outBuffers, size_t* outLengths)
 
     WriteToBuffer("%% %s\n", gGlyphName);
 
-    if (!cubeLibrary)
-        WriteSbandWidth();
+    WriteSbandWidth();
     if (gAddHints && (pathlist[hintsMasterIx].mainhints != NULL))
         WriteHints(MAINHINTS);
     WriteToBuffer("sc\n");
     firstMT = true;
     for (eltix = 0; eltix < gPathEntries; eltix++) {
-        /* A RDT may be tagged 'remove' because it is followed by a point CP. */
-        /* See AddLineCube(). */
-        if (pathlist[0].path[eltix].remove)
-            continue;
-
         xequal = yequal = false;
         if (gAddHints && (pathlist[hintsMasterIx].path[eltix].hints != NULL))
             WriteHints(eltix);
         switch (pathlist[0].path[eltix].type) {
             case RMT:
-                if (firstMT &&
-                    !cubeLibrary) /* translate by sidebearing value */
-                                  /* don't want this for cube */
+                /* translate by sidebearing value */
+                if (firstMT) {
                     for (ix = 0; ix < masterCount; ix++)
                         pathlist[ix].path[eltix].rx -=
                           IntToFix(pathlist[ix].sb);
+                }
                 firstMT = false;
             case RDT:
             case CP:
@@ -2224,105 +2095,25 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
     if (((*length) * masterCount) > FONTSTKLIMIT) {
         LogMsg(LOGERROR, NONFATALERROR, "Font stack limit exceeded");
     }
-    if (!cubeLibrary) {
-        switch (*length) {
-            case 1:
-                *subrIx = 7;
-                break;
-            case 2:
-                *subrIx = 8;
-                break;
-            case 3:
-                *subrIx = 9;
-                break;
-            case 4:
-                *subrIx = 10;
-                break;
-            case 6:
-                *subrIx = 11;
-                break;
-            default:
-                LogMsg(LOGERROR, NONFATALERROR, "Illegal operand length.");
-                break;
-        }
-    } else { /* CUBE */
-        switch (masterCount) {
-            case 2:
-                switch (*length) {
-                    case 1:
-                        *subrIx = 7;
-                        break;
-                    case 2:
-                        *subrIx = 8;
-                        break;
-                    case 3:
-                        *subrIx = 9;
-                        break;
-                    case 4:
-                        *subrIx = 10;
-                        break;
-                    case 6:
-                        *subrIx = 11;
-                        break;
-                    default:
-                        LogMsg(LOGERROR, NONFATALERROR,
-                               "Illegal operand length.");
-                        break;
-                }
-                break;
-
-            case 4:
-                switch (*length) {
-                    case 1:
-                        *subrIx = 12;
-                        break;
-                    case 2:
-                        *subrIx = 13;
-                        break;
-                    case 3:
-                        *subrIx = 14;
-                        break;
-                    case 4:
-                        *subrIx = 15;
-                        break;
-                    default:
-                        LogMsg(LOGERROR, NONFATALERROR,
-                               "Illegal operand length.");
-                        break;
-                }
-                break;
-
-            case 8:
-                switch (*length) {
-                    case 1:
-                        *subrIx = 16;
-                        break;
-                    case 2:
-                        *subrIx = 17;
-                        break;
-                    default:
-                        LogMsg(LOGERROR, NONFATALERROR,
-                               "Illegal operand length.");
-                        break;
-                }
-                break;
-
-            case 16:
-                switch (*length) {
-                    case 1:
-                        *subrIx = 18;
-                        break;
-                    default:
-                        LogMsg(LOGERROR, NONFATALERROR,
-                               "Illegal operand length.");
-                        break;
-                }
-                break;
-
-            default:
-                LogMsg(LOGERROR, NONFATALERROR, "Illegal masterCount.");
-                break;
-        }
+    switch (*length) {
+        case 1:
+            *subrIx = 7;
+            break;
+        case 2:
+            *subrIx = 8;
+            break;
+        case 3:
+            *subrIx = 9;
+            break;
+        case 4:
+            *subrIx = 10;
+            break;
+        case 6:
+            *subrIx = 11;
+            break;
+        default:
+            LogMsg(LOGERROR, NONFATALERROR, "Illegal operand length.");
+            break;
     }
 }
 
