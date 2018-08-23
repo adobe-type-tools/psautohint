@@ -424,9 +424,9 @@ class UFOFontData:
     def isCID():
         return False
 
-    def convertToBez(self, glyphName, removeHints, doAll=False):
-        # convertGLIFToBez does not yet support hints;
-        # no need for removeHints arg.
+    def convertToBez(self, glyphName, read_hints, doAll=False):
+        # convertGLIFToBez does not yet support reading hints, so read_hints
+        # is ignored.
         bezString, width = convertGLIFToBez(self, glyphName, doAll)
         return bezString, width
 
