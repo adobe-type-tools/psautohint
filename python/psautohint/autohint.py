@@ -53,9 +53,7 @@ class ACOptions(object):
         self.glyphList = []
         self.nameAliases = {}
         self.excludeGlyphList = False
-        self.usePlistFile = False
         self.hintAll = False
-        self.rehint = False
         self.allowChanges = False
         self.noFlex = False
         self.noHintSub = False
