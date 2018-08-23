@@ -21,6 +21,7 @@ class Options(ACOptions):
         self.outputPaths = [outpath]
         self.hintAll = True
         self.verbose = False
+        self.read_hints = True
 
 
 @pytest.mark.parametrize("ufo", glob.glob("%s/*/*/font.ufo" % DATA_DIR))
