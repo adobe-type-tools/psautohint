@@ -356,13 +356,9 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                         goto badFile;
                     psRMT(fontinfo);
                     break;
-                case 's': /* sol, snc */
-                case 'e': /* eol, enc */
+                case 's': /* snc */
+                case 'e': /* enc */
                     switch (nm[1]) {
-                        case 'o':
-                            if (nm[2] != 'l')
-                                goto badFile;
-                            break;
                         case 'n':
                             if (nm[2] != 'c')
                                 goto badFile;
