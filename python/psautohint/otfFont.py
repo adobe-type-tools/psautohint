@@ -10,7 +10,6 @@ import logging
 import os
 import re
 
-from fontTools.cffLib.specializer import specializeProgram
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import bytechr, byteord, open
 from fontTools.ttLib import TTFont, getTableClass
@@ -689,7 +688,7 @@ def convertBezToT2(bezString):
         except Exception:
             raise KeyError("Failed to extend t2Program with entry %s" % entry)
 
-    return specializeProgram(t2Program)
+    return t2Program
 
 
 class CFFFontData:
