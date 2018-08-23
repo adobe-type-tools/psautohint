@@ -226,18 +226,14 @@ class T2ToBezExtractor(T2OutlineExtractor):
                       args)
 
             self.bezProgram.append("beginsubr snc\n")
-            i = 0
-            for hint in curhhints:
-                self.bezProgram.append(str(hint))
+            for i, hint in enumerate(curhhints):
+                self.bezProgram.append("%s " % hint)
                 if i % 2:
                     self.bezProgram.append("rb\n")
-                i += 1
-            i = 0
-            for hint in curvhints:
-                self.bezProgram.append(str(hint))
+            for i, hint in enumerate(curvhints):
+                self.bezProgram.append("%s " % hint)
                 if i % 2:
                     self.bezProgram.append("ry\n")
-                i += 1
             self.bezProgram.extend(["endsubr enc\n", "newcolors\n"])
         return self.hintMaskString, index
 
