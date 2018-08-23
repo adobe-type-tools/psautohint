@@ -13,6 +13,8 @@ from psautohint import FontParseError
 from .differ import main as differ
 from . import DATA_DIR
 
+parametrize = pytest.mark.parametrize
+
 
 class Options(ACOptions):
     def __init__(self, inpath, outpath):
@@ -24,7 +26,7 @@ class Options(ACOptions):
         self.read_hints = True
 
 
-@pytest.mark.parametrize("ufo", glob.glob("%s/*/*/font.ufo" % DATA_DIR))
+@parametrize("ufo", glob.glob("%s/*/*/font.ufo" % DATA_DIR))
 def test_ufo(ufo, tmpdir):
     out = str(tmpdir / basename(ufo))
     options = Options(ufo, out)
@@ -33,7 +35,7 @@ def test_ufo(ufo, tmpdir):
     assert differ([ufo, out])
 
 
-@pytest.mark.parametrize("otf", glob.glob("%s/*/*/font.otf" % DATA_DIR))
+@parametrize("otf", glob.glob("%s/*/*/font.otf" % DATA_DIR))
 def test_otf(otf, tmpdir):
     out = str(tmpdir / basename(otf)) + ".out"
     options = Options(otf, out)
@@ -50,7 +52,7 @@ def test_otf(otf, tmpdir):
                    str(tmpdir / basename(out)) + ".xml"])
 
 
-@pytest.mark.parametrize("cff", glob.glob("%s/dummy/*.cff" % DATA_DIR))
+@parametrize("cff", glob.glob("%s/dummy/*.cff" % DATA_DIR))
 def test_cff(cff, tmpdir):
     out = str(tmpdir / basename(cff)) + ".out"
     options = Options(cff, out)
@@ -68,7 +70,7 @@ def test_cff(cff, tmpdir):
                    str(tmpdir / basename(out)) + ".xml"])
 
 
-@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.p*" % DATA_DIR))
+@parametrize("path", glob.glob("%s/dummy/font.p*" % DATA_DIR))
 def test_type1(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
@@ -104,8 +106,7 @@ def test_ufo_write_to_default_layer(tmpdir):
     assert differ([path, out])
 
 
-@pytest.mark.parametrize("path",
-                         glob.glob("%s/dummy/*_metainfo.ufo" % DATA_DIR))
+@parametrize("path", glob.glob("%s/dummy/*_metainfo.ufo" % DATA_DIR))
 def test_ufo_bad(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
@@ -114,7 +115,7 @@ def test_ufo_bad(path, tmpdir):
         hintFiles(options)
 
 
-@pytest.mark.parametrize("path", glob.glob("%s/dummy/bad_*.p*" % DATA_DIR))
+@parametrize("path", glob.glob("%s/dummy/bad_*.p*" % DATA_DIR))
 def test_type1_bad(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
@@ -142,8 +143,7 @@ def test_seac_op(tmpdir, caplog):
     assert "Skipping Aacute: can't process SEAC composite glyphs." in msgs
 
 
-@pytest.mark.parametrize("path",
-                         glob.glob("%s/dummy/bad_privatedict_*" % DATA_DIR))
+@parametrize("path", glob.glob("%s/dummy/bad_privatedict_*" % DATA_DIR))
 def test_bad_privatedict(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
@@ -152,8 +152,7 @@ def test_bad_privatedict(path, tmpdir):
         hintFiles(options)
 
 
-@pytest.mark.parametrize("path",
-                         glob.glob("%s/dummy/bad_privatedict_*" % DATA_DIR))
+@parametrize("path", glob.glob("%s/dummy/bad_privatedict_*" % DATA_DIR))
 def test_bad_privatedict_accept(path, tmpdir):
     """Same as above test, but PrivateDict is accepted because of
        `allow_no_blues` option."""
@@ -164,8 +163,7 @@ def test_bad_privatedict_accept(path, tmpdir):
     hintFiles(options)
 
 
-@pytest.mark.parametrize("path",
-                         glob.glob("%s/dummy/ok_privatedict_*" % DATA_DIR))
+@parametrize("path", glob.glob("%s/dummy/ok_privatedict_*" % DATA_DIR))
 def test_ok_privatedict_accept(path, tmpdir, caplog):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
