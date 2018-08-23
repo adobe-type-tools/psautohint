@@ -172,3 +172,33 @@ def test_ok_privatedict_accept(path, tmpdir, caplog):
 
     msg = "There is no value or 0 value for Dominant"
     assert any(r.getMessage().startswith(msg) for r in caplog.records)
+
+
+@parametrize("otf", glob.glob("%s/libertinus-*/*/font.otf" % DATA_DIR))
+def test_flex_otf(otf, tmpdir):
+    out = str(tmpdir / basename(otf)) + ".out"
+    options = Options(otf, out)
+    options.noFlex = False
+
+    hintFiles(options)
+
+    for path in (otf, out):
+        font = TTFont(path)
+        assert "CFF " in font
+        writer = XMLWriter(str(tmpdir / basename(path)) + ".xml")
+        font["CFF "].toXML(writer, font)
+        writer.close()
+
+    assert differ([str(tmpdir / basename(otf)) + ".xml",
+                   str(tmpdir / basename(out)) + ".xml"])
+
+
+@parametrize("ufo", glob.glob("%s/libertinus-*/*/font.ufo" % DATA_DIR))
+def test_flex_ufo(ufo, tmpdir):
+    out = str(tmpdir / basename(ufo)) + ".out"
+    options = Options(ufo, out)
+    options.noFlex = False
+
+    hintFiles(options)
+
+    assert differ([ufo, out])
