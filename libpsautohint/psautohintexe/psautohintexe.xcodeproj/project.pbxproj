@@ -71,6 +71,7 @@
 				BD2C11B7203DF77000D922B6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 0;
 		};
 		BD2C1148203DF47200D922B6 /* Products */ = {
 			isa = PBXGroup;
