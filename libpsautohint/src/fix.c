@@ -9,10 +9,6 @@
 
 #include "ac.h"
 
-#define maxFixes (100)
-static Fixed HFixYs[maxFixes], HFixDYs[maxFixes];
-static Fixed VFixXs[maxFixes], VFixDXs[maxFixes];
-static int32_t HFixCount, VFixCount;
 static Fixed bPrev, tPrev;
 
 void
@@ -21,62 +17,7 @@ InitFix(int32_t reason)
     switch (reason) {
         case STARTUP:
         case RESTART:
-            HFixCount = VFixCount = 0;
             bPrev = tPrev = FixedPosInf;
-    }
-}
-
-static void
-RecordHFix(Fixed y, Fixed dy)
-{
-    HFixYs[HFixCount] = y;
-    HFixDYs[HFixCount] = dy;
-    HFixCount++;
-}
-
-static void
-RecordVFix(Fixed x, Fixed dx)
-{
-    VFixXs[VFixCount] = x;
-    VFixDXs[VFixCount] = dx;
-    VFixCount++;
-}
-
-static void
-RecordForFix(bool vert, Fixed w, Fixed minW, Fixed b, Fixed t)
-{
-    Fixed mn, mx, delta;
-    if (b < t) {
-        mn = b;
-        mx = t;
-    } else {
-        mn = t;
-        mx = b;
-    }
-    if (!vert && HFixCount + 4 < maxFixes && gAutoHFix) {
-        Fixed fixdy = w - minW;
-        if (abs(fixdy) <= FixOne) {
-            RecordHFix(mn, fixdy);
-            RecordHFix(mx - fixdy, fixdy);
-        } else {
-            delta = FixHalfMul(fixdy);
-            RecordHFix(mn, delta);
-            RecordHFix(mn + fixdy, -delta);
-            RecordHFix(mx, -delta);
-            RecordHFix(mx - fixdy, delta);
-        }
-    } else if (vert && VFixCount + 4 < maxFixes && gAutoVFix) {
-        Fixed fixdx = w - minW;
-        if (abs(fixdx) <= FixOne) {
-            RecordVFix(mn, fixdx);
-            RecordVFix(mx - fixdx, fixdx);
-        } else {
-            delta = FixHalfMul(fixdx);
-            RecordVFix(mn, delta);
-            RecordVFix(mn + fixdx, -delta);
-            RecordVFix(mx, -delta);
-            RecordVFix(mx - fixdx, delta);
-        }
     }
 }
 
@@ -155,7 +96,7 @@ CheckTfmVal(Fixed b, Fixed t, bool vert)
 }
 #endif
 
-void
+static void
 CheckVal(HintVal* val, bool vert)
 {
     Fixed* stems;
@@ -199,8 +140,6 @@ CheckVal(HintVal* val, bool vert)
     }
     bPrev = b;
     tPrev = t;
-    if ((vert && gAutoVFix) || (!vert && gAutoHFix))
-        RecordForFix(vert, w, minW, b, t);
 }
 
 void
@@ -210,128 +149,4 @@ CheckVals(HintVal* vlst, bool vert)
         CheckVal(vlst, vert);
         vlst = vlst->vNxt;
     }
-}
-
-static void
-FixH(PathElt* e, Fixed fixy, Fixed fixdy)
-{
-    PathElt *prev, *nxt;
-    RMovePoint(0, fixdy, cpStart, e);
-    RMovePoint(0, fixdy, cpEnd, e);
-    prev = e->prev;
-    if (prev != NULL && prev->type == CURVETO && prev->y2 == fixy)
-        RMovePoint(0, fixdy, cpCurve2, prev);
-    if (e->type == CLOSEPATH)
-        e = GetDest(e);
-    nxt = e->next;
-    if (nxt != NULL && nxt->type == CURVETO && nxt->y1 == fixy)
-        RMovePoint(0, fixdy, cpCurve1, nxt);
-}
-
-static void
-FixHs(Fixed fixy, Fixed fixdy)
-{ /* y dy in user space */
-    PathElt* e;
-    Fixed xlst = 0, ylst = 0, xinit = 0, yinit = 0;
-    fixy = -fixy;
-    fixdy = -fixdy;
-    e = gPathStart;
-    while (e != NULL) {
-        switch (e->type) {
-            case MOVETO:
-                xlst = xinit = e->x;
-                ylst = yinit = e->y;
-                break;
-            case LINETO:
-                if (e->y == fixy && ylst == fixy)
-                    FixH(e, fixy, fixdy);
-                xlst = e->x;
-                ylst = e->y;
-                break;
-            case CURVETO:
-                xlst = e->x3;
-                ylst = e->y3;
-                break;
-            case CLOSEPATH:
-                if (yinit == fixy && ylst == fixy && xinit != xlst)
-                    FixH(e, fixy, fixdy);
-                break;
-            default: {
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal operator in path list.");
-            }
-        }
-        e = e->next;
-    }
-}
-
-static void
-FixV(PathElt* e, Fixed fixx, Fixed fixdx)
-{
-    PathElt *prev, *nxt;
-    RMovePoint(fixdx, 0, cpStart, e);
-    RMovePoint(fixdx, 0, cpEnd, e);
-    prev = e->prev;
-    if (prev != NULL && prev->type == CURVETO && prev->x2 == fixx)
-        RMovePoint(fixdx, 0, cpCurve2, prev);
-    if (e->type == CLOSEPATH)
-        e = GetDest(e);
-    nxt = e->next;
-    if (nxt != NULL && nxt->type == CURVETO && nxt->x1 == fixx)
-        RMovePoint(fixdx, 0, cpCurve1, nxt);
-}
-
-static void
-FixVs(Fixed fixx, Fixed fixdx)
-{ /* x dx in user space */
-    PathElt* e;
-    Fixed xlst = 0, ylst = 0, xinit = 0, yinit = 0;
-    e = gPathStart;
-    while (e != NULL) {
-        switch (e->type) {
-            case MOVETO:
-                xlst = xinit = e->x;
-                ylst = yinit = e->y;
-                break;
-            case LINETO:
-                if (e->x == fixx && xlst == fixx)
-                    FixV(e, fixx, fixdx);
-                xlst = e->x;
-                ylst = e->y;
-                break;
-            case CURVETO:
-                xlst = e->x3;
-                ylst = e->y3;
-                break;
-            case CLOSEPATH:
-                if (xinit == fixx && xlst == fixx && yinit != ylst)
-                    FixV(e, fixx, fixdx);
-                break;
-            default: {
-                LogMsg(LOGERROR, NONFATALERROR,
-                       "Illegal operator in point list.");
-            }
-        }
-        e = e->next;
-    }
-}
-
-bool
-DoFixes(void)
-{
-    bool didfixes = false;
-    int32_t i;
-    if (HFixCount > 0 && gAutoHFix) {
-        LogMsg(INFO, OK, "Fixing horizontal near misses.");
-        didfixes = true;
-        for (i = 0; i < HFixCount; i++)
-            FixHs(HFixYs[i], HFixDYs[i]);
-    }
-    if (VFixCount > 0 && gAutoVFix) {
-        LogMsg(INFO, OK, "Fixing vertical near misses.");
-        didfixes = true;
-        for (i = 0; i < VFixCount; i++)
-            FixVs(VFixXs[i], VFixDXs[i]);
-    }
-    return didfixes;
 }

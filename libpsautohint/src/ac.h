@@ -176,7 +176,7 @@ typedef struct {
 extern ACBuffer* gBezOutput;
 
 extern PathElt* gPathStart, *gPathEnd;
-extern bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix;
+extern bool gUseV, gUseH, gAutoLinearCurveFix;
 extern bool gEditGlyph; /* whether glyph can be modified when adding hints */
 extern bool gBandError;
 extern bool gHasFlex, gFlexOK, gFlexStrict;
@@ -302,10 +302,8 @@ bool AutoHintGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
 void EvalV(void);
 void EvalH(void);
 void GenVPts(int32_t specialGlyphType);
-void CheckVal(HintVal* val, bool vert);
 void CheckTfmVal(HintSeg* hSegList, Fixed* bandList, int32_t length);
 void CheckVals(HintVal* vlst, bool vert);
-bool DoFixes(void);
 bool FindLineSeg(Fixed loc, HintSeg* sL);
 void FltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, FltnRec* pfr);
 bool InBlueBand(Fixed loc, int32_t n, Fixed* p);
@@ -414,8 +412,7 @@ void AddHStem(Fixed right, Fixed left, bool curved);
 void AddGlyphExtremes(Fixed bot, Fixed top);
 
 bool AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata,
-               bool fixStems, bool extrahint, bool changeGlyph,
-               bool roundCoords);
+              bool extrahint, bool changeGlyph, bool roundCoords);
 
 bool MergeGlyphPaths(const ACFontInfo* fontinfo, const char** srcglyphs,
                     int nmasters, const char** masters, char** outbuffers,

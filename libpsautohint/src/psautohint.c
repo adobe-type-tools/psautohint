@@ -167,7 +167,6 @@ AutoHintString(const char* srcbezdata, const char* fontinfodata,
 
     result = AutoHint(fontinfo,     /* font info */
                       srcbezdata,   /* input glyph */
-                      false,        /* fixStems */
                       allowHintSub, /* extrahint */
                       allowEdit,    /* changeGlyphs */
                       roundCoords);

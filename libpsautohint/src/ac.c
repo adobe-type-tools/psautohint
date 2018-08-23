@@ -13,7 +13,7 @@
 #define MAXSTEMDIST 150 /* initial maximum stem width allowed for hints */
 
 PathElt *gPathStart, *gPathEnd;
-bool gUseV, gUseH, gAutoVFix, gAutoHFix, gAutoLinearCurveFix, gEditGlyph;
+bool gUseV, gUseH, gAutoLinearCurveFix, gEditGlyph;
 bool gHasFlex, gFlexOK, gFlexStrict, gBandError;
 Fixed gHBigDist, gVBigDist, gInitBigDist, gMinDist, gGhostWidth, gGhostLength,
   gBendLength, gBandMargin, gMaxFlare, gMaxBendMerge, gMaxMerge,
@@ -98,7 +98,6 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             gSCurveTan = 25;
             gMaxVal = 8000000.0;
             gMinVal = 1.0 / (float)(FixOne);
-            gAutoHFix = gAutoVFix = false;
             gEditGlyph = true;
             gRoundToInt = true;
             /* Default is to change a curve with collinear points into a line.
@@ -135,7 +134,7 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
 
 /* Returns whether hinting was successful. */
 bool
-AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
+AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata,
          bool extrahint, bool changeGlyph, bool roundCoords)
 {
     InitAll(fontinfo, STARTUP);
@@ -146,8 +145,6 @@ AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata, bool fixStems,
     gEditGlyph = changeGlyph;
     gRoundToInt = roundCoords;
     gAutoLinearCurveFix = gEditGlyph;
-    if (gEditGlyph && fixStems)
-        gAutoVFix = gAutoHFix = fixStems;
 
     return AutoHintGlyph(fontinfo, srcbezdata, extrahint);
 }

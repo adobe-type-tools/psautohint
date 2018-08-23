@@ -823,9 +823,6 @@ AddHintsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
         if (CounterFailed && retryHinting == 1) {
             goto retry;
         }
-        if (!DoFixes()) {
-            break;
-        }
         if (retryHinting > 1) {
             break;
         }
