@@ -1,0 +1,8 @@
+% square2
+sc
+0 0 mt
+0 500 dt
+500 500 dt
+500 0 dt
+cp
+ed

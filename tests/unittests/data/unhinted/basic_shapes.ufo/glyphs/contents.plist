@@ -6,8 +6,12 @@
     <string>_notdef.glif</string>
     <key>circle</key>
     <string>circle.glif</string>
+    <key>circle2</key>
+    <string>circle2.glif</string>
     <key>square</key>
     <string>square.glif</string>
+    <key>square2</key>
+    <string>square2.glif</string>
     <key>triangle</key>
     <string>triangle.glif</string>
   </dict>
