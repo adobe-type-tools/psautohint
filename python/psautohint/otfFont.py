@@ -77,17 +77,13 @@ class T2ToBezExtractor(T2OutlineExtractor):
             self.bezProgram.append("%s %s mt\n" % (x, y))
         else:
             self.bezProgram.append("%.2f %.2f mt\n" % (x, y))
-        self.sawMoveTo = 1
+        self.sawMoveTo = True
 
     def rLineTo(self, point):
-        point = self._nextPoint(point)
-        if not self.firstMarkingOpSeen:
-            self.firstMarkingOpSeen = True
-            self.bezProgram.append("sc\n")
-            self.bezProgram.append("0 0 mt\n")
-        log.debug("lineto %s, curpos %s", point, self.currentPoint)
         if not self.sawMoveTo:
             self.rMoveTo((0, 0))
+        point = self._nextPoint(point)
+        log.debug("lineto %s, curpos %s", point, self.currentPoint)
         x = point[0]
         y = point[1]
         if not self.allowDecimals:
@@ -98,17 +94,13 @@ class T2ToBezExtractor(T2OutlineExtractor):
             self.bezProgram.append("%.2f %.2f dt\n" % (x, y))
 
     def rCurveTo(self, pt1, pt2, pt3):
+        if not self.sawMoveTo:
+            self.rMoveTo((0, 0))
         pt1 = list(self._nextPoint(pt1))
         pt2 = list(self._nextPoint(pt2))
         pt3 = list(self._nextPoint(pt3))
-        if not self.firstMarkingOpSeen:
-            self.firstMarkingOpSeen = True
-            self.bezProgram.append("sc\n")
-            self.bezProgram.append("0 0 mt\n")
         log.debug("curveto %s %s %s, curpos %s", pt1, pt2, pt3,
                   self.currentPoint)
-        if not self.sawMoveTo:
-            self.rMoveTo((0, 0))
         if not self.allowDecimals:
             for pt in [pt1, pt2, pt3]:
                 pt[0] = int(round(pt[0]))
