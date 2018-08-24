@@ -1328,10 +1328,7 @@ def convertGlyphOutlineToBezString(outlineXML, ufoFontData, transform=None,
             argStack = []
             # Deal with setting up move-to.
             lastItem = outlineItem[0]
-            try:
-                point_type = lastItem.attrib["type"]
-            except KeyError:
-                point_type = "offcurve"
+            point_type = lastItem.attrib.get("type", "offcurve")
             if point_type in ["curve", "line", "qccurve"]:
                 outlineItem = outlineItem[1:]
                 if point_type != "line":
