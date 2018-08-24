@@ -260,11 +260,10 @@ def convertT2GlyphToBez(t2CharString, read_hints=True, allowDecimals=False):
                                  read_hints,
                                  allowDecimals)
     extractor.execute(t2CharString)
+    width = None
     if extractor.gotWidth:
-        t2Wdth = extractor.width - t2CharString.private.nominalWidthX
-    else:
-        t2Wdth = None
-    return "".join(extractor.bezProgram), t2Wdth
+        width = extractor.width - t2CharString.private.nominalWidthX
+    return "".join(extractor.bezProgram), width
 
 
 class HintMask:
