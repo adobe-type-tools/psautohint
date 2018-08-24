@@ -48,19 +48,11 @@ static int16_t GetOperandCount(int16_t);
 static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 
 /* macros */
-#define FixShift (8)
-#define IntToFix(i) ((int32_t)(i) << FixShift)
-#define FRnd(x) ((int32_t)(((x) + (1 << 7)) & ~0xFF))
-#define FTrunc8(x) ((int32_t)((x) >> 8))
-#define FixedToDouble(x) ((double)((x) / 256.0))
-#define FixOne (0x100)
-#define FixHalf (0x80)
 #define TFMX(x) ((x))
 #define TFMY(y) (-(y))
 #define ITFMX(x) ((x))
 #define ITFMY(y) (-(y))
 
-#define Frac(x) ((x)&0xFF)
 #define WRTNUM(i) WriteToBuffer("%d ", (int)(i))
 #define WRTNUMA(i) WriteToBuffer("%0.2f ", roundf((float)(i)*100) / 100)
 #define WriteStr(str) WriteToBuffer("%s ", str)
@@ -91,14 +83,14 @@ static void
 WriteX(Fixed x)
 {
     Fixed i = FRnd(x);
-    WRTNUM(FTrunc8(i));
+    WRTNUM(FTrunc(i));
 }
 
 static void
 WriteY(Fixed y)
 {
     Fixed i = FRnd(y);
-    WRTNUM(FTrunc8(i));
+    WRTNUM(FTrunc(i));
 }
 
 #define WriteCd(c)                                                             \
@@ -110,8 +102,8 @@ WriteY(Fixed y)
 static void
 WriteOneHintVal(Fixed val)
 {
-    if (Frac(val) == 0)
-        WRTNUM(FTrunc8(val));
+    if (FracPart(val) == 0)
+        WRTNUM(FTrunc(val));
     else
         WRTNUMA(FIXED2FLOAT(val));
 }
@@ -205,12 +197,12 @@ GetCoordFromType(int16_t pathtype, Cd* coord, indx mIx, indx eltno)
     switch (pathtype) {
         case RMT:
         case RDT:
-            (*coord).x = FTrunc8(FRnd(pathlist[mIx].path[eltno].x));
-            (*coord).y = FTrunc8(FRnd(pathlist[mIx].path[eltno].y));
+            (*coord).x = FTrunc(FRnd(pathlist[mIx].path[eltno].x));
+            (*coord).y = FTrunc(FRnd(pathlist[mIx].path[eltno].y));
             break;
         case RCT:
-            (*coord).x = FTrunc8(FRnd(pathlist[mIx].path[eltno].x3));
-            (*coord).y = FTrunc8(FRnd(pathlist[mIx].path[eltno].y3));
+            (*coord).x = FTrunc(FRnd(pathlist[mIx].path[eltno].x3));
+            (*coord).y = FTrunc(FRnd(pathlist[mIx].path[eltno].y3));
             break;
         case CP:
             GetCoordFromType(pathlist[mIx].path[eltno - 1].type, coord, mIx,
@@ -344,7 +336,7 @@ ZeroLengthCP(indx mIx, indx pathIx)
 static void
 AddLine(indx mIx, indx pathIx)
 {
-    Fixed fixTwo = IntToFix(2);
+    Fixed fixTwo = FixInt(2);
     Fixed xoffset = 0, yoffset = 0;
     Fixed xoffsetr = 0, yoffsetr = 0;
     GlyphPathElt *start, *end, *thisone;
@@ -386,7 +378,7 @@ AddLine(indx mIx, indx pathIx)
                 LogMsg(WARNING, OK,
                        "Could not modify point closepath in master "
                        "'%s', near (%d, %d).",
-                       masterNames[mIx], FTrunc8(end->x), FTrunc8(end->y));
+                       masterNames[mIx], FTrunc(end->x), FTrunc(end->y));
                 return;
             }
             break;
@@ -580,7 +572,7 @@ CurveBBox(indx mIx, int16_t hinttype, int32_t pathIx, Fixed* value)
     Fixed p1 = 0, p2 = 0, *minbx = 0, *maxbx = 0;
     GlyphPathElt pathElt;
 
-    *value = IntToFix(10000);
+    *value = FixInt(10000);
     pathElt = pathlist[mIx].path[pathIx];
     GetEndPoints1(mIx, pathIx, &startPt, &endPt);
     switch (hinttype) {
@@ -914,8 +906,7 @@ CheckFlexOK(indx ix)
                        "in '%s' at element %d near (%d, %d) because "
                        "the glyph does not have flex in each "
                        "design.",
-                       masterNames[i], (int)ix, FTrunc8(end->x),
-                       FTrunc8(end->y));
+                       masterNames[i], (int)ix, FTrunc(end->x), FTrunc(end->y));
                 return false;
             } else {
                 pathlist[i].path[ix].isFlex = flexOK;
@@ -1116,17 +1107,17 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
                    "(min=%d..%d[delta=%d], mid=%d..%d[delta=%d], "
                    "max=%d..%d[delta=%d])",
                    (hinttype == (RM + ESCVAL)) ? "vstem3" : "hstem3",
-                   masterNames[ix], FTrunc8((*hintElt)->leftorbot),
-                   FTrunc8((*hintElt)->rightortop),
-                   FTrunc8((*hintElt)->rightortop - (*hintElt)->leftorbot),
-                   FTrunc8((*hintElt)->next->leftorbot),
-                   FTrunc8((*hintElt)->next->rightortop),
-                   FTrunc8((*hintElt)->next->rightortop -
-                           (*hintElt)->next->leftorbot),
-                   FTrunc8((*hintElt)->next->next->leftorbot),
-                   FTrunc8((*hintElt)->next->next->rightortop),
-                   FTrunc8((*hintElt)->next->next->rightortop -
-                           (*hintElt)->next->next->leftorbot));
+                   masterNames[ix], FTrunc((*hintElt)->leftorbot),
+                   FTrunc((*hintElt)->rightortop),
+                   FTrunc((*hintElt)->rightortop - (*hintElt)->leftorbot),
+                   FTrunc((*hintElt)->next->leftorbot),
+                   FTrunc((*hintElt)->next->rightortop),
+                   FTrunc((*hintElt)->next->rightortop -
+                          (*hintElt)->next->leftorbot),
+                   FTrunc((*hintElt)->next->next->leftorbot),
+                   FTrunc((*hintElt)->next->next->rightortop),
+                   FTrunc((*hintElt)->next->next->rightortop -
+                          (*hintElt)->next->next->leftorbot));
             *errormsg = false;
         }
         for (ix = 0; ix < masterCount; ix++) {
@@ -1427,7 +1418,7 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
             /* If it is a cube library, sidebearings are considered to be
              * zero. for normal fonts, translate vstem hints left by
              * sidebearing. */
-            hintList->leftorbot -= IntToFix(pathlist[mIx].sb);
+            hintList->leftorbot -= FixInt(pathlist[mIx].sb);
 
         WriteOneHintVal(hintList->leftorbot);
         WriteOneHintVal(hintList->rightortop);
@@ -1493,7 +1484,7 @@ WriteHints(indx pathEltIx)
                  * zero */
                 /* for normal fonts, translate vstem hints left by sidebearing
                  */
-                hintArray[ix]->leftorbot -= IntToFix(pathlist[ix].sb);
+                hintArray[ix]->leftorbot -= FixInt(pathlist[ix].sb);
         }
         lbsame = rtsame = true;
         for (ix = 1; ix < masterCount; ix++) {
@@ -1703,8 +1694,8 @@ CoordsEqual(indx master1, indx master2, indx opIx, indx eltIx, int16_t op)
                    "Invalid index value: %d defined for curveto "
                    "command4. Op=%d, master=%s near "
                    "(%d %d).",
-                   (int)opIx, (int)op, masterNames[master1], FTrunc8(path1->x),
-                   FTrunc8(path1->y));
+                   (int)opIx, (int)op, masterNames[master1], FTrunc(path1->x),
+                   FTrunc(path1->y));
             break;
     }
 
@@ -1805,8 +1796,7 @@ WritePaths(char** outBuffers, size_t* outLengths)
                 /* translate by sidebearing value */
                 if (firstMT) {
                     for (ix = 0; ix < masterCount; ix++)
-                        pathlist[ix].path[eltix].rx -=
-                          IntToFix(pathlist[ix].sb);
+                        pathlist[ix].path[eltix].rx -= FixInt(pathlist[ix].sb);
                 }
                 firstMT = false;
             case RDT:
