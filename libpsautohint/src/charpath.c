@@ -48,11 +48,6 @@ static int16_t GetOperandCount(int16_t);
 static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 
 /* macros */
-#define TFMX(x) ((x))
-#define TFMY(y) (-(y))
-#define ITFMX(x) ((x))
-#define ITFMY(y) (-(y))
-
 #define WRTNUM(i) WriteToBuffer("%d ", (int)(i))
 #define WRTNUMA(i) WriteToBuffer("%0.2f ", roundf((float)(i)*100) / 100)
 #define WriteStr(str) WriteToBuffer("%s ", str)
@@ -578,19 +573,19 @@ CurveBBox(indx mIx, int16_t hinttype, int32_t pathIx, Fixed* value)
     switch (hinttype) {
         case RB:
         case RV + ESCVAL:
-            minval = TFMY(NUMMIN(startPt.y, endPt.y));
-            maxval = TFMY(NUMMAX(startPt.y, endPt.y));
-            p1 = TFMY(pathElt.y1);
-            p2 = TFMY(pathElt.y2);
+            minval = -NUMMIN(startPt.y, endPt.y);
+            maxval = -NUMMAX(startPt.y, endPt.y);
+            p1 = -pathElt.y1;
+            p2 = -pathElt.y2;
             minbx = &lly;
             maxbx = &ury;
             break;
         case RY:
         case RM + ESCVAL:
-            minval = TFMX(NUMMIN(startPt.x, endPt.x));
-            maxval = TFMX(NUMMAX(startPt.x, endPt.x));
-            p1 = TFMX(pathElt.x1);
-            p2 = TFMX(pathElt.x2);
+            minval = NUMMIN(startPt.x, endPt.x);
+            maxval = NUMMAX(startPt.x, endPt.x);
+            p1 = pathElt.x1;
+            p2 = pathElt.x2;
             minbx = &llx;
             maxbx = &urx;
             break;
@@ -600,18 +595,16 @@ CurveBBox(indx mIx, int16_t hinttype, int32_t pathIx, Fixed* value)
     if (p1 - maxval >= FixOne || p2 - maxval >= FixOne ||
         p1 - minval <= FixOne || p2 - minval <= FixOne) {
         /* Transform coordinates so I get the same value that AC would give. */
-        FindCurveBBox(TFMX(startPt.x), TFMY(startPt.y), TFMX(pathElt.x1),
-                      TFMY(pathElt.y1), TFMX(pathElt.x2), TFMY(pathElt.y2),
-                      TFMX(endPt.x), TFMY(endPt.y), &llx, &lly, &urx, &ury);
+        FindCurveBBox(startPt.x, -startPt.y, pathElt.x1, -pathElt.y1,
+                      pathElt.x2, -pathElt.y2, endPt.x, -endPt.y, &llx, &lly,
+                      &urx, &ury);
         if (*maxbx > maxval || minval > *minbx) {
             if (minval - *minbx > *maxbx - maxval)
-                *value = (hinttype == RB || hinttype == RV + ESCVAL)
-                           ? ITFMY(*minbx)
-                           : ITFMX(*minbx);
+                *value = (hinttype == RB || hinttype == RV + ESCVAL) ? -*minbx
+                                                                     : *minbx;
             else
-                *value = (hinttype == RB || hinttype == RV + ESCVAL)
-                           ? ITFMY(*maxbx)
-                           : ITFMX(*maxbx);
+                *value = (hinttype == RB || hinttype == RV + ESCVAL) ? -*maxbx
+                                                                     : *maxbx;
             return true;
         }
     }
