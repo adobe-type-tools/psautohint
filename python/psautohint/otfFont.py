@@ -180,7 +180,6 @@ class T2ToBezExtractor(T2OutlineExtractor):
     def op_vstemhm(self, index):
         args = self.popallWidth()
         self.vhints = []
-        self.countHints(args)
         self.updateHints(args, self.vhints, "ry")
         log.debug("vstemhm %s %s", self.vhints, args)
 
