@@ -125,7 +125,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         if self.sawMoveTo:
             log.debug("endPath")
             self.bezProgram.append("cp\n")
-        self.sawMoveTo = 0
+        self.sawMoveTo = False
 
     def closePath(self):
         self.closePathSeen = True

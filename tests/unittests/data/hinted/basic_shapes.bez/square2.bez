@@ -1,0 +1,10 @@
+% square2
+0 500 rb
+0 500 ry
+sc
+0 0 mt
+0 500 dt
+500 500 dt
+500 0 dt
+cp
+ed
