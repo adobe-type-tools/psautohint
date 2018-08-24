@@ -514,14 +514,14 @@ def convertBezToT2(bezString):
             lastPathOp = token
         elif token in ["beginsubr", "endsubr"]:
             lastPathOp = token
-        elif token in ["snc"]:
+        elif token == "snc":
             lastPathOp = token
             # The index into the t2list is kept
             # so we can quickly find them later.
             hintMask = HintMask(len(t2List))
             t2List.append([hintMask])
             hintMaskList.append(hintMask)
-        elif token in ["enc"]:
+        elif token == "enc":
             lastPathOp = token
         elif token == "rb":
             lastPathOp = token
