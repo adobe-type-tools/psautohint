@@ -62,6 +62,7 @@ static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 
 #define Frac(x) ((x)&0xFF)
 #define WRTNUM(i) WriteToBuffer("%d ", (int)(i))
+#define WRTNUMA(i) WriteToBuffer("%0.2f ", roundf((float)(i)*100) / 100)
 #define WriteStr(str) WriteToBuffer("%s ", str)
 #define WriteSubr(val) WriteToBuffer("%d subr ", val)
 
@@ -111,10 +112,8 @@ WriteOneHintVal(Fixed val)
 {
     if (Frac(val) == 0)
         WRTNUM(FTrunc8(val));
-    else {
-        WRTNUM(FTrunc8(FRnd(val * 100)));
-        WriteStr("100 div ");
-    }
+    else
+        WRTNUMA(FIXED2FLOAT(val));
 }
 
 /* Locates the first CP following the given path element. */

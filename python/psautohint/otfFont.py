@@ -523,10 +523,6 @@ def convertBezToT2(bezString):
             hintMaskList.append(hintMask)
         elif token in ["enc"]:
             lastPathOp = token
-        elif token == "div":
-            # i specifically do NOT set lastPathOp for this.
-            value = argList[-2] / float(argList[-1])
-            argList[-2:] = [value]
         elif token == "rb":
             lastPathOp = token
             try:
