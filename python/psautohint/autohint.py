@@ -37,6 +37,7 @@ import time
 
 from .otfFont import CFFFontData
 from .ufoFont import UFOFontData, kCheckOutlineName
+from ._psautohint import error as PsAutoHintCError
 
 from . import (get_font_format, hint_bez_glyph, hint_compatible_bez_glyphs,
                FontParseError)
@@ -353,24 +354,23 @@ def hintFile(options, path, outpath, reference_master):
             log.info("%s: Begin hinting.", nameAliases.get(name, name))
 
         # Call auto-hint library on bez string.
-        if reference_master or not options.reference_font:
-            newBezString = hint_bez_glyph(fontInfo, bezString,
-                                          options.allowChanges,
-                                          not options.noHintSub,
-                                          options.allowDecimalCoords)
-            options.baseMaster[name] = newBezString
-        else:
-            baseFontFileName = os.path.basename(options.reference_font)
-            masters = [baseFontFileName, fontFileName]
-            glyphs = [options.baseMaster[name], bezString]
-            newBezString = hint_compatible_bez_glyphs(fontInfo, glyphs,
-                                                      masters)
-            newBezString = newBezString[1]  # FIXME
-
-        if not newBezString:
-            raise ACHintError(
-                "%s Error - failure in processing outline data." %
-                nameAliases.get(name, name))
+        try:
+            if reference_master or not options.reference_font:
+                newBezString = hint_bez_glyph(fontInfo, bezString,
+                                              options.allowChanges,
+                                              not options.noHintSub,
+                                              options.allowDecimalCoords)
+                options.baseMaster[name] = newBezString
+            else:
+                baseFontFileName = os.path.basename(options.reference_font)
+                masters = [baseFontFileName, fontFileName]
+                glyphs = [options.baseMaster[name], bezString]
+                newBezString = hint_compatible_bez_glyphs(fontInfo, glyphs,
+                                                          masters)
+                newBezString = newBezString[1]  # FIXME
+        except PsAutoHintCError:
+            raise ACHintError("%s: Failure in processing outline data." %
+                              nameAliases.get(name, name))
 
         if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or
            ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
