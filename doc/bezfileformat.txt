@@ -26,7 +26,6 @@ operators:
    ry   -- vertical stem hint
    rm   -- vertical counter hints
    rv   -- horizontal counter hints
-   div  -- same as PostScript div operator
 
 
 Notes:

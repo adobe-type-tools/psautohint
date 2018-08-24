@@ -1679,9 +1679,6 @@ def convertBezToOutline(bezString):
             newHintMaskName = hintMask.pointName
         elif token in ["enc"]:
             pass
-        elif token == "div":
-            value = argList[-2] / float(argList[-1])
-            argList[-2:] = [value]
         elif token == "rb":
             if newHintMaskName is None:
                 newHintMaskName = hintMask.pointName
