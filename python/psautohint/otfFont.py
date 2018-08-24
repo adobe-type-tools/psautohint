@@ -651,11 +651,9 @@ def convertBezToT2(bezString):
         vhints = vhints[:hintLimit]
         numVHints = hintLimit
     if hhints:
-        isH = 1
-        t2Program = makeHintList(hhints, needHintMasks, isH)
+        t2Program = makeHintList(hhints, needHintMasks, isH=True)
     if vhints:
-        isH = 0
-        t2Program += makeHintList(vhints, needHintMasks, isH)
+        t2Program += makeHintList(vhints, needHintMasks, isH=False)
 
     if vStem3List or hStem3List:
         controlMaskList = buildControlMaskList(hStem3List, vStem3List)
