@@ -341,11 +341,11 @@ def makeHintList(hints, needHintMasks, isH):
             continue
         pos1 = hint[0]
         pos = pos1 - lastPos
-        if isinstance(pos, float) and (int(pos) == pos):
+        if pos % 1 == 0:
             pos = int(pos)
         hintList.append(pos)
         pos2 = hint[1]
-        if isinstance(pos2, float) and (int(pos2) == pos2):
+        if pos2 % 1 == 0:
             pos2 = int(pos2)
         lastPos = pos1 + pos2
         hintList.append(pos2)
@@ -503,7 +503,7 @@ def convertBezToT2(bezString):
                 if int(val1) == val2:
                     argList.append(val2)
                 else:
-                    argList.append("%s 100 div" % str(int(val1 * 100)))
+                    argList.append("%s 100 div" % int(val1 * 100))
             except ValueError:
                 argList.append(val1)
             continue
