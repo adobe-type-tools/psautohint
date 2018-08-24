@@ -1667,7 +1667,7 @@ def convertBezToOutline(bezString):
             pass
         elif token in ["beginsubr", "endsubr"]:
             pass
-        elif token in ["snc"]:
+        elif token == "snc":
             hintMask = HintMask(opIndex)
             # If the new hints precedes any marking operator,
             # then we want throw away the initial hint mask we
@@ -1677,7 +1677,7 @@ def convertBezToOutline(bezString):
             else:
                 hintMaskList.append(hintMask)
             newHintMaskName = hintMask.pointName
-        elif token in ["enc"]:
+        elif token == "enc":
             pass
         elif token == "rb":
             if newHintMaskName is None:
