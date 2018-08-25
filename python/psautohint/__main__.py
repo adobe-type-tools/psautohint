@@ -16,7 +16,6 @@ from fontTools.misc.py23 import open
 
 from . import __version__, get_font_format
 from .autohint import ACOptions, hintFiles
-from .ufoFont import kProcessedGlyphsLayer as PROCD_GLYPHS_LAYER
 
 
 FONTINFO_FILE_NAME = 'fontinfo'
@@ -499,9 +498,7 @@ def get_options(args):
         '-w',
         '--write-to-default-layer',
         action='store_true',
-        help='write hints to default layer\n'
-             "The layer's name is {}.\n"
-             'This is a UFO-only option.'.format(PROCD_GLYPHS_LAYER)
+        help='write hints to default layer. This is a UFO-only option.'
     )
     glyphs_parser = parser.add_mutually_exclusive_group()
     glyphs_parser.add_argument(
