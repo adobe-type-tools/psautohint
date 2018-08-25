@@ -63,7 +63,7 @@ ReadFontInfo(const ACFontInfo* fontinfo)
       DescenderOvershoot, FigHeight, FigOvershoot, Height5, Height5Overshoot,
       Height6, Height6Overshoot, LcHeight, LcOvershoot, OrdinalBaseline,
       OrdinalOvershoot, SuperiorBaseline, SuperiorOvershoot;
-    bool ORDINARYHINTING = !gScalingHints && gWriteHintedBez;
+    bool ORDINARYHINTING = gWriteHintedBez;
 
     AscenderHeight = AscenderOvershoot = BaselineYCoord = BaselineOvershoot =
       Baseline5 = Baseline5Overshoot = Baseline6 = Baseline6Overshoot =
@@ -78,13 +78,11 @@ ReadFontInfo(const ACFontInfo* fontinfo)
 
     /* check for FlexOK, AuxHStems, AuxVStems */
     /* for intelligent scaling, it's too hard to check these */
-    if (!gScalingHints) {
-        ParseStems(fontinfo, "StemSnapH", gHStems, &gNumHStems);
-        ParseStems(fontinfo, "StemSnapV", gVStems, &gNumVStems);
-        if (gNumHStems == 0) {
-            ParseStems(fontinfo, "DominantH", gHStems, &gNumHStems);
-            ParseStems(fontinfo, "DominantV", gVStems, &gNumVStems);
-        }
+    ParseStems(fontinfo, "StemSnapH", gHStems, &gNumHStems);
+    ParseStems(fontinfo, "StemSnapV", gVStems, &gNumVStems);
+    if (gNumHStems == 0) {
+        ParseStems(fontinfo, "DominantH", gHStems, &gNumHStems);
+        ParseStems(fontinfo, "DominantV", gVStems, &gNumVStems);
     }
     fontinfostr = GetFontInfo(fontinfo, "FlexOK", !ORDINARYHINTING);
     gFlexOK = (fontinfostr != NULL) && (fontinfostr[0] != '\0') &&

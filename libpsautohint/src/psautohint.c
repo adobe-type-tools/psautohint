@@ -16,8 +16,6 @@
 
 ACBuffer* gBezOutput = NULL;
 
-bool gScalingHints = false;
-
 static jmp_buf aclibmark; /* to handle exit() calls in the library version*/
 
 static ACBuffer*

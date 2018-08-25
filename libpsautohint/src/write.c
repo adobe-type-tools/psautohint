@@ -157,9 +157,6 @@ static void
 WriteOne(const ACFontInfo* fontinfo, Fixed s)
 { /* write s to output file */
     Fixed r = UnScaleAbs(fontinfo, s);
-    if (gScalingHints) {
-        r = FRnd(r);
-    }
     if (FracPart(r) == 0) {
         SWRTNUM(FTrunc(r))
     } else {
