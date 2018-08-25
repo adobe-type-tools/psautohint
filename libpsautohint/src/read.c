@@ -26,20 +26,6 @@ static bool forMultiMaster, includeHints;
 /* Reading file for comparison of multiple master data and hint information.
    Reads into GlyphPathElt structure instead of PathElt. */
 
-static float origEmSquare = 0.0;
-
-Fixed
-ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled)
-{
-    return unscaled;
-}
-
-Fixed
-UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled)
-{
-    return scaled;
-}
-
 static Fixed
 Pop(void)
 {
@@ -99,12 +85,12 @@ RDcurveto(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
     if (!forMultiMaster) {
         PathElt* new;
         new = AppendElement(CURVETO);
-        new->x1 = ScaleAbs(fontinfo, c1.x);
-        new->y1 = -ScaleAbs(fontinfo, c1.y);
-        new->x2 = ScaleAbs(fontinfo, c2.x);
-        new->y2 = -ScaleAbs(fontinfo, c2.y);
-        new->x3 = ScaleAbs(fontinfo, c3.x);
-        new->y3 = -ScaleAbs(fontinfo, c3.y);
+        new->x1 = c1.x;
+        new->y1 = -c1.y;
+        new->x2 = c2.x;
+        new->y2 = -c2.y;
+        new->x3 = c3.x;
+        new->y3 = -c3.y;
     } else {
         GlyphPathElt* new;
         new = AppendGlyphPathElement(RCT);
@@ -133,8 +119,8 @@ RDmtlt(const ACFontInfo* fontinfo, int32_t etype)
     if (!forMultiMaster) {
         PathElt* new;
         new = AppendElement(etype);
-        new->x = ScaleAbs(fontinfo, currentx);
-        new->y = -ScaleAbs(fontinfo, currenty);
+        new->x = currentx;
+        new->y = -currenty;
         return;
     } else {
         GlyphPathElt* new;

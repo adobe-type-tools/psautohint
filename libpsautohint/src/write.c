@@ -156,11 +156,10 @@ NewBest(HintPoint* lst)
 static void
 WriteOne(const ACFontInfo* fontinfo, Fixed s)
 { /* write s to output file */
-    Fixed r = UnScaleAbs(fontinfo, s);
-    if (FracPart(r) == 0) {
-        SWRTNUM(FTrunc(r))
+    if (FracPart(s) == 0) {
+        SWRTNUM(FTrunc(s))
     } else {
-        float d = (float)FIXED2FLOAT(r);
+        float d = (float)FIXED2FLOAT(s);
         SWRTNUMA(d);
     }
 }
@@ -443,22 +442,22 @@ SaveFile(const ACFontInfo* fontinfo)
     while (e != NULL) {
         switch (e->type) {
             case CURVETO:
-                c1.x = UnScaleAbs(fontinfo, e->x1);
-                c1.y = UnScaleAbs(fontinfo, -e->y1);
-                c2.x = UnScaleAbs(fontinfo, e->x2);
-                c2.y = UnScaleAbs(fontinfo, -e->y2);
-                c3.x = UnScaleAbs(fontinfo, e->x3);
-                c3.y = UnScaleAbs(fontinfo, -e->y3);
+                c1.x = e->x1;
+                c1.y = -e->y1;
+                c2.x = e->x2;
+                c2.y = -e->y2;
+                c3.x = e->x3;
+                c3.y = -e->y3;
                 ct(fontinfo, c1, c2, c3, e);
                 break;
             case LINETO:
-                c1.x = UnScaleAbs(fontinfo, e->x);
-                c1.y = UnScaleAbs(fontinfo, -e->y);
+                c1.x = e->x;
+                c1.y = -e->y;
                 dt(fontinfo, c1, e);
                 break;
             case MOVETO:
-                c1.x = UnScaleAbs(fontinfo, e->x);
-                c1.y = UnScaleAbs(fontinfo, -e->y);
+                c1.x = e->x;
+                c1.y = -e->y;
                 mt(fontinfo, c1, e);
                 break;
             case CLOSEPATH:
