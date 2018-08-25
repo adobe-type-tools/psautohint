@@ -10,7 +10,7 @@
 #include "ac.h"
 
 static void
-FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr, bool inside)
+FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
 {
 /* Like FFltnCurve, but assumes abs(deltas) <= 127 pixels */
 /* 8 bits of fraction gives enough precision for splitting curves */
@@ -45,8 +45,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr, bool inside)
     int32_t* p;
     p = cds;
     dpth = 1;
-    *(p++) = inside; /* initial value of inrect2. Set to True by caller, and is
-                        never set false.  */
+    *(p++) = true; /* inrect2 starts out true */
     *(p++) = false;  /* inbbox2 starts out false */
     /* shift coordinates so that lower left of BBox is at (0,0)*/
     /* This  fills the first  MiniBlkSz series of ints with the start point,
@@ -291,7 +290,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr, bool inside)
 /* abs values of coords must be < 2^14 so will not overflow when
    find midpoint by add and shift */
 static void
-FFltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, FltnRec* pfr, bool inrect)
+FFltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, FltnRec* pfr)
 {
     Cd d0, d1, d2, d3;
     Fixed llx, lly, urx, ury;
@@ -330,14 +329,6 @@ FFltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, FltnRec* pfr, bool inrect)
             ury = c;
     }
 
-    if (!inrect) {
-        if (urx < pfr->ll.x || llx > pfr->ur.x || ury < pfr->ll.y ||
-            lly > pfr->ur.y)
-            goto ReportC3;
-        if (urx <= pfr->ur.x && ury <= pfr->ur.y && llx >= pfr->ll.x &&
-            lly >= pfr->ll.y)
-            inrect = true;
-    }
     { /* if the height or width of the initial bbox is > 256, split it, and this
          function on the two parts. */
         Fixed th;
@@ -354,27 +345,15 @@ FFltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, FltnRec* pfr, bool inrect)
     }
     pfr->llx = llx;
     pfr->lly = lly;
-    if (!inrect) {
-        pfr->ll.x -= llx;
-        pfr->ur.x -= llx;
-        pfr->ll.y -= lly;
-        pfr->ur.y -= lly;
-    }
-    FMiniFltn(c0, c1, c2, c3, pfr, inrect);
-    if (!inrect) {
-        pfr->ll.x += llx;
-        pfr->ur.x += llx;
-        pfr->ll.y += lly;
-        pfr->ur.y += lly;
-    }
+    FMiniFltn(c0, c1, c2, c3, pfr);
     return;
 
 Split:
     /* Split the bez curve in half */
     FixedBezDiv(c0, c1, c2, c3, d0, d1, d2, d3);
     pfr->limit--;
-    FFltnCurve(c0, c1, c2, c3, pfr, inrect);
-    FFltnCurve(d0, d1, d2, d3, pfr, inrect);
+    FFltnCurve(c0, c1, c2, c3, pfr);
+    FFltnCurve(d0, d1, d2, d3, pfr);
     pfr->limit++;
     return;
 
@@ -389,5 +368,5 @@ FltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, FltnRec* pfr)
                        by recursive calls to FFltnCurve() */
     // pfr->feps = FixHalf;
     pfr->feps = FixOne; /* DEBUG 8 BIT FIX */
-    FFltnCurve(c0, c1, c2, c3, pfr, true);
+    FFltnCurve(c0, c1, c2, c3, pfr);
 }
