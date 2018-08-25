@@ -329,7 +329,6 @@ void MergeVals(bool vert);
 void MergeFromMainHints(char ch);
 void RoundPathCoords(void);
 void MoveSubpathToEnd(PathElt* e);
-void InitAuto(int32_t reason);
 void InitData(const ACFontInfo* fontinfo, int32_t reason);
 void InitFix(int32_t reason);
 void InitGen(int32_t reason);
