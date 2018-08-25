@@ -31,36 +31,13 @@ static float origEmSquare = 0.0;
 Fixed
 ScaleAbs(const ACFontInfo* fontinfo, Fixed unscaled)
 {
-    Fixed temp1;
-    if (!gScalingHints)
-        return unscaled;
-    if (origEmSquare == 0.0) {
-        char* fistr = GetFontInfo(fontinfo, "OrigEmSqUnits", OPTIONAL);
-        if (fistr)
-            origEmSquare = strtod(fistr, NULL);
-        else
-            origEmSquare = 1000.0;
-    }
-    temp1 = (Fixed)(1000.0 / origEmSquare * ((float)unscaled));
-    return temp1;
+    return unscaled;
 }
 
 Fixed
 UnScaleAbs(const ACFontInfo* fontinfo, Fixed scaled)
 {
-    Fixed temp1;
-    if (!gScalingHints)
-        return scaled;
-    if (origEmSquare == 0.0) {
-        char* fistr = GetFontInfo(fontinfo, "OrigEmSqUnits", OPTIONAL);
-        if (fistr)
-            origEmSquare = strtod(fistr, NULL);
-        else
-            origEmSquare = 1000.0;
-    }
-    temp1 = (Fixed)(origEmSquare / 1000.0 * ((float)scaled));
-    temp1 = FRnd(temp1);
-    return (temp1);
+    return scaled;
 }
 
 static Fixed

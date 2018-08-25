@@ -781,7 +781,7 @@ AddHintsSetup(void)
     }
     gHBigDist = (gHBigDist * 23) / 20;
     acfixtopflt(gHBigDist, &gHBigDistR);
-    if ((!gScalingHints) && (gRoundToInt)) {
+    if (gRoundToInt) {
         RoundPathCoords();
     }
     CheckForMultiMoveTo();

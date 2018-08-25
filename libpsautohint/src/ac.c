@@ -105,13 +105,7 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
             gAutoLinearCurveFix = true;
             gFlexOK = false;
             gFlexStrict = true;
-            if (gScalingHints) {
-                char* s = GetFontInfo(fontinfo, "OrigEmSqUnits", MANDATORY);
-                float origEmSquare = strtod(s, NULL);
-                gBlueFuzz = (Fixed)(origEmSquare / 2000.0); /* .5 pixel */
-            } else {
-                gBlueFuzz = DEFAULTBLUEFUZZ;
-            }
+            gBlueFuzz = DEFAULTBLUEFUZZ;
         /* fall through */
         case RESTART:
             memset((void*)vm, 0x0, VMSIZE);

@@ -190,7 +190,6 @@ extern HintVal *gVHinting, *gHHinting, *gVPrimary, *gHPrimary, *gValList;
 extern HintSeg* gSegLists[4]; /* left, right, top, bot */
 extern HintPoint* gPointList, **gPtLstArray;
 extern int32_t gPtLstIndex, gNumPtLsts, gMaxPtLsts;
-extern bool gScalingHints;
 
 /* global callbacks */
 
