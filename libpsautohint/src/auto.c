@@ -10,18 +10,7 @@
 #include "ac.h"
 #include "bbox.h"
 
-static bool hintBBox, hintHBounds, hintVBounds, haveHBnds, haveVBnds, mergeMain;
-
-void
-InitAuto(int32_t reason)
-{
-    switch (reason) {
-        case STARTUP:
-        case RESTART:
-            hintBBox = hintHBounds = hintVBounds = haveHBnds = haveVBnds =
-              false;
-    }
-}
+static bool mergeMain;
 
 static PathElt*
 GetSubPathNxt(PathElt* e)
@@ -646,24 +635,16 @@ static void
 ReHintBounds(PathElt* e)
 {
     if (!gUseH) {
-        if (hintHBounds && gHHinting == NULL && !haveHBnds)
-            ReHintHBnds();
-        else if (!hintBBox) {
-            if (gHHinting == NULL)
-                CpyHHint(e);
-            if (mergeMain)
-                MergeFromMainHints('b');
-        }
+        if (gHHinting == NULL)
+            CpyHHint(e);
+        if (mergeMain)
+            MergeFromMainHints('b');
     }
     if (!gUseV) {
-        if (hintVBounds && gVHinting == NULL && !haveVBnds)
-            ReHintVBnds();
-        else if (!hintBBox) {
-            if (gVHinting == NULL)
-                CpyVHint(e);
-            if (mergeMain)
-                MergeFromMainHints('y');
-        }
+        if (gVHinting == NULL)
+            CpyVHint(e);
+        if (mergeMain)
+            MergeFromMainHints('y');
     }
 }
 
@@ -689,7 +670,6 @@ StartNewHinting(PathElt* e, SegLnkLst* hLst, SegLnkLst* vLst)
         LogMsg(LOGERROR, NONFATALERROR, "Uninitialized extra hints list.");
     }
     XtraHints(e);
-    hintBBox = false;
     if (gUseV)
         CopyMainV();
     if (gUseH)
@@ -1055,7 +1035,6 @@ AutoExtraHints(bool movetoNewHints)
     bool (*Tst)(int32_t, int32_t), newHints = true;
     Fixed x, y;
 
-    hintBBox = hintVBounds = hintHBounds = false;
     mergeMain = (CountSubPaths() <= 5);
     e = gPathStart;
     LogMsg(LOGDEBUG, OK, "RemFlares");
@@ -1067,8 +1046,6 @@ AutoExtraHints(bool movetoNewHints)
     PromoteHints();
     LogMsg(LOGDEBUG, OK, "RemShortHints");
     RemShortHints();
-    haveVBnds = hintVBounds;
-    haveHBnds = hintHBounds;
     p = NULL;
     Tst = IsOk; /* it is ok to add to primary hinting */
     LogMsg(LOGDEBUG, OK, "hint loop");

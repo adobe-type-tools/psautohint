@@ -17,9 +17,7 @@ void FindCurveBBox(Fixed x0, Fixed y0, Fixed px1, Fixed py1, Fixed px2,
                    Fixed py2, Fixed x1, Fixed y1, Fixed* pllx, Fixed* plly,
                    Fixed* purx, Fixed* pury);
 void HintVBnds(void);
-void ReHintVBnds(void);
 void HintHBnds(void);
-void ReHintHBnds(void);
 void AddBBoxHV(bool Hflg, bool subs);
 void CheckPathBBox(void);
 bool CheckBBoxes(PathElt* e1, PathElt* e2);

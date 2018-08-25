@@ -19,7 +19,6 @@ void
 InitAll(const ACFontInfo* fontinfo, int32_t reason)
 {
     InitData(fontinfo, reason); /* must be first */
-    InitAuto(reason);
     InitFix(reason);
     InitGen(reason);
     InitPick(reason);

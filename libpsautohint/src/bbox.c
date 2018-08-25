@@ -198,12 +198,6 @@ HintVBnds(void)
 }
 
 void
-ReHintVBnds(void)
-{
-    AddHintPoint(vMn, 0, vMx, 0, 'y', pvMn, pvMx);
-}
-
-void
 HintHBnds(void)
 {
     if (gPathStart == NULL || HHintGlyph())
@@ -222,12 +216,6 @@ HintHBnds(void)
         phMn = phMx;
         phMx = p;
     }
-    AddHintPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
-}
-
-void
-ReHintHBnds(void)
-{
     AddHintPoint(0, hMn, 0, hMx, 'b', phMn, phMx);
 }
 
