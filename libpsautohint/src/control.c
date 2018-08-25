@@ -638,13 +638,11 @@ DoHStems(const ACFontInfo* fontinfo, HintVal* sLst1)
         AddHStem(top, bot, curved);
         sLst1 = sLst1->vNxt;
         if (top != INT32_MIN || bot != INT32_MAX) {
-            AddStemExtremes(UnScaleAbs(fontinfo, bot),
-                            UnScaleAbs(fontinfo, top));
+            AddStemExtremes(bot, top);
         }
     }
     if (glyphTop != INT32_MIN || glyphBot != INT32_MAX) {
-        AddGlyphExtremes(UnScaleAbs(fontinfo, glyphBot),
-                         UnScaleAbs(fontinfo, glyphTop));
+        AddGlyphExtremes(glyphBot, glyphTop);
     }
 }
 
