@@ -16,6 +16,9 @@ int32_t gNumHHints, gNumVHints;
 
 static void ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
                           int32_t maxstems, int* stems, int32_t* pnum);
+
+static char* GetFontInfo(const ACFontInfo*, char*, bool);
+
 static void
 ParseStems(const ACFontInfo* fontinfo, char* kw, Fixed* stems, int32_t* pnum)
 {
@@ -29,11 +32,8 @@ static void
 GetKeyValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
             int32_t* value)
 {
-    char* fontinfostr;
-
-    fontinfostr = GetFontInfo(fontinfo, keyword, optional);
-
-    if ((fontinfostr != NULL) && (fontinfostr[0] != 0)) {
+    char* fontinfostr = GetFontInfo(fontinfo, keyword, optional);
+    if (strlen(fontinfostr) != 0) {
         *value = (int32_t)atol(fontinfostr);
     }
     return;
@@ -43,11 +43,8 @@ static void
 GetKeyFixedValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
                  Fixed* value)
 {
-    char* fontinfostr;
-
-    fontinfostr = GetFontInfo(fontinfo, keyword, optional);
-
-    if ((fontinfostr != NULL) && (fontinfostr[0] != 0)) {
+    char* fontinfostr = GetFontInfo(fontinfo, keyword, optional);
+    if (strlen(fontinfostr) != 0) {
         float tempValue = strtod(fontinfostr, NULL);
         *value = (Fixed)tempValue * (1 << FixShift);
     }
@@ -85,12 +82,10 @@ ReadFontInfo(const ACFontInfo* fontinfo)
         ParseStems(fontinfo, "DominantV", gVStems, &gNumVStems);
     }
     fontinfostr = GetFontInfo(fontinfo, "FlexOK", !ORDINARYHINTING);
-    gFlexOK = (fontinfostr != NULL) && (fontinfostr[0] != '\0') &&
-              strcmp(fontinfostr, "false");
+    gFlexOK = strcmp(fontinfostr, "false");
 
     fontinfostr = GetFontInfo(fontinfo, "FlexStrict", true);
-    if (fontinfostr != NULL)
-        gFlexStrict = strcmp(fontinfostr, "false");
+    gFlexStrict = strcmp(fontinfostr, "false");
 
     /* get bluefuzz. It is already set to its default value in ac.c::InitData().
     GetKeyFixedValue does not change the value if it's not present in fontinfo.
@@ -99,11 +94,9 @@ ReadFontInfo(const ACFontInfo* fontinfo)
 
     /* Check for counter hinting glyphs. */
     fontinfostr = GetFontInfo(fontinfo, "VCounterChars", OPTIONAL);
-    if (fontinfostr != NULL)
-        gNumVHints = AddCounterHintGlyphs(fontinfostr, gVHintList);
+    gNumVHints = AddCounterHintGlyphs(fontinfostr, gVHintList);
     fontinfostr = GetFontInfo(fontinfo, "HCounterChars", OPTIONAL);
-    if (fontinfostr != NULL)
-        gNumHHints = AddCounterHintGlyphs(fontinfostr, gHHintList);
+    gNumHHints = AddCounterHintGlyphs(fontinfostr, gHHintList);
 
     GetKeyValue(fontinfo, "AscenderHeight", OPTIONAL, &AscenderHeight);
     GetKeyValue(fontinfo, "AscenderOvershoot", OPTIONAL, &AscenderOvershoot);
@@ -199,17 +192,17 @@ misdigit(int c)
     return c >= '0' && c <= '9';
 }
 
-/* Looks up the value of the specified keyword in the fontinfo
-   file.  If the keyword doesn't exist and this is an optional
-   key, returns a NULL.  Otherwise, returns the value string. */
-char*
+/* Looks up the value of the specified keyword in the fontinfo file. If the
+ * keyword doesn't exist and this is an optional key, returns an empty string.
+ * Otherwise, returns the value string. */
+static char*
 GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
 {
     size_t i;
 
     if (!fontinfo) {
         LogMsg(LOGERROR, NONFATALERROR, "Fontinfo is NULL");
-        return NULL;
+        return "";
     }
 
     for (i = 0; i < fontinfo->length; i++) {
@@ -223,7 +216,7 @@ GetFontInfo(const ACFontInfo* fontinfo, char* keyword, bool optional)
                "Fontinfo: Couldn't find fontinfo for %s.", keyword);
     }
 
-    return NULL;
+    return "";
 }
 
 /*
@@ -243,8 +236,7 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
     *pnum = 0;
 
     initline = GetFontInfo(fontinfo, kw, optional);
-
-    if (initline == NULL || strlen(initline) == 0)
+    if (strlen(initline) == 0)
         return; /* optional keyword not found */
 
     line = initline;
