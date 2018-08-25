@@ -29,9 +29,4 @@ void FreeFontInfo(ACFontInfo* fontinfo);
 
 bool ReadFontInfo(const ACFontInfo* fontinfo);
 
-/* Looks up the value of the specified keyword in the fontinfo
-   file.  If the keyword doesn't exist and this is an optional
-   key, returns a NULL.	 Otherwise, returns the value string. */
-char* GetFontInfo(const ACFontInfo*, char*, bool);
-
 #endif /* AC_FONTINFO_H_ */
