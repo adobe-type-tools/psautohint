@@ -119,10 +119,7 @@ import os
 import re
 import shutil
 
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
+from collections import OrderedDict
 
 from fontTools.misc.py23 import SimpleNamespace, open
 from fontTools.pens.basePen import BasePen
@@ -323,10 +320,6 @@ Example from "B" in SourceCodePro-Regular
 
 """
 
-XMLElement = ET.Element
-xmlToString = ET.tostring
-
-
 # UFO names
 PUBLIC_GLYPH_ORDER = "public.glyphOrder"
 
@@ -350,6 +343,7 @@ HSTEM3_NAME = "hstem3"
 HSTEM_NAME = "hstem"
 POINT_NAME = "name"
 POINT_TAG = "pointTag"
+STEMS_NAME = "stems"
 VSTEM3_NAME = "vstem3"
 VSTEM_NAME = "vstem"
 STACK_LIMIT = 46
@@ -424,97 +418,16 @@ class UFOFontData:
             layer = PROCESSED_LAYER_NAME
         glyphset = self._get_glyphset(layer)
 
-        glifXML = ET.fromstring(glyphset.getGLIF(name))
-
-        outlineItem = None
-        libIndex = outlineIndex = -1
-        outlineIndex = outlineIndex = -1
-        childIndex = 0
-        for childElement in glifXML:
-            if childElement.tag == "outline":
-                outlineItem = childElement
-                outlineIndex = childIndex
-            if childElement.tag == "lib":
-                libIndex = childIndex
-            childIndex += 1
-
-        newOutlineElement, hintInfoDict = convertBezToOutline(bezString)
-
-        if outlineItem is None:
-            # need to add it. Add it before the lib item, if any.
-            if libIndex > 0:
-                glifXML.insert(libIndex, newOutlineElement)
-            else:
-                glifXML.append(newOutlineElement)
-        else:
-            # remove the old one and add the new one.
-            glifXML.remove(outlineItem)
-            glifXML.insert(outlineIndex, newOutlineElement)
+        glyph = BezGlyph(bezString)
+        glyphset.readGlyph(name, glyph)
 
         # convertBezToGLIF is called only if the GLIF has been edited by a
         # tool. We need to update the edit status in the hash map entry. I
         # assume that convertToBez has been run before, which will add an entry
         # for this glyph.
         self.updateHashEntry(name)
-        # Add the stem hints.
-        if hintInfoDict is not None:
-            widthXML = glifXML.find("advance")
-            if widthXML is not None:
-                width = int(widthXML.get("width"))
-            else:
-                width = 1000
 
-            new_hash = "w%s" % width
-            for contour in newOutlineElement:
-                if contour.tag == "contour":
-                    for child in contour:
-                        if child.tag == "point":
-                            try:
-                                pt_type = child.attrib["type"][0]
-                            except KeyError:
-                                pt_type = ""
-                            new_hash += "%s%s%s" % (pt_type, child.attrib["x"],
-                                                    child.attrib["y"])
-            if len(new_hash) >= 128:
-                new_hash = hashlib.sha512(new_hash.encode("ascii")).hexdigest()
-
-            # We add this hash to the T1 data, as it is the hash which matches
-            # the output outline data. This is not necessarily the same as the
-            # hash of the source data - autohint can be used to change
-            # outlines.
-            if libIndex > 0:
-                libItem = glifXML[libIndex]
-            else:
-                libItem = XMLElement("lib")
-                glifXML.append(libItem)
-
-            dictItem = libItem.find("dict")
-            if dictItem is None:
-                dictItem = XMLElement("dict")
-                libItem.append(dictItem)
-
-            # Remove any existing hint data.
-            childList = list(dictItem)
-            for i, childItem in enumerate(childList):
-                if (childItem.tag == "key") and (
-                    (childItem.text == HINT_DOMAIN_NAME1) or (
-                        childItem.text == HINT_DOMAIN_NAME2)):
-                    dictItem.remove(childItem)  # remove key
-                    dictItem.remove(childList[i + 1])  # remove data item.
-
-            glyphDictItem = dictItem
-            key = XMLElement("key")
-            key.text = HINT_DOMAIN_NAME2
-            glyphDictItem.append(key)
-
-            glyphDictItem.append(hintInfoDict)
-
-            childList = list(hintInfoDict)
-            idValue = childList[1]
-            idValue.text = new_hash
-
-        addWhiteSpace(glifXML, 0)
-        return glifXML
+        return glyph
 
     def save(self, path):
         if path is None:
@@ -541,16 +454,13 @@ class UFOFontData:
 
         # Write glyphs.
         glyphset = writer.getGlyphSet(layer, defaultLayer=layer is None)
-        for name, glifXML in self.newGlyphMap.items():
+        for name, glyph in self.newGlyphMap.items():
             filename = self.glyphMap[name]
             if not self.writeToDefaultLayer and \
                     name in self.processedLayerGlyphMap:
                 filename = self.processedLayerGlyphMap[name]
-            path = os.path.join(glyphset.dirName, filename)
-            et = ET.ElementTree(glifXML)
-            with open(path, "wb") as fp:
-                et.write(fp, encoding="UTF-8", xml_declaration=True)
             glyphset.contents[name] = filename
+            glyphset.writeGlyph(name, glyph, glyph.drawPoints)
         glyphset.writeContents()
 
         # Write layer contents.
@@ -1014,6 +924,45 @@ class HashPointPen(AbstractPointPen):
         glyph.drawPoints(self)
 
 
+class BezGlyph(object):
+    def __init__(self, bez):
+        self._bez = bez
+        self.lib = {}
+
+    @staticmethod
+    def _draw(contours, pen):
+        for contour in contours:
+            pen.beginPath()
+            for point in contour:
+                x = point.get("x")
+                y = point.get("y")
+                segmentType = point.get("type", None)
+                name = point.get("name", None)
+                pen.addPoint((x, y), segmentType=segmentType, name=name)
+            pen.endPath()
+
+    def drawPoints(self, pen):
+        contours, hints = convertBezToOutline(self._bez)
+        self._draw(contours, pen)
+
+        # Add the stem hints.
+        if hints is not None:
+            # Add this hash to the glyph data, as it is the hash which matches
+            # the output outline data. This is not necessarily the same as the
+            # hash of the source data; autohint can be used to change outlines.
+            width = getattr(self, "width", 1000)
+            hash_pen = HashPointPen(None, width)
+            self._draw(contours, hash_pen)
+            hints["id"] = hash_pen.getHash()
+
+            # Remove any existing hint data.
+            for key in (HINT_DOMAIN_NAME1, HINT_DOMAIN_NAME2):
+                if key in self.lib:
+                    del self.lib[key]
+
+            self.lib[HINT_DOMAIN_NAME2] = hints
+
+
 class HintMask:
     # class used to collect hints for the current
     # hint mask when converting bez to T2.
@@ -1028,83 +977,61 @@ class HintMask:
         # The name attribute of the point which follows the new hint set.
         self.pointName = "hintSet" + str(listPos).zfill(4)
 
-    def addHintSet(self, hintSetList):
-        # Add the hint set to hintSetList
-        newHintSetDict = XMLElement("dict")
-        hintSetList.append(newHintSetDict)
+    def getHintSet(self):
+        hintset = OrderedDict()
+        hintset[POINT_TAG] = self.pointName
+        hintset[STEMS_NAME] = []
 
-        newHintSetKey = XMLElement("key")
-        newHintSetKey.text = POINT_TAG
-        newHintSetDict.append(newHintSetKey)
+        # XXX: self.vstem3List is a typo here?
+        if len(self.hList) > 0 or len(self.vstem3List):
+            hintset[STEMS_NAME].extend(
+                    makeHintSet(self.hList, self.hstem3List, isH=True))
 
-        newHintSetValue = XMLElement("string")
-        newHintSetValue.text = self.pointName
-        newHintSetDict.append(newHintSetValue)
+        if len(self.vList) > 0 or len(self.vstem3List):
+            hintset[STEMS_NAME].extend(
+                    makeHintSet(self.vList, self.vstem3List, isH=False))
 
-        stemKey = XMLElement("key")
-        stemKey.text = "stems"
-        newHintSetDict.append(stemKey)
-
-        newHintSetArray = XMLElement("array")
-        newHintSetDict.append(newHintSetArray)
-
-        if (len(self.hList) > 0) or (len(self.vstem3List)):
-            isH = True
-            addHintList(self.hList, self.hstem3List, newHintSetArray, isH)
-
-        if (len(self.vList) > 0) or (len(self.vstem3List)):
-            isH = False
-            addHintList(self.vList, self.vstem3List, newHintSetArray, isH)
+        return hintset
 
 
-def makeStemHintList(hintsStem3, stemList, isH):
+def makeStemHintList(hintsStem3, isH):
     # In bez terms, the first coordinate in each pair is
     # absolute, second is relative, and hence is the width.
     if isH:
         op = HSTEM3_NAME
     else:
         op = VSTEM3_NAME
-    newStem = XMLElement("string")
     posList = [op]
     for stem3 in hintsStem3:
         for pos, width in stem3:
-            if (isinstance(pos, float)) and (int(pos) == pos):
+            if pos % 1 == 0:
                 pos = int(pos)
-            if (isinstance(width, float)) and (int(width) == width):
+            if width % 1 == 0:
                 width = int(width)
             posList.append("%s %s" % (pos, width))
-    posString = " ".join(posList)
-    newStem.text = posString
-    stemList.append(newStem)
+    return " ".join(posList)
 
 
-def makeHintList(hints, newHintSetArray, isH):
+def makeHintList(hints, isH):
     # Add the list of hint operators
     # In bez terms, the first coordinate in each pair is
     # absolute, second is relative, and hence is the width.
+    hintset = []
     for hint in hints:
         if not hint:
             continue
         pos = hint[0]
-        if (isinstance(pos, float)) and (int(pos) == pos):
+        if pos % 1 == 0:
             pos = int(pos)
         width = hint[1]
-        if (isinstance(width, float)) and (int(width) == width):
+        if width % 1 == 0:
             width = int(width)
         if isH:
             op = HSTEM_NAME
         else:
             op = VSTEM_NAME
-        newStem = XMLElement("string")
-        newStem.text = "%s %s %s" % (op, pos, width)
-        newHintSetArray.append(newStem)
-
-
-def addFlexHint(flexList, flexArray):
-    for pointTag in flexList:
-        newFlexTag = XMLElement("string")
-        newFlexTag.text = pointTag
-        flexArray.append(newFlexTag)
+        hintset.append("%s %s %s" % (op, pos, width))
+    return hintset
 
 
 def fixStartPoint(outlineItem, opList):
@@ -1122,11 +1049,11 @@ def fixStartPoint(outlineItem, opList):
     firstPointElement = outlineItem[0]
     if (firstX == lastX) and (firstY == lastY):
         del outlineItem[-1]
-        firstPointElement.set("type", lastOp)
+        firstPointElement["type"] = lastOp
     else:
         # we have an implied final line to. All we need to do
         # is convert the inital moveto to a lineto.
-        firstPointElement.set("type", "line")
+        firstPointElement["type"] = "line"
 
 
 bezToUFOPoint = {
@@ -1183,7 +1110,7 @@ def convertBezToOutline(bezString):
     opIndex = 0
     curX = 0
     curY = 0
-    newOutline = XMLElement("outline")
+    newOutline = []
     outlineItem = None
     seenHints = False
 
@@ -1263,22 +1190,18 @@ def convertBezToOutline(bezString):
                 curX = argList[0]
                 curY = argList[1]
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement(
-                    "point", {"x": "%s" % showX, "y": "%s" % showY})
+                newPoint = {"x": showX, "y": showY}
                 outlineItem.append(newPoint)
                 curX = argList[2]
                 curY = argList[3]
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement(
-                    "point", {"x": "%s" % showX, "y": "%s" % showY})
+                newPoint = {"x": showX, "y": showY}
                 outlineItem.append(newPoint)
                 curX = argList[4]
                 curY = argList[5]
                 showX, showY = convertCoords(curX, curY)
                 opName = 'curve'
-                newPoint = XMLElement(
-                    "point", {"x": "%s" % showX, "y": "%s" % showY,
-                              "type": opName})
+                newPoint = {"x": showX, "y": showY, "type": opName}
                 outlineItem.append(newPoint)
                 opList.append([opName, curX, curY])
                 opIndex += 1
@@ -1286,7 +1209,7 @@ def convertBezToOutline(bezString):
                     argList = argList[6:12]
                 i += 1
             # attach the point name to the first point of the first curve.
-            outlineItem[-6].set(POINT_NAME, flexPointName)
+            outlineItem[-6][POINT_NAME] = flexPointName
             if newHintMaskName is not None:
                 # We have a hint mask that we want to attach to the first
                 # point of the flex op. However, there is already a flex
@@ -1319,9 +1242,7 @@ def convertBezToOutline(bezString):
                     curX += argList[0]
                     curY += argList[1]
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement(
-                    "point", {"x": "%s" % showX, "y": "%s" % showY,
-                              "type": "%s" % opName})
+                newPoint = {"x": showX, "y": showY, "type": opName}
 
                 if opName == "move":
                     if outlineItem is not None:
@@ -1330,19 +1251,18 @@ def convertBezToOutline(bezString):
                             # delete the previous outlineItem if it has
                             # only the move-to
                             log.info("Deleting moveto: %s adding %s",
-                                     xmlToString(newOutline[-1]),
-                                     xmlToString(outlineItem))
+                                     newOutline[-1], outlineItem)
                             del newOutline[-1]
                         else:
                             # Fix the start/implied end path
                             # of the previous path.
                             fixStartPoint(outlineItem, opList)
                     opList = []
-                    outlineItem = XMLElement('contour')
+                    outlineItem = []
                     newOutline.append(outlineItem)
 
                 if newHintMaskName is not None:
-                    newPoint.set(POINT_NAME, newHintMaskName)
+                    newPoint[POINT_NAME] = newHintMaskName
                     newHintMaskName = None
                 outlineItem.append(newPoint)
                 opList.append([opName, curX, curY])
@@ -1350,25 +1270,21 @@ def convertBezToOutline(bezString):
                 curX = argList[0]
                 curY = argList[1]
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement(
-                    "point", {"x": "%s" % showX, "y": "%s" % showY})
+                newPoint = {"x": showX, "y": showY}
                 outlineItem.append(newPoint)
                 curX = argList[2]
                 curY = argList[3]
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement(
-                    "point", {"x": "%s" % showX, "y": "%s" % showY})
+                newPoint = {"x": showX, "y": showY}
                 outlineItem.append(newPoint)
                 curX = argList[4]
                 curY = argList[5]
                 showX, showY = convertCoords(curX, curY)
-                newPoint = XMLElement(
-                    "point", {"x": "%s" % showX, "y": "%s" % showY,
-                              "type": "%s" % opName})
+                newPoint = {"x": showX, "y": showY, "type": opName}
                 outlineItem.append(newPoint)
                 if newHintMaskName is not None:
                     # attach the pointName to the first point of the curve.
-                    outlineItem[-3].set(POINT_NAME, newHintMaskName)
+                    outlineItem[-3][POINT_NAME] = newHintMaskName
                     newHintMaskName = None
                 opList.append([opName, curX, curY])
             argList = []
@@ -1389,42 +1305,27 @@ def convertBezToOutline(bezString):
     # regular hints, but not both.
 
     if (seenHints) or (len(flexList) > 0):
-        hintInfoDict = XMLElement("dict")
+        hintInfoDict = OrderedDict()
+        hintInfoDict["id"] = ""
 
-        idItem = XMLElement("key")
-        idItem.text = "id"
-        hintInfoDict.append(idItem)
-
-        idString = XMLElement("string")
-        idString.text = "id"
-        hintInfoDict.append(idString)
-
-        hintSetListItem = XMLElement("key")
-        hintSetListItem.text = HINT_SET_LIST_NAME
-        hintInfoDict.append(hintSetListItem)
-
-        hintSetListArray = XMLElement("array")
-        hintInfoDict.append(hintSetListArray)
         # Convert the rest of the hint masks
         # to a hintmask op and hintmask bytes.
+        hintInfoDict[HINT_SET_LIST_NAME] = []
         for hintMask in hintMaskList:
-            hintMask.addHintSet(hintSetListArray)
+            hintInfoDict[HINT_SET_LIST_NAME].append(hintMask.getHintSet())
 
         if len(flexList) > 0:
-            hintSetListItem = XMLElement("key")
-            hintSetListItem.text = FLEX_INDEX_LIST_NAME
-            hintInfoDict.append(hintSetListItem)
-
-            flexArray = XMLElement("array")
-            hintInfoDict.append(flexArray)
-            addFlexHint(flexList, flexArray)
+            hintInfoDict[FLEX_INDEX_LIST_NAME] = []
+            for pointTag in flexList:
+                hintInfoDict[FLEX_INDEX_LIST_NAME].append(pointTag)
 
     return newOutline, hintInfoDict
 
 
-def addHintList(hints, hintsStem3, newHintSetArray, isH):
+def makeHintSet(hints, hintsStem3, isH):
     # A charstring may have regular v stem hints or vstem3 hints, but not both.
     # Same for h stem hints and hstem3 hints.
+    hintset = []
     if len(hintsStem3) > 0:
         hintsStem3.sort()
         numHints = len(hintsStem3)
@@ -1432,8 +1333,7 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
         if numHints >= hintLimit:
             hintsStem3 = hintsStem3[:hintLimit]
             numHints = hintLimit
-        makeStemHintList(hintsStem3, newHintSetArray, isH)
-
+        hintset.append(makeStemHintList(hintsStem3, isH))
     else:
         hints.sort()
         numHints = len(hints)
@@ -1441,17 +1341,6 @@ def addHintList(hints, hintsStem3, newHintSetArray, isH):
         if numHints >= hintLimit:
             hints = hints[:hintLimit]
             numHints = hintLimit
-        makeHintList(hints, newHintSetArray, isH)
+        hintset.extend(makeHintList(hints, isH))
 
-
-def addWhiteSpace(parent, level):
-    child = None
-    childIndent = "\n" + ("  " * (level + 1))
-    prentIndent = "\n" + ("  " * (level))
-    for child in parent:
-        child.tail = childIndent
-        addWhiteSpace(child, level + 1)
-    if child is not None:
-        if parent.text is None:
-            parent.text = childIndent
-        child.tail = prentIndent
+    return hintset
