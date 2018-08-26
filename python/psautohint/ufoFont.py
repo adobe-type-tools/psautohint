@@ -409,25 +409,20 @@ class UFOFontData:
     def updateFromBez(self, bezData, name, width):
         # For UFO font, we don't use the width parameter:
         # it is carried over from the input glif file.
-        self.newGlyphMap[name] = self._convertBezToGLIF(name, bezData)
-
-    def _convertBezToGLIF(self, name, bezString):
-        # I need to replace the contours with data from the bez string.
         layer = None
         if self.useProcessedLayer and name in self.processedLayerGlyphMap:
             layer = PROCESSED_LAYER_NAME
         glyphset = self._get_glyphset(layer)
 
-        glyph = BezGlyph(bezString)
+        glyph = BezGlyph(bezData)
         glyphset.readGlyph(name, glyph)
+        self.newGlyphMap[name] = glyph
 
-        # convertBezToGLIF is called only if the GLIF has been edited by a
-        # tool. We need to update the edit status in the hash map entry. I
-        # assume that convertToBez has been run before, which will add an entry
-        # for this glyph.
+        # updateFromBez is called only if the glyph has been autohinted which
+        # might also change its outline data. We need to update the edit status
+        # in the hash map entry. I assume that convertToBez has been run
+        # before, which will add an entry for this glyph.
         self.updateHashEntry(name)
-
-        return glyph
 
     def save(self, path):
         if path is None:
@@ -601,50 +596,35 @@ class UFOFontData:
             self._glyphsets[layer_name] = glyphset
         return self._glyphsets[layer_name]
 
-    def _get_glyph(self, name, layer_name=None):
-        width, bez = None, None
-        glyphset = self._get_glyphset(layer_name)
-        if glyphset is not None:
-            pen = BezPen(glyphset, self)
-            glyph = glyphset[name]
-            glyph.draw(pen)
-            width = getattr(glyph, "width", 1000)
-            bez = pen.bez
-
-        return width, bez
-
-    def _build_glyph_hash(self, name, width, layer_name=None):
-        # Hash is always from the default glyph layer.
-        glyphset = self._get_glyphset(layer_name)
-        if glyphset is None:
-            return None
-        glyph = glyphset[name]
-
-        pen = HashPointPen(glyphset, width)
-        glyph.drawPoints(pen)
-
-        return pen.getHash()
+    def get_glyph_bez(self, glyph):
+        pen = BezPen(glyph.glyphSet, self)
+        glyph.draw(pen)
+        if not hasattr(glyph, "width"):
+            glyph.width = 1000
+        return pen.bez
 
     def _get_or_skip_glyph(self, name, doAll):
         # Get default glyph layer data, so we can check if the glyph
         # has been edited since this program was last run.
         # If the program name is in the history list, and the srcHash
         # matches the default glyph layer data, we can skip.
-        width, bez = self._get_glyph(name)
-        if bez is None:
-            return None, None, True
+        glyphset = self._get_glyphset()
+        glyph = glyphset[name]
+        bez = self.get_glyph_bez(glyph)
 
-        new_hash = self._build_glyph_hash(name, width)
-        skip = self.checkSkipGlyph(name, new_hash, doAll)
+        # Hash is always from the default glyph layer.
+        hash_pen = HashPointPen(glyph)
+        glyph.drawPoints(hash_pen)
+        skip = self.checkSkipGlyph(name, hash_pen.getHash(), doAll)
 
         # If self.useProcessedLayer and there is a glyph
         # in the processed layer, get the outline from that.
         if self.useProcessedLayer and name in self.processedLayerGlyphMap:
-            width, bez = self._get_glyph(name, PROCESSED_LAYER_NAME)
-            if bez is None:
-                return None, None, True
+            glyphset = self._get_glyphset(PROCESSED_LAYER_NAME)
+            glyph = glyphset[name]
+            bez = self.get_glyph_bez(glyph)
 
-        return width, bez, skip
+        return glyph.width, bez, skip
 
     def getGlyphList(self):
         return self.glyphList
@@ -886,10 +866,10 @@ class BezPen(BasePen):
 class HashPointPen(AbstractPointPen):
     DEFAULT_TRANSFORM = (1, 0, 0, 1, 0, 0)
 
-    def __init__(self, glyphset, width):
-        self.glyphset = glyphset
-        self.width = width
-        self.data = ["w%s" % width]
+    def __init__(self, glyph):
+        self.glyphset = getattr(glyph, "glyphSet", None)
+        self.width = getattr(glyph, "width", 1000)
+        self.data = ["w%s" % self.width]
 
     def getHash(self):
         data = "".join(self.data)
@@ -950,8 +930,7 @@ class BezGlyph(object):
             # Add this hash to the glyph data, as it is the hash which matches
             # the output outline data. This is not necessarily the same as the
             # hash of the source data; autohint can be used to change outlines.
-            width = getattr(self, "width", 1000)
-            hash_pen = HashPointPen(None, width)
+            hash_pen = HashPointPen(self)
             self._draw(contours, hash_pen)
             hints["id"] = hash_pen.getHash()
 
