@@ -1013,7 +1013,7 @@ def makeHintList(hints, isH):
     return hintset
 
 
-def fixStartPoint(outlineItem, opList):
+def fixStartPoint(contour, operators):
     # For the GLIF format, the idea of first/last point is funky, because
     # the format avoids identifying a start point. This means there is no
     # implied close-path line-to. If the last implied or explicit path-close
@@ -1023,16 +1023,16 @@ def fixStartPoint(outlineItem, opList):
     # the point list, and move the last curveto to the first op, replacing
     # the move-to.
 
-    _, firstX, firstY = opList[0]
-    lastOp, lastX, lastY = opList[-1]
-    firstPointElement = outlineItem[0]
+    _, firstX, firstY = operators[0]
+    lastOp, lastX, lastY = operators[-1]
+    point = contour[0]
     if (firstX == lastX) and (firstY == lastY):
-        del outlineItem[-1]
-        firstPointElement["type"] = lastOp
+        del contour[-1]
+        point["type"] = lastOp
     else:
         # we have an implied final line to. All we need to do
         # is convert the inital moveto to a lineto.
-        firstPointElement["type"] = "line"
+        point["type"] = "line"
 
 
 bezToUFOPoint = {
@@ -1043,14 +1043,13 @@ bezToUFOPoint = {
 }
 
 
-def convertCoords(curX, curY):
-    showX = int(curX)
-    if showX != curX:
-        showX = curX
-    showY = int(curY)
-    if showY != curY:
-        showY = curY
-    return showX, showY
+def convertCoords(current_x, current_y):
+    x, y = current_x, current_y
+    if x % 1 == 0:
+        x = int(x)
+    if y % 1 == 0:
+        y = int(y)
+    return x, y
 
 
 def convertBezToOutline(bezString):
@@ -1071,32 +1070,30 @@ def convertBezToOutline(bezString):
     # Counter hints are used only in LanguageGroup 1 glyphs, aka ideographs
 
     bezString = re.sub(r"%.+?\n", "", bezString)  # supress comments
-    bezList = re.findall(r"(\S+)", bezString)
-    if not bezList:
-        return "", None, None
-    flexList = []
+    bez = re.findall(r"(\S+)", bezString)
+    flexes = []
     # Create an initial hint mask. We use this if
     # there is no explicit initial hint sub.
-    hintMask = HintMask(0)
-    hintMaskList = [hintMask]
-    vStem3Args = []
-    hStem3Args = []
-    argList = []
-    opList = []
-    newHintMaskName = None
-    inPreFlex = False
-    hintInfoDict = None
-    opIndex = 0
-    curX = 0
-    curY = 0
-    newOutline = []
-    outlineItem = None
-    seenHints = False
+    hintmask = HintMask(0)
+    hintmasks = [hintmask]
+    vstem3_args = []
+    hstem3_args = []
+    args = []
+    operators = []
+    hintmask_name = None
+    in_preflex = False
+    hints = None
+    op_index = 0
+    current_x = 0
+    current_y = 0
+    contours = []
+    contour = None
+    has_hints = False
 
-    for token in bezList:
+    for token in bez:
         try:
             val = float(token)
-            argList.append(val)
+            args.append(val)
             continue
         except ValueError:
             pass
@@ -1105,46 +1102,46 @@ def convertBezToOutline(bezString):
         elif token in ["beginsubr", "endsubr"]:
             pass
         elif token == "snc":
-            hintMask = HintMask(opIndex)
+            hintmask = HintMask(op_index)
             # If the new hints precedes any marking operator,
             # then we want throw away the initial hint mask we
             # made, and use the new one as the first hint mask.
-            if opIndex == 0:
-                hintMaskList = [hintMask]
+            if op_index == 0:
+                hintmasks = [hintmask]
             else:
-                hintMaskList.append(hintMask)
-            newHintMaskName = hintMask.pointName
+                hintmasks.append(hintmask)
+            hintmask_name = hintmask.pointName
         elif token == "enc":
             pass
         elif token == "rb":
-            if newHintMaskName is None:
-                newHintMaskName = hintMask.pointName
-            hintMask.hList.append(argList)
-            argList = []
-            seenHints = True
+            if hintmask_name is None:
+                hintmask_name = hintmask.pointName
+            hintmask.hList.append(args)
+            args = []
+            has_hints = True
         elif token == "ry":
-            if newHintMaskName is None:
-                newHintMaskName = hintMask.pointName
-            hintMask.vList.append(argList)
-            argList = []
-            seenHints = True
+            if hintmask_name is None:
+                hintmask_name = hintmask.pointName
+            hintmask.vList.append(args)
+            args = []
+            has_hints = True
         elif token == "rm":  # vstem3's are vhints
-            if newHintMaskName is None:
-                newHintMaskName = hintMask.pointName
-            seenHints = True
-            vStem3Args.append(argList)
-            argList = []
-            if len(vStem3Args) == 3:
-                hintMask.vstem3List.append(vStem3Args)
-                vStem3Args = []
+            if hintmask_name is None:
+                hintmask_name = hintmask.pointName
+            has_hints = True
+            vstem3_args.append(args)
+            args = []
+            if len(vstem3_args) == 3:
+                hintmask.vstem3List.append(vstem3_args)
+                vstem3_args = []
 
         elif token == "rv":  # hstem3's are hhints
-            seenHints = True
-            hStem3Args.append(argList)
-            argList = []
-            if len(hStem3Args) == 3:
-                hintMask.hstem3List.append(hStem3Args)
-                hStem3Args = []
+            has_hints = True
+            hstem3_args.append(args)
+            args = []
+            if len(hstem3_args) == 3:
+                hintmask.hstem3List.append(hstem3_args)
+                hstem3_args = []
 
         elif token == "preflx1":
             # the preflx1/preflx2a sequence provides the same i as the flex
@@ -1152,51 +1149,50 @@ def convertBezToOutline(bezString):
             # provides the argument values needed for building a Type1 string
             # while the flex sequence is simply the 6 rcurveto points. Both
             # sequences are always provided.
-            argList = []
+            args = []
             # need to skip all move-tos until we see the "flex" operator.
-            inPreFlex = True
+            in_preflex = True
         elif token == "preflx2a":
-            argList = []
+            args = []
         elif token == "flxa":  # flex with absolute coords.
-            inPreFlex = False
-            flexPointName = BASE_FLEX_NAME + str(opIndex).zfill(4)
-            flexList.append(flexPointName)
-            curveCnt = 2
-            i = 0
+            in_preflex = False
+            flex_point_name = BASE_FLEX_NAME + str(op_index).zfill(4)
+            flexes.append(flex_point_name)
             # The first 12 args are the 6 args for each of
             # the two curves that make up the flex feature.
-            while i < curveCnt:
-                curX = argList[0]
-                curY = argList[1]
-                showX, showY = convertCoords(curX, curY)
-                newPoint = {"x": showX, "y": showY}
-                outlineItem.append(newPoint)
-                curX = argList[2]
-                curY = argList[3]
-                showX, showY = convertCoords(curX, curY)
-                newPoint = {"x": showX, "y": showY}
-                outlineItem.append(newPoint)
-                curX = argList[4]
-                curY = argList[5]
-                showX, showY = convertCoords(curX, curY)
-                opName = 'curve'
-                newPoint = {"x": showX, "y": showY, "type": opName}
-                outlineItem.append(newPoint)
-                opList.append([opName, curX, curY])
-                opIndex += 1
+            i = 0
+            while i < 2:
+                current_x = args[0]
+                current_y = args[1]
+                x, y = convertCoords(current_x, current_y)
+                point = {"x": x, "y": y}
+                contour.append(point)
+                current_x = args[2]
+                current_y = args[3]
+                x, y = convertCoords(current_x, current_y)
+                point = {"x": x, "y": y}
+                contour.append(point)
+                current_x = args[4]
+                current_y = args[5]
+                x, y = convertCoords(current_x, current_y)
+                point_type = 'curve'
+                point = {"x": x, "y": y, "type": point_type}
+                contour.append(point)
+                operators.append([point_type, current_x, current_y])
+                op_index += 1
                 if i == 0:
-                    argList = argList[6:12]
+                    args = args[6:12]
                 i += 1
             # attach the point name to the first point of the first curve.
-            outlineItem[-6][POINT_NAME] = flexPointName
-            if newHintMaskName is not None:
+            contour[-6][POINT_NAME] = flex_point_name
+            if hintmask_name is not None:
                 # We have a hint mask that we want to attach to the first
                 # point of the flex op. However, there is already a flex
                 # name in that attribute. What we do is set the flex point
                 # name into the hint mask.
-                hintMask.pointName = flexPointName
-                newHintMaskName = None
-            argList = []
+                hintmask.pointName = flex_point_name
+                hintmask_name = None
+            args = []
         elif token == "sc":
             pass
         elif token == "cp":
@@ -1204,101 +1200,101 @@ def convertBezToOutline(bezString):
         elif token == "ed":
             pass
         else:
-            if inPreFlex and token in ["rmt", "mt"]:
+            if in_preflex and token in ["rmt", "mt"]:
                 continue
 
             if token in ["rmt", "mt", "dt", "ct"]:
-                opIndex += 1
+                op_index += 1
             else:
                 raise BezParseError(
-                    "Unhandled operation: '%s' '%s'." % (argList, token))
-            opName = bezToUFOPoint[token]
+                    "Unhandled operation: '%s' '%s'." % (args, token))
+            point_type = bezToUFOPoint[token]
             if token in ["rmt", "mt", "dt"]:
                 if token in ["mt", "dt"]:
-                    curX = argList[0]
-                    curY = argList[1]
+                    current_x = args[0]
+                    current_y = args[1]
                 else:
-                    curX += argList[0]
-                    curY += argList[1]
-                showX, showY = convertCoords(curX, curY)
-                newPoint = {"x": showX, "y": showY, "type": opName}
+                    current_x += args[0]
+                    current_y += args[1]
+                x, y = convertCoords(current_x, current_y)
+                point = {"x": x, "y": y, "type": point_type}
 
-                if opName == "move":
-                    if outlineItem is not None:
-                        if len(outlineItem) == 1:
+                if point_type == "move":
+                    if contour is not None:
+                        if len(contour) == 1:
                             # Just in case we see two moves in a row,
-                            # delete the previous outlineItem if it has
+                            # delete the previous contour if it has
                             # only the move-to
                             log.info("Deleting moveto: %s adding %s",
-                                     newOutline[-1], outlineItem)
-                            del newOutline[-1]
+                                     contours[-1], contour)
+                            del contours[-1]
                         else:
                             # Fix the start/implied end path
                             # of the previous path.
-                            fixStartPoint(outlineItem, opList)
-                    opList = []
-                    outlineItem = []
-                    newOutline.append(outlineItem)
+                            fixStartPoint(contour, operators)
+                    operators = []
+                    contour = []
+                    contours.append(contour)
 
-                if newHintMaskName is not None:
-                    newPoint[POINT_NAME] = newHintMaskName
-                    newHintMaskName = None
-                outlineItem.append(newPoint)
-                opList.append([opName, curX, curY])
+                if hintmask_name is not None:
+                    point[POINT_NAME] = hintmask_name
+                    hintmask_name = None
+                contour.append(point)
+                operators.append([point_type, current_x, current_y])
             else:  # "ct"
-                curX = argList[0]
-                curY = argList[1]
-                showX, showY = convertCoords(curX, curY)
-                newPoint = {"x": showX, "y": showY}
-                outlineItem.append(newPoint)
-                curX = argList[2]
-                curY = argList[3]
-                showX, showY = convertCoords(curX, curY)
-                newPoint = {"x": showX, "y": showY}
-                outlineItem.append(newPoint)
-                curX = argList[4]
-                curY = argList[5]
-                showX, showY = convertCoords(curX, curY)
-                newPoint = {"x": showX, "y": showY, "type": opName}
-                outlineItem.append(newPoint)
-                if newHintMaskName is not None:
+                current_x = args[0]
+                current_y = args[1]
+                x, y = convertCoords(current_x, current_y)
+                point = {"x": x, "y": y}
+                contour.append(point)
+                current_x = args[2]
+                current_y = args[3]
+                x, y = convertCoords(current_x, current_y)
+                point = {"x": x, "y": y}
+                contour.append(point)
+                current_x = args[4]
+                current_y = args[5]
+                x, y = convertCoords(current_x, current_y)
+                point = {"x": x, "y": y, "type": point_type}
+                contour.append(point)
+                if hintmask_name is not None:
                     # attach the pointName to the first point of the curve.
-                    outlineItem[-3][POINT_NAME] = newHintMaskName
-                    newHintMaskName = None
-                opList.append([opName, curX, curY])
-            argList = []
+                    contour[-3][POINT_NAME] = hintmask_name
+                    hintmask_name = None
+                operators.append([point_type, current_x, current_y])
+            args = []
 
-    if outlineItem is not None:
-        if len(outlineItem) == 1:
+    if contour is not None:
+        if len(contour) == 1:
             # Just in case we see two moves in a row, delete
-            # the previous outlineItem if it has zero length.
-            del newOutline[-1]
+            # the previous contour if it has zero length.
+            del contours[-1]
         else:
-            fixStartPoint(outlineItem, opList)
+            fixStartPoint(contour, operators)
 
-    # add hints, if any
-    # Must be done at the end of op processing to make sure we have seen
-    # all the hints in the bez string.
-    # Note that the hintmasks are identified in the opList by the point name.
-    # We will follow the T1 spec: a glyph may have stem3 counter hints or
-    # regular hints, but not both.
+    # Add hints, if any.
+    # Must be done at the end of op processing to make sure we have seen all
+    # the hints in the bez string.
+    # Note that the hintmasks are identified in the operators by the point
+    # name. We will follow the T1 spec: a glyph may have stem3 counter hints
+    # or regular hints, but not both.
 
-    if (seenHints) or (len(flexList) > 0):
-        hintInfoDict = OrderedDict()
-        hintInfoDict["id"] = ""
+    if has_hints or len(flexes) > 0:
+        hints = OrderedDict()
+        hints["id"] = ""
 
-        # Convert the rest of the hint masks
-        # to a hintmask op and hintmask bytes.
-        hintInfoDict[HINT_SET_LIST_NAME] = []
-        for hintMask in hintMaskList:
-            hintInfoDict[HINT_SET_LIST_NAME].append(hintMask.getHintSet())
+        # Convert the rest of the hint masks to a hintmask op and hintmask
+        # bytes.
+        hints[HINT_SET_LIST_NAME] = []
+        for hintmask in hintmasks:
+            hints[HINT_SET_LIST_NAME].append(hintmask.getHintSet())
 
-        if len(flexList) > 0:
-            hintInfoDict[FLEX_INDEX_LIST_NAME] = []
-            for pointTag in flexList:
-                hintInfoDict[FLEX_INDEX_LIST_NAME].append(pointTag)
+        if len(flexes) > 0:
+            hints[FLEX_INDEX_LIST_NAME] = []
+            for pointTag in flexes:
+                hints[FLEX_INDEX_LIST_NAME].append(pointTag)
 
-    return newOutline, hintInfoDict
+    return contours, hints
 
 
 def makeHintSet(hints, hintsStem3, isH):
