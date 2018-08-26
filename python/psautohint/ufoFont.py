@@ -507,9 +507,8 @@ class UFOFontData:
                                 data.encode("utf-8"))
 
     def updateHashEntry(self, glyphName):
-        # srcHarsh has already been set: we are fixing the history list.
-        if self.log_only:
-            return
+        # srcHash has already been set: we are fixing the history list.
+
         # Get hash entry for glyph
         srcHash, historyList = self.hashMap[glyphName]
 
