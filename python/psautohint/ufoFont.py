@@ -961,8 +961,7 @@ class HintMask:
         hintset[POINT_TAG] = self.pointName
         hintset[STEMS_NAME] = []
 
-        # XXX: self.vstem3List is a typo here?
-        if len(self.hList) > 0 or len(self.vstem3List):
+        if len(self.hList) > 0 or len(self.hstem3List):
             hintset[STEMS_NAME].extend(
                     makeHintSet(self.hList, self.hstem3List, isH=True))
 
