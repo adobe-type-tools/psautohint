@@ -48,6 +48,7 @@ libpsautohint = library(
   'src/write.c',
   version_h,
   include_directories : include_directories(['include']),
+  c_args : '-DAC_C_LIB_EXPORTS',
   dependencies : libm,
   install : true,
 )

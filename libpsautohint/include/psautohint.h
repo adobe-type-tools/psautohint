@@ -28,12 +28,10 @@ extern "C" {
 
 #ifdef _WIN32
 #define ACLIB_API __declspec(dllexport)
-#else
-
-#if __GNUC__ && __MACH__
+#elif __GNUC__ && __MACH__
 #define ACLIB_API __attribute__((visibility("default")))
-#endif
-
+#else
+#define ACLIB_API
 #endif
 
 #else
