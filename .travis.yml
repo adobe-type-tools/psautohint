@@ -69,6 +69,12 @@ before_install:
   - source multibuild/common_utils.sh
   - source multibuild/travis_steps.sh
   - before_install
+  - |
+    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+      brew update
+      brew upgrade python
+    fi
+  - pip3 install meson ninja
 
 install:
   - build_wheel $REPO_DIR $PLAT
