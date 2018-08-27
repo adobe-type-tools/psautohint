@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import
 import glob
 from os.path import basename
 import pytest
+import logging
 
 from fontTools.misc.xmlWriter import XMLWriter
 from fontTools.cffLib import CFFFontSet
@@ -210,4 +211,60 @@ def test_too_long_glyph_name(tmpdir):
     options = Options(path, out)
 
     with pytest.raises(ACHintError):
+        hintFiles(options)
+
+
+def test_hashmap_glyph_changed(tmpdir, caplog):
+    path = "%s/dummy/hashmap_glyph_changed.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    hintFiles(options)
+    msgs = [r.getMessage() for r in caplog.records]
+    assert "Glyph 'a' has been edited. You must first run 'checkOutlines' " \
+           "before running 'autohint'. Skipping." in msgs
+
+
+def test_hashmap_processed_no_autohint(tmpdir, caplog):
+    path = "%s/dummy/hashmap_processed_no_autohint.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    hintFiles(options)
+
+    assert not differ([path, out])
+
+
+def test_hashmap_no_version(tmpdir, caplog):
+    caplog.set_level(logging.INFO)
+    path = "%s/dummy/hashmap_no_version.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    hintFiles(options)
+    msgs = [r.getMessage() for r in caplog.records]
+    assert "Updating hash map: was older version" in msgs
+
+    assert not differ([path, out])
+
+
+def test_hashmap_old_version(tmpdir, caplog):
+    caplog.set_level(logging.INFO)
+    path = "%s/dummy/hashmap_old_version.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    hintFiles(options)
+    msgs = [r.getMessage() for r in caplog.records]
+    assert "Updating hash map: was older version" in msgs
+
+    assert not differ([path, out])
+
+
+def test_hashmap_new_version(tmpdir, caplog):
+    path = "%s/dummy/hashmap_new_version.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    with pytest.raises(FontParseError):
         hintFiles(options)
