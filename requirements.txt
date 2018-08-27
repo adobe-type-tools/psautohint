@@ -1,2 +1,2 @@
 fonttools==3.29.0
-ufoLib[xml]
+ufoLib[xml]==2.3.1
