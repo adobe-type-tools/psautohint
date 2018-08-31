@@ -1,16 +1,11 @@
 import io
 import os
-import platform
-import subprocess
 import sys
 
 from distutils import log
 from distutils.command.build_scripts import build_scripts
-from distutils.dep_util import newer
-from distutils.util import convert_path
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-from setuptools.command.build_py import build_py
 
 
 class CustomBuildExt(build_ext):
@@ -29,61 +24,84 @@ class CustomBuildExt(build_ext):
         build_ext.build_extension(self, ext)
 
 
-class CustomBuildPy(build_py):
+class MesonExecutableTarget(str):
 
-    def run(self):
-        meson = ["meson",
-                 "--buildtype=release",
-                 "--strip",
-                 "--default-library=static",
-                 "_build",
-                 "libpsautohint"]
-        ninja = ["ninja", "-C", "_build"]
-        try:
-            subprocess.check_call(" ".join(meson), shell=True)
-            subprocess.check_call(" ".join(ninja), shell=True)
-        except subprocess.CalledProcessError:
-            print('psautohint: Error executing build command.')
-            sys.exit(1)
+    def __new__(self, name, src):
+        filename = name + ".exe" if sys.platform == "win32" else name
+        return str.__new__(self, filename)
 
-        build_py.run(self)
+    def __init__(self, name, src):
+        self.src = src
 
 
 class CustomBuildScripts(build_scripts):
+    """ Calls meson and ninja to build native executables that are installed
+    like scripts in Python's bin or Scripts folder.
+    This replaces the distutils build_scripts command.
+    """
 
-    def copy_scripts(self):
-        self.mkpath(self.build_dir)
-        outfiles = []
-        updated_files = []
-        for script in self.scripts:
-            script = convert_path(script)
-            outfile = os.path.join(self.build_dir, os.path.basename(script))
-            outfiles.append(outfile)
+    user_options = build_scripts.user_options + [
+        ('build-temp=', 't',
+         "directory for temporary meson/ninja build by-products"),
+    ]
 
-            if not self.force and not newer(script, outfile):
-                log.debug("psautohint: not copying %s (up-to-date)", script)
-                continue
+    def initialize_options(self):
+        build_scripts.initialize_options(self)
+        self.build_temp = None
 
-            try:
-                f = io.open(script, "rb")
-            except OSError:
-                if not self.dry_run:
-                    raise
-                f = None
+    def finalize_options(self):
+        build_scripts.finalize_options(self)
+        if self.build_temp is None:
+            # group meson/ninja build files under a 'scripts' subfolder
+            # inside the default build_temp folder
+            build_cmd = self.distribution.get_command_obj("build")
+            build_cmd.ensure_finalized()
+            self.build_temp = os.path.join(build_cmd.build_temp, "scripts")
+
+    def run(self):
+        if not self.scripts:
+            return
+        self.build_executables()
+
+    def build_executables(self):
+        for target in self.scripts:
+            if isinstance(target, MesonExecutableTarget):
+                self.build_executable(target)
             else:
-                first_line = f.readline()
-                if not first_line:
-                    f.close()
-                    self.warn("psautohint: %s is an empty file (skipping)"
-                              % script)
-                    continue
+                from distutils.errors import DistutilsSetupError
+                raise DistutilsSetupError(
+                    "expected MesonExecutableTarget, found %s: %r"
+                    % (type(target).__name__, target)
+                )
 
-            if f:
-                f.close()
-            updated_files.append(outfile)
-            self.copy_file(script, outfile)
+    def configure(self, src):
+        if os.path.exists(os.path.join(self.build_temp, "build.ninja")):
+            if self.force:
+                self.spawn(["ninja", "-C", self.build_temp, "reconfigure"])
+            else:
+                log.info("build directory already configured")
+            return
 
-        return outfiles, updated_files
+        self.mkpath(self.build_temp)
+        self.spawn(["meson",
+                    "--buildtype=release",
+                    "--strip",
+                    "--default-library=static",
+                    "--backend=ninja",
+                    self.build_temp,
+                    src])
+
+    def build_executable(self, target):
+        self.configure(target.src)
+
+        if self.force:
+            self.spawn(["ninja", "-C", self.build_temp, "-t", "clean", target])
+        self.spawn(["ninja", "-C", self.build_temp, target])
+
+        executable = os.path.join(self.build_temp, target)
+        self.mkpath(self.build_dir)
+        outfile = os.path.join(self.build_dir, target)
+        self.copy_file(executable, outfile)
 
 
 module1 = Extension("psautohint._psautohint",
@@ -139,11 +157,6 @@ module1 = Extension("psautohint._psautohint",
 with io.open("README.md", encoding="utf-8") as readme:
     long_description = readme.read()
 
-if platform.system() == 'Windows':
-    extension = '.exe'
-else:
-    extension = ''
-
 VERSION_TEMPLATE = """\
 /* file generated by setuptools_scm
    don't change, don't track in version control */
@@ -165,7 +178,9 @@ setup(name="psautohint",
       package_dir={'': 'python'},
       packages=['psautohint'],
       ext_modules=[module1],
-      scripts=["_build/autohintexe{}".format(extension)],
+      scripts=[
+          MesonExecutableTarget("autohintexe", src="libpsautohint"),
+      ],
       entry_points={
           'console_scripts': [
               "psautohint = psautohint.__main__:main",
@@ -186,7 +201,6 @@ setup(name="psautohint",
       },
       cmdclass={
           'build_ext': CustomBuildExt,
-          'build_py': CustomBuildPy,
           'build_scripts': CustomBuildScripts,
       },
       classifiers=[
