@@ -65,7 +65,7 @@ class ACOptions(object):
         self.logOnly = False
         self.printDefaultFDDict = False
         self.printFDDictList = False
-        self.allowDecimalCoords = False
+        self.round_coords = True
         self.writeToDefaultLayer = False
         self.baseMaster = {}
         self.font_format = None
@@ -196,11 +196,11 @@ def openFile(path, options):
 
     if font_format == "UFO":
         font = UFOFontData(path, options.logOnly,
-                           options.allowDecimalCoords,
+                           options.round_coords,
                            options.writeToDefaultLayer)
     elif font_format in ("OTF", "CFF"):
         is_otf = font_format == "OTF"
-        font = CFFFontData(path, options.allowDecimalCoords, is_otf)
+        font = CFFFontData(path, options.round_coords, is_otf)
     else:
         raise NotImplementedError("%s format is not supported yet, sorry." %
                                   font_format)
@@ -347,7 +347,7 @@ def hintFile(options, path, outpath, reference_master):
                 newBezString = hint_bez_glyph(fontInfo, bezString,
                                               options.allowChanges,
                                               not options.noHintSub,
-                                              options.allowDecimalCoords)
+                                              options.round_coords)
                 options.baseMaster[name] = newBezString
             else:
                 baseFontFileName = os.path.basename(options.reference_font)

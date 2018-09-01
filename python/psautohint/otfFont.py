@@ -43,7 +43,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
     # Note: flex is converted to regular rrcurveto's.
     # cntrmasks just map to hint replacement blocks with the specified stems.
     def __init__(self, localSubrs, globalSubrs, nominalWidthX, defaultWidthX,
-                 read_hints=True, allowDecimals=False):
+                 read_hints=True, round_coords=True):
         T2OutlineExtractor.__init__(self, None, localSubrs, globalSubrs,
                                     nominalWidthX, defaultWidthX)
         self.vhints = []
@@ -53,7 +53,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         self.firstMarkingOpSeen = False
         self.closePathSeen = False
         self.subrLevel = 0
-        self.allowDecimals = allowDecimals
+        self.round_coords = round_coords
         self.hintMaskBytes = None
 
     def execute(self, charString):
@@ -71,7 +71,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         log.debug("moveto %s, curpos %s", point, self.currentPoint)
         x = point[0]
         y = point[1]
-        if not self.allowDecimals:
+        if self.round_coords:
             x = int(round(x))
             y = int(round(y))
             self.bezProgram.append("%s %s mt\n" % (x, y))
@@ -86,7 +86,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         log.debug("lineto %s, curpos %s", point, self.currentPoint)
         x = point[0]
         y = point[1]
-        if not self.allowDecimals:
+        if self.round_coords:
             x = int(round(x))
             y = int(round(y))
             self.bezProgram.append("%s %s dt\n" % (x, y))
@@ -101,7 +101,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         pt3 = list(self._nextPoint(pt3))
         log.debug("curveto %s %s %s, curpos %s", pt1, pt2, pt3,
                   self.currentPoint)
-        if not self.allowDecimals:
+        if self.round_coords:
             for pt in [pt1, pt2, pt3]:
                 pt[0] = int(round(pt[0]))
                 pt[1] = int(round(pt[1]))
@@ -240,7 +240,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         self.hintCount = self.hintCount + int(len(args) / 2)
 
 
-def convertT2GlyphToBez(t2CharString, read_hints=True, allowDecimals=False):
+def convertT2GlyphToBez(t2CharString, read_hints=True, round_coords=True):
     # wrapper for T2ToBezExtractor which
     # applies it to the supplied T2 charstring
     subrs = getattr(t2CharString.private, "Subrs", [])
@@ -249,7 +249,7 @@ def convertT2GlyphToBez(t2CharString, read_hints=True, allowDecimals=False):
                                  t2CharString.private.nominalWidthX,
                                  t2CharString.private.defaultWidthX,
                                  read_hints,
-                                 allowDecimals)
+                                 round_coords)
     extractor.execute(t2CharString)
     width = None
     if extractor.gotWidth:
@@ -672,7 +672,7 @@ def convertBezToT2(bezString):
 
 
 class CFFFontData:
-    def __init__(self, path, allow_decimal_coords, is_otf):
+    def __init__(self, path, round_coords, is_otf):
         self.inputPath = path
         self.is_otf = is_otf
 
@@ -699,7 +699,7 @@ class CFFFontData:
         self.topDict = self.cffTable.cff.topDictIndex[0]
         self.charStrings = self.topDict.CharStrings
         self.charStringIndex = self.charStrings.charStringsIndex
-        self.allowDecimalCoords = allow_decimal_coords
+        self.round_coords = round_coords
 
     def getGlyphList(self):
         return self.ttFont.getGlyphOrder()
@@ -714,7 +714,7 @@ class CFFFontData:
         try:
             bezString, t2Wdth = convertT2GlyphToBez(t2CharString,
                                                     read_hints,
-                                                    self.allowDecimalCoords)
+                                                    self.round_coords)
             # Note: the glyph name is important, as it is used by autohintexe
             # for various heuristics, including [hv]stem3 derivation.
             bezString = "% " + glyphName + "\n" + bezString

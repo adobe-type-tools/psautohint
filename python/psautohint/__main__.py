@@ -334,7 +334,7 @@ class Options(ACOptions):
         self.logOnly = pargs.report_only
         self.printDefaultFDDict = pargs.print_dflt_fddict
         self.printFDDictList = pargs.print_list_fddict
-        self.allowDecimalCoords = pargs.decimal
+        self.round_coords = not pargs.decimal
         self.writeToDefaultLayer = pargs.write_to_default_layer
 
 
