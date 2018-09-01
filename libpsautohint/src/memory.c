@@ -49,9 +49,9 @@ AllocateMem(size_t nelem, size_t elsize, const char* description)
         memset(ptr, 0x0, nelem * elsize);
 
     if (ptr == NULL) {
-        LogMsg(LOGERROR, NONFATALERROR,
-               "Cannot allocate %d bytes of memory for %s.",
-               (int)(nelem * elsize), description);
+        LogMsg(LOGERROR, FATALERROR,
+               "Cannot allocate %zu bytes of memory for %s.", nelem * elsize,
+               description);
     }
     return (ptr);
 }
@@ -63,8 +63,8 @@ ReallocateMem(void* ptr, size_t size, const char* description)
     void* newptr = AC_memmanageFuncPtr(AC_memmanageCtxPtr, ptr, size);
 
     if (newptr == NULL) {
-        LogMsg(LOGERROR, NONFATALERROR,
-               "Cannot reallocate %d bytes of memory for %s.", (int)size,
+        LogMsg(LOGERROR, FATALERROR,
+               "Cannot reallocate %zu bytes of memory for %s.", size,
                description);
     }
     return (newptr);
