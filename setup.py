@@ -103,6 +103,16 @@ class CustomBuildScripts(build_scripts):
         outfile = os.path.join(self.build_dir, target)
         self.copy_file(executable, outfile)
 
+        # when building executable with VS2008 a *.exe.manifest xml file is
+        # generated alongside it. This links the executable to the respective
+        # MSVC runtime DLL. If this is not in the same folder as the exe, an
+        # error dialog "cannot find MSVCR90.DLL" pops up.
+        # TODO Embed the manifest inside the executable using mt.exe:
+        # https://msdn.microsoft.com/en-us/library/ms235591.aspx
+        if sys.platform == "win32" and os.path.exists(executable + ".manifest"):
+            self.copy_file(executable + ".manifest",
+                           outfile + ".manifest")
+
 
 module1 = Extension("psautohint._psautohint",
                     include_dirs=[
