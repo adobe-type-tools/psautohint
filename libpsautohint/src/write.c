@@ -48,10 +48,7 @@ WriteString(char* str)
           NUMMAX(gBezOutput->capacity * 2, gBezOutput->capacity + strlen(str));
         gBezOutput->data =
           ReallocateMem(gBezOutput->data, desiredsize, "output bez data");
-        if (gBezOutput->data)
-            gBezOutput->capacity = desiredsize;
-        else
-            return; /*FATAL ERROR*/
+        gBezOutput->capacity = desiredsize;
     }
     strcat(gBezOutput->data, str);
     gBezOutput->length += strlen(str);

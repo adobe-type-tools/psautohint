@@ -27,15 +27,7 @@ NewBuffer(size_t size)
         return NULL;
 
     buffer = (ACBuffer*)AllocateMem(1, sizeof(ACBuffer), "out buffer");
-    if (!buffer)
-        return NULL;
-
     buffer->data = AllocateMem(size, 1, "out buffer data");
-    if (!buffer->data) {
-        UnallocateMem(buffer);
-        return NULL;
-    }
-
     buffer->data[0] = '\0';
     buffer->capacity = size;
     buffer->length = 0;

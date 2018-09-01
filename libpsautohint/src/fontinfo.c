@@ -343,19 +343,11 @@ NewFontInfo(void)
     ACFontInfo* fontinfo;
 
     fontinfo = (ACFontInfo*)AllocateMem(1, sizeof(ACFontInfo), "fontinfo");
-    if (!fontinfo)
-        return NULL;
-
     fontinfo->length = 0;
     while (fontinfo_keys[fontinfo->length] != NULL)
         fontinfo->length++;
-
     fontinfo->values =
       (char**)AllocateMem(fontinfo->length, sizeof(char*), "fontinfo values");
-    if (!fontinfo->values) {
-        UnallocateMem(fontinfo);
-        return NULL;
-    }
 
     fontinfo->keys = fontinfo_keys;
     for (i = 0; i < fontinfo->length; i++)
@@ -435,10 +427,6 @@ ParseFontInfo(const char* data)
             if (!strncmp(info->keys[i], kwstart, matchLen)) {
                 info->values[i] =
                   AllocateMem(current - tkstart + 1, 1, "fontinfo entry value");
-                if (!info->values[i]) {
-                    FreeFontInfo(info);
-                    return NULL;
-                }
                 strncpy(info->values[i], tkstart, current - tkstart);
                 info->values[i][current - tkstart] = '\0';
                 break;
