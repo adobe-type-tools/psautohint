@@ -23,7 +23,7 @@ typedef unsigned char bool;
 
 #include "psautohint.h"
 
-static const char* C_ProgramVersion = "1.65240";
+static const char* C_ProgramVersion = "1.7";
 static const char* reportExt = ".rpt";
 static const char* dfltExt = ".new";
 static char* bezName = NULL;
