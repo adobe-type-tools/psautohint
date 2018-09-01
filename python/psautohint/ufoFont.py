@@ -441,6 +441,13 @@ class UFOFontData:
         if self.writeToDefaultLayer:
             layer = None
 
+        # Write layer contents.
+        layers = {DEFAULT_LAYER_NAME: DEFAULT_GLYPHS_DIRNAME}
+        if self.processedLayerGlyphMap or not self.writeToDefaultLayer:
+            layers[PROCESSED_LAYER_NAME] = PROCESSED_GLYPHS_DIRNAME
+        writer.layerContents.update(layers)
+        writer.writeLayerContents([DEFAULT_LAYER_NAME, PROCESSED_LAYER_NAME])
+
         # Write glyphs.
         glyphset = writer.getGlyphSet(layer, defaultLayer=layer is None)
         for name, glyph in self.newGlyphMap.items():
@@ -451,13 +458,6 @@ class UFOFontData:
             glyphset.contents[name] = filename
             glyphset.writeGlyph(name, glyph, glyph.drawPoints)
         glyphset.writeContents()
-
-        # Write layer contents.
-        layers = {DEFAULT_LAYER_NAME: DEFAULT_GLYPHS_DIRNAME}
-        if self.processedLayerGlyphMap:
-            layers[PROCESSED_LAYER_NAME] = PROCESSED_GLYPHS_DIRNAME
-        writer.layerContents.update(layers)
-        writer.writeLayerContents([DEFAULT_LAYER_NAME, PROCESSED_LAYER_NAME])
 
     @property
     def hashMap(self):
