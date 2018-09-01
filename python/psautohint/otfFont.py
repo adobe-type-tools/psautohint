@@ -672,7 +672,7 @@ def convertBezToT2(bezString):
 
 
 class CFFFontData:
-    def __init__(self, path, round_coords, is_otf):
+    def __init__(self, path, is_otf):
         self.inputPath = path
         self.is_otf = is_otf
 
@@ -699,7 +699,6 @@ class CFFFontData:
         self.topDict = self.cffTable.cff.topDictIndex[0]
         self.charStrings = self.topDict.CharStrings
         self.charStringIndex = self.charStrings.charStringsIndex
-        self.round_coords = round_coords
 
     def getGlyphList(self):
         return self.ttFont.getGlyphOrder()
@@ -707,14 +706,13 @@ class CFFFontData:
     def getPSName(self):
         return self.cffTable.cff.fontNames[0]
 
-    def convertToBez(self, glyphName, read_hints, doAll=False):
+    def convertToBez(self, glyphName, read_hints, round_coords, doAll=False):
         t2Wdth = None
         gid = self.charStrings.charStrings[glyphName]
         t2CharString = self.charStringIndex[gid]
         try:
-            bezString, t2Wdth = convertT2GlyphToBez(t2CharString,
-                                                    read_hints,
-                                                    self.round_coords)
+            bezString, t2Wdth = convertT2GlyphToBez(t2CharString, read_hints,
+                                                    round_coords)
             # Note: the glyph name is important, as it is used by autohintexe
             # for various heuristics, including [hv]stem3 derivation.
             bezString = "% " + glyphName + "\n" + bezString
