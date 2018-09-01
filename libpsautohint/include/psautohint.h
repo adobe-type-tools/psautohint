@@ -44,7 +44,6 @@ enum
 {
     AC_Success,
     AC_FatalError,
-    AC_MemoryError,
     AC_UnknownError,
     AC_InvalidParameterError
 };
