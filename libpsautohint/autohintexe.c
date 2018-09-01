@@ -7,16 +7,23 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#if !defined(_MSC_VER) || _MSC_VER >= 1800
+#include <stdbool.h>
+#else
+typedef unsigned char bool;
+#define true 1
+#define false 0
+#endif
+
 #include "psautohint.h"
 
-static const char* C_ProgramVersion = "1.65240";
+static const char* C_ProgramVersion = "1.7";
 static const char* reportExt = ".rpt";
 static const char* dfltExt = ".new";
 static char* bezName = NULL;
@@ -246,7 +253,7 @@ main(int argc, char* argv[])
                                       suffix of environment variable holding the
                                       bez string. */
 
-    int16_t total_files = 0;
+    int total_files = 0;
     int result, argi;
 
     badParam = false;

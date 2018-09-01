@@ -5,6 +5,7 @@ environment:
   global:
     TWINE_USERNAME: "adobe-type-tools-ci"
     # TWINE_PASSWORD is set in Appveyor settings
+    PYTHON3: "C:\\Python36-x64"
 
   matrix:
     - PYTHON: "C:\\Python27"
@@ -63,7 +64,7 @@ install:
 
   # install required python version if not present, and prepend to the PATH
   - ps: multibuild\install_python.ps1
-  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%;%PYTHON3%\Scripts
 
   # check that we have the expected version and architecture for Python
   - python --version
@@ -75,6 +76,12 @@ install:
 
   # install tox
   - python -m pip install -r dev-requirements.txt
+
+  # install meson and ninja for autohintexe.
+  # we install meson from master because it includes a 'meson.exe' entry point
+  # that makes it easier to run meson on Windows when installed via pip:
+  # https://github.com/mesonbuild/meson/pull/4004
+  - call %PYTHON3%\python.exe -m pip install git+https://github.com/mesonbuild/meson.git#egg=meson ninja
 
   # build psautohint wheel
   - tox -e wheel

@@ -48,6 +48,7 @@ matrix:
       install:
         - pip install tox
       script:
+        - pip3 install meson ninja
         - tox -e coverage-codecov-c
       after_success: false
     - os: osx
