@@ -354,8 +354,7 @@ class BezParseError(ValueError):
 
 
 class UFOFontData:
-    def __init__(self, path, log_only, round_coords,
-                 write_to_default_layer):
+    def __init__(self, path, log_only, write_to_default_layer):
         self._reader = UFOReader(path, validate=False)
 
         self.path = path
@@ -375,8 +374,6 @@ class UFOFontData:
         self.hashMapChanged = False
         # If True, then write data to the default layer
         self.writeToDefaultLayer = write_to_default_layer
-        # if True, do NOT round x,y values when processing.
-        self.round_coords = round_coords
 
         self._load_glyphmap()
 
@@ -390,14 +387,14 @@ class UFOFontData:
     def isCID():
         return False
 
-    def convertToBez(self, glyphName, read_hints, doAll=False):
+    def convertToBez(self, name, read_hints, round_coords, doAll=False):
         # We do not yet support reading hints, so read_hints is ignored.
-        width, bez, skip = self._get_or_skip_glyph(glyphName, doAll)
+        width, bez, skip = self._get_or_skip_glyph(name, round_coords, doAll)
         if skip:
             return None, width
 
         bezString = "\n".join(bez)
-        bezString = "\n".join(["% " + glyphName, "sc", bezString, "ed", ""])
+        bezString = "\n".join(["% " + name, "sc", bezString, "ed", ""])
         return bezString, width
 
     def updateFromBez(self, bezData, name, width):
@@ -555,21 +552,22 @@ class UFOFontData:
             self._glyphsets[layer_name] = glyphset
         return self._glyphsets[layer_name]
 
-    def get_glyph_bez(self, glyph):
-        pen = BezPen(glyph.glyphSet, self)
+    @staticmethod
+    def get_glyph_bez(glyph, round_coords):
+        pen = BezPen(glyph.glyphSet, round_coords)
         glyph.draw(pen)
         if not hasattr(glyph, "width"):
             glyph.width = 1000
         return pen.bez
 
-    def _get_or_skip_glyph(self, name, doAll):
+    def _get_or_skip_glyph(self, name, round_coords, doAll):
         # Get default glyph layer data, so we can check if the glyph
         # has been edited since this program was last run.
         # If the program name is in the history list, and the srcHash
         # matches the default glyph layer data, we can skip.
         glyphset = self._get_glyphset()
         glyph = glyphset[name]
-        bez = self.get_glyph_bez(glyph)
+        bez = self.get_glyph_bez(glyph, round_coords)
 
         # Hash is always from the default glyph layer.
         hash_pen = HashPointPen(glyph)
@@ -580,7 +578,7 @@ class UFOFontData:
         if name in self.processedLayerGlyphMap:
             glyphset = self._get_glyphset(PROCESSED_LAYER_NAME)
             glyph = glyphset[name]
-            bez = self.get_glyph_bez(glyph)
+            bez = self.get_glyph_bez(glyph, round_coords)
 
         return glyph.width, bez, skip
 
@@ -790,13 +788,13 @@ class UFOFontData:
 
 
 class BezPen(BasePen):
-    def __init__(self, glyph_set, font):
+    def __init__(self, glyph_set, round_coords):
         super(BezPen, self).__init__(glyph_set)
-        self.font = font
+        self.round_coords = round_coords
         self.bez = []
 
     def _point(self, point):
-        if self.font.round_coords:
+        if self.round_coords:
             return " ".join("%d" % round(pt) for pt in point)
         else:
             return " ".join("%3f" % pt for pt in point)

@@ -195,12 +195,10 @@ def openFile(path, options):
         raise FontParseError("{} is not a supported font format".format(path))
 
     if font_format == "UFO":
-        font = UFOFontData(path, options.logOnly,
-                           options.round_coords,
-                           options.writeToDefaultLayer)
+        font = UFOFontData(path, options.logOnly, options.writeToDefaultLayer)
     elif font_format in ("OTF", "CFF"):
         is_otf = font_format == "OTF"
-        font = CFFFontData(path, options.round_coords, is_otf)
+        font = CFFFontData(path, is_otf)
     else:
         raise NotImplementedError("%s format is not supported yet, sorry." %
                                   font_format)
@@ -305,6 +303,7 @@ def hintFile(options, path, outpath, reference_master):
 
         # Convert to bez format
         bezString, width = fontData.convertToBez(name, options.read_hints,
+                                                 options.round_coords,
                                                  options.hintAll)
         if bezString is None or "mt" not in bezString:
             # skip empty glyphs.
