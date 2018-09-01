@@ -268,3 +268,34 @@ def test_hashmap_new_version(tmpdir, caplog):
 
     with pytest.raises(FontParseError):
         hintFiles(options)
+
+
+def test_decimals_ufo(tmpdir):
+    path = "%s/dummy/decimals.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+    options.round_coords = False
+
+    hintFiles(options)
+
+    assert differ([path, out])
+
+
+def test_decimals_otf(tmpdir):
+    otf = "%s/dummy/decimals.otf" % DATA_DIR
+    out = str(tmpdir / basename(otf)) + ".out"
+    options = Options(otf, out)
+    options.round_coords = False
+
+    hintFiles(options)
+
+    for path in (otf, out):
+        font = TTFont(path)
+        assert "CFF " in font
+        writer = XMLWriter(str(tmpdir / basename(path)) + ".xml")
+        font["CFF "].toXML(writer, font)
+        writer.close()
+
+    assert differ([str(tmpdir / basename(otf)) + ".xml",
+                   str(tmpdir / basename(out)) + ".xml"])
+
