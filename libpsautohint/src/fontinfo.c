@@ -393,8 +393,6 @@ ParseFontInfo(const char* data)
     size_t i;
 
     ACFontInfo* info = NewFontInfo();
-    if (!info)
-        return NULL;
 
     if (!data)
         return info;

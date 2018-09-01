@@ -23,9 +23,6 @@ NewBuffer(size_t size)
 {
     ACBuffer* buffer;
 
-    if (size == 0)
-        return NULL;
-
     buffer = (ACBuffer*)AllocateMem(1, sizeof(ACBuffer), "out buffer");
     buffer->data = AllocateMem(size, 1, "out buffer data");
     buffer->data[0] = '\0';
@@ -115,12 +112,10 @@ AutoHintString(const char* srcbezdata, const char* fontinfodata,
     int value, result;
     ACFontInfo* fontinfo = NULL;
 
-    if (!srcbezdata)
+    if (!srcbezdata || !*length)
         return AC_InvalidParameterError;
 
     fontinfo = ParseFontInfo(fontinfodata);
-    if (!fontinfo)
-        return AC_MemoryError;
 
     set_errorproc(error_handler);
     value = setjmp(aclibmark);
@@ -150,11 +145,6 @@ AutoHintString(const char* srcbezdata, const char* fontinfodata,
     }
 
     gBezOutput = NewBuffer(*length);
-    if (!gBezOutput) {
-        FreeFontInfo(fontinfo);
-        return AC_MemoryError;
-    }
-
     result = AutoHint(fontinfo,     /* font info */
                       srcbezdata,   /* input glyph */
                       allowHintSub, /* extrahint */
@@ -207,8 +197,6 @@ AutoHintStringMM(const char** srcbezdata, const char* fontinfodata,
         return AC_InvalidParameterError;
 
     fontinfo = ParseFontInfo(fontinfodata);
-    if (!fontinfo)
-        return AC_MemoryError;
 
     set_errorproc(error_handler);
     value = setjmp(aclibmark);
