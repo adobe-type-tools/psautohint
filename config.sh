@@ -6,7 +6,17 @@
 function pre_build {
     # Any stuff that you need to do before you start building the wheels
     # Runs in the root directory of this repository.
-    :
+
+    # meson requires python3, append it to the PATH
+    if $(python -c "import sys; sys.exit(not (sys.version_info[:2] < (3, 4)))"); then
+        if [ -n "$IS_OSX" ]; then
+            get_macpython_environment 3.6 venv3
+            export PATH="$PATH:$(pwd)/venv3/bin"
+        else
+            export PATH="$PATH:$(cpython_path 3.6)/bin"
+        fi
+    fi
+    pip3 install meson ninja
 }
 
 function run_tests {
