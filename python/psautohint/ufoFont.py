@@ -354,7 +354,7 @@ class BezParseError(ValueError):
 
 
 class UFOFontData:
-    def __init__(self, path, log_only, allow_decimal_coords,
+    def __init__(self, path, log_only, round_coords,
                  write_to_default_layer):
         self._reader = UFOReader(path, validate=False)
 
@@ -376,7 +376,7 @@ class UFOFontData:
         # If True, then write data to the default layer
         self.writeToDefaultLayer = write_to_default_layer
         # if True, do NOT round x,y values when processing.
-        self.allowDecimalCoords = allow_decimal_coords
+        self.round_coords = round_coords
 
         self._load_glyphmap()
 
@@ -796,10 +796,10 @@ class BezPen(BasePen):
         self.bez = []
 
     def _point(self, point):
-        if self.font.allowDecimalCoords:
-            return " ".join("%3f" % pt for pt in point)
-        else:
+        if self.font.round_coords:
             return " ".join("%d" % round(pt) for pt in point)
+        else:
+            return " ".join("%3f" % pt for pt in point)
 
     def _moveTo(self, pt):
         self.bez.append("%s mt" % self._point(pt))
