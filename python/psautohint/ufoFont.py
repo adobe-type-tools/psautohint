@@ -796,8 +796,7 @@ class BezPen(BasePen):
     def _point(self, point):
         if self.round_coords:
             return " ".join("%d" % round(pt) for pt in point)
-        else:
-            return " ".join("%3f" % pt for pt in point)
+        return " ".join("%3f" % pt for pt in point)
 
     def _moveTo(self, pt):
         self.bez.append("%s mt" % self._point(pt))
@@ -806,10 +805,7 @@ class BezPen(BasePen):
         self.bez.append("%s dt" % self._point(pt))
 
     def _curveToOne(self, pt1, pt2, pt3):
-        pt1 = self._point(pt1)
-        pt2 = self._point(pt2)
-        pt3 = self._point(pt3)
-        self.bez.append("%s %s %s ct" % (pt1, pt2, pt3))
+        self.bez.append("%s ct" % self._point(pt1 + pt2 + pt3))
 
     @staticmethod
     def _qCurveToOne(pt1, pt2):

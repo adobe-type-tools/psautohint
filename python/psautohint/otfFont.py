@@ -63,20 +63,18 @@ class T2ToBezExtractor(T2OutlineExtractor):
         if (not self.closePathSeen) and (self.subrLevel == 0):
             self.closePath()
 
+    def _point(self, point):
+        if self.round_coords:
+            return " ".join("%d" % round(pt) for pt in point)
+        return " ".join("%3f" % pt for pt in point)
+
     def rMoveTo(self, point):
         point = self._nextPoint(point)
         if not self.firstMarkingOpSeen:
             self.firstMarkingOpSeen = True
             self.bezProgram.append("sc\n")
         log.debug("moveto %s, curpos %s", point, self.currentPoint)
-        x = point[0]
-        y = point[1]
-        if self.round_coords:
-            x = int(round(x))
-            y = int(round(y))
-            self.bezProgram.append("%s %s mt\n" % (x, y))
-        else:
-            self.bezProgram.append("%.2f %.2f mt\n" % (x, y))
+        self.bezProgram.append("%s mt\n" % self._point(point))
         self.sawMoveTo = True
 
     def rLineTo(self, point):
@@ -84,14 +82,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
             self.rMoveTo((0, 0))
         point = self._nextPoint(point)
         log.debug("lineto %s, curpos %s", point, self.currentPoint)
-        x = point[0]
-        y = point[1]
-        if self.round_coords:
-            x = int(round(x))
-            y = int(round(y))
-            self.bezProgram.append("%s %s dt\n" % (x, y))
-        else:
-            self.bezProgram.append("%.2f %.2f dt\n" % (x, y))
+        self.bezProgram.append("%s dt\n" % self._point(point))
 
     def rCurveTo(self, pt1, pt2, pt3):
         if not self.sawMoveTo:
@@ -101,17 +92,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         pt3 = list(self._nextPoint(pt3))
         log.debug("curveto %s %s %s, curpos %s", pt1, pt2, pt3,
                   self.currentPoint)
-        if self.round_coords:
-            for pt in [pt1, pt2, pt3]:
-                pt[0] = int(round(pt[0]))
-                pt[1] = int(round(pt[1]))
-            self.bezProgram.append(
-                "%s %s %s %s %s %s ct\n" %
-                (pt1[0], pt1[1], pt2[0], pt2[1], pt3[0], pt3[1]))
-        else:
-            self.bezProgram.append(
-                "%.2f %.2f %.2f %.2f %.2f %.2f ct\n" %
-                (pt1[0], pt1[1], pt2[0], pt2[1], pt3[0], pt3[1]))
+        self.bezProgram.append("%s ct\n" % self._point(pt1 + pt2 + pt3))
 
     def op_endchar(self, index):
         self.endPath()
