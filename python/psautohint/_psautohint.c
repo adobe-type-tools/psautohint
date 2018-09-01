@@ -157,9 +157,6 @@ autohint(PyObject* self, PyObject* args)
                 case AC_FatalError:
                     PyErr_SetString(PsAutoHintError, "Fatal error");
                     break;
-                case AC_MemoryError:
-                    PyErr_NoMemory();
-                    break;
                 case AC_InvalidParameterError:
                     PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
                     break;
@@ -293,9 +290,6 @@ autohintmm(PyObject* self, PyObject* args)
                     break;
                 case AC_FatalError:
                     PyErr_SetString(PsAutoHintError, "Fatal error");
-                    break;
-                case AC_MemoryError:
-                    PyErr_NoMemory();
                     break;
                 case AC_InvalidParameterError:
                     PyErr_SetString(PyExc_ValueError, "Invalid glyph data");
