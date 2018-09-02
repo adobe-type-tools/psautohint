@@ -313,9 +313,8 @@ def hintFile(options, path, outpath, reference_master):
 
         # get new fontinfo string if FDarray index has changed,
         # as each FontDict has different alignment zones.
-        gid = fontData.getGlyphID(name)
         if isCID:
-            fdIndex = fontData.getfdIndex(gid)
+            fdIndex = fontData.getfdIndex(name)
             if not fdIndex == lastFDIndex:
                 lastFDIndex = fdIndex
                 fdDict = fontData.getFontInfo(options.allow_no_blues,

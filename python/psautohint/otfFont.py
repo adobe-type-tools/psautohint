@@ -724,9 +724,6 @@ class CFFFontData:
     def close(self):
         self.ttFont.close()
 
-    def getGlyphID(self, name):
-        return self.ttFont.getGlyphID(name)
-
     def isCID(self):
         return hasattr(self.topDict, "FDSelect")
 
@@ -859,7 +856,8 @@ class CFFFontData:
 
         return fdDict
 
-    def getfdIndex(self, gid):
+    def getfdIndex(self, name):
+        gid = self.ttFont.getGlyphID(name)
         return self.topDict.FDSelect[gid]
 
     def getfdInfo(self, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs,

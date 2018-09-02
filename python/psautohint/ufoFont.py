@@ -773,15 +773,6 @@ class UFOFontData:
 
         return fdGlyphDict, fontDictList
 
-    def getGlyphID(self, glyphName):
-        try:
-            gid = self.orderMap[glyphName]
-        except IndexError:
-            raise FontParseError(
-                "Could not find glyph name '%s' in UFO font contents plist. "
-                "'%s'. " % (glyphName, self.path))
-        return gid
-
     @staticmethod
     def close():
         return
