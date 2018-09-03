@@ -653,16 +653,16 @@ def convertBezToT2(bezString):
 
 
 class CFFFontData:
-    def __init__(self, path, is_otf):
+    def __init__(self, path, font_format):
         self.inputPath = path
-        self.is_otf = is_otf
+        self.font_format = font_format
 
-        if is_otf:
+        if font_format == "OTF":
             # It is an OTF font, we can process it directly.
             font = TTFont(path)
             if "CFF " not in font:
                 raise FontParseError("OTF font has no CFF table <%s>." % path)
-        else:
+        elif font_format == "CFF":
             # It is s CFF font, package it in an OTF font.
             with open(path, "rb") as fp:
                 data = fp.read()
@@ -671,6 +671,9 @@ class CFFFontData:
             cff_class = getTableClass('CFF ')
             font['CFF '] = cff_class('CFF ')
             font['CFF '].decompile(data, font)
+        else:
+            raise NotImplementedError("%s font format is not supported." %
+                                      self.font_format)
 
         self.ttFont = font
         self.cffTable = font["CFF "]
@@ -710,13 +713,16 @@ class CFFFontData:
         if out_path is None:
             out_path = self.inputPath
 
-        if self.is_otf:
+        if self.font_format == "OTF":
             self.ttFont.save(out_path)
             self.ttFont.close()
-        else:
+        elif self.font_format == "CFF":
             data = self.ttFont["CFF "].compile(self.ttFont)
             with open(out_path, "wb") as tf:
                 tf.write(data)
+        else:
+            raise NotImplementedError("%s font format is not supported." %
+                                      self.font_format)
 
     def close(self):
         self.ttFont.close()
