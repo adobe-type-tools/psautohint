@@ -14,7 +14,7 @@ import sys
 
 from fontTools.misc.py23 import open
 
-from . import __version__, get_font_format
+from . import __version__, get_font_format, AUTOHINTEXE
 from .autohint import ACOptions, hintFiles
 
 
@@ -694,6 +694,15 @@ def main(args=None):
     except Exception:
         logging.exception("Unhandled exception occurred")
         raise
+
+
+def autohintexe(args=None):
+    import subprocess
+
+    if args is None:
+        args = sys.argv[1:]
+
+    return subprocess.call([AUTOHINTEXE] + args)
 
 
 if __name__ == '__main__':
