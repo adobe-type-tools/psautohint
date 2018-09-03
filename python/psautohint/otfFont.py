@@ -12,7 +12,12 @@ import re
 
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import bytechr, byteord, open
-from fontTools.ttLib import TTFont, getTableClass
+from fontTools.t1Lib import T1Font
+from fontTools.ttLib import TTFont, newTable
+from fontTools.cffLib import (CharStrings, GlobalSubrsIndex, PrivateDict,
+                              TopDictIndex, TopDict)
+from fontTools.pens.t2CharStringPen import T2CharStringPen
+from fontTools.pens.recordingPen import RecordingPen
 
 from . import fdTools, FontParseError
 
@@ -652,6 +657,75 @@ def convertBezToT2(bezString):
     return t2Program
 
 
+def _type1_to_cff(font, CFF):
+    cff = CFF.cff
+
+    # set up the basics
+    cff.major = 1
+    cff.minor = 0
+    cff.hdrSize = 4
+
+    private = PrivateDict()
+
+    cff.GlobalSubrs = GlobalSubrsIndex(private=private)
+
+    topDict = TopDict()
+    topDict.charset = []
+    topDict.Private = private
+    topDict.CharStrings = CharStrings(file=None, charset=None,
+                                      globalSubrs=None, private=private,
+                                      fdSelect=None, fdArray=None)
+
+    cff.topDictIndex = TopDictIndex()
+    cff.topDictIndex.append(topDict)
+
+    fontName = font["FontName"]
+    cff.fontNames = [fontName]
+
+    # populate top dict
+    topDict.FontName = fontName
+    topDict.FontBBox = font["FontBBox"]
+    info_keys = ("version", "Copyright", "Notice", "FullName", "FamilyName",
+                 "Weight", "isFixedPitch", "ItalicAngle", "UnderlinePosition",
+                 "UnderlineThickness")
+    t1info = font["FontInfo"]
+    for key in info_keys:
+        if key in t1info:
+            setattr(topDict, key, t1info[key])
+
+    # populate private dict
+    private_keys = ("BlueFuzz", "BlueShift", "BlueScale", "BlueValues",
+                    "FamilyBlues", "FamilyOtherBlues", "OtherBlues",
+                    "StdHW", "StdVW", "StemSnapH", "StemSnapV")
+    t1private = font["Private"]
+    for key in private_keys:
+        if key in t1private:
+            value = t1private[key]
+            if key in ("StdHW", "StdVW"):
+                value = value[0]
+            private.rawDict[key] = value
+
+    # populate glyphs
+    glyphSet = font.getGlyphSet()
+    glyphOrder = list(glyphSet.keys())
+    glyphOrder.pop(glyphOrder.index(".notdef"))
+    glyphOrder.insert(0, ".notdef")
+    for glyphName in glyphOrder:
+        glyph = glyphSet[glyphName]
+
+        # draw first to get the width, glyph.width is set after drawing
+        pen = RecordingPen()
+        glyph.draw(pen)
+        t2pen = T2CharStringPen(glyph.width, glyphSet)
+        pen.replay(t2pen)
+
+        charString = t2pen.getCharString(private, optimize=False)
+        topDict.CharStrings[glyphName] = charString
+        topDict.charset.append(glyphName)
+
+    return CFF
+
+
 class CFFFontData:
     def __init__(self, path, font_format):
         self.inputPath = path
@@ -662,15 +736,19 @@ class CFFFontData:
             font = TTFont(path)
             if "CFF " not in font:
                 raise FontParseError("OTF font has no CFF table <%s>." % path)
-        elif font_format == "CFF":
-            # It is s CFF font, package it in an OTF font.
-            with open(path, "rb") as fp:
-                data = fp.read()
-
+        elif font_format in ("CFF", "PFA", "PFB"):
+            # It is a CFF or Type 1 font, package it in an OTF font.
             font = TTFont()
-            cff_class = getTableClass('CFF ')
-            font['CFF '] = cff_class('CFF ')
-            font['CFF '].decompile(data, font)
+            CFF = newTable("CFF ")
+            if font_format == "CFF":
+                with open(path, "rb") as fp:
+                    CFF.decompile(fp.read(), font)
+            else:
+                t1 = T1Font(path)
+                self._t1_font = t1
+                _type1_to_cff(t1, CFF)
+
+            font['CFF '] = CFF
         else:
             raise NotImplementedError("%s font format is not supported." %
                                       self.font_format)
@@ -716,13 +794,10 @@ class CFFFontData:
         if self.font_format == "OTF":
             self.ttFont.save(out_path)
             self.ttFont.close()
-        elif self.font_format == "CFF":
+        else:
             data = self.ttFont["CFF "].compile(self.ttFont)
             with open(out_path, "wb") as tf:
                 tf.write(data)
-        else:
-            raise NotImplementedError("%s font format is not supported." %
-                                      self.font_format)
 
     def close(self):
         self.ttFont.close()
