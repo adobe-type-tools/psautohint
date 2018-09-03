@@ -679,7 +679,6 @@ class CFFFontData:
         # Get charstring.
         self.topDict = self.cffTable.cff.topDictIndex[0]
         self.charStrings = self.topDict.CharStrings
-        self.charStringIndex = self.charStrings.charStringsIndex
 
     def getGlyphList(self):
         return self.ttFont.getGlyphOrder()
@@ -689,8 +688,7 @@ class CFFFontData:
 
     def convertToBez(self, glyphName, read_hints, round_coords, doAll=False):
         t2Wdth = None
-        gid = self.charStrings.charStrings[glyphName]
-        t2CharString = self.charStringIndex[gid]
+        t2CharString = self.charStrings[glyphName]
         try:
             bezString, t2Wdth = convertT2GlyphToBez(t2CharString, read_hints,
                                                     round_coords)
@@ -705,8 +703,7 @@ class CFFFontData:
 
     def updateFromBez(self, bezData, glyphName, width):
         t2Program = [width] + convertBezToT2(bezData)
-        gid = self.charStrings.charStrings[glyphName]
-        t2CharString = self.charStringIndex[gid]
+        t2CharString = self.charStrings[glyphName]
         t2CharString.program = t2Program
 
     def save(self, out_path):
