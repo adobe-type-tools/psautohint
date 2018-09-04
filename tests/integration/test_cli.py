@@ -101,7 +101,7 @@ except (subprocess.CalledProcessError, OSError):
     pass
 
 
-@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.pf[ab]" % DATA_DIR))
+@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.p*" % DATA_DIR))
 @pytest.mark.skipif(tx_found, reason="'tx' is found")
 def test_type1_raises(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
@@ -110,15 +110,7 @@ def test_type1_raises(path, tmpdir):
         autohint([path, '-o', out])
 
 
-@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.ps" % DATA_DIR))
-def test_type1_cid_raises(path, tmpdir):
-    out = str(tmpdir / basename(path)) + ".out"
-
-    with pytest.raises(SystemExit):
-        autohint([path, '-o', out])
-
-
-@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.pf[ab]" % DATA_DIR))
+@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.p*" % DATA_DIR))
 @pytest.mark.skipif(tx_found is False, reason="'tx' is missing")
 def test_type1_supported(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"

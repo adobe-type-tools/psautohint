@@ -671,7 +671,7 @@ class CFFFontData:
             font = TTFont(path)
             if "CFF " not in font:
                 raise FontParseError("OTF font has no CFF table <%s>." % path)
-        elif font_format != "PFC":
+        else:
             # Else, package it in an OTF font.
             if font_format == "CFF":
                 with open(path, "rb") as fp:
@@ -689,9 +689,6 @@ class CFFFontData:
             font = TTFont()
             font['CFF '] = newTable('CFF ')
             font['CFF '].decompile(data, font)
-        else:
-            raise NotImplementedError("%s font format is not supported." %
-                                      self.font_format)
 
         self.ttFont = font
         self.cffTable = font["CFF "]
@@ -917,10 +914,14 @@ class CFFFontData:
             fdGlyphDict, fontDictList, finalFDict = fdTools.parseFontInfoFile(
                 fontDictList, fontInfoData, glyphList, maxY, minY,
                 self.getPSName())
+            if hasattr(topDict, "FDArray"):
+                private = topDict.FDArray[fdIndex].Private
+            else:
+                private = topDict.Private
             if finalFDict is None:
                 # If a font dict was not explicitly specified for the
                 # output font, use the first user-specified font dict.
-                fdTools.mergeFDDicts(fontDictList[1:], topDict.Private)
+                fdTools.mergeFDDicts(fontDictList[1:], private)
             else:
-                fdTools.mergeFDDicts([finalFDict], topDict.Private)
+                fdTools.mergeFDDicts([finalFDict], private)
         return fdGlyphDict, fontDictList
