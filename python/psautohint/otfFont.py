@@ -12,7 +12,7 @@ import re
 
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import bytechr, byteord, open
-from fontTools.ttLib import TTFont, getTableClass
+from fontTools.ttLib import TTFont, newTable
 
 from . import fdTools, FontParseError
 
@@ -668,8 +668,7 @@ class CFFFontData:
                 data = fp.read()
 
             font = TTFont()
-            cff_class = getTableClass('CFF ')
-            font['CFF '] = cff_class('CFF ')
+            font['CFF '] = newTable('CFF ')
             font['CFF '].decompile(data, font)
         else:
             raise NotImplementedError("%s font format is not supported." %
