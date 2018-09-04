@@ -76,6 +76,13 @@ install:
   # install tox
   - python -m pip install -r dev-requirements.txt
 
+  # Install AFDKO for tx. 2.7 is arbitrary, we just want it for one of the
+  # matrices.
+  - ps: >-
+      if($env:PYTHON_VERSION -eq '2.7') {
+        pip install --pre afdko
+      }
+
   # build psautohint wheel
   - tox -e wheel
   # get the full path to the compiled wheel (ugly but works)

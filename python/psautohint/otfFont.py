@@ -9,6 +9,8 @@ from __future__ import print_function, absolute_import
 import logging
 import os
 import re
+import subprocess
+import tempfile
 
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import bytechr, byteord, open
@@ -652,6 +654,13 @@ def convertBezToT2(bezString):
     return t2Program
 
 
+def _run_tx(args):
+    try:
+        subprocess.check_call(["tx"] + args)
+    except (subprocess.CalledProcessError, OSError) as e:
+        raise FontParseError(e)
+
+
 class CFFFontData:
     def __init__(self, path, font_format):
         self.inputPath = path
@@ -662,10 +671,20 @@ class CFFFontData:
             font = TTFont(path)
             if "CFF " not in font:
                 raise FontParseError("OTF font has no CFF table <%s>." % path)
-        elif font_format == "CFF":
-            # It is s CFF font, package it in an OTF font.
-            with open(path, "rb") as fp:
-                data = fp.read()
+        elif font_format != "PFC":
+            # Else, package it in an OTF font.
+            if font_format == "CFF":
+                with open(path, "rb") as fp:
+                    data = fp.read()
+            else:
+                fd, temp_path = tempfile.mkstemp()
+                os.close(fd)
+                try:
+                    _run_tx(["-cff", "+b", "-std", path, temp_path])
+                    with open(temp_path, "rb") as fp:
+                        data = fp.read()
+                finally:
+                    os.remove(temp_path)
 
             font = TTFont()
             font['CFF '] = newTable('CFF ')
@@ -708,20 +727,30 @@ class CFFFontData:
         t2CharString = self.charStrings[glyphName]
         t2CharString.program = t2Program
 
-    def save(self, out_path):
-        if out_path is None:
-            out_path = self.inputPath
+    def save(self, path):
+        if path is None:
+            path = self.inputPath
 
         if self.font_format == "OTF":
-            self.ttFont.save(out_path)
+            self.ttFont.save(path)
             self.ttFont.close()
-        elif self.font_format == "CFF":
-            data = self.ttFont["CFF "].compile(self.ttFont)
-            with open(out_path, "wb") as tf:
-                tf.write(data)
         else:
-            raise NotImplementedError("%s font format is not supported." %
-                                      self.font_format)
+            data = self.ttFont["CFF "].compile(self.ttFont)
+            if self.font_format == "CFF":
+                with open(path, "wb") as fp:
+                    fp.write(data)
+            else:
+                fd, temp_path = tempfile.mkstemp()
+                os.write(fd, data)
+                os.close(fd)
+
+                try:
+                    args = ["-t1", "-std"]
+                    if self.font_format == "PFB":
+                        args.append("-pfb")
+                    _run_tx(args + [temp_path, path])
+                finally:
+                    os.remove(temp_path)
 
     def close(self):
         self.ttFont.close()

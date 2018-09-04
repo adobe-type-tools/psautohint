@@ -10,6 +10,7 @@ import argparse
 import logging
 import os
 import re
+import subprocess
 import sys
 
 from fontTools.misc.py23 import open
@@ -394,17 +395,33 @@ def _check_save_path(path_str):
     return test_path
 
 
+def _check_tx():
+    try:
+        subprocess.check_output(["tx", "-h"], stderr=subprocess.STDOUT)
+        return True
+    except (subprocess.CalledProcessError, OSError):
+        return False
+
+
 def _validate_font_paths(path_lst, parser):
     """
     Checks that all input paths are fonts, and that all are the same format.
     Returns the font format string.
     """
+    has_tx = None
     format_set = set()
     for path in path_lst:
         font_format = get_font_format(path)
         if font_format is None:
             parser.error("{} is not a supported font format".format(
                 os.path.basename(path)))
+        if font_format in ("PFA", "PFB", "PFC"):
+            if has_tx is None:
+                has_tx = _check_tx()
+            if not has_tx:
+                parser.error("{} font format requires 'tx'. "
+                             "Please install 'afdko'.".format(
+                                 os.path.basename(path)))
         format_set.add(font_format)
     if len(format_set) > 1:
         parser.error("the input fonts must be all of the same format")
@@ -688,17 +705,12 @@ def main(args=None):
 
     try:
         hintFiles(options)
-    except NotImplementedError as ex:
-        logging.error(ex)
-        sys.exit(1)
     except Exception:
         logging.exception("Unhandled exception occurred")
         raise
 
 
 def autohintexe(args=None):
-    import subprocess
-
     if args is None:
         args = sys.argv[1:]
 

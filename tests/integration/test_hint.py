@@ -4,6 +4,7 @@ import glob
 from os.path import basename
 import pytest
 import logging
+import subprocess
 
 from fontTools.misc.xmlWriter import XMLWriter
 from fontTools.cffLib import CFFFontSet
@@ -71,12 +72,43 @@ def test_cff(cff, tmpdir):
                    str(tmpdir / basename(out)) + ".xml"])
 
 
-@parametrize("path", glob.glob("%s/dummy/font.p*" % DATA_DIR))
-def test_type1(path, tmpdir):
+tx_found = False
+try:
+    subprocess.check_call(["tx", "-h"])
+    tx_found = True
+except (subprocess.CalledProcessError, OSError):
+    pass
+
+
+@parametrize("path", glob.glob("%s/dummy/font.pf[ab]" % DATA_DIR))
+@pytest.mark.skipif(tx_found, reason="'tx' is found")
+def test_type1_raises(path, tmpdir):
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+    with pytest.raises(FontParseError):
+        hintFiles(options)
+
+
+@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.ps" % DATA_DIR))
+def test_type1_cid_raises(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
     with pytest.raises(NotImplementedError):
         hintFiles(options)
+
+
+@parametrize("path", glob.glob("%s/dummy/font.pf[ab]" % DATA_DIR))
+@pytest.mark.skipif(tx_found is False, reason="'tx' is missing")
+def test_type1_supported(path, tmpdir):
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+    hintFiles(options)
+
+    path_dump = str(tmpdir / basename(path)) + ".txt"
+    out_dump = str(tmpdir / basename(out)) + ".txt"
+    subprocess.check_call(["tx", "-dump", "-6", path, path_dump])
+    subprocess.check_call(["tx", "-dump", "-6", out, out_dump])
+    assert differ([path_dump, out_dump])
 
 
 def test_unsupported_format(tmpdir):
@@ -298,4 +330,3 @@ def test_decimals_otf(tmpdir):
 
     assert differ([str(tmpdir / basename(otf)) + ".xml",
                    str(tmpdir / basename(out)) + ".xml"])
-

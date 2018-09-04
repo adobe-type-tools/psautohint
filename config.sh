@@ -6,7 +6,9 @@
 function pre_build {
     # Any stuff that you need to do before you start building the wheels
     # Runs in the root directory of this repository.
-    :
+    if [ \( -n "$IS_OSX" -a "$MB_PYTHON_VERSION" = "2.7" \) -o \( "$PYTHON_VERSION" = "3.6" \) ]; then
+        pip install --pre afdko
+    fi
 }
 
 function run_tests {

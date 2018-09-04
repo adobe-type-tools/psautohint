@@ -93,12 +93,37 @@ def test_multi_reference_is_duplicated(tmpdir):
         autohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
+tx_found = False
+try:
+    subprocess.check_call(["tx", "-h"])
+    tx_found = True
+except (subprocess.CalledProcessError, OSError):
+    pass
+
+
 @pytest.mark.parametrize("path", glob.glob("%s/dummy/font.pf[ab]" % DATA_DIR))
-def test_type1(path, tmpdir):
+@pytest.mark.skipif(tx_found, reason="'tx' is found")
+def test_type1_raises(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
     with pytest.raises(SystemExit):
         autohint([path, '-o', out])
+
+
+@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.ps" % DATA_DIR))
+def test_type1_cid_raises(path, tmpdir):
+    out = str(tmpdir / basename(path)) + ".out"
+
+    with pytest.raises(SystemExit):
+        autohint([path, '-o', out])
+
+
+@pytest.mark.parametrize("path", glob.glob("%s/dummy/font.pf[ab]" % DATA_DIR))
+@pytest.mark.skipif(tx_found is False, reason="'tx' is missing")
+def test_type1_supported(path, tmpdir):
+    out = str(tmpdir / basename(path)) + ".out"
+
+    autohint([path, '-o', out])
 
 
 @pytest.mark.parametrize("glyphs", [
