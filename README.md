@@ -32,12 +32,9 @@ The autohinter can be used by running:
 
     psautohint
 
-Building `autohintexe` binary requires [meson](http://mesonbuild.com) and
-[ninja](https://ninja-build.org/):
+To build just the `autohintexe` binary:
 
-    meson _build libpsautohint
-    ninja -C _build
-    ninja -C _build install
+    python setup.py build_exe
 
 Testing
 -------
