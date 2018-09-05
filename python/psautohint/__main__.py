@@ -15,7 +15,7 @@ import sys
 
 from fontTools.misc.py23 import open
 
-from . import __version__, get_font_format, AUTOHINTEXE
+from . import __version__, get_font_format
 from .autohint import ACOptions, hintFiles
 
 
