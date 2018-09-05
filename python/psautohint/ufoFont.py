@@ -321,8 +321,6 @@ Example from "B" in SourceCodePro-Regular
 """
 
 # UFO names
-PUBLIC_GLYPH_ORDER = "public.glyphOrder"
-
 ADOBE_DOMAIN_PREFIX = "com.adobe.type"
 
 PROCESSED_LAYER_NAME = "AFDKO ProcessedGlyphs"
@@ -358,10 +356,9 @@ class UFOFontData:
         self._reader = UFOReader(path, validate=False)
 
         self.path = path
-        self.glyphMap = {}
-        self.processedLayerGlyphMap = {}
+        self._glyphmap = None
+        self._processed_layer_glyphmap = None
         self.newGlyphMap = {}
-        self.glyphList = []
         self._fontInfo = None
         self._glyphsets = {}
         # If True, we are running in report mode and not doing any changes, so
@@ -374,8 +371,6 @@ class UFOFontData:
         self.hashMapChanged = False
         # If True, then write data to the default layer
         self.writeToDefaultLayer = write_to_default_layer
-
-        self._load_glyphmap()
 
     def getUnitsPerEm(self):
         return self.fontInfo.get("unitsPerEm", 1000)
@@ -583,40 +578,24 @@ class UFOFontData:
         return glyph.width, bez, skip
 
     def getGlyphList(self):
-        return self.glyphList
-
-    def _load_glyphmap(self):
-        # Need to both get the list of glyphs in the font, and also the glyph
-        # order. The latter is taken from the public.glyphOrder key in the lib,
-        # if it exists, else it is taken from the contents.  Any existing
-        # glyphs which are not named in the public.glyphOrder are sorted after
-        # all glyphs which are named in the public.glyphOrder, in the order
-        # that they occurred in contents.plist.
         glyphset = self._get_glyphset()
-        self.glyphMap = glyphset.contents
-        self.glyphList = glyphset.keys()
+        return sorted(list(glyphset.keys()))
 
-        self.orderMap = {}
-        fontlib = self._reader.readLib()
-        glyphOrder = fontlib.get(PUBLIC_GLYPH_ORDER, self.glyphList)
-        for i, name in enumerate(glyphOrder):
-            self.orderMap[name] = i
+    @property
+    def glyphMap(self):
+        if self._glyphmap is None:
+            glyphset = self._get_glyphset()
+            self._glyphmap = glyphset.contents
+        return self._glyphmap
 
-        # If there are glyphs in the font which are not named in the
-        # public.glyphOrder entry, add them in the order of the
-        # contents.plist file.
-        for name in self.glyphList:
-            if name not in self.orderMap:
-                self.orderMap[name] = len(self.orderMap)
-        self.glyphList = sorted(list(self.orderMap.keys()))
-
-        # I also need to get the glyph map for the processed layer,
-        # and use this when the glyph is read from the processed layer.
-        # glyph file names that differ from what is in the default glyph layer.
-        # Because checkOutliensUFO used the defcon library, it can write
-        glyphset = self._get_glyphset(PROCESSED_LAYER_NAME)
-        if glyphset is not None:
-            self.processedLayerGlyphMap = glyphset.contents
+    @property
+    def processedLayerGlyphMap(self):
+        if self._processed_layer_glyphmap is None:
+            self._processed_layer_glyphmap = {}
+            glyphset = self._get_glyphset(PROCESSED_LAYER_NAME)
+            if glyphset is not None:
+                self._processed_layer_glyphmap = glyphset.contents
+        return self._processed_layer_glyphmap
 
     @property
     def fontInfo(self):
@@ -772,15 +751,6 @@ class UFOFontData:
                     fdTools.mergeFDDicts([finalFDict], self.fontDict)
 
         return fdGlyphDict, fontDictList
-
-    def getGlyphID(self, glyphName):
-        try:
-            gid = self.orderMap[glyphName]
-        except IndexError:
-            raise FontParseError(
-                "Could not find glyph name '%s' in UFO font contents plist. "
-                "'%s'. " % (glyphName, self.path))
-        return gid
 
     @staticmethod
     def close():

@@ -9,10 +9,12 @@ from __future__ import print_function, absolute_import
 import logging
 import os
 import re
+import subprocess
+import tempfile
 
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import bytechr, byteord, open
-from fontTools.ttLib import TTFont, getTableClass
+from fontTools.ttLib import TTFont, newTable
 
 from . import fdTools, FontParseError
 
@@ -652,24 +654,40 @@ def convertBezToT2(bezString):
     return t2Program
 
 
-class CFFFontData:
-    def __init__(self, path, is_otf):
-        self.inputPath = path
-        self.is_otf = is_otf
+def _run_tx(args):
+    try:
+        subprocess.check_call(["tx"] + args)
+    except (subprocess.CalledProcessError, OSError) as e:
+        raise FontParseError(e)
 
-        if is_otf:
+
+class CFFFontData:
+    def __init__(self, path, font_format):
+        self.inputPath = path
+        self.font_format = font_format
+
+        if font_format == "OTF":
             # It is an OTF font, we can process it directly.
             font = TTFont(path)
             if "CFF " not in font:
                 raise FontParseError("OTF font has no CFF table <%s>." % path)
         else:
-            # It is s CFF font, package it in an OTF font.
-            with open(path, "rb") as fp:
-                data = fp.read()
+            # Else, package it in an OTF font.
+            if font_format == "CFF":
+                with open(path, "rb") as fp:
+                    data = fp.read()
+            else:
+                fd, temp_path = tempfile.mkstemp()
+                os.close(fd)
+                try:
+                    _run_tx(["-cff", "+b", "-std", path, temp_path])
+                    with open(temp_path, "rb") as fp:
+                        data = fp.read()
+                finally:
+                    os.remove(temp_path)
 
             font = TTFont()
-            cff_class = getTableClass('CFF ')
-            font['CFF '] = cff_class('CFF ')
+            font['CFF '] = newTable('CFF ')
             font['CFF '].decompile(data, font)
 
         self.ttFont = font
@@ -679,7 +697,6 @@ class CFFFontData:
         # Get charstring.
         self.topDict = self.cffTable.cff.topDictIndex[0]
         self.charStrings = self.topDict.CharStrings
-        self.charStringIndex = self.charStrings.charStringsIndex
 
     def getGlyphList(self):
         return self.ttFont.getGlyphOrder()
@@ -689,8 +706,7 @@ class CFFFontData:
 
     def convertToBez(self, glyphName, read_hints, round_coords, doAll=False):
         t2Wdth = None
-        gid = self.charStrings.charStrings[glyphName]
-        t2CharString = self.charStringIndex[gid]
+        t2CharString = self.charStrings[glyphName]
         try:
             bezString, t2Wdth = convertT2GlyphToBez(t2CharString, read_hints,
                                                     round_coords)
@@ -705,27 +721,36 @@ class CFFFontData:
 
     def updateFromBez(self, bezData, glyphName, width):
         t2Program = [width] + convertBezToT2(bezData)
-        gid = self.charStrings.charStrings[glyphName]
-        t2CharString = self.charStringIndex[gid]
+        t2CharString = self.charStrings[glyphName]
         t2CharString.program = t2Program
 
-    def save(self, out_path):
-        if out_path is None:
-            out_path = self.inputPath
+    def save(self, path):
+        if path is None:
+            path = self.inputPath
 
-        if self.is_otf:
-            self.ttFont.save(out_path)
+        if self.font_format == "OTF":
+            self.ttFont.save(path)
             self.ttFont.close()
         else:
             data = self.ttFont["CFF "].compile(self.ttFont)
-            with open(out_path, "wb") as tf:
-                tf.write(data)
+            if self.font_format == "CFF":
+                with open(path, "wb") as fp:
+                    fp.write(data)
+            else:
+                fd, temp_path = tempfile.mkstemp()
+                os.write(fd, data)
+                os.close(fd)
+
+                try:
+                    args = ["-t1", "-std"]
+                    if self.font_format == "PFB":
+                        args.append("-pfb")
+                    _run_tx(args + [temp_path, path])
+                finally:
+                    os.remove(temp_path)
 
     def close(self):
         self.ttFont.close()
-
-    def getGlyphID(self, name):
-        return self.ttFont.getGlyphID(name)
 
     def isCID(self):
         return hasattr(self.topDict, "FDSelect")
@@ -859,7 +884,8 @@ class CFFFontData:
 
         return fdDict
 
-    def getfdIndex(self, gid):
+    def getfdIndex(self, name):
+        gid = self.ttFont.getGlyphID(name)
         return self.topDict.FDSelect[gid]
 
     def getfdInfo(self, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs,
@@ -888,10 +914,14 @@ class CFFFontData:
             fdGlyphDict, fontDictList, finalFDict = fdTools.parseFontInfoFile(
                 fontDictList, fontInfoData, glyphList, maxY, minY,
                 self.getPSName())
+            if hasattr(topDict, "FDArray"):
+                private = topDict.FDArray[fdIndex].Private
+            else:
+                private = topDict.Private
             if finalFDict is None:
                 # If a font dict was not explicitly specified for the
                 # output font, use the first user-specified font dict.
-                fdTools.mergeFDDicts(fontDictList[1:], topDict.Private)
+                fdTools.mergeFDDicts(fontDictList[1:], private)
             else:
-                fdTools.mergeFDDicts([finalFDict], topDict.Private)
+                fdTools.mergeFDDicts([finalFDict], private)
         return fdGlyphDict, fontDictList

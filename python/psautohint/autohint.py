@@ -196,12 +196,8 @@ def openFile(path, options):
 
     if font_format == "UFO":
         font = UFOFontData(path, options.logOnly, options.writeToDefaultLayer)
-    elif font_format in ("OTF", "CFF"):
-        is_otf = font_format == "OTF"
-        font = CFFFontData(path, is_otf)
     else:
-        raise NotImplementedError("%s format is not supported yet, sorry." %
-                                  font_format)
+        font = CFFFontData(path, font_format)
 
     return font
 
@@ -313,9 +309,8 @@ def hintFile(options, path, outpath, reference_master):
 
         # get new fontinfo string if FDarray index has changed,
         # as each FontDict has different alignment zones.
-        gid = fontData.getGlyphID(name)
         if isCID:
-            fdIndex = fontData.getfdIndex(gid)
+            fdIndex = fontData.getfdIndex(name)
             if not fdIndex == lastFDIndex:
                 lastFDIndex = fdIndex
                 fdDict = fontData.getFontInfo(options.allow_no_blues,

@@ -10,7 +10,7 @@ environment:
     - PYTHON: "C:\\Python27"
       PYTHON_VERSION: "2.7"
       PYTHON_ARCH: "32"
-      TOXENV: "py27-cov"
+      TOXENV: "py27-cov-tx"
       TOXPYTHON: "C:\\Python27\\python.exe"
 
     # - PYTHON: "C:\\Python36"

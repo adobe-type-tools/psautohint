@@ -6,7 +6,12 @@
 function pre_build {
     # Any stuff that you need to do before you start building the wheels
     # Runs in the root directory of this repository.
-    :
+
+    # Travis only clones the latest 50 commits. We need the full repository
+    # to compute the version string from the git metadata:
+    # https://github.com/travis-ci/travis-ci/issues/3412#issuecomment-83993903
+    # https://github.com/pypa/setuptools_scm/issues/93
+    git fetch --unshallow
 }
 
 function run_tests {
@@ -24,6 +29,11 @@ function run_tests {
     # select tox environment based on the current python version
     # E.g.: '2.7' -> 'py27-cov'
     TOXENV="py${MB_PYTHON_VERSION//\./}-cov"
+    # append the "-tx" tox factor to run the tests with afdko, but only
+    # for python 2.7 (at least for the time being)
+    if [ "$MB_PYTHON_VERSION" == "2.7" ]; then
+        TOXENV="$TOXENV-tx"
+    fi
 
     # Install pre-compiled wheel and run tests against it
     tox --installpkg "${wheel}" -e "${TOXENV}"
