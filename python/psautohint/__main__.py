@@ -710,12 +710,5 @@ def main(args=None):
         raise
 
 
-def autohintexe(args=None):
-    if args is None:
-        args = sys.argv[1:]
-
-    return subprocess.call([AUTOHINTEXE] + args)
-
-
 if __name__ == '__main__':
     sys.exit(main())

@@ -629,7 +629,6 @@ setup(name="psautohint",
       entry_points={
           'console_scripts': [
               "psautohint = psautohint.__main__:main",
-              "autohintexe = psautohint.__main__:autohintexe",
           ],
       },
       setup_requires=["setuptools_scm"],
