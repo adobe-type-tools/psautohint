@@ -6,7 +6,7 @@ import subprocess
 import pytest
 
 from psautohint import FontParseError
-from psautohint.__main__ import main as psautohint, autohintexe
+from psautohint.__main__ import main as psautohint
 
 from . import make_temp_copy, DATA_DIR
 
@@ -261,8 +261,3 @@ def test_invalid_save_path(tmpdir):
     out = str(tmpdir / basename(path) / "foo") + ".out"
     with pytest.raises(SystemExit):
         autohint([path, '-o', out])
-
-
-def test_autohintexe():
-    assert autohintexe([]) == 3
-    assert autohintexe(["-h"]) == 0
