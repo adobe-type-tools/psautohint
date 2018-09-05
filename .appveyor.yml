@@ -10,7 +10,7 @@ environment:
     - PYTHON: "C:\\Python27"
       PYTHON_VERSION: "2.7"
       PYTHON_ARCH: "32"
-      TOXENV: "py27-cov"
+      TOXENV: "py27-cov-tx"
       TOXPYTHON: "C:\\Python27\\python.exe"
 
     # - PYTHON: "C:\\Python36"
@@ -75,13 +75,6 @@ install:
 
   # install tox
   - python -m pip install -r dev-requirements.txt
-
-  # Install AFDKO for tx. 2.7 is arbitrary, we just want it for one of the
-  # matrices.
-  - ps: >-
-      if($env:PYTHON_VERSION -eq '2.7') {
-        pip install --pre afdko
-      }
 
   # build psautohint wheel
   - tox -e wheel
