@@ -246,7 +246,7 @@ main(int argc, char* argv[])
     bool allowEdit, roundCoords, allowHintSub, badParam, allStems;
     bool argumentIsBezData = false;
     bool doMM = false;
-    bool report = false;
+    bool report_zones = false, report_stems = false;
     char* fontInfoFileName = NULL; /* font info file name, or suffix of
                                       environment variable holding
                                       the fontfino string. */
@@ -365,14 +365,10 @@ main(int argc, char* argv[])
                 fileSuffix = (char*)reportExt;
                 switch (current_arg[2]) {
                     case 'a':
-                        AC_SetReportRetryCB(reportRetry);
-                        AC_SetReportZonesCB(charZoneCB, stemZoneCB);
-                        report = true;
+                        report_zones = true;
                         break;
                     case 's':
-                        AC_SetReportRetryCB(reportRetry);
-                        AC_SetReportStemsCB(hstemCB, vstemCB, allStems);
-                        report = true;
+                        report_stems = true;
                         break;
                     default:
                         fprintf(stdout, "Error. %s is an invalid parameter.\n",
@@ -390,6 +386,16 @@ main(int argc, char* argv[])
                 badParam = true;
                 break;
         }
+    }
+
+    if (report_zones) {
+        AC_SetReportRetryCB(reportRetry);
+        AC_SetReportZonesCB(charZoneCB, stemZoneCB);
+    }
+
+    if (report_stems) {
+        AC_SetReportRetryCB(reportRetry);
+        AC_SetReportStemsCB(hstemCB, vstemCB, allStems);
     }
 
     if (firstFileNameIndex == -1) {
@@ -422,7 +428,7 @@ main(int argc, char* argv[])
             outputsize = 4 * strlen(bezdata);
             output = malloc(outputsize);
 
-            if (!argumentIsBezData && report) {
+            if (!argumentIsBezData && (report_zones || report_stems)) {
                 openReportFile(bezName, fileSuffix);
             }
 
