@@ -252,7 +252,7 @@ ParseIntStems(const ACFontInfo* fontinfo, char* kw, bool optional,
         while (misspace(*line))
             line++; /* skip past any blanks */
 
-        if (sscanf(line, " %d", &val) == EOF)
+        if (sscanf(line, " %d", &val) < 1)
             break;
 
         if (count >= maxstems) {
