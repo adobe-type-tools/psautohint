@@ -402,8 +402,8 @@ void ListHintInfo(void);
 
 void InitAll(const ACFontInfo* fontinfo, int32_t reason);
 
-void AddVStem(Fixed top, Fixed bottom, bool curved);
-void AddHStem(Fixed right, Fixed left, bool curved);
+void AddVStem(Fixed right, Fixed left, bool curved);
+void AddHStem(Fixed top, Fixed bottom, bool curved);
 
 void AddGlyphExtremes(Fixed bot, Fixed top);
 

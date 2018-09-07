@@ -10,24 +10,24 @@
 #include "ac.h"
 
 void
-AddVStem(Fixed top, Fixed bottom, bool curved)
+AddVStem(Fixed right, Fixed left, bool curved)
 {
     if (curved && !gAllStems)
         return;
 
     if (gAddVStemCB != NULL) {
-        gAddVStemCB(top, bottom, gGlyphName);
+        gAddVStemCB(right, left, gGlyphName);
     }
 }
 
 void
-AddHStem(Fixed right, Fixed left, bool curved)
+AddHStem(Fixed top, Fixed bottom, bool curved)
 {
     if (curved && !gAllStems)
         return;
 
     if (gAddHStemCB != NULL) {
-        gAddHStemCB(right, left, gGlyphName);
+        gAddHStemCB(top, bottom, gGlyphName);
     }
 }
 
