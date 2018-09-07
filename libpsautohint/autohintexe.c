@@ -154,8 +154,9 @@ getFileData(char* name)
 
     struct stat filestat;
     if ((stat(name, &filestat)) < 0) {
-        fprintf(stdout, "Error. Could not open file '%s'. Please check "
-                        "that it exists and is not write-protected.\n",
+        fprintf(stdout,
+                "Error. Could not open file '%s'. Please check "
+                "that it exists and is not write-protected.\n",
                 name);
         exit(AC_FatalError);
     }
@@ -175,8 +176,9 @@ getFileData(char* name)
         size_t fileSize = 0;
         FILE* fp = fopen(name, "r");
         if (fp == NULL) {
-            fprintf(stdout, "Error. Could not open file '%s'. Please check "
-                            "that it exists and is not write-protected.\n",
+            fprintf(stdout,
+                    "Error. Could not open file '%s'. Please check "
+                    "that it exists and is not write-protected.\n",
                     name);
             exit(AC_FatalError);
         }
@@ -396,9 +398,8 @@ main(int argc, char* argv[])
         badParam = true;
     }
     if (fontinfo == NULL) {
-        fprintf(
-          stdout,
-          "Error. Illegal command line. Must provide font info.\n");
+        fprintf(stdout,
+                "Error. Illegal command line. Must provide font info.\n");
         badParam = true;
     }
 
@@ -407,8 +408,7 @@ main(int argc, char* argv[])
 
     AC_SetReportCB(reportCB);
     argi = firstFileNameIndex - 1;
-    if (!doMM)
-    {
+    if (!doMM) {
         while (++argi < argc) {
             char* bezdata;
             char* output;
@@ -427,7 +427,7 @@ main(int argc, char* argv[])
             }
 
             result = AutoHintString(bezdata, fontinfo, &output, &outputsize,
-                                     allowEdit, allowHintSub, roundCoords);
+                                    allowEdit, allowHintSub, roundCoords);
 
             if (reportFile != NULL) {
                 closeReportFile();
@@ -445,46 +445,46 @@ main(int argc, char* argv[])
             if (result != AC_Success)
                 exit(result);
         }
-    }
-    else /* assume files are MM bez files */
+    } else /* assume files are MM bez files */
     {
         /** MM support */
-        char** masters; /* master names - here, harwired to 001 - <num files>-1 */
-        char** inGlyphs; /* Input bez data */
-        char** outGlyphs;/* output bez data */
+        char**
+          masters; /* master names - here, harwired to 001 - <num files>-1 */
+        char** inGlyphs;     /* Input bez data */
+        char** outGlyphs;    /* output bez data */
         size_t* outputSizes; /* size of output data */
         int i;
 
-        masters = malloc(sizeof(char*)*total_files);
-        outputSizes = malloc(sizeof(size_t)*total_files);
-        inGlyphs = malloc(sizeof(char*)*total_files);
-        outGlyphs = malloc(sizeof(char*)*total_files);
+        masters = malloc(sizeof(char*) * total_files);
+        outputSizes = malloc(sizeof(size_t) * total_files);
+        inGlyphs = malloc(sizeof(char*) * total_files);
+        outGlyphs = malloc(sizeof(char*) * total_files);
 
-        argi = firstFileNameIndex -1;
-        for (i = 0; i < total_files; i++)
-        {
+        argi = firstFileNameIndex - 1;
+        for (i = 0; i < total_files; i++) {
             argi++;
             bezName = argv[argi];
             masters[i] = malloc(strlen(bezName) + 1);
-            strcpy(masters[i],bezName);
+            strcpy(masters[i], bezName);
             inGlyphs[i] = getFileData(bezName);
             outputSizes[i] = 4 * strlen(inGlyphs[i]);
             outGlyphs[i] = malloc(outputSizes[i]);
         }
 
-        result = AutoHintString(inGlyphs[0], fontinfo, &outGlyphs[0], &outputSizes[0],
-                                 allowEdit, allowHintSub, roundCoords);
+        result =
+          AutoHintString(inGlyphs[0], fontinfo, &outGlyphs[0], &outputSizes[0],
+                         allowEdit, allowHintSub, roundCoords);
         if (result != AC_Success)
             exit(result);
 
         free(inGlyphs[0]);
-        inGlyphs[0] = malloc(sizeof(char*)*outputSizes[0]);
-        strcpy(inGlyphs[0],outGlyphs[0] );
-        result = AutoHintStringMM((const char **)inGlyphs, fontinfo,
-                                   total_files, (const char **)masters, outGlyphs, outputSizes);
+        inGlyphs[0] = malloc(sizeof(char*) * outputSizes[0]);
+        strcpy(inGlyphs[0], outGlyphs[0]);
+        result =
+          AutoHintStringMM((const char**)inGlyphs, fontinfo, total_files,
+                           (const char**)masters, outGlyphs, outputSizes);
 
-        for (i = 0; i < total_files; i++)
-        {
+        for (i = 0; i < total_files; i++) {
             writeFileData(masters[i], outGlyphs[i], "new");
             free(masters[i]);
             free(inGlyphs[i]);
@@ -496,7 +496,6 @@ main(int argc, char* argv[])
         free(outputSizes);
         if (result != AC_Success)
             exit(result);
-
     }
 
     return 0;
