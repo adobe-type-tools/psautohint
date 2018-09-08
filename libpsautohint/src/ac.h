@@ -49,7 +49,7 @@
 
 /* glyph point coordinates */
 typedef struct {
-   int32_t x, y;
+   Fixed x, y;
    } Cd;
 
 typedef struct {
