@@ -1,6 +1,5 @@
 import io
 import os
-import sys
 
 from distutils import log
 from setuptools import setup, Extension, Command
@@ -25,19 +24,6 @@ class CustomBuildExt(_build_ext):
         if self.distribution.has_c_libraries():
             self.run_command("build_clib")
         _build_ext.run(self)
-
-    def build_extension(self, ext):
-        compiler_type = self.compiler.compiler_type
-
-        if compiler_type == "unix":
-            if ext.extra_compile_args is None:
-                ext.extra_compile_args = []
-            # fixes segmentation fault when python (and thus the extension
-            # module) is compiled with -O3 and tree vectorize:
-            # https://github.com/khaledhosny/psautohint/issues/16
-            ext.extra_compile_args.append("-fno-tree-vectorize")
-
-        _build_ext.build_extension(self, ext)
 
 
 class Executable(Extension):
@@ -558,6 +544,12 @@ libraries = [
             "macros": [
                 ("AC_C_LIB_EXPORTS", None),
             ],
+            "cflags": [
+                # fixes segmentation fault when python (and thus the extension
+                # module) is compiled with -O3 and tree vectorize:
+                # https://github.com/khaledhosny/psautohint/issues/16
+                "-fno-tree-vectorize",
+            ] if os.name != "nt" else [],
         }
     ),
 ]
@@ -596,7 +588,7 @@ executables = [
         # when running gcc with --coverage):
         # https://travis-ci.org/adobe-type-tools/psautohint/jobs/423944212#L581
         # It should be ok if '-lpsautohint' is mentioned twice.
-        libraries=["psautohint"] + (["m"] if sys.platform != "win32" else []),
+        libraries=["psautohint"] + (["m"] if os.name != "nt" else []),
     ),
 ]
 
