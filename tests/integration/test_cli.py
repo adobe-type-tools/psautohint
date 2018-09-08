@@ -165,7 +165,7 @@ def test_missing_glyph_list(glyphs, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
     with pytest.raises(FontParseError):
-        autohint([path, '-o', out, '-g', glyphs])
+        autohint([path, '--traceback', '-o', out, '-g', glyphs])
 
 
 @pytest.mark.parametrize("path", ["%s/dummy/fontinfo" % DATA_DIR, DATA_DIR])
@@ -174,12 +174,16 @@ def test_unsupported_format(path):
         autohint([path])
 
 
-def test_missing_cff_table(tmpdir):
+@pytest.mark.parametrize("option,exception", [
+    ([], SystemExit),
+    (['--traceback'], FontParseError),
+])
+def test_missing_cff_table(option, exception, tmpdir):
     path = "%s/dummy/nocff.otf" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    with pytest.raises(FontParseError):
-        autohint([path, '-o', out])
+    with pytest.raises(exception):
+        autohint([path, '-o', out] + option)
 
 
 @pytest.mark.parametrize("option,argument", [
