@@ -14,9 +14,6 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
 {
 /* Like FFltnCurve, but assumes abs(deltas) <= 127 pixels */
 /* 8 bits of fraction gives enough precision for splitting curves */
-#define MFix(f) (f)
-#define UnMFix(f) (f)
-#define MFixInt(f) ((f) << 8)
 #define MiniFltnMaxDepth (6)
 #define inrect (p[-10])
 #define inbbox (p[-9])
@@ -39,10 +36,10 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
 #define d3x (p[8])
 #define d3y (p[9])
 #define MiniBlkSz (10)
-#define mdpt(a, b) (((int32_t)(a) + (int32_t)(b)) >> 1)
-    int32_t cds[MiniBlkSz * MiniFltnMaxDepth], dpth, eps;
-    int32_t bbLLX = 0, bbLLY = 0, bbURX = 0, bbURY = 0;
-    int32_t* p;
+#define mdpt(a, b) (((a) + (b)) >> 1)
+    Fixed cds[MiniBlkSz * MiniFltnMaxDepth], dpth, eps;
+    Fixed bbLLX = 0, bbLLY = 0, bbURX = 0, bbURY = 0;
+    Fixed* p;
     p = cds;
     dpth = 1;
     *(p++) = true; /* inrect2 starts out true */
@@ -78,28 +75,28 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
         Fixed llx, lly;
         llx = pfr->llx;
         lly = pfr->lly;
-        *(p++) = (int32_t)MFix(f0.x - llx);
-        *(p++) = (int32_t)MFix(f0.y - lly);
-        *(p++) = (int32_t)MFix(f1.x - llx);
-        *(p++) = (int32_t)MFix(f1.y - lly);
-        *(p++) = (int32_t)MFix(f2.x - llx);
-        *(p++) = (int32_t)MFix(f2.y - lly);
-        *(p++) = (int32_t)MFix(f3.x - llx);
-        *(p++) = (int32_t)MFix(f3.y - lly);
+        *(p++) = f0.x - llx;
+        *(p++) = f0.y - lly;
+        *(p++) = f1.x - llx;
+        *(p++) = f1.y - lly;
+        *(p++) = f2.x - llx;
+        *(p++) = f2.y - lly;
+        *(p++) = f3.x - llx;
+        *(p++) = f3.y - lly;
     }
     if (!inrect) {
         Fixed c, f128;
-        c = (int32_t)pfr->ll.x;
-        bbLLX = (c <= 0) ? 0 : (int32_t)MFix(c);
-        c = (int32_t)pfr->ll.y;
-        bbLLY = (c <= 0) ? 0 : (int32_t)MFix(c);
+        c = pfr->ll.x;
+        bbLLX = (c <= 0) ? 0 : c;
+        c = pfr->ll.y;
+        bbLLY = (c <= 0) ? 0 : c;
         f128 = FixInt(128);
-        c = (int32_t)pfr->ur.x;
-        bbURX = (c >= f128) ? 0x7fff : (int32_t)MFix(c);
-        c = (int32_t)pfr->ur.y;
-        bbURY = (c >= f128) ? 0x7fff : (int32_t)MFix(c);
+        c = pfr->ur.x;
+        bbURX = (c >= f128) ? 0x7fff : c;
+        c = pfr->ur.y;
+        bbURY = (c >= f128) ? 0x7fff : c;
     }
-    eps = (int32_t)MFix(pfr->feps);
+    eps = pfr->feps;
     //      if (eps < 8)
     //          eps = 8;  /* Brotz patch */
     if (eps < 16) /* DEBUG 8 BIT FIX */
@@ -110,7 +107,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
         if (dpth == MiniFltnMaxDepth)
             goto ReportC3;
         if (!inrect) {
-            int32_t llx, lly, urx, ury, c;
+            Fixed llx, lly, urx, ury, c;
             llx = urx = c0x;
             if ((c = c1x) < llx)
                 llx = c;
@@ -156,7 +153,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
                 ur = r0 + mrgn;
             }
             if (ur < 0)
-                ur = MFixInt(128) - 1;
+                ur = FixInt(128) - 1;
             c = c1x;
             if (c > ll && c < ur) {
                 c = c2x;
@@ -171,7 +168,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
                         ur = r0 + mrgn;
                     }
                     if (ur < 0)
-                        ur = MFixInt(128) - 1;
+                        ur = FixInt(128) - 1;
                     c = c1y;
                     if (c > ll && c < ur) {
                         c = c2y;
@@ -182,7 +179,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
             }
         }
         if (inbbox) {
-            int32_t eqa, eqb, x, y;
+            Fixed eqa, eqb, x, y;
             Fixed EPS, d;
             x = c0x;
             y = c0y;
@@ -190,39 +187,38 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
             eqb = x - c3x;
             if (eqa == 0 && eqb == 0)
                 goto ReportC3;
-            EPS = ((abs(eqa) > abs(eqb)) ? (int32_t)eqa : (int32_t)eqb) *
-                  (int32_t)eps;
+            EPS = ((abs(eqa) > abs(eqb)) ? eqa : eqb) * eps;
             if (EPS < 0)
                 EPS = -EPS;
-            d = (int32_t)eqa * (int32_t)(c1x - x);
-            d += (int32_t)eqb * (int32_t)(c1y - y);
+            d = eqa * (c1x - x);
+            d += eqb * (c1y - y);
             if (abs(d) < EPS) {
-                d = (int32_t)eqa * (int32_t)(c2x - x);
-                d += (int32_t)eqb * (int32_t)(c2y - y);
+                d = eqa * (c2x - x);
+                d += eqb * (c2y - y);
                 if (abs(d) < EPS)
                     goto ReportC3;
             }
         }
         { /* Bezier divide */
-            int32_t c0, c1, c2, d1, d2, d3;
+            Fixed c0, c1, c2, d1, d2, d3;
             d0x = c0 = c0x;
             c1 = c1x;
             c2 = c2x;
-            d1x = d1 = (int32_t)mdpt(c0, c1);
-            d3 = (int32_t)mdpt(c1, c2);
-            d2x = d2 = (int32_t)mdpt(d1, d3);
-            c2x = c2 = (int32_t)mdpt(c2, c3x);
-            c1x = c1 = (int32_t)mdpt(d3, c2);
-            c0x = d3x = (int32_t)mdpt(d2, c1);
+            d1x = d1 = mdpt(c0, c1);
+            d3 = mdpt(c1, c2);
+            d2x = d2 = mdpt(d1, d3);
+            c2x = c2 = mdpt(c2, c3x);
+            c1x = c1 = mdpt(d3, c2);
+            c0x = d3x = mdpt(d2, c1);
             d0y = c0 = c0y;
             c1 = c1y;
             c2 = c2y;
-            d1y = d1 = (int32_t)mdpt(c0, c1);
-            d3 = (int32_t)mdpt(c1, c2);
-            d2y = d2 = (int32_t)mdpt(d1, d3);
-            c2y = c2 = (int32_t)mdpt(c2, c3y);
-            c1y = c1 = (int32_t)mdpt(d3, c2);
-            c0y = d3y = (int32_t)mdpt(d2, c1);
+            d1y = d1 = mdpt(c0, c1);
+            d3 = mdpt(c1, c2);
+            d2y = d2 = mdpt(d1, d3);
+            c2y = c2 = mdpt(c2, c3y);
+            c1y = c1 = mdpt(d3, c2);
+            c0y = d3y = mdpt(d2, c1);
             bbox2 = inbbox;
             inrect2 = inrect;
             p += MiniBlkSz;
@@ -234,8 +230,8 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
         if (--dpth == 0)
             c = f3;
         else {
-            c.x = UnMFix(c3x) + pfr->llx;
-            c.y = UnMFix(c3y) + pfr->lly;
+            c.x = c3x + pfr->llx;
+            c.y = c3y + pfr->lly;
         }
         (*pfr->report)(c); // call FPBBoxPt() to reset bbox.
         if (dpth == 0)
@@ -244,9 +240,6 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
     }
     }
 } /* end of FMiniFltn */
-#undef MFix
-#undef UnMFix
-#undef MFixInt
 #undef MiniFltnMaxDepth
 #undef inrect
 #undef inbbox
