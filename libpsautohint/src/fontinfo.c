@@ -44,10 +44,8 @@ GetKeyFixedValue(const ACFontInfo* fontinfo, char* keyword, bool optional,
                  Fixed* value)
 {
     char* fontinfostr = GetFontInfo(fontinfo, keyword, optional);
-    if (strlen(fontinfostr) != 0) {
-        float tempValue = strtod(fontinfostr, NULL);
-        *value = (Fixed)tempValue * (1 << FixShift);
-    }
+    if (strlen(fontinfostr) != 0)
+        *value = FixInt(strtod(fontinfostr, NULL));
 }
 
 bool
