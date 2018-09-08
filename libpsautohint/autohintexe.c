@@ -434,6 +434,8 @@ main(int argc, char* argv[])
 
             result = AutoHintString(bezdata, fontinfo, &output, &outputsize,
                                     allowEdit, allowHintSub, roundCoords);
+            if (!argumentIsBezData)
+                free(bezdata);
 
             if (reportFile != NULL) {
                 closeReportFile();
@@ -503,6 +505,9 @@ main(int argc, char* argv[])
         if (result != AC_Success)
             exit(result);
     }
+
+    if (fontInfoFileName)
+        free(fontinfo);
 
     return 0;
 }
