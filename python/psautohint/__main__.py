@@ -641,6 +641,11 @@ def get_options(args):
         action='version',
         version=__version__
     )
+    parser.add_argument(
+        '--traceback',
+        action='store_true',
+        help="show traceback for exceptions.",
+    )
     parsed_args = parser.parse_args(args)
 
     if parsed_args.verbose == 0:
@@ -697,17 +702,19 @@ def get_options(args):
     else:
         _parse_fontinfo_file(options, parsed_args.fontinfo_file)
 
-    return options
+    return options, parsed_args
 
 
 def main(args=None):
-    options = get_options(args)
+    options, pargs = get_options(args)
 
     try:
         hintFiles(options)
-    except Exception:
-        logging.exception("Unhandled exception occurred")
-        raise
+    except Exception as ex:
+        if pargs.traceback:
+            raise
+        logging.error(ex)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
