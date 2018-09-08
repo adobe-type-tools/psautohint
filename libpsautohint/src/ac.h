@@ -236,8 +236,8 @@ extern char gGlyphName[MAX_GLYPHNAME_LEN];
 #define FixedPosInf INT32_MAX
 #define FixedNegInf INT32_MIN
 #define FixShift (8)
-#define FixInt(i) (((int32_t)(i)) << FixShift)
-#define FixReal(i) ((int32_t)((i) *256.0))
+#define FixInt(i) (((int32_t)(i)) * (1 << FixShift))
+#define FixReal(i) ((int32_t)((i) * (float)(1 << FixShift)))
 int32_t FRnd(int32_t x);
 #define FHalfRnd(x) ((int32_t)(((x)+(1<<7)) & ~0xFF))
 #define FracPart(x) ((int32_t)(x) & 0xFF)
