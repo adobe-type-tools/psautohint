@@ -233,21 +233,21 @@ extern char gGlyphName[MAX_GLYPHNAME_LEN];
 
 /* macros */
 
-#define FixedPosInf INT32_MAX
-#define FixedNegInf INT32_MIN
-#define FixShift (8)
-#define FixInt(i) (((int32_t)(i)) * (1 << FixShift))
-#define FixReal(i) ((int32_t)((i) * (float)(1 << FixShift)))
-int32_t FRnd(int32_t x);
-#define FHalfRnd(x) ((int32_t)(((x)+(1<<7)) & ~0xFF))
-#define FracPart(x) ((int32_t)(x) & 0xFF)
-#define FTrunc(x) (((int32_t)(x))>>FixShift)
-#define FIXED2FLOAT(x) (x/256.0)
-
 #define FixOne (0x100)
 #define FixTwo (0x200)
 #define FixHalf (0x80)
 #define FixQuarter (0x40)
+
+#define FixedPosInf INT32_MAX
+#define FixedNegInf INT32_MIN
+#define FixInt(i) (((int32_t)(i)) * FixOne)
+#define FixReal(i) ((int32_t)((i) * (float)FixOne))
+int32_t FRnd(int32_t x);
+#define FHalfRnd(x) ((int32_t)(((x)+(1<<7)) & ~0xFF))
+#define FracPart(x) ((int32_t)(x) & 0xFF)
+#define FTrunc(x) (((int32_t)(x)) / FixOne)
+#define FIXED2FLOAT(x) (x / (float)FixOne)
+
 #define FixHalfMul(f) (2*((f) >> 2)) /* DEBUG 8 BIT. Revert this to ((f) >>1) once I am confident that there are not bugs from the update to 8 bits for the Fixed fraction. */
 #define FixTwoMul(f) ((f) << 1)
 #define PSDist(d) ((FixInt(d)))
