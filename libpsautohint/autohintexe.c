@@ -489,7 +489,7 @@ main(int argc, char* argv[])
         inGlyphs[0] = malloc(sizeof(char*) * outputSizes[0]);
         strcpy(inGlyphs[0], outGlyphs[0]);
         result =
-          AutoHintStringMM((const char**)inGlyphs, fontinfo, total_files,
+          AutoHintStringMM((const char**)inGlyphs, total_files,
                            (const char**)masters, outGlyphs, outputSizes);
 
         for (i = 0; i < total_files; i++) {

@@ -42,8 +42,8 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
     Fixed* p;
     p = cds;
     dpth = 1;
-    *(p++) = true; /* inrect2 starts out true */
-    *(p++) = false;  /* inbbox2 starts out false */
+    *(p++) = true;  /* inrect2 starts out true */
+    *(p++) = false; /* inbbox2 starts out false */
     /* shift coordinates so that lower left of BBox is at (0,0)*/
     /* This  fills the first  MiniBlkSz series of ints with the start point,
     control point, end end point
