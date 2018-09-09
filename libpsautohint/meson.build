@@ -6,6 +6,20 @@ cc = meson.get_compiler('c')
 version_h = vcs_tag(input : 'src/version.h.in', output : 'version.h')
 libm = cc.find_library('m', required : false)
 
+
+
+cflags = [
+  '-Wdeclaration-after-statement',
+  '-Wextra',
+  '-Wmissing-prototypes',
+  '-Wpedantic',
+  '-Wstrict-prototypes',
+  '-Wunused-macros',
+  '-Werror',
+]
+
+add_global_arguments(cc.get_supported_arguments(cflags), language : 'c')
+
 libpsautohint = library(
   'psautohint',
   'include/psautohint.h',
