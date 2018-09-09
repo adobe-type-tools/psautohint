@@ -11,9 +11,13 @@ libm = cc.find_library('m', required : false)
 cflags = [
   '-Wdeclaration-after-statement',
   '-Wextra',
+  '-Wimplicit-fallthrough',
   '-Wmissing-prototypes',
+  '-Wmissing-variable-declarations',
   '-Wpedantic',
   '-Wstrict-prototypes',
+  '-Wstringop-truncation',
+  '-Wunreachable-code-break',
   '-Wunused-macros',
   '-Werror',
 ]
