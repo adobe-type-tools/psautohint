@@ -10,15 +10,15 @@
 #include "ac.h"
 #include "bbox.h"
 
-static void DoHStems(const ACFontInfo* fontinfo, HintVal* sLst1);
+static void DoHStems(HintVal* sLst1);
 static void DoVStems(HintVal* sLst);
 
 static bool CounterFailed;
 
 void
-InitAll(const ACFontInfo* fontinfo, int32_t reason)
+InitAll(int32_t reason)
 {
-    InitData(fontinfo, reason); /* must be first */
+    InitData(reason); /* must be first */
     InitFix(reason);
     InitGen(reason);
     InitPick(reason);
@@ -372,7 +372,7 @@ XtraHints(PathElt* e)
 }
 
 static void
-Blues(const ACFontInfo* fontinfo)
+Blues(void)
 {
     Fixed pv = 0, pd = 0, pc = 0, pb = 0, pa = 0;
     HintVal* sLst;
@@ -564,8 +564,8 @@ Blues(const ACFontInfo* fontinfo)
     LogMsg(LOGDEBUG, OK, "pick best");
     MarkLinks(gValList, true);
     CheckVals(gValList, false);
-    DoHStems(fontinfo, gValList); /* Report stems and alignment zones, if this
-                                    has been requested. */
+    DoHStems(gValList);  /* Report stems and alignment zones, if this
+                                     has been requested. */
     PickHVals(gValList); /* Moves best HintVal items from valList to Hhinting
                            list. (? Choose from set of HintVals for the samte
                            stem values.) */
@@ -606,7 +606,7 @@ Blues(const ACFontInfo* fontinfo)
 }
 
 static void
-DoHStems(const ACFontInfo* fontinfo, HintVal* sLst1)
+DoHStems(HintVal* sLst1)
 {
     Fixed glyphTop = INT32_MIN, glyphBot = INT32_MAX;
     bool curved;
@@ -788,15 +788,14 @@ AddHintsSetup(void)
 /* If extrahint is true then it is ok to have multi-level
  hinting. */
 static void
-AddHintsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
-                  bool extrahint)
+AddHintsInnerLoop(const char* srcglyph, bool extrahint)
 {
     int32_t retryHinting = 0;
     while (true) {
         PreGenPts();
         CheckSmooth();
         InitShuffleSubpaths();
-        Blues(fontinfo);
+        Blues();
         if (!gDoAligns) {
             Yellows();
         }
@@ -835,8 +834,8 @@ AddHintsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
 
         /* SaveFile(); SaveFile is always called in AddHintsCleanup, so this is
          * a duplciate */
-        InitAll(fontinfo, RESTART);
-        if (gWriteHintedBez && !ReadGlyph(fontinfo, srcglyph, false, false)) {
+        InitAll(RESTART);
+        if (gWriteHintedBez && !ReadGlyph(srcglyph, false, false)) {
             break;
         }
         AddHintsSetup();
@@ -851,7 +850,7 @@ AddHintsInnerLoop(const ACFontInfo* fontinfo, const char* srcglyph,
 }
 
 static void
-AddHintsCleanup(const ACFontInfo* fontinfo)
+AddHintsCleanup(void)
 {
     RemoveRedundantFirstHints();
     if (gWriteHintedBez) {
@@ -860,18 +859,18 @@ AddHintsCleanup(const ACFontInfo* fontinfo)
             LogMsg(LOGERROR, NONFATALERROR,
                    "The glyph path vanished while adding hints.");
         } else {
-            SaveFile(fontinfo);
+            SaveFile();
         }
     }
-    InitAll(fontinfo, RESTART);
+    InitAll(RESTART);
 }
 
 static void
-AddHints(const ACFontInfo* fontinfo, const char* srcglyph, bool extrahint)
+AddHints(const char* srcglyph, bool extrahint)
 {
     if (gPathStart == NULL || gPathStart == gPathEnd) {
         LogMsg(INFO, OK, "No glyph path, so no hints.");
-        SaveFile(fontinfo); /* make sure it gets saved with no hinting */
+        SaveFile(); /* make sure it gets saved with no hinting */
         return;
     }
     CounterFailed = gBandError = false;
@@ -885,18 +884,18 @@ AddHints(const ACFontInfo* fontinfo, const char* srcglyph, bool extrahint)
         gHasFlex = false;
         AutoAddFlex();
     }
-    AddHintsInnerLoop(fontinfo, srcglyph, extrahint);
-    AddHintsCleanup(fontinfo);
+    AddHintsInnerLoop(srcglyph, extrahint);
+    AddHintsCleanup();
 }
 
 bool
-AutoHintGlyph(const ACFontInfo* fontinfo, const char* srcglyph, bool extrahint)
+AutoHintGlyph(const char* srcglyph, bool extrahint)
 {
     int32_t lentop = gLenTopBands, lenbot = gLenBotBands;
-    if (!ReadGlyph(fontinfo, srcglyph, false, false)) {
+    if (!ReadGlyph(srcglyph, false, false)) {
         LogMsg(LOGERROR, NONFATALERROR, "Cannot parse glyph.");
     }
-    AddHints(fontinfo, srcglyph, extrahint);
+    AddHints(srcglyph, extrahint);
     gLenTopBands = lentop;
     gLenBotBands = lenbot;
     return true;

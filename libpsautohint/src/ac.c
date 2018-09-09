@@ -62,7 +62,7 @@ Alloc(int32_t sz)
 }
 
 void
-InitData(const ACFontInfo* fontinfo, int32_t reason)
+InitData(int32_t reason)
 {
     float tmp;
 
@@ -128,10 +128,10 @@ InitData(const ACFontInfo* fontinfo, int32_t reason)
 
 /* Returns whether hinting was successful. */
 bool
-AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata,
-         bool extrahint, bool changeGlyph, bool roundCoords)
+AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata, bool extrahint,
+         bool changeGlyph, bool roundCoords)
 {
-    InitAll(fontinfo, STARTUP);
+    InitAll(STARTUP);
 
     if (!ReadFontInfo(fontinfo))
         return false;
@@ -140,7 +140,7 @@ AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata,
     gRoundToInt = roundCoords;
     gAutoLinearCurveFix = gEditGlyph;
 
-    return AutoHintGlyph(fontinfo, srcbezdata, extrahint);
+    return AutoHintGlyph(srcbezdata, extrahint);
 }
 
 #if defined(_MSC_VER) && _MSC_VER < 1800

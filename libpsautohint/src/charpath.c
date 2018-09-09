@@ -430,7 +430,7 @@ CheckForZeroLengthCP(void)
  number of points and in the same path order.  If this isn't the
  case the glyph is not included in the font. */
 static bool
-CompareGlyphPaths(const ACFontInfo* fontinfo, const char** glyphs)
+CompareGlyphPaths(const char** glyphs)
 {
     indx mIx, ix, i;
     int32_t totalPathElt, minPathLen;
@@ -450,11 +450,11 @@ CompareGlyphPaths(const ACFontInfo* fontinfo, const char** glyphs)
 
         if (hintsMasterIx == mIx) {
             /* read char data and hints from bez file */
-            if (!ReadGlyph(fontinfo, glyphs[mIx], true, gAddHints))
+            if (!ReadGlyph(glyphs[mIx], true, gAddHints))
                 return false;
         } else {
             /* read char data only */
-            if (!ReadGlyph(fontinfo, glyphs[mIx], true, false))
+            if (!ReadGlyph(glyphs[mIx], true, false))
                 return false;
         }
 
@@ -1975,9 +1975,8 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
  *************/
 
 bool
-MergeGlyphPaths(const ACFontInfo* fontinfo, const char** srcglyphs,
-                int nmasters, const char** masters, char** outbuffers,
-                size_t* outlengths)
+MergeGlyphPaths(const char** srcglyphs, int nmasters, const char** masters,
+                char** outbuffers, size_t* outlengths)
 {
     bool ok;
     /* This requires that  master  hintsMasterIx has already been hinted with
@@ -1985,7 +1984,7 @@ MergeGlyphPaths(const ACFontInfo* fontinfo, const char** srcglyphs,
     masterCount = nmasters;
     masterNames = masters;
 
-    ok = CompareGlyphPaths(fontinfo, srcglyphs);
+    ok = CompareGlyphPaths(srcglyphs);
     if (ok) {
         CheckForZeroLengthCP();
         SetSbandWidth();

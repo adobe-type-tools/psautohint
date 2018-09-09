@@ -151,7 +151,7 @@ NewBest(HintPoint* lst)
 }
 
 static void
-WriteOne(const ACFontInfo* fontinfo, Fixed s)
+WriteOne(Fixed s)
 { /* write s to output file */
     if (FracPart(s) == 0) {
         SWRTNUM(FTrunc(s))
@@ -162,19 +162,19 @@ WriteOne(const ACFontInfo* fontinfo, Fixed s)
 }
 
 static void
-WritePointItem(const ACFontInfo* fontinfo, HintPoint* lst)
+WritePointItem(HintPoint* lst)
 {
     switch (lst->c) {
         case 'b':
         case 'v':
-            WriteOne(fontinfo, lst->y0);
-            WriteOne(fontinfo, lst->y1 - lst->y0);
+            WriteOne(lst->y0);
+            WriteOne(lst->y1 - lst->y0);
             sws(((lst->c == 'b') ? "rb" : "rv"));
             break;
         case 'y':
         case 'm':
-            WriteOne(fontinfo, lst->x0);
-            WriteOne(fontinfo, lst->x1 - lst->x0);
+            WriteOne(lst->x0);
+            WriteOne(lst->x1 - lst->x0);
             sws(((lst->c == 'y') ? "ry" : "rm"));
             break;
         default: {
@@ -188,7 +188,7 @@ WritePointItem(const ACFontInfo* fontinfo, HintPoint* lst)
 }
 
 static void
-WrtPntLst(const ACFontInfo* fontinfo, HintPoint* lst)
+WrtPntLst(HintPoint* lst)
 {
     HintPoint* ptLst;
     char ch;
@@ -237,18 +237,18 @@ WrtPntLst(const ACFontInfo* fontinfo, HintPoint* lst)
             lst = lst->next;
         }
         bst->done = true; /* mark as having been done */
-        WritePointItem(fontinfo, bst);
+        WritePointItem(bst);
     }
 }
 
 static void
-wrtnewhints(const ACFontInfo* fontinfo, PathElt* e)
+wrtnewhints(PathElt* e)
 {
     if (!wrtHintInfo) {
         return;
     }
     hintmaskstr[0] = '\0';
-    WrtPntLst(fontinfo, gPtLstArray[e->newhints]);
+    WrtPntLst(gPtLstArray[e->newhints]);
     if (strcmp(prevhintmaskstr, hintmaskstr)) {
         WriteString("beginsubr snc\n");
         WriteString(hintmaskstr);
@@ -272,20 +272,20 @@ IsFlex(PathElt* e)
 }
 
 static void
-mt(const ACFontInfo* fontinfo, Cd c, PathElt* e)
+mt(Cd c, PathElt* e)
 {
     if (e->newhints != 0) {
-        wrtnewhints(fontinfo, e);
+        wrtnewhints(e);
     }
     wrtcda(c);
     WriteString("mt\n");
 }
 
 static void
-dt(const ACFontInfo* fontinfo, Cd c, PathElt* e)
+dt(Cd c, PathElt* e)
 {
     if (e->newhints != 0) {
-        wrtnewhints(fontinfo, e);
+        wrtnewhints(e);
     }
     wrtcda(c);
     WriteString("dt\n");
@@ -377,10 +377,10 @@ wrtflex(Cd c1, Cd c2, Cd c3, PathElt* e)
 }
 
 static void
-ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PathElt* e)
+ct(Cd c1, Cd c2, Cd c3, PathElt* e)
 {
     if (e->newhints != 0) {
-        wrtnewhints(fontinfo, e);
+        wrtnewhints(e);
     }
     if (e->isFlex && IsFlex(e)) {
         wrtflex(c1, c2, c3, e);
@@ -393,10 +393,10 @@ ct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3, PathElt* e)
 }
 
 static void
-cp(const ACFontInfo* fontinfo, PathElt* e)
+cp(PathElt* e)
 {
     if (e->newhints != 0) {
-        wrtnewhints(fontinfo, e);
+        wrtnewhints(e);
     }
     WriteString("cp\n");
 }
@@ -415,7 +415,7 @@ NumberPath(void)
 }
 
 void
-SaveFile(const ACFontInfo* fontinfo)
+SaveFile(void)
 {
     PathElt* e = gPathStart;
     Cd c1, c2, c3;
@@ -428,7 +428,7 @@ SaveFile(const ACFontInfo* fontinfo)
     prevhintmaskstr[0] = '\0';
     if (wrtHintInfo && (!e->newhints)) {
         hintmaskstr[0] = '\0';
-        WrtPntLst(fontinfo, gPtLstArray[0]);
+        WrtPntLst(gPtLstArray[0]);
         WriteString(hintmaskstr);
         strcpy(prevhintmaskstr, hintmaskstr);
     }
@@ -445,20 +445,20 @@ SaveFile(const ACFontInfo* fontinfo)
                 c2.y = -e->y2;
                 c3.x = e->x3;
                 c3.y = -e->y3;
-                ct(fontinfo, c1, c2, c3, e);
+                ct(c1, c2, c3, e);
                 break;
             case LINETO:
                 c1.x = e->x;
                 c1.y = -e->y;
-                dt(fontinfo, c1, e);
+                dt(c1, e);
                 break;
             case MOVETO:
                 c1.x = e->x;
                 c1.y = -e->y;
-                mt(fontinfo, c1, e);
+                mt(c1, e);
                 break;
             case CLOSEPATH:
-                cp(fontinfo, e);
+                cp(e);
                 break;
             default: {
                 LogMsg(LOGERROR, NONFATALERROR, "Illegal path list.");

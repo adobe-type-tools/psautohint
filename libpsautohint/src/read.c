@@ -11,7 +11,6 @@
 
 #include "ac.h"
 #include "charpath.h"
-#include "fontinfo.h"
 #include "opcodes.h"
 
 char gGlyphName[MAX_GLYPHNAME_LEN];
@@ -80,7 +79,7 @@ AppendElement(int32_t etype)
 }
 
 static void
-RDcurveto(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
+RDcurveto(Cd c1, Cd c2, Cd c3)
 {
     if (!forMultiMaster) {
         PathElt* new;
@@ -114,7 +113,7 @@ RDcurveto(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
 }
 
 static void
-RDmtlt(const ACFontInfo* fontinfo, int32_t etype)
+RDmtlt(int32_t etype)
 {
     if (!forMultiMaster) {
         PathElt* new;
@@ -132,11 +131,11 @@ RDmtlt(const ACFontInfo* fontinfo, int32_t etype)
     }
 }
 
-#define RDlineto() RDmtlt(fontinfo, LINETO)
-#define RDmoveto() RDmtlt(fontinfo, MOVETO)
+#define RDlineto() RDmtlt(LINETO)
+#define RDmoveto() RDmtlt(MOVETO)
 
 static void
-psRMT(const ACFontInfo* fontinfo)
+psRMT(void)
 {
     Cd c;
     PopPCd(&c);
@@ -149,7 +148,7 @@ psRMT(const ACFontInfo* fontinfo)
 }
 
 static void
-Rct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
+Rct(Cd c1, Cd c2, Cd c3)
 {
     tempx = currentx;
     tempy = currenty;
@@ -162,7 +161,7 @@ Rct(const ACFontInfo* fontinfo, Cd c1, Cd c2, Cd c3)
     DoDelta(c3.x, c3.y);
     c3.x = currentx;
     c3.y = currenty;
-    RDcurveto(fontinfo, c1, c2, c3);
+    RDcurveto(c1, c2, c3);
 }
 
 static void
@@ -175,7 +174,7 @@ psCP(void)
 }
 
 static void
-psMT(const ACFontInfo* fontinfo)
+psMT(void)
 {
     Cd c;
     c.y = Pop();
@@ -188,7 +187,7 @@ psMT(const ACFontInfo* fontinfo)
 }
 
 static void
-psDT(const ACFontInfo* fontinfo)
+psDT(void)
 {
     Cd c;
     c.y = Pop();
@@ -201,7 +200,7 @@ psDT(const ACFontInfo* fontinfo)
 }
 
 static void
-psCT(const ACFontInfo* fontinfo)
+psCT(void)
 {
     Cd c1, c2, c3;
     tempx = currentx;
@@ -209,11 +208,11 @@ psCT(const ACFontInfo* fontinfo)
     PopPCd(&c3);
     PopPCd(&c2);
     PopPCd(&c1);
-    RDcurveto(fontinfo, c1, c2, c3);
+    RDcurveto(c1, c2, c3);
 }
 
 static void
-psFLX(const ACFontInfo* fontinfo)
+psFLX(void)
 {
     Cd c0, c1, c2, c3, c4, c5;
     int32_t i;
@@ -225,8 +224,8 @@ psFLX(const ACFontInfo* fontinfo)
     PopPCd(&c2);
     PopPCd(&c1);
     PopPCd(&c0);
-    Rct(fontinfo, c0, c1, c2);
-    Rct(fontinfo, c3, c4, c5);
+    Rct(c0, c1, c2);
+    Rct(c3, c4, c5);
     flex = false;
 }
 
@@ -266,7 +265,7 @@ isPrefix(const char* s, const char* pref)
 }
 
 static void
-DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
+DoName(const char* nm, const char* buff, int len)
 {
     switch (len) {
         case 2:
@@ -274,7 +273,7 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                 case 'c': /* ct, cp */
                     switch (nm[1]) {
                         case 't':
-                            psCT(fontinfo);
+                            psCT();
                             break;
                         case 'p':
                             psCP();
@@ -286,12 +285,12 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                 case 'm': /* mt */
                     if (nm[1] != 't')
                         goto badFile;
-                    psMT(fontinfo);
+                    psMT();
                     break;
                 case 'd': /* dt */
                     if (nm[1] != 't')
                         goto badFile;
-                    psDT(fontinfo);
+                    psDT();
                     break;
                 case 's': /* sc */
                     if (nm[1] != 'c')
@@ -317,7 +316,7 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                 case 'r': /* rmt */
                     if (nm[1] != 'm' || nm[2] != 't')
                         goto badFile;
-                    psRMT(fontinfo);
+                    psRMT();
                     break;
                 case 's': /* snc */
                 case 'e': /* enc */
@@ -332,7 +331,7 @@ DoName(const ACFontInfo* fontinfo, const char* nm, const char* buff, int len)
                     break;
                 case 'f': /* flx */
                     if (nm[1] == 'l' && nm[2] == 'x')
-                        psFLX(fontinfo);
+                        psFLX();
                     else
                         goto badFile;
                     break;
@@ -388,7 +387,7 @@ badFile : {
 }
 
 static void
-ParseString(const ACFontInfo* fontinfo, const char* s)
+ParseString(const char* s)
 {
     const char* s0;
     char c;
@@ -464,7 +463,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
                         if (c == 0)
                             break;
                     }
-                    DoName(fontinfo, s0, s, (int)(s - s0 - 1));
+                    DoName(s0, s, (int)(s - s0 - 1));
                     if (c == '\0')
                         s--;
                     continue;
@@ -506,8 +505,7 @@ ParseString(const ACFontInfo* fontinfo, const char* s)
 }
 
 bool
-ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph, bool forBlendData,
-          bool readHints)
+ReadGlyph(const char* srcglyph, bool forBlendData, bool readHints)
 {
     if (!srcglyph)
         return false;
@@ -517,7 +515,7 @@ ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph, bool forBlendData,
     forMultiMaster = forBlendData;
     includeHints = readHints;
 
-    ParseString(fontinfo, srcglyph);
+    ParseString(srcglyph);
 
     return true;
 }

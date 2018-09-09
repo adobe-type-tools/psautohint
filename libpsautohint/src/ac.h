@@ -296,8 +296,7 @@ void AddHintPoint(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch, PathElt* p0,
 void AddHPair(HintVal* v, char ch);
 void AddVPair(HintVal* v, char ch);
 void XtraHints(PathElt* e);
-bool AutoHintGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
-                    bool extrahint);
+bool AutoHintGlyph(const char* srcglyph, bool extrahint);
 void EvalV(void);
 void EvalH(void);
 void GenVPts(int32_t specialGlyphType);
@@ -329,7 +328,7 @@ void MergeVals(bool vert);
 void MergeFromMainHints(char ch);
 void RoundPathCoords(void);
 void MoveSubpathToEnd(PathElt* e);
-void InitData(const ACFontInfo* fontinfo, int32_t reason);
+void InitData(int32_t reason);
 void InitFix(int32_t reason);
 void InitGen(int32_t reason);
 void InitPick(int32_t reason);
@@ -388,19 +387,18 @@ void AddVSegment(Fixed from, Fixed to, Fixed loc, PathElt* p1, PathElt* p2,
 void AddHSegment(Fixed from, Fixed to, Fixed loc, PathElt* p1, PathElt* p2,
                  int32_t typ, int32_t i);
 void Delete(PathElt* e);
-bool ReadGlyph(const ACFontInfo* fontinfo, const char* srcglyph,
-               bool forBlendData, bool readHints);
+bool ReadGlyph(const char* srcglyph, bool forBlendData, bool readHints);
 double FixToDbl(Fixed f);
 bool CompareValues(HintVal* val1, HintVal* val2, int32_t factor,
                    int32_t ghstshift);
-void SaveFile(const ACFontInfo* fontinfo);
+void SaveFile(void);
 void CheckForMultiMoveTo(void);
 #define STARTUP (0)
 #define RESTART (1)
 
 void ListHintInfo(void);
 
-void InitAll(const ACFontInfo* fontinfo, int32_t reason);
+void InitAll(int32_t reason);
 
 void AddVStem(Fixed right, Fixed left, bool curved);
 void AddHStem(Fixed top, Fixed bottom, bool curved);
@@ -410,8 +408,8 @@ void AddGlyphExtremes(Fixed bot, Fixed top);
 bool AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata,
               bool extrahint, bool changeGlyph, bool roundCoords);
 
-bool MergeGlyphPaths(const ACFontInfo* fontinfo, const char** srcglyphs,
-                    int nmasters, const char** masters, char** outbuffers,
-                    size_t* outlengths);
+bool MergeGlyphPaths(const char** srcglyphs, int nmasters,
+                     const char** masters, char** outbuffers,
+                     size_t* outlengths);
 
 #endif /* AC_AC_H_ */

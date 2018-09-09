@@ -180,7 +180,6 @@ static char autohintmm_doc[] =
   "  autohintm(font_info, glyphs)\n"
   "\n"
   "Args:\n"
-  "  font_info: font information.\n"
   "  glyphs: sequence of glyph data in bez format.\n"
   "  masters: sequence of master names.\n"
   "\n"
@@ -197,15 +196,13 @@ autohintmm(PyObject* self, PyObject* args)
     Py_ssize_t inCount = 0;
     PyObject* mastersObj = NULL;
     Py_ssize_t mastersCount = 0;
-    PyObject* fontObj = NULL;
     PyObject* outSeq = NULL;
-    char* fontInfo = NULL;
     const char** masters;
     bool error = true;
     Py_ssize_t i;
 
-    if (!PyArg_ParseTuple(args, "O!O!O!", &PyBytes_Type, &fontObj,
-                          &PyTuple_Type, &inObj, &PyTuple_Type, &mastersObj))
+    if (!PyArg_ParseTuple(args, "O!O!", &PyTuple_Type, &inObj, &PyTuple_Type,
+                          &mastersObj))
         return NULL;
 
     inCount = PyTuple_GET_SIZE(inObj);
@@ -235,10 +232,6 @@ autohintmm(PyObject* self, PyObject* args)
             goto done;
     }
 
-    fontInfo = PyBytes_AsString(fontObj);
-    if (!fontInfo)
-        goto done;
-
     AC_SetMemManager(NULL, memoryManager);
     AC_SetReportCB(reportCB);
 
@@ -263,8 +256,8 @@ autohintmm(PyObject* self, PyObject* args)
             outGlyphs[i] = MEMNEW(outputSizes[i]);
         }
 
-        result = AutoHintStringMM(inGlyphs, fontInfo, mastersCount, masters,
-                                  outGlyphs, outputSizes);
+        result = AutoHintStringMM(inGlyphs, mastersCount, masters, outGlyphs,
+                                  outputSizes);
         if (result == AC_Success) {
             error = false;
             for (i = 0; i < inCount; i++) {

@@ -26,7 +26,7 @@ def test_autohint_good_args():
 
 
 def test_autohintmm_good_args():
-    _psautohint.autohintmm(INFO, (GLYPH, GLYPH), (NAME, NAME))
+    _psautohint.autohintmm((GLYPH, GLYPH), (NAME, NAME))
 
 
 @pytest.mark.parametrize("args", [
@@ -43,15 +43,13 @@ def test_autohint_bad_args(args):
 
 
 @pytest.mark.parametrize("args", [
-    [],                                               # no arguments
-    [INFO],                                           # 1 argument
-    [INFO, (GLYPH, GLYPH)],                           # 2 arguments
-    [tounicode(INFO), (GLYPH, GLYPH), (NAME, NAME)],  # 1st is string not bytes
-    [INFO, GLYPH, (NAME, NAME)],                      # 2nd is not a tuple
-    [INFO, (GLYPH, GLYPH), NAME],                     # 3rd is not a tuple
-    [INFO, (GLYPH, GLYPH), tuple()],                  # 3rd is an empty tuple
-    [INFO, (GLYPH, GLYPH), (NAME,)],                  # 3rd is shorter than 2nd
-    [INFO, (GLYPH,), (NAME,)],                        # 2nd is one glyph
+    [],                          # no arguments
+    [(GLYPH, GLYPH)],            # 1 argument
+    [GLYPH, (NAME, NAME)],       # 1st is not a tuple
+    [(GLYPH, GLYPH), NAME],      # 2nd is not a tuple
+    [(GLYPH, GLYPH), tuple()],   # 2nd is an empty tuple
+    [(GLYPH, GLYPH), (NAME,)],   # 2nd is shorter than 1st
+    [(GLYPH,), (NAME,)],         # 1st is one glyph
 ])
 def test_autohintmm_bad_args(args):
     with pytest.raises(TypeError):
@@ -59,8 +57,8 @@ def test_autohintmm_bad_args(args):
 
 
 @pytest.mark.parametrize("args", [
-    [INFO, (tounicode(GLYPH), GLYPH), (NAME, NAME)],  # 2nd should be bytes
-    [INFO, (GLYPH, GLYPH), (tounicode(NAME), NAME)],  # 3rd should be bytes
+    [(tounicode(GLYPH), GLYPH), (NAME, NAME)],  # 1st should be bytes
+    [(GLYPH, GLYPH), (tounicode(NAME), NAME)],  # 2nd should be bytes
 ])
 @pytest.mark.skipif(sys.version_info < (3, 0),
                     reason="Python 2 accepts the unicode strings here!")
@@ -103,7 +101,7 @@ def test_autohint_bad_glyph(glyph):
 ])
 def test_autohintmm_bad_glyphs(glyphs):
     with pytest.raises(_psautohint.error):
-        _psautohint.autohintmm(INFO, glyphs, (NAME, NAME))
+        _psautohint.autohintmm(glyphs, (NAME, NAME))
 
 
 @pytest.mark.parametrize("info", [

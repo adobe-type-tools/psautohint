@@ -162,14 +162,12 @@ AutoHintString(const char* srcbezdata, const char* fontinfodata,
 }
 
 ACLIB_API int
-AutoHintStringMM(const char** srcbezdata, const char* fontinfodata,
-                 int nmasters, const char** masters, char** dstbezdata,
-                 size_t* lengths)
+AutoHintStringMM(const char** srcbezdata, int nmasters, const char** masters,
+                 char** dstbezdata, size_t* lengths)
 {
-    /* Only the master with index 'hintsMasterIx' needs to be hinted; this is
-     * why only the fontinfo data for that master is needed. This function
-     * expects that the master with index 'hintsMasterIx' has already been
-     * hinted with AutoHint().
+    /* Only the master with index 'hintsMasterIx' needs to be hinted.
+     * This function expects that the master with index 'hintsMasterIx' has
+     * already been hinted with AutoHint().
      *
      * The hints for the others masters are derived a very simple process. When
      * the first master was hinted, the logic recorded the path element index
@@ -191,12 +189,9 @@ AutoHintStringMM(const char** srcbezdata, const char* fontinfodata,
      * current master main or path elements. (This actually happens in
      * charpath.c::InsertHint().) */
     int value, result;
-    ACFontInfo* fontinfo = NULL;
 
     if (!srcbezdata)
         return AC_InvalidParameterError;
-
-    fontinfo = ParseFontInfo(fontinfodata);
 
     set_errorproc(error_handler);
     value = setjmp(aclibmark);
@@ -207,17 +202,15 @@ AutoHintStringMM(const char** srcbezdata, const char* fontinfodata,
 
     if (value == -1) {
         /* a fatal error occurred somewhere. */
-        FreeFontInfo(fontinfo);
         return AC_FatalError;
     } else if (value == 1) {
         /* AutoHint was called successfully */
-        FreeFontInfo(fontinfo);
         return AC_Success;
     }
 
     /* result == true is good */
-    result = MergeGlyphPaths(fontinfo, srcbezdata, nmasters, masters,
-                             dstbezdata, lengths);
+    result =
+      MergeGlyphPaths(srcbezdata, nmasters, masters, dstbezdata, lengths);
 
     /* The following call to error_handler() always returns control to just
      * after the setjmp() function call above, but with value set to 1 if
