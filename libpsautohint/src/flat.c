@@ -97,8 +97,6 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
         bbURY = (c >= f128) ? 0x7fff : c;
     }
     eps = pfr->feps;
-    //      if (eps < 8)
-    //          eps = 8;  /* Brotz patch */
     if (eps < 16) /* DEBUG 8 BIT FIX */
         eps = 16; /* Brotz patch */
     while (true) {
@@ -233,7 +231,7 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
             c.x = c3x + pfr->llx;
             c.y = c3y + pfr->lly;
         }
-        (*pfr->report)(c); // call FPBBoxPt() to reset bbox.
+        (*pfr->report)(c); /* call FPBBoxPt() to reset bbox. */
         if (dpth == 0)
             return;
         p -= MiniBlkSz;
@@ -359,7 +357,6 @@ FltnCurve(Cd c0, Cd c1, Cd c2, Cd c3, FltnRec* pfr)
 {
     pfr->limit = 6; /* limit on how many times a bez curve can be split in half
                        by recursive calls to FFltnCurve() */
-    // pfr->feps = FixHalf;
     pfr->feps = FixOne; /* DEBUG 8 BIT FIX */
     FFltnCurve(c0, c1, c2, c3, pfr);
 }

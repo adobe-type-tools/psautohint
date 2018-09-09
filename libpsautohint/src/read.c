@@ -482,9 +482,8 @@ ParseString(const char* s)
             else if ((c == ' ') || (c == '\t')) {
                 if (isReal) {
                     rval = strtod(c0, NULL);
-                    rval = roundf(rval * 100) / 100; // Autohint can only
-                                                     // support 2 digits of
-                                                     // decimal precision.
+                    /* Autohint only supports 2 digits of decimal precision. */
+                    rval = roundf(rval * 100) / 100;
                     /* do not need to use 'neg' to negate the value, as c0
                      * string includes the minus sign.*/
                     r = FixReal(rval); /* convert to Fixed */
