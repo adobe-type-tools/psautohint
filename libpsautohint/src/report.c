@@ -136,7 +136,7 @@ AskForSplit(PathElt* e)
     if (e->type == MOVETO)
         e = GetClosedBy(e);
     GetEndPoints(e, &x0, &y0, &x1, &y1);
-    LogMsg(LOGERROR, OK,
+    LogMsg(WARNING, OK,
            "Please split the element that goes from %g %g to %g %g.",
            FixToDbl(x0), FixToDbl(-y0), FixToDbl(x1), FixToDbl(-y1));
 }
@@ -410,7 +410,7 @@ ReportDuplicates(Fixed x, Fixed y)
 void
 ReportBBoxBogus(Fixed llx, Fixed lly, Fixed urx, Fixed ury)
 {
-    LogMsg(LOGERROR, OK, "Glyph bounding box looks bogus: %g %g %g %g.",
+    LogMsg(WARNING, OK, "Glyph bounding box looks bogus: %g %g %g %g.",
            FixToDbl(llx), FixToDbl(lly), FixToDbl(urx), FixToDbl(ury));
 }
 
