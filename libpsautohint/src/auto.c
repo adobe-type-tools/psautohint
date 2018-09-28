@@ -503,7 +503,6 @@ CheckHintSegs(PathElt* e, bool flg, bool Hflg)
             if (val != NULL && TestHintLst(lst2, val, flg, false) == 0) {
                 if (TryResolveConflict(e, Hflg))
                     return CheckHintSegs(e, flg, Hflg);
-                AskForSplit(e);
                 if (Hflg)
                     e->Hs = NULL;
                 else

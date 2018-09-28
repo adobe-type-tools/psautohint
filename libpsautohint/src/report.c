@@ -130,18 +130,6 @@ ReportSplit(PathElt* e)
 }
 
 void
-AskForSplit(PathElt* e)
-{
-    Fixed x0, y0, x1, y1;
-    if (e->type == MOVETO)
-        e = GetClosedBy(e);
-    GetEndPoints(e, &x0, &y0, &x1, &y1);
-    LogMsg(WARNING, OK,
-           "Please split the element that goes from %g %g to %g %g.",
-           FixToDbl(x0), FixToDbl(-y0), FixToDbl(x1), FixToDbl(-y1));
-}
-
-void
 ReportPossibleLoop(PathElt* e)
 {
     Fixed x0, y0, x1, y1;
