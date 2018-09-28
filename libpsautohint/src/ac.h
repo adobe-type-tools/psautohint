@@ -348,7 +348,6 @@ void ExpectedMoveTo(PathElt* e);
 void ReportMissingClosePath(void);
 void ReportTryFlexNearMiss(Fixed x0, Fixed y0, Fixed x2, Fixed y2);
 void ReportTryFlexError(bool CPflg, Fixed x, Fixed y);
-void AskForSplit(PathElt* e);
 void ReportSplit(PathElt* e);
 void ReportRemFlare(PathElt* e, PathElt* e2, bool hFlg, int32_t i);
 void ReportRemConflict(PathElt* e);
