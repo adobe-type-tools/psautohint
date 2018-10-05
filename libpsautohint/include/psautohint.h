@@ -87,7 +87,7 @@ ACLIB_API void AC_SetReportCB(AC_REPORTFUNCPTR reportCB);
  * belongs to the AC lib. It should be copied immediately - it may may last
  * past the return of the callback.
  */
-typedef void (*AC_REPORTSTEMPTR)(int top, int bottom, char* glyphName);
+typedef void (*AC_REPORTSTEMPTR)(float top, float bottom, char* glyphName);
 
 ACLIB_API void AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB,
                                    AC_REPORTSTEMPTR vstemCB,
@@ -103,7 +103,7 @@ ACLIB_API void AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB,
  * belongs to the AC lib. It should be copied immediately - it may may last
  * past the return of the callback.
  */
-typedef void (*AC_REPORTZONEPTR)(int top, int bottom, char* glyphName);
+typedef void (*AC_REPORTZONEPTR)(float top, float bottom, char* glyphName);
 
 ACLIB_API void AC_SetReportZonesCB(AC_REPORTZONEPTR charCB,
                                    AC_REPORTZONEPTR stemCB);
