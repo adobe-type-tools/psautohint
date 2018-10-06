@@ -557,11 +557,15 @@ Blues(void)
     LogMsg(LOGDEBUG, OK, "pick best");
     MarkLinks(gValList, true);
     CheckVals(gValList, false);
-    DoHStems(gValList);  /* Report stems and alignment zones, if this
-                                     has been requested. */
-    PickHVals(gValList); /* Moves best HintVal items from valList to Hhinting
-                           list. (? Choose from set of HintVals for the samte
-                           stem values.) */
+
+    /* Report stems and alignment zones, if this has been requested. */
+    if (gDoAligns || gDoStems)
+        DoHStems(gValList);
+
+    /* Moves best HintVal items from valList to Hhinting list.
+     * (? Choose from set of HintVals for the samte stem values.) */
+    PickHVals(gValList);
+
     if (!CounterFailed && HHintGlyph()) {
         gPruneValue = pv;
         gPruneD = pd;
@@ -603,9 +607,7 @@ DoHStems(HintVal* sLst1)
 {
     Fixed glyphTop = INT32_MIN, glyphBot = INT32_MAX;
     bool curved;
-    if (!gDoAligns && !gDoStems) {
-        return;
-    }
+
     while (sLst1 != NULL) {
         Fixed bot = -sLst1->vLoc1;
         Fixed top = -sLst1->vLoc2;
@@ -614,28 +616,25 @@ DoHStems(HintVal* sLst1)
             top = bot;
             bot = tmp;
         }
-        if (top > glyphTop) {
+        if (top > glyphTop)
             glyphTop = top;
-        }
-        if (bot < glyphBot) {
+        if (bot < glyphBot)
             glyphBot = bot;
-        }
+
         /* skip if ghost or not a line on top or bottom */
-        if (sLst1->vGhst) {
-            sLst1 = sLst1->vNxt;
-            continue;
+        if (!sLst1->vGhst) {
+            curved = !FindLineSeg(sLst1->vLoc1, botList) &&
+                     !FindLineSeg(sLst1->vLoc2, topList);
+            AddHStem(top, bot, curved);
+            if (top != INT32_MIN || bot != INT32_MAX)
+                AddStemExtremes(bot, top);
         }
-        curved = !FindLineSeg(sLst1->vLoc1, botList) &&
-                 !FindLineSeg(sLst1->vLoc2, topList);
-        AddHStem(top, bot, curved);
+
         sLst1 = sLst1->vNxt;
-        if (top != INT32_MIN || bot != INT32_MAX) {
-            AddStemExtremes(bot, top);
-        }
     }
-    if (glyphTop != INT32_MIN || glyphBot != INT32_MAX) {
+
+    if (glyphTop != INT32_MIN || glyphBot != INT32_MAX)
         AddGlyphExtremes(glyphBot, glyphTop);
-    }
 }
 
 static void
@@ -666,7 +665,10 @@ Yellows(void)
     LogMsg(LOGDEBUG, OK, "pick best");
     MarkLinks(gValList, false);
     CheckVals(gValList, true);
-    DoVStems(gValList);
+
+    if (gDoAligns || gDoStems)
+        DoVStems(gValList);
+
     PickVVals(gValList);
     if (!CounterFailed && VHintGlyph()) {
         gPruneValue = pv;
@@ -707,9 +709,6 @@ Yellows(void)
 static void
 DoVStems(HintVal* sLst)
 {
-    if (!gDoAligns && !gDoStems) {
-        return;
-    }
     while (sLst != NULL) {
         Fixed lft, rght;
         bool curved;
