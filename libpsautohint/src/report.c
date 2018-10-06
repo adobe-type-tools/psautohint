@@ -169,14 +169,7 @@ ReportRemShortHints(Fixed ex, Fixed ey)
            FixToDbl(-ey));
 }
 
-static void
-PrintDebugVal(Fixed v)
-{
-    if (v >= FixInt(100000))
-        LogMsg(LOGDEBUG, OK, "%d", FTrunc(v));
-    else
-        LogMsg(LOGDEBUG, OK, "%g", FixToDbl(v));
-}
+#define VAL(v) ((v) >= FixInt(100000) ? FTrunc(v) : FixToDbl(v))
 
 static void
 ShwHV(HintVal* val)
@@ -184,29 +177,31 @@ ShwHV(HintVal* val)
     Fixed bot, top;
     bot = -val->vLoc1;
     top = -val->vLoc2;
-    LogMsg(LOGDEBUG, OK, "b %g t %g v ", FixToDbl(bot), FixToDbl(top));
-    PrintDebugVal(val->vVal);
-    LogMsg(LOGDEBUG, OK, " s %g", FixToDbl(val->vSpc));
-    if (val->vGhst)
-        LogMsg(LOGDEBUG, OK, " G");
+    LogMsg(LOGDEBUG, OK, "b %g t %g v %g s %g%s", FixToDbl(bot), FixToDbl(top),
+           VAL(val->vVal), FixToDbl(val->vSpc), val->vGhst ? " G" : "");
 }
 
 void
 ShowHVal(HintVal* val)
 {
-    Fixed l, r;
-    HintSeg* seg;
-    ShwHV(val);
-    seg = val->vSeg1;
-    if (seg == NULL)
+    Fixed l1, l2, r1, r2;
+    Fixed bot, top;
+    HintSeg* seg = val->vSeg1;
+    if (seg == NULL) {
+        ShwHV(val);
         return;
-    l = seg->sMin;
-    r = seg->sMax;
-    LogMsg(LOGDEBUG, OK, " l1 %g r1 %g ", FixToDbl(l), FixToDbl(r));
+    }
+    bot = -val->vLoc1;
+    top = -val->vLoc2;
+    l1 = seg->sMin;
+    r1 = seg->sMax;
     seg = val->vSeg2;
-    l = seg->sMin;
-    r = seg->sMax;
-    LogMsg(LOGDEBUG, OK, " l2 %g r2 %g", FixToDbl(l), FixToDbl(r));
+    l2 = seg->sMin;
+    r2 = seg->sMax;
+    LogMsg(LOGDEBUG, OK, "b %g t %g v %g s %g%s l1 %g r1 %g  l2 %g r2 %g",
+           FixToDbl(bot), FixToDbl(top), VAL(val->vVal), FixToDbl(val->vSpc),
+           val->vGhst ? " G" : "", FixToDbl(l1), FixToDbl(r1), FixToDbl(l2),
+           FixToDbl(r2));
 }
 
 void
@@ -230,27 +225,30 @@ ShwVV(HintVal* val)
     Fixed lft, rht;
     lft = val->vLoc1;
     rht = val->vLoc2;
-    LogMsg(LOGDEBUG, OK, "l %g r %g v ", FixToDbl(lft), FixToDbl(rht));
-    PrintDebugVal(val->vVal);
-    LogMsg(LOGDEBUG, OK, " s %g", FixToDbl(val->vSpc));
+    LogMsg(LOGDEBUG, OK, "l %g r %g v %g s %g", FixToDbl(lft), FixToDbl(rht),
+           VAL(val->vVal), FixToDbl(val->vSpc));
 }
 
 void
 ShowVVal(HintVal* val)
 {
-    Fixed b, t;
-    HintSeg* seg;
-    ShwVV(val);
-    seg = val->vSeg1;
-    if (seg == NULL)
+    Fixed b1, b2, t1, t2;
+    Fixed lft, rht;
+    HintSeg* seg = val->vSeg1;
+    if (seg == NULL) {
+        ShwVV(val);
         return;
-    b = -seg->sMin;
-    t = -seg->sMax;
-    LogMsg(LOGDEBUG, OK, " b1 %g t1 %g ", FixToDbl(b), FixToDbl(t));
+    }
+    lft = val->vLoc1;
+    rht = val->vLoc2;
+    b1 = -seg->sMin;
+    t1 = -seg->sMax;
     seg = val->vSeg2;
-    b = -seg->sMin;
-    t = -seg->sMax;
-    LogMsg(LOGDEBUG, OK, " b2 %g t2 %g", FixToDbl(b), FixToDbl(t));
+    b2 = -seg->sMin;
+    t2 = -seg->sMax;
+    LogMsg(LOGDEBUG, OK, "l %g r %g v %g s %g b1 %g t1 %g  b2 %g t2 %g",
+           FixToDbl(lft), FixToDbl(rht), VAL(val->vVal), FixToDbl(val->vSpc),
+           FixToDbl(b1), FixToDbl(t1), FixToDbl(b2), FixToDbl(t2));
 }
 
 void
@@ -326,17 +324,13 @@ LogHintInfo(HintPoint* pl)
 static void
 LstHVal(HintVal* val)
 {
-    LogMsg(LOGDEBUG, OK, "\t");
     ShowHVal(val);
-    LogMsg(LOGDEBUG, OK, " ");
 }
 
 static void
 LstVVal(HintVal* val)
 {
-    LogMsg(LOGDEBUG, OK, "\t");
     ShowVVal(val);
-    LogMsg(LOGDEBUG, OK, " ");
 }
 
 void
@@ -406,42 +400,34 @@ void
 ReportMergeHVal(Fixed b0, Fixed t0, Fixed b1, Fixed t1, Fixed v0, Fixed s0,
                 Fixed v1, Fixed s1)
 {
-    LogMsg(LOGDEBUG, OK,
-
-           "Replace H hints pair at %g %g by %g %g\n\told value ",
+    LogMsg(LOGDEBUG, OK, "Replace H hints pair at %g %g by %g %g",
            FixToDbl(-b0), FixToDbl(-t0), FixToDbl(-b1), FixToDbl(-t1));
-    PrintDebugVal(v0);
-    LogMsg(LOGDEBUG, OK, " %g new value ", FixToDbl(s0));
-    PrintDebugVal(v1);
-    LogMsg(LOGDEBUG, OK, " %g", FixToDbl(s1));
+    LogMsg(LOGDEBUG, OK, "\told value %g %g new value %g %g", VAL(v0),
+           FixToDbl(s0), VAL(v1), FixToDbl(s1));
 }
 
 void
 ReportMergeVVal(Fixed l0, Fixed r0, Fixed l1, Fixed r1, Fixed v0, Fixed s0,
                 Fixed v1, Fixed s1)
 {
-    LogMsg(LOGDEBUG, OK, "Replace V hints pair at %g %g by %g %g\n\told value ",
-           FixToDbl(l0), FixToDbl(r0), FixToDbl(l1), FixToDbl(r1));
-    PrintDebugVal(v0);
-    LogMsg(LOGDEBUG, OK, " %g new value ", FixToDbl(s0));
-    PrintDebugVal(v1);
-    LogMsg(LOGDEBUG, OK, " %g", FixToDbl(s1));
+    LogMsg(LOGDEBUG, OK, "Replace V hints pair at %g %g by %g %g", FixToDbl(l0),
+           FixToDbl(r0), FixToDbl(l1), FixToDbl(r1));
+    LogMsg(LOGDEBUG, OK, "\told value %g %g new value %g %g", VAL(v0),
+           FixToDbl(s0), VAL(v1), FixToDbl(s1));
 }
 
 void
 ReportPruneHVal(HintVal* val, HintVal* v, int32_t i)
 {
-    LogMsg(LOGDEBUG, OK, "PruneHVal: %d\n\t", i);
+    LogMsg(LOGDEBUG, OK, "PruneHVal: %d", i);
     ShowHVal(val);
-    LogMsg(LOGDEBUG, OK, "\n\t");
     ShowHVal(v);
 }
 
 void
 ReportPruneVVal(HintVal* val, HintVal* v, int32_t i)
 {
-    LogMsg(LOGDEBUG, OK, "PruneVVal: %d\n\t", i);
+    LogMsg(LOGDEBUG, OK, "PruneVVal: %d", i);
     ShowVVal(val);
-    LogMsg(LOGDEBUG, OK, "\n\t");
     ShowVVal(v);
 }
