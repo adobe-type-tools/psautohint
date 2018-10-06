@@ -378,164 +378,157 @@ Blues(void)
     HintVal* sLst;
 
     /*
-     Top alignment zones are in the global 'topBands', bottom in 'botBands'.
-
-     This function looks through the path, as defined by the linked list of
-    'elts', starting at the global 'pathStart', and adds to several lists.
-    Coordinates are stored in the elt.(x,y) as (original value)/2.0, aka right
-    shifted by 1 bit from the original 24.8 Fixed. I suspect that is to allow a
-    larger integer portion - when this program was written, an int was 16 bits.
-
-
-     HStems, Vstems are global lists of Fixed 24.8 numbers..
-
-     segLists is an array of 4  HintSeg linked lists. list 0 and 1 are
-    respectively up and down vertical segments. Lists 2 and 3 are
-     respectively left pointing and right pointing horizontal segments. On a
-    counter-clockwise path, this is the same as selecting
-     top and bottom stem locations.
-
-     NoBlueGlyph() consults a hard-coded list of glyph names, If the glyph is in
-    this list, set the alignment zones (top and botBands) to empty.
-
-     1) gen.c:GenHPts() . Buid the raw list of stem segments in global 'topList'
-    and 'botList'.
-
-     gen.c:GenHPts() steps through the liked list of path segments, starting at
-    'pathStart' It decides if a path is mostly H,
-     and if so, adds it to a linked list of hstem candidates in segLists, by
-    calling gen.c:AddHSegment(). This calls ReportAddHSeg() (useful in
-    debugging),
-     and then gen.c:AddSegment.
-
-     If the path segment is in fact entirely vertical and is followed by a sharp
-    bend,
-     gen.c:GenHPts adds two new path segments just 1 unit long,  after the
-    segment end point,
-     called H/VBends (segment type sBend=1). I have no idea what these are for.
-
-     AddSegment is pretty simple. It creates a new hint segment 'HintSeg' for
-    the parent path elt , fills it in, adds it to appropriate  list of the 4
-    segLists, and then sorts by hstem location. seg->sElt is the parent elt
-     seg->sType is the type
-     seg->sLoc is the location in Fixed 18.14: right shift 7 to get integer
-    value.
-
-     If the current path elt is a Closepath, It also calls LinkSegment() to add
-    the current stem segment to the list of stem segments referenced by this
-    elt.
-     e->Hs/Vs.
-
-     Note that a hint segment is created for each nearly vertical or horioztonal
-    path elt. Ths means that in an H, there will be two hint segments created
-    for
-     the bottom and top of the H, as there are two horizontal paths with the
-    same Y at the top and bottom of the H.
-
-     Assign the top and bottom Hstem location lists.
-     topList = segLists[2]
-     botList = segLists[3];
-
-     2) eval.c::EvalH().  Evaluate every combination of botList and topList, and
-    assign a priority value and a 'Q' value.
-
-     For each bottom stem
-     for each top stem
-     1) assign priority (spc) and weight (val) values with EvalHPair()
-     2) report stem near misses  in the 'HStems' list with HStemMiss()
-     3) decide whether to add pair to 'HStems' list with AddHValue()
-
-     Add ghost hints.
-     For each bottom stem segment and then for each top stem segment:
-     if it is in an alignment zone, make a ghost hint segment and add it with
-    AddHValue().
-
-     EvalHPair() sets priority (spc) and weight (val) values.
-            Omit pair by setting value to 0 if:
-                    bottom is in bottom alignment zone, and top is in top
-    alignment zone. (otherwise, these will override the ghost hints).
-
-            Boost priority by +2 if either the bot or top segment is in an
-    alignment zone.
-
-            dy = stem widt ( top - bot)
-
-            Calculcate dist. Dist is set to a fudge factor *dy.
-            if bottom segment xo->x1 overlaps top x0->x1, the fudge factor is
-    1.0. The
-            less the overlap, the larger the fduge factor.
-            if bottom segment xo->x1 overlaps top x0->x1:.
-                    if  top and bottom overlap exactly, dist = dy
-                    if they barely overlap, dist = 1.4*dy
-                    in between, interpolate.
-            else, look at closest ends betwen bottom and top segments.
-                    dx = min X separation between top and bottom segments.
-                    dist = 1.4 *dy
-                    dist += dx*dx
-                    if dx > dy:
-                            dist *= dx / dy;
-            Look through the HStems global list. For each match to dy, boost
-    priority by + 1.
-            Calculate weight with gen.c:AdjustVal()
-                    if dy is more than twice the 1.1.5* the largest hint in
-    HStems, set weight to 0.
-                    Calculate weight as related to length of the segments
-    squared divied by the distance squared.
-                    Basically, the greater the ratio segment overlap  to stem
-    width, the higher the value.
-                    if dy is greater than the largest stem hint in HStems,
-    decrease the value
-                            scale weight by  of *(largest stem hint in HStems)/
-    dy)**3.
-
-     AddHValue() decides whether add a (bottom, top)  pair of hint segments.
-     Do not add the pair if:
-     if weight (val) is 0,
-     if both are sBEND segments
-     if neither are a ghost hint, and weight <= pruneD and priority (spc) is <=
-    0:
-     if either is an sBEND: skip
-     if the BBox for one segment is the same or inside the BBox for the other:
-    skip
-
-     else add it with eval.c:InsertHValue()
-     add new HintVal to global valList.
-     item->vVal = val; # weight
-     item->initVal = val; # originl weight from EvalHPair()
-     item->vSpc = spc; # priority
-     item->vLoc1 = bot; # bottom Y value in Fixed 18.14
-     item->vLoc2 = top; # top Y value in Fixed 18.14
-     item->vSeg1 = bSeg; # bottom hint segment
-     item->vSeg2 = tSeg; # top hint segment
-     item->vGhst = ghst; # if it is a ghost segment.
-     The new item is inserted after the first element where vlist->vLoc2 >= top
-    and vlist->vLoc1 >= bottom
-
-     3) merge.c:PruneHVals();
-
-     item2 in the list knocks out item1 if:
-    1) (item2 val is more than 3* greater than item1 val) and
-            val 1 is less than FixedInt(100) and
-            item2 top and bottom is within item 1 top and bottom
-            and (  if val1 is more than 50* less than val2 and
-                                    either top seg1 is close to top seg 2, or
-    bottom seg1 is close to bottom seg 2
-                    )
-            and (val 1 < FixInt(16)) or ( ( item1 top not in blue zone, or top1
-    = top2) and
-                                                                    ( item1
-    bottom not in blue zone, or top1 = bottom2))
-    "Close to" for the bottom segment means you can get to the bottom elt for
-    item 2 from bottom elt for 1 within the same path, by
-     stepping either forward or back from item 1's elt, and without going
-    outside the bounds between
-     location 1 and location 2. Same for top segments.
-
-
-
-
-     4) pick.c:FindBestHVals();
-     When a hint segment    */
+     * Top alignment zones are in the global 'gTopBands', bottom in
+     * 'gBotBands'.
+     *
+     * This function looks through the path, as defined by the linked list of
+     * PathElt's, starting at the global 'gPathStart', and adds to several
+     * lists.  Coordinates are stored in the PathElt.(x,y) as (original
+     * value)/2.0, aka right shifted by 1 bit from the original 24.8 Fixed. I
+     * suspect that is to allow a larger integer portion - when this program
+     * was written, an int was 16 bits.
+     *
+     * 'gHStems' and 'gVStems' are global arrays of Fixed 24.8 numbers..
+     *
+     * 'gSegLists' is an array of 4 HintSeg linked lists. List 0 and 1 are
+     * respectively up and down vertical segments. Lists 2 and 3 are
+     * respectively left pointing and right pointing horizontal segments. On a
+     * counter-clockwise path, this is the same as selecting top and bottom
+     * stem locations.
+     *
+     * NoBlueGlyph() consults a hard-coded list of glyph names, if the glyph is
+     * in this list, set the alignment zones ('gTopBands' and 'gBotBands') to
+     * empty.
+     *
+     * 1) gen.c:GenHPts()
+     *    Builds the raw list of stem segments in global
+     *    'topList' and 'botList'. It steps through the liked list of path
+     *    segments, starting at 'gPathStart'. It decides if a path is mostly H,
+     *    and if so, adds it to a linked list of hstem candidates in gSegLists,
+     *    by calling gen.c:AddHSegment(). This calls ReportAddHSeg() (useful in
+     *    debugging), and then gen.c:AddSegment().
+     *
+     *    If the path segment is in fact entirely vertical and is followed by a
+     *    sharp bend, gen.c:GenHPts() adds two new path segments just 1 unit
+     *    long, after the segment end point, called H/VBends (segment type
+     *    sBend=1). I have no idea what these are for.
+     *
+     *    AddSegment() is pretty simple. It creates a new hint segment
+     *    (HintSeg) for the parent PathElt, fills it in, adds it to appropriate
+     *    list of the 4 gSegLists, and then sorts by hstem location. seg->sElt
+     *    is the parent PathElt, seg->sType is the type, seg->sLoc is the
+     *    location in Fixed 18.14: right shift 7 to get integer value.
+     *
+     *    If the current PathElt is a Closepath, It also calls LinkSegment() to
+     *    add the current stem segment to the list of stem segments referenced
+     *    by this elt's e->Hs/Vs.
+     *
+     *    Note that a hint segment is created for each nearly vertical or
+     *    horizontal PathElt. This means that in an H, there will be two hint
+     *    segments created for the bottom and top of the H, as there are two
+     *    horizontal paths with the same Y at the top and bottom of the H.
+     *
+     *    Assign the top and bottom Hstem location lists.
+     *    topList = segLists[2]
+     *    botList = segLists[3];
+     *
+     * 2) eval.c::EvalH()
+     *    Evaluates every combination of botList and topList, and assign a
+     *    priority value and a 'Q' value.
+     *
+     *    For each bottom stem
+     *    for each top stem
+     *    1) assign priority (spc) and weight (val) values with EvalHPair()
+     *    2) report stem near misses  in the 'HStems' list with HStemMiss()
+     *    3) decide whether to add pair to 'HStems' list with AddHValue()
+     *
+     *     Add ghost hints.
+     *     For each bottom stem segment and then for each top stem segment:
+     *     if it is in an alignment zone, make a ghost hint segment and add it
+     *     with AddHValue().
+     *
+     *     EvalHPair() sets priority (spc) and weight (val) values.
+     *       Omit pair by setting value to 0 if:
+     *         bottom is in bottom alignment zone, and top is in top alignment
+     *         zone. (otherwise, these will override the ghost hints).
+     *
+     *       Boost priority by +2 if either the bot or top segment is in an
+     *       alignment zone.
+     *
+     *       dy = stem width ( top - bot)
+     *
+     *       Calculate dist. Dist is set to a fudge factor * dy.
+     *         if bottom segment xo->x1 overlaps top x0->x1, the fudge factor is
+     *         1.0. The less the overlap, the larger the fduge factor.
+     *         if bottom segment xo->x1 overlaps top x0->x1:.
+     *           if  top and bottom overlap exactly, dist = dy
+     *           if they barely overlap, dist = 1.4*dy
+     *           in between, interpolate.
+     *         else, look at closest ends betwen bottom and top segments.
+     *           dx = min X separation between top and bottom segments.
+     *           dist = 1.4 *dy
+     *           dist += dx*dx
+     *           if dx > dy:
+     *             dist *= dx / dy;
+     *
+     *       Look through the gHStems global list. For each match to dy, boost
+     *       priority by +1.
+     *
+     *       Calculate weight with gen.c:AdjustVal()
+     *         if dy is more than twice the 1.1.5* the largest hint in gHStems,
+     *         set weight to 0.
+     *         Calculate weight as related to length of the segments squared
+     *         divided by the distance squared.
+     *         Basically, the greater the ratio segment overlap to stem width,
+     *         the higher the value.
+     *         if dy is greater than the largest stem hint in gHStems, decrease
+     *         the value scale weight by  of * (largest stem hint in
+     *         gHStems)/dy)**3.
+     *
+     *     AddHValue() decides whether add a (bottom, top)  pair of hint segments.
+     *     Do not add the pair if:
+     *     if weight (val) is 0,
+     *     if both are sBEND segments
+     *     if neither are a ghost hint, and weight <= pruneD and priority (spc)
+     *     is <= 0:
+     *     if either is an sBEND: skip
+     *     if the BBox for one segment is the same or inside the BBox for the
+     *     other: skip
+     *
+     *     else add it with eval.c:InsertHValue()
+     *     add new HintVal to global valList.
+     *     item->vVal = val; # weight
+     *     item->initVal = val; # originl weight from EvalHPair()
+     *     item->vSpc = spc; # priority
+     *     item->vLoc1 = bot; # bottom Y value in Fixed 18.14
+     *     item->vLoc2 = top; # top Y value in Fixed 18.14
+     *     item->vSeg1 = bSeg; # bottom hint segment
+     *     item->vSeg2 = tSeg; # top hint segment
+     *     item->vGhst = ghst; # if it is a ghost segment.
+     *     The new item is inserted after the first element where vlist->vLoc2 >= top
+     *    and vlist->vLoc1 >= bottom
+     *
+     * 3) merge.c:PruneHVals();
+     *
+     *    item2 in the list knocks out item1 if:
+     *    1) (item2 val is more than 3* greater than item1 val) and
+     *       (val 1 is less than FixedInt(100)) and
+     *       (item2 top and bottom is within item 1 top and bottom) and
+     *       (if val1 is more than 50* less than val2 and either top
+     *        seg1 is close to top seg 2, or bottom seg1 is close to
+     *        bottom seg 2) and
+     *       (val 1 < FixInt(16)) or
+     *       ((item1 top not in blue zone, or top1 = top2) and
+     *        (item1 bottom not in blue zone, or top1 = bottom2))
+     *    "Close to" for the bottom segment means you can get to the bottom elt for
+     *    item 2 from bottom elt for 1 within the same path, by
+     *     stepping either forward or back from item 1's elt, and without going
+     *    outside the bounds between
+     *     location 1 and location 2. Same for top segments.
+     *
+     * 4) pick.c:FindBestHVals();
+     * When a hint segment
+     */
 
     LogMsg(LOGDEBUG, OK, "generate blues");
     if (NoBlueGlyph()) {
