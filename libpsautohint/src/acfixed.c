@@ -21,9 +21,9 @@ Fixed
 acpflttofix(float* pf)
 {
     float f = *pf;
-    if (f >= FixedPosInf / FIXEDSCALE)
-        return FixedPosInf;
-    if (f <= FixedNegInf / FIXEDSCALE)
-        return FixedNegInf;
+    if (f >= FIXED_MAX / FIXEDSCALE)
+        return FIXED_MAX;
+    if (f <= FIXED_MIN / FIXEDSCALE)
+        return FIXED_MIN;
     return (Fixed)(f * FIXEDSCALE);
 }
