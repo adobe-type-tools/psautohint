@@ -260,7 +260,6 @@ int32_t FRnd(int32_t x);
 #define ProdGe0(f0, f1) (!ProdLt0(f0, f1))
 
 #define DEBUG_ROUND(val) { val = ( val >=0 ) ? (2*(val/2)) : (2*((val - 1)/2));}
-#define DEBUG_ROUND4(val) { val = ( val >=0 ) ? (4*(val/4)) : (4*((val - 1)/4));}
 
 #define MAXBUFFLEN 127
 
