@@ -778,11 +778,11 @@ bool
 CompareValues(HintVal* val1, HintVal* val2, int32_t factor, int32_t ghstshift)
 {
     Fixed v1 = val1->vVal, v2 = val2->vVal, mx;
-    mx = v1 > v2 ? v1 : v2;
+    mx = NUMMAX(v1, v2);
     while (mx < FIXED_MAX / 2) {
-        mx <<= 1;
-        v1 <<= 1;
-        v2 <<= 1;
+        mx *= 2;
+        v1 *= 2;
+        v2 *= 2;
     }
     if (ghstshift > 0 && val1->vGhst != val2->vGhst) {
         if (val1->vGhst)
