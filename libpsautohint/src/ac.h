@@ -238,8 +238,8 @@ extern char gGlyphName[MAX_GLYPHNAME_LEN];
 #define FixHalf (0x80)
 #define FixQuarter (0x40)
 
-#define FixedPosInf INT32_MAX
-#define FixedNegInf INT32_MIN
+#define FIXED_MAX INT32_MAX
+#define FIXED_MIN INT32_MIN
 #define FixInt(i) (((int32_t)(i)) * FixOne)
 #define FixReal(i) ((int32_t)((i) * (float)FixOne))
 int32_t FRnd(int32_t x);

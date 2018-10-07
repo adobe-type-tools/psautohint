@@ -779,7 +779,7 @@ CompareValues(HintVal* val1, HintVal* val2, int32_t factor, int32_t ghstshift)
 {
     Fixed v1 = val1->vVal, v2 = val2->vVal, mx;
     mx = v1 > v2 ? v1 : v2;
-    while (mx < FixedPosInf / 2) {
+    while (mx < FIXED_MAX / 2) {
         mx <<= 1;
         v1 <<= 1;
         v2 <<= 1;
@@ -794,10 +794,9 @@ CompareValues(HintVal* val1, HintVal* val2, int32_t factor, int32_t ghstshift)
         (val1->vSpc == 0 && val2->vSpc == 0))
         return v1 > v2;
     if (val1->vSpc > 0)
-        return (v1 < FixedPosInf / factor) ? (v1 * factor > v2)
-                                           : (v1 > v2 / factor);
-    return (v2 < FixedPosInf / factor) ? (v1 > v2 * factor)
-                                       : (v1 / factor > v2);
+        return (v1 < FIXED_MAX / factor) ? (v1 * factor > v2)
+                                         : (v1 > v2 / factor);
+    return (v2 < FIXED_MAX / factor) ? (v1 > v2 * factor) : (v1 / factor > v2);
 }
 
 static void

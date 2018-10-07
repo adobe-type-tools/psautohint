@@ -17,7 +17,7 @@ InitFix(int32_t reason)
     switch (reason) {
         case STARTUP:
         case RESTART:
-            bPrev = tPrev = FixedPosInf;
+            bPrev = tPrev = FIXED_MAX;
     }
 }
 

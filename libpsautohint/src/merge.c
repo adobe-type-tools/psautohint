@@ -115,23 +115,23 @@ PruneOne(HintVal* sLst, bool hFlg, HintVal* sL, int32_t i)
 #define PRNFCTR (3)
 
 #define PruneLt(val, v)                                                        \
-    (((v) < (FixedPosInf / 10) && (val) < (FixedPosInf / PRNFCTR))             \
+    (((v) < (FIXED_MAX / 10) && (val) < (FIXED_MAX / PRNFCTR))                 \
        ? ((val)*PRNFCTR < (v)*10)                                              \
        : ((val) / 10 < (v) / PRNFCTR))
 #define PruneLe(val, v)                                                        \
-    (((val) < (FixedPosInf / PRNFCTR)) ? ((v) <= (val)*PRNFCTR)                \
-                                       : ((v) / PRNFCTR <= (val)))
+    (((val) < (FIXED_MAX / PRNFCTR)) ? ((v) <= (val)*PRNFCTR)                  \
+                                     : ((v) / PRNFCTR <= (val)))
 #define PruneGt(val, v)                                                        \
-    (((val) < (FixedPosInf / PRNFCTR)) ? ((v) > (val)*PRNFCTR)                 \
-                                       : ((v) / PRNFCTR > (val)))
+    (((val) < (FIXED_MAX / PRNFCTR)) ? ((v) > (val)*PRNFCTR)                   \
+                                     : ((v) / PRNFCTR > (val)))
 #define MUCHFCTR (50)
 #define PruneMuchGt(val, v)                                                    \
-    (((val) < (FixedPosInf / MUCHFCTR)) ? ((v) > (val)*MUCHFCTR)               \
-                                        : ((v) / MUCHFCTR > (val)))
+    (((val) < (FIXED_MAX / MUCHFCTR)) ? ((v) > (val)*MUCHFCTR)                 \
+                                      : ((v) / MUCHFCTR > (val)))
 #define VERYMUCHFCTR (100)
 #define PruneVeryMuchGt(val, v)                                                \
-    (((val) < (FixedPosInf / VERYMUCHFCTR)) ? ((v) > (val)*VERYMUCHFCTR)       \
-                                            : ((v) / VERYMUCHFCTR > (val)))
+    (((val) < (FIXED_MAX / VERYMUCHFCTR)) ? ((v) > (val)*VERYMUCHFCTR)         \
+                                          : ((v) / VERYMUCHFCTR > (val)))
 
 /* The changes made here and in PruneHVals are to fix a bug in
  MinisterLight/E where the top left point was not getting hinted. */

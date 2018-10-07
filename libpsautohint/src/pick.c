@@ -36,9 +36,8 @@ ConsiderPicking(Fixed bestSpc, Fixed bestVal, HintVal* hintList,
         return true;
     if (LtPruneB(bestVal))
         return false;
-    return (bestVal < FixedPosInf / gPruneC)
-             ? (prevBestVal <= bestVal * gPruneC)
-             : (prevBestVal / gPruneC <= bestVal);
+    return (bestVal < FIXED_MAX / gPruneC) ? (prevBestVal <= bestVal * gPruneC)
+                                           : (prevBestVal / gPruneC <= bestVal);
 }
 
 void
