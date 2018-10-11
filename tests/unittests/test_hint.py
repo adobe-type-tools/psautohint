@@ -88,7 +88,8 @@ def get_glyph(font, name):
     glob.glob("%s/unhinted/*.[uo][ft][of]" % DATA_DIR),
     glob.glob("%s/hinted/*.[uo][ft][of]" % DATA_DIR),
 ))
-def test_bez(unhinted, hinted):
+@pytest.mark.parametrize("use_autohintexe", [False, True])
+def test_bez(unhinted, hinted, use_autohintexe):
     unhinted_base = os.path.splitext(unhinted)[0]
     hinted_base = os.path.splitext(hinted)[0]
 
@@ -121,5 +122,6 @@ def test_bez(unhinted, hinted):
         hinted_otf_glyph = get_glyph(hinted_otf_font, name)
         assert hinted_otf_glyph == hinted_bez_glyph
 
-        result = hint_bez_glyph(bez_info, bez_glyph)
+        result = hint_bez_glyph(bez_info, bez_glyph,
+                                use_autohintexe=use_autohintexe)
         assert normalize_glyph(result, name) == hinted_bez_glyph

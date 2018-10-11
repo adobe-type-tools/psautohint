@@ -3,11 +3,14 @@ from __future__ import print_function, absolute_import
 import os
 import sys
 import plistlib
+import logging
 
 from fontTools.misc.py23 import tobytes, tounicode
 
 from . import _psautohint
 
+
+log = logging.getLogger(__name__)
 
 __version__ = _psautohint.version
 
@@ -64,18 +67,57 @@ def get_font_format(font_file_path):
         return None
 
 
+def _hint_with_autohintexe(info, glyph, allow_edit, allow_hint_sub,
+                           round_coordinates):
+    import subprocess
+
+    edit = "" if allow_edit else "-e"
+    hintsub = "" if allow_hint_sub else "-n"
+    decimal = "" if round_coordinates else "-d"
+    cmd = [AUTOHINTEXE, edit, hintsub, decimal, "-D", "-i", info, "-b", glyph]
+    cmd = [a for a in cmd if a]  # Filter out empty args, just in case.
+    try:
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        outdata, errordata = p.communicate()
+
+        # A bit of hack to parse the stderr output and route it through our
+        # logger.
+        if errordata:
+            errordata = tounicode(errordata).strip().split("\n")
+            for line in errordata:
+                if ": " in line:
+                    level, msg = line.split(": ", 1)
+                    if level not in ("DEBUG", "INFO", "WARNING", "ERROR"):
+                        level, msg = "INFO", line
+                    getattr(log, level.lower())(msg)
+                else:
+                    log.info(line)
+
+        return tounicode(outdata)
+    except (subprocess.CalledProcessError, OSError) as err:
+        raise _psautohint.error(err)
+
+
 def hint_bez_glyph(info, glyph, allow_edit=True, allow_hint_sub=True,
-                   round_coordinates=True):
-    hinted = _psautohint.autohint(tobytes(info),
-                                  tobytes(glyph),
-                                  allow_edit,
-                                  allow_hint_sub,
-                                  round_coordinates)
+                   round_coordinates=True, use_autohintexe=False):
+    if use_autohintexe:
+        hinted = _hint_with_autohintexe(info,
+                                        glyph,
+                                        allow_edit,
+                                        allow_hint_sub,
+                                        round_coordinates)
+    else:
+        hinted = _psautohint.autohint(tobytes(info),
+                                      tobytes(glyph),
+                                      allow_edit,
+                                      allow_hint_sub,
+                                      round_coordinates)
 
     return tounicode(hinted)
 
 
-def hint_compatible_bez_glyphs(info, glyphs, masters):
+def hint_compatible_bez_glyphs(info, glyphs, masters, use_autohintexe=False):
     hinted = _psautohint.autohintmm(tuple(tobytes(g) for g in glyphs),
                                     tuple(tobytes(m) for m in masters))
 

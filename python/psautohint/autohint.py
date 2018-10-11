@@ -69,6 +69,7 @@ class ACOptions(object):
         self.writeToDefaultLayer = False
         self.baseMaster = {}
         self.font_format = None
+        self.use_autohintexe = False
 
 
 class ACHintError(Exception):
@@ -341,7 +342,8 @@ def hintFile(options, path, outpath, reference_master):
                 newBezString = hint_bez_glyph(fontInfo, bezString,
                                               options.allowChanges,
                                               not options.noHintSub,
-                                              options.round_coords)
+                                              options.round_coords,
+                                              options.use_autohintexe)
                 options.baseMaster[name] = newBezString
             else:
                 baseFontFileName = os.path.basename(options.reference_font)
