@@ -32,11 +32,12 @@ AC_SetReportCB(AC_REPORTFUNCPTR reportCB)
 
 ACLIB_API void
 AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB,
-                    unsigned int allStems)
+                    unsigned int allStems, void* userData)
 {
     gAllStems = allStems;
     gAddHStemCB = hstemCB;
     gAddVStemCB = vstemCB;
+    gAddStemUserData = userData;
     gDoStems = true;
 
     gAddGlyphExtremesCB = NULL;
@@ -45,10 +46,12 @@ AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB, AC_REPORTSTEMPTR vstemCB,
 }
 
 ACLIB_API void
-AC_SetReportZonesCB(AC_REPORTZONEPTR glyphCB, AC_REPORTZONEPTR stemCB)
+AC_SetReportZonesCB(AC_REPORTZONEPTR glyphCB, AC_REPORTZONEPTR stemCB,
+                    void* userData)
 {
     gAddGlyphExtremesCB = glyphCB;
     gAddStemExtremesCB = stemCB;
+    gAddExtremesUserData = userData;
     gDoAligns = true;
 
     gAddHStemCB = NULL;
@@ -57,9 +60,10 @@ AC_SetReportZonesCB(AC_REPORTZONEPTR glyphCB, AC_REPORTZONEPTR stemCB)
 }
 
 ACLIB_API void
-AC_SetReportRetryCB(AC_RETRYPTR retryCB)
+AC_SetReportRetryCB(AC_RETRYPTR retryCB, void* userData)
 {
     gReportRetryCB = retryCB;
+    gReportRetryUserData = userData;
 }
 
 /*
@@ -106,7 +110,7 @@ AutoHintString(const char* srcbezdata, const char* fontinfodata,
         return AC_FatalError;
     } else if (value == 1) {
         /* AutoHint was called successfully */
-        char* data;
+        char *data;
         size_t len;
 
         ACBufferRead(gBezOutput, &data, &len);

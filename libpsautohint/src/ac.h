@@ -196,9 +196,13 @@ extern AC_REPORTSTEMPTR gAddVStemCB;
 extern AC_REPORTZONEPTR gAddGlyphExtremesCB;
 extern AC_REPORTZONEPTR gAddStemExtremesCB;
 
-void AddStemExtremes(Fixed bot, Fixed top);
-
 extern AC_RETRYPTR gReportRetryCB;
+
+extern void* gAddStemUserData;
+extern void* gAddExtremesUserData;
+extern void* gReportRetryUserData;
+
+void AddStemExtremes(Fixed bot, Fixed top);
 
 #define leftList (gSegLists[0])
 #define rightList (gSegLists[1])
