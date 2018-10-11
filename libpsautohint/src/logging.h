@@ -18,10 +18,10 @@
 #define FATALERROR 2
 
 /* defines for LogMsg level param */
-#define LOGDEBUG -1
-#define INFO 0
-#define WARNING 1
-#define LOGERROR 2
+#define LOGDEBUG  AC_LogDebug
+#define INFO      AC_LogInfo
+#define WARNING   AC_LogWarning
+#define LOGERROR  AC_LogError
 
 /* maximum message length */
 #define MAXMSGLEN 500
