@@ -12,6 +12,17 @@ from . import _psautohint
 __version__ = _psautohint.version
 
 
+AUTOHINTEXE = os.path.join(
+    os.path.dirname(__file__),
+    "autohintexe" + (".exe" if sys.platform in ("win32", "cygwin") else "")
+)
+if not os.path.isfile(AUTOHINTEXE) or not os.access(AUTOHINTEXE, os.X_OK):
+    import warnings
+    warnings.warn(
+        "embedded 'autohintexe' executable not found: %r" % AUTOHINTEXE
+    )
+
+
 class FontParseError(Exception):
     pass
 
@@ -69,14 +80,3 @@ def hint_compatible_bez_glyphs(info, glyphs, masters):
                                     tuple(tobytes(m) for m in masters))
 
     return [tounicode(g) for g in hinted]
-
-
-AUTOHINTEXE = os.path.join(
-    os.path.dirname(__file__),
-    "autohintexe" + (".exe" if sys.platform in ("win32", "cygwin") else "")
-)
-if not os.path.isfile(AUTOHINTEXE) or not os.access(AUTOHINTEXE, os.X_OK):
-    import warnings
-    warnings.warn(
-        "embedded 'autohintexe' executable not found: %r" % AUTOHINTEXE
-    )
