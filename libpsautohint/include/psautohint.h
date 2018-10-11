@@ -46,6 +46,14 @@ enum
     AC_InvalidParameterError
 };
 
+enum
+{
+    AC_LogDebug = -1,
+    AC_LogInfo,
+    AC_LogWarning,
+    AC_LogError
+};
+
 /*
  * Function: AC_getVersion
  *

@@ -47,16 +47,16 @@ reportCB(char* msg, int level)
     }
 
     switch (level) {
-        case -1: /* LOGDEBUG */
+        case AC_LogDebug:
             PyObject_CallMethod(logger, "debug", "s", msg);
             break;
-        case 0: /* INFO */
+        case AC_LogInfo:
             PyObject_CallMethod(logger, "info", "s", msg);
             break;
-        case 1: /* WARNING */
+        case AC_LogWarning:
             PyObject_CallMethod(logger, "warning", "s", msg);
             break;
-        case 2: /* LOGERROR */
+        case AC_LogError:
             PyObject_CallMethod(logger, "error", "s", msg);
             break;
         default:

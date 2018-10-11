@@ -118,19 +118,19 @@ static void
 reportCB(char* msg, int level)
 {
     switch (level) {
-        case -1: /* LOGDEBUG */
+        case AC_LogDebug:
             if (debug)
                 fprintf(stderr, "DEBUG: %s\n", msg);
             break;
-        case 0: /* INFO */
+        case AC_LogInfo:
             if (verbose)
                 fprintf(stderr, "INFO: %s\n", msg);
             break;
-        case 1: /* WARNING */
+        case AC_LogWarning:
             if (verbose)
                 fprintf(stderr, "WARNING: %s\n", msg);
             break;
-        case 2: /* LOGERROR */
+        case AC_LogError:
             fprintf(stderr, "ERROR: %s\n", msg);
             break;
         default:
