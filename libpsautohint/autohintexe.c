@@ -66,7 +66,7 @@ printHelp(void)
                     "the -f parameter for data input \n");
     fprintf(stdout, "   <name1> [name2]..[nameN]  paths to glyph bez files\n");
     fprintf(stdout, "   -b the last argument is bez data instead of a file "
-                    "name and the result will go to stdOut\n");
+                    "name and the result will go to stdout\n");
     fprintf(
       stdout,
       "   -s <suffix> Write output data to 'file name' + 'suffix', rather\n");
@@ -120,18 +120,18 @@ reportCB(char* msg, int level)
     switch (level) {
         case -1: /* LOGDEBUG */
             if (debug)
-                fprintf(stdout, "DEBUG: %s\n", msg);
+                fprintf(stderr, "DEBUG: %s\n", msg);
             break;
         case 0: /* INFO */
             if (verbose)
-                fprintf(stdout, "INFO: %s\n", msg);
+                fprintf(stderr, "INFO: %s\n", msg);
             break;
         case 1: /* WARNING */
             if (verbose)
-                fprintf(stdout, "WARNING: %s\n", msg);
+                fprintf(stderr, "WARNING: %s\n", msg);
             break;
         case 2: /* LOGERROR */
-            fprintf(stdout, "ERROR: %s\n", msg);
+            fprintf(stderr, "ERROR: %s\n", msg);
             break;
         default:
             break;
@@ -154,7 +154,7 @@ getFileData(char* name)
 
     struct stat filestat;
     if ((stat(name, &filestat)) < 0) {
-        fprintf(stdout,
+        fprintf(stderr,
                 "Error. Could not open file '%s'. Please check "
                 "that it exists and is not write-protected.\n",
                 name);
@@ -162,13 +162,13 @@ getFileData(char* name)
     }
 
     if (filestat.st_size == 0) {
-        fprintf(stdout, "Error. File '%s' has zero size.\n", name);
+        fprintf(stderr, "Error. File '%s' has zero size.\n", name);
         exit(AC_FatalError);
     }
 
     data = malloc(filestat.st_size + 1);
     if (data == NULL) {
-        fprintf(stdout,
+        fprintf(stderr,
                 "Error. Could not allcoate memory for contents of file %s.\n",
                 name);
         exit(AC_FatalError);
@@ -176,7 +176,7 @@ getFileData(char* name)
         size_t fileSize = 0;
         FILE* fp = fopen(name, "r");
         if (fp == NULL) {
-            fprintf(stdout,
+            fprintf(stderr,
                     "Error. Could not open file '%s'. Please check "
                     "that it exists and is not write-protected.\n",
                     name);
@@ -278,7 +278,7 @@ main(int argc, char* argv[])
             total_files++;
             continue;
         } else if (firstFileNameIndex != -1) {
-            fprintf(stdout, "Error. Illegal command line. \"-\" option "
+            fprintf(stderr, "Error. Illegal command line. \"-\" option "
                             "found after first file name.\n");
             exit(1);
         }
@@ -304,7 +304,7 @@ main(int argc, char* argv[])
                 break;
             case 'f':
                 if (fontinfo != NULL) {
-                    fprintf(stdout, "Error. Illegal command line. \"-f\" "
+                    fprintf(stderr, "Error. Illegal command line. \"-f\" "
                                     "can’t be used together with the "
                                     "\"-i\" command.\n");
                     exit(1);
@@ -312,7 +312,7 @@ main(int argc, char* argv[])
                 fontInfoFileName = argv[++argi];
                 if ((fontInfoFileName[0] == '\0') ||
                     (fontInfoFileName[0] == '-')) {
-                    fprintf(stdout, "Error. Illegal command line. \"-f\" "
+                    fprintf(stderr, "Error. Illegal command line. \"-f\" "
                                     "option must be followed by a file "
                                     "name.\n");
                     exit(1);
@@ -321,14 +321,14 @@ main(int argc, char* argv[])
                 break;
             case 'i':
                 if (fontinfo != NULL) {
-                    fprintf(stdout, "Error. Illegal command line. \"-i\" "
+                    fprintf(stderr, "Error. Illegal command line. \"-i\" "
                                     "can’t be used together with the "
                                     "\"-f\" command.\n");
                     exit(1);
                 }
                 fontinfo = argv[++argi];
                 if ((fontinfo[0] == '\0') || (fontinfo[0] == '-')) {
-                    fprintf(stdout, "Error. Illegal command line. \"-i\" "
+                    fprintf(stderr, "Error. Illegal command line. \"-i\" "
                                     "option must be followed by a font "
                                     "info string.\n");
                     exit(1);
@@ -337,7 +337,7 @@ main(int argc, char* argv[])
             case 's':
                 fileSuffix = argv[++argi];
                 if ((fileSuffix[0] == '\0') || (fileSuffix[0] == '-')) {
-                    fprintf(stdout, "Error. Illegal command line. \"-s\" "
+                    fprintf(stderr, "Error. Illegal command line. \"-s\" "
                                     "option must be followed by a string, "
                                     "and the string must not begin with "
                                     "'-'.\n");
@@ -371,7 +371,7 @@ main(int argc, char* argv[])
                         report_stems = true;
                         break;
                     default:
-                        fprintf(stdout, "Error. %s is an invalid parameter.\n",
+                        fprintf(stderr, "Error. %s is an invalid parameter.\n",
                                 current_arg);
                         badParam = true;
                         break;
@@ -381,7 +381,7 @@ main(int argc, char* argv[])
                 printVersions();
                 exit(0);
             default:
-                fprintf(stdout, "Error. %s is an invalid parameter.\n",
+                fprintf(stderr, "Error. %s is an invalid parameter.\n",
                         current_arg);
                 badParam = true;
                 break;
@@ -399,12 +399,12 @@ main(int argc, char* argv[])
     }
 
     if (firstFileNameIndex == -1) {
-        fprintf(stdout,
+        fprintf(stderr,
                 "Error. Illegal command line. Must provide bez file name.\n");
         badParam = true;
     }
     if (fontinfo == NULL) {
-        fprintf(stdout,
+        fprintf(stderr,
                 "Error. Illegal command line. Must provide font info.\n");
         badParam = true;
     }
@@ -444,7 +444,7 @@ main(int argc, char* argv[])
                     if (!argumentIsBezData) {
                         writeFileData(bezName, output, fileSuffix);
                     } else {
-                        printf("%s", output);
+                        fprintf(stdout, "%s", output);
                     }
                 }
             }
