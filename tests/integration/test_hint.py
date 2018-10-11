@@ -72,6 +72,16 @@ def test_cff(cff, tmpdir):
                    str(tmpdir / basename(out)) + ".xml"])
 
 
+def test_autohintexe(tmpdir):
+    path = "%s/dummy/font.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+    options.use_autohintexe = True
+    hintFiles(options)
+
+    assert differ([path, out])
+
+
 tx_found = False
 try:
     subprocess.check_call(["tx", "-h"])
