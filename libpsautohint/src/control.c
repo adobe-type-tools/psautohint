@@ -818,7 +818,7 @@ AddHintsInnerLoop(const char* srcglyph, bool extrahint)
         /* if we are doing the stem and zones reporting, we need to discard the
          * reported. */
         if (gReportRetryCB != NULL) {
-            gReportRetryCB();
+            gReportRetryCB(gReportRetryUserData);
         }
         if (gPathStart == NULL || gPathStart == gPathEnd) {
             LogMsg(LOGERROR, NONFATALERROR, "No glyph path.");

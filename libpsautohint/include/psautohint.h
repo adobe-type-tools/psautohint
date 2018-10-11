@@ -91,15 +91,20 @@ ACLIB_API void AC_SetReportCB(AC_REPORTFUNCPTR reportCB);
  * If allStems is false, then stems defined by curves are excluded from the
  * reporting.
  *
+ * userData is a pointer provided by the client, and will be passed to report
+ * callback functions.
+ *
  * Note that the callbacks should not dispose of the glyphName memory; that
  * belongs to the AC lib. It should be copied immediately - it may may last
  * past the return of the callback.
  */
-typedef void (*AC_REPORTSTEMPTR)(float top, float bottom, char* glyphName);
+typedef void (*AC_REPORTSTEMPTR)(float top, float bottom, char* glyphName,
+                                 void* userData);
 
 ACLIB_API void AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB,
                                    AC_REPORTSTEMPTR vstemCB,
-                                   unsigned int allStems);
+                                   unsigned int allStems,
+                                   void* userData);
 
 /*
  * Function: AC_SetReportZonesCB
@@ -107,14 +112,19 @@ ACLIB_API void AC_SetReportStemsCB(AC_REPORTSTEMPTR hstemCB,
  * If this is called , then the AC lib will write all the alignment zones it
  * encounters.
  *
+ * userData is a pointer provided by the client, and will be passed to report
+ * callback functions.
+ *
  * Note that the callbacks should not dispose of the glyphName memory; that
  * belongs to the AC lib. It should be copied immediately - it may may last
  * past the return of the callback.
  */
-typedef void (*AC_REPORTZONEPTR)(float top, float bottom, char* glyphName);
+typedef void (*AC_REPORTZONEPTR)(float top, float bottom, char* glyphName,
+                                 void* userData);
 
 ACLIB_API void AC_SetReportZonesCB(AC_REPORTZONEPTR charCB,
-                                   AC_REPORTZONEPTR stemCB);
+                                   AC_REPORTZONEPTR stemCB,
+                                   void* userData);
 
 /*
  * Function: AC_SetReportRetryCB
@@ -124,9 +134,9 @@ ACLIB_API void AC_SetReportZonesCB(AC_REPORTZONEPTR charCB,
  *
  * This is to be used when AC_SetReportZonesCB or AC_SetReportStemsCB are used.
  */
-typedef void (*AC_RETRYPTR)(void);
+typedef void (*AC_RETRYPTR)(void* userData);
 
-ACLIB_API void AC_SetReportRetryCB(AC_RETRYPTR retryCB);
+ACLIB_API void AC_SetReportRetryCB(AC_RETRYPTR retryCB, void* userData);
 
 /*
  * Function: AutoHintString

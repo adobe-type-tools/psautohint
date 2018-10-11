@@ -16,7 +16,8 @@ AddVStem(Fixed right, Fixed left, bool curved)
         return;
 
     if (gAddVStemCB)
-        gAddVStemCB(FIXED2FLOAT(right), FIXED2FLOAT(left), gGlyphName);
+        gAddVStemCB(FIXED2FLOAT(right), FIXED2FLOAT(left), gGlyphName,
+                    gAddStemUserData);
 }
 
 void
@@ -26,19 +27,22 @@ AddHStem(Fixed top, Fixed bottom, bool curved)
         return;
 
     if (gAddHStemCB)
-        gAddHStemCB(FIXED2FLOAT(top), FIXED2FLOAT(bottom), gGlyphName);
+        gAddHStemCB(FIXED2FLOAT(top), FIXED2FLOAT(bottom), gGlyphName,
+                    gAddStemUserData);
 }
 
 void
 AddGlyphExtremes(Fixed bot, Fixed top)
 {
     if (gAddGlyphExtremesCB)
-        gAddGlyphExtremesCB(FIXED2FLOAT(top), FIXED2FLOAT(bot), gGlyphName);
+        gAddGlyphExtremesCB(FIXED2FLOAT(top), FIXED2FLOAT(bot), gGlyphName,
+                            gAddExtremesUserData);
 }
 
 void
 AddStemExtremes(Fixed bot, Fixed top)
 {
     if (gAddStemExtremesCB)
-        gAddStemExtremesCB(FIXED2FLOAT(top), FIXED2FLOAT(bot), gGlyphName);
+        gAddStemExtremesCB(FIXED2FLOAT(top), FIXED2FLOAT(bot), gGlyphName,
+                           gAddExtremesUserData);
 }

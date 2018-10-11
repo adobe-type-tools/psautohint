@@ -42,6 +42,9 @@ AC_REPORTSTEMPTR gAddVStemCB = NULL;
 AC_REPORTZONEPTR gAddGlyphExtremesCB = NULL;
 AC_REPORTZONEPTR gAddStemExtremesCB = NULL;
 AC_RETRYPTR gReportRetryCB = NULL;
+void* gAddStemUserData = NULL;
+void* gAddExtremesUserData = NULL;
+void* gReportRetryUserData = NULL;
 
 #define VMSIZE (1000000)
 static unsigned char *vmfree, *vmlast, vm[VMSIZE];

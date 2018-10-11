@@ -19,21 +19,18 @@
 typedef unsigned char bool;
 #define true 1
 #define false 0
+#define snprintf(buf, len, format, ...)                                        \
+    _snprintf_s(buf, len, len, format, __VA_ARGS__)
 #endif
 
 #include "psautohint.h"
 
-static const char* C_ProgramVersion = "1.7";
+static const char* C_ProgramVersion = "1.8";
 static const char* reportExt = ".rpt";
 static const char* dfltExt = ".new";
-static char* bezName = NULL;
-static char* fileSuffix = NULL;
-static FILE* reportFile = NULL;
 
 static bool verbose = true; /* if true don't number of characters processed. */
 static bool debug = false;
-
-static void openReportFile(char* name, char* fSuffix);
 
 static void
 printVersions(void)
@@ -82,36 +79,38 @@ printHelp(void)
     fprintf(stdout, "   -v print versions.\n");
 }
 
+#define STR_LEN 200
+#define WRITE_TO_BUFFER(text, a1, a2, a3)                                      \
+    if (userData) {                                                            \
+        char str[STR_LEN];                                                     \
+        ACBuffer* buffer = (ACBuffer*)userData;                                \
+        size_t len = snprintf(str, STR_LEN, text, a1, a2, a3);                 \
+        if (len > 0)                                                           \
+            ACBufferWrite(buffer, str, len <= STR_LEN ? len : STR_LEN);        \
+    }
+
 static void
-charZoneCB(float top, float bottom, char* glyphName)
+charZoneCB(float top, float bottom, char* glyphName, void* userData)
 {
-    if (reportFile)
-        fprintf(reportFile, "charZone %s top %f bottom %f\n", glyphName, top,
-                bottom);
+    WRITE_TO_BUFFER("charZone %s top %f bottom %f\n", glyphName, top, bottom);
 }
 
 static void
-stemZoneCB(float top, float bottom, char* glyphName)
+stemZoneCB(float top, float bottom, char* glyphName, void* userData)
 {
-    if (reportFile)
-        fprintf(reportFile, "stemZone %s top %f bottom %f\n", glyphName, top,
-                bottom);
+    WRITE_TO_BUFFER("stemZone %s top %f bottom %f\n", glyphName, top, bottom);
 }
 
 static void
-hstemCB(float top, float bottom, char* glyphName)
+hstemCB(float top, float bottom, char* glyphName, void* userData)
 {
-    if (reportFile)
-        fprintf(reportFile, "HStem %s top %f bottom %f\n", glyphName, top,
-                bottom);
+    WRITE_TO_BUFFER("HStem %s top %f bottom %f\n", glyphName, top, bottom);
 }
 
 static void
-vstemCB(float right, float left, char* glyphName)
+vstemCB(float right, float left, char* glyphName, void* userData)
 {
-    if (reportFile)
-        fprintf(reportFile, "VStem %s right %f left %f\n", glyphName, right,
-                left);
+    WRITE_TO_BUFFER("VStem %s right %f left %f\n", glyphName, right, left);
 }
 
 static void
@@ -139,11 +138,11 @@ reportCB(char* msg, int level)
 }
 
 static void
-reportRetry(void)
+reportRetry(void* userData)
 {
-    if (reportFile != NULL) {
-        fclose(reportFile);
-        openReportFile(bezName, fileSuffix);
+    if (userData) {
+        ACBuffer* buffer = (ACBuffer*)userData;
+        ACBufferReset(buffer);
     }
 }
 
@@ -211,10 +210,11 @@ writeFileData(char* name, char* output, size_t outputsize, char* fSuffix)
     fclose(fp);
 }
 
-static void
+static FILE*
 openReportFile(char* name, char* fSuffix)
 {
-    if ((fSuffix != NULL) && (fSuffix[0] != '\0')) {
+    FILE* file;
+    if (fSuffix != NULL && fSuffix[0] != '\0') {
         char* savedName;
         size_t nameSize;
         nameSize = strlen(name) + strlen(fSuffix) + 1;
@@ -222,17 +222,11 @@ openReportFile(char* name, char* fSuffix)
         savedName[0] = '\0';
         strcat(savedName, name);
         strcat(savedName, fSuffix);
-        reportFile = fopen(savedName, "w");
+        file = fopen(savedName, "w");
         free(savedName);
     } else
-        reportFile = fopen(name, "w");
-}
-
-static void
-closeReportFile(void)
-{
-    if (reportFile != NULL)
-        fclose(reportFile);
+        file = fopen(name, "w");
+    return file;
 }
 
 int
@@ -254,15 +248,15 @@ main(int argc, char* argv[])
     int firstFileNameIndex = -1;   /* arg index for first bez file name, or
                                       suffix of environment variable holding the
                                       bez string. */
-
+    char* fileSuffix = (char*)dfltExt;
     int total_files = 0;
     int result, argi;
+    ACBuffer* reportBuffer = NULL;
 
     badParam = false;
     allStems = false;
 
     allowEdit = allowHintSub = roundCoords = true;
-    fileSuffix = (char*)dfltExt;
 
     /* read in options */
     argi = 0;
@@ -388,15 +382,16 @@ main(int argc, char* argv[])
         }
     }
 
-    if (report_zones) {
-        AC_SetReportRetryCB(reportRetry);
-        AC_SetReportZonesCB(charZoneCB, stemZoneCB);
+    if (report_zones || report_stems) {
+        reportBuffer = ACBufferNew(150);
+        AC_SetReportRetryCB(reportRetry, (void*)reportBuffer);
     }
 
-    if (report_stems) {
-        AC_SetReportRetryCB(reportRetry);
-        AC_SetReportStemsCB(hstemCB, vstemCB, allStems);
-    }
+    if (report_zones)
+        AC_SetReportZonesCB(charZoneCB, stemZoneCB, (void*)reportBuffer);
+
+    if (report_stems)
+        AC_SetReportStemsCB(hstemCB, vstemCB, allStems, (void*)reportBuffer);
 
     if (firstFileNameIndex == -1) {
         fprintf(stderr,
@@ -419,7 +414,7 @@ main(int argc, char* argv[])
             char* bezdata;
             char* output;
             size_t outputsize = 0;
-            bezName = argv[argi];
+            char* bezName = argv[argi];
             if (!argumentIsBezData) {
                 bezdata = getFileData(bezName);
             } else {
@@ -428,17 +423,25 @@ main(int argc, char* argv[])
             outputsize = 4 * strlen(bezdata);
             output = malloc(outputsize);
 
-            if (!argumentIsBezData && (report_zones || report_stems)) {
-                openReportFile(bezName, fileSuffix);
-            }
+            if (reportBuffer)
+                ACBufferReset(reportBuffer);
 
             result = AutoHintString(bezdata, fontinfo, &output, &outputsize,
                                     allowEdit, allowHintSub, roundCoords);
             if (!argumentIsBezData)
                 free(bezdata);
 
-            if (reportFile != NULL) {
-                closeReportFile();
+            if (reportBuffer) {
+                char* data;
+                size_t len;
+                ACBufferRead(reportBuffer, &data, &len);
+                if (!argumentIsBezData) {
+                    FILE* file = openReportFile(bezName, fileSuffix);
+                    fwrite(data, 1, len, file);
+                    fclose(file);
+                } else {
+                    fwrite(data, 1, len, stdout);
+                }
             } else {
                 if ((outputsize != 0) && (result == AC_Success)) {
                     if (!argumentIsBezData) {
@@ -470,6 +473,7 @@ main(int argc, char* argv[])
 
         argi = firstFileNameIndex - 1;
         for (i = 0; i < total_files; i++) {
+            char* bezName;
             argi++;
             bezName = argv[argi];
             masters[i] = malloc(strlen(bezName) + 1);
@@ -508,6 +512,8 @@ main(int argc, char* argv[])
 
     if (fontInfoFileName)
         free(fontinfo);
+
+    ACBufferFree(reportBuffer);
 
     return 0;
 }
