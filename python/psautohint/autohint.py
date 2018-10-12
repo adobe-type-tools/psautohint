@@ -69,6 +69,9 @@ class ACOptions(object):
         self.writeToDefaultLayer = False
         self.baseMaster = {}
         self.font_format = None
+        self.report_zones = False
+        self.report_stems = False
+        self.report_all_stems = False
         self.use_autohintexe = False
 
 
@@ -343,6 +346,9 @@ def hintFile(options, path, outpath, reference_master):
                                               options.allowChanges,
                                               not options.noHintSub,
                                               options.round_coords,
+                                              options.report_zones,
+                                              options.report_stems,
+                                              options.report_all_stems,
                                               options.use_autohintexe)
                 options.baseMaster[name] = newBezString
             else:

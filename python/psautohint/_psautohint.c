@@ -28,6 +28,8 @@
 typedef unsigned char bool;
 #define true 1
 #define false 0
+#define snprintf(buf, len, format, ...)                                        \
+    _snprintf_s(buf, len, len, format, __VA_ARGS__)
 #endif
 
 #include "psautohint.h"
@@ -61,6 +63,49 @@ reportCB(char* msg, int level)
             break;
         default:
             break;
+    }
+}
+
+#define STR_LEN 200
+#define WRITE_TO_BUFFER(text, a1, a2, a3)                                      \
+    if (userData) {                                                            \
+        char str[STR_LEN];                                                     \
+        ACBuffer* buffer = (ACBuffer*)userData;                                \
+        size_t len = snprintf(str, STR_LEN, text, a1, a2, a3);                 \
+        if (len > 0)                                                           \
+            ACBufferWrite(buffer, str, len <= STR_LEN ? len : STR_LEN);        \
+    }
+
+static void
+charZoneCB(float top, float bottom, char* glyphName, void* userData)
+{
+    WRITE_TO_BUFFER("charZone %s top %f bottom %f\n", glyphName, top, bottom);
+}
+
+static void
+stemZoneCB(float top, float bottom, char* glyphName, void* userData)
+{
+    WRITE_TO_BUFFER("stemZone %s top %f bottom %f\n", glyphName, top, bottom);
+}
+
+static void
+hstemCB(float top, float bottom, char* glyphName, void* userData)
+{
+    WRITE_TO_BUFFER("HStem %s top %f bottom %f\n", glyphName, top, bottom);
+}
+
+static void
+vstemCB(float right, float left, char* glyphName, void* userData)
+{
+    WRITE_TO_BUFFER("VStem %s right %f left %f\n", glyphName, right, left);
+}
+
+static void
+reportRetry(void* userData)
+{
+    if (userData) {
+        ACBuffer* buffer = (ACBuffer*)userData;
+        ACBufferReset(buffer);
     }
 }
 
@@ -115,17 +160,40 @@ static PyObject*
 autohint(PyObject* self, PyObject* args)
 {
     int allowEdit = true, roundCoords = true, allowHintSub = true;
+    int report = 0, allStems = false;
     PyObject* fontObj = NULL;
     PyObject* inObj = NULL;
     PyObject* outObj = NULL;
     char* inData = NULL;
     char* fontInfo = NULL;
     bool error = true;
+    ACBuffer* reportBufffer = NULL;
 
-    if (!PyArg_ParseTuple(args, "O!O!|iii", &PyBytes_Type, &fontObj,
+    if (!PyArg_ParseTuple(args, "O!O!|iiiii", &PyBytes_Type, &fontObj,
                           &PyBytes_Type, &inObj, &allowEdit, &allowHintSub,
-                          &roundCoords))
+                          &roundCoords, &report, &allStems))
         return NULL;
+
+    if (report) {
+        reportBufffer = ACBufferNew(150);
+        allowEdit = allowHintSub = false;
+        switch (report) {
+            case 1:
+                AC_SetReportRetryCB(reportRetry, (void*)reportBufffer);
+                AC_SetReportZonesCB(charZoneCB, stemZoneCB,
+                                    (void*)reportBufffer);
+                break;
+            case 2:
+                AC_SetReportRetryCB(reportRetry, (void*)reportBufffer);
+                AC_SetReportStemsCB(hstemCB, vstemCB, allStems,
+                                    (void*)reportBufffer);
+                break;
+            default:
+                PyErr_SetString(PyExc_ValueError,
+                                "Invalid \"report\" argument, must be 1 or 2");
+                goto done;
+        }
+    }
 
     AC_SetMemManager(NULL, memoryManager);
     AC_SetReportCB(reportCB);
@@ -143,7 +211,14 @@ autohint(PyObject* self, PyObject* args)
 
             if (result == AC_Success) {
                 error = false;
-                outObj = PyBytes_FromStringAndSize(output, outLen);
+                if (reportBufffer) {
+                    char* data;
+                    size_t len;
+                    ACBufferRead(reportBufffer, &data, &len);
+                    outObj = PyBytes_FromStringAndSize(data, len);
+                } else {
+                    outObj = PyBytes_FromStringAndSize(output, outLen);
+                }
             }
 
             MEMFREE(output);
@@ -167,6 +242,9 @@ autohint(PyObject* self, PyObject* args)
             }
         }
     }
+
+done:
+    ACBufferFree(reportBufffer);
 
     if (error)
         return NULL;
