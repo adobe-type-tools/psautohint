@@ -68,13 +68,18 @@ def get_font_format(font_file_path):
 
 
 def _hint_with_autohintexe(info, glyph, allow_edit, allow_hint_sub,
-                           round_coordinates):
+                           round_coordinates, report_zones,
+                           report_stems, report_all_stems):
     import subprocess
 
     edit = "" if allow_edit else "-e"
     hintsub = "" if allow_hint_sub else "-n"
     decimal = "" if round_coordinates else "-d"
-    cmd = [AUTOHINTEXE, edit, hintsub, decimal, "-D", "-i", info, "-b", glyph]
+    zones = "-ra" if report_zones else ""
+    stems = "-rs" if report_stems else ""
+    allstems = "-a" if report_all_stems else ""
+    cmd = [AUTOHINTEXE, edit, hintsub, decimal, zones, stems, allstems,
+           "-D", "-i", info, "-b", glyph]
     cmd = [a for a in cmd if a]  # Filter out empty args, just in case.
     try:
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
@@ -100,19 +105,31 @@ def _hint_with_autohintexe(info, glyph, allow_edit, allow_hint_sub,
 
 
 def hint_bez_glyph(info, glyph, allow_edit=True, allow_hint_sub=True,
-                   round_coordinates=True, use_autohintexe=False):
+                   round_coordinates=True, report_zones=False,
+                   report_stems=False, report_all_stems=False,
+                   use_autohintexe=False):
     if use_autohintexe:
         hinted = _hint_with_autohintexe(info,
                                         glyph,
                                         allow_edit,
                                         allow_hint_sub,
-                                        round_coordinates)
+                                        round_coordinates,
+                                        report_zones,
+                                        report_stems,
+                                        report_all_stems)
     else:
+        report = 0
+        if report_zones:
+            report = 1
+        elif report_stems:
+            report = 2
         hinted = _psautohint.autohint(tobytes(info),
                                       tobytes(glyph),
                                       allow_edit,
                                       allow_hint_sub,
-                                      round_coordinates)
+                                      round_coordinates,
+                                      report,
+                                      report_all_stems)
 
     return tounicode(hinted)
 
