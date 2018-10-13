@@ -32,7 +32,19 @@ class Options(ACOptions):
 # @pytest.mark.parametrize("use_autohintexe", [False, True])
 def test_otf(zones, stems, all_stems, tmpdir, use_autohintexe=True):
     path = "%s/dummy/font.otf" % DATA_DIR
-    out = str(tmpdir / basename(path)) + ".out"
+    out = str(tmpdir / basename(path))
     options = Options(path, out, zones, stems, all_stems)
     options.use_autohintexe = use_autohintexe
+
     hintFiles(options)
+
+    if zones:
+        suffixes = ['.top.txt', '.bot.txt']
+    else:
+        suffixes = ['.hstm.txt', '.vstm.txt']
+
+    for suffix in suffixes:
+        exp_suffix = suffix
+        if all_stems:
+            exp_suffix = '.all' + suffix
+        assert differ([path + exp_suffix, out + suffix, '-l', '1'])

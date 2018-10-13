@@ -34,6 +34,7 @@ import logging
 import os
 import re
 import time
+from collections import defaultdict
 
 from .otfFont import CFFFontData
 from .ufoFont import UFOFontData
@@ -77,6 +78,235 @@ class ACOptions(object):
 
 class ACHintError(Exception):
     pass
+
+
+class GlyphReports:
+    def __init__(self):
+        self.glyphName = None
+        self.hStemList = {}
+        self.vStemList = {}
+        self.hStemPosList = {}
+        self.vStemPosList = {}
+        self.charZoneList = {}
+        self.stemZoneStemList = {}
+        self.glyphs = {}
+
+    def startGlyphName(self, glyphName):
+        self.hStemList = {}
+        self.vStemList = {}
+        self.hStemPosList = {}
+        self.vStemPosList = {}
+        self.charZoneList = {}
+        self.stemZoneStemList = {}
+        self.glyphs[glyphName] = [self.hStemList, self.vStemList,
+                                  self.charZoneList, self.stemZoneStemList]
+        self.glyphName = glyphName
+
+    def addGlyphReport(self, reportString):
+        lines = reportString.splitlines()
+        for line in lines:
+            tokenList = line.split()
+            key = tokenList[0]
+            x = eval(tokenList[3])
+            y = eval(tokenList[5])
+            hintpos = "%s %s" % (x, y)
+            if key == "charZone":
+                self.charZoneList[hintpos] = (x, y)
+            elif key == "stemZone":
+                self.stemZoneStemList[hintpos] = (x, y)
+            elif key == "HStem":
+                width = x - y
+                # avoid counting duplicates
+                if hintpos not in self.hStemPosList:
+                    count = self.hStemList.get(width, 0)
+                    self.hStemList[width] = count+1
+                    self.hStemPosList[hintpos] = width
+            elif key == "VStem":
+                width = x - y
+                # avoid counting duplicates
+                if hintpos not in self.vStemPosList:
+                    count = self.vStemList.get(width, 0)
+                    self.vStemList[width] = count+1
+                    self.vStemPosList[hintpos] = width
+            else:
+                raise FontParseError("Found unknown keyword %s in report file "
+                                     "for glyph %s." % (key, self.glyphName))
+
+    @staticmethod
+    def round_value(val):
+        if val >= 0:
+            return int(val + 0.5)
+        else:
+            return int(val - 0.5)
+
+    def parse_stem_dict(self, stem_dict):
+        """
+        stem_dict: {45.5: 1, 47.0: 2}
+        """
+        # key: stem width
+        # value: stem count
+        width_dict = defaultdict(int)
+        for width, count in stem_dict.items():
+            width = self.round_value(width)
+            width_dict[width] += count
+        return width_dict
+
+    def parse_zone_dicts(self, char_dict, stem_dict):
+        all_zones_dict = char_dict.copy()
+        all_zones_dict.update(stem_dict)
+        # key: zone height
+        # value: zone count
+        top_dict = defaultdict(int)
+        bot_dict = defaultdict(int)
+        for top, bot in all_zones_dict.values():
+            top = self.round_value(top)
+            top_dict[top] += 1
+            bot = self.round_value(bot)
+            bot_dict[bot] += 1
+        return top_dict, bot_dict
+
+    @staticmethod
+    def assemble_rep_list(items_dict, count_dict):
+        # item 0: stem/zone count
+        # item 1: stem width/zone height
+        # item 2: list of glyph names
+        rep_list = []
+        for item in items_dict:
+            rep_list.append((count_dict[item], item, sorted(items_dict[item])))
+        return rep_list
+
+    def getReportLists(self):
+        """
+        self.glyphs is a dictionary:
+            key: glyph name
+            value: list of 4 dictionaries
+                   self.hStemList
+                   self.vStemList
+                   self.charZoneList
+                   self.stemZoneStemList
+        {
+         'A': [{45.5: 1, 47.0: 2}, {229.0: 1}, {}, {}],
+         'B': [{46.0: 2, 46.5: 2, 47.0: 1}, {94.0: 1, 95.0: 1, 100.0: 1}, {}, {}],
+         'C': [{50.0: 2}, {109.0: 1}, {}, {}],
+         'D': [{46.0: 1, 46.5: 2, 47.0: 1}, {95.0: 1, 109.0: 1}, {}, {}],
+         'E': [{46.5: 2, 47.0: 1, 50.0: 2, 177.0: 1, 178.0: 1},
+               {46.0: 1, 75.5: 2, 95.0: 1}, {}, {}],
+         'F': [{46.5: 2, 47.0: 1, 50.0: 1, 177.0: 1},
+               {46.0: 1, 60.0: 1, 75.5: 1, 95.0: 1}, {}, {}],
+         'G': [{43.0: 1, 44.5: 1, 50.0: 1, 51.0: 1}, {94.0: 1, 109.0: 1}, {}, {}]
+        }
+        """
+        h_stem_items_dict = defaultdict(set)
+        h_stem_count_dict = defaultdict(int)
+        v_stem_items_dict = defaultdict(set)
+        v_stem_count_dict = defaultdict(int)
+
+        top_zone_items_dict = defaultdict(set)
+        top_zone_count_dict = defaultdict(int)
+        bot_zone_items_dict = defaultdict(set)
+        bot_zone_count_dict = defaultdict(int)
+
+        for gName, dicts in self.glyphs.items():
+            hStemDict, vStemDict, charZoneDict, stemZoneStemDict = dicts
+
+            glyph_h_stem_dict = self.parse_stem_dict(hStemDict)
+            glyph_v_stem_dict = self.parse_stem_dict(vStemDict)
+
+            for stem_width, stem_count in glyph_h_stem_dict.items():
+                h_stem_items_dict[stem_width].add(gName)
+                h_stem_count_dict[stem_width] += stem_count
+
+            for stem_width, stem_count in glyph_v_stem_dict.items():
+                v_stem_items_dict[stem_width].add(gName)
+                v_stem_count_dict[stem_width] += stem_count
+
+            glyph_top_zone_dict, glyph_bot_zone_dict = self.parse_zone_dicts(
+                charZoneDict, stemZoneStemDict)
+
+            for zone_height, zone_count in glyph_top_zone_dict.items():
+                top_zone_items_dict[zone_height].add(gName)
+                top_zone_count_dict[zone_height] += zone_count
+
+            for zone_height, zone_count in glyph_bot_zone_dict.items():
+                bot_zone_items_dict[zone_height].add(gName)
+                bot_zone_count_dict[zone_height] += zone_count
+
+        # item 0: stem count
+        # item 1: stem width
+        # item 2: list of glyph names
+        h_stem_list = self.assemble_rep_list(
+            h_stem_items_dict, h_stem_count_dict)
+
+        v_stem_list = self.assemble_rep_list(
+            v_stem_items_dict, v_stem_count_dict)
+
+        # item 0: zone count
+        # item 1: zone height
+        # item 2: list of glyph names
+        top_zone_list = self.assemble_rep_list(
+            top_zone_items_dict, top_zone_count_dict)
+
+        bot_zone_list = self.assemble_rep_list(
+            bot_zone_items_dict, bot_zone_count_dict)
+
+        return h_stem_list, v_stem_list, top_zone_list, bot_zone_list
+
+
+def srtCnt(t):
+    """
+    sort by: count (1st item), value (2nd item), list of glyph names (3rd item)
+    """
+    return (-t[0], -t[1], t[2])
+
+
+def srtVal(t):
+    """
+    sort by: value (2nd item), count (1st item), list of glyph names (3rd item)
+    """
+    return (t[1], -t[0], t[2])
+
+
+def srtRevVal(t):
+    """
+    sort by: value (2nd item), count (1st item), list of glyph names (3rd item)
+    """
+    return (-t[1], -t[0], t[2])
+
+
+
+def PrintReports(path, h_stems, v_stems, top_zones, bot_zones):
+    items = ([h_stems, srtCnt], [v_stems, srtCnt],
+             [top_zones, srtRevVal], [bot_zones, srtVal])
+    atime = time.asctime()
+    suffixes = (".hstm.txt", ".vstm.txt", ".top.txt", ".bot.txt")
+    titles = ("Horizontal Stem List for %s on %s\n" % (path, atime),
+              "Vertical Stem List for %s on %s\n" % (path, atime),
+              "Top Zone List for %s on %s\n" % (path, atime),
+              "Bottom Zone List for %s on %s\n" % (path, atime),
+             )
+    headers = ("Count\tWidth\tGlyph List\n",
+               "Count\tWidth\tGlyph List\n",
+               "Count\tTop Zone\tGlyph List\n",
+               "Count\tBottom Zone\tGlyph List\n",
+               )
+    for i, item in enumerate(items):
+        reps, sortFunc = item
+        if not reps:
+            continue
+        fName = '{}{}'.format(path, suffixes[i])
+        title = titles[i]
+        header = headers[i]
+        try:
+            with open(fName, "w") as fp:
+                fp.write(title)
+                fp.write(header)
+                reps.sort(key=sortFunc)
+                for item in reps:
+                    fp.write("%s\t%s\t%s\n" % (item[0], item[1], item[2]))
+                log.info("Wrote %s" % fName)
+        except (IOError, OSError):
+            log.error("Error creating file %s!" % fName)
+
 
 
 def getGlyphID(glyphTag, fontGlyphList):
@@ -289,6 +519,10 @@ def hintFile(options, path, outpath, reference_master):
         log.info("Using alternate FDDict global values from fontinfo "
                  "file for some glyphs.")
 
+    reports = None
+    if options.report_zones or options.report_stems:
+        reports = GlyphReports()
+
     # Get charstring for identifier in glyph-list
     isCID = fontData.isCID()
     lastFDIndex = None
@@ -300,6 +534,9 @@ def hintFile(options, path, outpath, reference_master):
     processedGlyphCount = 0
     for name in glyphList:
         seenGlyphCount += 1
+
+        if reports is not None and name == ".notdef":
+            continue
 
         # Convert to bez format
         bezString, width = fontData.convertToBez(name, options.read_hints,
@@ -339,6 +576,9 @@ def hintFile(options, path, outpath, reference_master):
         else:
             log.info("%s: Begin hinting.", nameAliases.get(name, name))
 
+        if reports is not None:
+            reports.startGlyphName(name)
+
         # Call auto-hint library on bez string.
         try:
             if reference_master or not options.reference_font:
@@ -350,7 +590,10 @@ def hintFile(options, path, outpath, reference_master):
                                               options.report_stems,
                                               options.report_all_stems,
                                               options.use_autohintexe)
-                options.baseMaster[name] = newBezString
+                if reports is not None:
+                    reports.addGlyphReport(newBezString.strip())
+                else:
+                    options.baseMaster[name] = newBezString
             else:
                 baseFontFileName = os.path.basename(options.reference_font)
                 masters = [baseFontFileName, fontFileName]
@@ -380,6 +623,10 @@ def hintFile(options, path, outpath, reference_master):
         else:
             fontData.close()
             log.info("No glyphs were hinted.")
+    elif reports is not None:
+        h_stems, v_stems, top_zones, bot_zones = reports.getReportLists()
+        PrintReports(outpath, h_stems, v_stems, top_zones, bot_zones)
+
     if processedGlyphCount != seenGlyphCount:
         log.info("Skipped %s of %s glyphs.",
                  seenGlyphCount - processedGlyphCount, seenGlyphCount)
