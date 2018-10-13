@@ -190,7 +190,7 @@ getFileData(char* name)
 }
 
 static void
-writeFileData(char* name, char* output, char* fSuffix)
+writeFileData(char* name, char* output, size_t outputsize, char* fSuffix)
 {
     FILE* fp;
 
@@ -207,7 +207,7 @@ writeFileData(char* name, char* output, char* fSuffix)
     } else
         fp = fopen(name, "w");
 
-    fwrite(output, 1, strlen(output), fp);
+    fwrite(output, 1, outputsize, fp);
     fclose(fp);
 }
 
@@ -442,9 +442,9 @@ main(int argc, char* argv[])
             } else {
                 if ((outputsize != 0) && (result == AC_Success)) {
                     if (!argumentIsBezData) {
-                        writeFileData(bezName, output, fileSuffix);
+                        writeFileData(bezName, output, outputsize, fileSuffix);
                     } else {
-                        fprintf(stdout, "%s", output);
+                        fwrite(output, 1, outputsize, stdout);
                     }
                 }
             }
@@ -493,7 +493,7 @@ main(int argc, char* argv[])
                            (const char**)masters, outGlyphs, outputSizes);
 
         for (i = 0; i < total_files; i++) {
-            writeFileData(masters[i], outGlyphs[i], "new");
+            writeFileData(masters[i], outGlyphs[i], outputSizes[i], "new");
             free(masters[i]);
             free(inGlyphs[i]);
             free(outGlyphs[i]);

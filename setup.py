@@ -496,6 +496,7 @@ libraries = [
                 "libpsautohint/src/acfixed.c",
                 "libpsautohint/src/auto.c",
                 "libpsautohint/src/bbox.c",
+                "libpsautohint/src/buffer.c",
                 "libpsautohint/src/charpath.c",
                 "libpsautohint/src/charpathpriv.c",
                 "libpsautohint/src/charprop.c",

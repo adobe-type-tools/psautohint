@@ -34,6 +34,7 @@ libpsautohint = library(
   'src/basic.h',
   'src/bbox.c',
   'src/bbox.h',
+  'src/buffer.c',
   'src/charpath.c',
   'src/charpath.h',
   'src/charpathpriv.c',

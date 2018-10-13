@@ -18,30 +18,6 @@ ACBuffer* gBezOutput = NULL;
 
 static jmp_buf aclibmark; /* to handle exit() calls in the library version*/
 
-static ACBuffer*
-NewBuffer(size_t size)
-{
-    ACBuffer* buffer;
-
-    buffer = (ACBuffer*)AllocateMem(1, sizeof(ACBuffer), "out buffer");
-    buffer->data = AllocateMem(size, 1, "out buffer data");
-    buffer->data[0] = '\0';
-    buffer->capacity = size;
-    buffer->length = 0;
-
-    return buffer;
-}
-
-static void
-FreeBuffer(ACBuffer* buffer)
-{
-    if (!buffer)
-        return;
-
-    UnallocateMem(buffer->data);
-    UnallocateMem(buffer);
-}
-
 ACLIB_API void
 AC_SetMemManager(void* ctxptr, AC_MEMMANAGEFUNCPTR func)
 {
@@ -130,21 +106,24 @@ AutoHintString(const char* srcbezdata, const char* fontinfodata,
         return AC_FatalError;
     } else if (value == 1) {
         /* AutoHint was called successfully */
+        char* data;
+        size_t len;
+
+        ACBufferRead(gBezOutput, &data, &len);
+
+        if (len > *length)
+            *dstbezdata = ReallocateMem(*dstbezdata, len, "Output buffer");
+
+        *length = len;
+        memcpy(*dstbezdata, data, len);
+
+        ACBufferFree(gBezOutput);
         FreeFontInfo(fontinfo);
-
-        if (gBezOutput->length >= *length)
-            *dstbezdata = ReallocateMem(*dstbezdata, gBezOutput->length + 1,
-                                        "Output buffer");
-
-        *length = gBezOutput->length + 1;
-        strncpy(*dstbezdata, gBezOutput->data, *length);
-
-        FreeBuffer(gBezOutput);
 
         return AC_Success;
     }
 
-    gBezOutput = NewBuffer(*length);
+    gBezOutput = ACBufferNew(*length);
     result = AutoHint(fontinfo,     /* font info */
                       srcbezdata,   /* input glyph */
                       allowHintSub, /* extrahint */

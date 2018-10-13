@@ -143,7 +143,7 @@ autohint(PyObject* self, PyObject* args)
 
             if (result == AC_Success) {
                 error = false;
-                outObj = PyBytes_FromString(output);
+                outObj = PyBytes_FromStringAndSize(output, outLen);
             }
 
             MEMFREE(output);
@@ -261,7 +261,8 @@ autohintmm(PyObject* self, PyObject* args)
         if (result == AC_Success) {
             error = false;
             for (i = 0; i < inCount; i++) {
-                PyObject* outObj = PyBytes_FromString(outGlyphs[i]);
+                PyObject* outObj =
+                  PyBytes_FromStringAndSize(outGlyphs[i], outputSizes[i]);
                 PyTuple_SET_ITEM(outSeq, i, outObj);
             }
         }
