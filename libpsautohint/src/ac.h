@@ -165,12 +165,6 @@ typedef struct {
   size_t length;    /* number of the entries */
 } ACFontInfo;
 
-typedef struct {
-  char* data;       /* glyph data held in the buffer */
-  size_t length;    /* actual length of the data */
-  size_t capacity;  /* allocated memory size */
-} ACBuffer;
-
 /* global data */
 
 extern ACBuffer* gBezOutput;

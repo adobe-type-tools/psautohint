@@ -43,15 +43,7 @@ WriteString(char* str)
         return;
     }
 
-    if ((gBezOutput->length + strlen(str)) >= gBezOutput->capacity) {
-        size_t desiredsize =
-          NUMMAX(gBezOutput->capacity * 2, gBezOutput->capacity + strlen(str));
-        gBezOutput->data =
-          ReallocateMem(gBezOutput->data, desiredsize, "output bez data");
-        gBezOutput->capacity = desiredsize;
-    }
-    strcat(gBezOutput->data, str);
-    gBezOutput->length += strlen(str);
+    ACBufferWrite(gBezOutput, str, strlen(str));
 }
 
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal places. */
