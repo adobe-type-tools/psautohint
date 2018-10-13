@@ -12,6 +12,7 @@ import os
 import re
 import subprocess
 import sys
+import textwrap
 
 from fontTools.misc.py23 import open
 
@@ -343,10 +344,26 @@ class _CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
     """
     Adds extra line between options
     """
+    @staticmethod
+    def __add_whitespace(i, i_wtsp, arg):
+        if i == 0:
+            return arg
+        return (" " * i_wtsp) + arg
+
     def _split_lines(self, arg, width):
+        arg_rows = arg.splitlines()
+        for i, line in enumerate(arg_rows):
+            search = re.search('\s*[0-9\-]{0,}\.?\s*', line)
+            if line.strip() is "":
+                arg_rows[i] = " "
+            elif search:
+                line_wtsp = search.end()
+                lines = [self.__add_whitespace(j, line_wtsp, x)
+                         for j, x in enumerate(textwrap.wrap(line, width))]
+                arg_rows[i] = lines
+
         # [''] adds the extra line between args
-        return super(_CustomHelpFormatter,
-                     self)._split_lines(arg, width) + ['']
+        return [item for sublist in arg_rows for item in sublist] + ['']
 
 
 class _AdditionalHelpAction(argparse.Action):
