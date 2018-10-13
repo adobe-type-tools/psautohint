@@ -7,7 +7,9 @@ import pytest
 
 from psautohint import FontParseError
 from psautohint.__main__ import main as psautohint
+from psautohint.__main__ import stemhist
 
+from .differ import main as differ
 from . import make_temp_copy, DATA_DIR
 
 
@@ -265,3 +267,26 @@ def test_invalid_save_path(tmpdir):
     out = str(tmpdir / basename(path) / "foo") + ".out"
     with pytest.raises(SystemExit):
         autohint([path, '-o', out])
+
+
+@pytest.mark.parametrize("args", [
+    pytest.param(['-z'], id="report_zones"),
+    pytest.param([], id="report_stems"),
+    pytest.param(['-a'], id="report_stems,all_stems"),
+])
+def test_stemhist(args, tmpdir):
+    path = "%s/dummy/font.otf" % DATA_DIR
+    out = str(tmpdir / basename(path))
+
+    stemhist([path, '-o', out] + args)
+
+    if '-z' in args:
+        suffixes = ['.top.txt', '.bot.txt']
+    else:
+        suffixes = ['.hstm.txt', '.vstm.txt']
+
+    for suffix in suffixes:
+        exp_suffix = suffix
+        if '-a' in args:
+            exp_suffix = '.all' + suffix
+        assert differ([path + exp_suffix, out + suffix, '-l', '1'])
