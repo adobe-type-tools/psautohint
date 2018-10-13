@@ -322,9 +322,9 @@ def _process_glyph_list_arg(glyph_list, name_aliases):
     return [_expand_cid_name(n, name_aliases) for n in glyph_list]
 
 
-class Options(ACOptions):
+class HintOptions(ACOptions):
     def __init__(self, pargs):
-        super(Options, self).__init__()
+        super(HintOptions, self).__init__()
         self.inputPaths = pargs.font_paths
         self.outputPaths = pargs.output_paths
         self.reference_font = pargs.reference_font
@@ -690,7 +690,7 @@ def get_options(args):
     else:
         all_font_paths = parsed_args.font_paths
 
-    options = Options(parsed_args)
+    options = HintOptions(parsed_args)
 
     options.font_format = _validate_font_paths(all_font_paths, parser)
 
@@ -724,6 +724,181 @@ def get_options(args):
 
 def main(args=None):
     options, pargs = get_options(args)
+
+    try:
+        hintFiles(options)
+    except Exception as ex:
+        if pargs.traceback:
+            raise
+        logging.error(ex)
+        sys.exit(1)
+
+
+class ReportOptions(ACOptions):
+    def __init__(self, pargs):
+        super(ReportOptions, self).__init__()
+        self.hintAll = True
+        self.noFlex = True
+        self.allow_no_blues = True
+        self.logOnly = True
+        self.use_autohintexe = True
+        self.inputPaths = pargs.font_paths
+        self.outputPaths = pargs.output_paths
+        self.report_stems = not pargs.alignment_zones
+        self.report_zones = pargs.alignment_zones
+        self.report_all_stems = pargs.all_stems
+
+
+def get_stemhist_options(args):
+    parser = argparse.ArgumentParser(
+        formatter_class=_CustomHelpFormatter,
+        description='Stem and Alignment zones report for PostScript, '
+                    'OpenType/CFF and UFO fonts.'
+    )
+    parser.add_argument(
+        'font_paths',
+        metavar='FONT',
+        nargs='+',
+        type=_validate_path,
+        help='Type1/CFF/OTF/UFO font files'
+    )
+    parser.add_argument(
+        '-o',
+        '--output',
+        metavar='PATH',
+        nargs='+',
+        dest='output_paths',
+        type=_check_save_path,
+        help='When this is specified, the path argument is used as the base '
+             'path for the reports. Otherwise, the font file path is used as '
+             'the base path. Several reports are written, using the base path '
+             'name plus an extension.\n'
+             'Without the -z option, the report files are:\n'
+             '   <base path>.hstm.txt  The horizontal stems.\n'
+             '   <base path>.vstm.txt  The vertical stems.\n'
+             'With the -z option, the report files are:\n'
+             '   <base path>.top.txt   The top zones.\n'
+             '   <base path>.bot.txt   The bottom zones.'
+    )
+    parser.add_argument(
+        '-z',
+        '--alignment-zones',
+        action='store_true',
+        dest='alignment_zones',
+        help='Print alignment zone report rather than stem report.'
+    )
+    parser.add_argument(
+        '-a',
+        '--all',
+        action='store_true',
+        dest='all_stems',
+        help='Include stems formed by curved line segments; by default, '
+             'includes only stems formed by straight line segments.'
+    )
+    glyphs_parser = parser.add_mutually_exclusive_group()
+    glyphs_parser.add_argument(
+        '-g',
+        '--glyphs',
+        metavar='GLYPH_LIST',
+        dest='glyphs_to_hint',
+        type=_split_comma_sequence,
+        default=[],
+        help='comma-separated sequence of glyphs to process\n'
+             'The glyph identifiers may be glyph indexes, glyph names, or '
+             'glyph CIDs. CID values must be prefixed with a forward slash.\n'
+             'Examples:\n'
+             '    psautohint -g A,B,C,69 MyFont.ufo\n'
+             '    psautohint -g /103,/434,68 MyCIDFont'
+    )
+    glyphs_parser.add_argument(
+        '--glyphs-file',
+        metavar='PATH',
+        dest='glyphs_to_hint_file',
+        type=_validate_path,
+        help='file containing a list of glyphs to process\n'
+             'The file must contain a comma-separated sequence of glyph '
+             'identifiers.'
+    )
+    glyphs_parser.add_argument(
+        '-x',
+        '--exclude-glyphs',
+        metavar='GLYPH_LIST',
+        dest='glyphs_to_not_hint',
+        type=_split_comma_sequence,
+        default=[],
+        help='comma-separated sequence of glyphs to NOT process\n'
+             "Counterpart to '--glyphs' option."
+    )
+    glyphs_parser.add_argument(
+        '--exclude-glyphs-file',
+        metavar='PATH',
+        dest='glyphs_to_not_hint_file',
+        type=_validate_path,
+        help='file containing a list of glyphs to NOT process\n'
+             "Counterpart to '--glyphs-file' option."
+    )
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='verbose mode\n'
+             'Use -vv for extra-verbose mode.'
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=__version__
+    )
+    parser.add_argument(
+        '--traceback',
+        action='store_true',
+        help="show traceback for exceptions.",
+    )
+    parsed_args = parser.parse_args(args)
+
+    if parsed_args.verbose == 0:
+        log_level = logging.WARNING
+    elif parsed_args.verbose == 1:
+        log_level = logging.INFO
+    else:
+        log_level = logging.DEBUG
+
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=log_level)
+
+    if (parsed_args.output_paths and
+            len(parsed_args.font_paths) != len(parsed_args.output_paths)):
+        parser.error("number of input and output fonts differ")
+
+    if len(parsed_args.font_paths) != len(set(parsed_args.font_paths)):
+        parser.error("found duplicate font inputs")
+
+    options = ReportOptions(parsed_args)
+
+    options.font_format = _validate_font_paths(parsed_args.font_paths, parser)
+
+    if parsed_args.glyphs_to_hint:
+        options.glyphList = _process_glyph_list_arg(
+            parsed_args.glyphs_to_hint, options.nameAliases)
+    elif parsed_args.glyphs_to_not_hint:
+        options.excludeGlyphList = True
+        options.glyphList = _process_glyph_list_arg(
+            parsed_args.glyphs_to_not_hint, options.nameAliases)
+    elif parsed_args.glyphs_to_hint_file:
+        options.glyphList = _process_glyph_list_arg(
+            _read_txt_file(parsed_args.glyphs_to_hint_file),
+            options.nameAliases)
+    elif parsed_args.glyphs_to_not_hint_file:
+        options.excludeGlyphList = True
+        options.glyphList = _process_glyph_list_arg(
+            _read_txt_file(parsed_args.glyphs_to_not_hint_file),
+            options.nameAliases)
+
+    return options, parsed_args
+
+
+def stemhist(args=None):
+    options, pargs = get_stemhist_options(args)
 
     try:
         hintFiles(options)

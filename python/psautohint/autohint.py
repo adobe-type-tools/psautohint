@@ -625,6 +625,8 @@ def hintFile(options, path, outpath, reference_master):
             log.info("No glyphs were hinted.")
     elif reports is not None:
         h_stems, v_stems, top_zones, bot_zones = reports.getReportLists()
+        if outpath is None:
+            outpath = path
         PrintReports(outpath, h_stems, v_stems, top_zones, bot_zones)
 
     if processedGlyphCount != seenGlyphCount:
