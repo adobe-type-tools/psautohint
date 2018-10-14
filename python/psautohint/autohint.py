@@ -30,6 +30,7 @@
 
 from __future__ import print_function, absolute_import
 
+import ast
 import logging
 import os
 import re
@@ -107,8 +108,8 @@ class GlyphReports:
         for line in lines:
             tokenList = line.split()
             key = tokenList[0]
-            x = eval(tokenList[3])
-            y = eval(tokenList[5])
+            x = ast.literal_eval(tokenList[3])
+            y = ast.literal_eval(tokenList[5])
             hintpos = "%s %s" % (x, y)
             if key == "charZone":
                 self.charZoneList[hintpos] = (x, y)
