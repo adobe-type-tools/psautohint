@@ -42,3 +42,13 @@ function run_tests {
     # container can lead to permission errors
     rm -rf .tox
 }
+
+# override default 'install_delocate' as a temporary workaround for
+# autohintexe embedded executable losing execute permissions on macOS
+# https://github.com/matthew-brett/delocate/issues/42
+# https://github.com/matthew-brett/delocate/pull/43
+# https://github.com/adobe-type-tools/psautohint/pull/116
+function install_delocate {
+    check_pip
+    $PIP_CMD install git+https://github.com/anthrotype/delocate.git@fix-exe-permissions#egg=delocate
+}
