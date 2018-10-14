@@ -176,16 +176,19 @@ def test_unsupported_format(path):
         autohint([path])
 
 
-@pytest.mark.parametrize("option,exception", [
-    ([], SystemExit),
-    (['--traceback'], FontParseError),
-])
-def test_missing_cff_table(option, exception, tmpdir):
+def test_missing_cff_table1(tmpdir):
     path = "%s/dummy/nocff.otf" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
 
-    with pytest.raises(exception):
-        autohint([path, '-o', out] + option)
+    assert autohint([path, '-o', out]) == 1
+
+
+def test_missing_cff_table2(tmpdir):
+    path = "%s/dummy/nocff.otf" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+
+    with pytest.raises(FontParseError):
+        autohint([path, '-o', out, '--traceback'])
 
 
 @pytest.mark.parametrize("option,argument", [

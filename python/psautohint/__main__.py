@@ -11,7 +11,6 @@ import logging
 import os
 import re
 import subprocess
-import sys
 import textwrap
 
 from fontTools.misc.py23 import open
@@ -731,7 +730,7 @@ def main(args=None):
         if pargs.traceback:
             raise
         logging.error(ex)
-        sys.exit(1)
+        return 1
 
 
 class ReportOptions(ACOptions):
@@ -906,8 +905,9 @@ def stemhist(args=None):
         if pargs.traceback:
             raise
         logging.error(ex)
-        sys.exit(1)
+        return 1
 
 
 if __name__ == '__main__':
+    import sys
     sys.exit(main())
