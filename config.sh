@@ -48,7 +48,8 @@ function run_tests {
 # https://github.com/matthew-brett/delocate/issues/42
 # https://github.com/matthew-brett/delocate/pull/43
 # https://github.com/adobe-type-tools/psautohint/pull/116
+# TODO: remove this once new delocate with the above patch is released
 function install_delocate {
     check_pip
-    $PIP_CMD install git+https://github.com/anthrotype/delocate.git@fix-exe-permissions#egg=delocate
+    $PIP_CMD install git+https://github.com/matthew-brett/delocate.git#egg=delocate
 }
