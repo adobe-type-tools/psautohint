@@ -16,7 +16,7 @@ FixToDbl(Fixed f)
 {
     float r;
     acfixtopflt(f, &r);
-    return r;
+    return (double)r;
 }
 
 void

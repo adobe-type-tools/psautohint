@@ -557,7 +557,7 @@ ATan(Fixed a, Fixed b)
     acfixtopflt(b, &bb);
     cc = (float)DEG(atan2((double)aa, (double)bb));
     while (cc < 0)
-        cc += 360.0;
+        cc += 360.0f;
     return acpflttofix(&cc);
 }
 

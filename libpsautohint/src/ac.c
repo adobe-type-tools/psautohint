@@ -100,7 +100,7 @@ InitData(int32_t reason)
             gFlexCand = PSDist(4);
             gSCurveTan = 25;
             gMaxVal = 8000000.0;
-            gMinVal = 1.0 / (float)(FixOne);
+            gMinVal = 1.0f / (float)(FixOne);
             gEditGlyph = true;
             gRoundToInt = true;
             /* Default is to change a curve with collinear points into a line.

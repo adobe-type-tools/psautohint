@@ -55,7 +55,7 @@ WriteString(char* str)
 
 #define WRTRNUM(i)                                                             \
     {                                                                          \
-        snprintf(S0, MAXBUFFLEN, "%0.2f ", roundf((float)(i)*100) / 100);      \
+        snprintf(S0, MAXBUFFLEN, "%0.2f ", round((double)(i)*100) / 100);      \
         WriteString(S0);                                                       \
     }
 
@@ -118,7 +118,7 @@ safestrcat(char* s1, char* s2)
 
 #define SWRTNUMA(i)                                                            \
     {                                                                          \
-        snprintf(S0, MAXBUFFLEN, "%0.2f ", roundf((float)(i)*100) / 100);      \
+        snprintf(S0, MAXBUFFLEN, "%0.2f ", round((double)(i)*100) / 100);      \
         sws(S0);                                                               \
     }
 
@@ -316,7 +316,7 @@ wrtflex(Cd c1, Cd c2, Cd c3, PathElt* e)
         } else {
             acfixtopflt(fc3.y - c3.y, &shrink);
             shrink = (float)delta / shrink;
-            if (shrink < 0.0) {
+            if (shrink < 0.0f) {
                 shrink = -shrink;
             }
             acfixtopflt(fc3.y - c3.y, &r1);
@@ -332,7 +332,7 @@ wrtflex(Cd c1, Cd c2, Cd c3, PathElt* e)
         } else {
             acfixtopflt(fc3.x - c3.x, &shrink);
             shrink = (float)delta / shrink;
-            if (shrink < 0.0) {
+            if (shrink < 0.0f) {
                 shrink = -shrink;
             }
             acfixtopflt(fc3.x - c3.x, &r1);
