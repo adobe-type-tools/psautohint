@@ -113,25 +113,48 @@ PruneOne(HintVal* sLst, bool hFlg, HintVal* sL, int32_t i)
 
 #define PRNDIST (PSDist(10))
 #define PRNFCTR (3)
-
-#define PruneLt(val, v)                                                        \
-    (((v) < (FIXED_MAX / 10) && (val) < (FIXED_MAX / PRNFCTR))                 \
-       ? ((val)*PRNFCTR < (v)*10)                                              \
-       : ((val) / 10 < (v) / PRNFCTR))
-#define PruneLe(val, v)                                                        \
-    (((val) < (FIXED_MAX / PRNFCTR)) ? ((v) <= (val)*PRNFCTR)                  \
-                                     : ((v) / PRNFCTR <= (val)))
-#define PruneGt(val, v)                                                        \
-    (((val) < (FIXED_MAX / PRNFCTR)) ? ((v) > (val)*PRNFCTR)                   \
-                                     : ((v) / PRNFCTR > (val)))
 #define MUCHFCTR (50)
-#define PruneMuchGt(val, v)                                                    \
-    (((val) < (FIXED_MAX / MUCHFCTR)) ? ((v) > (val)*MUCHFCTR)                 \
-                                      : ((v) / MUCHFCTR > (val)))
 #define VERYMUCHFCTR (100)
-#define PruneVeryMuchGt(val, v)                                                \
-    (((val) < (FIXED_MAX / VERYMUCHFCTR)) ? ((v) > (val)*VERYMUCHFCTR)         \
-                                          : ((v) / VERYMUCHFCTR > (val)))
+
+static bool
+PruneLt(Fixed val, Fixed v)
+{
+    if (v < (FIXED_MAX / 10) && val < (FIXED_MAX / PRNFCTR))
+        return (val * PRNFCTR) < (v * 10);
+    return (val / 10) < (v / PRNFCTR);
+}
+
+static bool
+PruneLe(Fixed val, Fixed v)
+{
+    if (val < (FIXED_MAX / PRNFCTR))
+        return v <= (val * PRNFCTR);
+    return (v / PRNFCTR) <= val;
+}
+
+static bool
+PruneGt(Fixed val, Fixed v)
+{
+    if (val < (FIXED_MAX / PRNFCTR))
+        return v > (val * PRNFCTR);
+    return (v / PRNFCTR) > val;
+}
+
+static bool
+PruneMuchGt(Fixed val, Fixed v)
+{
+    if (val < (FIXED_MAX / MUCHFCTR))
+        return v > (val * MUCHFCTR);
+    return (v / MUCHFCTR) > val;
+}
+
+static bool
+PruneVeryMuchGt(Fixed val, Fixed v)
+{
+    if (val < (FIXED_MAX / VERYMUCHFCTR))
+        return v > (val * VERYMUCHFCTR);
+    return (v / VERYMUCHFCTR) > val;
+}
 
 /* The changes made here and in PruneHVals are to fix a bug in
  MinisterLight/E where the top left point was not getting hinted. */
