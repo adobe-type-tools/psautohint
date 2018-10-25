@@ -89,16 +89,16 @@ HVness(float* pq)
     /* as q -> 0, result goes to 1.0 */
     /* as q -> inf, result goes to 0.0 */
     q = *pq;
-    if (q < .25)
-        result = (float)Interpolate(q, 1.0, 0.0, .841, .25);
-    else if (q < .5)
-        result = (float)Interpolate(q, .841, .25, .707, .5);
+    if (q < .25f)
+        result = (float)Interpolate(q, 1.0f, 0.0f, .841f, .25f);
+    else if (q < .5f)
+        result = (float)Interpolate(q, .841f, .25f, .707f, .5f);
     else if (q < 1)
-        result = (float)Interpolate(q, .707, .5, .5, 1.0);
+        result = (float)Interpolate(q, .707f, .5f, .5f, 1.0f);
     else if (q < 2)
-        result = (float)Interpolate(q, .5, 1.0, .25, 2.0);
+        result = (float)Interpolate(q, .5f, 1.0f, .25f, 2.0f);
     else if (q < 4)
-        result = (float)Interpolate(q, .25, 2.0, 0.0, 4.0);
+        result = (float)Interpolate(q, .25f, 2.0f, 0.0f, 4.0f);
     else
         result = 0.0;
     return acpflttofix(&result);

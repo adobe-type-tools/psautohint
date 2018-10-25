@@ -49,7 +49,7 @@ static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 
 /* macros */
 #define WRTNUM(i) WriteToBuffer("%d ", (int)(i))
-#define WRTNUMA(i) WriteToBuffer("%0.2f ", roundf((float)(i)*100) / 100)
+#define WRTNUMA(i) WriteToBuffer("%0.2f ", round((double)(i)*100) / 100)
 #define WriteStr(str) WriteToBuffer("%s ", str)
 #define WriteSubr(val) WriteToBuffer("%d subr ", val)
 

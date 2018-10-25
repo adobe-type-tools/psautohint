@@ -45,12 +45,12 @@ AdjustVal(Fixed* pv, Fixed l1, Fixed l2, Fixed dist, Fixed d, bool hFlg)
         q = (float)dist;
         q = q * q;
     }
-    v = (float)((1000.0 * r1 * r2) / (q * q));
+    v = (float)((1000.0f * r1 * r2) / (q * q));
     if (d <= (hFlg ? gHBigDist : gVBigDist))
         goto done;
     acfixtopflt(d, &rd);
     q = (hFlg ? gHBigDistR : gVBigDistR) / rd; /* 0 < q < 1.0 */
-    if (q <= 0.5) {
+    if (q <= 0.5f) {
         v = 0.0;
         goto done;
     }
@@ -61,7 +61,7 @@ AdjustVal(Fixed* pv, Fixed l1, Fixed l2, Fixed dist, Fixed d, bool hFlg)
 done:
     if (v > gMaxVal)
         v = gMaxVal;
-    else if (v > 0.0 && v < gMinVal)
+    else if (v > 0.0f && v < gMinVal)
         v = gMinVal;
     *pv = acpflttofix(&v);
 }
@@ -70,7 +70,7 @@ static Fixed
 CalcOverlapDist(Fixed d, Fixed overlaplen, Fixed minlen)
 {
     float r = (float)d, ro = (float)overlaplen, rm = (float)minlen;
-    r = r * ((float)(1.0 + 0.4 * (1.0 - ro / rm)));
+    r = r * ((float)(1.0f + 0.4f * (1.0f - ro / rm)));
     d = (Fixed)r;
     return d;
 }
@@ -461,7 +461,7 @@ CombVals(Fixed v1, Fixed v2)
     x = a;
     for (i = 0; i < 16; i++) {
         xx = ((float)0.5) * (x + a / x);
-        if (i >= 8 && mfabs(xx - x) <= mfabs(xx) * 0.0000001)
+        if (i >= 8 && mfabs(xx - x) <= mfabs(xx) * 0.0000001f)
             break;
         x = xx;
     }
