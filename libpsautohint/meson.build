@@ -9,6 +9,7 @@ libm = cc.find_library('m', required : false)
 
 
 cflags = [
+  '-Wcast-align',
   '-Wdeclaration-after-statement',
   '-Wextra',
   '-Wimplicit-fallthrough',
