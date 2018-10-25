@@ -71,9 +71,10 @@ reportCB(char* msg, int level)
     if (userData) {                                                            \
         char str[STR_LEN];                                                     \
         ACBuffer* buffer = (ACBuffer*)userData;                                \
-        size_t len = snprintf(str, STR_LEN, text, a1, a2, a3);                 \
+        int len = snprintf(str, STR_LEN, text, a1, (double)a2, (double)a3);    \
         if (len > 0)                                                           \
-            ACBufferWrite(buffer, str, len <= STR_LEN ? len : STR_LEN);        \
+            ACBufferWrite(buffer, str,                                         \
+                          (size_t)(len <= STR_LEN ? len : STR_LEN));           \
     }
 
 static void
