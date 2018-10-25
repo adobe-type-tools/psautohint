@@ -50,7 +50,7 @@ void* gReportRetryUserData = NULL;
 static unsigned char *vmfree, *vmlast, vm[VMSIZE];
 
 /* sub allocator */
-unsigned char*
+void*
 Alloc(int32_t sz)
 {
     unsigned char* s;

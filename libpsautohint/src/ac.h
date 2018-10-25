@@ -269,7 +269,7 @@ int32_t FRnd(int32_t x);
 void acfixtopflt(Fixed x, float* pf);
 Fixed acpflttofix(float* pf);
 
-unsigned char* Alloc(int32_t sz); /* Sub-allocator */
+void *Alloc(int32_t sz); /* Sub-allocator */
 
 int AddCounterHintGlyphs(char* charlist, char* HintList[]);
 bool FindNameInList(char* nm, char** lst);
