@@ -189,7 +189,7 @@ getFileData(char* name)
 }
 
 static void
-writeFileData(char* name, char* output, size_t outputsize, char* fSuffix)
+writeFileData(char* name, char* output, size_t outputsize, const char* fSuffix)
 {
     FILE* fp;
 
@@ -211,7 +211,7 @@ writeFileData(char* name, char* output, size_t outputsize, char* fSuffix)
 }
 
 static FILE*
-openReportFile(char* name, char* fSuffix)
+openReportFile(char* name, const char* fSuffix)
 {
     FILE* file;
     if (fSuffix != NULL && fSuffix[0] != '\0') {
@@ -248,7 +248,7 @@ main(int argc, char* argv[])
     int firstFileNameIndex = -1;   /* arg index for first bez file name, or
                                       suffix of environment variable holding the
                                       bez string. */
-    char* fileSuffix = (char*)dfltExt;
+    const char* fileSuffix = dfltExt;
     int total_files = 0;
     int result, argi;
     ACBuffer* reportBuffer = NULL;
@@ -356,7 +356,7 @@ main(int argc, char* argv[])
 
             case 'r':
                 allowEdit = allowHintSub = false;
-                fileSuffix = (char*)reportExt;
+                fileSuffix = reportExt;
                 switch (current_arg[2]) {
                     case 'a':
                         report_zones = true;

@@ -391,7 +391,7 @@ ParseString(const char* s)
 {
     const char* s0;
     char c;
-    char* c0;
+    const char* c0;
     bool neg = false;
     bool isReal;
     float rval;
@@ -472,7 +472,7 @@ ParseString(const char* s)
         }
     rdnum:
         isReal = false;
-        c0 = (char*)(s - 1);
+        c0 = s - 1;
         while (true) {
             c = *s++;
             if (c == '.')
