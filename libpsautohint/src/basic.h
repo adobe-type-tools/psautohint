@@ -35,6 +35,7 @@ typedef unsigned char bool;
 #endif /* _MSC_VER < 1900 */
 
 #if _MSC_VER < 1800
+double round(double x);
 float roundf(float x);
 #endif /* _MSC_VER < 1800 */
 #endif /* _MSC_VER */
