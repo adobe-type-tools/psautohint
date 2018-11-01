@@ -274,8 +274,9 @@ def test_invalid_save_path(tmpdir):
 
 @pytest.mark.parametrize("args", [
     pytest.param(['-z'], id="report_zones"),
-    pytest.param([], id="report_stems"),
+    pytest.param([],     id="report_stems"),
     pytest.param(['-a'], id="report_stems,all_stems"),
+    pytest.param(['-g', 'a-z,A-Z,zero-nine'], id="report_stems,glyphs"),
 ])
 def test_stemhist(args, tmpdir):
     path = "%s/dummy/font.otf" % DATA_DIR
@@ -292,4 +293,7 @@ def test_stemhist(args, tmpdir):
         exp_suffix = suffix
         if '-a' in args:
             exp_suffix = '.all' + suffix
+        if '-g' in args:
+            g = args[args.index('-g') + 1]
+            exp_suffix = '.' + g + exp_suffix
         assert differ([path + exp_suffix, out + suffix, '-l', '1'])
