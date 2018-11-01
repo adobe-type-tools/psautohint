@@ -321,6 +321,8 @@ Example from "B" in SourceCodePro-Regular
 """
 
 # UFO names
+PUBLIC_GLYPH_ORDER = "public.glyphOrder"
+
 ADOBE_DOMAIN_PREFIX = "com.adobe.type"
 
 PROCESSED_LAYER_NAME = "AFDKO ProcessedGlyphs"
@@ -578,8 +580,16 @@ class UFOFontData:
         return glyph.width, bez, skip
 
     def getGlyphList(self):
-        glyphset = self._get_glyphset()
-        return sorted(list(glyphset.keys()))
+        glyphOrder = self._reader.readLib().get(PUBLIC_GLYPH_ORDER, [])
+        glyphList = list(self._get_glyphset().keys())
+
+        # Sort the returned glyph list by the glyph order as we depend in the
+        # order for expanding glyph ranges.
+        def key_fn(v):
+            if v in glyphOrder:
+                return glyphOrder.index(v)
+            return len(glyphOrder)
+        return sorted(glyphList, key=key_fn)
 
     @property
     def glyphMap(self):
