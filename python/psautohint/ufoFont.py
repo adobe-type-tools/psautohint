@@ -124,8 +124,8 @@ from collections import OrderedDict
 from fontTools.misc.py23 import SimpleNamespace, open
 from fontTools.pens.basePen import BasePen
 from fontTools.pens.pointPen import AbstractPointPen
-from fontTools.ufoLib import (UFOReader, UFOWriter, DATA_DIRNAME,
-                              DEFAULT_GLYPHS_DIRNAME, DEFAULT_LAYER_NAME)
+from fontTools.ufoLib import (UFOReader, UFOWriter, DEFAULT_GLYPHS_DIRNAME,
+                              DEFAULT_LAYER_NAME)
 from fontTools.ufoLib.errors import UFOLibError
 
 from . import fdTools, FontParseError
@@ -457,8 +457,10 @@ class UFOFontData:
     @property
     def hashMap(self):
         if self._hashmap is None:
-            data = self._reader.readBytesFromPath(
-                os.path.join(DATA_DIRNAME, HASHMAP_NAME))
+            try:
+                data = self._reader.readData(HASHMAP_NAME)
+            except UFOLibError:
+                data = None
             if data:
                 hashmap = ast.literal_eval(data.decode("utf-8"))
             else:
@@ -492,8 +494,7 @@ class UFOFontData:
         data.append("")
         data = "\n".join(data)
 
-        writer.writeBytesToPath(os.path.join(DATA_DIRNAME, HASHMAP_NAME),
-                                data.encode("utf-8"))
+        writer.writeData(HASHMAP_NAME, data.encode("utf-8"))
 
     def updateHashEntry(self, glyphName):
         # srcHash has already been set: we are fixing the history list.
