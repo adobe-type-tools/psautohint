@@ -325,8 +325,8 @@ PUBLIC_GLYPH_ORDER = "public.glyphOrder"
 
 ADOBE_DOMAIN_PREFIX = "com.adobe.type"
 
-PROCESSED_LAYER_NAME = "AFDKO ProcessedGlyphs"
-PROCESSED_GLYPHS_DIRNAME = "glyphs.%s.processedGlyphs" % ADOBE_DOMAIN_PREFIX
+PROCESSED_LAYER_NAME = "%s.processedglyphs" % ADOBE_DOMAIN_PREFIX
+PROCESSED_GLYPHS_DIRNAME = "glyphs.%s" % PROCESSED_LAYER_NAME
 
 HASHMAP_NAME = "%s.processedHashMap" % ADOBE_DOMAIN_PREFIX
 HASHMAP_VERSION_NAME = "hashMapVersion"
