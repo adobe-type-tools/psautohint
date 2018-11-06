@@ -2,7 +2,6 @@ from __future__ import print_function, absolute_import
 
 import os
 import sys
-import plistlib
 import logging
 
 from fontTools.misc.py23 import tobytes, tounicode
@@ -31,18 +30,19 @@ class FontParseError(Exception):
 
 
 def _font_is_ufo(path):
-    if os.path.isdir(path) and path.lower().endswith('.ufo'):
-        meta_path = os.path.join(path, 'metainfo.plist')
-        if os.path.isfile(meta_path):
-            metainfo = plistlib.readPlist(meta_path)
-            keys = ('creator', 'formatVersion')
-            if metainfo and all([key in metainfo for key in keys]):
-                return True
-    return False
+    from fontTools.ufoLib import UFOReader
+    from fontTools.ufoLib.errors import UFOLibError
+    try:
+        UFOReader(path, validate=False)
+        return True
+    except (UFOLibError, KeyError, TypeError):
+        return False
 
 
 def get_font_format(font_file_path):
-    if os.path.isfile(font_file_path):
+    if _font_is_ufo(font_file_path):
+        return "UFO"
+    elif os.path.isfile(font_file_path):
         with open(font_file_path, 'rb') as f:
             head = f.read(4)
             if head == b'OTTO':
@@ -62,8 +62,6 @@ def get_font_format(font_file_path):
                             return 'PFC'
         return None
     else:
-        if _font_is_ufo(font_file_path):
-            return "UFO"
         return None
 
 
