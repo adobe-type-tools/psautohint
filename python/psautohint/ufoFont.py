@@ -123,9 +123,10 @@ from collections import OrderedDict
 
 from fontTools.misc.py23 import SimpleNamespace, open
 from fontTools.pens.basePen import BasePen
-from ufoLib import (UFOReader, UFOWriter, DATA_DIRNAME, DEFAULT_GLYPHS_DIRNAME,
-                    DEFAULT_LAYER_NAME)
-from ufoLib.pointPen import AbstractPointPen
+from fontTools.pens.pointPen import AbstractPointPen
+from fontTools.ufoLib import (UFOReader, UFOWriter, DATA_DIRNAME,
+                              DEFAULT_GLYPHS_DIRNAME, DEFAULT_LAYER_NAME)
+from fontTools.ufoLib.errors import UFOLibError
 
 from . import fdTools, FontParseError
 
@@ -543,9 +544,10 @@ class UFOFontData:
     def _get_glyphset(self, layer_name=None):
         if layer_name not in self._glyphsets:
             glyphset = None
-            if layer_name is None or layer_name in \
-                    self._reader.getLayerNames():
+            try:
                 glyphset = self._reader.getGlyphSet(layer_name)
+            except UFOLibError:
+                pass
             self._glyphsets[layer_name] = glyphset
         return self._glyphsets[layer_name]
 
