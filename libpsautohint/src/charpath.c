@@ -54,6 +54,7 @@ static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 #define WriteSubr(val) WriteToBuffer("%d subr ", val)
 
 /* Checks if buffer needs to grow before writing out string. */
+/* TODO: port to ACBuffer API */
 static void
 WriteToBuffer(char* format, ...)
 {
@@ -65,7 +66,7 @@ WriteToBuffer(char* format, ...)
     len = vsnprintf(outstr, MAXBUFFLEN, format, va);
     va_end(va);
 
-    if ((byteCount + len) > buffSize) {
+    if ((byteCount + len) >= buffSize) {
         buffSize += GROWBUFF;
         outbuff = (char*)ReallocateMem(outbuff, buffSize, "file buffer");
     }
