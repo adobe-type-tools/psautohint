@@ -36,7 +36,7 @@
 static bool firstMT;
 static Cd* refPtArray = NULL;
 static char* outbuff;
-static int16_t masterCount;
+static int masterCount;
 static const char** masterNames;
 static size_t byteCount, buffSize;
 static PathList* pathlist = NULL;
