@@ -658,11 +658,14 @@ def hintFiles(options):
     paths = []
     outpaths = []
 
+    # If there is a reference font, prepend it to font paths.
+    # It must be the first font in the list, code below assumes that.
     if options.reference_font:
         fonts.append(openFile(options.reference_font, options))
         paths.append(options.reference_font)
         outpaths.append(options.reference_font)
 
+    # Open the rest of the fonts and handle output paths.
     for i, path in enumerate(options.inputPaths):
         fonts.append(openFile(path, options))
         paths.append(path)
@@ -675,8 +678,12 @@ def hintFiles(options):
         options.noFlex = True
 
     if options.reference_font:
+        # We are doing compatible, AKA multiple master, hinting.
         log.info("Start time: %s.", time.asctime())
 
+        # Get the glyphs and font info of the reference font, we assume the
+        # fonts have the same glyph set, glyph dict and in general are
+        # compatible. If not bad things will happen.
         glyph_list = get_glyph_list(options, fonts[0], paths[0])
         fontinfo_list = get_fontinfo_list(options, fonts[0], paths[0],
                                           glyph_list)
@@ -687,11 +694,15 @@ def hintFiles(options):
             outpath = outpaths[i]
 
             if i == 0:
+                # This is the reference font, pre-hint it as the rest of the
+                # fonts will copy its hinting.
                 glyphs_list.append(
                     hint_font(options, font, glyph_list, fontinfo_list))
             else:
                 glyphs_list.append(get_bez_glyphs(options, font, glyph_list))
 
+        # Run the compatible hinting, copying the hinting of the reference font
+        # to the rest of the fonts.
         hinted_glyphs_list = hint_compatible_fonts(options, fonts, paths,
                                                    glyph_list,
                                                    glyphs_list, fontinfo_list)
@@ -709,6 +720,7 @@ def hintFiles(options):
 
         log.info("End time: %s.", time.asctime())
     else:
+        # Regular hints, just iterate over the fonts and hint each one.
         for i, font in enumerate(fonts):
             path = paths[i]
             outpath = outpaths[i]
