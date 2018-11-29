@@ -275,7 +275,8 @@ def srtRevVal(t):
 
 
 
-def PrintReports(path, h_stems, v_stems, top_zones, bot_zones):
+def PrintReports(path, reports):
+    h_stems, v_stems, top_zones, bot_zones = reports.getReportLists()
     items = ([h_stems, srtCnt], [v_stems, srtCnt],
              [top_zones, srtRevVal], [bot_zones, srtVal])
     atime = time.asctime()
@@ -720,8 +721,7 @@ def hintFiles(options):
             if options.report_zones or options.report_stems:
                 reports = get_glyph_reports(options, font, glyph_list,
                                             fontinfo_list)
-                h_stems, v_stems, top_zones, bot_zones = reports.getReportLists()
-                PrintReports(outpath, h_stems, v_stems, top_zones, bot_zones)
+                PrintReports(outpath, reports)
             else:
                 hinted = hint_font(options, font, glyph_list, fontinfo_list)
                 if hinted:
