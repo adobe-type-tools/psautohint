@@ -437,37 +437,48 @@ def openFile(path, options):
     return font
 
 
-def hintFiles(options):
-    if options.reference_font:
-        hintFile(options, options.reference_font, None, reference_master=True)
-    for i, path in enumerate(options.inputPaths):
-        outpath = None
-        if options.outputPaths is not None and i < len(options.outputPaths):
-            outpath = options.outputPaths[i]
-        hintFile(options, path, outpath, reference_master=False)
-
-
-def hintFile(options, path, outpath, reference_master):
-    nameAliases = options.nameAliases
-
-    fontFileName = os.path.basename(path)
-    log.info("Hinting font %s. Start time: %s.", path, time.asctime())
-
-    fontData = openFile(path, options)
+def get_glyph_list(options, font, path):
+    filename = os.path.basename(path)
 
     # filter specified list, if any, with font list.
-    fontGlyphList = fontData.getGlyphList()
-    glyphList = filterGlyphList(options, fontGlyphList, fontFileName)
-    if not glyphList:
+    glyph_list = filterGlyphList(options, font.getGlyphList(), filename)
+    if not glyph_list:
         raise FontParseError("Selected glyph list is empty for font <%s>." %
-                             fontFileName)
+                             filename)
 
-    fontInfo = ""
+    return glyph_list
+
+
+def get_bez_glyphs(options, font, glyph_list):
+    glyphs = {}
+
+    for name in glyph_list:
+        # Convert to bez format
+        bez_glyph, width = font.convertToBez(name, options.read_hints,
+                                             options.round_coords,
+                                             options.hintAll)
+        if bez_glyph is None or "mt" not in bez_glyph:
+            # skip empty glyphs.
+            continue
+        glyphs[name] = (bez_glyph, width)
+
+    total = len(glyph_list)
+    processed = len(glyphs)
+    if processed != total:
+        log.info("Skipped %s of %s glyphs.", total - processed, total)
+
+    return glyphs
+
+
+def get_fontinfo_list(options, font, path, glyph_list):
+    fontinfo_list = {}
+
+    fontinfo = ""
 
     # Check counter glyphs, if any.
     counter_glyphs = options.hCounterGlyphs + options.vCounterGlyphs
     if counter_glyphs:
-        missing = [n for n in counter_glyphs if n not in fontGlyphList]
+        missing = [n for n in counter_glyphs if n not in font.getGlyphList()]
         if missing:
             log.error("H/VCounterChars glyph named in fontinfo is "
                       "not in font: %s", missing)
@@ -475,30 +486,29 @@ def hintFile(options, path, outpath, reference_master):
     # Build alignment zone string
     if options.printDefaultFDDict:
         print("Showing default FDDict Values:")
-        fdDict = fontData.getFontInfo(options.allow_no_blues,
-                                      options.noFlex,
-                                      options.vCounterGlyphs,
-                                      options.hCounterGlyphs)
-        printFontInfo(str(fdDict))
-        fontData.close()
+        fddict = font.getFontInfo(options.allow_no_blues,
+                                  options.noFlex,
+                                  options.vCounterGlyphs,
+                                  options.hCounterGlyphs)
+        printFontInfo(str(fddict))
         return
 
-    fdGlyphDict, fontDictList = fontData.getfdInfo(options.allow_no_blues,
-                                                   options.noFlex,
-                                                   options.vCounterGlyphs,
-                                                   options.hCounterGlyphs,
-                                                   glyphList)
+    fdglyphdict, fontDictList = font.getfdInfo(options.allow_no_blues,
+                                               options.noFlex,
+                                               options.vCounterGlyphs,
+                                               options.hCounterGlyphs,
+                                               glyph_list)
 
     if options.printFDDictList:
         # Print the user defined FontDicts, and exit.
-        if fdGlyphDict:
+        if fdglyphdict:
             print("Showing user-defined FontDict Values:\n")
             for fi, fontDict in enumerate(fontDictList):
                 print(fontDict.DictName)
                 printFontInfo(str(fontDict))
                 gnameList = []
                 # item = [glyphName, [fdIndex, glyphListIndex]]
-                itemList = sorted(fdGlyphDict.items(), key=lambda x: x[1][1])
+                itemList = sorted(fdglyphdict.items(), key=lambda x: x[1][1])
                 for gName, entry in itemList:
                     if entry[0] == fi:
                         gnameList.append(gName)
@@ -510,127 +520,218 @@ def hintFile(options, path, outpath, reference_master):
                 print(gTxt + "\n")
         else:
             print("There are no user-defined FontDict Values.")
-        fontData.close()
         return
 
-    if fdGlyphDict is None:
-        fdDict = fontDictList[0]
-        fontInfo = fdDict.getFontInfo()
+    if fdglyphdict is None:
+        fddict = fontDictList[0]
+        fontinfo = fddict.getFontInfo()
     else:
         log.info("Using alternate FDDict global values from fontinfo "
                  "file for some glyphs.")
 
-    reports = None
-    if options.report_zones or options.report_stems:
-        reports = GlyphReports()
-
-    # Get charstring for identifier in glyph-list
-    isCID = fontData.isCID()
     lastFDIndex = None
-    anyGlyphChanged = False
-    if isCID:
-        options.noFlex = True
-
-    seenGlyphCount = 0
-    processedGlyphCount = 0
-    for name in glyphList:
-        seenGlyphCount += 1
-
-        if reports is not None and name == ".notdef":
-            continue
-
-        # Convert to bez format
-        bezString, width = fontData.convertToBez(name, options.read_hints,
-                                                 options.round_coords,
-                                                 options.hintAll)
-        if bezString is None or "mt" not in bezString:
-            # skip empty glyphs.
-            continue
-
-        processedGlyphCount += 1
-
+    for name in glyph_list:
         # get new fontinfo string if FDarray index has changed,
         # as each FontDict has different alignment zones.
-        if isCID:
-            fdIndex = fontData.getfdIndex(name)
+        if font.isCID():
+            fdIndex = font.getfdIndex(name)
             if not fdIndex == lastFDIndex:
                 lastFDIndex = fdIndex
-                fdDict = fontData.getFontInfo(options.allow_no_blues,
-                                              options.noFlex,
-                                              options.vCounterGlyphs,
-                                              options.hCounterGlyphs,
-                                              fdIndex)
-                fontInfo = fdDict.getFontInfo()
+                fddict = font.getFontInfo(options.allow_no_blues,
+                                          options.noFlex,
+                                          options.vCounterGlyphs,
+                                          options.hCounterGlyphs,
+                                          fdIndex)
+                fontinfo = fddict.getFontInfo()
         else:
-            if fdGlyphDict is not None:
-                fdIndex = fdGlyphDict[name][0]
+            if fdglyphdict is not None:
+                fdIndex = fdglyphdict[name][0]
                 if lastFDIndex != fdIndex:
                     lastFDIndex = fdIndex
-                    fdDict = fontDictList[fdIndex]
-                    fontInfo = fdDict.getFontInfo()
+                    fddict = fontDictList[fdIndex]
+                    fontinfo = fddict.getFontInfo()
 
-        # Build autohint point list identifier
+        fontinfo_list[name] = (fontinfo, fddict, fdglyphdict)
 
-        if fdGlyphDict:
+    return fontinfo_list
+
+
+def hint_glyph(options, name, bez_glyph, fontinfo):
+    try:
+        hinted = hint_bez_glyph(fontinfo, bez_glyph, options.allowChanges,
+                                not options.noHintSub, options.round_coords,
+                                options.report_zones, options.report_stems,
+                                options.report_all_stems,
+                                options.use_autohintexe)
+    except PsAutoHintCError:
+        raise ACHintError("%s: Failure in processing outline data." %
+                          options.nameAliases.get(name, name))
+
+    return hinted
+
+
+def get_glyph_reports(options, font, glyph_list, fontinfo_list):
+    reports = GlyphReports()
+
+    glyphs = get_bez_glyphs(options, font, glyph_list)
+    for name in glyphs:
+        if name == ".notdef":
+            continue
+
+        bez_glyph = glyphs[name][0]
+        fontinfo = fontinfo_list[name][0]
+
+        reports.startGlyphName(name)
+        report = hint_glyph(options, name, bez_glyph, fontinfo)
+        reports.addGlyphReport(report.strip())
+
+    return reports
+
+
+def hint_font(options, font, glyph_list, fontinfo_list):
+    aliases = options.nameAliases
+
+    hinted = {}
+    glyphs = get_bez_glyphs(options, font, glyph_list)
+    for name in glyphs:
+        bez_glyph, width = glyphs[name]
+        fontinfo, fddict, fdglyphdict = fontinfo_list[name]
+
+        if fdglyphdict:
             log.info("%s: Begin hinting (using fdDict %s).",
-                     nameAliases.get(name, name), fdDict.DictName)
+                     aliases.get(name, name), fddict.DictName)
         else:
-            log.info("%s: Begin hinting.", nameAliases.get(name, name))
-
-        if reports is not None:
-            reports.startGlyphName(name)
+            log.info("%s: Begin hinting.", aliases.get(name, name))
 
         # Call auto-hint library on bez string.
-        try:
-            if reference_master or not options.reference_font:
-                newBezString = hint_bez_glyph(fontInfo, bezString,
-                                              options.allowChanges,
-                                              not options.noHintSub,
-                                              options.round_coords,
-                                              options.report_zones,
-                                              options.report_stems,
-                                              options.report_all_stems,
-                                              options.use_autohintexe)
-                if reports is not None:
-                    reports.addGlyphReport(newBezString.strip())
-                else:
-                    options.baseMaster[name] = newBezString
-            else:
-                baseFontFileName = os.path.basename(options.reference_font)
-                masters = [baseFontFileName, fontFileName]
-                glyphs = [options.baseMaster[name], bezString]
-                newBezString = hint_compatible_bez_glyphs(fontInfo, glyphs,
-                                                          masters)
-                newBezString = newBezString[1]  # FIXME
-        except PsAutoHintCError:
-            raise ACHintError("%s: Failure in processing outline data." %
-                              nameAliases.get(name, name))
+        new_bez_glyph = hint_glyph(options, name, bez_glyph, fontinfo)
+        options.baseMaster[name] = new_bez_glyph
 
-        if not (("ry" in newBezString[:200]) or ("rb" in newBezString[:200]) or
-           ("rm" in newBezString[:200]) or ("rv" in newBezString[:200])):
+        if not ("ry" in new_bez_glyph or "rb" in new_bez_glyph or
+                "rm" in new_bez_glyph or "rv" in new_bez_glyph):
             log.info("No hints added!")
 
         if options.logOnly:
             continue
 
-        # Convert bez to charstring, and update CFF.
-        anyGlyphChanged = True
-        fontData.updateFromBez(newBezString, name, width)
+        hinted[name] = (new_bez_glyph, width)
 
-    if not options.logOnly:
-        if anyGlyphChanged:
-            log.info("Saving font file with new hints..." + time.asctime())
-            fontData.save(outpath)
+    return hinted
+
+
+def hint_compatible_fonts(options, fonts, paths, glyph_list, glyphs,
+                          fontinfo_list):
+    aliases = options.nameAliases
+
+    hinted = {}
+    for name in glyphs[0]:
+        fontinfo, fddict, fdglyphdict = fontinfo_list[name]
+
+        if fdglyphdict:
+            log.info("%s: Begin hinting (using fdDict %s).",
+                     aliases.get(name, name), fddict.DictName)
         else:
-            fontData.close()
-            log.info("No glyphs were hinted.")
-    elif reports is not None:
-        h_stems, v_stems, top_zones, bot_zones = reports.getReportLists()
-        if outpath is None:
-            outpath = path
-        PrintReports(outpath, h_stems, v_stems, top_zones, bot_zones)
+            log.info("%s: Begin hinting.", aliases.get(name, name))
 
-    if processedGlyphCount != seenGlyphCount:
-        log.info("Skipped %s of %s glyphs.",
-                 seenGlyphCount - processedGlyphCount, seenGlyphCount)
-    log.info("Done with font %s. End time: %s.", path, time.asctime())
+        masters = [os.path.basename(path) for path in paths]
+        bez_glyphs = [g[name][0] for g in glyphs]
+        widths = [g[name][1] for g in glyphs]
+
+        try:
+            new_bez_glyphs = hint_compatible_bez_glyphs(fontinfo, bez_glyphs,
+                                                        masters)
+        except PsAutoHintCError:
+            raise ACHintError("%s: Failure in processing outline data." %
+                              aliases.get(name, name))
+
+        if options.logOnly:
+            continue
+
+        hinted[name] = (new_bez_glyphs, widths)
+
+    return hinted
+
+
+def hintFiles(options):
+    fonts = []
+    paths = []
+    outpaths = []
+
+    if options.reference_font:
+        fonts.append(openFile(options.reference_font, options))
+        paths.append(options.reference_font)
+        outpaths.append(options.reference_font)
+
+    for i, path in enumerate(options.inputPaths):
+        fonts.append(openFile(path, options))
+        paths.append(path)
+        if options.outputPaths is not None and i < len(options.outputPaths):
+            outpaths.append(options.outputPaths[i])
+        else:
+            outpaths.append(path)
+
+    if fonts[0].isCID():
+        options.noFlex = True
+
+    if options.reference_font:
+        log.info("Start time: %s.", time.asctime())
+
+        glyph_list = get_glyph_list(options, fonts[0], paths[0])
+        fontinfo_list = get_fontinfo_list(options, fonts[0], paths[0],
+                                          glyph_list)
+
+        glyphs_list = []
+        for i, font in enumerate(fonts):
+            path = paths[i]
+            outpath = outpaths[i]
+
+            if i == 0:
+                glyphs_list.append(
+                    hint_font(options, font, glyph_list, fontinfo_list))
+            else:
+                glyphs_list.append(get_bez_glyphs(options, font, glyph_list))
+
+        hinted_glyphs_list = hint_compatible_fonts(options, fonts, paths,
+                                                   glyph_list,
+                                                   glyphs_list, fontinfo_list)
+        if hinted_glyphs_list:
+            log.info("Saving font files with new hints...")
+            for name in hinted_glyphs_list:
+                bez_glyphs, widths = hinted_glyphs_list[name]
+                for i, font in enumerate(fonts):
+                    font.updateFromBez(bez_glyphs[i], name, widths[i])
+            for i, font in enumerate(fonts):
+                font.save(outpaths[i])
+        else:
+            log.info("No glyphs were hinted.")
+            font.close()
+
+        log.info("End time: %s.", time.asctime())
+    else:
+        for i, font in enumerate(fonts):
+            path = paths[i]
+            outpath = outpaths[i]
+
+            glyph_list = get_glyph_list(options, font, path)
+            fontinfo_list = get_fontinfo_list(options, font, path, glyph_list)
+
+            log.info("Hinting font %s. Start time: %s.", path, time.asctime())
+
+            if options.report_zones or options.report_stems:
+                reports = get_glyph_reports(options, font, glyph_list,
+                                            fontinfo_list)
+                h_stems, v_stems, top_zones, bot_zones = reports.getReportLists()
+                PrintReports(outpath, h_stems, v_stems, top_zones, bot_zones)
+            else:
+                hinted = hint_font(options, font, glyph_list, fontinfo_list)
+                if hinted:
+                    log.info("Saving font file with new hints...")
+                    for name in hinted:
+                        bez_glyph, width = hinted[name]
+                        font.updateFromBez(bez_glyph, name, width)
+                    font.save(outpath)
+                else:
+                    log.info("No glyphs were hinted.")
+                    font.close()
+
+            log.info("Done with font %s. End time: %s.", path, time.asctime())
