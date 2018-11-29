@@ -117,31 +117,6 @@ GetCPIx(indx mIx, int32_t pathIx)
     return (-1);
 }
 
-/* Locates the first MT preceding the given path element. */
-static int
-GetMTIx(indx mIx, indx pathIx)
-{
-    indx ix;
-
-    for (ix = pathIx; ix >= 0; ix--)
-        if (pathlist[mIx].path[ix].type == RMT)
-            return ix;
-    LogMsg(LOGERROR, NONFATALERROR, "No moveto.");
-    return (-1);
-}
-
-/* Locates the first MT SUCCEEDING the given path element. */
-static int
-GetNextMTIx(indx mIx, indx pathIx)
-{
-    indx ix;
-
-    for (ix = pathIx; ix < gPathEntries; ix++)
-        if (pathlist[mIx].path[ix].type == RMT)
-            return ix;
-    return (-1);
-}
-
 static void
 GetEndPoint1(indx mIx, int32_t pathIx, Fixed* ptX, Fixed* ptY)
 {
@@ -317,114 +292,6 @@ ChangetoCurve(indx mIx, indx pathIx)
     pathElt->rx3 = pathElt->x3 - pathElt->x2;
     pathElt->ry3 = pathElt->y3 - pathElt->y2;
     return true;
-}
-
-static bool
-ZeroLengthCP(indx mIx, indx pathIx)
-{
-    Cd startPt = { 0, 0 }, endPt = { 0, 0 };
-
-    GetEndPoints1(mIx, pathIx, &startPt, &endPt);
-    return (startPt.x == endPt.x && startPt.y == endPt.y);
-}
-
-/* Subtracts or adds one unit from the segment at pathIx. */
-static void
-AddLine(indx mIx, indx pathIx)
-{
-    Fixed fixTwo = FixInt(2);
-    Fixed xoffset = 0, yoffset = 0;
-    Fixed xoffsetr = 0, yoffsetr = 0;
-    GlyphPathElt *start, *end, *thisone;
-    indx i, n;
-
-    if (pathlist[mIx].path[pathIx].type != RCT) {
-        LogMsg(WARNING, OK,
-               "Please convert the point closepath in master: "
-               "%s, to a line closepath.",
-               masterNames[mIx]);
-        return;
-    }
-    i = GetMTIx(mIx, pathIx) + 1;
-    start = &pathlist[mIx].path[i];
-    end = &pathlist[mIx].path[pathIx];
-    /* Check control points to find out if x or y value should be adjusted
-     in order to get a smooth curve. */
-    switch (start->type) {
-        case RDT:
-            LogMsg(WARNING, OK,
-                   "Please convert the point closepath to a line "
-                   "closepath in master: %s.",
-                   masterNames[mIx]);
-            return;
-        case RCT:
-            if ((abs(start->x1 - end->x2) < fixTwo) &&
-                (abs(start->x1 - pathlist[mIx].path[i - 1].x) < fixTwo))
-                yoffset = (start->y1 < end->y2 && end->y2 > 0) ||
-                              (start->y1 > end->y2 && end->y2 < 0)
-                            ? FixOne
-                            : -FixOne;
-            else if ((abs(start->y1 - end->y2) < fixTwo) &&
-                     (abs(start->y1 - pathlist[mIx].path[i - 1].y) < fixTwo))
-                xoffset = (start->x1 < end->x2 && end->x2 > 0) ||
-                              (start->x1 > end->x2 && end->x2 < 0)
-                            ? FixOne
-                            : -FixOne;
-            else {
-                LogMsg(WARNING, OK,
-                       "Could not modify point closepath in master "
-                       "'%s', near (%d, %d).",
-                       masterNames[mIx], FTrunc(end->x), FTrunc(end->y));
-                return;
-            }
-            break;
-        default:
-            LogMsg(LOGERROR, NONFATALERROR, "Bad description in master %s.",
-                   masterNames[mIx]);
-    }
-
-    thisone = &(pathlist[mIx].path[pathIx]);
-    thisone->x3 += xoffset;
-    xoffsetr = (xoffset == 0) ? 0 : ((thisone->rx3 < 0) ? FixOne : -FixOne);
-    thisone->rx3 += xoffsetr;
-
-    thisone->y3 += yoffset;
-    yoffsetr = (yoffset == 0) ? 0 : ((thisone->ry3 < 0) ? FixOne : -FixOne);
-    thisone->ry3 += yoffsetr;
-
-    /* Now, fix up the following MT's rx1, ry1 values
-     This fixes a LOOOONG-standing bug.    renner Wed Jul 16 09:33:50 1997*/
-    if ((n = GetNextMTIx(mIx, pathIx)) > 0) {
-        GlyphPathElt* nxtone = &(pathlist[mIx].path[n]);
-        nxtone->rx += (-xoffsetr);
-        nxtone->ry += (-yoffsetr);
-    }
-}
-
-/*
- Look for zero length closepaths.  If true then add a small
- one unit line to each design.  Because blending can cause
- small arithmetic errors at each point in the path the
- accumulation of such errors might cause the path to not end
- up at the same point where it started.  This can cause a sharp
- angle segment that may cause spike problems in old rasterizers,
- and in the qreducer (used for filling very large size glyphs).
- The one unit line, which is drawn by the closepath, takes up the
- slack for the arithmetic errors and avoids the spike problem.
- */
-static void
-CheckForZeroLengthCP(void)
-{
-    indx ix, pathIx;
-
-    for (ix = 0; ix < masterCount; ix++) {
-        for (pathIx = 0; pathIx < gPathEntries; pathIx++) {
-            if (pathlist[ix].path[pathIx].type == CP &&
-                ZeroLengthCP(ix, pathIx)) {
-                AddLine(ix, pathIx - 1);
-            }
-        }
-    }
 }
 
 /* Checks that glyph paths for multiple masters have the same
@@ -1987,7 +1854,6 @@ MergeGlyphPaths(const char** srcglyphs, int nmasters, const char** masters,
 
     ok = CompareGlyphPaths(srcglyphs);
     if (ok) {
-        CheckForZeroLengthCP();
         SetSbandWidth();
         if (gAddHints && hintsMasterIx >= 0 && gPathEntries > 0) {
             if (!ReadandAssignHints()) {
