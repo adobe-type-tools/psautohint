@@ -83,55 +83,45 @@ class ACHintError(Exception):
 
 class GlyphReports:
     def __init__(self):
-        self.glyphName = None
-        self.hStemList = {}
-        self.vStemList = {}
-        self.hStemPosList = {}
-        self.vStemPosList = {}
-        self.charZoneList = {}
-        self.stemZoneStemList = {}
         self.glyphs = {}
 
-    def startGlyphName(self, glyphName):
-        self.hStemList = {}
-        self.vStemList = {}
-        self.hStemPosList = {}
-        self.vStemPosList = {}
-        self.charZoneList = {}
-        self.stemZoneStemList = {}
-        self.glyphs[glyphName] = [self.hStemList, self.vStemList,
-                                  self.charZoneList, self.stemZoneStemList]
-        self.glyphName = glyphName
+    def addGlyphReport(self, glyphName, reportString):
+        hstems = {}
+        vstems = {}
+        hstems_pos = {}
+        vstems_pos = {}
+        char_zones = {}
+        stem_zone_stems = {}
+        self.glyphs[glyphName] = [hstems, vstems, char_zones, stem_zone_stems]
 
-    def addGlyphReport(self, reportString):
         lines = reportString.splitlines()
         for line in lines:
-            tokenList = line.split()
-            key = tokenList[0]
-            x = ast.literal_eval(tokenList[3])
-            y = ast.literal_eval(tokenList[5])
+            tokens = line.split()
+            key = tokens[0]
+            x = ast.literal_eval(tokens[3])
+            y = ast.literal_eval(tokens[5])
             hintpos = "%s %s" % (x, y)
             if key == "charZone":
-                self.charZoneList[hintpos] = (x, y)
+                char_zones[hintpos] = (x, y)
             elif key == "stemZone":
-                self.stemZoneStemList[hintpos] = (x, y)
+                stem_zone_stems[hintpos] = (x, y)
             elif key == "HStem":
                 width = x - y
                 # avoid counting duplicates
-                if hintpos not in self.hStemPosList:
-                    count = self.hStemList.get(width, 0)
-                    self.hStemList[width] = count+1
-                    self.hStemPosList[hintpos] = width
+                if hintpos not in hstems_pos:
+                    count = hstems.get(width, 0)
+                    hstems[width] = count+1
+                    hstems_pos[hintpos] = width
             elif key == "VStem":
                 width = x - y
                 # avoid counting duplicates
-                if hintpos not in self.vStemPosList:
-                    count = self.vStemList.get(width, 0)
-                    self.vStemList[width] = count+1
-                    self.vStemPosList[hintpos] = width
+                if hintpos not in vstems_pos:
+                    count = vstems.get(width, 0)
+                    vstems[width] = count+1
+                    vstems_pos[hintpos] = width
             else:
                 raise FontParseError("Found unknown keyword %s in report file "
-                                     "for glyph %s." % (key, self.glyphName))
+                                     "for glyph %s." % (key, glyphName))
 
     @staticmethod
     def round_value(val):
@@ -181,10 +171,10 @@ class GlyphReports:
         self.glyphs is a dictionary:
             key: glyph name
             value: list of 4 dictionaries
-                   self.hStemList
-                   self.vStemList
-                   self.charZoneList
-                   self.stemZoneStemList
+                   hstems
+                   vstems
+                   char_zones
+                   stem_zone_stems
         {
          'A': [{45.5: 1, 47.0: 2}, {229.0: 1}, {}, {}],
          'B': [{46.0: 2, 46.5: 2, 47.0: 1}, {94.0: 1, 95.0: 1, 100.0: 1}, {}, {}],
@@ -581,9 +571,8 @@ def get_glyph_reports(options, font, glyph_list, fontinfo_list):
         bez_glyph = glyphs[name][0]
         fontinfo = fontinfo_list[name][0]
 
-        reports.startGlyphName(name)
         report = hint_glyph(options, name, bez_glyph, fontinfo)
-        reports.addGlyphReport(report.strip())
+        reports.addGlyphReport(name, report.strip())
 
     return reports
 
