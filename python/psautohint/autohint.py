@@ -176,7 +176,7 @@ class GlyphReports:
             rep_list.append((count_dict[item], item, sorted(items_dict[item])))
         return rep_list
 
-    def getReportLists(self):
+    def _get_lists(self):
         """
         self.glyphs is a dictionary:
             key: glyph name
@@ -252,53 +252,55 @@ class GlyphReports:
 
         return h_stem_list, v_stem_list, top_zone_list, bot_zone_list
 
+    @staticmethod
+    def _sort_count(t):
+        """
+        sort by: count (1st item), value (2nd item), list of glyph names (3rd
+        item)
+        """
+        return (-t[0], -t[1], t[2])
 
-def srtCnt(t):
-    """
-    sort by: count (1st item), value (2nd item), list of glyph names (3rd item)
-    """
-    return (-t[0], -t[1], t[2])
+    @staticmethod
+    def _sort_val(t):
+        """
+        sort by: value (2nd item), count (1st item), list of glyph names (3rd
+        item)
+        """
+        return (t[1], -t[0], t[2])
 
+    @staticmethod
+    def _sort_val_reversed(t):
+        """
+        sort by: value (2nd item), count (1st item), list of glyph names (3rd
+        item)
+        """
+        return (-t[1], -t[0], t[2])
 
-def srtVal(t):
-    """
-    sort by: value (2nd item), count (1st item), list of glyph names (3rd item)
-    """
-    return (t[1], -t[0], t[2])
-
-
-def srtRevVal(t):
-    """
-    sort by: value (2nd item), count (1st item), list of glyph names (3rd item)
-    """
-    return (-t[1], -t[0], t[2])
-
-
-
-def PrintReports(path, reports):
-    h_stems, v_stems, top_zones, bot_zones = reports.getReportLists()
-    items = ([h_stems, srtCnt], [v_stems, srtCnt],
-             [top_zones, srtRevVal], [bot_zones, srtVal])
-    atime = time.asctime()
-    suffixes = (".hstm.txt", ".vstm.txt", ".top.txt", ".bot.txt")
-    titles = ("Horizontal Stem List for %s on %s\n" % (path, atime),
-              "Vertical Stem List for %s on %s\n" % (path, atime),
-              "Top Zone List for %s on %s\n" % (path, atime),
-              "Bottom Zone List for %s on %s\n" % (path, atime),
-             )
-    headers = ("Count\tWidth\tGlyph List\n",
-               "Count\tWidth\tGlyph List\n",
-               "Count\tTop Zone\tGlyph List\n",
-               "Count\tBottom Zone\tGlyph List\n",
-               )
-    for i, item in enumerate(items):
-        reps, sortFunc = item
-        if not reps:
-            continue
-        fName = '{}{}'.format(path, suffixes[i])
-        title = titles[i]
-        header = headers[i]
-        try:
+    def save(self, path):
+        h_stems, v_stems, top_zones, bot_zones = self._get_lists()
+        items = ([h_stems, self._sort_count],
+                 [v_stems, self._sort_count],
+                 [top_zones, self._sort_val_reversed],
+                 [bot_zones, self._sort_val])
+        atime = time.asctime()
+        suffixes = (".hstm.txt", ".vstm.txt", ".top.txt", ".bot.txt")
+        titles = ("Horizontal Stem List for %s on %s\n" % (path, atime),
+                  "Vertical Stem List for %s on %s\n" % (path, atime),
+                  "Top Zone List for %s on %s\n" % (path, atime),
+                  "Bottom Zone List for %s on %s\n" % (path, atime),
+                 )
+        headers = ("Count\tWidth\tGlyph List\n",
+                   "Count\tWidth\tGlyph List\n",
+                   "Count\tTop Zone\tGlyph List\n",
+                   "Count\tBottom Zone\tGlyph List\n",
+                   )
+        for i, item in enumerate(items):
+            reps, sortFunc = item
+            if not reps:
+                continue
+            fName = '{}{}'.format(path, suffixes[i])
+            title = titles[i]
+            header = headers[i]
             with open(fName, "w") as fp:
                 fp.write(title)
                 fp.write(header)
@@ -306,9 +308,6 @@ def PrintReports(path, reports):
                 for item in reps:
                     fp.write("%s\t%s\t%s\n" % (item[0], item[1], item[2]))
                 log.info("Wrote %s" % fName)
-        except (IOError, OSError):
-            log.error("Error creating file %s!" % fName)
-
 
 
 def getGlyphID(glyphTag, fontGlyphList):
@@ -733,7 +732,7 @@ def hintFiles(options):
             if options.report_zones or options.report_stems:
                 reports = get_glyph_reports(options, font, glyph_list,
                                             fontinfo_list)
-                PrintReports(outpath, reports)
+                reports.save(outpath)
             else:
                 hinted = hint_font(options, font, glyph_list, fontinfo_list)
                 if hinted:
