@@ -86,13 +86,13 @@ error_handler(int16_t code)
 
 ACLIB_API int
 AutoHintString(const char* srcbezdata, const char* fontinfodata,
-               char** dstbezdata, size_t* length, int allowEdit,
-               int allowHintSub, int roundCoords)
+               ACBuffer* outbuffer, int allowEdit, int allowHintSub,
+               int roundCoords)
 {
     int value, result;
     ACFontInfo* fontinfo = NULL;
 
-    if (!srcbezdata || !*length)
+    if (!srcbezdata)
         return AC_InvalidParameterError;
 
     fontinfo = ParseFontInfo(fontinfodata);
@@ -110,24 +110,12 @@ AutoHintString(const char* srcbezdata, const char* fontinfodata,
         return AC_FatalError;
     } else if (value == 1) {
         /* AutoHint was called successfully */
-        char *data;
-        size_t len;
-
-        ACBufferRead(gBezOutput, &data, &len);
-
-        if (len > *length)
-            *dstbezdata = ReallocateMem(*dstbezdata, len, "Output buffer");
-
-        *length = len;
-        memcpy(*dstbezdata, data, len);
-
-        ACBufferFree(gBezOutput);
         FreeFontInfo(fontinfo);
 
         return AC_Success;
     }
 
-    gBezOutput = ACBufferNew(*length);
+    gBezOutput = outbuffer;
     result = AutoHint(fontinfo,     /* font info */
                       srcbezdata,   /* input glyph */
                       allowHintSub, /* extrahint */
@@ -146,7 +134,7 @@ AutoHintString(const char* srcbezdata, const char* fontinfodata,
 
 ACLIB_API int
 AutoHintStringMM(const char** srcbezdata, int nmasters, const char** masters,
-                 char** dstbezdata, size_t* lengths)
+                 ACBuffer** outbuffers)
 {
     /* Only the master with index 'hintsMasterIx' needs to be hinted.
      * This function expects that the master with index 'hintsMasterIx' has
@@ -192,8 +180,7 @@ AutoHintStringMM(const char** srcbezdata, int nmasters, const char** masters,
     }
 
     /* result == true is good */
-    result =
-      MergeGlyphPaths(srcbezdata, nmasters, masters, dstbezdata, lengths);
+    result = MergeGlyphPaths(srcbezdata, nmasters, masters, outbuffers);
 
     /* The following call to error_handler() always returns control to just
      * after the setjmp() function call above, but with value set to 1 if

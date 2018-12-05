@@ -204,26 +204,23 @@ autohint(PyObject* self, PyObject* args)
     if (inData && fontInfo) {
         int result = -1;
 
-        size_t outLen = 4 * strlen(inData);
-        char* output = MEMNEW(outLen);
+        ACBuffer* output = ACBufferNew(4 * strlen(inData));
         if (output) {
-            result = AutoHintString(inData, fontInfo, &output, &outLen,
-                                    allowEdit, allowHintSub, roundCoords);
+            result = AutoHintString(inData, fontInfo, output, allowEdit,
+                                    allowHintSub, roundCoords);
 
             if (result == AC_Success) {
+                char* data;
+                size_t len;
                 error = false;
-                if (reportBufffer) {
-                    char* data;
-                    size_t len;
+                if (reportBufffer)
                     ACBufferRead(reportBufffer, &data, &len);
-                    outObj = PyBytes_FromStringAndSize(data, len);
-                } else {
-                    outObj = PyBytes_FromStringAndSize(output, outLen);
-                }
+                else
+                    ACBufferRead(output, &data, &len);
+                outObj = PyBytes_FromStringAndSize(data, len);
             }
-
-            MEMFREE(output);
         }
+        ACBufferFree(output);
 
         if (result != AC_Success) {
             switch (result) {
@@ -319,9 +316,8 @@ autohintmm(PyObject* self, PyObject* args)
         int result = -1;
 
         const char** inGlyphs = MEMNEW(inCount * sizeof(char*));
-        char** outGlyphs = MEMNEW(inCount * sizeof(char*));
-        size_t* outputSizes = MEMNEW(inCount * sizeof(size_t*));
-        if (!inGlyphs || !outGlyphs || !outputSizes) {
+        ACBuffer** outGlyphs = MEMNEW(inCount * sizeof(ACBuffer*));
+        if (!inGlyphs || !outGlyphs) {
             PyErr_NoMemory();
             goto finish;
         }
@@ -331,17 +327,19 @@ autohintmm(PyObject* self, PyObject* args)
             inGlyphs[i] = PyBytes_AsString(glyphObj);
             if (!inGlyphs[i])
                 goto finish;
-            outputSizes[i] = 4 * strlen(inGlyphs[i]);
-            outGlyphs[i] = MEMNEW(outputSizes[i]);
+            outGlyphs[i] = ACBufferNew(4 * strlen(inGlyphs[i]));
         }
 
-        result = AutoHintStringMM(inGlyphs, mastersCount, masters, outGlyphs,
-                                  outputSizes);
+        result = AutoHintStringMM(inGlyphs, mastersCount, masters, outGlyphs);
         if (result == AC_Success) {
             error = false;
             for (i = 0; i < inCount; i++) {
-                PyObject* outObj =
-                  PyBytes_FromStringAndSize(outGlyphs[i], outputSizes[i]);
+                PyObject* outObj;
+                char* data;
+                size_t len;
+
+                ACBufferRead(outGlyphs[i], &data, &len);
+                outObj = PyBytes_FromStringAndSize(data, len);
                 PyTuple_SET_ITEM(outSeq, i, outObj);
             }
         }
@@ -349,12 +347,11 @@ autohintmm(PyObject* self, PyObject* args)
     finish:
         if (outGlyphs) {
             for (i = 0; i < inCount; i++)
-                MEMFREE(outGlyphs[i]);
+                ACBufferFree(outGlyphs[i]);
         }
 
         MEMFREE(inGlyphs);
         MEMFREE(outGlyphs);
-        MEMFREE(outputSizes);
 
         if (result != AC_Success) {
             switch (result) {

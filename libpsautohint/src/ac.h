@@ -405,7 +405,6 @@ bool AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata,
               bool extrahint, bool changeGlyph, bool roundCoords);
 
 bool MergeGlyphPaths(const char** srcglyphs, int nmasters,
-                     const char** masters, char** outbuffers,
-                     size_t* outlengths);
+                     const char** masters, ACBuffer** outbuffers);
 
 #endif /* AC_AC_H_ */

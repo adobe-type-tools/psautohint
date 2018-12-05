@@ -413,47 +413,45 @@ main(int argc, char* argv[])
     if (!doMM) {
         while (++argi < argc) {
             char* bezdata;
-            char* output;
-            size_t outputsize = 0;
+            ACBuffer* output;
             char* bezName = argv[argi];
             if (!argumentIsBezData) {
                 bezdata = getFileData(bezName);
             } else {
                 bezdata = bezName;
             }
-            outputsize = 4 * strlen(bezdata);
-            output = malloc(outputsize);
+            output = ACBufferNew(4 * strlen(bezdata));
 
             if (reportBuffer)
                 ACBufferReset(reportBuffer);
 
-            result = AutoHintString(bezdata, fontinfo, &output, &outputsize,
-                                    allowEdit, allowHintSub, roundCoords);
+            result = AutoHintString(bezdata, fontinfo, output, allowEdit,
+                                    allowHintSub, roundCoords);
             if (!argumentIsBezData)
                 free(bezdata);
 
-            if (reportBuffer) {
+            if (result == AC_Success) {
                 char* data;
                 size_t len;
-                ACBufferRead(reportBuffer, &data, &len);
-                if (!argumentIsBezData) {
-                    FILE* file = openReportFile(bezName, fileSuffix);
-                    fwrite(data, 1, len, file);
-                    fclose(file);
-                } else {
-                    fwrite(data, 1, len, stdout);
-                }
-            } else {
-                if ((outputsize != 0) && (result == AC_Success)) {
+                if (reportBuffer) {
+                    ACBufferRead(reportBuffer, &data, &len);
                     if (!argumentIsBezData) {
-                        writeFileData(bezName, output, outputsize, fileSuffix);
+                        FILE* file = openReportFile(bezName, fileSuffix);
+                        fwrite(data, 1, len, file);
+                        fclose(file);
                     } else {
-                        fwrite(output, 1, outputsize, stdout);
+                        fwrite(data, 1, len, stdout);
                     }
+                } else {
+                    ACBufferRead(output, &data, &len);
+                    if (!argumentIsBezData)
+                        writeFileData(bezName, data, len, fileSuffix);
+                    else
+                        fwrite(data, 1, len, stdout);
                 }
             }
 
-            free(output);
+            ACBufferFree(output);
             if (result != AC_Success)
                 exit(result);
         }
@@ -462,15 +460,14 @@ main(int argc, char* argv[])
         /** MM support */
         char**
           masters; /* master names - here, harwired to 001 - <num files>-1 */
-        char** inGlyphs;     /* Input bez data */
-        char** outGlyphs;    /* output bez data */
-        size_t* outputSizes; /* size of output data */
+        char** inGlyphs;       /* Input bez data */
+        ACBuffer** outGlyphs;  /* output bez data */
+        ACBuffer* hintedGlyph; /* reference hinted glyph */
         int i;
 
         masters = malloc(sizeof(char*) * total_files);
-        outputSizes = malloc(sizeof(size_t) * total_files);
         inGlyphs = malloc(sizeof(char*) * total_files);
-        outGlyphs = malloc(sizeof(char*) * total_files);
+        outGlyphs = malloc(sizeof(ACBuffer*) * total_files);
 
         argi = firstFileNameIndex - 1;
         for (i = 0; i < total_files; i++) {
@@ -480,33 +477,38 @@ main(int argc, char* argv[])
             masters[i] = malloc(strlen(bezName) + 1);
             strcpy(masters[i], bezName);
             inGlyphs[i] = getFileData(bezName);
-            outputSizes[i] = 4 * strlen(inGlyphs[i]);
-            outGlyphs[i] = malloc(outputSizes[i]);
+            outGlyphs[i] = ACBufferNew(4 * strlen(inGlyphs[i]));
         }
 
-        result =
-          AutoHintString(inGlyphs[0], fontinfo, &outGlyphs[0], &outputSizes[0],
-                         allowEdit, allowHintSub, roundCoords);
+        hintedGlyph = ACBufferNew(4 * strlen(inGlyphs[0]));
+
+        result = AutoHintString(inGlyphs[0], fontinfo, hintedGlyph, allowEdit,
+                                allowHintSub, roundCoords);
         if (result != AC_Success)
             exit(result);
 
         free(inGlyphs[0]);
-        inGlyphs[0] = malloc(sizeof(char*) * outputSizes[0]);
-        strcpy(inGlyphs[0], outGlyphs[0]);
-        result =
-          AutoHintStringMM((const char**)inGlyphs, total_files,
-                           (const char**)masters, outGlyphs, outputSizes);
+        {
+            char* data;
+            size_t len;
+            ACBufferRead(hintedGlyph, &data, &len);
+            strncpy(inGlyphs[0], data, len);
+        }
+        result = AutoHintStringMM((const char**)inGlyphs, total_files,
+                                  (const char**)masters, outGlyphs);
 
         for (i = 0; i < total_files; i++) {
-            writeFileData(masters[i], outGlyphs[i], outputSizes[i], "new");
+            char* data;
+            size_t len;
+            ACBufferRead(outGlyphs[i], &data, &len);
+            writeFileData(masters[i], data, len, "new");
             free(masters[i]);
             free(inGlyphs[i]);
-            free(outGlyphs[i]);
+            ACBufferFree(outGlyphs[i]);
         }
         free(inGlyphs);
         free(outGlyphs);
         free(masters);
-        free(outputSizes);
         if (result != AC_Success)
             exit(result);
     }
