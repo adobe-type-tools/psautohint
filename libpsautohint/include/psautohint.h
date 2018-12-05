@@ -54,6 +54,15 @@ enum
     AC_LogError
 };
 
+
+typedef struct ACBuffer ACBuffer;
+
+ACLIB_API ACBuffer* ACBufferNew(size_t size);
+ACLIB_API void ACBufferFree(ACBuffer* buffer);
+ACLIB_API void ACBufferReset(ACBuffer* buffer);
+ACLIB_API void ACBufferWrite(ACBuffer* buffer, char* data, size_t length);
+ACLIB_API void ACBufferRead(ACBuffer* buffer, char** data, size_t* length);
+
 /*
  * Function: AC_getVersion
  *
@@ -151,7 +160,7 @@ ACLIB_API void AC_SetReportRetryCB(AC_RETRYPTR retryCB, void* userData);
  * insufficient for the target bezdata, it will be reallocated as needed.
  */
 ACLIB_API int AutoHintString(const char* srcbezdata, const char* fontinfo,
-                             char** dstbezdata, size_t* length, int allowEdit,
+                             ACBuffer* outbuffer, int allowEdit,
                              int allowHintSub, int roundCoords);
 
 /*
@@ -159,8 +168,7 @@ ACLIB_API int AutoHintString(const char* srcbezdata, const char* fontinfo,
  *
  */
 ACLIB_API int AutoHintStringMM(const char** srcbezdata, int nmasters,
-                               const char** masters, char** dstbezdata,
-                               size_t* lengths);
+                               const char** masters, ACBuffer** outbuffers);
 
 /*
  * Function: AC_initCallGlobals
@@ -169,15 +177,6 @@ ACLIB_API int AutoHintStringMM(const char** srcbezdata, int nmasters,
  * between any of the auto-hinting and stem reporting modes while running.
  */
 ACLIB_API void AC_initCallGlobals(void);
-
-
-typedef struct ACBuffer ACBuffer;
-
-ACLIB_API ACBuffer* ACBufferNew(size_t size);
-ACLIB_API void ACBufferFree(ACBuffer* buffer);
-ACLIB_API void ACBufferReset(ACBuffer* buffer);
-ACLIB_API void ACBufferWrite(ACBuffer* buffer, char* data, size_t length);
-ACLIB_API void ACBufferRead(ACBuffer* buffer, char** data, size_t* length);
 
 #ifdef __cplusplus
 }

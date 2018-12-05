@@ -18,7 +18,6 @@
 #define DONT_COMBINE_PATHS 1
 
 #define DMIN 50       /* device minimum (one-half of a device pixel) */
-#define GROWBUFF 2048 /* Amount to grow output buffer, if necessary. */
 #define FONTSTKLIMIT 22
 
 #define MAINHINTS -1
@@ -35,10 +34,9 @@
 
 static bool firstMT;
 static Cd* refPtArray = NULL;
-static char* outbuff;
+static ACBuffer* outbuff;
 static int masterCount;
 static const char** masterNames;
-static size_t byteCount, buffSize;
 static PathList* pathlist = NULL;
 static indx hintsMasterIx = 0; /* The index of the master we read hints from */
 
@@ -59,20 +57,15 @@ static void
 WriteToBuffer(char* format, ...)
 {
     char outstr[MAXBUFFLEN + 1];
-    size_t len;
+    int len;
     va_list va;
 
     va_start(va, format);
     len = vsnprintf(outstr, MAXBUFFLEN, format, va);
     va_end(va);
 
-    if ((byteCount + len) >= buffSize) {
-        buffSize += GROWBUFF;
-        outbuff = (char*)ReallocateMem(outbuff, buffSize, "file buffer");
-    }
-
-    sprintf(outbuff + byteCount, "%s", outstr);
-    byteCount += len;
+    if (len > 0)
+        ACBufferWrite(outbuff, outstr, (size_t)NUMMIN(len, MAXBUFFLEN + 1));
 }
 
 static void
@@ -1586,7 +1579,7 @@ SamePathValues(indx eltIx, int16_t op, indx startIx, int16_t length)
  combines them into a single path description using new subroutine
  calls 7 - 11. */
 static void
-WritePaths(char** outBuffers, size_t* outLengths)
+WritePaths(ACBuffer** outBuffers)
 {
     indx ix, eltix, opix, startIx, mIx;
     int16_t length, subrIx, opcount, op;
@@ -1596,8 +1589,6 @@ WritePaths(char** outBuffers, size_t* outLengths)
     for (mIx = 0; mIx < masterCount; mIx++) {
         PathList path = pathlist[mIx];
 
-        byteCount = 0;
-        buffSize = outLengths[mIx];
         outbuff = outBuffers[mIx];
 
         WriteToBuffer("%% %s\n", gGlyphName);
@@ -1631,9 +1622,6 @@ WritePaths(char** outBuffers, size_t* outLengths)
             WriteToBuffer("\n");
         }
         WriteToBuffer("ed\n");
-
-        outLengths[mIx] = byteCount;
-        outBuffers[mIx] = outbuff;
     }
     return;
 #endif /* DONT_COMBINE_PATHS */
@@ -1844,7 +1832,7 @@ GetLengthandSubrIx(int16_t opcount, int16_t* length, int16_t* subrIx)
 
 bool
 MergeGlyphPaths(const char** srcglyphs, int nmasters, const char** masters,
-                char** outbuffers, size_t* outlengths)
+                ACBuffer** outbuffers)
 {
     bool ok;
     /* This requires that  master  hintsMasterIx has already been hinted with
@@ -1862,7 +1850,7 @@ MergeGlyphPaths(const char** srcglyphs, int nmasters, const char** masters,
             }
             CheckHandVStem3();
         }
-        WritePaths(outbuffers, outlengths);
+        WritePaths(outbuffers);
     }
     FreePathElements(masterCount);
 
