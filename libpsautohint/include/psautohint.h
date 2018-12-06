@@ -61,6 +61,7 @@ ACLIB_API ACBuffer* ACBufferNew(size_t size);
 ACLIB_API void ACBufferFree(ACBuffer* buffer);
 ACLIB_API void ACBufferReset(ACBuffer* buffer);
 ACLIB_API void ACBufferWrite(ACBuffer* buffer, char* data, size_t length);
+ACLIB_API void ACBufferWriteF(ACBuffer* buffer, char* format, ...);
 ACLIB_API void ACBufferRead(ACBuffer* buffer, char** data, size_t* length);
 
 /*

@@ -1,4 +1,4 @@
-project('psautohint', 'c', version : '1.7.0')
+project('psautohint', 'c', version : '1.7.0', default_options : 'c_std=c99')
 
 pkg = import('pkgconfig')
 cc = meson.get_compiler('c')
