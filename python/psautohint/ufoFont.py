@@ -121,7 +121,7 @@ import shutil
 
 from collections import OrderedDict
 
-from fontTools.misc.py23 import SimpleNamespace, open
+from fontTools.misc.py23 import SimpleNamespace, open, tostr, round
 from fontTools.pens.basePen import BasePen
 from fontTools.pens.pointPen import AbstractPointPen
 from fontTools.ufoLib import (UFOReader, UFOWriter, DEFAULT_GLYPHS_DIRNAME,
@@ -332,7 +332,7 @@ PROCESSED_GLYPHS_DIRNAME = "glyphs.%s" % PROCESSED_LAYER_NAME
 HASHMAP_NAME = "%s.processedHashMap" % ADOBE_DOMAIN_PREFIX
 HASHMAP_VERSION_NAME = "hashMapVersion"
 HASHMAP_VERSION = (1, 0)  # If major version differs, do not use.
-AUTOHINT_NAME = "autohint"
+AUTOHINT_NAME = tostr("autohint")
 CHECKOUTLINE_NAME = "checkOutlines"
 
 BASE_FLEX_NAME = "flexCurve"
@@ -536,7 +536,7 @@ class UFOFontData:
             # If the source hash has changed, we need to delete the processed
             # layer glyph.
             self.hashMapChanged = True
-            self.hashMap[glyphName] = [newSrcHash, [AUTOHINT_NAME]]
+            self.hashMap[glyphName] = [tostr(newSrcHash), [AUTOHINT_NAME]]
             if glyphName in self.processedLayerGlyphMap:
                 del self.processedLayerGlyphMap[glyphName]
 
@@ -803,7 +803,7 @@ class HashPointPen(AbstractPointPen):
 
     def __init__(self, glyph):
         self.glyphset = getattr(glyph, "glyphSet", None)
-        self.width = getattr(glyph, "width", 1000)
+        self.width = round(getattr(glyph, "width", 1000), 9)
         self.data = ["w%s" % self.width]
 
     def getHash(self):
@@ -832,7 +832,7 @@ class HashPointPen(AbstractPointPen):
 
         for i, v in enumerate(transformation):
             if transformation[i] != self.DEFAULT_TRANSFORM[i]:
-                self.data.append(str(v))
+                self.data.append(str(round(v, 9)))
 
         self.data.append("w%s" % self.width)
         glyph = self.glyphset[baseGlyphName]
