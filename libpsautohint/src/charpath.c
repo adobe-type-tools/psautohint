@@ -7,8 +7,6 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
-#include <stdarg.h>
-
 #include "ac.h"
 #include "bbox.h"
 #include "charpath.h"
@@ -46,27 +44,10 @@ static int16_t GetOperandCount(int16_t);
 static void GetLengthandSubrIx(int16_t, int16_t*, int16_t*);
 
 /* macros */
+#define WriteToBuffer(...) ACBufferWriteF(outbuff, __VA_ARGS__)
 #define WRTNUM(i) WriteToBuffer("%d ", (int)(i))
 #define WRTNUMA(i) WriteToBuffer("%0.2f ", round((double)(i)*100) / 100)
-#define WriteStr(str) WriteToBuffer("%s ", str)
 #define WriteSubr(val) WriteToBuffer("%d subr ", val)
-
-/* Checks if buffer needs to grow before writing out string. */
-/* TODO: port to ACBuffer API */
-static void
-WriteToBuffer(char* format, ...)
-{
-    char outstr[MAXBUFFLEN + 1];
-    int len;
-    va_list va;
-
-    va_start(va, format);
-    len = vsnprintf(outstr, MAXBUFFLEN, format, va);
-    va_end(va);
-
-    if (len > 0)
-        ACBufferWrite(outbuff, outstr, (size_t)NUMMIN(len, MAXBUFFLEN + 1));
-}
 
 static void
 WriteX(Fixed x)
@@ -1618,8 +1599,7 @@ WritePaths(ACBuffer** outBuffers)
 
             WritePathElt(mIx, eltix, op, 0, opcount);
 
-            WriteToBuffer(GetOperator(op));
-            WriteToBuffer("\n");
+            WriteToBuffer("%s\n", GetOperator(op));
         }
         WriteToBuffer("ed\n");
     }
@@ -1713,8 +1693,7 @@ WritePaths(ACBuffer** outBuffers)
                 if (subrIx >= 0 && op != CP)
                     WriteSubr(subrIx);
             } /* end of for opix */
-        WriteStr(GetOperator(op));
-        WriteToBuffer("\n");
+        WriteToBuffer("%s\n", GetOperator(op));
     } /* end of for eltix */
     WriteToBuffer("ed\n");
 }

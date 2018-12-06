@@ -7,6 +7,9 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
+#include <stdarg.h>
+
+#include "logging.h"
 #include "memory.h"
 #include "psautohint.h"
 
@@ -65,6 +68,27 @@ ACBufferWrite(ACBuffer* buffer, char* data, size_t length)
     }
     memcpy(buffer->data + buffer->len, data, length);
     buffer->len += length;
+}
+
+#define STRLEN 500
+ACLIB_API void
+ACBufferWriteF(ACBuffer* buffer, char* format, ...)
+{
+    char outstr[STRLEN];
+    int len;
+    va_list va;
+
+    if (!buffer)
+        return;
+
+    va_start(va, format);
+    len = vsnprintf(outstr, STRLEN, format, va);
+    va_end(va);
+
+    if (len > 0 && len <= STRLEN)
+        ACBufferWrite(buffer, outstr, strlen(outstr));
+    else
+        LogMsg(LOGERROR, FATALERROR, "Failed to write string to ACBuffer.");
 }
 
 ACLIB_API void

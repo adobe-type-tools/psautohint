@@ -15,6 +15,7 @@
 
 static Fixed currentx, currenty;
 static bool firstFlex, wrtHintInfo;
+#define MAXBUFFLEN 127
 static char S0[MAXBUFFLEN + 1];
 static HintPoint* bst;
 static char bch;
@@ -35,29 +36,11 @@ FRnd(int32_t x)
     return r;
 }
 
-static void
-WriteString(char* str)
-{
-    if (!gBezOutput) {
-        LogMsg(LOGERROR, FATALERROR, "NULL output buffer while writing glyph.");
-        return;
-    }
-
-    ACBufferWrite(gBezOutput, str, strlen(str));
-}
+#define WriteString(...) ACBufferWriteF(gBezOutput, __VA_ARGS__)
 
 /* Note: The 8 bit fixed fraction cannot support more than 2 decimal places. */
-#define WRTNUM(i)                                                              \
-    {                                                                          \
-        snprintf(S0, MAXBUFFLEN, "%d ", (int32_t)(i));                         \
-        WriteString(S0);                                                       \
-    }
-
-#define WRTRNUM(i)                                                             \
-    {                                                                          \
-        snprintf(S0, MAXBUFFLEN, "%0.2f ", round((double)(i)*100) / 100);      \
-        WriteString(S0);                                                       \
-    }
+#define WRTNUM(i) WriteString("%d ", (int32_t)(i))
+#define WRTRNUM(i) WriteString("%0.2f ", round((double)(i)*100) / 100)
 
 static void
 wrtxa(Fixed x)
@@ -242,9 +225,7 @@ wrtnewhints(PathElt* e)
     hintmaskstr[0] = '\0';
     WrtPntLst(gPtLstArray[e->newhints]);
     if (strcmp(prevhintmaskstr, hintmaskstr)) {
-        WriteString("beginsubr snc\n");
-        WriteString(hintmaskstr);
-        WriteString("endsubr enc\nnewcolors\n");
+        WriteString("beginsubr snc\n%sendsubr enc\nnewcolors\n", hintmaskstr);
         strcpy(prevhintmaskstr, hintmaskstr);
     }
 }
@@ -412,16 +393,14 @@ SaveFile(void)
     PathElt* e = gPathStart;
     Cd c1, c2, c3;
 
-    WriteString("% ");
-    WriteString(gGlyphName);
-    WriteString("\n");
+    WriteString("%% %s\n", gGlyphName);
     wrtHintInfo = (gPathStart != NULL && gPathStart != gPathEnd);
     NumberPath();
     prevhintmaskstr[0] = '\0';
     if (wrtHintInfo && (!e->newhints)) {
         hintmaskstr[0] = '\0';
         WrtPntLst(gPtLstArray[0]);
-        WriteString(hintmaskstr);
+        WriteString("%s", hintmaskstr);
         strcpy(prevhintmaskstr, hintmaskstr);
     }
 
@@ -457,7 +436,7 @@ SaveFile(void)
             }
         }
 #if WRTABS_COMMENT
-        WriteString(" % ");
+        WriteString(" %% ");
         WRTNUM(e->count)
         switch (e->type) {
             case CURVETO:

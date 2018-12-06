@@ -79,39 +79,32 @@ printHelp(void)
     fprintf(stdout, "   -v print versions.\n");
 }
 
-#define STR_LEN 200
-#define WRITE_TO_BUFFER(text, a1, a2, a3)                                      \
-    if (userData) {                                                            \
-        char str[STR_LEN];                                                     \
-        ACBuffer* buffer = (ACBuffer*)userData;                                \
-        int len = snprintf(str, STR_LEN, text, a1, (double)a2, (double)a3);    \
-        if (len > 0)                                                           \
-            ACBufferWrite(buffer, str,                                         \
-                          (size_t)(len <= STR_LEN ? len : STR_LEN));           \
-    }
-
 static void
 charZoneCB(float top, float bottom, char* glyphName, void* userData)
 {
-    WRITE_TO_BUFFER("charZone %s top %f bottom %f\n", glyphName, top, bottom);
+    ACBufferWriteF((ACBuffer*)userData, "charZone %s top %f bottom %f\n",
+                   glyphName, (double)top, (double)bottom);
 }
 
 static void
 stemZoneCB(float top, float bottom, char* glyphName, void* userData)
 {
-    WRITE_TO_BUFFER("stemZone %s top %f bottom %f\n", glyphName, top, bottom);
+    ACBufferWriteF((ACBuffer*)userData, "stemZone %s top %f bottom %f\n",
+                   glyphName, (double)top, (double)bottom);
 }
 
 static void
 hstemCB(float top, float bottom, char* glyphName, void* userData)
 {
-    WRITE_TO_BUFFER("HStem %s top %f bottom %f\n", glyphName, top, bottom);
+    ACBufferWriteF((ACBuffer*)userData, "HStem %s top %f bottom %f\n",
+                   glyphName, (double)top, (double)bottom);
 }
 
 static void
 vstemCB(float right, float left, char* glyphName, void* userData)
 {
-    WRITE_TO_BUFFER("VStem %s right %f left %f\n", glyphName, right, left);
+    ACBufferWriteF((ACBuffer*)userData, "VStem %s right %f left %f\n",
+                   glyphName, (double)right, (double)left);
 }
 
 static void

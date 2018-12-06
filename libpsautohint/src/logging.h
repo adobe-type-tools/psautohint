@@ -7,6 +7,8 @@
  * This license is available at: http://opensource.org/licenses/Apache-2.0.
  */
 
+#include "psautohint.h"
+
 #include "basic.h"
 
 #ifndef BF_LOGGING_H_
