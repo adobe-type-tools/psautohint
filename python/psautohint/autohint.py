@@ -560,6 +560,31 @@ def hint_glyph(options, name, bez_glyph, fontinfo):
     return hinted
 
 
+def hint_compatible_glyphs(options, name, bez_glyphs, masters, fontinfo):
+    try:
+        if False:
+            # This is disabled because it causes crashes on the CI servers
+            # which are not reproducible locally. The below branch is a hack to
+            # avoid the crash and should be dropped once the crash is fixed,
+            # https://github.com/adobe-type-tools/psautohint/pull/131
+            hinted = hint_compatible_bez_glyphs(fontinfo, bez_glyphs, masters)
+        else:
+            hinted = []
+            for i, bez in enumerate(bez_glyphs[1:]):
+                in_bez = [bez_glyphs[0], bez]
+                in_masters = [masters[0], masters[i + 1]]
+                out = hint_compatible_bez_glyphs(fontinfo, in_bez, in_masters)
+                if i == 0:
+                    hinted = out
+                else:
+                    hinted.append(out[1])
+    except PsAutoHintCError:
+        raise ACHintError("%s: Failure in processing outline data." %
+                          options.nameAliases.get(name, name))
+
+    return hinted
+
+
 def get_glyph_reports(options, font, glyph_list, fontinfo_list):
     reports = GlyphReports()
 
@@ -626,12 +651,8 @@ def hint_compatible_fonts(options, fonts, paths, glyph_list, glyphs,
         bez_glyphs = [g[name][0] for g in glyphs]
         widths = [g[name][1] for g in glyphs]
 
-        try:
-            new_bez_glyphs = hint_compatible_bez_glyphs(fontinfo, bez_glyphs,
-                                                        masters)
-        except PsAutoHintCError:
-            raise ACHintError("%s: Failure in processing outline data." %
-                              aliases.get(name, name))
+        new_bez_glyphs = hint_compatible_glyphs(options, name, bez_glyphs,
+                                                masters, fontinfo)
 
         if options.logOnly:
             continue
