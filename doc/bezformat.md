@@ -16,7 +16,7 @@ operators:
 | `preflx2` | marks end of flex op                                   |
 | `flx`     | flex op                                                |
 | `beginsubr snc` | marks start of new block of hint values          |
-| `endsubr enc<new line>newcolors` | marks end of hint values        |
+| `endsubr enc\nnewcolors` | marks end of hint values                |
 | `rb`      | horizontal stem hint                                   |
 | `ry`      | vertical stem hint                                     |
 | `rm`      | vertical counter hints                                 |
