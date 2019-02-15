@@ -124,8 +124,7 @@ from collections import OrderedDict
 from fontTools.misc.py23 import SimpleNamespace, open, tostr, round
 from fontTools.pens.basePen import BasePen
 from fontTools.pens.pointPen import AbstractPointPen
-from fontTools.ufoLib import (UFOReader, UFOWriter, DEFAULT_GLYPHS_DIRNAME,
-                              DEFAULT_LAYER_NAME)
+from fontTools.ufoLib import UFOReader, UFOWriter
 from fontTools.ufoLib.errors import UFOLibError
 
 from . import fdTools, FontParseError
@@ -437,11 +436,11 @@ class UFOFontData:
             layer = None
 
         # Write layer contents.
-        layers = {DEFAULT_LAYER_NAME: DEFAULT_GLYPHS_DIRNAME}
+        layers = writer.layerContents.copy()
         if self.processedLayerGlyphMap or not self.writeToDefaultLayer:
             layers[PROCESSED_LAYER_NAME] = PROCESSED_GLYPHS_DIRNAME
         writer.layerContents.update(layers)
-        writer.writeLayerContents([DEFAULT_LAYER_NAME, PROCESSED_LAYER_NAME])
+        writer.writeLayerContents()
 
         # Write glyphs.
         glyphset = writer.getGlyphSet(layer, defaultLayer=layer is None)
