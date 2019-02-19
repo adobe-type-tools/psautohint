@@ -444,12 +444,17 @@ def get_bez_glyphs(options, font, glyph_list):
 
     for name in glyph_list:
         # Convert to bez format
-        bez_glyph, width = font.convertToBez(name, options.read_hints,
-                                             options.round_coords,
-                                             options.hintAll)
-        if bez_glyph is None or "mt" not in bez_glyph:
-            # skip empty glyphs.
-            continue
+        try:
+            bez_glyph, width = font.convertToBez(name, options.read_hints,
+                                                 options.round_coords,
+                                                 options.hintAll)
+            if bez_glyph is None or "mt" not in bez_glyph:
+                # skip empty glyphs.
+                continue
+        except KeyError:
+            # Source fonts may be sparse, e.g. be a subset of the
+            # reference font.
+            bez_glyph = width = None
         glyphs[name] = (bez_glyph, width)
 
     total = len(glyph_list)
@@ -571,9 +576,12 @@ def hint_compatible_glyphs(options, name, bez_glyphs, masters, fontinfo):
         else:
             hinted = []
             for i, bez in enumerate(bez_glyphs[1:]):
-                in_bez = [bez_glyphs[0], bez]
-                in_masters = [masters[0], masters[i + 1]]
-                out = hint_compatible_bez_glyphs(fontinfo, in_bez, in_masters)
+                if bez is None:
+                    out = [bez_glyphs[0], None]
+                else:
+                    in_bez = [bez_glyphs[0], bez]
+                    in_masters = [masters[0], masters[i + 1]]
+                    out = hint_compatible_bez_glyphs(fontinfo, in_bez, in_masters)
                 if i == 0:
                     hinted = out
                 else:
@@ -720,7 +728,8 @@ def hintFiles(options):
             for name in hinted_glyphs_list:
                 bez_glyphs, widths = hinted_glyphs_list[name]
                 for i, font in enumerate(fonts):
-                    font.updateFromBez(bez_glyphs[i], name, widths[i])
+                    if bez_glyphs[i]:
+                        font.updateFromBez(bez_glyphs[i], name, widths[i])
             for i, font in enumerate(fonts):
                 font.save(outpaths[i])
         else:
