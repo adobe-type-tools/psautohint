@@ -73,3 +73,29 @@ def test_incompatible_masters(tmpdir):
     options = Options(reference, inpaths, outpaths)
     with pytest.raises(ACHintError):
         hintFiles(options)
+
+
+def test_sparse_mmotf(tmpdir):
+    base = "%s/sparse_masters" % DATA_DIR
+    paths = sorted(glob.glob(base + "/*.otf"))
+    # the reference font is modified in-place, make a temp copy first
+    # MasterSet_Kanji-w0.00.otf has to be the reference font.
+    reference = make_temp_copy(tmpdir, paths[0])
+    inpaths = paths[1:]
+    outpaths = [str(tmpdir / basename(p)) + ".out" for p in inpaths]
+
+    options = Options(reference, inpaths, outpaths)
+    options.allow_no_blues = True
+    hintFiles(options)
+
+    refs = [p + ".ref" for p in paths]
+    for ref, out in zip(refs, [reference] + outpaths):
+        for path in (ref, out):
+            font = TTFont(path)
+            assert "CFF " in font
+            writer = XMLWriter(str(tmpdir / basename(path)) + ".xml")
+            font["CFF "].toXML(writer, font)
+            writer.close()
+
+        assert differ([str(tmpdir / basename(ref)) + ".xml",
+                       str(tmpdir / basename(out)) + ".xml"])
