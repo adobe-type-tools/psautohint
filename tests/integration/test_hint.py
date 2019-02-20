@@ -332,3 +332,14 @@ def test_decimals_otf(tmpdir):
 
     assert differ([str(tmpdir / basename(otf)) + ".xml",
                    str(tmpdir / basename(out)) + ".xml"])
+
+
+def test_layers(tmpdir):
+    path = "%s/dummy/layers.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+    options.allow_no_blues = True
+
+    hintFiles(options)
+
+    assert differ([path, out])
