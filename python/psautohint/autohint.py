@@ -631,7 +631,7 @@ def hint_font(options, font, glyph_list, fontinfo_list):
 
         if not ("ry" in new_bez_glyph or "rb" in new_bez_glyph or
                 "rm" in new_bez_glyph or "rv" in new_bez_glyph):
-            log.info("No hints added!")
+            log.info("%s: No hints added!", aliases.get(name, name))
 
         if options.logOnly:
             continue
