@@ -389,6 +389,26 @@ class _AdditionalHelpAction(argparse.Action):
         parser.exit(message=formatter.format_help())
 
 
+class DuplicateMessageFilter(logging.Filter):
+    """
+    Suppresses any log message that was reported before in the same module and
+    for the same logging level. We check for module and level number in
+    addition to the message just in case, though checking the message only is
+    probably enough.
+    """
+
+    def __init__(self):
+        super(DuplicateMessageFilter, self).__init__()
+        self.logs = set()
+
+    def filter(self, record):
+        current = (record.module, record.levelno, record.getMessage())
+        if current in self.logs:
+            return False
+        self.logs.add(current)
+        return True
+
+
 def _split_comma_sequence(comma_str):
     return [item.strip() for item in comma_str.split(',')]
 
@@ -673,6 +693,8 @@ def get_options(args):
 
     logging.basicConfig(format="%(levelname)s: %(message)s", level=log_level,
                         filename=parsed_args.log_path)
+    for handler in logging.root.handlers:
+        handler.addFilter(DuplicateMessageFilter())
 
     if (parsed_args.output_paths and
             len(parsed_args.font_paths) != len(parsed_args.output_paths)):
@@ -864,6 +886,8 @@ def get_stemhist_options(args):
         log_level = logging.DEBUG
 
     logging.basicConfig(format="%(levelname)s: %(message)s", level=log_level)
+    for handler in logging.root.handlers:
+        handler.addFilter(DuplicateMessageFilter())
 
     if (parsed_args.output_paths and
             len(parsed_args.font_paths) != len(parsed_args.output_paths)):
