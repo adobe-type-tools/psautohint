@@ -15,6 +15,7 @@ import tempfile
 from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
 from fontTools.misc.py23 import bytechr, byteord, open
 from fontTools.ttLib import TTFont, newTable
+from collections import namedtuple
 
 from . import fdTools, FontParseError
 
@@ -254,45 +255,16 @@ class HintMask:
         # return hintmask bytes for known hints.
         numHHints = len(hHints)
         numVHints = len(vHints)
+        self.byteLength = byteLength = int((7 + numHHints + numVHints) / 8)
         maskVal = 0
         byteIndex = 0
-        self.byteLength = byteLength = int((7 + numHHints + numVHints) / 8)
         mask = b""
-        self.hList.sort()
-        for hint in self.hList:
-            try:
-                i = hHints.index(hint)
-            except ValueError:
-                # we get here if some hints have been dropped
-                # because of the stack limit
-                continue
-            newbyteIndex = int(i / 8)
-            if newbyteIndex != byteIndex:
-                mask += bytechr(maskVal)
-                byteIndex += 1
-                while byteIndex < newbyteIndex:
-                    mask += b"\0"
-                    byteIndex += 1
-                maskVal = 0
-            maskVal += 2**(7 - (i % 8))
-
-        self.vList.sort()
-        for hint in self.vList:
-            try:
-                i = numHHints + vHints.index(hint)
-            except ValueError:
-                # we get here if some hints have been dropped
-                # because of the stack limit
-                continue
-            newbyteIndex = int(i / 8)
-            if newbyteIndex != byteIndex:
-                mask += bytechr(maskVal)
-                byteIndex += 1
-                while byteIndex < newbyteIndex:
-                    mask += b"\0"
-                    byteIndex += 1
-                maskVal = 0
-            maskVal += 2**(7 - (i % 8))
+        if self.hList:
+            mask, maskVal, byteIndex = self.addMaskBits(
+                hHints, self.hList, 0, mask, maskVal, byteIndex)
+        if self.vList:
+            mask, maskVal, byteIndex = self.addMaskBits(
+                vHints, self.vList, numHHints, mask, maskVal, byteIndex)
 
         if maskVal:
             mask += bytechr(maskVal)
@@ -301,6 +273,32 @@ class HintMask:
             mask += b"\0" * (byteLength - len(mask))
         self.mask = mask
         return mask
+
+    @staticmethod
+    def addMaskBits(allHints, maskHints, numPriorHints, mask, maskVal,
+                    byteIndex):
+        # sort in allhints order.
+        sort_list = [[allHints.index(hint) + numPriorHints, hint] for hint in
+                     maskHints if hint in allHints]
+        if not sort_list:
+            # we get here if some hints have been dropped # because of
+            # the stack limit, so that none of the items in maskHints are
+            # not in allHints
+            return mask, maskVal, byteIndex
+
+        sort_list.sort()
+        (idx_list, maskHints) = zip(*sort_list)
+        for i in idx_list:
+            newbyteIndex = int(i / 8)
+            if newbyteIndex != byteIndex:
+                mask += bytechr(maskVal)
+                byteIndex += 1
+                while byteIndex < newbyteIndex:
+                    mask += b"\0"
+                    byteIndex += 1
+                maskVal = 0
+            maskVal += 2**(7 - (i % 8))
+        return mask, maskVal, byteIndex
 
 
 def makeHintList(hints, needHintMasks, isH):
@@ -336,7 +334,6 @@ def makeHintList(hints, needHintMasks, isH):
         else:
             op = "vstem"
         hintList.append(op)
-
     return hintList
 
 
@@ -440,17 +437,70 @@ def makeRelativeCTArgs(argList, curX, curY):
     return argList, newCurX, newCurY
 
 
-def convertBezToT2(bezString):
+def build_hint_order(hints):
+    # MM hints have duplicate hints. We want to return a list of indices into
+    # the original unsorted and unfiltered list. The list should be sorted, and
+    # should filter out duplicates
+
+    numHints = len(hints)
+    index_list = list(range(numHints))
+    hint_list = list(zip(hints, index_list))
+    hint_list.sort()
+    new_hints = [hint_list[i] for i in range(1, numHints)
+                 if hint_list[i][0] != hint_list[i-1][0]]
+    new_hints = [hint_list[0]] + new_hints
+    hints, hint_order = list(zip(*new_hints))
+    # indexing into 'hint_order' with the hint index from the bez file
+    # will now yield the hint index after sorting.
+    return hints, hint_order
+
+
+RefHintMask = namedtuple("RefHintMask", "pos hbytes")
+
+
+class MMHintInfo:
+    def __init__(self, name=None):
+        self.reset(name)
+
+    def reset(self, glyph_name):
+        self.defined = False
+        self.h_order = None
+        self.v_order = None
+        self.hint_masks = []
+        self.glyph_name = glyph_name
+
+
+def convertBezToT2(bezString, mm_hint_info=None):
     # convert bez data to a T2 outline program, a list of operator tokens.
     #
     # Convert all bez ops to simplest T2 equivalent.
     # Add all hints to vertical and horizontal hint lists as encountered.
     # Insert a HintMask class whenever a new set of hints is encountered.
+    # Add all hints as prefix to t2Program
     # After all operators have been processed, convert HintMask items into
     # hintmask ops and hintmask bytes.
-    # Add all hints as prefix
     # Review operator list to optimize T2 operators.
+    #
+    # If doing MM-hinting, extra work is needed to maintain merge
+    # compatibility between the reference font and the region fonts.
+    # Although hints are generated for exactly the same outline features
+    # in all fonts, they will have different values. Consequently, the
+    # hints in a region font may not sort to the same order as in the
+    # reference font. In addition, they may be filtered differently. Only
+    # unique hints are added from the bez file to the hint list. Two hint
+    # pairs may differ in one font, but not in another.
+    # We work around these problems by first not filtering the hint
+    # pairs for uniqueness when accumulating the hint lists. For the
+    # reference font, once we have collected all the hints, we remove any
+    # duplicate pairs, but keep a list of the retained hint pair indices
+    # into the unfiltered hint pair list. For the region fonts, we
+    # select hints from the unfiltered hint pair lists by using the selected
+    # index list from the reference font.
+    # Note that this breaks the CFF spec for snapshotted instances of the
+    # CFF2 VF variable font, as hints may not be in ascending order, and the
+    # hint list may contain duplicate hints.
 
+    in_mm_hints = mm_hint_info is not None
     bezString = re.sub(r"%.+?\n", "", bezString)  # suppress comments
     bezList = re.findall(r"(\S+)", bezString)
     if not bezList:
@@ -499,33 +549,45 @@ def convertBezToT2(bezString):
             lastPathOp = token
         elif token == "rb":
             lastPathOp = token
-            try:
-                i = hhints.index(argList)
-            except ValueError:
-                i = len(hhints)
+            if in_mm_hints:
                 hhints.append(argList)
+                i = len(hhints) - 1
+            else:
+                try:
+                    i = hhints.index(argList)
+                except ValueError:
+                    i = len(hhints)
+                    hhints.append(argList)
             if hintMask:
                 if hhints[i] not in hintMask.hList:
                     hintMask.hList.append(hhints[i])
             argList = []
         elif token == "ry":
             lastPathOp = token
-            try:
-                i = vhints.index(argList)
-            except ValueError:
-                i = len(vhints)
+            if in_mm_hints:
                 vhints.append(argList)
+                i = len(vhints) - 1
+            else:
+                try:
+                    i = vhints.index(argList)
+                except ValueError:
+                    i = len(vhints)
+                    vhints.append(argList)
             if hintMask:
                 if vhints[i] not in hintMask.vList:
                     hintMask.vList.append(vhints[i])
             argList = []
 
         elif token == "rm":  # vstem3 hints are vhints
-            try:
-                i = vhints.index(argList)
-            except ValueError:
-                i = len(vhints)
+            if in_mm_hints:
                 vhints.append(argList)
+                i = len(vhints) - 1
+            else:
+                try:
+                    i = vhints.index(argList)
+                except ValueError:
+                    i = len(vhints)
+                    vhints.append(argList)
             if hintMask:
                 if vhints[i] not in hintMask.vList:
                     hintMask.vList.append(vhints[i])
@@ -541,11 +603,15 @@ def convertBezToT2(bezString):
             argList = []
             lastPathOp = token
         elif token == "rv":  # hstem3 are hhints
-            try:
-                i = hhints.index(argList)
-            except ValueError:
-                i = len(hhints)
+            if in_mm_hints:
                 hhints.append(argList)
+                i = len(hhints) - 1
+            else:
+                try:
+                    i = hhints.index(argList)
+                except ValueError:
+                    i = len(hhints)
+                    hhints.append(argList)
             if hintMask:
                 if hhints[i] not in hintMask.hList:
                     hintMask.hList.append(hhints[i])
@@ -609,8 +675,18 @@ def convertBezToT2(bezString):
         hStem3List.append(hStem3Args)
 
     t2Program = []
-    hhints.sort()
-    vhints.sort()
+
+    if mm_hint_info is None:
+        hhints.sort()
+        vhints.sort()
+    elif mm_hint_info.defined:
+        # Apply hint order from reference font in MM hinting
+        hhints = [hhints[j] for j in mm_hint_info.h_order]
+        vhints = [vhints[j] for j in mm_hint_info.v_order]
+    else:
+        # Define hint order from reference font in MM hinting
+        hhints, mm_hint_info.h_order = build_hint_order(hhints)
+        vhints, mm_hint_info.v_order = build_hint_order(vhints)
     numHHints = len(hhints)
     numVHints = len(vhints)
     hintLimit = int((kStackLimit - 2) / 2)
@@ -634,15 +710,35 @@ def convertBezToT2(bezString):
     if needHintMasks:
         # If there is not a hintsub before any drawing operators, then
         # add an initial first hint mask to the t2Program.
-        if hintMaskList[1].listPos != 0:
-            hBytes = hintMaskList[0].maskByte(hhints, vhints)
-            t2Program.extend(["hintmask", hBytes])
+        if (mm_hint_info is None) or (not mm_hint_info.defined):
+            # a single font and a reference font for mm hinting are
+            # processed the same way
+            if hintMaskList[1].listPos != 0:
+                hBytes = hintMaskList[0].maskByte(hhints, vhints)
+                t2Program.extend(["hintmask", hBytes])
+                if in_mm_hints:
+                    hm = RefHintMask(pos=0, hbytes=hBytes)
+                    mm_hint_info.hint_masks.append(hm)
 
-        # Convert the rest of the hint masks
-        # to a hintmask op and hintmask bytes.
-        for hintMask in hintMaskList[1:]:
-            pos = hintMask.listPos
-            t2List[pos] = [["hintmask"], hintMask.maskByte(hhints, vhints)]
+            # Convert the rest of the hint masks
+            # to a hintmask op and hintmask bytes.
+            for hintMask in hintMaskList[1:]:
+                pos = hintMask.listPos
+                hBytes = hintMask.maskByte(hhints, vhints)
+                t2List[pos] = [["hintmask"], hBytes]
+                if in_mm_hints:
+                    hm = RefHintMask(pos=pos, hbytes=hBytes)
+                    mm_hint_info.hint_masks.append(hm)
+        elif (mm_hint_info is not None):
+            # This is a MM region font: apply hint masks from reference font.
+            hm0_mask = mm_hint_info.hint_masks[0].hbytes
+            if isinstance(t2List[0][0], HintMask):
+                t2List[0] = [["hintmask"], hm0_mask]
+            else:
+                t2Program.extend(["hintmask", hm0_mask])
+
+            for hm in mm_hint_info.hint_masks[1:]:
+                t2List[hm.pos] = [["hintmask"], hm.hbytes]
 
     for entry in t2List:
         try:
@@ -650,6 +746,9 @@ def convertBezToT2(bezString):
             t2Program.append(entry[1])
         except Exception:
             raise KeyError("Failed to extend t2Program with entry %s" % entry)
+
+    if in_mm_hints:
+        mm_hint_info.defined = True
 
     return t2Program
 
@@ -665,6 +764,7 @@ class CFFFontData:
     def __init__(self, path, font_format):
         self.inputPath = path
         self.font_format = font_format
+        self.mm_hint_info = MMHintInfo()
 
         if font_format == "OTF":
             # It is an OTF font, we can process it directly.
@@ -719,8 +819,11 @@ class CFFFontData:
             bezString = None
         return bezString, t2Wdth
 
-    def updateFromBez(self, bezData, glyphName, width):
-        t2Program = [width] + convertBezToT2(bezData)
+    def updateFromBez(self, bezData, glyphName, width, mm_hint_info=None):
+        if self.mm_hint_info.glyph_name != glyphName:
+            self.mm_hint_info.reset(glyphName)
+
+        t2Program = [width] + convertBezToT2(bezData, mm_hint_info)
         t2CharString = self.charStrings[glyphName]
         t2CharString.program = t2Program
 
