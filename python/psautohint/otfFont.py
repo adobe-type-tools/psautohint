@@ -450,8 +450,9 @@ def build_hint_order(hints):
                  if hint_list[i][0] != hint_list[i-1][0]]
     new_hints = [hint_list[0]] + new_hints
     hints, hint_order = list(zip(*new_hints))
-    # indexing into 'hint_order' with the hint index from the bez file
-    # will now yield the hint index after sorting.
+    # hints is now a list of hint pairs, sorted by increasing bottom edge.
+    # hint_order is now a list of the hint indices from the bez file, but
+    # sorted in the order of the hint pairs.
     return hints, hint_order
 
 
@@ -468,6 +469,23 @@ class MMHintInfo:
         self.v_order = None
         self.hint_masks = []
         self.glyph_name = glyph_name
+
+
+def update_hints(in_mm_hints, argList, hints, hintMask, is_v=False):
+    if in_mm_hints:
+        hints.append(argList)
+        i = len(hints) - 1
+    else:
+        try:
+            i = hints.index(argList)
+        except ValueError:
+            i = len(hints)
+            hints.append(argList)
+    if hintMask:
+        hintList = hintMask.vList if is_v else hintMask.hList
+        if hints[i] not in hintList:
+            hintList.append(hints[i])
+    return i
 
 
 def convertBezToT2(bezString, mm_hint_info=None):
@@ -548,50 +566,15 @@ def convertBezToT2(bezString, mm_hint_info=None):
         elif token == "enc":
             lastPathOp = token
         elif token == "rb":
-            lastPathOp = token
-            if in_mm_hints:
-                hhints.append(argList)
-                i = len(hhints) - 1
-            else:
-                try:
-                    i = hhints.index(argList)
-                except ValueError:
-                    i = len(hhints)
-                    hhints.append(argList)
-            if hintMask:
-                if hhints[i] not in hintMask.hList:
-                    hintMask.hList.append(hhints[i])
+            update_hints(in_mm_hints, argList, hhints, hintMask, False)
             argList = []
+            lastPathOp = token
         elif token == "ry":
-            lastPathOp = token
-            if in_mm_hints:
-                vhints.append(argList)
-                i = len(vhints) - 1
-            else:
-                try:
-                    i = vhints.index(argList)
-                except ValueError:
-                    i = len(vhints)
-                    vhints.append(argList)
-            if hintMask:
-                if vhints[i] not in hintMask.vList:
-                    hintMask.vList.append(vhints[i])
+            update_hints(in_mm_hints, argList, vhints, hintMask, True)
             argList = []
-
+            lastPathOp = token
         elif token == "rm":  # vstem3 hints are vhints
-            if in_mm_hints:
-                vhints.append(argList)
-                i = len(vhints) - 1
-            else:
-                try:
-                    i = vhints.index(argList)
-                except ValueError:
-                    i = len(vhints)
-                    vhints.append(argList)
-            if hintMask:
-                if vhints[i] not in hintMask.vList:
-                    hintMask.vList.append(vhints[i])
-
+            update_hints(in_mm_hints, argList, vhints, hintMask, True)
             if (lastPathOp != token) and vStem3Args:
                 # first rm, must be start of a new vstem3
                 # if we already have a set of vstems in vStem3Args, save them,
@@ -603,18 +586,7 @@ def convertBezToT2(bezString, mm_hint_info=None):
             argList = []
             lastPathOp = token
         elif token == "rv":  # hstem3 are hhints
-            if in_mm_hints:
-                hhints.append(argList)
-                i = len(hhints) - 1
-            else:
-                try:
-                    i = hhints.index(argList)
-                except ValueError:
-                    i = len(hhints)
-                    hhints.append(argList)
-            if hintMask:
-                if hhints[i] not in hintMask.hList:
-                    hintMask.hList.append(hhints[i])
+            update_hints(in_mm_hints, argList, hhints, hintMask, False)
 
             if (lastPathOp != token) and hStem3Args:
                 # first rv, must be start of a new h countermask
