@@ -278,7 +278,7 @@ class GlyphReports:
                   "Vertical Stem List for %s on %s\n" % (path, atime),
                   "Top Zone List for %s on %s\n" % (path, atime),
                   "Bottom Zone List for %s on %s\n" % (path, atime),
-                 )
+                  )
         headers = ("Count\tWidth\tGlyph List\n",
                    "Count\tWidth\tGlyph List\n",
                    "Count\tTop Zone\tGlyph List\n",
@@ -581,7 +581,8 @@ def hint_compatible_glyphs(options, name, bez_glyphs, masters, fontinfo):
                 else:
                     in_bez = [bez_glyphs[0], bez]
                     in_masters = [masters[0], masters[i + 1]]
-                    out = hint_compatible_bez_glyphs(fontinfo, in_bez, in_masters)
+                    out = hint_compatible_bez_glyphs(fontinfo, in_bez,
+                        in_masters)
                 if i == 0:
                     hinted = out
                 else:
