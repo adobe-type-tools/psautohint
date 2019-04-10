@@ -70,6 +70,10 @@ class ACOptions(object):
         self.round_coords = True
         self.writeToDefaultLayer = False
         self.baseMaster = {}
+        self.mm_hint_info_dict = None
+        # mm_hint_info_dict is keyed by glyph name. Each value hold the
+        # MM hint info from al the source fonts for the glyph. The type
+        # of the value may differ betweenfont types.
         self.font_format = None
         self.report_zones = False
         self.report_stems = False
@@ -582,7 +586,7 @@ def hint_compatible_glyphs(options, name, bez_glyphs, masters, fontinfo):
                     in_bez = [bez_glyphs[0], bez]
                     in_masters = [masters[0], masters[i + 1]]
                     out = hint_compatible_bez_glyphs(fontinfo, in_bez,
-                        in_masters)
+                                                     in_masters)
                 if i == 0:
                     hinted = out
                 else:
@@ -671,6 +675,13 @@ def hint_compatible_fonts(options, fonts, paths, glyph_list, glyphs,
     return hinted
 
 
+def fix_font_hints(fontData, fix_list, mm_hint_info_dict,
+                   is_reference_font=False):
+    for glyph_name in fix_list:
+        fontData.fix_glyph_hints(glyph_name, mm_hint_info_dict[glyph_name],
+                                 is_reference_font)
+
+
 def hintFiles(options):
     fonts = []
     paths = []
@@ -716,6 +727,7 @@ def hintFiles(options):
                 # fonts will copy its hinting.
                 glyphs_list.append(
                     hint_font(options, font, glyph_list, fontinfo_list))
+                mm_hint_info_dict = font.mm_hint_info_dict
             else:
                 glyphs_list.append(get_bez_glyphs(options, font, glyph_list))
 
@@ -730,7 +742,21 @@ def hintFiles(options):
                 bez_glyphs, widths = hinted_glyphs_list[name]
                 for i, font in enumerate(fonts):
                     if bez_glyphs[i]:
-                        font.updateFromBez(bez_glyphs[i], name, widths[i])
+                        font.updateFromBez(bez_glyphs[i], name, widths[i],
+                                           mm_hint_info_dict)
+
+            # Now check if we need to fix any hint lists.
+            if mm_hint_info_dict:
+                fix_list = [gname for gname in mm_hint_info_dict if
+                            mm_hint_info_dict[gname].bad_hint_idxs]
+                if len(fix_list) > 0:
+                    fix_font_hints(fonts[0], fix_list,
+                                   mm_hint_info_dict,
+                                   is_reference_font=True)
+                    for font in fonts[1:]:
+                        fix_font_hints(font, fix_list,
+                                       mm_hint_info_dict)
+
             for i, font in enumerate(fonts):
                 font.save(outpaths[i])
         else:
@@ -738,6 +764,7 @@ def hintFiles(options):
             font.close()
 
         log.info("End time: %s.", time.asctime())
+
     else:
         # Regular hints, just iterate over the fonts and hint each one.
         for i, font in enumerate(fonts):

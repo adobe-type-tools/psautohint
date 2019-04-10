@@ -12,10 +12,10 @@ import re
 import subprocess
 import tempfile
 
-from fontTools.misc.psCharStrings import T2OutlineExtractor, SimpleT2Decompiler
+from fontTools.misc.psCharStrings import (T2OutlineExtractor,
+                                          SimpleT2Decompiler)
 from fontTools.misc.py23 import bytechr, byteord, open
 from fontTools.ttLib import TTFont, newTable
-from collections import namedtuple
 
 from . import fdTools, FontParseError
 
@@ -246,10 +246,13 @@ class HintMask:
     # hint mask when converting bez to T2.
     def __init__(self, listPos):
         # The index into the t2list is kept so we can quickly find them later.
+        # Note that t2list has one item per operator, and does not include the
+        # initial hint operators - first op is always [rhv]moveto or endchar.
         self.listPos = listPos
         # These contain the actual hint values.
         self.hList = []
         self.vList = []
+        self.mask = None
 
     def maskByte(self, hHints, vHints):
         # return hintmask bytes for known hints.
@@ -456,19 +459,69 @@ def build_hint_order(hints):
     return hints, hint_order
 
 
-RefHintMask = namedtuple("RefHintMask", "pos hbytes")
-
-
 class MMHintInfo:
-    def __init__(self, name=None):
-        self.reset(name)
-
-    def reset(self, glyph_name):
+    def __init__(self, glyph_name=None):
         self.defined = False
         self.h_order = None
         self.v_order = None
         self.hint_masks = []
         self.glyph_name = glyph_name
+        # badHintPairs and newHintMasks are used when removing bad hint
+        # pairs. badHintPairs contains the hint pair indices for all the bad
+        # hint pairs in any of the fonts for the current glyph. newHintMasks
+        # maps from token index to a new hint mask value. Token index is the
+        # index of the token in the CharString.program.
+        self.bad_hint_idxs = set()
+        self.newHintMasks = {}
+
+
+def make_abs(hint_pair):
+    bottom_edge, delta = hint_pair
+    new_hint_pair = [bottom_edge, delta]
+    if delta in [-20, -21]:
+        new_hint_pair[0] = bottom_edge + delta
+        new_hint_pair[1] = bottom_edge
+    else:
+        new_hint_pair[1] = bottom_edge + delta
+    return new_hint_pair
+
+
+def check_hint_overlap(hint_list, last_idx, bad_hint_idxs):
+    # return True if there is an overlap.
+    prev = hint_list[0]
+    for i, hint_pair in enumerate(hint_list[1:], 1):
+        if prev[1] >= hint_pair[0]:
+            bad_hint_idxs.add(i + last_idx)
+        prev = hint_pair
+
+
+def check_hint_pairs(hint_pairs, mm_hint_info, last_idx=0):
+    # pairs must be in ascending order by bottom (or left) edge,
+    # and pairs in a hint group must not overlap.
+
+    # check order first
+    hint_list = [make_abs(hint_pair) for hint_pair in hint_pairs]
+    bad_hint_idxs = set()
+    prev = hint_list[0]
+    for i, hint_pair in enumerate(hint_list[1:], 1):
+        if prev[0] > hint_pair[0]:
+            bad_hint_idxs.add(i + last_idx)
+        prev = hint_pair
+
+    # check for overlap in hint groups.
+    if mm_hint_info.hint_masks:
+        for hint_mask in mm_hint_info.hint_masks:
+            if last_idx == 0:
+                hint_list = hint_mask.hList
+            else:
+                hint_list = hint_mask.vList
+            hint_list = [make_abs(hint_pair) for hint_pair in hint_list]
+            check_hint_overlap(hint_list, last_idx, bad_hint_idxs)
+    else:
+        check_hint_overlap(hint_list, last_idx, bad_hint_idxs)
+
+    if bad_hint_idxs:
+        mm_hint_info.bad_hint_idxs |= bad_hint_idxs
 
 
 def update_hints(in_mm_hints, argList, hints, hintMask, is_v=False):
@@ -640,7 +693,6 @@ def convertBezToT2(bezString, mm_hint_info=None):
     # change the t2List length until the hintmasks have been converted.
     numHintMasks = len(hintMaskList)
     needHintMasks = numHintMasks > 1
-
     if vStem3Args:
         vStem3List.append(vStem3Args)
     if hStem3Args:
@@ -654,7 +706,10 @@ def convertBezToT2(bezString, mm_hint_info=None):
     elif mm_hint_info.defined:
         # Apply hint order from reference font in MM hinting
         hhints = [hhints[j] for j in mm_hint_info.h_order]
+        check_hint_pairs(hhints, mm_hint_info)
+        last_idx = len(hhints)
         vhints = [vhints[j] for j in mm_hint_info.v_order]
+        check_hint_pairs(vhints, mm_hint_info, last_idx)
     else:
         # Define hint order from reference font in MM hinting
         hhints, mm_hint_info.h_order = build_hint_order(hhints)
@@ -689,8 +744,7 @@ def convertBezToT2(bezString, mm_hint_info=None):
                 hBytes = hintMaskList[0].maskByte(hhints, vhints)
                 t2Program.extend(["hintmask", hBytes])
                 if in_mm_hints:
-                    hm = RefHintMask(pos=0, hbytes=hBytes)
-                    mm_hint_info.hint_masks.append(hm)
+                    mm_hint_info.hint_masks.append(hintMaskList[0])
 
             # Convert the rest of the hint masks
             # to a hintmask op and hintmask bytes.
@@ -699,18 +753,17 @@ def convertBezToT2(bezString, mm_hint_info=None):
                 hBytes = hintMask.maskByte(hhints, vhints)
                 t2List[pos] = [["hintmask"], hBytes]
                 if in_mm_hints:
-                    hm = RefHintMask(pos=pos, hbytes=hBytes)
-                    mm_hint_info.hint_masks.append(hm)
+                    mm_hint_info.hint_masks.append(hintMask)
         elif (mm_hint_info is not None):
             # This is a MM region font: apply hint masks from reference font.
-            hm0_mask = mm_hint_info.hint_masks[0].hbytes
+            hm0_mask = mm_hint_info.hint_masks[0].mask
             if isinstance(t2List[0][0], HintMask):
                 t2List[0] = [["hintmask"], hm0_mask]
             else:
                 t2Program.extend(["hintmask", hm0_mask])
 
             for hm in mm_hint_info.hint_masks[1:]:
-                t2List[hm.pos] = [["hintmask"], hm.hbytes]
+                t2List[hm.listPos] = [["hintmask"], hm.mask]
 
     for entry in t2List:
         try:
@@ -732,11 +785,56 @@ def _run_tx(args):
         raise FontParseError(e)
 
 
+class FixHintWidthDecompiler(SimpleT2Decompiler):
+    # If we are using this class, we know the charstring has hints.
+    def __init__(self, localSubrs, globalSubrs, private=None):
+        SimpleT2Decompiler.__init__(self, localSubrs, globalSubrs, private)
+        self.has_explicit_width = None
+        self.h_hint_args = self.v_hint_args = None
+        self.last_stem_index = None
+
+    def op_hstem(self, index):
+        self.countHints(is_vert=False)
+        self.last_stem_index = index
+    op_hstemhm = op_hstem
+
+    def op_vstem(self, index):
+        self.countHints(is_vert=True)
+        self.last_stem_index = index
+    op_vstemhm = op_vstem
+
+    def op_hintmask(self, index):
+        if not self.hintMaskBytes:
+            # Note that I am assuming that there is never an op_vstemhm
+            # followed by an op_hintmask. Since this is applied after saving
+            # the font with fontTools, this is safe.
+            self.countHints(is_vert=True)
+            self.hintMaskBytes = (self.hintCount + 7) // 8
+        cs = self.callingStack[-1]
+        hintMaskBytes, index = cs.getBytes(index, self.hintMaskBytes)
+        return hintMaskBytes, index
+
+    def countHints(self, is_vert):
+        args = self.popall()
+        if self.has_explicit_width is None:
+            if (len(args) % 2) == 0:
+                self.has_explicit_width = False
+            else:
+                self.has_explicit_width = True
+                self.width_arg = args[0]
+                args = args[1:]
+        self.hintCount = self.hintCount + len(args) // 2
+        if is_vert:
+            self.v_hint_args = args
+        else:
+            self.h_hint_args = args
+
+
 class CFFFontData:
     def __init__(self, path, font_format):
         self.inputPath = path
         self.font_format = font_format
-        self.mm_hint_info = MMHintInfo()
+        self.mm_hint_info_dict = {}
 
         if font_format == "OTF":
             # It is an OTF font, we can process it directly.
@@ -791,10 +889,11 @@ class CFFFontData:
             bezString = None
         return bezString, t2Wdth
 
-    def updateFromBez(self, bezData, glyphName, width, mm_hint_info=None):
-        if self.mm_hint_info.glyph_name != glyphName:
-            self.mm_hint_info.reset(glyphName)
-
+    def updateFromBez(self, bezData, glyphName, width, mm_hint_info_dict=None):
+        if ((mm_hint_info_dict is not None)
+                and glyphName not in mm_hint_info_dict):
+            mm_hint_info_dict[glyphName] = MMHintInfo(glyphName)
+        mm_hint_info = mm_hint_info_dict[glyphName]
         t2Program = [width] + convertBezToT2(bezData, mm_hint_info)
         t2CharString = self.charStrings[glyphName]
         t2CharString.program = t2Program
@@ -1000,3 +1099,86 @@ class CFFFontData:
             else:
                 fdTools.mergeFDDicts([finalFDict], private)
         return fdGlyphDict, fontDictList
+
+    def fix_glyph_hints(self, glyph_name, mm_hint_info, is_reference_font):
+        # 1. Delete any bad hints.
+        # 2. If reference font, recalculate the hint mask byte strings
+        # 3. Replace hint masks.
+        try:
+            t2CharString = self.charStrings[glyph_name]
+        except KeyError:
+            return  # Happens with sparse source fonts - just skip the glyph.
+        subrs = getattr(t2CharString.private, "Subrs", [])
+        decompiler = FixHintWidthDecompiler(subrs, t2CharString.globalSubrs,
+                                            t2CharString.private)
+        decompiler.execute(t2CharString)
+        program = t2CharString.program
+
+        hm_pos_list = [i for i, token in enumerate(program)
+                       if token == 'hintmask']
+        num_hhint_pairs = len(decompiler.h_hint_args) // 2
+
+        # 1. Build list of good [vh]hints.
+        bad_hint_idxs = list(mm_hint_info.bad_hint_idxs)
+        bad_hint_idxs.sort()
+        for idx in reversed(bad_hint_idxs):
+            if idx < num_hhint_pairs:
+                hint_args = decompiler.h_hint_args
+                bottom_idx = idx * 2
+            else:
+                hint_args = decompiler.v_hint_args
+                bottom_idx = (idx-num_hhint_pairs) * 2
+            delta = hint_args[bottom_idx] + hint_args[bottom_idx + 1]
+            del hint_args[bottom_idx:bottom_idx+2]
+            hint_args[bottom_idx] += delta
+
+        del program[:hm_pos_list[0]]  # delete old hints
+
+        # If there were decompiler.v_hint_args, but they have now all been
+        # deleted, the first token will still be 'vstem[hm]'
+        if ((not decompiler.v_hint_args)
+                and program[0].startswith('vstem')):
+            del program[0]
+
+        if (decompiler.has_explicit_width):
+            hint_program = [decompiler.width_arg]
+        else:
+            hint_program = []
+        if decompiler.h_hint_args:
+            op_hstem = 'hstemhm' if mm_hint_info.hint_masks else 'hstem'
+            hint_program.extend(decompiler.h_hint_args)
+            hint_program.append(op_hstem)
+        if decompiler.v_hint_args:
+            hint_program.extend(decompiler.v_hint_args)
+            # Don't need to append op_vstem, as this is still in hint_program.
+            program = hint_program + program
+
+        # Re-calculate the hint masks.
+        if is_reference_font:
+            h_args = decompiler.h_hint_args
+
+            hhints = [h_args[0:2]]
+            prev = hhints[0]
+            for i in range(2, len(h_args), 2):
+                bottom = h_args[i] + prev[0] + prev[1]
+                hhints.append([bottom, h_args[i+1]])
+                prev = hhints[-1]
+
+            v_args = decompiler.v_hint_args
+            vhints = [v_args[0:2]]
+            prev = vhints[0]
+            for i in range(2, len(v_args), 2):
+                bottom = v_args[i] + prev[0] + prev[1]
+                vhints.append([bottom, v_args[i+1]])
+                prev = vhints[-1]
+            for hm in mm_hint_info.hint_masks:
+                hm.maskByte(hhints, vhints)
+
+        # Apply fixed hint masks
+        hm_pos_list = [i for i, token in enumerate(program)
+                       if token == 'hintmask']
+        for i, hm in enumerate(mm_hint_info.hint_masks):
+            pos = hm_pos_list[i]
+            program[pos+1] = hm.mask
+
+        t2CharString.program = program
