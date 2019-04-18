@@ -394,7 +394,7 @@ class UFOFontData:
         bezString = "\n".join(["% " + name, "sc", bezString, "ed", ""])
         return bezString, width
 
-    def updateFromBez(self, bezData, name, width):
+    def updateFromBez(self, bezData, name, width, mm_hint_info=None):
         # For UFO font, we don't use the width parameter:
         # it is carried over from the input glif file.
         layer = None

@@ -363,6 +363,12 @@ CheckSCurve(PathElt* ee)
 static void
 CheckZeroLength(void)
 {
+    if ((!gEditGlyph) || forMultiMaster)
+    {
+    	/* Do not change topology when hinting MM fonts,
+    	and do not edit glyphs if not requested */
+        return;
+    }
     PathElt *e, *NxtE;
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3;
     e = gPathStart;

@@ -973,38 +973,6 @@ ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
     }
 }
 
-/* Go through each hint element and check that all rm's and rv's
- meet the necessary criteria. */
-static void
-FindHandVStem3(HintElt** hintElt, indx pathIx, bool* errormsg)
-{
-    int16_t count = 1;
-
-    while (*hintElt != NULL) {
-        if ((*hintElt)->type == (RM + ESCVAL) ||
-            (*hintElt)->type == (RV + ESCVAL)) {
-            ReadHorVStem3Values(pathIx, count, (*hintElt)->type, errormsg);
-            /* RM's and RV's are in pairs of 3 */
-            hintElt = &(*hintElt)->next->next->next;
-            count += 3;
-        } else {
-            hintElt = &(*hintElt)->next;
-            count++;
-        }
-    }
-}
-
-static void
-CheckHandVStem3(void)
-{
-    indx ix;
-    bool errormsg = true;
-
-    FindHandVStem3(&pathlist[hintsMasterIx].mainhints, MAINHINTS, &errormsg);
-    for (ix = 0; ix < gPathEntries; ix++)
-        FindHandVStem3(&pathlist[hintsMasterIx].path[ix].hints, ix, &errormsg);
-}
-
 static void
 CheckFlexValues(int16_t* operator, indx eltix, indx flexix, bool* xequal,
                 bool* yequal)
@@ -1827,7 +1795,6 @@ MergeGlyphPaths(const char** srcglyphs, int nmasters, const char** masters,
                 LogMsg(LOGERROR, FATALERROR,
                        "Path problem in ReadAndAssignHints");
             }
-            CheckHandVStem3();
         }
         WritePaths(outbuffers);
     }
