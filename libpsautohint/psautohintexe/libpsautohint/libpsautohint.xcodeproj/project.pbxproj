@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56BD964E226E09C700452646 /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 56BD964D226E09C700452646 /* buffer.c */; };
 		BD2C1182203DF53500D922B6 /* ac.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C1165203DF53500D922B6 /* ac.c */; };
 		BD2C1183203DF53500D922B6 /* acfixed.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C1166203DF53500D922B6 /* acfixed.c */; };
 		BD2C1184203DF53500D922B6 /* auto.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C1167203DF53500D922B6 /* auto.c */; };
@@ -48,6 +49,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		56BD964D226E09C700452646 /* buffer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = buffer.c; sourceTree = "<group>"; };
 		BD2C115E203DF50800D922B6 /* libpsautohint.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libpsautohint.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD2C1165203DF53500D922B6 /* ac.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ac.c; sourceTree = "<group>"; };
 		BD2C1166203DF53500D922B6 /* acfixed.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = acfixed.c; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 				BD2C1166203DF53500D922B6 /* acfixed.c */,
 				BD2C1167203DF53500D922B6 /* auto.c */,
 				BD2C1168203DF53500D922B6 /* bbox.c */,
+				56BD964D226E09C700452646 /* buffer.c */,
 				BD2C1169203DF53500D922B6 /* charpath.c */,
 				BD2C116A203DF53500D922B6 /* charpathpriv.c */,
 				BD2C116B203DF53500D922B6 /* charprop.c */,
@@ -257,6 +260,7 @@
 				BD2C1186203DF53500D922B6 /* charpath.c in Sources */,
 				BD2C1187203DF53500D922B6 /* charpathpriv.c in Sources */,
 				BD2C1188203DF53500D922B6 /* charprop.c in Sources */,
+				56BD964E226E09C700452646 /* buffer.c in Sources */,
 				BD2C1189203DF53500D922B6 /* check.c in Sources */,
 				BD2C118A203DF53500D922B6 /* control.c in Sources */,
 				BD2C118B203DF53500D922B6 /* eval.c in Sources */,
