@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56BD964E226E09C700452646 /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 56BD964D226E09C700452646 /* buffer.c */; };
 		BD2C1182203DF53500D922B6 /* ac.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C1165203DF53500D922B6 /* ac.c */; };
 		BD2C1183203DF53500D922B6 /* acfixed.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C1166203DF53500D922B6 /* acfixed.c */; };
 		BD2C1184203DF53500D922B6 /* auto.c in Sources */ = {isa = PBXBuildFile; fileRef = BD2C1167203DF53500D922B6 /* auto.c */; };
@@ -48,45 +49,46 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		56BD964D226E09C700452646 /* buffer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = buffer.c; sourceTree = "<group>"; };
 		BD2C115E203DF50800D922B6 /* libpsautohint.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libpsautohint.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		BD2C1165203DF53500D922B6 /* ac.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = ac.c; path = ../../src/ac.c; sourceTree = "<group>"; };
-		BD2C1166203DF53500D922B6 /* acfixed.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = acfixed.c; path = ../../src/acfixed.c; sourceTree = "<group>"; };
-		BD2C1167203DF53500D922B6 /* auto.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = auto.c; path = ../../src/auto.c; sourceTree = "<group>"; };
-		BD2C1168203DF53500D922B6 /* bbox.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = bbox.c; path = ../../src/bbox.c; sourceTree = "<group>"; };
-		BD2C1169203DF53500D922B6 /* charpath.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = charpath.c; path = ../../src/charpath.c; sourceTree = "<group>"; };
-		BD2C116A203DF53500D922B6 /* charpathpriv.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = charpathpriv.c; path = ../../src/charpathpriv.c; sourceTree = "<group>"; };
-		BD2C116B203DF53500D922B6 /* charprop.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = charprop.c; path = ../../src/charprop.c; sourceTree = "<group>"; };
-		BD2C116C203DF53500D922B6 /* check.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = check.c; path = ../../src/check.c; sourceTree = "<group>"; };
-		BD2C116D203DF53500D922B6 /* control.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = control.c; path = ../../src/control.c; sourceTree = "<group>"; };
-		BD2C116E203DF53500D922B6 /* eval.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = eval.c; path = ../../src/eval.c; sourceTree = "<group>"; };
-		BD2C116F203DF53500D922B6 /* fix.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = fix.c; path = ../../src/fix.c; sourceTree = "<group>"; };
-		BD2C1170203DF53500D922B6 /* flat.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = flat.c; path = ../../src/flat.c; sourceTree = "<group>"; };
-		BD2C1171203DF53500D922B6 /* fontinfo.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = fontinfo.c; path = ../../src/fontinfo.c; sourceTree = "<group>"; };
-		BD2C1172203DF53500D922B6 /* gen.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = gen.c; path = ../../src/gen.c; sourceTree = "<group>"; };
-		BD2C1173203DF53500D922B6 /* head.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = head.c; path = ../../src/head.c; sourceTree = "<group>"; };
-		BD2C1174203DF53500D922B6 /* logging.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = logging.c; path = ../../src/logging.c; sourceTree = "<group>"; };
-		BD2C1175203DF53500D922B6 /* memory.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = memory.c; path = ../../src/memory.c; sourceTree = "<group>"; };
-		BD2C1177203DF53500D922B6 /* merge.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = merge.c; path = ../../src/merge.c; sourceTree = "<group>"; };
-		BD2C1178203DF53500D922B6 /* misc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = misc.c; path = ../../src/misc.c; sourceTree = "<group>"; };
-		BD2C1179203DF53500D922B6 /* optable.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = optable.c; path = ../../src/optable.c; sourceTree = "<group>"; };
-		BD2C117A203DF53500D922B6 /* pick.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = pick.c; path = ../../src/pick.c; sourceTree = "<group>"; };
-		BD2C117B203DF53500D922B6 /* psautohint.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = psautohint.c; path = ../../src/psautohint.c; sourceTree = "<group>"; };
-		BD2C117C203DF53500D922B6 /* read.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = read.c; path = ../../src/read.c; sourceTree = "<group>"; };
-		BD2C117D203DF53500D922B6 /* report.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = report.c; path = ../../src/report.c; sourceTree = "<group>"; };
-		BD2C117E203DF53500D922B6 /* shuffle.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = shuffle.c; path = ../../src/shuffle.c; sourceTree = "<group>"; };
-		BD2C117F203DF53500D922B6 /* stemreport.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = stemreport.c; path = ../../src/stemreport.c; sourceTree = "<group>"; };
-		BD2C1181203DF53500D922B6 /* write.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = write.c; path = ../../src/write.c; sourceTree = "<group>"; };
-		BD2C119F203DF55300D922B6 /* psautohint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = psautohint.h; path = ../../include/psautohint.h; sourceTree = "<group>"; };
-		BD2C11A1203DF56F00D922B6 /* ac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ac.h; path = ../../src/ac.h; sourceTree = "<group>"; };
-		BD2C11A2203DF56F00D922B6 /* basic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = basic.h; path = ../../src/basic.h; sourceTree = "<group>"; };
-		BD2C11A3203DF56F00D922B6 /* bbox.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = bbox.h; path = ../../src/bbox.h; sourceTree = "<group>"; };
-		BD2C11A4203DF56F00D922B6 /* charpath.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = charpath.h; path = ../../src/charpath.h; sourceTree = "<group>"; };
-		BD2C11A5203DF56F00D922B6 /* fontinfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fontinfo.h; path = ../../src/fontinfo.h; sourceTree = "<group>"; };
-		BD2C11A6203DF56F00D922B6 /* logging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = logging.h; path = ../../src/logging.h; sourceTree = "<group>"; };
-		BD2C11A7203DF56F00D922B6 /* memory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = memory.h; path = ../../src/memory.h; sourceTree = "<group>"; };
-		BD2C11A8203DF56F00D922B6 /* opcodes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = opcodes.h; path = ../../src/opcodes.h; sourceTree = "<group>"; };
-		BD2C11A9203DF56F00D922B6 /* optable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = optable.h; path = ../../src/optable.h; sourceTree = "<group>"; };
-		BD2C11DD203DFB4E00D922B6 /* winstdint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = winstdint.h; path = ../../src/winstdint.h; sourceTree = "<group>"; };
+		BD2C1165203DF53500D922B6 /* ac.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ac.c; sourceTree = "<group>"; };
+		BD2C1166203DF53500D922B6 /* acfixed.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = acfixed.c; sourceTree = "<group>"; };
+		BD2C1167203DF53500D922B6 /* auto.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = auto.c; sourceTree = "<group>"; };
+		BD2C1168203DF53500D922B6 /* bbox.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bbox.c; sourceTree = "<group>"; };
+		BD2C1169203DF53500D922B6 /* charpath.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = charpath.c; sourceTree = "<group>"; };
+		BD2C116A203DF53500D922B6 /* charpathpriv.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = charpathpriv.c; sourceTree = "<group>"; };
+		BD2C116B203DF53500D922B6 /* charprop.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = charprop.c; sourceTree = "<group>"; };
+		BD2C116C203DF53500D922B6 /* check.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = check.c; sourceTree = "<group>"; };
+		BD2C116D203DF53500D922B6 /* control.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = control.c; sourceTree = "<group>"; };
+		BD2C116E203DF53500D922B6 /* eval.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = eval.c; sourceTree = "<group>"; };
+		BD2C116F203DF53500D922B6 /* fix.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fix.c; sourceTree = "<group>"; };
+		BD2C1170203DF53500D922B6 /* flat.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = flat.c; sourceTree = "<group>"; };
+		BD2C1171203DF53500D922B6 /* fontinfo.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fontinfo.c; sourceTree = "<group>"; };
+		BD2C1172203DF53500D922B6 /* gen.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gen.c; sourceTree = "<group>"; };
+		BD2C1173203DF53500D922B6 /* head.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = head.c; sourceTree = "<group>"; };
+		BD2C1174203DF53500D922B6 /* logging.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = logging.c; sourceTree = "<group>"; };
+		BD2C1175203DF53500D922B6 /* memory.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = memory.c; sourceTree = "<group>"; };
+		BD2C1177203DF53500D922B6 /* merge.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = merge.c; sourceTree = "<group>"; };
+		BD2C1178203DF53500D922B6 /* misc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = misc.c; sourceTree = "<group>"; };
+		BD2C1179203DF53500D922B6 /* optable.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = optable.c; sourceTree = "<group>"; };
+		BD2C117A203DF53500D922B6 /* pick.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = pick.c; sourceTree = "<group>"; };
+		BD2C117B203DF53500D922B6 /* psautohint.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = psautohint.c; sourceTree = "<group>"; };
+		BD2C117C203DF53500D922B6 /* read.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = read.c; sourceTree = "<group>"; };
+		BD2C117D203DF53500D922B6 /* report.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = report.c; sourceTree = "<group>"; };
+		BD2C117E203DF53500D922B6 /* shuffle.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = shuffle.c; sourceTree = "<group>"; };
+		BD2C117F203DF53500D922B6 /* stemreport.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = stemreport.c; sourceTree = "<group>"; };
+		BD2C1181203DF53500D922B6 /* write.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = write.c; sourceTree = "<group>"; };
+		BD2C119F203DF55300D922B6 /* psautohint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = psautohint.h; path = ../include/psautohint.h; sourceTree = "<group>"; };
+		BD2C11A1203DF56F00D922B6 /* ac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ac.h; sourceTree = "<group>"; };
+		BD2C11A2203DF56F00D922B6 /* basic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = basic.h; sourceTree = "<group>"; };
+		BD2C11A3203DF56F00D922B6 /* bbox.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bbox.h; sourceTree = "<group>"; };
+		BD2C11A4203DF56F00D922B6 /* charpath.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = charpath.h; sourceTree = "<group>"; };
+		BD2C11A5203DF56F00D922B6 /* fontinfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fontinfo.h; sourceTree = "<group>"; };
+		BD2C11A6203DF56F00D922B6 /* logging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = logging.h; sourceTree = "<group>"; };
+		BD2C11A7203DF56F00D922B6 /* memory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = memory.h; sourceTree = "<group>"; };
+		BD2C11A8203DF56F00D922B6 /* opcodes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opcodes.h; sourceTree = "<group>"; };
+		BD2C11A9203DF56F00D922B6 /* optable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optable.h; sourceTree = "<group>"; };
+		BD2C11DD203DFB4E00D922B6 /* winstdint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = winstdint.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +136,7 @@
 				BD2C11DD203DFB4E00D922B6 /* winstdint.h */,
 			);
 			name = include;
+			path = ../../src;
 			sourceTree = "<group>";
 		};
 		BD2C11B6203DF58B00D922B6 /* src */ = {
@@ -143,6 +146,7 @@
 				BD2C1166203DF53500D922B6 /* acfixed.c */,
 				BD2C1167203DF53500D922B6 /* auto.c */,
 				BD2C1168203DF53500D922B6 /* bbox.c */,
+				56BD964D226E09C700452646 /* buffer.c */,
 				BD2C1169203DF53500D922B6 /* charpath.c */,
 				BD2C116A203DF53500D922B6 /* charpathpriv.c */,
 				BD2C116B203DF53500D922B6 /* charprop.c */,
@@ -168,6 +172,7 @@
 				BD2C1181203DF53500D922B6 /* write.c */,
 			);
 			name = src;
+			path = ../../src;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -198,6 +203,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = BD2C1162203DF50800D922B6 /* Build configuration list for PBXNativeTarget "libpsautohint" */;
 			buildPhases = (
+				56BD964C226E098800452646 /* Set version number */,
 				BD2C115A203DF50800D922B6 /* Sources */,
 				BD2C115B203DF50800D922B6 /* Frameworks */,
 				BD2C115C203DF50800D922B6 /* Headers */,
@@ -243,6 +249,27 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		56BD964C226E098800452646 /* Set version number */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Set version number";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/bash\n\ngit=$(sh /etc/profile; which git)\nnumber_of_commits=$(\"$git\" rev-list HEAD --count)\ngit_release_version=$(\"$git\" describe --tags)\n\ntarget_file=\"$SRCROOT/../../src/version.h\"\n/bin/cat <<EOM >$target_file\n/* file generated by Xcode\n   don't change, don't track in version control */\n#define PSAUTOHINT_VERSION \"$git_release_version\"\nEOM\n# echo \"warning: finished\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		BD2C115A203DF50800D922B6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -255,6 +282,7 @@
 				BD2C1186203DF53500D922B6 /* charpath.c in Sources */,
 				BD2C1187203DF53500D922B6 /* charpathpriv.c in Sources */,
 				BD2C1188203DF53500D922B6 /* charprop.c in Sources */,
+				56BD964E226E09C700452646 /* buffer.c in Sources */,
 				BD2C1189203DF53500D922B6 /* check.c in Sources */,
 				BD2C118A203DF53500D922B6 /* control.c in Sources */,
 				BD2C118B203DF53500D922B6 /* eval.c in Sources */,
