@@ -20,3 +20,5 @@ dist
 htmlcov/
 libpsautohint/src/version.h
 pip-wheel-metadata/psautohint.dist-info
+
+*.xcodeproj
