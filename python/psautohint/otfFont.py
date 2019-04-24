@@ -306,7 +306,7 @@ class HintMask:
 
     @property
     def num_bits(self):
-        count = sum([bin(mask_byte).count('1') for mask_byte in self.mask])
+        count = sum([bin(mask_byte).count('1') for mask_byte in bytearray(self.mask)])
         return count
 
 
@@ -362,9 +362,6 @@ kHintArgsMatch = 2
 
 
 def checkStem3ArgsOverlap(arg_list, hint_list):
-    # status == 0 -> no overlap
-    # status == 1 -> arg are the same
-    # status = 2 -> args overlap, and are not the same
     status = kHintArgsNoOverlap
     for x0, x1 in arg_list:
         x1 = x0 + x1
@@ -405,13 +402,6 @@ def _add_cntr_maskHints(counter_mask_list, src_hints, is_h):
 
 
 def build_counter_mask_list(h_stem3_list, v_stem3_list):
-    """
-    The deal is that a charstring will use either counter hints, or stem 3
-    hints, but not both. We examine all the arglists. If any are not a
-    multiple of 3, then we use all the arglists as is as the args to a
-    counter hint. If all are a multiple of 3, then we divide them up into
-    triplets, and add a separate conter mask for each unique arg set.
-    """
 
     v_counter_mask = HintMask(0)
     h_counter_mask = v_counter_mask
@@ -471,7 +461,7 @@ def check_hint_overlap(hint_list, last_idx, bad_hint_idxs):
     prev = hint_list[0]
     for i, hint_pair in enumerate(hint_list[1:], 1):
         if prev[1] >= hint_pair[0]:
-            bad_hint_idxs.add(i + last_idx)
+            bad_hint_idxs.add(i + last_idx - 1)
         prev = hint_pair
 
 
@@ -485,7 +475,7 @@ def check_hint_pairs(hint_pairs, mm_hint_info, last_idx=0):
     prev = hint_list[0]
     for i, hint_pair in enumerate(hint_list[1:], 1):
         if prev[0] > hint_pair[0]:
-            bad_hint_idxs.add(i + last_idx)
+            bad_hint_idxs.add(i + last_idx - 1)
         prev = hint_pair
 
     # check for overlap in hint groups.
@@ -687,14 +677,12 @@ def convertBezToT2(bezString, mm_hint_info=None):
     elif mm_hint_info.defined:
         # Apply hint order from reference font in MM hinting
         hhints = [hhints[j] for j in mm_hint_info.h_order]
-        check_hint_pairs(hhints, mm_hint_info)
-        last_idx = len(hhints)
         vhints = [vhints[j] for j in mm_hint_info.v_order]
-        check_hint_pairs(vhints, mm_hint_info, last_idx)
     else:
         # Define hint order from reference font in MM hinting
         hhints, mm_hint_info.h_order = build_hint_order(hhints)
         vhints, mm_hint_info.v_order = build_hint_order(vhints)
+
     num_hhints = len(hhints)
     num_vhints = len(vhints)
     hint_limit = int((kStackLimit - 2) / 2)
@@ -704,6 +692,12 @@ def convertBezToT2(bezString, mm_hint_info=None):
     if num_vhints >= hint_limit:
         vhints = vhints[:hint_limit]
         num_vhints = hint_limit
+
+    if mm_hint_info and mm_hint_info.defined:
+        check_hint_pairs(hhints, mm_hint_info)
+        last_idx = len(hhints)
+        check_hint_pairs(vhints, mm_hint_info, last_idx)
+
     if hhints:
         t2Program = make_hint_list(hhints, need_hint_masks, is_h=True)
     if vhints:
@@ -791,6 +785,7 @@ def _run_tx(args):
 class FixHintWidthDecompiler(SimpleT2Decompiler):
     # If we are using this class, we know the charstring has hints.
     def __init__(self, localSubrs, globalSubrs, private=None):
+        self.hintMaskBytes = 0 # to silence false Codacy error.
         SimpleT2Decompiler.__init__(self, localSubrs, globalSubrs, private)
         self.has_explicit_width = None
         self.h_hint_args = self.v_hint_args = None
@@ -1100,6 +1095,16 @@ class CFFFontData:
                 fdTools.mergeFDDicts([finalFDict], private)
         return fdGlyphDict, fontDictList
 
+    @staticmethod
+    def args_to_hints(hint_args):
+        hints = [hint_args[0:2]]
+        prev = hints[0]
+        for i in range(2, len(hint_args), 2):
+            bottom = hint_args[i] + prev[0] + prev[1]
+            hints.append([bottom, hint_args[i+1]])
+            prev = hints[-1]
+        return hints
+
     def fix_glyph_hints(self, glyph_name, mm_hint_info, is_reference_font):
         # 1. Delete any bad hints.
         # 2. If reference font, recalculate the hint mask byte strings
@@ -1168,22 +1173,8 @@ class CFFFontData:
 
         # Re-calculate the hint masks.
         if is_reference_font:
-            h_args = decompiler.h_hint_args
-
-            hhints = [h_args[0:2]]
-            prev = hhints[0]
-            for i in range(2, len(h_args), 2):
-                bottom = h_args[i] + prev[0] + prev[1]
-                hhints.append([bottom, h_args[i+1]])
-                prev = hhints[-1]
-
-            v_args = decompiler.v_hint_args
-            vhints = [v_args[0:2]]
-            prev = vhints[0]
-            for i in range(2, len(v_args), 2):
-                bottom = v_args[i] + prev[0] + prev[1]
-                vhints.append([bottom, v_args[i+1]])
-                prev = vhints[-1]
+            hhints = self.args_to_hints(decompiler.h_hint_args)
+            vhints = self.args_to_hints(decompiler.v_hint_args)
             for hm in mm_hint_info.hint_masks:
                 hm.maskByte(hhints, vhints)
 
@@ -1198,10 +1189,10 @@ class CFFFontData:
         # Now fix the control masks. We will weed out a control mask
         # if it ends up with fewer than 3 hints.
         cntr_masks = mm_hint_info.cntr_masks
-        mask_byte_list = [cm.mask for cm in cntr_masks]
-        if is_reference_font:
+        if is_reference_font and cntr_masks:
             # Update mask bytes,
             # and remove control masks with fewer than 3 bits.
+            mask_byte_list = [cm.mask for cm in cntr_masks]
             for cm in cntr_masks:
                 cm.maskByte(hhints, vhints)
             new_cm_list = [cm for cm in cntr_masks if cm.num_bits >= 3]
