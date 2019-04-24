@@ -365,6 +365,12 @@ CheckZeroLength(void)
 {
     PathElt *e, *NxtE;
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3;
+    if ((!gEditGlyph) || forMultiMaster)
+    {
+        /* Do not change topology when hinting MM fonts,
+         and do not edit glyphs if not requested */
+        return;
+    }
     e = gPathStart;
     while (e != NULL) { /* delete zero length elements */
         NxtE = e->next;

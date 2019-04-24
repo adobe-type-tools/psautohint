@@ -883,129 +883,6 @@ Ct(Cd coord1, Cd coord2, Cd coord3, indx startix, int16_t length)
 }
 
 static void
-ReadHorVStem3Values(indx pathIx, int16_t eltno, int16_t hinttype,
-                    bool* errormsg)
-{
-    indx ix;
-    HintElt** hintElt = NULL;
-    int16_t count;
-    bool ok = true;
-    Fixed min, dmin, mid, dmid, max, dmax;
-
-    for (ix = 0; ix < masterCount; ix++) {
-        count = 1;
-        if (ix == hintsMasterIx)
-            continue;
-        hintElt = (pathIx == MAINHINTS ? &pathlist[ix].mainhints
-                                       : &pathlist[ix].path[pathIx].hints);
-        /* Find specified hint element. */
-        while (*hintElt != NULL && count != eltno) {
-            hintElt = &(*hintElt)->next;
-            count++;
-        }
-        /* Check that RM or RV type is in pairs of threes. */
-        if (*hintElt == NULL || (*hintElt)->next == NULL ||
-            (*hintElt)->next->next == NULL) {
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Invalid format for hint operator: hstem3 or "
-                   "vstem3 in master: %s.",
-                   masterNames[ix]);
-        }
-        if ((*hintElt)->type != hinttype ||
-            (*hintElt)->next->type != hinttype ||
-            (*hintElt)->next->next->type != hinttype) {
-            LogMsg(LOGERROR, NONFATALERROR,
-                   "Invalid format for hint operator: hstem3 or "
-                   "vstem3 in master: %s.",
-                   masterNames[ix]);
-        }
-        min = (*hintElt)->leftorbot;
-        dmin = (*hintElt)->rightortop - min;
-        mid = (*hintElt)->next->leftorbot;
-        dmid = (*hintElt)->next->rightortop - mid;
-        max = (*hintElt)->next->next->leftorbot;
-        dmax = (*hintElt)->next->next->rightortop - max;
-        /* Check that counters are the same width and stems are the same width.
-         */
-        if (dmin != dmax || (((mid + dmid / 2) - (min + dmin / 2)) !=
-                             ((max + dmax / 2) - (mid + dmid / 2)))) {
-            ok = false;
-            break;
-        }
-    }
-    if (!ok) { /* change RM's to RY's or RV's to RB's for this element in each
-                  master */
-        int16_t newhinttype = (hinttype == (RM + ESCVAL) ? RY : RB);
-        if (*errormsg) {
-            LogMsg(INFO, OK,
-                   "Near miss for using operator: %s in master '%s'. "
-                   "(min=%d..%d[delta=%d], mid=%d..%d[delta=%d], "
-                   "max=%d..%d[delta=%d])",
-                   (hinttype == (RM + ESCVAL)) ? "vstem3" : "hstem3",
-                   masterNames[ix], FTrunc((*hintElt)->leftorbot),
-                   FTrunc((*hintElt)->rightortop),
-                   FTrunc((*hintElt)->rightortop - (*hintElt)->leftorbot),
-                   FTrunc((*hintElt)->next->leftorbot),
-                   FTrunc((*hintElt)->next->rightortop),
-                   FTrunc((*hintElt)->next->rightortop -
-                          (*hintElt)->next->leftorbot),
-                   FTrunc((*hintElt)->next->next->leftorbot),
-                   FTrunc((*hintElt)->next->next->rightortop),
-                   FTrunc((*hintElt)->next->next->rightortop -
-                          (*hintElt)->next->next->leftorbot));
-            *errormsg = false;
-        }
-        for (ix = 0; ix < masterCount; ix++) {
-            count = 1;
-            hintElt = (pathIx == MAINHINTS ? &pathlist[ix].mainhints
-                                           : &pathlist[ix].path[pathIx].hints);
-            /* Find specified hint element. */
-            while (*hintElt != NULL && count != eltno) {
-                hintElt = &(*hintElt)->next;
-                count++;
-            }
-            /* Already checked that hintElt->next, etc. exists,
-             so don't need to do it again. */
-            (*hintElt)->type = newhinttype;
-            (*hintElt)->next->type = newhinttype;
-            (*hintElt)->next->next->type = newhinttype;
-        }
-    }
-}
-
-/* Go through each hint element and check that all rm's and rv's
- meet the necessary criteria. */
-static void
-FindHandVStem3(HintElt** hintElt, indx pathIx, bool* errormsg)
-{
-    int16_t count = 1;
-
-    while (*hintElt != NULL) {
-        if ((*hintElt)->type == (RM + ESCVAL) ||
-            (*hintElt)->type == (RV + ESCVAL)) {
-            ReadHorVStem3Values(pathIx, count, (*hintElt)->type, errormsg);
-            /* RM's and RV's are in pairs of 3 */
-            hintElt = &(*hintElt)->next->next->next;
-            count += 3;
-        } else {
-            hintElt = &(*hintElt)->next;
-            count++;
-        }
-    }
-}
-
-static void
-CheckHandVStem3(void)
-{
-    indx ix;
-    bool errormsg = true;
-
-    FindHandVStem3(&pathlist[hintsMasterIx].mainhints, MAINHINTS, &errormsg);
-    for (ix = 0; ix < gPathEntries; ix++)
-        FindHandVStem3(&pathlist[hintsMasterIx].path[ix].hints, ix, &errormsg);
-}
-
-static void
 CheckFlexValues(int16_t* operator, indx eltix, indx flexix, bool* xequal,
                 bool* yequal)
 {
@@ -1827,7 +1704,6 @@ MergeGlyphPaths(const char** srcglyphs, int nmasters, const char** masters,
                 LogMsg(LOGERROR, FATALERROR,
                        "Path problem in ReadAndAssignHints");
             }
-            CheckHandVStem3();
         }
         WritePaths(outbuffers);
     }
