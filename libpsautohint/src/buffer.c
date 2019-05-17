@@ -70,7 +70,7 @@ ACBufferWrite(ACBuffer* buffer, char* data, size_t length)
     buffer->len += length;
 }
 
-#define STRLEN 500
+#define STRLEN 1000
 ACLIB_API void
 ACBufferWriteF(ACBuffer* buffer, char* format, ...)
 {
@@ -85,10 +85,22 @@ ACBufferWriteF(ACBuffer* buffer, char* format, ...)
     len = vsnprintf(outstr, STRLEN, format, va);
     va_end(va);
 
-    if (len > 0 && len <= STRLEN)
-        ACBufferWrite(buffer, outstr, strlen(outstr));
-    else
-        LogMsg(LOGERROR, FATALERROR, "Failed to write string to ACBuffer.");
+    if (len > 0 && len <= STRLEN) {
+        ACBufferWrite(buffer, outstr, len);
+    } else {
+        char* outstr = AllocateMem(1, len + 1, "Temporary buffer");
+
+        va_start(va, format);
+        len = vsnprintf(outstr, len + 1, format, va);
+        va_end(va);
+
+        if (len > 0)
+            ACBufferWrite(buffer, outstr, len);
+        else
+            LogMsg(LOGERROR, FATALERROR, "Failed to write string to ACBuffer.");
+
+        UnallocateMem(outstr);
+    }
 }
 
 ACLIB_API void
