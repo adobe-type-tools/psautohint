@@ -1,1 +1,2 @@
-tox==3.9.0 # >3.9.0 depends on more-itertools 7.0.0 which dropped Python 2.7 support
+# tox > 3.9.0 depends on more-itertools 7.0.0 which dropped Python 2.7 support
+tox==3.9.0 # pyup: ignore
