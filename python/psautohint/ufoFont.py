@@ -926,11 +926,7 @@ def makeStemHintList(hintsStem3, isH):
     posList = [op]
     for stem3 in hintsStem3:
         for pos, width in stem3:
-            if pos % 1 == 0:
-                pos = int(pos)
-            if width % 1 == 0:
-                width = int(width)
-            posList.append("%s %s" % (pos, width))
+            posList.append("%s %s" % (norm_float(pos), norm_float(width)))
     return " ".join(posList)
 
 
@@ -943,16 +939,12 @@ def makeHintList(hints, isH):
         if not hint:
             continue
         pos = hint[0]
-        if pos % 1 == 0:
-            pos = int(pos)
         width = hint[1]
-        if width % 1 == 0:
-            width = int(width)
         if isH:
             op = HSTEM_NAME
         else:
             op = VSTEM_NAME
-        hintset.append("%s %s %s" % (op, pos, width))
+        hintset.append("%s %s %s" % (op, norm_float(pos), norm_float(width)))
     return hintset
 
 
@@ -987,12 +979,7 @@ bezToUFOPoint = {
 
 
 def convertCoords(current_x, current_y):
-    x, y = current_x, current_y
-    if x % 1 == 0:
-        x = int(x)
-    if y % 1 == 0:
-        y = int(y)
-    return x, y
+    return norm_float(current_x), norm_float(current_y)
 
 
 def convertBezToOutline(bezString):
