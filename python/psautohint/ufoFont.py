@@ -404,6 +404,8 @@ class UFOFontData:
 
         glyph = BezGlyph(bezData)
         glyphset.readGlyph(name, glyph)
+        if hasattr(glyph, 'width'):
+            glyph.width = norm_float(glyph.width)
         self.newGlyphMap[name] = glyph
 
         # updateFromBez is called only if the glyph has been autohinted which
@@ -802,7 +804,7 @@ class HashPointPen(AbstractPointPen):
 
     def __init__(self, glyph):
         self.glyphset = getattr(glyph, "glyphSet", None)
-        self.width = round(getattr(glyph, "width", 1000), 9)
+        self.width = norm_float(round(getattr(glyph, "width", 1000), 9))
         self.data = ["w%s" % self.width]
 
     def getHash(self):
@@ -823,7 +825,8 @@ class HashPointPen(AbstractPointPen):
             pt_type = ""
         else:
             pt_type = segmentType[0]
-        self.data.append("%s%s%s" % (pt_type, repr(pt[0]), repr(pt[1])))
+        self.data.append("%s%s%s" % (
+            pt_type, repr(norm_float(pt[0])), repr(norm_float(pt[1]))))
 
     def addComponent(self, baseGlyphName, transformation, identifier=None,
                      **kwargs):
@@ -831,7 +834,7 @@ class HashPointPen(AbstractPointPen):
 
         for i, v in enumerate(transformation):
             if transformation[i] != self.DEFAULT_TRANSFORM[i]:
-                self.data.append(str(round(v, 9)))
+                self.data.append(str(norm_float(round(v, 9))))
 
         self.data.append("w%s" % self.width)
         glyph = self.glyphset[baseGlyphName]
@@ -904,6 +907,13 @@ class HintMask:
                     makeHintSet(self.vList, self.vstem3List, isH=False))
 
         return hintset
+
+
+def norm_float(value):
+    """Converts a float (whose decimal part is zero) to integer"""
+    if isinstance(value, float) and value % 1 == 0:
+        return int(value)
+    return value
 
 
 def makeStemHintList(hintsStem3, isH):
