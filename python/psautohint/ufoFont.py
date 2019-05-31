@@ -404,6 +404,8 @@ class UFOFontData:
 
         glyph = BezGlyph(bezData)
         glyphset.readGlyph(name, glyph)
+        if hasattr(glyph, 'width'):
+            glyph.width = norm_float(glyph.width)
         self.newGlyphMap[name] = glyph
 
         # updateFromBez is called only if the glyph has been autohinted which
@@ -802,7 +804,7 @@ class HashPointPen(AbstractPointPen):
 
     def __init__(self, glyph):
         self.glyphset = getattr(glyph, "glyphSet", None)
-        self.width = round(getattr(glyph, "width", 1000), 9)
+        self.width = norm_float(round(getattr(glyph, "width", 1000), 9))
         self.data = ["w%s" % self.width]
 
     def getHash(self):
@@ -823,7 +825,8 @@ class HashPointPen(AbstractPointPen):
             pt_type = ""
         else:
             pt_type = segmentType[0]
-        self.data.append("%s%s%s" % (pt_type, repr(pt[0]), repr(pt[1])))
+        self.data.append("%s%s%s" % (
+            pt_type, repr(norm_float(pt[0])), repr(norm_float(pt[1]))))
 
     def addComponent(self, baseGlyphName, transformation, identifier=None,
                      **kwargs):
@@ -831,7 +834,7 @@ class HashPointPen(AbstractPointPen):
 
         for i, v in enumerate(transformation):
             if transformation[i] != self.DEFAULT_TRANSFORM[i]:
-                self.data.append(str(round(v, 9)))
+                self.data.append(str(norm_float(round(v, 9))))
 
         self.data.append("w%s" % self.width)
         glyph = self.glyphset[baseGlyphName]
@@ -897,13 +900,20 @@ class HintMask:
 
         if len(self.hList) > 0 or len(self.hstem3List):
             hintset[STEMS_NAME].extend(
-                    makeHintSet(self.hList, self.hstem3List, isH=True))
+                makeHintSet(self.hList, self.hstem3List, isH=True))
 
         if len(self.vList) > 0 or len(self.vstem3List):
             hintset[STEMS_NAME].extend(
-                    makeHintSet(self.vList, self.vstem3List, isH=False))
+                makeHintSet(self.vList, self.vstem3List, isH=False))
 
         return hintset
+
+
+def norm_float(value):
+    """Converts a float (whose decimal part is zero) to integer"""
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    return value
 
 
 def makeStemHintList(hintsStem3, isH):
@@ -916,11 +926,7 @@ def makeStemHintList(hintsStem3, isH):
     posList = [op]
     for stem3 in hintsStem3:
         for pos, width in stem3:
-            if pos % 1 == 0:
-                pos = int(pos)
-            if width % 1 == 0:
-                width = int(width)
-            posList.append("%s %s" % (pos, width))
+            posList.append("%s %s" % (norm_float(pos), norm_float(width)))
     return " ".join(posList)
 
 
@@ -933,16 +939,12 @@ def makeHintList(hints, isH):
         if not hint:
             continue
         pos = hint[0]
-        if pos % 1 == 0:
-            pos = int(pos)
         width = hint[1]
-        if width % 1 == 0:
-            width = int(width)
         if isH:
             op = HSTEM_NAME
         else:
             op = VSTEM_NAME
-        hintset.append("%s %s %s" % (op, pos, width))
+        hintset.append("%s %s %s" % (op, norm_float(pos), norm_float(width)))
     return hintset
 
 
@@ -977,12 +979,7 @@ bezToUFOPoint = {
 
 
 def convertCoords(current_x, current_y):
-    x, y = current_x, current_y
-    if x % 1 == 0:
-        x = int(x)
-    if y % 1 == 0:
-        y = int(y)
-    return x, y
+    return norm_float(current_x), norm_float(current_y)
 
 
 def convertBezToOutline(bezString):

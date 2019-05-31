@@ -352,7 +352,7 @@ class _CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
     def _split_lines(self, arg, width):
         arg_rows = arg.splitlines()
         for i, line in enumerate(arg_rows):
-            search = re.search('\s*[0-9\-]{0,}\.?\s*', line)
+            search = re.search(r'\s*[0-9\-]{0,}\.?\s*', line)
             if line.strip() is "":
                 arg_rows[i] = " "
             elif search:
