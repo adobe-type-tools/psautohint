@@ -110,14 +110,14 @@ class GlyphReports:
                 # avoid counting duplicates
                 if hintpos not in hstems_pos:
                     count = hstems.get(width, 0)
-                    hstems[width] = count+1
+                    hstems[width] = count + 1
                     hstems_pos[hintpos] = width
             elif key == "VStem":
                 width = x - y
                 # avoid counting duplicates
                 if hintpos not in vstems_pos:
                     count = vstems.get(width, 0)
-                    vstems[width] = count+1
+                    vstems[width] = count + 1
                     vstems_pos[hintpos] = width
             else:
                 raise FontParseError("Found unknown keyword %s in report file "
@@ -177,14 +177,14 @@ class GlyphReports:
                    stem_zone_stems
         {
          'A': [{45.5: 1, 47.0: 2}, {229.0: 1}, {}, {}],
-         'B': [{46.0: 2, 46.5: 2, 47.0: 1}, {94.0: 1, 95.0: 1, 100.0: 1}, {}, {}],
+         'B': [{46.0: 2, 46.5: 2, 47.0: 1}, {94.0: 1, 100.0: 1}, {}, {}],
          'C': [{50.0: 2}, {109.0: 1}, {}, {}],
          'D': [{46.0: 1, 46.5: 2, 47.0: 1}, {95.0: 1, 109.0: 1}, {}, {}],
          'E': [{46.5: 2, 47.0: 1, 50.0: 2, 177.0: 1, 178.0: 1},
                {46.0: 1, 75.5: 2, 95.0: 1}, {}, {}],
          'F': [{46.5: 2, 47.0: 1, 50.0: 1, 177.0: 1},
                {46.0: 1, 60.0: 1, 75.5: 1, 95.0: 1}, {}, {}],
-         'G': [{43.0: 1, 44.5: 1, 50.0: 1, 51.0: 1}, {94.0: 1, 109.0: 1}, {}, {}]
+         'G': [{43.0: 1, 44.5: 1, 50.0: 1}, {94.0: 1, 109.0: 1}, {}, {}]
         }
         """
         h_stem_items_dict = defaultdict(set)

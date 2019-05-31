@@ -900,11 +900,11 @@ class HintMask:
 
         if len(self.hList) > 0 or len(self.hstem3List):
             hintset[STEMS_NAME].extend(
-                    makeHintSet(self.hList, self.hstem3List, isH=True))
+                makeHintSet(self.hList, self.hstem3List, isH=True))
 
         if len(self.vList) > 0 or len(self.vstem3List):
             hintset[STEMS_NAME].extend(
-                    makeHintSet(self.vList, self.vstem3List, isH=False))
+                makeHintSet(self.vList, self.vstem3List, isH=False))
 
         return hintset
 

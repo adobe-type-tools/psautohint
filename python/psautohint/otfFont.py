@@ -306,7 +306,8 @@ class HintMask:
 
     @property
     def num_bits(self):
-        count = sum([bin(mask_byte).count('1') for mask_byte in bytearray(self.mask)])
+        count = sum(
+            [bin(mask_byte).count('1') for mask_byte in bytearray(self.mask)])
         return count
 
 
@@ -436,7 +437,7 @@ def build_hint_order(hints):
     hint_list = list(zip(hints, index_list))
     hint_list.sort()
     new_hints = [hint_list[i] for i in range(1, num_hints)
-                 if hint_list[i][0] != hint_list[i-1][0]]
+                 if hint_list[i][0] != hint_list[i - 1][0]]
     new_hints = [hint_list[0]] + new_hints
     hints, hint_order = list(zip(*new_hints))
     # hints is now a list of hint pairs, sorted by increasing bottom edge.
@@ -785,7 +786,7 @@ def _run_tx(args):
 class FixHintWidthDecompiler(SimpleT2Decompiler):
     # If we are using this class, we know the charstring has hints.
     def __init__(self, localSubrs, globalSubrs, private=None):
-        self.hintMaskBytes = 0 # to silence false Codacy error.
+        self.hintMaskBytes = 0  # to silence false Codacy error.
         SimpleT2Decompiler.__init__(self, localSubrs, globalSubrs, private)
         self.has_explicit_width = None
         self.h_hint_args = self.v_hint_args = None
@@ -1101,7 +1102,7 @@ class CFFFontData:
         prev = hints[0]
         for i in range(2, len(hint_args), 2):
             bottom = hint_args[i] + prev[0] + prev[1]
-            hints.append([bottom, hint_args[i+1]])
+            hints.append([bottom, hint_args[i + 1]])
             prev = hints[-1]
         return hints
 
@@ -1130,9 +1131,9 @@ class CFFFontData:
                 bottom_idx = idx * 2
             else:
                 hint_args = decompiler.v_hint_args
-                bottom_idx = (idx-num_hhint_pairs) * 2
+                bottom_idx = (idx - num_hhint_pairs) * 2
             delta = hint_args[bottom_idx] + hint_args[bottom_idx + 1]
-            del hint_args[bottom_idx:bottom_idx+2]
+            del hint_args[bottom_idx:bottom_idx + 2]
             if len(hint_args) > bottom_idx:
                 hint_args[bottom_idx] += delta
 
@@ -1153,8 +1154,7 @@ class CFFFontData:
 
         # If there were decompiler.v_hint_args, but they have now all been
         # deleted, the first token will still be 'vstem[hm]'. Delete it.
-        if ((not decompiler.v_hint_args)
-                and program[0].startswith('vstem')):
+        if ((not decompiler.v_hint_args) and program[0].startswith('vstem')):
             del program[0]
 
         # Add width and updated hints back.
@@ -1184,7 +1184,7 @@ class CFFFontData:
                            if token == 'hintmask']
             for i, hm in enumerate(mm_hint_info.hint_masks):
                 pos = hm_pos_list[i]
-                program[pos+1] = hm.mask
+                program[pos + 1] = hm.mask
 
         # Now fix the control masks. We will weed out a control mask
         # if it ends up with fewer than 3 hints.
@@ -1203,7 +1203,7 @@ class CFFFontData:
             # Remove all the old cntrmask ops
             num_old_cm = len(cntr_masks)
             idx = program.index('cntrmask')
-            del program[idx:idx + num_old_cm*2]
+            del program[idx:idx + num_old_cm * 2]
             cm_progam = [['cntrmask', cm.mask] for cm in
                          mm_hint_info.new_cntr_masks]
             cm_progam = list(itertools.chain(*cm_progam))
