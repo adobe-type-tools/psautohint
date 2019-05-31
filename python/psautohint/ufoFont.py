@@ -911,7 +911,7 @@ class HintMask:
 
 def norm_float(value):
     """Converts a float (whose decimal part is zero) to integer"""
-    if isinstance(value, float) and value % 1 == 0:
+    if isinstance(value, float) and value.is_integer():
         return int(value)
     return value
 
