@@ -824,8 +824,9 @@ class HashPointPen(AbstractPointPen):
             pt_type = ""
         else:
             pt_type = segmentType[0]
-        self.data.append("%s%s%s" % (
-            pt_type, repr(norm_float(pt[0])), repr(norm_float(pt[1]))))
+        self.data.append("%s%s%s" % (pt_type,
+                                     repr(norm_float(round(pt[0], 9))),
+                                     repr(norm_float(round(pt[1], 9)))))
 
     def addComponent(self, baseGlyphName, transformation, identifier=None,
                      **kwargs):
