@@ -800,7 +800,6 @@ class BezPen(BasePen):
 
 
 class HashPointPen(AbstractPointPen):
-    DEFAULT_TRANSFORM = (1, 0, 0, 1, 0, 0)
 
     def __init__(self, glyph):
         self.glyphset = getattr(glyph, "glyphSet", None)
@@ -832,9 +831,8 @@ class HashPointPen(AbstractPointPen):
                      **kwargs):
         self.data.append("base:%s" % baseGlyphName)
 
-        for i, v in enumerate(transformation):
-            if transformation[i] != self.DEFAULT_TRANSFORM[i]:
-                self.data.append(str(norm_float(round(v, 9))))
+        for v in transformation:
+            self.data.append(str(norm_float(round(v, 9))))
 
         self.data.append("w%s" % self.width)
         glyph = self.glyphset[baseGlyphName]
