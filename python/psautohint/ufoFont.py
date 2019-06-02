@@ -558,7 +558,7 @@ class UFOFontData:
         pen = BezPen(glyph.glyphSet, round_coords)
         glyph.draw(pen)
         if not hasattr(glyph, "width"):
-            glyph.width = 1000
+            glyph.width = 0
         return pen.bez
 
     def _get_or_skip_glyph(self, name, round_coords, doAll):
@@ -803,7 +803,7 @@ class HashPointPen(AbstractPointPen):
 
     def __init__(self, glyph):
         self.glyphset = getattr(glyph, "glyphSet", None)
-        self.width = norm_float(round(getattr(glyph, "width", 1000), 9))
+        self.width = norm_float(round(getattr(glyph, "width", 0), 9))
         self.data = ["w%s" % self.width]
 
     def getHash(self):
