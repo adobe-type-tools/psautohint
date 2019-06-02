@@ -304,6 +304,16 @@ def test_hashmap_new_version(tmpdir, caplog):
         hintFiles(options)
 
 
+def test_hashmap_advance(tmpdir):
+    path = "%s/dummy/hashmap_advance.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    hintFiles(options)
+
+    assert differ([path, out])
+
+
 def test_hashmap_transform(tmpdir):
     path = "%s/dummy/hashmap_transform.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
