@@ -435,7 +435,12 @@ class UFOFontData:
 
         # Write layer contents.
         layers = writer.layerContents.copy()
-        if self.processedLayerGlyphMap or not self.writeToDefaultLayer:
+        if self.writeToDefaultLayer and PROCESSED_LAYER_NAME in layers:
+            # Delete processed glyphs directory
+            writer.deleteGlyphSet(PROCESSED_LAYER_NAME)
+            # Remove entry from 'layercontents.plist' file
+            del layers[PROCESSED_LAYER_NAME]
+        elif self.processedLayerGlyphMap or not self.writeToDefaultLayer:
             layers[PROCESSED_LAYER_NAME] = PROCESSED_GLYPHS_DIRNAME
         writer.layerContents.update(layers)
         writer.writeLayerContents()
