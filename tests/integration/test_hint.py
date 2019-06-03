@@ -314,6 +314,32 @@ def test_hashmap_advance(tmpdir):
     assert differ([path, out])
 
 
+def test_hashmap_dflt_layer(tmpdir):
+    path = "%s/dummy/hashmap_dflt_layer.ufo" % DATA_DIR
+    rslt = "%s/dummy/hashmap_dflt_layer_hinted.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+    options.writeToDefaultLayer = True
+
+    hintFiles(options)
+
+    assert differ([rslt, out])
+
+
+def test_hashmap_dflt_layer_rehint(tmpdir):
+    path = "%s/dummy/hashmap_dflt_layer.ufo" % DATA_DIR
+    rslt = "%s/dummy/hashmap_dflt_layer_rehinted.ufo" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+    options.writeToDefaultLayer = False
+    hintFiles(options)
+    options2 = Options(out, out)
+    options2.writeToDefaultLayer = True
+    hintFiles(options2)
+
+    assert differ([rslt, out])
+
+
 def test_hashmap_transform(tmpdir):
     path = "%s/dummy/hashmap_transform.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"

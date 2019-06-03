@@ -429,17 +429,18 @@ class UFOFontData:
 
         writer = UFOWriter(path, self._reader.formatVersion, validate=False)
 
-        if self.hashMapChanged:
-            self.writeHashMap(writer)
-        self.hashMapChanged = False
-
         layer = PROCESSED_LAYER_NAME
         if self.writeToDefaultLayer:
             layer = None
 
         # Write layer contents.
         layers = writer.layerContents.copy()
-        if self.processedLayerGlyphMap or not self.writeToDefaultLayer:
+        if self.writeToDefaultLayer and PROCESSED_LAYER_NAME in layers:
+            # Delete processed glyphs directory
+            writer.deleteGlyphSet(PROCESSED_LAYER_NAME)
+            # Remove entry from 'layercontents.plist' file
+            del layers[PROCESSED_LAYER_NAME]
+        elif self.processedLayerGlyphMap or not self.writeToDefaultLayer:
             layers[PROCESSED_LAYER_NAME] = PROCESSED_GLYPHS_DIRNAME
         writer.layerContents.update(layers)
         writer.writeLayerContents()
@@ -451,9 +452,16 @@ class UFOFontData:
             if not self.writeToDefaultLayer and \
                     name in self.processedLayerGlyphMap:
                 filename = self.processedLayerGlyphMap[name]
+            # Recalculate glyph hashes
+            if self.writeToDefaultLayer:
+                self.recalcHashEntry(name, glyph)
             glyphset.contents[name] = filename
             glyphset.writeGlyph(name, glyph, glyph.drawPoints)
         glyphset.writeContents()
+
+        # Write hashmap
+        if self.hashMapChanged:
+            self.writeHashMap(writer)
 
     @property
     def hashMap(self):
@@ -486,10 +494,8 @@ class UFOFontData:
         if not hashMap:
             return  # no glyphs were processed.
 
-        hasMapKeys = hashMap.keys()
-        hasMapKeys = sorted(hasMapKeys)
         data = ["{"]
-        for gName in hasMapKeys:
+        for gName in sorted(hashMap.keys()):
             data.append("'%s': %s," % (gName, hashMap[gName]))
         data.append("}")
         data.append("")
@@ -507,6 +513,17 @@ class UFOFontData:
         # If the program is not in the history list, add it.
         if AUTOHINT_NAME not in historyList:
             historyList.append(AUTOHINT_NAME)
+
+    def recalcHashEntry(self, glyphName, glyph):
+        hashBefore, historyList = self.hashMap[glyphName]
+
+        hash_pen = HashPointPen(glyph)
+        glyph.drawPoints(hash_pen)
+        hashAfter = hash_pen.getHash()
+
+        if hashAfter != hashBefore:
+            self.hashMap[glyphName] = [tostr(hashAfter), historyList]
+            self.hashMapChanged = True
 
     def checkSkipGlyph(self, glyphName, newSrcHash, doAll):
         skip = False
