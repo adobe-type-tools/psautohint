@@ -1,1 +1,2 @@
-fonttools[ufo,lxml]==3.43.1
+lxml==4.3.5
+fonttools[ufo,lxml]==3.44.0
