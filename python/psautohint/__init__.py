@@ -2,8 +2,6 @@ import os
 import sys
 import logging
 
-from fontTools.misc.py23 import tobytes, tounicode
-
 from . import _psautohint
 
 
@@ -85,7 +83,7 @@ def _hint_with_autohintexe(info, glyph, allow_edit, allow_hint_sub,
         # A bit of hack to parse the stderr output and route it through our
         # logger.
         if errordata:
-            errordata = tounicode(errordata).strip().split("\n")
+            errordata = errordata.decode('ascii').strip().split("\n")
             for line in errordata:
                 if ": " in line:
                     level, msg = line.split(": ", 1)
@@ -95,7 +93,7 @@ def _hint_with_autohintexe(info, glyph, allow_edit, allow_hint_sub,
                 else:
                     log.info(line)
 
-        return tounicode(outdata)
+        return outdata.decode('ascii')
     except (subprocess.CalledProcessError, OSError) as err:
         raise _psautohint.error(err)
 
@@ -119,19 +117,21 @@ def hint_bez_glyph(info, glyph, allow_edit=True, allow_hint_sub=True,
             report = 1
         elif report_stems:
             report = 2
-        hinted = _psautohint.autohint(tobytes(info),
-                                      tobytes(glyph),
-                                      allow_edit,
-                                      allow_hint_sub,
-                                      round_coordinates,
-                                      report,
-                                      report_all_stems)
+        # In/out of C code is bytes. In/out of Python code is str.
+        hinted_b = _psautohint.autohint(info.encode('ascii'),
+                                        glyph.encode('ascii'),
+                                        allow_edit,
+                                        allow_hint_sub,
+                                        round_coordinates,
+                                        report,
+                                        report_all_stems)
+        hinted = hinted_b.decode('ascii')
 
-    return tounicode(hinted)
+    return hinted
 
 
 def hint_compatible_bez_glyphs(info, glyphs, masters, use_autohintexe=False):
-    hinted = _psautohint.autohintmm(tuple(tobytes(g) for g in glyphs),
-                                    tuple(tobytes(m) for m in masters))
+    hinted = _psautohint.autohintmm(tuple(g.encode('ascii') for g in glyphs),
+                                    tuple(m.encode('ascii') for m in masters))
 
-    return [tounicode(g) for g in hinted]
+    return [g.decode('ascii') for g in hinted]

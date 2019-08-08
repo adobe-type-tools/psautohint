@@ -11,8 +11,6 @@ import re
 import subprocess
 import textwrap
 
-from fontTools.misc.py23 import open
-
 from . import __version__, get_font_format
 from .autohint import ACOptions, hintFiles
 
@@ -37,7 +35,7 @@ The reports provided by the stemHist tool can be useful for choosing alignment
 zone and stem width values.
 """
 
-FDDICT_DOC = """
+FDDICT_DOC = r"""
 By default, psautohint uses the font's global alignment zones and stem widths
 when hinting each glyph. However, if there is a file named 'fontinfo' in the
 same directory as the input font file, psautohint will search it for
@@ -351,7 +349,7 @@ class _CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
         arg_rows = arg.splitlines()
         for i, line in enumerate(arg_rows):
             search = re.search(r'\s*[0-9\-]{0,}\.?\s*', line)
-            if line.strip() is "":
+            if line.strip() == "":
                 arg_rows[i] = " "
             elif search:
                 line_wtsp = search.end()

@@ -14,8 +14,6 @@ import logging
 import os
 import sys
 
-from fontTools.misc.py23 import open
-
 __version__ = '0.2.5'
 
 logger = logging.getLogger('differ')

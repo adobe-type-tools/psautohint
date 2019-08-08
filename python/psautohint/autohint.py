@@ -389,10 +389,10 @@ fontInfoKeywordList = [
     'Baseline6',
 ]
 
-integerPattern = """ -?\d+"""
-arrayPattern = """ \[[ ,0-9]+\]"""
-stringPattern = """ \S+"""
-counterPattern = """ \([\S ]+\)"""
+integerPattern = r""" -?\d+"""
+arrayPattern = r""" \[[ ,0-9]+\]"""
+stringPattern = r""" \S+"""
+counterPattern = r""" \([\S ]+\)"""
 
 
 def printFontInfo(fontInfoString):

@@ -13,7 +13,6 @@ import itertools
 
 from fontTools.misc.psCharStrings import (T2OutlineExtractor,
                                           SimpleT2Decompiler)
-from fontTools.misc.py23 import bytechr, byteord, open
 from fontTools.ttLib import TTFont, newTable
 
 from . import fdTools, FontParseError
@@ -33,7 +32,7 @@ def hintOn(i, hintMaskBytes):
     # used to add the active hints to the bez string,
     # when a T2 hintmask operator is encountered.
     byteIndex = int(i / 8)
-    byteValue = byteord(hintMaskBytes[byteIndex])
+    byteValue = hintMaskBytes[byteIndex]
     offset = 7 - (i % 8)
     return ((2**offset) & byteValue) > 0
 
@@ -195,7 +194,7 @@ class T2ToBezExtractor(T2OutlineExtractor):
         if self.read_hints:
             curhhints, curvhints = self.getCurHints(self.hintMaskString)
             strout = ""
-            mask = [strout + hex(byteord(ch)) for ch in self.hintMaskString]
+            mask = [strout + hex(ch) for ch in self.hintMaskString]
             log.debug("%s %s %s %s %s", bezCommand, mask, curhhints, curvhints,
                       args)
 
@@ -269,7 +268,7 @@ class HintMask:
                 vHints, self.v_list, num_hhints, mask, maskVal, byteIndex)
 
         if maskVal:
-            mask += bytechr(maskVal)
+            mask += bytes([maskVal])
 
         if len(mask) < byteLength:
             mask += b"\0" * (byteLength - len(mask))
@@ -293,7 +292,7 @@ class HintMask:
         for i in idx_list:
             newbyteIndex = int(i / 8)
             if newbyteIndex != byteIndex:
-                mask += bytechr(maskVal)
+                mask += bytes([maskVal])
                 byteIndex += 1
                 while byteIndex < newbyteIndex:
                     mask += b"\0"
