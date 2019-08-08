@@ -28,8 +28,6 @@
 #     Add glyph hint entry to plist file
 #  Save font plist file.
 
-from __future__ import print_function, absolute_import
-
 import ast
 import logging
 import os

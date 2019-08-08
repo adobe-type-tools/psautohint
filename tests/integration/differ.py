@@ -7,8 +7,6 @@ Helper script for diff'ing files.
 Used as part of the integration tests.
 """
 
-from __future__ import print_function, division, absolute_import
-
 import argparse
 import difflib
 import filecmp

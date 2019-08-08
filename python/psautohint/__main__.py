@@ -4,8 +4,6 @@
 Auto-hinting program for PostScript, OpenType/CFF and UFO fonts.
 """
 
-from __future__ import print_function, absolute_import
-
 import argparse
 import logging
 import os

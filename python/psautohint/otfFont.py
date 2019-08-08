@@ -4,8 +4,6 @@
 Utilities for converting between T2 charstrings and the bez data format.
 """
 
-from __future__ import print_function, absolute_import
-
 import logging
 import os
 import re

@@ -8,8 +8,6 @@ The "fontinfo" file is expected to be in the same directory as the input
 font file.
 """
 
-from __future__ import print_function, absolute_import
-
 import logging
 import re
 

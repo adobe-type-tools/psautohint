@@ -110,8 +110,6 @@ tools stripped out the _hintFormat1_ hint data as invalid elements.
 
 """
 
-from __future__ import print_function, absolute_import, unicode_literals
-
 import ast
 import hashlib
 import logging
