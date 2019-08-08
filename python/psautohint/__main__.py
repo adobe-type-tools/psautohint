@@ -425,7 +425,7 @@ def _check_save_path(path_str):
             os.remove(check_path)
     except (IOError, OSError):
         raise argparse.ArgumentTypeError(
-            "{} is not a valid path to write to.".format(test_path))
+            f"{test_path} is not a valid path to write to.")
     return test_path
 
 
@@ -446,16 +446,15 @@ def _validate_font_paths(path_lst, parser):
     format_set = set()
     for path in path_lst:
         font_format = get_font_format(path)
+        base_name = os.path.basename(path)
         if font_format is None:
-            parser.error("{} is not a supported font format".format(
-                os.path.basename(path)))
+            parser.error(f"{base_name} is not a supported font format")
         if font_format in ("PFA", "PFB", "PFC"):
             if has_tx is None:
                 has_tx = _check_tx()
             if not has_tx:
-                parser.error("{} font format requires 'tx'. "
-                             "Please install 'afdko'.".format(
-                                 os.path.basename(path)))
+                parser.error(f"{base_name} font format requires 'tx'. "
+                             "Please install 'afdko'.")
         format_set.add(font_format)
     if len(format_set) > 1:
         parser.error("the input fonts must be all of the same format")
@@ -468,7 +467,7 @@ def _validate_path(path_str):
     valid_path = os.path.abspath(os.path.realpath(path_str))
     if not os.path.exists(valid_path):
         raise argparse.ArgumentTypeError(
-            "{} is not a valid path.".format(path_str))
+            f"{path_str} is not a valid path.")
     return valid_path
 
 
@@ -640,7 +639,7 @@ def get_options(args):
         metavar='PATH',
         type=_validate_path,
         help='file containing hinting parameters\n'
-             "Default: '{}'".format(FONTINFO_FILE_NAME)
+             f"Default: '{FONTINFO_FILE_NAME}'"
     )
     parser.add_argument(
         '--print-dflt-fddict',

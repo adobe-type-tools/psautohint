@@ -286,7 +286,7 @@ class GlyphReports:
             reps, sortFunc = item
             if not reps:
                 continue
-            fName = '{}{}'.format(path, suffixes[i])
+            fName = f'{path}{suffixes[i]}'
             title = titles[i]
             header = headers[i]
             with open(fName, "w") as fp:
@@ -415,7 +415,7 @@ def printFontInfo(fontInfoString):
 def openFile(path, options):
     font_format = get_font_format(path)
     if font_format is None:
-        raise FontParseError("{} is not a supported font format".format(path))
+        raise FontParseError(f"{path} is not a supported font format")
 
     if font_format == "UFO":
         font = UFOFontData(path, options.logOnly, options.writeToDefaultLayer)
