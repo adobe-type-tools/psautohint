@@ -35,9 +35,6 @@ matrix:
   include:
     - os: linux
       env:
-        - MB_PYTHON_VERSION=2.7
-    - os: linux
-      env:
         - MB_PYTHON_VERSION=3.6
         - BUILD_SDIST=true
     - os: linux
@@ -50,10 +47,6 @@ matrix:
       script:
         - tox -e coverage-codecov-c
       after_success: false
-    - os: osx
-      language: generic
-      env:
-        - MB_PYTHON_VERSION=2.7
     - os: osx
       language: generic
       env:
