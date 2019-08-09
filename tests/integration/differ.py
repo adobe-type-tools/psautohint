@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Copyright 2018 Adobe. All rights reserved.
 
 """
@@ -12,9 +10,10 @@ import difflib
 import filecmp
 import logging
 import os
+import re
 import sys
 
-__version__ = '0.2.5'
+__version__ = '0.3.3'
 
 logger = logging.getLogger('differ')
 
@@ -35,6 +34,8 @@ class Differ(object):
         self.skip_strings = opts.skip_strings
         # tuple of integers for the line numbers to skip
         self.skip_lines = opts.skip_lines
+        # regex pattern matching the beginning of line
+        self.skip_regex = opts.skip_regex
         self.encoding = opts.encoding
 
     def diff_paths(self):
@@ -42,16 +43,13 @@ class Differ(object):
         Diffs the contents of two paths using the parameters provided.
         Returns True if the contents match, and False if they don't.
         """
-        if self.mode == TXT_MODE:
-            if os.path.isfile(self.path1):
+        if os.path.isdir(self.path1):
+            return self._diff_dirs()
+        else:  # paths are files
+            if self.mode == TXT_MODE:
                 return self._diff_txt_files(self.path1, self.path2)
-            elif os.path.isdir(self.path1):
-                return self._diff_dirs()
-        elif self.mode == BIN_MODE:
-            if os.path.isfile(self.path1):
+            elif self.mode == BIN_MODE:
                 return filecmp.cmp(self.path1, self.path2)
-            elif os.path.isdir(self.path1):
-                return self._diff_dirs()
 
     def _diff_txt_files(self, path1, path2):
         """
@@ -83,7 +81,7 @@ class Differ(object):
                 for i, line in enumerate(f.readlines(), 1):
                     # Skip lines that change, such as timestamps
                     if self._line_to_skip(line):
-                        logger.debug("Matched begin of line. "
+                        logger.debug(f"Matched begin of line. "
                                      f"Skipped: {line.rstrip()}")
                         # Blank the line instead of actually skipping (via
                         # 'continue'); this way the difflib results show the
@@ -93,9 +91,11 @@ class Differ(object):
                     elif i in self.skip_lines:
                         logger.debug(f"Matched line #{i}. "
                                      f"Skipped: {line.rstrip()}")
-                        # Blank the line instead of actually skipping (via
-                        # 'continue'); this way the difflib results show the
-                        # correct line numbers
+                        line = ''
+                    # Skip lines that match regex
+                    elif self.skip_regex and self.skip_regex.match(line):
+                        logger.debug(f"Matched regex begin of line. "
+                                     f"Skipped: {line.rstrip()}")
                         line = ''
                     # Use os-native line separator to enable running difflib
                     lines.append(line.rstrip() + os.linesep)
@@ -146,18 +146,18 @@ class Differ(object):
         diffs_str = ''
         set_1st = set(all_paths1)
         set_2nd = set(all_paths2)
-        diff1 = sorted(list(set_1st - set_2nd))
-        diff2 = sorted(list(set_2nd - set_1st))
+        diff1 = sorted(set_1st - set_2nd)
+        diff2 = sorted(set_2nd - set_1st)
         if diff1:
             dir1 = os.path.basename(self.path1)
-            diff1_str = '\n    '.join(diff1)
+            dj1 = '\n    '.join(diff1)
             diffs_str += (f"\n  In 1st folder ({dir1}) but not in 2nd:"
-                          f"\n    {diff1_str}")
+                          f"\n    {dj1}")
         if diff2:
             dir2 = os.path.basename(self.path2)
-            diff2_str = '\n    '.join(diff2)
+            dj2 = '\n    '.join(diff2)
             diffs_str += (f"\n  In 2nd folder ({dir2}) but not in 1st:"
-                          f"\n    {diff2_str}")
+                          f"\n    {dj2}")
         return diffs_str
 
     def _compare_dir_contents(self):
@@ -169,8 +169,8 @@ class Differ(object):
         all_paths1 = self._get_all_file_paths_in_dir_tree(self.path1)
         all_paths2 = self._get_all_file_paths_in_dir_tree(self.path2)
         if all_paths1 != all_paths2:
-            report = self._report_dir_diffs(all_paths1, all_paths2)
-            logger.info(f"Folders' contents don't match.{report}")
+            dd = self._report_dir_diffs(all_paths1, all_paths2)
+            logger.info(f"Folders' contents don't match.{dd}")
             return None
         return all_paths1
 
@@ -197,15 +197,17 @@ class Differ(object):
 def _get_path_kind(pth):
     """
     Returns a string describing the kind of path.
-    String values are file, folder, invalid, and unknown.
+    Possible values are 'file', 'folder', and 'invalid'.
     """
-    if not os.path.exists(pth):
+    try:
+        if os.path.isfile(pth):
+            return 'file'
+        elif os.path.isdir(pth):
+            return 'folder'
+        elif not os.path.exists(pth):
+            return 'invalid'
+    except TypeError:
         return 'invalid'
-    elif os.path.isfile(pth):
-        return 'file'
-    elif os.path.isdir(pth):
-        return 'folder'
-    return 'unknown'
 
 
 def _paths_are_same_kind(path1, path2):
@@ -239,7 +241,11 @@ def _split_num_range_or_delta(num_str):
         return num_range
     elif len(num_delta) == 3:
         return num_delta
-    return num_str
+    elif num_str.isnumeric():
+        return num_str
+    else:
+        raise argparse.ArgumentTypeError(
+            f"Invalid number range or delta: {num_str}")
 
 
 def _convert_to_int(num_str):
@@ -252,18 +258,15 @@ def _convert_to_int(num_str):
 def _expand_num_range_or_delta(num_str_lst):
     start_num = _convert_to_int(num_str_lst[0])
     rng_dlt_num = _convert_to_int(num_str_lst[1])
-    plus_minus = num_str_lst[2]
-    if plus_minus == '+':
+    sign = num_str_lst[2]
+    if sign == '+':
         return list(range(start_num, start_num + rng_dlt_num + 1))
-    elif plus_minus == '-':
+    else:  # sign == '-'
         if not (rng_dlt_num >= start_num):
             raise argparse.ArgumentTypeError(
-                "The start of range value is larger than the end of range "
+                f"The start of range value is larger than the end of range "
                 f"value: {start_num}-{rng_dlt_num}")
         return list(range(start_num, rng_dlt_num + 1))
-    else:
-        raise argparse.ArgumentTypeError(
-            f"Unrecognized number separator: {plus_minus}")
 
 
 def _convert_seq_to_ints(num_seq):
@@ -273,12 +276,23 @@ def _convert_seq_to_ints(num_seq):
             seq.extend(_expand_num_range_or_delta(item))
         else:
             seq.append(_convert_to_int(item))
-    return seq
+    return sorted(set(seq))
 
 
 def _split_linenumber_sequence(str_seq):
     num_seq = [_split_num_range_or_delta(item) for item in str_seq.split(',')]
     return tuple(_convert_seq_to_ints(num_seq))
+
+
+def _compile_regex(str_seq):
+    if not str_seq.startswith('^'):
+        raise argparse.ArgumentTypeError(
+            "The expression must start with the caret '^' character")
+    try:
+        return re.compile(str_seq)
+    except re.error as err:
+        raise argparse.ArgumentTypeError(
+            f'The expression is invalid: {err}')
 
 
 def get_options(args):
@@ -312,8 +326,8 @@ def get_options(args):
         dest='skip_strings',
         type=_split_string_sequence,
         default=(),
-        help=('string for matching the beginning of a line to skip\n'
-              f'For multiple strings, separate them with {SPLIT_MARKER}')
+        help=f'string for matching the beginning of a line to skip\n'
+             f'For multiple strings, separate them with {SPLIT_MARKER}'
     )
     parser.add_argument(
         '-l',
@@ -325,6 +339,16 @@ def get_options(args):
              'For multiple line numbers, separate them with a comma (,).\n'
              'For ranges of lines, use a minus (-) between two numbers.\n'
              'For a line delta, use a plus (+) between two numbers.'
+    )
+    parser.add_argument(
+        '-r',
+        '--regex',
+        dest='skip_regex',
+        type=_compile_regex,
+        help='regular expression matching the beginning of a line to skip\n'
+             "The expression must start with the caret '^' character, "
+             'and characters such as backslash, semicolon, and space need '
+             'to be escaped.'
     )
     parser.add_argument(
         '-e',
@@ -356,11 +380,15 @@ def get_options(args):
     logging.basicConfig(level=level)
 
     if not _paths_are_same_kind(options.path1, options.path2):
-        parser.error("The paths are not of the same kind. "
-                     f"Path1's kind is {_get_path_kind(options.path1)}. "
-                     f"Path2's kind is {_get_path_kind(options.path2)}.")
+        kp1 = _get_path_kind(options.path1)
+        kp2 = _get_path_kind(options.path2)
+        parser.error(f"The paths are not of the same kind. "
+                     f"Path1's kind is {kp1}. "
+                     f"Path2's kind is {kp2}.")
 
     logger.debug(f"Line numbers: {options.skip_lines}")
+    regexpat = getattr(options.skip_regex, 'pattern', None)
+    logger.debug(f"Regular expression: {regexpat}")
 
     return options
 

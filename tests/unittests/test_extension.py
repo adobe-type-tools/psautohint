@@ -1,5 +1,4 @@
 import pytest
-import sys
 
 from psautohint import _psautohint
 
@@ -58,8 +57,6 @@ def test_autohintmm_bad_args(args):
     [(GLYPH.decode('ascii'), GLYPH), (NAME, NAME)],  # 1st should be bytes
     [(GLYPH, GLYPH), (NAME.decode('ascii'), NAME)],  # 2nd should be bytes
 ])
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Python 2 accepts the unicode strings here!")
 def test_autohintmm_unicode(args):
     with pytest.raises(TypeError):
         _psautohint.autohintmm(*args)
