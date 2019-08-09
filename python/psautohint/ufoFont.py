@@ -110,8 +110,6 @@ tools stripped out the _hintFormat1_ hint data as invalid elements.
 
 """
 
-from __future__ import print_function, absolute_import, unicode_literals
-
 import ast
 import hashlib
 import logging
@@ -120,8 +118,8 @@ import re
 import shutil
 
 from collections import OrderedDict
+from types import SimpleNamespace
 
-from fontTools.misc.py23 import SimpleNamespace, open, tostr, round
 from fontTools.pens.basePen import BasePen
 from fontTools.pens.pointPen import AbstractPointPen
 from fontTools.ufoLib import UFOReader, UFOWriter
@@ -331,7 +329,7 @@ PROCESSED_GLYPHS_DIRNAME = "glyphs.%s" % PROCESSED_LAYER_NAME
 HASHMAP_NAME = "%s.processedHashMap" % ADOBE_DOMAIN_PREFIX
 HASHMAP_VERSION_NAME = "hashMapVersion"
 HASHMAP_VERSION = (1, 0)  # If major version differs, do not use.
-AUTOHINT_NAME = tostr("autohint")
+AUTOHINT_NAME = "autohint"
 CHECKOUTLINE_NAME = "checkOutlines"
 
 BASE_FLEX_NAME = "flexCurve"
@@ -522,7 +520,7 @@ class UFOFontData:
         hashAfter = hash_pen.getHash()
 
         if hashAfter != hashBefore:
-            self.hashMap[glyphName] = [tostr(hashAfter), historyList]
+            self.hashMap[glyphName] = [hashAfter, historyList]
             self.hashMapChanged = True
 
     def checkSkipGlyph(self, glyphName, newSrcHash, doAll):
@@ -554,7 +552,7 @@ class UFOFontData:
             # If the source hash has changed, we need to delete the processed
             # layer glyph.
             self.hashMapChanged = True
-            self.hashMap[glyphName] = [tostr(newSrcHash), [AUTOHINT_NAME]]
+            self.hashMap[glyphName] = [newSrcHash, [AUTOHINT_NAME]]
             if glyphName in self.processedLayerGlyphMap:
                 del self.processedLayerGlyphMap[glyphName]
 

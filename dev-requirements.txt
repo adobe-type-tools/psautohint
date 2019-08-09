@@ -1,2 +1,5 @@
-# tox > 3.9.0 depends on more-itertools 7.0.0 which dropped Python 2.7 support
-tox==3.9.0 # pyup: ignore
+ # pyparsing pinned to 2.4.0 to avoid UserWarnings introduced in 2.4.1
+ # (which are actually from dependency, "packaging").
+ # see https://github.com/tox-dev/tox/issues/1375
+pyparsing==2.4.0 # pyup: ignore
+tox==3.13.2

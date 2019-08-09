@@ -28,8 +28,6 @@
 #     Add glyph hint entry to plist file
 #  Save font plist file.
 
-from __future__ import print_function, absolute_import
-
 import ast
 import logging
 import os
@@ -288,7 +286,7 @@ class GlyphReports:
             reps, sortFunc = item
             if not reps:
                 continue
-            fName = '{}{}'.format(path, suffixes[i])
+            fName = f'{path}{suffixes[i]}'
             title = titles[i]
             header = headers[i]
             with open(fName, "w") as fp:
@@ -391,10 +389,10 @@ fontInfoKeywordList = [
     'Baseline6',
 ]
 
-integerPattern = """ -?\d+"""
-arrayPattern = """ \[[ ,0-9]+\]"""
-stringPattern = """ \S+"""
-counterPattern = """ \([\S ]+\)"""
+integerPattern = r""" -?\d+"""
+arrayPattern = r""" \[[ ,0-9]+\]"""
+stringPattern = r""" \S+"""
+counterPattern = r""" \([\S ]+\)"""
 
 
 def printFontInfo(fontInfoString):
@@ -417,7 +415,7 @@ def printFontInfo(fontInfoString):
 def openFile(path, options):
     font_format = get_font_format(path)
     if font_format is None:
-        raise FontParseError("{} is not a supported font format".format(path))
+        raise FontParseError(f"{path} is not a supported font format")
 
     if font_format == "UFO":
         font = UFOFontData(path, options.logOnly, options.writeToDefaultLayer)

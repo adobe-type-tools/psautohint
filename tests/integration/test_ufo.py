@@ -1,5 +1,3 @@
-from __future__ import print_function, division, absolute_import
-
 from psautohint.ufoFont import UFOFontData
 
 from . import DATA_DIR

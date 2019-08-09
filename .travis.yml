@@ -3,7 +3,7 @@ sudo: required
 language: python
 # The travis Python version is unrelated to the version we build and test
 # with.  This is set with the MB_PYTHON_VERSION variable.
-python: 3.5
+python: 3.6
 services: docker
 
 branches:
@@ -29,13 +29,7 @@ env:
 
 matrix:
   fast_finish: true
-  exclude:
-    # Exclude the default Python 3.5 build
-    - python: 3.5
   include:
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=2.7
     - os: linux
       env:
         - MB_PYTHON_VERSION=3.6
@@ -50,10 +44,6 @@ matrix:
       script:
         - tox -e coverage-codecov-c
       after_success: false
-    - os: osx
-      language: generic
-      env:
-        - MB_PYTHON_VERSION=2.7
     - os: osx
       language: generic
       env:

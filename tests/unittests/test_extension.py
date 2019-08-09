@@ -1,7 +1,4 @@
 import pytest
-import sys
-
-from fontTools.misc.py23 import tounicode
 
 from psautohint import _psautohint
 
@@ -30,12 +27,12 @@ def test_autohintmm_good_args():
 
 
 @pytest.mark.parametrize("args", [
-    [],                          # no arguments
-    [INFO],                      # 1 argument
-    [tounicode(INFO), GLYPH],    # 1st is string not bytes
-    [INFO, tounicode(GLYPH)],    # 2nd is string not bytes
-    [[INFO], tounicode(GLYPH)],  # 1st is a list
-    [INFO, [tounicode(GLYPH)]],  # 2nd is a list
+    [],                               # no arguments
+    [INFO],                           # 1 argument
+    [INFO.decode('ascii'), GLYPH],    # 1st is string not bytes
+    [INFO, GLYPH.decode('ascii')],    # 2nd is string not bytes
+    [[INFO], GLYPH.decode('ascii')],  # 1st is a list
+    [INFO, [GLYPH.decode('ascii')]],  # 2nd is a list
 ])
 def test_autohint_bad_args(args):
     with pytest.raises(TypeError):
@@ -57,11 +54,9 @@ def test_autohintmm_bad_args(args):
 
 
 @pytest.mark.parametrize("args", [
-    [(tounicode(GLYPH), GLYPH), (NAME, NAME)],  # 1st should be bytes
-    [(GLYPH, GLYPH), (tounicode(NAME), NAME)],  # 2nd should be bytes
+    [(GLYPH.decode('ascii'), GLYPH), (NAME, NAME)],  # 1st should be bytes
+    [(GLYPH, GLYPH), (NAME.decode('ascii'), NAME)],  # 2nd should be bytes
 ])
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Python 2 accepts the unicode strings here!")
 def test_autohintmm_unicode(args):
     with pytest.raises(TypeError):
         _psautohint.autohintmm(*args)

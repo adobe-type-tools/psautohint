@@ -100,15 +100,9 @@ reportRetry(void* userData)
     ACBufferReset((ACBuffer*)userData);
 }
 
-#if PY_MAJOR_VERSION >= 3
 #define MEMNEW(size) PyMem_RawCalloc(1, size)
 #define MEMFREE(ptr) PyMem_RawFree(ptr)
 #define MEMRENEW(ptr, size) PyMem_RawRealloc(ptr, size)
-#else
-#define MEMNEW(size) PyMem_Malloc(size)
-#define MEMFREE(ptr) PyMem_Free(ptr)
-#define MEMRENEW(ptr, size) PyMem_Realloc(ptr, size)
-#endif
 
 static void*
 memoryManager(void* ctx, void* ptr, size_t size)
@@ -392,7 +386,6 @@ static char psautohint_doc[] =
     Py_INCREF(PsAutoHintError);                                                \
     PyModule_AddObject(m, "error", PsAutoHintError);
 
-#if PY_MAJOR_VERSION >= 3
 /* clang-format off */
 static struct PyModuleDef psautohint_module = {
   PyModuleDef_HEAD_INIT,
@@ -420,18 +413,3 @@ PyInit__psautohint(void)
 
     return m;
 }
-#else /* Python < 3 */
-PyMODINIT_FUNC
-init_psautohint(void)
-{
-    PyObject* m;
-
-    m = Py_InitModule3("_psautohint", psautohint_methods, psautohint_doc);
-    if (m == NULL)
-        return;
-
-    SETUPMODULE
-
-    return;
-}
-#endif
