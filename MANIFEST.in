@@ -1,5 +1,4 @@
-include README.rst COPYING LICENSE
-include Makefile source/Makefile
+include README.md COPYING LICENSE
 include requirements.txt
 
 recursive-include libpsautohint *.h
