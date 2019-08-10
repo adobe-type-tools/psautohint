@@ -18,19 +18,10 @@
 #define PY_SSIZE_T_CLEAN 1
 #include <Python.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#if !defined(_MSC_VER) || _MSC_VER >= 1800
-#include <stdbool.h>
-#else
-typedef unsigned char bool;
-#define true 1
-#define false 0
-#define snprintf(buf, len, format, ...)                                        \
-    _snprintf_s(buf, len, len, format, __VA_ARGS__)
-#endif
 
 #include "psautohint.h"
 
@@ -100,10 +91,6 @@ reportRetry(void* userData)
     ACBufferReset((ACBuffer*)userData);
 }
 
-#define MEMNEW(size) PyMem_RawCalloc(1, size)
-#define MEMFREE(ptr) PyMem_RawFree(ptr)
-#define MEMRENEW(ptr, size) PyMem_RawRealloc(ptr, size)
-
 static void*
 memoryManager(void* ctx, void* ptr, size_t size)
 {
@@ -111,11 +98,11 @@ memoryManager(void* ctx, void* ptr, size_t size)
         return NULL;
 
     if (ptr && size)
-        ptr = MEMRENEW(ptr, size);
+        ptr = PyMem_RawRealloc(ptr, size);
     else if (size)
-        ptr = MEMNEW(size);
+        ptr = PyMem_RawCalloc(1, size);
     else
-        MEMFREE(ptr);
+        PyMem_RawFree(ptr);
 
     return ptr;
 }
@@ -279,7 +266,7 @@ autohintmm(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    masters = MEMNEW(mastersCount * sizeof(char*));
+    masters = PyMem_RawCalloc(mastersCount, sizeof(char*));
     if (!masters) {
         PyErr_NoMemory();
         return NULL;
@@ -299,8 +286,8 @@ autohintmm(PyObject* self, PyObject* args)
     if (outSeq) {
         int result = -1;
 
-        const char** inGlyphs = MEMNEW(inCount * sizeof(char*));
-        ACBuffer** outGlyphs = MEMNEW(inCount * sizeof(ACBuffer*));
+        const char** inGlyphs = PyMem_RawCalloc(inCount, sizeof(char*));
+        ACBuffer** outGlyphs = PyMem_RawCalloc(inCount, sizeof(ACBuffer*));
         if (!inGlyphs || !outGlyphs) {
             PyErr_NoMemory();
             goto finish;
@@ -334,8 +321,8 @@ autohintmm(PyObject* self, PyObject* args)
                 ACBufferFree(outGlyphs[i]);
         }
 
-        MEMFREE(inGlyphs);
-        MEMFREE(outGlyphs);
+        PyMem_RawFree(inGlyphs);
+        PyMem_RawFree(outGlyphs);
 
         if (result != AC_Success) {
             switch (result) {
@@ -357,7 +344,7 @@ autohintmm(PyObject* self, PyObject* args)
     }
 
 done:
-    MEMFREE(masters);
+    PyMem_RawFree(masters);
 
     if (error) {
         Py_XDECREF(outSeq);

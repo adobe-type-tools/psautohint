@@ -65,7 +65,6 @@ libpsautohint = library(
   'src/report.c',
   'src/shuffle.c',
   'src/stemreport.c',
-  'src/winstdint.h',
   'src/write.c',
   version_h,
   include_directories : include_directories(['include']),

@@ -145,17 +145,3 @@ AutoHint(const ACFontInfo* fontinfo, const char* srcbezdata, bool extrahint,
 
     return AutoHintGlyph(srcbezdata, extrahint);
 }
-
-#if defined(_MSC_VER) && _MSC_VER < 1800
-double
-round(double x)
-{
-    return x < 0 ? ceil(x-0.5) : floor(x + 0.5);
-}
-
-float
-roundf(float x)
-{
-    return (float)(x < 0 ? ceil(x-0.5) : floor(x + 0.5));
-}
-#endif
