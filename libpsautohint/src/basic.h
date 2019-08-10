@@ -9,36 +9,17 @@
 
 #ifndef BASIC_H
 #define BASIC_H
-#include <stdlib.h>
+
 #include <ctype.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <setjmp.h>
-#include <sys/types.h>
 #include <math.h>
-
-#if !defined(_MSC_VER) || _MSC_VER >= 1800
-#include <stdint.h>
+#include <setjmp.h>
 #include <stdbool.h>
-#else
-#include "winstdint.h"
-typedef unsigned char bool;
-#define true 1
-#define false 0
-#endif
-
-#ifdef _MSC_VER
-#if _MSC_VER < 1900
-#define snprintf(buf, size, ...) _snprintf_s(buf, size, _TRUNCATE, __VA_ARGS__)
-#endif /* _MSC_VER < 1900 */
-
-#if _MSC_VER < 1800
-double round(double x);
-float roundf(float x);
-#endif /* _MSC_VER < 1800 */
-#endif /* _MSC_VER */
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 
 typedef int32_t               Fixed;
 typedef int indx;		/* for indexes that could be either short or

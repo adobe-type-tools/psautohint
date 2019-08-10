@@ -18,19 +18,10 @@
 #define PY_SSIZE_T_CLEAN 1
 #include <Python.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#if !defined(_MSC_VER) || _MSC_VER >= 1800
-#include <stdbool.h>
-#else
-typedef unsigned char bool;
-#define true 1
-#define false 0
-#define snprintf(buf, len, format, ...)                                        \
-    _snprintf_s(buf, len, len, format, __VA_ARGS__)
-#endif
 
 #include "psautohint.h"
 
