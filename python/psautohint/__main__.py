@@ -499,7 +499,7 @@ def get_options(args):
     parser.add_argument(
         'font_paths',
         metavar='FONT',
-        nargs='+',
+        nargs='*',
         type=_validate_path,
         help='Type1/CFF/OTF/UFO font files'
     )
@@ -690,6 +690,13 @@ def get_options(args):
                         filename=parsed_args.log_path)
     for handler in logging.root.handlers:
         handler.addFilter(DuplicateMessageFilter())
+
+    if not len(parsed_args.font_paths) and len(parsed_args.output_paths):
+        # allow "psautohint -o outputpath inputpath"
+        # see https://github.com/adobe-type-tools/psautohint/issues/129
+        half = len(parsed_args.output_paths)//2
+        parsed_args.font_paths = [
+            parsed_args.output_paths.pop(half) for _ in range(half)]
 
     if (parsed_args.output_paths and
             len(parsed_args.font_paths) != len(parsed_args.output_paths)):
