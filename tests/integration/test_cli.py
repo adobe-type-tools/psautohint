@@ -323,3 +323,23 @@ def test_multi_intuitive_unequal(tmpdir):
 
     with pytest.raises(SystemExit):
         autohint(['-o', out1, out2, in1])
+
+
+def test_legacy_option(capsys, tmpdir):
+    """ Check that a warning is issued when legacy autohint
+    options are used."""
+    inpath = "%s/dummy/font.ufo" % DATA_DIR
+    outpath = str(tmpdir / basename(inpath)) + ".out"
+
+    autohint([inpath, '-o', outpath, '-logOnly', '-xg', 'fake.txt'])
+    captured = capsys.readouterr()
+    expected = (
+        "WARNING: option '-logOnly' is supported only for compatibility with "
+        "the old 'autohint' tool and may be removed in future versions")
+
+    assert expected in captured.err
+
+
+def test_lack_of_input_raises(tmpdir):
+    with pytest.raises(SystemExit):
+        autohint(['--report-only'])
