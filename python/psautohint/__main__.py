@@ -717,7 +717,7 @@ def get_options(args):
     parser.add_argument(
         # -a/--all
         '-all',
-        nargs='*',
+        nargs=0,
         action=_DeprecatedAction,
         ap_action='store_true',
         dest='hint_all_ufo',
@@ -726,7 +726,7 @@ def get_options(args):
     parser.add_argument(
         # -w/--write-to-default-layer
         '-wd',
-        nargs='*',
+        nargs=0,
         action=_DeprecatedAction,
         ap_action='store_true',
         dest='write_to_default_layer',
@@ -760,7 +760,7 @@ def get_options(args):
     report_parser.add_argument(
         # --report-only
         '-logOnly',
-        nargs='*',
+        nargs=0,
         dest='report_only',
         action=_DeprecatedAction,
         ap_action='store_true',
@@ -777,7 +777,7 @@ def get_options(args):
     parser.add_argument(
         # -d/--decimal
         '-decimal',
-        nargs='*',
+        nargs=0,
         dest='decimal',
         action=_DeprecatedAction,
         ap_action='store_true',
@@ -786,7 +786,7 @@ def get_options(args):
     parser.add_argument(
         # --no-flex
         '-nf',
-        nargs='*',
+        nargs=0,
         dest='no_flex',
         action=_DeprecatedAction,
         ap_action='store_true',
@@ -795,7 +795,7 @@ def get_options(args):
     parser.add_argument(
         # --no-hint-sub
         '-ns',
-        nargs='*',
+        nargs=0,
         dest='no_hint_sub',
         action=_DeprecatedAction,
         ap_action='store_true',
@@ -811,7 +811,7 @@ def get_options(args):
     parser.add_argument(
         # --print-dflt-fddict
         '-pfd',
-        nargs='*',
+        nargs=0,
         dest='print_dflt_fddict',
         action=_DeprecatedAction,
         ap_action='store_true',
@@ -820,7 +820,7 @@ def get_options(args):
     parser.add_argument(
         # --print-list-fddict
         '-pfdl',
-        nargs='*',
+        nargs=0,
         dest='print_list_fddict',
         action=_DeprecatedAction,
         ap_action='store_true',
