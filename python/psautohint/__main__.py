@@ -366,6 +366,7 @@ class _AdditionalHelpAction(argparse.Action):
     """
     Based on argparse's _HelpAction and _VersionAction.
     """
+
     def __init__(self,
                  option_strings,
                  addl_help=None,
@@ -391,6 +392,7 @@ class _DeprecatedAction(argparse.Action):
     Custom action to raise a DeprecationWarning when hit. Used for the
     autohint compatibility args/flags.
     """
+
     def __init__(self,
                  option_strings,
                  dest,
@@ -850,7 +852,7 @@ def get_options(args):
             len(parsed_args.output_paths or [])):
         # allow "psautohint -o outputpath inputpath"
         # see https://github.com/adobe-type-tools/psautohint/issues/129
-        half = len(parsed_args.output_paths)//2
+        half = len(parsed_args.output_paths) // 2
         parsed_args.font_paths = [
             parsed_args.output_paths.pop(half) for _ in range(half)]
 
