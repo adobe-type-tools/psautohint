@@ -298,14 +298,14 @@ def test_stemhist(args, tmpdir):
 
 
 @pytest.mark.parametrize("path", FONTS)
-def test_outpath_intuitive(path, tmpdir):
+def test_outpath_order(path, tmpdir):
     """ e.g. psautohint -o outfile infile"""
     out = str(tmpdir / basename(path)) + ".out"
 
     autohint(['-o', out, path])
 
 
-def test_multi_intuitive(tmpdir):
+def test_multi_order(tmpdir):
     """ e.g. psautohint -o outfile1 outfile2 infile1 infile2"""
     in1 = "%s/dummy/font.ufo" % DATA_DIR
     in2 = "%s/dummy/big_glyph.ufo" % DATA_DIR
@@ -315,7 +315,7 @@ def test_multi_intuitive(tmpdir):
     autohint(['-o', out1, out2, in1, in2])
 
 
-def test_multi_intuitive_unequal(tmpdir):
+def test_multi_order_unequal(tmpdir):
     """ e.g. psautohint -o outfile1 outfile2 infile"""
     in1 = "%s/dummy/font.ufo" % DATA_DIR
     out1 = str(tmpdir / basename(in1)) + ".out"
