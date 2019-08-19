@@ -9,6 +9,7 @@ import logging
 import os
 import re
 import subprocess
+import sys
 import textwrap
 
 from . import __version__, get_font_format
@@ -365,6 +366,7 @@ class _AdditionalHelpAction(argparse.Action):
     """
     Based on argparse's _HelpAction and _VersionAction.
     """
+
     def __init__(self,
                  option_strings,
                  addl_help=None,
@@ -383,6 +385,36 @@ class _AdditionalHelpAction(argparse.Action):
         formatter = parser._get_formatter()
         formatter.add_text(self.addl_help)
         parser.exit(message=formatter.format_help())
+
+
+class _DeprecatedAction(argparse.Action):
+    """
+    Custom action to raise a DeprecationWarning when hit. Used for the
+    autohint compatibility args/flags.
+    """
+
+    def __init__(self,
+                 option_strings,
+                 dest,
+                 ap_action=None,
+                 **kwArgs):
+        self._ap_action = ap_action
+        super(_DeprecatedAction, self).__init__(
+            option_strings=option_strings,
+            dest=dest,
+            **kwArgs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        autohint_compat_warning = (
+            f"WARNING: option '{option_string}' is supported only for "
+            "compatibility with the old 'autohint' tool and may be removed in "
+            "future versions")
+        print(autohint_compat_warning, file=sys.stderr)
+
+        if self._ap_action == 'store_true':
+            setattr(namespace, self.dest, True)
+        else:
+            setattr(namespace, self.dest, values)
 
 
 class DuplicateMessageFilter(logging.Filter):
@@ -496,10 +528,10 @@ def get_options(args):
         formatter_class=_CustomHelpFormatter,
         description=__doc__
     )
-    parser.add_argument(
+    parser_fonts = parser.add_argument(
         'font_paths',
         metavar='FONT',
-        nargs='+',
+        nargs='*',
         type=_validate_path,
         help='Type1/CFF/OTF/UFO font files'
     )
@@ -677,6 +709,131 @@ def get_options(args):
         action='store_true',
         help="show traceback for exceptions.",
     )
+
+    # The following are added for compatibility with autohint. The action,
+    # _DeprecatedAction, will cause a warning message to be displayed when
+    # the option is used. Using help=argparse.SUPPRESS causes them not to be
+    # displayed in the standard help ('psautohint -h/--help').
+    parser.add_argument(
+        # -a/--all
+        '-all',
+        nargs=0,
+        action=_DeprecatedAction,
+        ap_action='store_true',
+        dest='hint_all_ufo',
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        # -w/--write-to-default-layer
+        '-wd',
+        nargs=0,
+        action=_DeprecatedAction,
+        ap_action='store_true',
+        dest='write_to_default_layer',
+        help=argparse.SUPPRESS,
+    )
+    glyphs_parser.add_argument(
+        # --glyphs-file
+        '-gf',
+        dest='glyphs_to_hint_file',
+        action=_DeprecatedAction,
+        type=_validate_path,
+        help=argparse.SUPPRESS,
+    )
+    glyphs_parser.add_argument(
+        # -x/--exclude-glyphs
+        '-xg',
+        dest='glyphs_to_not_hint',
+        action=_DeprecatedAction,
+        type=_split_comma_sequence,
+        default=[],
+        help=argparse.SUPPRESS,
+    )
+    glyphs_parser.add_argument(
+        # --exclude-glyphs-file
+        '-xgf',
+        dest='glyphs_to_not_hint_file',
+        action=_DeprecatedAction,
+        type=_validate_path,
+        help=argparse.SUPPRESS,
+    )
+    report_parser.add_argument(
+        # --report-only
+        '-logOnly',
+        nargs=0,
+        dest='report_only',
+        action=_DeprecatedAction,
+        ap_action='store_true',
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        # --log
+        '-log',
+        dest='log_path',
+        action=_DeprecatedAction,
+        type=_check_save_path,
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        # -d/--decimal
+        '-decimal',
+        nargs=0,
+        dest='decimal',
+        action=_DeprecatedAction,
+        ap_action='store_true',
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        # --no-flex
+        '-nf',
+        nargs=0,
+        dest='no_flex',
+        action=_DeprecatedAction,
+        ap_action='store_true',
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        # --no-hint-sub
+        '-ns',
+        nargs=0,
+        dest='no_hint_sub',
+        action=_DeprecatedAction,
+        ap_action='store_true',
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        # --no-zones-stems
+        '-nb',
+        action='store_true',
+        dest='no_zones_stems',
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        # --print-dflt-fddict
+        '-pfd',
+        nargs=0,
+        dest='print_dflt_fddict',
+        action=_DeprecatedAction,
+        ap_action='store_true',
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        # --print-list-fddict
+        '-pfdl',
+        nargs=0,
+        dest='print_list_fddict',
+        action=_DeprecatedAction,
+        ap_action='store_true',
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        # --doc-fddict
+        '-hfd',
+        action=_AdditionalHelpAction,
+        help=argparse.SUPPRESS,
+        addl_help=FDDICT_DOC
+    )
+
     parsed_args = parser.parse_args(args)
 
     if parsed_args.verbose == 0:
@@ -690,6 +847,18 @@ def get_options(args):
                         filename=parsed_args.log_path)
     for handler in logging.root.handlers:
         handler.addFilter(DuplicateMessageFilter())
+
+    if (not len(parsed_args.font_paths or []) and
+            len(parsed_args.output_paths or [])):
+        # allow "psautohint -o outputpath inputpath"
+        # see https://github.com/adobe-type-tools/psautohint/issues/129
+        half = len(parsed_args.output_paths) // 2
+        parsed_args.font_paths = [
+            parsed_args.output_paths.pop(half) for _ in range(half)]
+
+    if not len(parsed_args.font_paths):
+        parser.error(
+            f"the following arguments are required: {parser_fonts.metavar}")
 
     if (parsed_args.output_paths and
             len(parsed_args.font_paths) != len(parsed_args.output_paths)):
@@ -928,5 +1097,4 @@ def stemhist(args=None):
 
 
 if __name__ == '__main__':
-    import sys
     sys.exit(main())
