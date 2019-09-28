@@ -296,9 +296,9 @@ class GlyphReports:
                 fp.write(title)
                 fp.write(header)
                 reps.sort(key=sortFunc)
-                for item in reps:
-                    gnames = ' '.join(item[2])
-                    fp.write(f"{item[0]:5}    {item[1]:5}    [{gnames}]\n")
+                for rep in reps:
+                    gnames = ' '.join(rep[2])
+                    fp.write(f"{rep[0]:5}    {rep[1]:5}    [{gnames}]\n")
                 log.info("Wrote %s" % fName)
 
 
