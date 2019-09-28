@@ -153,7 +153,11 @@ GetCoordFromType(int16_t pathtype, Cd* coord, indx mIx, indx eltno)
             GetCoordFromType(pathlist[mIx].path[eltno - 1].type, coord, mIx,
                              eltno - 1);
             break;
-    };
+        default:
+            LogMsg(LOGERROR, NONFATALERROR, "Unrecognized path type");
+            memset(coord, 0, sizeof(Cd));
+            break;
+    }
 }
 
 static const char* const pathTypes[] = { "moveto", "lineto", "curveto",
@@ -433,6 +437,7 @@ CurveBBox(indx mIx, int16_t hinttype, int32_t pathIx, Fixed* value)
             break;
         default:
             LogMsg(LOGERROR, NONFATALERROR, "Illegal hint type.");
+            return false;
     }
     if (p1 - maxval >= FixOne || p2 - maxval >= FixOne ||
         p1 - minval <= FixOne || p2 - minval <= FixOne) {
@@ -1164,6 +1169,8 @@ WriteUnmergedHints(indx pathEltIx, indx mIx)
     UnallocateMem(hintList);
 }
 
+#define BREAK_ON_NULL_HINTARRAY_IX if(hintArray[ix] == NULL) break
+
 static void
 WriteHints(indx pathEltIx)
 {
@@ -1189,6 +1196,7 @@ WriteHints(indx pathEltIx)
         indx startix = 0;
         int16_t hinttype = hintArray[hintsMasterIx]->type;
         for (ix = 0; ix < masterCount; ix++) {
+            BREAK_ON_NULL_HINTARRAY_IX;
             hintArray[ix]->rightortop -=
               hintArray[ix]->leftorbot; /* relativize */
             if ((hinttype == RY || hinttype == (RM + ESCVAL)))
@@ -1200,6 +1208,7 @@ WriteHints(indx pathEltIx)
         }
         lbsame = rtsame = true;
         for (ix = 1; ix < masterCount; ix++) {
+            BREAK_ON_NULL_HINTARRAY_IX;
             if (hintArray[ix]->leftorbot != hintArray[ix - 1]->leftorbot)
                 lbsame = false;
             if (hintArray[ix]->rightortop != hintArray[ix - 1]->rightortop)
@@ -1210,17 +1219,21 @@ WriteHints(indx pathEltIx)
             WriteOneHintVal(hintArray[0]->rightortop);
         } else if (lbsame) {
             WriteOneHintVal(hintArray[0]->leftorbot);
-            for (ix = 0; ix < masterCount; ix++)
+            for (ix = 0; ix < masterCount; ix++) {
+                BREAK_ON_NULL_HINTARRAY_IX;
                 WriteOneHintVal((ix == 0 ? hintArray[ix]->rightortop
                                          : hintArray[ix]->rightortop -
                                              hintArray[0]->rightortop));
+            }
             GetLengthandSubrIx(1, &length, &subrIx);
             WriteSubr(subrIx);
         } else if (rtsame) {
-            for (ix = 0; ix < masterCount; ix++)
+            for (ix = 0; ix < masterCount; ix++) {
+                BREAK_ON_NULL_HINTARRAY_IX;
                 WriteOneHintVal((ix == 0 ? hintArray[ix]->leftorbot
                                          : hintArray[ix]->leftorbot -
                                              hintArray[0]->leftorbot));
+            }
             GetLengthandSubrIx(1, &length, &subrIx);
             WriteSubr(subrIx);
             WriteOneHintVal(hintArray[0]->rightortop);
@@ -1234,6 +1247,7 @@ WriteHints(indx pathEltIx)
             }
             for (opix = 0; opix < opcount; opix += length) {
                 for (ix = startix; ix < masterCount; ix++) {
+                    BREAK_ON_NULL_HINTARRAY_IX;
                     if (opix == 0)
                         WriteOneHintVal((ix == 0 ? hintArray[ix]->leftorbot
                                                  : hintArray[ix]->leftorbot -

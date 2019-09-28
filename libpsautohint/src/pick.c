@@ -238,12 +238,14 @@ PrevVal(HintVal* val, HintVal* vList)
         vList = vList->vNxt;
         if (vList == NULL) {
             LogMsg(LOGERROR, NONFATALERROR, "Malformed value list.");
+            return NULL;
         }
 
         if (vList == val)
             return prev;
         prev = vList;
     }
+    return NULL;
 }
 
 static void
@@ -264,7 +266,7 @@ void
 PickHVals(HintVal* valList)
 {
     HintVal *vlist, *hintList, *rejectList, *bestPrev, *prev, *best, *nxt;
-    Fixed bestVal, prevBestVal;
+    Fixed bestVal = 0, prevBestVal;
     Fixed bot, top, vtop, vbot;
     HintVal* newBst;
     HintSeg *seg1, *seg2;

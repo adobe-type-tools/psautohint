@@ -44,12 +44,12 @@ GetClosedBy(PathElt* clsdby)
 void
 GetEndPoint(PathElt* e, Fixed* x1p, Fixed* y1p)
 {
+retry:
     if (e == NULL) {
         *x1p = 0;
         *y1p = 0;
         return;
     }
-retry:
     switch (e->type) {
         case MOVETO:
         case LINETO:

@@ -95,7 +95,8 @@ AddSegment(Fixed from, Fixed to, Fixed loc, int32_t lftLstNm, int32_t rghtLstNm,
     if (e2 != NULL) {
         if (e2->type == CLOSEPATH)
             e2 = GetDest(e2);
-        CopySegmentLink(e1, e2, Hflg);
+        if (e1 != NULL)
+            CopySegmentLink(e1, e2, Hflg);
         if (e1 == NULL || e2 == e1->prev)
             seg->sElt = e2;
     }

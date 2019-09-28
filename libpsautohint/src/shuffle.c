@@ -160,6 +160,9 @@ DoShuffleSubpaths(void)
     unsigned char sumlinks[MAXCNT], output[MAXCNT], outlinks[MAXCNT];
     unsigned char* lnks;
     int32_t i, j;
+    memset(sumlinks, 0, MAXCNT * sizeof(unsigned char));
+    memset(output, 0, MAXCNT * sizeof(unsigned char));
+    memset(outlinks, 0, MAXCNT * sizeof(unsigned char));
     if (links == NULL)
         return;
     PrintLinks();

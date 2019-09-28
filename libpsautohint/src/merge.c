@@ -60,6 +60,8 @@ CloseSegs(HintSeg* s1, HintSeg* s2, bool vert)
     /* true if the elements for these segs are "close" in the path */
     PathElt *e1, *e2;
     Fixed loc1, loc2;
+    if ((s1 == NULL) || (s2 == NULL))
+        return false;
     if (s1 == s2)
         return true;
     e1 = s1->sElt;
