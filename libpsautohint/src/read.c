@@ -40,6 +40,7 @@ Push(Fixed r)
 {
     if (stkindex >= STKMAX) {
         LogMsg(LOGERROR, NONFATALERROR, "Stack overflow while reading glyph.");
+        return;
     }
     stk[stkindex] = r;
     stkindex++;
@@ -423,6 +424,7 @@ ParseString(const char* s)
                                "Bad input data. Glyph name is greater than "
                                "%d chars.",
                                MAX_GLYPHNAME_LEN);
+                        end = MAX_GLYPHNAME_LEN - 1;
                     }
 
                     strncpy(gGlyphName, s, end);
