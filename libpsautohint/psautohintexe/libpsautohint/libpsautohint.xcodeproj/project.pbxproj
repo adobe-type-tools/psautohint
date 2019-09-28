@@ -45,7 +45,6 @@
 		BD2C11B1203DF56F00D922B6 /* memory.h in Headers */ = {isa = PBXBuildFile; fileRef = BD2C11A7203DF56F00D922B6 /* memory.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		BD2C11B2203DF56F00D922B6 /* opcodes.h in Headers */ = {isa = PBXBuildFile; fileRef = BD2C11A8203DF56F00D922B6 /* opcodes.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		BD2C11B3203DF56F00D922B6 /* optable.h in Headers */ = {isa = PBXBuildFile; fileRef = BD2C11A9203DF56F00D922B6 /* optable.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		BD2C11DE203DFB4E00D922B6 /* winstdint.h in Headers */ = {isa = PBXBuildFile; fileRef = BD2C11DD203DFB4E00D922B6 /* winstdint.h */; settings = {ATTRIBUTES = (Private, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -88,7 +87,6 @@
 		BD2C11A7203DF56F00D922B6 /* memory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = memory.h; sourceTree = "<group>"; };
 		BD2C11A8203DF56F00D922B6 /* opcodes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opcodes.h; sourceTree = "<group>"; };
 		BD2C11A9203DF56F00D922B6 /* optable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = optable.h; sourceTree = "<group>"; };
-		BD2C11DD203DFB4E00D922B6 /* winstdint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = winstdint.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -133,7 +131,6 @@
 				BD2C11A8203DF56F00D922B6 /* opcodes.h */,
 				BD2C11A9203DF56F00D922B6 /* optable.h */,
 				BD2C119F203DF55300D922B6 /* psautohint.h */,
-				BD2C11DD203DFB4E00D922B6 /* winstdint.h */,
 			);
 			name = include;
 			path = ../../src;
@@ -192,7 +189,6 @@
 				BD2C11B1203DF56F00D922B6 /* memory.h in Headers */,
 				BD2C11B2203DF56F00D922B6 /* opcodes.h in Headers */,
 				BD2C11B3203DF56F00D922B6 /* optable.h in Headers */,
-				BD2C11DE203DFB4E00D922B6 /* winstdint.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
