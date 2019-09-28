@@ -40,6 +40,7 @@ FindPathBBox(void)
     FltnRec fr;
     PathElt* e;
     Cd c0, c1, c2, c3;
+    memset(&c0, 0, sizeof(Cd));
     if (gPathStart == NULL) {
         xmin = ymin = xmax = ymax = 0;
         pxmn = pxmx = pymn = pymx = NULL;
@@ -88,6 +89,7 @@ FindSubpathBBox(PathElt* e)
 {
     FltnRec fr;
     Cd c0, c1, c2, c3;
+    memset(&c0, 0, sizeof(Cd));
     if (e == NULL) {
         xmin = ymin = xmax = ymax = 0;
         pxmn = pxmx = pymn = pymx = NULL;

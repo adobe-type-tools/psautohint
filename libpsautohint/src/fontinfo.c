@@ -23,6 +23,7 @@ static void
 ParseStems(const ACFontInfo* fontinfo, char* kw, Fixed* stems, int32_t* pnum)
 {
     int istems[MAXSTEMS], i;
+    memset(istems, 0, MAXSTEMS * sizeof(int));
     ParseIntStems(fontinfo, kw, OPTIONAL, MAXSTEMS, istems, pnum);
     for (i = 0; i < *pnum; i++)
         stems[i] = FixInt(istems[i]);
