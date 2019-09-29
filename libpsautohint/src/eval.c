@@ -371,6 +371,8 @@ AddVValue(Fixed lft, Fixed rght, Fixed val, Fixed spc, HintSeg* lSeg,
             !CheckBBoxes(lSeg->sElt, rSeg->sElt))
             return;
     }
+    if (rSeg == NULL)
+        return;
     InsertVValue(lft, rght, val, spc, lSeg, rSeg);
 }
 
