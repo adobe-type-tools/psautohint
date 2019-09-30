@@ -306,12 +306,14 @@ FreeFontInfo(ACFontInfo* fontinfo)
     if (!fontinfo)
         return;
 
-    for (i = 0; i < fontinfo->length; i++) {
-        if (fontinfo->values[i][0]) {
-            UnallocateMem(fontinfo->values[i]);
+    if(fontinfo->values) {
+        for (i = 0; i < fontinfo->length; i++) {
+            if (fontinfo->values[i][0]) {
+                UnallocateMem(fontinfo->values[i]);
+            }
         }
+        UnallocateMem(fontinfo->values);
     }
-    UnallocateMem(fontinfo->values);
     UnallocateMem(fontinfo);
 }
 
