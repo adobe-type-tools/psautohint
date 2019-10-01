@@ -139,7 +139,7 @@ autohint(PyObject* self, PyObject* args)
     char* inData = NULL;
     char* fontInfo = NULL;
     bool error = true;
-    ACBuffer* reportBufffer = NULL;
+    ACBuffer* reportBuffer = NULL;
 
     if (!PyArg_ParseTuple(args, "O!O!|iiiii", &PyBytes_Type, &fontObj,
                           &PyBytes_Type, &inObj, &allowEdit, &allowHintSub,
@@ -147,18 +147,18 @@ autohint(PyObject* self, PyObject* args)
         return NULL;
 
     if (report) {
-        reportBufffer = ACBufferNew(150);
+        reportBuffer = ACBufferNew(150);
         allowEdit = allowHintSub = false;
         switch (report) {
             case 1:
-                AC_SetReportRetryCB(reportRetry, (void*)reportBufffer);
+                AC_SetReportRetryCB(reportRetry, (void*)reportBuffer);
                 AC_SetReportZonesCB(charZoneCB, stemZoneCB,
-                                    (void*)reportBufffer);
+                                    (void*)reportBuffer);
                 break;
             case 2:
-                AC_SetReportRetryCB(reportRetry, (void*)reportBufffer);
+                AC_SetReportRetryCB(reportRetry, (void*)reportBuffer);
                 AC_SetReportStemsCB(hstemCB, vstemCB, allStems,
-                                    (void*)reportBufffer);
+                                    (void*)reportBuffer);
                 break;
             default:
                 PyErr_SetString(PyExc_ValueError,
@@ -184,8 +184,8 @@ autohint(PyObject* self, PyObject* args)
                 char* data;
                 size_t len;
                 error = false;
-                if (reportBufffer)
-                    ACBufferRead(reportBufffer, &data, &len);
+                if (reportBuffer)
+                    ACBufferRead(reportBuffer, &data, &len);
                 else
                     ACBufferRead(output, &data, &len);
                 outObj = PyBytes_FromStringAndSize(data, len);
@@ -213,7 +213,8 @@ autohint(PyObject* self, PyObject* args)
     }
 
 done:
-    ACBufferFree(reportBufffer);
+    ACBufferFree(reportBuffer);
+    AC_SetReportRetryCB(NULL, NULL); /* clear out pointer to reportBuffer */
 
     if (error)
         return NULL;
