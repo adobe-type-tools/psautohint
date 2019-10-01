@@ -14,7 +14,7 @@ import itertools
 from fontTools.misc.psCharStrings import (T2OutlineExtractor,
                                           SimpleT2Decompiler)
 from fontTools.ttLib import TTFont, newTable
-
+from fontTools.misc.fixedTools import otRound
 from . import fdTools, FontParseError
 
 
@@ -233,10 +233,10 @@ def convertT2GlyphToBez(t2CharString, read_hints=True, round_coords=True):
                                  read_hints,
                                  round_coords)
     extractor.execute(t2CharString)
-    width = None
-    if extractor.gotWidth:
-        width = extractor.width - t2CharString.private.nominalWidthX
-    return "".join(extractor.bezProgram), width
+    t2_width_arg = None
+    if extractor.gotWidth and (extractor.width is not None):
+        t2_width_arg = extractor.width - t2CharString.private.nominalWidthX
+    return "".join(extractor.bezProgram), t2_width_arg
 
 
 class HintMask:
@@ -669,97 +669,101 @@ def convertBezToT2(bezString, mm_hint_info=None):
 
     t2Program = []
 
-    if mm_hint_info is None:
-        hhints.sort()
-        vhints.sort()
-    elif mm_hint_info.defined:
-        # Apply hint order from reference font in MM hinting
-        hhints = [hhints[j] for j in mm_hint_info.h_order]
-        vhints = [vhints[j] for j in mm_hint_info.v_order]
-    else:
-        # Define hint order from reference font in MM hinting
-        hhints, mm_hint_info.h_order = build_hint_order(hhints)
-        vhints, mm_hint_info.v_order = build_hint_order(vhints)
+    if hhints or vhints:
+        if mm_hint_info is None:
+            hhints.sort()
+            vhints.sort()
+        elif mm_hint_info.defined:
+            # Apply hint order from reference font in MM hinting
+            hhints = [hhints[j] for j in mm_hint_info.h_order]
+            vhints = [vhints[j] for j in mm_hint_info.v_order]
+        else:
+            # Define hint order from reference font in MM hinting
+            hhints, mm_hint_info.h_order = build_hint_order(hhints)
+            vhints, mm_hint_info.v_order = build_hint_order(vhints)
 
-    num_hhints = len(hhints)
-    num_vhints = len(vhints)
-    hint_limit = int((kStackLimit - 2) / 2)
-    if num_hhints >= hint_limit:
-        hhints = hhints[:hint_limit]
-        num_hhints = hint_limit
-    if num_vhints >= hint_limit:
-        vhints = vhints[:hint_limit]
-        num_vhints = hint_limit
+        num_hhints = len(hhints)
+        num_vhints = len(vhints)
+        hint_limit = int((kStackLimit - 2) / 2)
+        if num_hhints >= hint_limit:
+            hhints = hhints[:hint_limit]
+            num_hhints = hint_limit
+        if num_vhints >= hint_limit:
+            vhints = vhints[:hint_limit]
+            num_vhints = hint_limit
 
-    if mm_hint_info and mm_hint_info.defined:
-        check_hint_pairs(hhints, mm_hint_info)
-        last_idx = len(hhints)
-        check_hint_pairs(vhints, mm_hint_info, last_idx)
+        if mm_hint_info and mm_hint_info.defined:
+            check_hint_pairs(hhints, mm_hint_info)
+            last_idx = len(hhints)
+            check_hint_pairs(vhints, mm_hint_info, last_idx)
 
-    if hhints:
-        t2Program = make_hint_list(hhints, need_hint_masks, is_h=True)
-    if vhints:
-        t2Program += make_hint_list(vhints, need_hint_masks, is_h=False)
+        if hhints:
+            t2Program = make_hint_list(hhints, need_hint_masks, is_h=True)
+        if vhints:
+            t2Program += make_hint_list(vhints, need_hint_masks, is_h=False)
 
-    cntrmask_progam = None
-    if mm_hint_info is None:
-        if v_stem3_list or h_stem3_list:
-            counter_mask_list = build_counter_mask_list(h_stem3_list,
-                                                        v_stem3_list)
-            cntrmask_progam = [['cntrmask', cMask.maskByte(hhints, vhints)] for
+        cntrmask_progam = None
+        if mm_hint_info is None:
+            if v_stem3_list or h_stem3_list:
+                counter_mask_list = build_counter_mask_list(h_stem3_list,
+                                                            v_stem3_list)
+                cntrmask_progam = [['cntrmask', cMask.maskByte(hhints,
+                                                               vhints)] for
+                                   cMask in counter_mask_list]
+        elif (not mm_hint_info.defined):
+            if v_stem3_list or h_stem3_list:
+                # this is the reference font - we need to build the list.
+                counter_mask_list = build_counter_mask_list(h_stem3_list,
+                                                            v_stem3_list)
+                cntrmask_progam = [['cntrmask', cMask.maskByte(hhints,
+                                                               vhints)] for
+                                   cMask in counter_mask_list]
+                mm_hint_info.cntr_masks = counter_mask_list
+        else:
+            # This is a region font - we need to used the reference font list.
+            counter_mask_list = mm_hint_info.cntr_masks
+            cntrmask_progam = [['cntrmask', cMask.mask] for
                                cMask in counter_mask_list]
-    elif (not mm_hint_info.defined):
-        if v_stem3_list or h_stem3_list:
-            # this is the reference font - we need to build the list.
-            counter_mask_list = build_counter_mask_list(h_stem3_list,
-                                                        v_stem3_list)
-            cntrmask_progam = [['cntrmask', cMask.maskByte(hhints, vhints)] for
-                               cMask in counter_mask_list]
-            mm_hint_info.cntr_masks = counter_mask_list
-    else:
-        # This is a region font - we need to used the reference font list.
-        counter_mask_list = mm_hint_info.cntr_masks
-        cntrmask_progam = [['cntrmask', cMask.mask] for
-                           cMask in counter_mask_list]
 
-    if cntrmask_progam:
-        cntrmask_progam = itertools.chain(*cntrmask_progam)
-        t2Program.extend(cntrmask_progam)
+        if cntrmask_progam:
+            cntrmask_progam = itertools.chain(*cntrmask_progam)
+            t2Program.extend(cntrmask_progam)
 
-    if need_hint_masks:
-        # If there is not a hintsub before any drawing operators, then
-        # add an initial first hint mask to the t2Program.
-        if (mm_hint_info is None) or (not mm_hint_info.defined):
-            # a single font and a reference font for mm hinting are
-            # processed the same way
-            if hintMaskList[1].listPos != 0:
-                hBytes = hintMaskList[0].maskByte(hhints, vhints)
-                t2Program.extend(["hintmask", hBytes])
-                if in_mm_hints:
-                    mm_hint_info.hint_masks.append(hintMaskList[0])
+        if need_hint_masks:
+            # If there is not a hintsub before any drawing operators, then
+            # add an initial first hint mask to the t2Program.
+            if (mm_hint_info is None) or (not mm_hint_info.defined):
+                # a single font and a reference font for mm hinting are
+                # processed the same way
+                if hintMaskList[1].listPos != 0:
+                    hBytes = hintMaskList[0].maskByte(hhints, vhints)
+                    t2Program.extend(["hintmask", hBytes])
+                    if in_mm_hints:
+                        mm_hint_info.hint_masks.append(hintMaskList[0])
 
-            # Convert the rest of the hint masks
-            # to a hintmask op and hintmask bytes.
-            for hint_mask in hintMaskList[1:]:
-                pos = hint_mask.listPos
-                hBytes = hint_mask.maskByte(hhints, vhints)
-                t2List[pos] = [["hintmask"], hBytes]
-                if in_mm_hints:
-                    mm_hint_info.hint_masks.append(hint_mask)
-        elif (mm_hint_info is not None):
-            # This is a MM region font: apply hint masks from reference font.
-            try:
-                hm0_mask = mm_hint_info.hint_masks[0].mask
-            except IndexError:
-                import pdb
-                pdb.set_trace()
-            if isinstance(t2List[0][0], HintMask):
-                t2List[0] = [["hintmask"], hm0_mask]
-            else:
-                t2Program.extend(["hintmask", hm0_mask])
+                # Convert the rest of the hint masks
+                # to a hintmask op and hintmask bytes.
+                for hint_mask in hintMaskList[1:]:
+                    pos = hint_mask.listPos
+                    hBytes = hint_mask.maskByte(hhints, vhints)
+                    t2List[pos] = [["hintmask"], hBytes]
+                    if in_mm_hints:
+                        mm_hint_info.hint_masks.append(hint_mask)
+            elif (mm_hint_info is not None):
+                # This is a MM region font:
+                # apply hint masks from reference font.
+                try:
+                    hm0_mask = mm_hint_info.hint_masks[0].mask
+                except IndexError:
+                    import pdb
+                    pdb.set_trace()
+                if isinstance(t2List[0][0], HintMask):
+                    t2List[0] = [["hintmask"], hm0_mask]
+                else:
+                    t2Program.extend(["hintmask", hm0_mask])
 
-            for hm in mm_hint_info.hint_masks[1:]:
-                t2List[hm.listPos] = [["hintmask"], hm.mask]
+                for hm in mm_hint_info.hint_masks[1:]:
+                    t2List[hm.listPos] = [["hintmask"], hm.mask]
 
     for entry in t2List:
         try:
@@ -832,14 +836,20 @@ class CFFFontData:
         self.inputPath = path
         self.font_format = font_format
         self.mm_hint_info_dict = {}
-
+        self.is_cff2 = False
         if font_format == "OTF":
             # It is an OTF font, we can process it directly.
             font = TTFont(path)
-            if "CFF " not in font:
+            if "CFF "in font:
+                cff_format = "CFF "
+            elif "CFF2" in font:
+                cff_format = "CFF2"
+                self.is_cff2 = True
+            else:
                 raise FontParseError("OTF font has no CFF table <%s>." % path)
         else:
             # Else, package it in an OTF font.
+            cff_format = "CFF "
             if font_format == "CFF":
                 with open(path, "rb") as fp:
                     data = fp.read()
@@ -858,7 +868,7 @@ class CFFFontData:
             font['CFF '].decompile(data, font)
 
         self.ttFont = font
-        self.cffTable = font["CFF "]
+        self.cffTable = font[cff_format]
 
         # for identifier in glyph-list:
         # Get charstring.
@@ -869,14 +879,35 @@ class CFFFontData:
         return self.ttFont.getGlyphOrder()
 
     def getPSName(self):
-        return self.cffTable.cff.fontNames[0]
+        if self.is_cff2 and 'name' in self.ttFont:
+            psName = next((name_rec.string for name_rec in self.ttFont[
+                'name'].names if (name_rec.nameID == 6) and (
+                    name_rec.platformID == 3)))
+            psName = psName.decode('utf-16be')
+        else:
+            psName = self.cffTable.cff.fontNames[0]
+        return psName
+
+    def get_min_max(self, pTopDict, upm):
+        if self.is_cff2 and 'hhea' in self.ttFont:
+            font_max = self.ttFont['hhea'].ascent
+            font_min = self.ttFont['hhea'].descent
+        elif hasattr(pTopDict, 'FontBBox'):
+            font_max = pTopDict.FontBBox[3]
+            font_min = pTopDict.FontBBox[1]
+        else:
+            font_max = upm * 1.25
+            font_min = -upm * 0.25
+        alignment_min = min(-upm * 0.25, font_min)
+        alignment_max = max(upm * 1.25, font_max)
+        return alignment_min, alignment_max
 
     def convertToBez(self, glyphName, read_hints, round_coords, doAll=False):
         t2Wdth = None
         t2CharString = self.charStrings[glyphName]
         try:
-            bezString, t2Wdth = convertT2GlyphToBez(t2CharString, read_hints,
-                                                    round_coords)
+            bezString, t2Wdth = convertT2GlyphToBez(t2CharString,
+                                                    read_hints, round_coords)
             # Note: the glyph name is important, as it is used by autohintexe
             # for various heuristics, including [hv]stem3 derivation.
             bezString = "% " + glyphName + "\n" + bezString
@@ -886,8 +917,13 @@ class CFFFontData:
             bezString = None
         return bezString, t2Wdth
 
-    def updateFromBez(self, bezData, glyphName, width, mm_hint_info=None):
-        t2Program = [width] + convertBezToT2(bezData, mm_hint_info)
+    def updateFromBez(self, bezData, glyphName, t2_width_arg,
+                      mm_hint_info=None):
+        t2Program = convertBezToT2(bezData, mm_hint_info)
+
+        if t2_width_arg is not None:
+            t2Program = [t2_width_arg] + t2Program
+
         t2CharString = self.charStrings[glyphName]
         t2CharString.program = t2Program
 
@@ -922,6 +958,16 @@ class CFFFontData:
     def isCID(self):
         return hasattr(self.topDict, "FDSelect")
 
+    def hasFDArray(self):
+        return self.is_cff2 or hasattr(self.topDict, "FDSelect")
+
+    def flattenBlends(self, blendList):
+        if type(blendList[0]) is list:
+            flatList = [blendList[i][0] for i in range(len(blendList))]
+        else:
+            flatList = blendList
+        return flatList
+
     def getFontInfo(self, allow_no_blues, noFlex,
                     vCounterGlyphs, hCounterGlyphs, fdIndex=0):
         # The psautohint library needs the global font hint zones
@@ -948,16 +994,15 @@ class CFFFontData:
 
         fdDict.FontName = getattr(pTopDict, "FontName", self.getPSName())
 
-        low = min(-upm * 0.25, pTopDict.FontBBox[1] - 200)
-        high = max(upm * 1.25, pTopDict.FontBBox[3] + 200)
-        # Make a set of inactive alignment zones: zones outside of the
-        # font BBox so as not to affect hinting. Used when source font has
-        # no BlueValues or has invalid BlueValues. Some fonts have bad BBox
-        # values, so I don't let this be smaller than -upm*0.25, upm*1.25.
-        inactiveAlignmentValues = [low, low, high, high]
         blueValues = getattr(privateDict, "BlueValues", [])[:]
         numBlueValues = len(blueValues)
         if numBlueValues < 4:
+            low, high = self.get_min_max(pTopDict, upm)
+            # Make a set of inactive alignment zones: zones outside of the
+            # font BBox so as not to affect hinting. Used when source font has
+            # no BlueValues or has invalid BlueValues. Some fonts have bad BBox
+            # values, so I don't let this be smaller than -upm*0.25, upm*1.25.
+            inactiveAlignmentValues = [low, low, high, high]
             if allow_no_blues:
                 blueValues = inactiveAlignmentValues
                 numBlueValues = len(blueValues)
@@ -970,6 +1015,7 @@ class CFFFontData:
         # The first pair only is a bottom zone, where the first value is the
         # overshoot position. The rest are top zones, and second value of the
         # pair is the overshoot position.
+        blueValues = self.flattenBlends(blueValues)
         blueValues[0] = blueValues[0] - blueValues[1]
         for i in range(3, numBlueValues, 2):
             blueValues[i] = blueValues[i] - blueValues[i - 1]
@@ -988,6 +1034,7 @@ class CFFFontData:
             numBlueValues = len(privateDict.OtherBlues)
             blueValues = privateDict.OtherBlues[:]
             blueValues.sort()
+            blueValues = self.flattenBlends(blueValues)
             for i in range(0, numBlueValues, 2):
                 blueValues[i] = blueValues[i] - blueValues[i + 1]
             blueValues = [str(v) for v in blueValues]
@@ -1011,6 +1058,7 @@ class CFFFontData:
             else:
                 raise FontParseError("Font has neither StemSnapV nor StdVW!")
         vstems.sort()
+        vstems = self.flattenBlends(vstems)
         if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1)):
             vstems = [upm]  # dummy value that will allow PyAC to run
             log.warning("There is no value or 0 value for DominantV.")
@@ -1029,6 +1077,7 @@ class CFFFontData:
             else:
                 raise FontParseError("Font has neither StemSnapH nor StdHW!")
         hstems.sort()
+        hstems = self.flattenBlends(hstems)
         if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1)):
             hstems = [upm]  # dummy value that will allow PyAC to run
             log.warning("There is no value or 0 value for DominantH.")
@@ -1053,7 +1102,11 @@ class CFFFontData:
 
     def getfdIndex(self, name):
         gid = self.ttFont.getGlyphID(name)
-        return self.topDict.FDSelect[gid]
+        if hasattr(self.topDict, "FDSelect"):
+            fdIndex = self.topDict.FDSelect[gid]
+        else:
+            fdIndex = 0
+        return fdIndex
 
     def getfdInfo(self, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs,
                   glyphList, fdIndex=0):
@@ -1103,31 +1156,51 @@ class CFFFontData:
             prev = hints[-1]
         return hints
 
-    def fix_glyph_hints(self, glyph_name, mm_hint_info, is_reference_font):
-        # 1. Delete any bad hints.
-        # 2. If reference font, recalculate the hint mask byte strings
-        # 3. Replace hint masks.
-        # 3. Fix cntr masks.
-        try:
-            t2CharString = self.charStrings[glyph_name]
-        except KeyError:
-            return  # Happens with sparse source fonts - just skip the glyph.
-        subrs = getattr(t2CharString.private, "Subrs", [])
-        decompiler = FixHintWidthDecompiler(subrs, t2CharString.globalSubrs,
-                                            t2CharString.private)
-        decompiler.execute(t2CharString)
-        program = t2CharString.program
-        num_hhint_pairs = len(decompiler.h_hint_args) // 2
+    @staticmethod
+    def extract_hint_args(program):
+        width = None
+        h_hint_args = []
+        v_hint_args = []
+        for i, token in enumerate(program):
+            if type(token) is str:
+                if i % 2 != 0:
+                    width = program[0]
+                    del program[0]
+                    idx = i - 1
+                else:
+                    idx = i
+
+                if (token[:4] == 'vstem') or token[-3:] == 'mask':
+                    h_hint_args = []
+                    v_hint_args = program[:idx]
+
+                elif token[:5] == 'hstem':
+                    h_hint_args = program[:idx]
+                    v_program = program[idx+1:]
+
+                    for j, token in enumerate(v_program):
+                        if type(token) is str:
+                            if (token[:5] == 'vstem') or token[-4:] == 'mask':
+                                v_hint_args = v_program[:j]
+                                break
+                break
+
+        return width, h_hint_args, v_hint_args
+
+    def fix_t2_program_hints(self, program, mm_hint_info, is_reference_font):
+
+        width_arg, h_hint_args, v_hint_args = self.extract_hint_args(program)
 
         # 1. Build list of good [vh]hints.
         bad_hint_idxs = list(mm_hint_info.bad_hint_idxs)
         bad_hint_idxs.sort()
+        num_hhint_pairs = len(h_hint_args) // 2
         for idx in reversed(bad_hint_idxs):
             if idx < num_hhint_pairs:
-                hint_args = decompiler.h_hint_args
+                hint_args = h_hint_args
                 bottom_idx = idx * 2
             else:
-                hint_args = decompiler.v_hint_args
+                hint_args = v_hint_args
                 bottom_idx = (idx - num_hhint_pairs) * 2
             delta = hint_args[bottom_idx] + hint_args[bottom_idx + 1]
             del hint_args[bottom_idx:bottom_idx + 2]
@@ -1149,29 +1222,29 @@ class CFFFontData:
         if last_hint_idx is not None:
             del program[:last_hint_idx]
 
-        # If there were decompiler.v_hint_args, but they have now all been
+        # If there were v_hint_args, but they have now all been
         # deleted, the first token will still be 'vstem[hm]'. Delete it.
-        if ((not decompiler.v_hint_args) and program[0].startswith('vstem')):
+        if ((not v_hint_args) and program[0].startswith('vstem')):
             del program[0]
 
         # Add width and updated hints back.
-        if (decompiler.has_explicit_width):
-            hint_program = [decompiler.width_arg]
+        if width_arg is not None:
+            hint_program = [width_arg]
         else:
             hint_program = []
-        if decompiler.h_hint_args:
+        if h_hint_args:
             op_hstem = 'hstemhm' if mm_hint_info.hint_masks else 'hstem'
-            hint_program.extend(decompiler.h_hint_args)
+            hint_program.extend(h_hint_args)
             hint_program.append(op_hstem)
-        if decompiler.v_hint_args:
-            hint_program.extend(decompiler.v_hint_args)
+        if v_hint_args:
+            hint_program.extend(v_hint_args)
             # Don't need to append op_vstem, as this is still in hint_program.
             program = hint_program + program
 
         # Re-calculate the hint masks.
         if is_reference_font:
-            hhints = self.args_to_hints(decompiler.h_hint_args)
-            vhints = self.args_to_hints(decompiler.v_hint_args)
+            hhints = self.args_to_hints(h_hint_args)
+            vhints = self.args_to_hints(v_hint_args)
             for hm in mm_hint_info.hint_masks:
                 hm.maskByte(hhints, vhints)
 
@@ -1205,5 +1278,63 @@ class CFFFontData:
                          mm_hint_info.new_cntr_masks]
             cm_progam = list(itertools.chain(*cm_progam))
             program[idx:idx] = cm_progam
+        return program
 
+    def fix_glyph_hints(self, glyph_name, mm_hint_info, is_reference_font):
+        # 1. Delete any bad hints.
+        # 2. If reference font, recalculate the hint mask byte strings
+        # 3. Replace hint masks.
+        # 3. Fix cntr masks.
+        try:
+            t2CharString = self.charStrings[glyph_name]
+        except KeyError:
+            return  # Happens with sparse source fonts - just skip the glyph.
+
+        program = self.fix_t2_program_hints(t2CharString.program, mm_hint_info,
+                                            is_reference_font)
         t2CharString.program = program
+
+
+def interpolate_cff2_charstring(charstring, gname, interpolateFromDeltas,
+                                vsindex):
+    # Interpolate charstring
+    # e.g replace blend op args with regular args,
+    # and discard vsindex op.
+    new_program = []
+    last_i = 0
+    program = charstring.program
+    for i, token in enumerate(program):
+        if token == 'vsindex':
+            if last_i != 0:
+                new_program.extend(program[last_i:i - 1])
+            last_i = i + 1
+        elif token == 'blend':
+            num_regions = charstring.getNumRegions(vsindex)
+            numMasters = 1 + num_regions
+            num_args = program[i - 1]
+            # The program list starting at program[i] is now:
+            # ..args for following operations
+            # num_args values  from the default font
+            # num_args tuples, each with numMasters-1 delta values
+            # num_blend_args
+            # 'blend'
+            argi = i - (num_args * numMasters + 1)
+            if last_i != argi:
+                new_program.extend(program[last_i:argi])
+                last_i = argi
+            end_args = tuplei = argi + num_args
+            master_args = []
+            while argi < end_args:
+                next_ti = tuplei + num_regions
+                deltas = program[tuplei:next_ti]
+                val = interpolateFromDeltas(vsindex, deltas)
+                master_val = program[argi]
+                master_val += otRound(val)
+                master_args.append(master_val)
+                tuplei = next_ti
+                argi += 1
+            new_program.extend(master_args)
+            last_i = i + 1
+    if last_i != 0:
+        new_program.extend(program[last_i:])
+    return new_program

@@ -382,6 +382,10 @@ class UFOFontData:
     def isCID():
         return False
 
+    @staticmethod
+    def hasFDArray():
+        return False
+
     def convertToBez(self, name, read_hints, round_coords, doAll=False):
         # We do not yet support reading hints, so read_hints is ignored.
         width, bez, skip = self._get_or_skip_glyph(name, round_coords, doAll)
