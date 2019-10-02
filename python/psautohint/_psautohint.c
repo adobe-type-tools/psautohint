@@ -192,6 +192,7 @@ autohint(PyObject* self, PyObject* args)
             }
         }
         ACBufferFree(output);
+        output=NULL;
 
         if (result != AC_Success) {
             switch (result) {
@@ -214,7 +215,10 @@ autohint(PyObject* self, PyObject* args)
 
 done:
     ACBufferFree(reportBuffer);
-    AC_SetReportRetryCB(NULL, NULL); /* clear out pointer to reportBuffer */
+    reportBuffer = NULL;
+    /* the next two calls clear out references to reportBuffer */
+    AC_SetReportRetryCB(NULL, NULL);
+    AC_SetReportStemsCB(0, 0, 0, NULL);
 
     if (error)
         return NULL;
@@ -318,8 +322,10 @@ autohintmm(PyObject* self, PyObject* args)
 
     finish:
         if (outGlyphs) {
-            for (i = 0; i < inCount; i++)
+            for (i = 0; i < inCount; i++) {
                 ACBufferFree(outGlyphs[i]);
+                outGlyphs[i] = NULL;
+            }
         }
 
         PyMem_RawFree(inGlyphs);

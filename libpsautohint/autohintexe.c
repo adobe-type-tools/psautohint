@@ -436,6 +436,7 @@ main(int argc, char* argv[])
             }
 
             ACBufferFree(output);
+            output=NULL;
             if (result != AC_Success)
                 exit(result);
         }
@@ -489,6 +490,7 @@ main(int argc, char* argv[])
             free(masters[i]);
             free(inGlyphs[i]);
             ACBufferFree(outGlyphs[i]);
+            outGlyphs[i] = NULL;
         }
         free(inGlyphs);
         free(outGlyphs);
@@ -501,6 +503,11 @@ main(int argc, char* argv[])
         free(fontinfo);
 
     ACBufferFree(reportBuffer);
+    reportBuffer = NULL;
+    /* the next two calls clear out references to reportBuffer */
+    AC_SetReportRetryCB(NULL, NULL);
+    AC_SetReportStemsCB(0, 0, 0, NULL);
+
 
     return 0;
 }
