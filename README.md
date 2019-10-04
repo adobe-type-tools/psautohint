@@ -44,3 +44,19 @@ Testing
 We have a test suite that can be run with:
 
     tox
+
+Debugging
+---------
+
+For standard debugging, build with:
+
+    python setup.py build --debug
+
+It is also possible to build a debug version with [AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer) ("ASan") support (currently _for Mac OS X only_)  with:
+
+    python setup.py build --asan
+    pip install .
+
+Once it is installed, you can use the `util/launch-asan.sh` shell script to launch a Python process that invokes the ASan libraries needed for debugging. Attach Xcode the launched process, then execute code in the process that triggers memory usage problems and wait for ASan to do its magic.
+
+NOTE: be sure to build and install `psautohint` as described above; using other techniques such as `python setup.py install` will cause a re-build _without_ ASan and debug support, which won't work.

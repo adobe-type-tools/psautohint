@@ -383,6 +383,30 @@ class CustomBuild(_build):
 
     command_name = "build"
 
+    user_options = _build.user_options + [
+        ('asan', None, 'debug + Address Sanitizer')
+    ]
+
+    boolean_options = _build.boolean_options + ['asan']
+
+    def initialize_options(self):
+        _build.initialize_options(self)
+        self.asan = None
+
+    def finalize_options(self):
+        _build.finalize_options(self)
+        if self.asan:
+            # implies debug
+            self.debug = 1
+
+            asancflags = " -O0 -g -fsanitize=address"
+            cflags = os.environ.get('CFLAGS', '') + asancflags
+            os.environ['CFLAGS'] = cflags
+
+            asanldflags = " -fsanitize=address -shared-libasan"
+            ldflags = os.environ.get('LDFLAGS', '') + asanldflags
+            os.environ['LDFLAGS'] = ldflags
+
     def has_executables(self):
         return self.distribution.has_executables()
 
@@ -425,6 +449,37 @@ class CustomBuildClib(_build_clib):
             filenames.extend(extra_deps)
 
         return filenames
+
+    def build_libraries(self, libraries):
+        for (lib_name, build_info) in libraries:
+            sources = build_info.get('sources')
+            if sources is None or not isinstance(sources, (list, tuple)):
+                raise DistutilsSetupError(
+                       "in 'libraries' option (library '%s'), "
+                       "'sources' must be present and must be "
+                       "a list of source filenames" % lib_name)
+            sources = list(sources)
+
+            log.info("building '%s' library", lib_name)
+
+            # First, compile the source code to object files in the library
+            # directory.  (This should probably change to putting object
+            # files in a temporary build directory.)
+            macros = build_info.get('macros')
+            include_dirs = build_info.get('include_dirs')
+
+            objects = self.compiler.compile(sources,
+                                            output_dir=self.build_temp,
+                                            macros=macros,
+                                            include_dirs=include_dirs,
+                                            debug=self.debug)
+
+            # Now "link" the object files together into a static library.
+            # (On Unix at least, this isn't really linking -- it just
+            # builds an archive.  Whatever.)
+            self.compiler.create_static_lib(objects, lib_name,
+                                            output_dir=self.build_clib,
+                                            debug=self.debug)
 
 
 class CustomInstall(_install):
