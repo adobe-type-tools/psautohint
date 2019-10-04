@@ -587,26 +587,7 @@ def hint_glyph(options, name, bez_glyph, fontinfo):
 
 def hint_compatible_glyphs(options, name, bez_glyphs, masters, fontinfo):
     try:
-        if False:
-            # This is disabled because it causes crashes on the CI servers
-            # which are not reproducible locally. The below branch is a hack to
-            # avoid the crash and should be dropped once the crash is fixed,
-            # https://github.com/adobe-type-tools/psautohint/pull/131
-            hinted = hint_compatible_bez_glyphs(fontinfo, bez_glyphs, masters)
-        else:
-            hinted = []
-            for i, bez in enumerate(bez_glyphs[1:]):
-                if bez is None:
-                    out = [bez_glyphs[0], None]
-                else:
-                    in_bez = [bez_glyphs[0], bez]
-                    in_masters = [masters[0], masters[i + 1]]
-                    out = hint_compatible_bez_glyphs(fontinfo, in_bez,
-                                                     in_masters)
-                if i == 0:
-                    hinted = out
-                else:
-                    hinted.append(out[1])
+        hinted = hint_compatible_bez_glyphs(fontinfo, bez_glyphs, masters)
     except PsAutoHintCError:
         raise ACHintError("%s: Failure in processing outline data." %
                           options.nameAliases.get(name, name))
