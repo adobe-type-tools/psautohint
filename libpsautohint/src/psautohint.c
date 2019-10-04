@@ -201,6 +201,10 @@ AC_initCallGlobals(void)
     gAddHStemCB = NULL;
     gAddVStemCB = NULL;
     gDoStems = false;
+    gAddStemUserData = NULL;
+    gAllStems = 0;
+    gReportRetryCB = NULL;
+    gReportRetryUserData = NULL;
 }
 
 ACLIB_API const char*

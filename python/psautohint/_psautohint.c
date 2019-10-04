@@ -216,9 +216,7 @@ autohint(PyObject* self, PyObject* args)
 done:
     ACBufferFree(reportBuffer);
     reportBuffer = NULL;
-    /* the next two calls clear out references to reportBuffer */
-    AC_SetReportRetryCB(NULL, NULL);
-    AC_SetReportStemsCB(0, 0, 0, NULL);
+    AC_initCallGlobals(); /* clear out references to reportBuffer */
 
     if (error)
         return NULL;
