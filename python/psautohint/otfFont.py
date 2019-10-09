@@ -4,6 +4,7 @@
 Utilities for converting between T2 charstrings and the bez data format.
 """
 
+import copy
 import logging
 import os
 import re
@@ -15,6 +16,13 @@ from fontTools.misc.psCharStrings import (T2OutlineExtractor,
                                           SimpleT2Decompiler)
 from fontTools.ttLib import TTFont, newTable
 from fontTools.misc.fixedTools import otRound
+from fontTools.varLib.varStore import VarStoreInstancer
+from fontTools.varLib.cff import CFF2CharStringMergePen, MergeOutlineExtractor
+# import subset.cff is needed to load the implementation for
+# CFF.desubroutinize: the module adds this class method to the CFF and CFF2
+# classes.
+import fontTools.subset.cff
+
 from . import fdTools, FontParseError
 
 
@@ -26,6 +34,25 @@ kStemLimit = 96
 
 class SEACError(Exception):
     pass
+
+
+def _add_method(*clazzes):
+    """Returns a decorator function that adds a new method to one or
+    more classes."""
+    def wrapper(method):
+        done = []
+        for clazz in clazzes:
+            if clazz in done:
+                continue  # Support multiple names of a clazz
+            done.append(clazz)
+            assert clazz.__name__ != 'DefaultTable', \
+                'Oops, table class not found.'
+            assert not hasattr(clazz, method.__name__), \
+                "Oops, class '%s' has method '%s'." % (clazz.__name__,
+                                                       method.__name__)
+            setattr(clazz, method.__name__, method)
+        return None
+    return wrapper
 
 
 def hintOn(i, hintMaskBytes):
@@ -836,7 +863,9 @@ class CFFFontData:
         self.inputPath = path
         self.font_format = font_format
         self.mm_hint_info_dict = {}
+        self.t2_widths = {}
         self.is_cff2 = False
+        self.is_vf = False
         if font_format == "OTF":
             # It is an OTF font, we can process it directly.
             font = TTFont(path)
@@ -874,6 +903,15 @@ class CFFFontData:
         # Get charstring.
         self.topDict = self.cffTable.cff.topDictIndex[0]
         self.charStrings = self.topDict.CharStrings
+        if 'fvar' in self.ttFont:
+            self.is_vf = True
+            fvar = self.ttFont['fvar']
+            CFF2 = self.cffTable
+            CFF2.desubroutinize()
+            topDict = CFF2.cff.topDictIndex[0]
+            self.temp_cs = copy.deepcopy(self.charStrings['.notdef'])
+            self.vs_data_models = self.get_vs_data_models(topDict,
+                                                          fvar)
 
     def getGlyphList(self):
         return self.ttFont.getGlyphOrder()
@@ -915,17 +953,22 @@ class CFFFontData:
             log.warning("Skipping %s: can't process SEAC composite glyphs.",
                         glyphName)
             bezString = None
-        return bezString, t2Wdth
+        self.t2_widths[glyphName] = t2Wdth
+        return bezString
 
-    def updateFromBez(self, bezData, glyphName, t2_width_arg,
-                      mm_hint_info=None):
+    def updateFromBez(self, bezData, glyphName, mm_hint_info=None):
         t2Program = convertBezToT2(bezData, mm_hint_info)
-
-        if t2_width_arg is not None:
-            t2Program = [t2_width_arg] + t2Program
-
-        t2CharString = self.charStrings[glyphName]
-        t2CharString.program = t2Program
+        if not self.is_cff2:
+            t2_width_arg = self.t2_widths[glyphName]
+            if t2_width_arg is not None:
+                t2Program = [t2_width_arg] + t2Program
+        if self.vs_data_models is not None:
+            # It is a variable font. Accumulate the charstrings.
+            self.glyph_programs.append(t2Program)
+        else:
+            # This is an MM source font. Update the font's charstring directly.
+            t2CharString = self.charStrings[glyphName]
+            t2CharString.program = t2Program
 
     def save(self, path):
         if path is None:
@@ -1280,19 +1323,88 @@ class CFFFontData:
             program[idx:idx] = cm_progam
         return program
 
-    def fix_glyph_hints(self, glyph_name, mm_hint_info, is_reference_font):
+    def fix_glyph_hints(self, glyph_name, mm_hint_info,
+                        is_reference_font=None):
         # 1. Delete any bad hints.
         # 2. If reference font, recalculate the hint mask byte strings
         # 3. Replace hint masks.
         # 3. Fix cntr masks.
-        try:
-            t2CharString = self.charStrings[glyph_name]
-        except KeyError:
-            return  # Happens with sparse source fonts - just skip the glyph.
+        if self.is_vf:
+            # We get called once, and fix all the charstring programs.
+            for i, t2_program in self.glyph_programs:
+                self.glyph_programs[i] = self.fix_t2_program_hints(
+                    t2_program, mm_hint_info, is_reference_font=(i == 0))
+        else:
+            # we are called for each font in turn
+            try:
+                t2CharString = self.charStrings[glyph_name]
+            except KeyError:
+                return  # Happens with sparse sources - just skip the glyph.
 
-        program = self.fix_t2_program_hints(t2CharString.program, mm_hint_info,
-                                            is_reference_font)
-        t2CharString.program = program
+            program = self.fix_t2_program_hints(t2CharString.program,
+                                                mm_hint_info,
+                                                is_reference_font)
+            t2CharString.program = program
+
+    def get_vf_bez_glyphs(self, glyph_name):
+
+        charstring = self.charStrings[glyph_name]
+        if 'fvar' in self.ttFont:
+            # have not yet collected VF global data.
+            self.is_vf = True
+            fvar = self.ttFont['fvar']
+            CFF2 = self.cffTable
+            CFF2.desubroutinize()
+            topDict = CFF2.cff.topDictIndex[0]
+            # We need a new charstring object into which we can save the
+            # hinted CFF2 program data. Copying an existing charstring is a
+            # little easier than creating a new one and making sure that all
+            # properties are set correctly.
+            self.temp_cs = copy.deepcopy(self.charStrings['.notdef'])
+            self.vs_data_models = self.get_vs_data_models(topDict,
+                                                          fvar)
+
+        if 'vsindex' in charstring.program:
+            op_index = charstring.program.index('vsindex')
+            vsindex = charstring.program[op_index - 1]
+        else:
+            vsindex = 0
+        self.vsindex = vsindex
+        self.glyph_programs = []
+        vs_data_model = self.vs_data_model = self.vs_data_models[vsindex]
+
+        bez_list = []
+        for vsi in vs_data_model.master_vsi_list:
+            t2_program = interpolate_cff2_charstring(charstring, glyph_name,
+                                                     vsi.interpolateFromDeltas,
+                                                     vsindex)
+            self.temp_cs.program = t2_program
+            bezString, _ = convertT2GlyphToBez(self.temp_cs, True, True)
+            #  DBG Adding glyph name is useful only for debugging.
+            bezString = "% {}\n".format(glyph_name) + bezString
+            bez_list.append(bezString)
+        return bez_list
+
+    @staticmethod
+    def get_vs_data_models(topDict, fvar):
+        otvs = topDict.VarStore.otVarStore
+        region_list = otvs.VarRegionList.Region
+        axis_tags = [axis_entry.axisTag for axis_entry in fvar.axes]
+        vs_data_models = []
+        for vsindex, var_data in enumerate(otvs.VarData):
+            vsi = VarStoreInstancer(topDict.VarStore.otVarStore, fvar.axes, {})
+            master_vsi_list = [vsi]
+            for region_idx in var_data.VarRegionIndex:
+                region = region_list[region_idx]
+                loc = {}
+                for i, axis in enumerate(region.VarRegionAxis):
+                    loc[axis_tags[i]] = axis.PeakCoord
+                vsi = VarStoreInstancer(topDict.VarStore.otVarStore, fvar.axes,
+                                        loc)
+                master_vsi_list.append(vsi)
+            vdm = VarDataModel(var_data, vsindex, master_vsi_list)
+            vs_data_models.append(vdm)
+        return vs_data_models
 
 
 def interpolate_cff2_charstring(charstring, gname, interpolateFromDeltas,
@@ -1338,3 +1450,69 @@ def interpolate_cff2_charstring(charstring, gname, interpolateFromDeltas,
     if last_i != 0:
         new_program.extend(program[last_i:])
     return new_program
+
+
+def merge_hinted_glyphs(self, name):
+    new_t2cs = merge_hinted_programs(self.temp_cs, self.glyph_programs,
+                                     name, self.vs_data_model)
+    if self.vsindex:
+        new_t2cs.program = [self.vsindex, 'vsindex'] + new_t2cs.program
+    self.charStrings[name] = new_t2cs
+
+
+def merge_hinted_programs(charstring, t2_programs, gname, vs_data_model):
+    num_masters = vs_data_model.num_masters
+    var_pen = CFF2CharStringMergePen([], gname, num_masters, 0)
+    charstring.outlineExtractor = MergeOutlineExtractor
+
+    for i, t2_program in enumerate(t2_programs):
+        var_pen.restart(i)
+        charstring.program = t2_program
+        charstring.draw(var_pen)
+
+    new_charstring = var_pen.getCharString(
+        private=charstring.private,
+        globalSubrs=charstring.globalSubrs,
+        var_model=vs_data_model, optimize=True)
+    return new_charstring
+
+
+@_add_method(VarStoreInstancer)
+def get_scalars(self, vsindex, region_idx):
+    varData = self._varData
+    # The index key needs to be the master value index, which includes
+    # the default font value. VarRegionIndex provides the region indices.
+    scalars = {0: 1.0}  # The default font always has a weight of 1.0
+    region_index = varData[vsindex].VarRegionIndex
+    for idx in range(region_idx):  # omit the scalar for the region.
+        scalar = self._getScalar(region_index[idx])
+        if scalar:
+            scalars[idx+1] = scalar
+    return scalars
+
+
+class VarDataModel(object):
+
+    def __init__(self, var_data, vsindex, master_vsi_list):
+        self.master_vsi_list = master_vsi_list
+        self.var_data = var_data
+        self._num_masters = len(master_vsi_list)
+        self.delta_weights = [{}]  # for default font value
+        for region_idx, vsi in enumerate(master_vsi_list[1:]):
+            scalars = vsi.get_scalars(vsindex, region_idx)
+            self.delta_weights.append(scalars)
+
+    @property
+    def num_masters(self):
+        return self._num_masters
+
+    def getDeltas(self, master_values):
+        assert len(master_values) == len(self.delta_weights)
+        out = []
+        for i, scalars in enumerate(self.delta_weights):
+            delta = master_values[i]
+            for j, scalar in scalars.items():
+                if scalar:
+                    delta -= out[j] * scalar
+            out.append(delta)
+        return out

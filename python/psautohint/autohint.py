@@ -29,15 +29,13 @@
 #  Save font plist file.
 
 import ast
-import copy
 import logging
 import os
 import re
 import time
 from collections import defaultdict, namedtuple
 
-from .otfFont import (CFFFontData, convertT2GlyphToBez, convertBezToT2,
-                      interpolate_cff2_charstring)
+from .otfFont import (CFFFontData)
 
 from .ufoFont import UFOFontData
 from ._psautohint import error as PsAutoHintCError
@@ -45,31 +43,7 @@ from ._psautohint import error as PsAutoHintCError
 from . import (get_font_format, hint_bez_glyph, hint_compatible_bez_glyphs,
                FontParseError)
 
-from fontTools.varLib.varStore import VarStoreInstancer
-from fontTools.varLib.cff import CFF2CharStringMergePen, MergeOutlineExtractor
-# import subset.cff is needed to get the implementation for CFF.desubroutinize.
-import fontTools.subset.cff
-
 log = logging.getLogger(__name__)
-
-
-def _add_method(*clazzes):
-    """Returns a decorator function that adds a new method to one or
-    more classes."""
-    def wrapper(method):
-        done = []
-        for clazz in clazzes:
-            if clazz in done:
-                continue  # Support multiple names of a clazz
-            done.append(clazz)
-            assert clazz.__name__ != 'DefaultTable', \
-                'Oops, table class not found.'
-            assert not hasattr(clazz, method.__name__), \
-                "Oops, class '%s' has method '%s'." % (clazz.__name__,
-                                                       method.__name__)
-            setattr(clazz, method.__name__, method)
-        return None
-    return wrapper
 
 
 class ACOptions(object):
@@ -485,10 +459,9 @@ def get_bez_glyphs(options, font, glyph_list):
     for name in glyph_list:
         # Convert to bez format
         try:
-            bez_glyph, t2_width_arg = font.convertToBez(name,
-                                                        options.read_hints,
-                                                        options.round_coords,
-                                                        options.hintAll)
+            bez_glyph = font.convertToBez(name, options.read_hints,
+                                          options.round_coords,
+                                          options.hintAll)
 
             if bez_glyph is None or "mt" not in bez_glyph:
                 # skip empty glyphs.
@@ -496,8 +469,8 @@ def get_bez_glyphs(options, font, glyph_list):
         except KeyError:
             # Source fonts may be sparse, e.g. be a subset of the
             # reference font.
-            bez_glyph = t2_width_arg = None
-        glyphs[name] = GlyphEntry(bez_glyph, t2_width_arg, font)
+            bez_glyph = None
+        glyphs[name] = GlyphEntry(bez_glyph, font)
 
     total = len(glyph_list)
     processed = len(glyphs)
@@ -623,6 +596,7 @@ class MMHintInfo:
         self.bad_hint_idxs = set()
         self.cntr_masks = []
         self.new_cntr_masks = []
+        self.glyph_programs = None
 
     @property
     def needs_fix(self):
@@ -695,7 +669,7 @@ def get_glyph_reports(options, font, glyph_list, fontinfo_list):
     return reports
 
 
-GlyphEntry = namedtuple("GlyphEntry", "bez_data,width,font")
+GlyphEntry = namedtuple("GlyphEntry", "bez_data,font")
 
 
 def hint_font(options, font, glyph_list, fontinfo_list):
@@ -725,7 +699,7 @@ def hint_font(options, font, glyph_list, fontinfo_list):
         if options.logOnly:
             continue
 
-        hinted[name] = GlyphEntry(new_bez_glyph, g_entry.width, font)
+        hinted[name] = GlyphEntry(new_bez_glyph, font)
 
     return hinted
 
@@ -733,7 +707,7 @@ def hint_font(options, font, glyph_list, fontinfo_list):
 def hint_compatible_fonts(options, paths, glyphs,
                           fontinfo_list):
     # glyphs is a list of dicts, one per font. Each dict is keyed by glyph name
-    # and references a tuple of (src bez file, width, font)
+    # and references a tuple of (src bez file, font)
     aliases = options.nameAliases
 
     hinted_glyphs = set()
@@ -759,8 +733,7 @@ def hint_compatible_fonts(options, paths, glyphs,
         for i, new_bez_glyph in enumerate(new_bez_glyphs):
             if new_bez_glyph is not None:
                 g_entry = glyphs[i][name]
-                g_entry.font.updateFromBez(new_bez_glyph, name, g_entry.width,
-                                           mm_hint_info)
+                g_entry.font.updateFromBez(new_bez_glyph, name, mm_hint_info)
 
         hinted_glyphs.add(name)
         # Now check if we need to fix any hint lists.
@@ -775,133 +748,21 @@ def hint_compatible_fonts(options, paths, glyphs,
     return len(hinted_glyphs) > 0
 
 
-@_add_method(VarStoreInstancer)
-def get_scalars(self, vsindex, region_idx):
-    varData = self._varData
-    # The index key needs to be the master value index, which includes
-    # the default font value. VarRegionIndex provides the region indices.
-    scalars = {0: 1.0}  # The default font always has a weight of 1.0
-    region_index = varData[vsindex].VarRegionIndex
-    for idx in range(region_idx):  # omit the scalar for the region.
-        scalar = self._getScalar(region_index[idx])
-        if scalar:
-            scalars[idx+1] = scalar
-    return scalars
-
-
-class VarDataModel(object):
-
-    def __init__(self, var_data, vsindex, master_vsi_list):
-        self.master_vsi_list = master_vsi_list
-        self.var_data = var_data
-        self._num_masters = len(master_vsi_list)
-        self.delta_weights = [{}]  # for default font value
-        for region_idx, vsi in enumerate(master_vsi_list[1:]):
-            scalars = vsi.get_scalars(vsindex, region_idx)
-            self.delta_weights.append(scalars)
-
-    @property
-    def num_masters(self):
-        return self._num_masters
-
-    def getDeltas(self, master_values):
-        assert len(master_values) == len(self.delta_weights)
-        out = []
-        for i, scalars in enumerate(self.delta_weights):
-            delta = master_values[i]
-            for j, scalar in scalars.items():
-                if scalar:
-                    delta -= out[j] * scalar
-            out.append(delta)
-        return out
-
-
-def merge_hinted_programs(charstring, t2_programs, gname, vs_data_model):
-    num_masters = vs_data_model.num_masters
-    var_pen = CFF2CharStringMergePen([], gname, num_masters, 0)
-    charstring.outlineExtractor = MergeOutlineExtractor
-
-    for i, t2_program in enumerate(t2_programs):
-        var_pen.restart(i)
-        charstring.program = t2_program
-        charstring.draw(var_pen)
-
-    new_charstring = var_pen.getCharString(
-        private=charstring.private,
-        globalSubrs=charstring.globalSubrs,
-        var_model=vs_data_model, optimize=True)
-    return new_charstring
-
-
-def get_cff2_bez_glyphs(charstring, temp_cs, glyph_name, vs_data_model,
-                        vsindex):
-    bez_list = []
-    for vsi in vs_data_model.master_vsi_list:
-        t2_program = interpolate_cff2_charstring(charstring, glyph_name,
-                                                 vsi.interpolateFromDeltas,
-                                                 vsindex)
-        temp_cs.program = t2_program
-        bezString, _ = convertT2GlyphToBez(temp_cs, True, True)
-        #  DBG Adding glyph name is useful only for debugging.
-        bezString = "% {}\n".format(glyph_name) + bezString
-        bez_list.append(bezString)
-    return bez_list
-
-
-def get_vs_data_models(topDict, fvar):
-    otvs = topDict.VarStore.otVarStore
-    region_list = otvs.VarRegionList.Region
-    axis_tags = [axis_entry.axisTag for axis_entry in fvar.axes]
-    vs_data_models = []
-    for vsindex, var_data in enumerate(otvs.VarData):
-        vsi = VarStoreInstancer(topDict.VarStore.otVarStore, fvar.axes, {})
-        master_vsi_list = [vsi]
-        for region_idx in var_data.VarRegionIndex:
-            region = region_list[region_idx]
-            loc = {}
-            for i, axis in enumerate(region.VarRegionAxis):
-                loc[axis_tags[i]] = axis.PeakCoord
-            vsi = VarStoreInstancer(topDict.VarStore.otVarStore, fvar.axes,
-                                    loc)
-            master_vsi_list.append(vsi)
-        vdm = VarDataModel(var_data, vsindex, master_vsi_list)
-        vs_data_models.append(vdm)
-    return vs_data_models
-
-
 def hint_vf_font(options, font_path, out_path):
     font = openFile(font_path, options)
-
     options.noFlex = True  # work around for incompatibel flex args.
     aliases = options.nameAliases
     glyph_names = get_glyph_list(options, font, font_path)
     log.info("Hinting font %s. Start time: %s.", font_path, time.asctime())
     fontinfo_list = get_fontinfo_list(options, font, font_path,
                                       glyph_names, True)
-
     hinted_glyphs = set()
-    fvar = font.ttFont['fvar']
-    CFF2 = font.cffTable
-    CFF2.desubroutinize()
-    topDict = CFF2.cff.topDictIndex[0]
-    charstrings = CFF2.cff.topDictIndex[0].CharStrings
-    temp_cs = copy.deepcopy(charstrings['.notdef'])
-    vs_data_models = get_vs_data_models(topDict, fvar)
 
     for name in glyph_names:
         fontinfo, _, _ = fontinfo_list[name]
-
         log.info("%s: Begin hinting.", aliases.get(name, name))
 
-        charstring = charstrings[name]
-        if 'vsindex' in charstring.program:
-            op_index = charstring.program.index('vsindex')
-            vsindex = charstring.program[op_index - 1]
-        else:
-            vsindex = 0
-        vs_data_model = vs_data_models[vsindex]
-        bez_glyphs = get_cff2_bez_glyphs(
-            charstring, temp_cs, name, vs_data_model, vsindex)
+        bez_glyphs = font.get_vf_bez_glyphs(name)
         num_masters = len(bez_glyphs)
         masters = [f"Master-{i}" for i in range(num_masters)]
         new_bez_glyphs = hint_compatible_glyphs(options, name, bez_glyphs,
@@ -909,35 +770,23 @@ def hint_vf_font(options, font_path, out_path):
         if None in new_bez_glyphs:
             log.info(f"Error while hinting glyph {name}.")
             continue
-
         if options.logOnly:
             continue
         hinted_glyphs.add(name)
 
-        # First, convert bez to fontTools T2 program,
+        # First, convert bez to fontTools T2 programs,
         # and check if any hints conflict.
         mm_hint_info = MMHintInfo()
-        t2_programs = []
         for i, new_bez_glyph in enumerate(new_bez_glyphs):
             if new_bez_glyph is not None:
-                t2_program = convertBezToT2(new_bez_glyph,
-                                            mm_hint_info=mm_hint_info)
-                t2_programs.append(t2_program)
+                font.updateFromBez(new_bez_glyph, name, mm_hint_info)
 
-        # If there are conflicting hints, remove them.
+        # Now check if we need to fix any hint lists.
         if mm_hint_info.needs_fix:
-            for i, t2_program in enumerate(t2_programs):
-                program = font.fix_t2_program_hints(t2_program,
-                                                    mm_hint_info,
-                                                    is_reference_font=(i == 0))
-                t2_programs[i] = program
+            font.fix_glyph_hints(name, mm_hint_info)
 
-        # Now merge the programs.
-        new_t2cs = merge_hinted_programs(temp_cs, t2_programs, name,
-                                         vs_data_model)
-        if vsindex:
-            new_t2cs.program = [vsindex, 'vsindex'] + new_t2cs.program
-        charstrings[name] = new_t2cs
+        # Now merge the programs into a singel CFF2 charstring program
+        font.merge_hinted_glyphs(name)
 
     if hinted_glyphs:
         log.info(f"Saving font file {out_path} with new hints...")
@@ -1001,7 +850,7 @@ def hint_regular_fonts(options, fonts, paths, outpaths):
                 log.info("Saving font file with new hints...")
                 for name in hinted:
                     g_entry = hinted[name]
-                    font.updateFromBez(g_entry.bez_data, name, g_entry.width)
+                    font.updateFromBez(g_entry.bez_data, name)
                 font.save(outpath)
             else:
                 log.info("No glyphs were hinted.")
