@@ -866,6 +866,7 @@ class CFFFontData:
         self.t2_widths = {}
         self.is_cff2 = False
         self.is_vf = False
+        self.vs_data_models = None
         if font_format == "OTF":
             # It is an OTF font, we can process it directly.
             font = TTFont(path)
@@ -1221,9 +1222,10 @@ class CFFFontData:
                     h_hint_args = program[:idx]
                     v_program = program[idx+1:]
 
-                    for j, token in enumerate(v_program):
-                        if type(token) is str:
-                            if (token[:5] == 'vstem') or token[-4:] == 'mask':
+                    for j, vtoken in enumerate(v_program):
+                        if type(vtoken) is str:
+                            if (vtoken[:5] == 'vstem') or vtoken[-4:] == \
+                                    'mask':
                                 v_hint_args = v_program[:j]
                                 break
                 break
@@ -1433,7 +1435,6 @@ def interpolate_cff2_charstring(charstring, gname, interpolateFromDeltas,
             argi = i - (num_args * numMasters + 1)
             if last_i != argi:
                 new_program.extend(program[last_i:argi])
-                last_i = argi
             end_args = tuplei = argi + num_args
             master_args = []
             while argi < end_args:
