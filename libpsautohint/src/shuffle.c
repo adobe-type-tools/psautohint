@@ -139,6 +139,8 @@ Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
             break;
         e = e->next;
     }
+    if (e == NULL)
+        return;
     MoveSubpathToEnd(e);
     LogMsg(LOGDEBUG, OK, "move subpath %d to end.", bst);
     output[bst] = 1;

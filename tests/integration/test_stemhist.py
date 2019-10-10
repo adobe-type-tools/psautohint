@@ -25,10 +25,8 @@ class Options(ACOptions):
     pytest.param(False, True, False, id="report_stems"),
     pytest.param(False, True, True, id="report_stems,all_stems"),
 ])
-# This is is disabled for now as mysterious crashes happen when not using
-# autohintexe.
-# @pytest.mark.parametrize("use_autohintexe", [False, True])
-def test_otf(zones, stems, all_stems, tmpdir, use_autohintexe=True):
+@pytest.mark.parametrize("use_autohintexe", [False, True])
+def test_otf(zones, stems, all_stems, tmpdir, use_autohintexe):
     path = "%s/dummy/font.otf" % DATA_DIR
     out = str(tmpdir / basename(path))
     options = Options(path, out, zones, stems, all_stems)

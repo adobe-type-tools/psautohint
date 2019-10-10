@@ -1,0 +1,10 @@
+extraction:
+  python:
+    python_setup:
+      requirements: "cython>=0.29"
+  cpp:
+    after_prepare:
+    - "pip3 install --upgrade --user cython"
+    - "export PATH=\"$HOME/.local/bin:$PATH\""
+    index:
+      build_command: "python3 setup.py build"
