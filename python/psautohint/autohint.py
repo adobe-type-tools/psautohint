@@ -587,7 +587,19 @@ def hint_glyph(options, name, bez_glyph, fontinfo):
 
 def hint_compatible_glyphs(options, name, bez_glyphs, masters, fontinfo):
     try:
-        hinted = hint_compatible_bez_glyphs(fontinfo, bez_glyphs, masters)
+        hinted = []
+        for i, bez in enumerate(bez_glyphs[1:]):
+            if bez is None:
+                out = [bez_glyphs[0], None]
+            else:
+                in_bez = [bez_glyphs[0], bez]
+                in_masters = [masters[0], masters[i + 1]]
+                out = hint_compatible_bez_glyphs(fontinfo, in_bez, in_masters)
+            if i == 0:
+                hinted = out
+            else:
+                hinted.append(out[1])
+
     except PsAutoHintCError:
         raise ACHintError("%s: Failure in processing outline data." %
                           options.nameAliases.get(name, name))
