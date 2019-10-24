@@ -382,19 +382,21 @@ class UFOFontData:
     def isCID():
         return False
 
+    @staticmethod
+    def hasFDArray():
+        return False
+
     def convertToBez(self, name, read_hints, round_coords, doAll=False):
         # We do not yet support reading hints, so read_hints is ignored.
         width, bez, skip = self._get_or_skip_glyph(name, round_coords, doAll)
         if skip:
-            return None, width
+            return None
 
         bezString = "\n".join(bez)
         bezString = "\n".join(["% " + name, "sc", bezString, "ed", ""])
-        return bezString, width
+        return bezString
 
-    def updateFromBez(self, bezData, name, width, mm_hint_info=None):
-        # For UFO font, we don't use the width parameter:
-        # it is carried over from the input glif file.
+    def updateFromBez(self, bezData, name, mm_hint_info=None):
         layer = None
         if name in self.processedLayerGlyphMap:
             layer = PROCESSED_LAYER_NAME

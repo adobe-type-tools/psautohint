@@ -19,6 +19,7 @@ class Options(ACOptions):
         self.reference_font = reference
         self.hintAll = True
         self.verbose = False
+        self.verbose = False
 
 
 @pytest.mark.parametrize("base", glob.glob("%s/*/Masters" % DATA_DIR))
@@ -58,6 +59,23 @@ def test_mmotf(base, tmpdir):
 
         assert differ([str(tmpdir / basename(ref)) + ".xml",
                        str(tmpdir / basename(out)) + ".xml"])
+
+
+@pytest.mark.parametrize("otf", glob.glob("%s/vf_tests/*.otf" % DATA_DIR))
+def test_vfotf(otf, tmpdir):
+    out = str(tmpdir / basename(otf)) + ".out"
+    options = Options(None, [otf], [out])
+    options.allow_no_blues = True
+    hintFiles(options)
+
+    for path in (otf, out):
+        font = TTFont(path)
+        assert "CFF2" in font
+        writer = XMLWriter(str(tmpdir / basename(path)) + ".xml")
+        font["CFF2"].toXML(writer, font)
+        writer.close()
+    assert differ([str(tmpdir / basename(otf)) + ".xml",
+                   str(tmpdir / basename(out)) + ".xml"])
 
 
 def test_incompatible_masters(tmpdir):

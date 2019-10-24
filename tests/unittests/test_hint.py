@@ -32,7 +32,7 @@ class BezFontData:
         if glyphName not in self._glyphs:
             with open(os.path.join(self._path, glyphName + ".bez")) as fp:
                 self._glyphs[glyphName] = fp.read()
-        return (self._glyphs[glyphName], 0)
+        return self._glyphs[glyphName]
 
     def getGlyphList(self):
         files = glob.glob(self._path + "/*.bez")
@@ -80,7 +80,7 @@ def normalize_glyph(glyph, name):
 
 
 def get_glyph(font, name):
-    glyph = font.convertToBez(name, True, True)[0]
+    glyph = font.convertToBez(name, True, True)
     return normalize_glyph(glyph, name)
 
 
