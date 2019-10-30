@@ -269,8 +269,7 @@ static void
 VStemMiss(HintSeg* leftSeg, HintSeg* rightSeg)
 {
     Fixed ltop, lbot, lloc, rloc, rtop, rbot;
-    Fixed mndist, dx, dist;
-    Fixed l, r, minDiff, minW, w;
+    Fixed dx, l, r, minDiff, minW, w;
     int i;
     if (gNumVStems == 0)
         return;
@@ -284,17 +283,9 @@ VStemMiss(HintSeg* leftSeg, HintSeg* rightSeg)
     if (dx < gMinDist)
         return;
     /* top is always > bot, independent of YgoesUp */
-    if ((ltop >= rbot) && (lbot <= rtop)) { /* overlap */
-        Fixed overlaplen = NUMMIN(ltop, rtop) - NUMMAX(lbot, rbot);
-        Fixed minlen = NUMMIN(ltop - lbot, rtop - rbot);
-        if (minlen == overlaplen)
-            dist = dx;
-        else
-            dist = CalcOverlapDist(dx, overlaplen, minlen);
-    } else
+    if ((ltop < rbot) || (lbot > rtop))  /* does not overlap */
         return;
-    mndist = FixTwoMul(gMinDist);
-    dist = NUMMAX(dist, mndist);
+
     l = lloc;
     r = rloc;
     w = abs(r - l);
