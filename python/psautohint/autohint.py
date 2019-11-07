@@ -71,7 +71,6 @@ class ACOptions(object):
         self.report_zones = False
         self.report_stems = False
         self.report_all_stems = False
-        self.use_autohintexe = False
 
     def __str__(self):
         # used only when debugging.
@@ -607,8 +606,7 @@ def hint_glyph(options, name, bez_glyph, fontinfo):
         hinted = hint_bez_glyph(fontinfo, bez_glyph, options.allowChanges,
                                 not options.noHintSub, options.round_coords,
                                 options.report_zones, options.report_stems,
-                                options.report_all_stems,
-                                options.use_autohintexe)
+                                options.report_all_stems)
     except PsAutoHintCError:
         raise ACHintError("%s: Failure in processing outline data." %
                           options.nameAliases.get(name, name))

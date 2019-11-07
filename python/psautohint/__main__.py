@@ -926,7 +926,6 @@ class ReportOptions(ACOptions):
         self.noFlex = True
         self.allow_no_blues = True
         self.logOnly = True
-        self.use_autohintexe = True
         self.inputPaths = pargs.font_paths
         self.outputPaths = pargs.output_paths
         self.report_stems = not pargs.alignment_zones
