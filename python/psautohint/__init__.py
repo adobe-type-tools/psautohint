@@ -61,76 +61,28 @@ def get_font_format(font_file_path):
         return None
 
 
-def _hint_with_autohintexe(info, glyph, allow_edit, allow_hint_sub,
-                           round_coordinates, report_zones,
-                           report_stems, report_all_stems):
-    import subprocess
-
-    edit = "" if allow_edit else "-e"
-    hintsub = "" if allow_hint_sub else "-n"
-    decimal = "" if round_coordinates else "-d"
-    zones = "-ra" if report_zones else ""
-    stems = "-rs" if report_stems else ""
-    allstems = "-a" if report_all_stems else ""
-    cmd = [AUTOHINTEXE, edit, hintsub, decimal, zones, stems, allstems,
-           "-D", "-i", info, "-b", glyph]
-    cmd = [a for a in cmd if a]  # Filter out empty args, just in case.
-    try:
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
-        outdata, errordata = p.communicate()
-
-        # A bit of hack to parse the stderr output and route it through our
-        # logger.
-        if errordata:
-            errordata = errordata.decode('ascii').strip().split("\n")
-            for line in errordata:
-                if ": " in line:
-                    level, msg = line.split(": ", 1)
-                    if level not in ("DEBUG", "INFO", "WARNING", "ERROR"):
-                        level, msg = "INFO", line
-                    getattr(log, level.lower())(msg)
-                else:
-                    log.info(line)
-
-        return outdata.decode('ascii')
-    except (subprocess.CalledProcessError, OSError) as err:
-        raise _psautohint.error(err)
-
-
 def hint_bez_glyph(info, glyph, allow_edit=True, allow_hint_sub=True,
                    round_coordinates=True, report_zones=False,
-                   report_stems=False, report_all_stems=False,
-                   use_autohintexe=False):
-    if use_autohintexe:
-        hinted = _hint_with_autohintexe(info,
-                                        glyph,
-                                        allow_edit,
-                                        allow_hint_sub,
-                                        round_coordinates,
-                                        report_zones,
-                                        report_stems,
-                                        report_all_stems)
-    else:
-        report = 0
-        if report_zones:
-            report = 1
-        elif report_stems:
-            report = 2
-        # In/out of C code is bytes. In/out of Python code is str.
-        hinted_b = _psautohint.autohint(info.encode('ascii'),
-                                        glyph.encode('ascii'),
-                                        allow_edit,
-                                        allow_hint_sub,
-                                        round_coordinates,
-                                        report,
-                                        report_all_stems)
-        hinted = hinted_b.decode('ascii')
+                   report_stems=False, report_all_stems=False):
+    report = 0
+    if report_zones:
+        report = 1
+    elif report_stems:
+        report = 2
+    # In/out of C code is bytes. In/out of Python code is str.
+    hinted_b = _psautohint.autohint(info.encode('ascii'),
+                                    glyph.encode('ascii'),
+                                    allow_edit,
+                                    allow_hint_sub,
+                                    round_coordinates,
+                                    report,
+                                    report_all_stems)
+    hinted = hinted_b.decode('ascii')
 
     return hinted
 
 
-def hint_compatible_bez_glyphs(info, glyphs, masters, use_autohintexe=False):
+def hint_compatible_bez_glyphs(info, glyphs, masters):
     hinted = _psautohint.autohintmm(tuple(g.encode('ascii') for g in glyphs),
                                     tuple(m.encode('ascii') for m in masters))
 
