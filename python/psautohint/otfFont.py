@@ -473,8 +473,9 @@ def build_hint_order(hints):
 def make_abs(hint_pair):
     bottom_edge, delta = hint_pair
     new_hint_pair = [bottom_edge, delta]
-    if delta in [-20, -21]:
-        new_hint_pair[0] = bottom_edge + delta
+    if delta in [-20, -21]:  # It is a ghost hint!
+        # We use this only in comparing overlap and order:
+        # pretend the delta is 0, as it isn't a real value.
         new_hint_pair[1] = bottom_edge
     else:
         new_hint_pair[1] = bottom_edge + delta
@@ -495,11 +496,11 @@ def check_hint_pairs(hint_pairs, mm_hint_info, last_idx=0):
     # and pairs in a hint group must not overlap.
 
     # check order first
-    hint_list = [make_abs(hint_pair) for hint_pair in hint_pairs]
     bad_hint_idxs = set()
-    prev = hint_list[0]
-    for i, hint_pair in enumerate(hint_list[1:], 1):
+    prev = hint_pairs[0]
+    for i, hint_pair in enumerate(hint_pairs[1:], 1):
         if prev[0] > hint_pair[0]:
+            # If there is a conflict, we drop the previous hint
             bad_hint_idxs.add(i + last_idx - 1)
         prev = hint_pair
 
@@ -513,6 +514,7 @@ def check_hint_pairs(hint_pairs, mm_hint_info, last_idx=0):
             hint_list = [make_abs(hint_pair) for hint_pair in hint_list]
             check_hint_overlap(hint_list, last_idx, bad_hint_idxs)
     else:
+        hint_list = [make_abs(hint_pair) for hint_pair in hint_pairs]
         check_hint_overlap(hint_list, last_idx, bad_hint_idxs)
 
     if bad_hint_idxs:
