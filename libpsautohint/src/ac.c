@@ -117,7 +117,7 @@ InitData(int32_t reason)
 
             /* ?? Does this cause a leak ?? */
             gPointList = NULL;
-            gMaxPtLsts = 5;
+            gMaxPtLsts = 64;
             gPtLstArray = (HintPoint**)Alloc(gMaxPtLsts * sizeof(HintPoint*));
             gPtLstIndex = 0;
             gPtLstArray[0] = NULL;
