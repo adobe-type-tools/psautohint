@@ -345,12 +345,13 @@ GetNewPtLst(void)
     if (gNumPtLsts >= gMaxPtLsts) { /* increase size */
         HintPoint** newArray;
         int32_t i;
-        gMaxPtLsts += 5;
-        newArray = (HintPoint**)Alloc(gMaxPtLsts * sizeof(HintPoint*));
-        for (i = 0; i < gMaxPtLsts - 5; i++) {
+        int32_t newSize = gMaxPtLsts * 2;
+        newArray = (HintPoint**)Alloc(newSize * sizeof(HintPoint*));
+        for (i = 0; i < gMaxPtLsts; i++) {
             newArray[i] = gPtLstArray[i];
         }
         gPtLstArray = newArray;
+        gMaxPtLsts = newSize;
     }
     gPtLstIndex = gNumPtLsts;
     gNumPtLsts++;
