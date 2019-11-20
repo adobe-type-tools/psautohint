@@ -142,7 +142,7 @@ typedef struct _pthelt {
   int16_t type;
   SegLnkLst *Hs, *Vs;
   bool Hcopy:1, Vcopy:1, isFlex:1, yFlex:1, newCP:1;
-  int unused:9;
+  unsigned int unused:9;
   int16_t count, newhints;
   Fixed x, y, x1, y1, x2, y2, x3, y3;
   } PathElt;
