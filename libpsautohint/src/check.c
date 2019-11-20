@@ -11,16 +11,16 @@
 
 #include "ac.h"
 
-static bool xflat, yflat, xdone, ydone, bbquit;
-static int32_t xstate, ystate, xstart, ystart;
-static Fixed x0, cy0, x1, cy1, xloc, yloc;
-static Fixed x, y, xnxt, ynxt;
-static Fixed yflatstartx, yflatstarty, yflatendx, yflatendy;
-static Fixed xflatstarty, xflatstartx, xflatendx, xflatendy;
-static bool vert, started, reCheckSmooth;
-static Fixed loc, frst, lst, fltnvalue;
-static PathElt* e;
-static bool forMultiMaster = false, inflPtFound = false;
+static bool g_xflat, g_yflat, g_xdone, g_ydone, g_bbquit;
+static int32_t g_xstate, g_ystate, g_xstart, g_ystart;
+static Fixed g_x0, g_cy0, g_x1, g_cy1, g_xloc, g_yloc;
+static Fixed g_x, g_y, g_xnxt, g_ynxt;
+static Fixed g_yflatstartx, g_yflatstarty, g_yflatendx, g_yflatendy;
+static Fixed g_xflatstarty, g_xflatstartx, g_xflatendx, g_xflatendy;
+static bool g_vert, g_started, g_reCheckSmooth;
+static Fixed g_loc, g_frst, g_lst, g_fltnvalue;
+static PathElt* g_e;
+static bool g_forMultiMaster = false, g_inflPtFound = false;
 
 #define STARTING (0)
 #define goingUP (1)
@@ -35,7 +35,7 @@ static bool forMultiMaster = false, inflPtFound = false;
 static void
 chkBad(void)
 {
-    reCheckSmooth = ResolveConflictBySplit(e, false, NULL, NULL);
+    g_reCheckSmooth = ResolveConflictBySplit(g_e, false, NULL, NULL);
     ;
 }
 
@@ -45,37 +45,37 @@ chkBad(void)
 static void
 chkYDIR(void)
 {
-    if (y > yloc) { /* going up */
-        if (ystate == goingUP)
+    if (g_y > g_yloc) { /* going up */
+        if (g_ystate == goingUP)
             return;
-        if (ystate == STARTING)
-            ystart = ystate = goingUP;
+        if (g_ystate == STARTING)
+            g_ystart = g_ystate = goingUP;
         else /*if (ystate == goingDOWN)*/ {
-            if (ystart == goingUP) {
-                yflatendx = xloc;
-                yflatendy = yloc;
-            } else if (!yflat) {
-                yflatstartx = xloc;
-                yflatstarty = yloc;
-                yflat = true;
+            if (g_ystart == goingUP) {
+                g_yflatendx = g_xloc;
+                g_yflatendy = g_yloc;
+            } else if (!g_yflat) {
+                g_yflatstartx = g_xloc;
+                g_yflatstarty = g_yloc;
+                g_yflat = true;
             }
-            ystate = goingUP;
+            g_ystate = goingUP;
         }
-    } else if (y < yloc) { /* going down */
-        if (ystate == goingDOWN)
+    } else if (g_y < g_yloc) { /* going down */
+        if (g_ystate == goingDOWN)
             return;
-        if (ystate == STARTING)
-            ystart = ystate = goingDOWN;
+        if (g_ystate == STARTING)
+            g_ystart = g_ystate = goingDOWN;
         else /*if (ystate == goingUP)*/ {
-            if (ystart == goingDOWN) {
-                yflatendx = xloc;
-                yflatendy = yloc;
-            } else if (!yflat) {
-                yflatstartx = xloc;
-                yflatstarty = yloc;
-                yflat = true;
+            if (g_ystart == goingDOWN) {
+                g_yflatendx = g_xloc;
+                g_yflatendy = g_yloc;
+            } else if (!g_yflat) {
+                g_yflatstartx = g_xloc;
+                g_yflatstarty = g_yloc;
+                g_yflat = true;
             }
-            ystate = goingDOWN;
+            g_ystate = goingDOWN;
         }
     }
 }
@@ -83,77 +83,77 @@ chkYDIR(void)
 static void
 chkYFLAT(void)
 {
-    if (!yflat) {
-        if (LsTan(y - yloc, x - xloc)) {
-            yflat = true;
-            yflatstartx = xloc;
-            yflatstarty = yloc;
+    if (!g_yflat) {
+        if (LsTan(g_y - g_yloc, g_x - g_xloc)) {
+            g_yflat = true;
+            g_yflatstartx = g_xloc;
+            g_yflatstarty = g_yloc;
         }
         return;
     }
-    if (ystate != ystart)
+    if (g_ystate != g_ystart)
         return;
-    if (GrTan(y - yloc, x - xloc)) {
-        yflatendx = xloc;
-        yflatendy = yloc;
-        ydone = true;
+    if (GrTan(g_y - g_yloc, g_x - g_xloc)) {
+        g_yflatendx = g_xloc;
+        g_yflatendy = g_yloc;
+        g_ydone = true;
     }
 }
 
 static void
 chkXFLAT(void)
 {
-    if (!xflat) {
-        if (LsTan(x - xloc, y - yloc)) {
-            xflat = true;
-            xflatstartx = xloc;
-            xflatstarty = yloc;
+    if (!g_xflat) {
+        if (LsTan(g_x - g_xloc, g_y - g_yloc)) {
+            g_xflat = true;
+            g_xflatstartx = g_xloc;
+            g_xflatstarty = g_yloc;
         }
         return;
     }
-    if (xstate != xstart)
+    if (g_xstate != g_xstart)
         return;
-    if (GrTan(x - xloc, y - yloc)) {
-        xflatendx = xloc;
-        xflatendy = yloc;
-        xdone = true;
+    if (GrTan(g_x - g_xloc, g_y - g_yloc)) {
+        g_xflatendx = g_xloc;
+        g_xflatendy = g_yloc;
+        g_xdone = true;
     }
 }
 
 static void
 chkXDIR(void)
 {
-    if (x > xloc) { /* going up */
-        if (xstate == goingUP)
+    if (g_x > g_xloc) { /* going up */
+        if (g_xstate == goingUP)
             return;
-        if (xstate == STARTING)
-            xstart = xstate = goingUP;
+        if (g_xstate == STARTING)
+            g_xstart = g_xstate = goingUP;
         else /*if (xstate == goingDOWN)*/ {
-            if (xstart == goingUP) {
-                xflatendx = xloc;
-                xflatendy = yloc;
-            } else if (!xflat) {
-                xflatstartx = xloc;
-                xflatstarty = yloc;
-                xflat = true;
+            if (g_xstart == goingUP) {
+                g_xflatendx = g_xloc;
+                g_xflatendy = g_yloc;
+            } else if (!g_xflat) {
+                g_xflatstartx = g_xloc;
+                g_xflatstarty = g_yloc;
+                g_xflat = true;
             }
-            xstate = goingUP;
+            g_xstate = goingUP;
         }
-    } else if (x < xloc) {
-        if (xstate == goingDOWN)
+    } else if (g_x < g_xloc) {
+        if (g_xstate == goingDOWN)
             return;
-        if (xstate == STARTING)
-            xstart = xstate = goingDOWN;
+        if (g_xstate == STARTING)
+            g_xstart = g_xstate = goingDOWN;
         else /*if (xstate == goingUP)*/ {
-            if (xstart == goingDOWN) {
-                xflatendx = xloc;
-                xflatendy = yloc;
-            } else if (!xflat) {
-                xflatstartx = xloc;
-                xflatstarty = yloc;
-                xflat = true;
+            if (g_xstart == goingDOWN) {
+                g_xflatendx = g_xloc;
+                g_xflatendy = g_yloc;
+            } else if (!g_xflat) {
+                g_xflatstartx = g_xloc;
+                g_xflatstarty = g_yloc;
+                g_xflat = true;
             }
-            xstate = goingDOWN;
+            g_xstate = goingDOWN;
         }
     }
 }
@@ -163,74 +163,74 @@ chkDT(Cd c)
 {
     Fixed loc;
 
-    x = c.x;
-    y = c.y;
-    ynxt = y;
-    xnxt = x;
-    if (!ydone) {
+    g_x = c.x;
+    g_y = c.y;
+    g_ynxt = g_y;
+    g_xnxt = g_x;
+    if (!g_ydone) {
         chkYDIR();
         chkYFLAT();
-        if (ydone && yflat && abs(yflatstarty - cy0) > SDELTA &&
-            abs(cy1 - yflatendy) > SDELTA) {
-            if ((ystart == goingUP && yflatstarty - yflatendy > SDELTA) ||
-                (ystart == goingDOWN && yflatendy - yflatstarty > SDELTA)) {
-                if (gEditGlyph && !forMultiMaster)
+        if (g_ydone && g_yflat && abs(g_yflatstarty - g_cy0) > SDELTA &&
+            abs(g_cy1 - g_yflatendy) > SDELTA) {
+            if ((g_ystart == goingUP && g_yflatstarty - g_yflatendy > SDELTA) ||
+                (g_ystart == goingDOWN && g_yflatendy - g_yflatstarty > SDELTA)) {
+                if (gEditGlyph && !g_forMultiMaster)
                     chkBad();
                 return;
             }
-            if (abs(yflatstartx - yflatendx) > SDELTA3) {
-                DEBUG_ROUND(yflatstartx);
-                DEBUG_ROUND(yflatendx);
-                DEBUG_ROUND(yflatstarty);
-                DEBUG_ROUND(yflatendy);
+            if (abs(g_yflatstartx - g_yflatendx) > SDELTA3) {
+                DEBUG_ROUND(g_yflatstartx);
+                DEBUG_ROUND(g_yflatendx);
+                DEBUG_ROUND(g_yflatstarty);
+                DEBUG_ROUND(g_yflatendy);
 
-                loc = (yflatstarty + yflatendy) / 2;
+                loc = (g_yflatstarty + g_yflatendy) / 2;
                 DEBUG_ROUND(loc);
 
-                if (!forMultiMaster) {
-                    AddHSegment(yflatstartx, yflatendx, loc, e, NULL, sCURVE,
+                if (!g_forMultiMaster) {
+                    AddHSegment(g_yflatstartx, g_yflatendx, loc, g_e, NULL, sCURVE,
                                 13);
                 } else {
-                    inflPtFound = true;
-                    fltnvalue = -loc;
+                    g_inflPtFound = true;
+                    g_fltnvalue = -loc;
                 }
             }
         }
     }
-    if (!xdone) {
+    if (!g_xdone) {
         chkXDIR();
         chkXFLAT();
-        if (xdone && xflat && abs(xflatstartx - x0) > SDELTA &&
-            abs(x1 - xflatendx) > SDELTA) {
-            if ((xstart == goingUP && xflatstartx - xflatendx > SDELTA) ||
-                (xstart == goingDOWN && xflatendx - xflatstartx > SDELTA)) {
-                if (gEditGlyph && !forMultiMaster)
+        if (g_xdone && g_xflat && abs(g_xflatstartx - g_x0) > SDELTA &&
+            abs(g_x1 - g_xflatendx) > SDELTA) {
+            if ((g_xstart == goingUP && g_xflatstartx - g_xflatendx > SDELTA) ||
+                (g_xstart == goingDOWN && g_xflatendx - g_xflatstartx > SDELTA)) {
+                if (gEditGlyph && !g_forMultiMaster)
                     chkBad();
                 return;
             }
-            if (abs(xflatstarty - xflatendy) > SDELTA3) {
-                DEBUG_ROUND(xflatstarty);
-                DEBUG_ROUND(xflatendy);
-                DEBUG_ROUND(xflatstartx);
-                DEBUG_ROUND(xflatendx);
+            if (abs(g_xflatstarty - g_xflatendy) > SDELTA3) {
+                DEBUG_ROUND(g_xflatstarty);
+                DEBUG_ROUND(g_xflatendy);
+                DEBUG_ROUND(g_xflatstartx);
+                DEBUG_ROUND(g_xflatendx);
 
-                loc = (xflatstartx + xflatendx) / 2;
+                loc = (g_xflatstartx + g_xflatendx) / 2;
                 DEBUG_ROUND(loc);
 
-                if (!forMultiMaster)
+                if (!g_forMultiMaster)
 
                 {
-                    AddVSegment(xflatstarty, xflatendy, loc, e, NULL, sCURVE,
+                    AddVSegment(g_xflatstarty, g_xflatendy, loc, g_e, NULL, sCURVE,
                                 13);
                 } else {
-                    inflPtFound = true;
-                    fltnvalue = loc;
+                    g_inflPtFound = true;
+                    g_fltnvalue = loc;
                 }
             }
         }
     }
-    xloc = xnxt;
-    yloc = ynxt;
+    g_xloc = g_xnxt;
+    g_yloc = g_ynxt;
 }
 
 #define FQ(x) ((int32_t)((x) >> 6))
@@ -315,19 +315,19 @@ GetInflectionPoint(Fixed px, Fixed py, Fixed px1, Fixed pcy1, Fixed px2,
     c2.y = -py2;
     c3.x = px3;
     c3.y = -py3;
-    xstate = ystate = STARTING;
-    xdone = ydone = xflat = yflat = inflPtFound = false;
-    x0 = c0.x;
-    cy0 = c0.y;
-    x1 = c3.x;
-    cy1 = c3.y;
-    xloc = x0;
-    yloc = cy0;
-    forMultiMaster = true;
+    g_xstate = g_ystate = STARTING;
+    g_xdone = g_ydone = g_xflat = g_yflat = g_inflPtFound = false;
+    g_x0 = c0.x;
+    g_cy0 = c0.y;
+    g_x1 = c3.x;
+    g_cy1 = c3.y;
+    g_xloc = g_x0;
+    g_yloc = g_cy0;
+    g_forMultiMaster = true;
     FltnCurve(c0, c1, c2, c3, &fltnrec);
-    if (inflPtFound)
-        *inflPt = fltnvalue;
-    return inflPtFound;
+    if (g_inflPtFound)
+        *inflPt = g_fltnvalue;
+    return g_inflPtFound;
 }
 
 static void
@@ -347,16 +347,16 @@ CheckSCurve(PathElt* ee)
     c2.y = ee->y2;
     c3.x = ee->x3;
     c3.y = ee->y3;
-    xstate = ystate = STARTING;
-    xdone = ydone = xflat = yflat = false;
-    x0 = c0.x;
-    cy0 = c0.y;
-    x1 = c3.x;
-    cy1 = c3.y;
-    xloc = x0;
-    yloc = cy0;
-    e = ee;
-    forMultiMaster = false;
+    g_xstate = g_ystate = STARTING;
+    g_xdone = g_ydone = g_xflat = g_yflat = false;
+    g_x0 = c0.x;
+    g_cy0 = c0.y;
+    g_x1 = c3.x;
+    g_cy1 = c3.y;
+    g_xloc = g_x0;
+    g_yloc = g_cy0;
+    g_e = ee;
+    g_forMultiMaster = false;
     FltnCurve(c0, c1, c2, c3, &fr);
 }
 
@@ -365,7 +365,7 @@ CheckZeroLength(void)
 {
     PathElt *e, *NxtE;
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3;
-    if ((!gEditGlyph) || forMultiMaster)
+    if ((!gEditGlyph) || g_forMultiMaster)
     {
         /* Do not change topology when hinting MM fonts,
          and do not edit glyphs if not requested */
@@ -403,7 +403,7 @@ CheckSmooth(void)
     Fixed x0, cy0, x1, cy1, x2, y2, x3, y3, smdiff, xx, yy;
     CheckZeroLength();
 restart:
-    reCheckSmooth = false;
+    g_reCheckSmooth = false;
     recheck = false;
     e = gPathStart;
     while (e != NULL) {
@@ -436,7 +436,7 @@ restart:
     Nxt:
         e = NxtE;
     }
-    if (reCheckSmooth)
+    if (g_reCheckSmooth)
         goto restart;
     if (!recheck)
         return;
@@ -452,22 +452,22 @@ static void
 chkBBDT(Cd c)
 {
     Fixed x = c.x, y = c.y;
-    if (bbquit)
+    if (g_bbquit)
         return;
-    if (vert) {
-        lst = y;
-        if (!started && abs(x - loc) <= BBdist) {
-            started = true;
-            frst = y;
-        } else if (started && abs(x - loc) > BBdist)
-            bbquit = true;
+    if (g_vert) {
+        g_lst = y;
+        if (!g_started && abs(x - g_loc) <= BBdist) {
+            g_started = true;
+            g_frst = y;
+        } else if (g_started && abs(x - g_loc) > BBdist)
+            g_bbquit = true;
     } else {
-        lst = x;
-        if (!started && abs(y - loc) <= BBdist) {
-            started = true;
-            frst = x;
-        } else if (started && abs(y - loc) > BBdist)
-            bbquit = true;
+        g_lst = x;
+        if (!g_started && abs(y - g_loc) <= BBdist) {
+            g_started = true;
+            g_frst = x;
+        } else if (g_started && abs(y - g_loc) > BBdist)
+            g_bbquit = true;
     }
 }
 
@@ -499,20 +499,20 @@ CheckBBoxEdge(PathElt* e, bool vrt, Fixed lc, Fixed* pf, Fixed* pl)
 
     GetEndPoint(e->prev, &c0.x, &c0.y);
     fr.report = chkBBDT;
-    bbquit = false;
+    g_bbquit = false;
     c1.x = e->x1;
     c1.y = e->y1;
     c2.x = e->x2;
     c2.y = e->y2;
     c3.x = e->x3;
     c3.y = e->y3;
-    loc = lc;
-    vert = vrt;
-    started = false;
+    g_loc = lc;
+    g_vert = vrt;
+    g_started = false;
     chkBBDT(c0);
     FltnCurve(c0, c1, c2, c3, &fr);
-    *pf = frst;
-    *pl = lst;
+    *pf = g_frst;
+    *pl = g_lst;
 }
 
 static void

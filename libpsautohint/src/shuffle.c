@@ -10,7 +10,7 @@
 #include "ac.h"
 #define MAXCNT (100)
 
-static unsigned char* links;
+static unsigned char* g_links;
 static int32_t rowcnt;
 
 void
@@ -30,7 +30,7 @@ InitShuffleSubpaths(void)
     }
     cnt++;
     rowcnt = cnt;
-    links =
+    g_links =
       (cnt < 4 || cnt >= MAXCNT) ? NULL : (unsigned char*)Alloc(cnt * cnt);
 }
 
@@ -50,7 +50,7 @@ PrintLinks(void)
         if (i < 10)
             LogMsg(LOGDEBUG, OK, " ");
         for (j = 0; j < rowcnt; j++) {
-            LogMsg(LOGDEBUG, OK, "%d   ", links[rowcnt * i + j]);
+            LogMsg(LOGDEBUG, OK, "%d   ", g_links[rowcnt * i + j]);
         }
         LogMsg(LOGDEBUG, OK, "\n");
     }
@@ -98,7 +98,7 @@ MarkLinks(HintVal* vL, bool hFlg)
     int32_t i, j;
     HintSeg* seg;
     PathElt* e;
-    if (links == NULL)
+    if (g_links == NULL)
         return;
     for (; vL != NULL; vL = vL->vNxt) {
         seg = vL->vSeg1;
@@ -122,8 +122,8 @@ MarkLinks(HintVal* vL, bool hFlg)
         else
             ShowVVal(vL);
         LogMsg(LOGDEBUG, OK, " : %d <-> %d", i, j);
-        links[rowcnt * i + j] = 1;
-        links[rowcnt * j + i] = 1;
+        g_links[rowcnt * i + j] = 1;
+        g_links[rowcnt * j + i] = 1;
     }
 }
 
@@ -165,12 +165,12 @@ DoShuffleSubpaths(void)
     memset(sumlinks, 0, MAXCNT * sizeof(unsigned char));
     memset(output, 0, MAXCNT * sizeof(unsigned char));
     memset(outlinks, 0, MAXCNT * sizeof(unsigned char));
-    if (links == NULL)
+    if (g_links == NULL)
         return;
     PrintLinks();
     for (i = 0; i < rowcnt; i++)
         output[i] = sumlinks[i] = outlinks[i] = 0;
-    lnks = links;
+    lnks = g_links;
     for (i = 0; i < rowcnt; i++) {
         for (j = 0; j < rowcnt; j++) {
             if (*lnks++ != 0)
@@ -189,7 +189,7 @@ DoShuffleSubpaths(void)
         }
         if (bst == -1)
             break;
-        Outpath(links, outlinks, output, bst);
+        Outpath(g_links, outlinks, output, bst);
         while (true) {
             int32_t bstlnks;
             bst = -1;
@@ -208,7 +208,7 @@ DoShuffleSubpaths(void)
             }
             if (bst == -1)
                 break;
-            Outpath(links, outlinks, output, bst);
+            Outpath(g_links, outlinks, output, bst);
         }
     }
 }
