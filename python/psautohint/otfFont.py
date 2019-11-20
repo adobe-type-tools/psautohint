@@ -25,6 +25,8 @@ import fontTools.subset.cff
 
 from . import fdTools, FontParseError
 
+# keep linting tools quiet about unused import
+assert fontTools.subset.cff is not None
 
 log = logging.getLogger(__name__)
 
