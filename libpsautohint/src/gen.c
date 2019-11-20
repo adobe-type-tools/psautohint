@@ -217,6 +217,7 @@ DoHBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PathElt* p)
         Fixed delta = FixHalfMul(gBendLength);
         bool doboth = false;
         if ((x0 <= x1 && x1 < x2) || (x0 < x1 && x1 <= x2)) {
+            /* do nothing */
         } else if ((x2 < x1 && x1 <= x0) || (x2 <= x1 && x1 < x0))
             delta = -delta;
         else if (ysame) {
@@ -252,6 +253,7 @@ DoHBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PathElt* p)
         Fixed delta = FixHalfMul(gBendLength);
         bool doboth = false;
         if ((x2 < x0 && x0 <= x1) || (x2 <= x0 && x0 < x1)) {
+            /* do nothing */
         } else if ((x1 < x0 && x0 <= x2) || (x1 <= x0 && x0 < x2))
             delta = -delta;
         else if (ysame) {
@@ -286,6 +288,7 @@ DoVBendsNxt(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PathElt* p)
         Fixed delta = FixHalfMul(gBendLength);
         bool doboth = false;
         if ((y0 <= y1 && y1 < y2) || (y0 < y1 && y1 <= y2)) {
+            /* do nothing */
         } else if ((y2 < y1 && y1 <= y0) || (y2 <= y1 && y1 < y0))
             delta = -delta;
         else if (xsame) {
@@ -321,6 +324,7 @@ DoVBendsPrv(Fixed x0, Fixed y0, Fixed x1, Fixed y1, PathElt* p)
         Fixed delta = FixHalfMul(gBendLength);
         bool doboth = false;
         if ((y2 < y0 && y0 <= y1) || (y2 <= y0 && y0 < y1)) {
+            /* do nothing */
         } else if ((y1 < y0 && y0 <= y2) || (y1 <= y0 && y0 < y2))
             delta = -delta;
         else if (xsame) {

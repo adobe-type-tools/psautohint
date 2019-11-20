@@ -450,6 +450,7 @@ MergeVals(bool vert)
         vL = NULL;
         while (vLst != NULL) {
             if (vLst->merge) {
+                /* do nothing */
             } else if (vL == NULL ||
                        CompareValues(vLst->vBst, vL->vBst, SFACTOR, 0))
                 vL = vLst;

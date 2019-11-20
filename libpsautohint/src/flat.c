@@ -194,8 +194,8 @@ FMiniFltn(Cd f0, Cd f1, Cd f2, Cd f3, FltnRec* pfr)
             d = (int64_t)eqa * (c1x - x);
             d += (int64_t)eqb * (c1y - y);
             if (labs(d) < EPS) {
-                d = eqa * (c2x - x);
-                d += eqb * (c2y - y);
+                d = (int64_t)eqa * (c2x - x);
+                d += (int64_t)eqb * (c2y - y);
                 if (labs(d) < EPS)
                     goto ReportC3;
             }
