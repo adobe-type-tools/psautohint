@@ -1252,7 +1252,6 @@ def makeHintSet(hints, hintsStem3, isH):
         hintLimit = int((STACK_LIMIT - 2) / 2)
         if numHints >= hintLimit:
             hintsStem3 = hintsStem3[:hintLimit]
-            numHints = hintLimit
         hintset.append(makeStemHintList(hintsStem3, isH))
     else:
         hints.sort()
@@ -1260,7 +1259,6 @@ def makeHintSet(hints, hintsStem3, isH):
         hintLimit = int((STACK_LIMIT - 2) / 2)
         if numHints >= hintLimit:
             hints = hints[:hintLimit]
-            numHints = hintLimit
         hintset.extend(makeHintList(hints, isH))
 
     return hintset
