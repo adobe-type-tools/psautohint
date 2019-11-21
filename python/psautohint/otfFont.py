@@ -413,7 +413,6 @@ def _add_cntr_maskHints(counter_mask_list, src_hints, is_h):
     for arg_list in src_hints:
         for mask in counter_mask_list:
             dst_hints = mask.h_list if is_h else mask.v_list
-            overlap_status = kHintArgsNoOverlap
             if not dst_hints:
                 dst_hints.extend(arg_list)
                 overlap_status = kHintArgsMatch
@@ -718,10 +717,8 @@ def convertBezToT2(bezString, mm_hint_info=None):
         hint_limit = int((kStackLimit - 2) / 2)
         if num_hhints >= hint_limit:
             hhints = hhints[:hint_limit]
-            num_hhints = hint_limit
         if num_vhints >= hint_limit:
             vhints = vhints[:hint_limit]
-            num_vhints = hint_limit
 
         if mm_hint_info and mm_hint_info.defined:
             check_hint_pairs(hhints, mm_hint_info)
