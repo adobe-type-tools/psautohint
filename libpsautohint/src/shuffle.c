@@ -10,12 +10,12 @@
 #include "ac.h"
 #define MAXCNT (100)
 
-static unsigned char* g_links;
 static int32_t rowcnt;
 
-void
+unsigned char*
 InitShuffleSubpaths(void)
 {
+    unsigned char* links;
     int32_t cnt = -1;
     PathElt* e = gPathStart;
     while (e != NULL) { /* every element is marked with its subpath count */
@@ -30,12 +30,13 @@ InitShuffleSubpaths(void)
     }
     cnt++;
     rowcnt = cnt;
-    g_links =
+    links =
       (cnt < 4 || cnt >= MAXCNT) ? NULL : (unsigned char*)Alloc(cnt * cnt);
+    return links;
 }
 
 static void
-PrintLinks(void)
+PrintLinks(unsigned char* links)
 {
     int32_t i, j;
     LogMsg(LOGDEBUG, OK, "Links ");
@@ -50,7 +51,7 @@ PrintLinks(void)
         if (i < 10)
             LogMsg(LOGDEBUG, OK, " ");
         for (j = 0; j < rowcnt; j++) {
-            LogMsg(LOGDEBUG, OK, "%d   ", g_links[rowcnt * i + j]);
+            LogMsg(LOGDEBUG, OK, "%d   ", links[rowcnt * i + j]);
         }
         LogMsg(LOGDEBUG, OK, "\n");
     }
@@ -93,12 +94,12 @@ PrintOutLinks(unsigned char* outlinks)
 }
 
 void
-MarkLinks(HintVal* vL, bool hFlg)
+MarkLinks(HintVal* vL, bool hFlg, unsigned char* links)
 {
     int32_t i, j;
     HintSeg* seg;
     PathElt* e;
-    if (g_links == NULL)
+    if (links == NULL)
         return;
     for (; vL != NULL; vL = vL->vNxt) {
         seg = vL->vSeg1;
@@ -122,8 +123,8 @@ MarkLinks(HintVal* vL, bool hFlg)
         else
             ShowVVal(vL);
         LogMsg(LOGDEBUG, OK, " : %d <-> %d", i, j);
-        g_links[rowcnt * i + j] = 1;
-        g_links[rowcnt * j + i] = 1;
+        links[rowcnt * i + j] = 1;
+        links[rowcnt * j + i] = 1;
     }
 }
 
@@ -157,7 +158,7 @@ Outpath(unsigned char* links, unsigned char* outlinks, unsigned char* output,
  had the most problems with this which caused huge files
  to be created. */
 void
-DoShuffleSubpaths(void)
+DoShuffleSubpaths(unsigned char* links)
 {
     unsigned char sumlinks[MAXCNT], output[MAXCNT], outlinks[MAXCNT];
     unsigned char* lnks;
@@ -165,12 +166,12 @@ DoShuffleSubpaths(void)
     memset(sumlinks, 0, MAXCNT * sizeof(unsigned char));
     memset(output, 0, MAXCNT * sizeof(unsigned char));
     memset(outlinks, 0, MAXCNT * sizeof(unsigned char));
-    if (g_links == NULL)
+    if (links == NULL)
         return;
-    PrintLinks();
+    PrintLinks(links);
     for (i = 0; i < rowcnt; i++)
         output[i] = sumlinks[i] = outlinks[i] = 0;
-    lnks = g_links;
+    lnks = links;
     for (i = 0; i < rowcnt; i++) {
         for (j = 0; j < rowcnt; j++) {
             if (*lnks++ != 0)
@@ -189,7 +190,7 @@ DoShuffleSubpaths(void)
         }
         if (bst == -1)
             break;
-        Outpath(g_links, outlinks, output, bst);
+        Outpath(links, outlinks, output, bst);
         while (true) {
             int32_t bstlnks;
             bst = -1;
@@ -208,7 +209,7 @@ DoShuffleSubpaths(void)
             }
             if (bst == -1)
                 break;
-            Outpath(g_links, outlinks, output, bst);
+            Outpath(links, outlinks, output, bst);
         }
     }
 }
