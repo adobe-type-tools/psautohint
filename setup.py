@@ -11,7 +11,6 @@ from distutils.dep_util import newer_group
 from distutils.ccompiler import show_compilers
 
 from distutils.command.build import build as _build
-from setuptools.command.sdist import sdist as _sdist
 from setuptools.command.build_clib import build_clib as _build_clib
 from setuptools.command.install import install as _install
 from setuptools.command.install_lib import install_lib as _install_lib
@@ -360,22 +359,6 @@ class build_exe(Command):
         return os.path.join(*exe_path) + exe_suffix
 
 
-class CustomSdist(_sdist):
-    """Adds all executables 'sources' and 'depends' files to the manifest.
-    """
-
-    command_name = "sdist"
-
-    def _add_defaults_executables(self):
-        if self.distribution.has_executables():
-            build_exe = self.get_finalized_command('build_exe')
-            self.filelist.extend(build_exe.get_source_files())
-
-    def add_defaults(self):
-        _sdist.add_defaults()
-        self._add_defaults_executables()
-
-
 class CustomBuild(_build):
     """Runs 'build_exe' sub-command if any executables are defined for
     the current distribution.
@@ -518,7 +501,6 @@ cmdclass = {
     'build_clib': CustomBuildClib,
     'build_ext': CustomBuildExt,
     'build_exe': build_exe,
-    'sdist': CustomSdist,
     'install': CustomInstall,
     'install_lib': CustomInstallLib,
 }
