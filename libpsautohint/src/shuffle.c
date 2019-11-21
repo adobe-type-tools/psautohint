@@ -15,7 +15,6 @@ static int32_t rowcnt;
 unsigned char*
 InitShuffleSubpaths(void)
 {
-    unsigned char* links;
     int32_t cnt = -1;
     PathElt* e = gPathStart;
     while (e != NULL) { /* every element is marked with its subpath count */
@@ -30,9 +29,9 @@ InitShuffleSubpaths(void)
     }
     cnt++;
     rowcnt = cnt;
-    links =
-      (cnt < 4 || cnt >= MAXCNT) ? NULL : (unsigned char*)Alloc(cnt * cnt);
-    return links;
+    if (cnt < 4 || cnt >= MAXCNT)
+        return NULL;
+    return Alloc(cnt * cnt);
 }
 
 static void
