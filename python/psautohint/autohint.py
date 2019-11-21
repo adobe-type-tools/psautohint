@@ -620,6 +620,15 @@ def hint_compatible_glyphs(options, name, bez_glyphs, masters, fontinfo):
     # and hint_vf_font.
     try:
         ref_master = masters[0]
+        # *************************************************************
+        # *********** DO NOT DELETE THIS COMMENTED-OUT CODE ***********
+        # If you're tempted to "clean up", work on solving
+        # https://github.com/adobe-type-tools/psautohint/issues/202
+        # first, then you can uncomment the "hint_compatible_bez_glyphs"
+        # line and remove this and other related comments, as well as
+        # the workaround block following "# else:", below. Thanks.
+        # *************************************************************
+        #
         # if False:
         #     # This is disabled because it causes crashes on the CI servers
         #     # which are not reproducible locally. The branch below is a hack
