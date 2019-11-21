@@ -413,7 +413,6 @@ def _add_cntr_maskHints(counter_mask_list, src_hints, is_h):
     for arg_list in src_hints:
         for mask in counter_mask_list:
             dst_hints = mask.h_list if is_h else mask.v_list
-            overlap_status = kHintArgsNoOverlap
             if not dst_hints:
                 dst_hints.extend(arg_list)
                 overlap_status = kHintArgsMatch

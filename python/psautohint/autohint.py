@@ -620,28 +620,31 @@ def hint_compatible_glyphs(options, name, bez_glyphs, masters, fontinfo):
     # and hint_vf_font.
     try:
         ref_master = masters[0]
-        if False:
-            # This is disabled because it causes crashes on the CI servers
-            # which are not reproducible locally. The branch below is a hack to
-            # avoid the crash and should be dropped once the crash is fixed,
-            # https://github.com/adobe-type-tools/psautohint/pull/131
-            hinted = hint_compatible_bez_glyphs(fontinfo, bez_glyphs, masters)
-        else:
-            hinted = []
-            hinted_ref_bez = hint_glyph(options, name, bez_glyphs[0], fontinfo)
-            for i, bez in enumerate(bez_glyphs[1:]):
-                if bez is None:
-                    out = [hinted_ref_bez, None]
-                else:
-                    in_bez = [hinted_ref_bez, bez]
-                    in_masters = [ref_master, masters[i + 1]]
-                    out = hint_compatible_bez_glyphs(fontinfo, in_bez,
-                                                     in_masters)
-                    # out is [hinted_ref_bez, new_hinted_region_bez]
-                if i == 0:
-                    hinted = out
-                else:
-                    hinted.append(out[1])
+        # if False:
+        #     # This is disabled because it causes crashes on the CI servers
+        #     # which are not reproducible locally. The branch below is a hack
+        #     # to avoid the crash and should be dropped once the crash is
+        #     # fixed, https://github.com/adobe-type-tools/psautohint/pull/131
+        #     hinted = hint_compatible_bez_glyphs(
+        #         fontinfo, bez_glyphs, masters)
+        # *** see https://github.com/adobe-type-tools/psautohint/issues/202 ***
+        # else:
+        hinted = []
+        hinted_ref_bez = hint_glyph(options, name, bez_glyphs[0], fontinfo)
+        for i, bez in enumerate(bez_glyphs[1:]):
+            if bez is None:
+                out = [hinted_ref_bez, None]
+            else:
+                in_bez = [hinted_ref_bez, bez]
+                in_masters = [ref_master, masters[i + 1]]
+                out = hint_compatible_bez_glyphs(fontinfo,
+                                                 in_bez,
+                                                 in_masters)
+                # out is [hinted_ref_bez, new_hinted_region_bez]
+            if i == 0:
+                hinted = out
+            else:
+                hinted.append(out[1])
     except PsAutoHintCError:
         raise ACHintError("%s: Failure in processing outline data." %
                           options.nameAliases.get(name, name))

@@ -682,7 +682,6 @@ class UFOFontData:
             setattr(fdDict, key, value)
 
         otherBlues = self.fontInfo.get("postscriptOtherBlues", [])
-        numBlueValues = len(otherBlues)
 
         if len(otherBlues) > 0:
             i = 0

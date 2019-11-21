@@ -63,6 +63,8 @@ def main():
         with open(os.path.join(outpath, glyph_path), "x") as fp:
             fp.write(glyph)
 
+    return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
