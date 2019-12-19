@@ -496,7 +496,7 @@ def check_hint_pairs(hint_pairs, mm_hint_info, last_idx=0):
     # pairs must be in ascending order by bottom (or left) edge,
     # and pairs in a hint group must not overlap.
 
-    # check order first
+    # check that order is correct first
     bad_hint_idxs = set()
     prev = hint_pairs[0]
     for i, hint_pair in enumerate(hint_pairs[1:], 1):
@@ -504,6 +504,11 @@ def check_hint_pairs(hint_pairs, mm_hint_info, last_idx=0):
             # If there is a conflict, we drop the previous hint
             bad_hint_idxs.add(i + last_idx - 1)
         prev = hint_pair
+
+    # check for hint inversion
+    for i, hint_pair in enumerate(hint_pairs[1:], 1):
+        if hint_pair[0] > hint_pair[1]:
+             bad_hint_idxs.add(i + last_idx - 1)
 
     # check for overlap in hint groups.
     if mm_hint_info.hint_masks:
