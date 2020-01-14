@@ -362,8 +362,7 @@ def filterGlyphList(options, fontGlyphList, fontFileName):
             if glyphNames is not None:
                 glyphList.extend(glyphNames)
         if options.excludeGlyphList:
-            newList = filter(lambda name: name not in glyphList, fontGlyphList)
-            glyphList = newList
+            glyphList = [n for n in fontGlyphList if n not in glyphList]
     return glyphList
 
 
