@@ -38,7 +38,8 @@ from collections import defaultdict, namedtuple
 from .otfFont import CFFFontData
 from .ufoFont import UFOFontData
 from ._psautohint import error as PsAutoHintCError
-
+from .hint_region_glyphs import (get_hint_map, fixup_hints,
+                                 get_hinted_bez_data)
 from . import (get_font_format, hint_bez_glyph, hint_compatible_bez_glyphs,
                FontParseError)
 
@@ -638,22 +639,31 @@ def hint_compatible_glyphs(options, name, bez_glyphs, masters, fontinfo):
         #         fontinfo, bez_glyphs, masters)
         # *** see https://github.com/adobe-type-tools/psautohint/issues/202 ***
         # else:
+        use_new = True
         hinted = []
         hinted_ref_bez = hint_glyph(options, name, bez_glyphs[0], fontinfo)
+        if use_new:
+            hint_map = get_hint_map(name, hinted_ref_bez)
         for i, bez in enumerate(bez_glyphs[1:]):
             if bez is None:
                 out = [hinted_ref_bez, None]
             else:
-                in_bez = [hinted_ref_bez, bez]
-                in_masters = [ref_master, masters[i + 1]]
-                out = hint_compatible_bez_glyphs(fontinfo,
+                if use_new:
+                    hint_map.add_region_path_data(bez)
+                else:
+                    in_bez = [hinted_ref_bez, bez]
+                    in_masters = [ref_master, masters[i + 1]]
+                    out = hint_compatible_bez_glyphs(fontinfo,
                                                  in_bez,
                                                  in_masters)
-                # out is [hinted_ref_bez, new_hinted_region_bez]
-            if i == 0:
-                hinted = out
-            else:
-                hinted.append(out[1])
+                    # out is [hinted_ref_bez, new_hinted_region_bez]
+                    if i == 0:
+                        hinted = out
+                    else:
+                        hinted.append(out[1])
+        if use_new:
+            fixup_hints(hint_map)
+            hinted = get_hinted_bez_data(hint_map)
     except PsAutoHintCError:
         raise ACHintError("%s: Failure in processing outline data." %
                           options.nameAliases.get(name, name))
