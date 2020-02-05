@@ -38,12 +38,10 @@ jobs:
       env:
         - MB_PYTHON_VERSION=3.7
     - os: linux
-      before_install: false
       install:
         - pip install tox
       script:
         - tox -e coverage-codecov-c
-      after_success: false
     - os: osx
       language: generic
       env:
@@ -53,7 +51,6 @@ jobs:
       env:
         - MB_PYTHON_VERSION=3.7
     - os: linux
-      before_install: false
       install:
         - pip3 install meson ninja
       script:
@@ -61,7 +58,6 @@ jobs:
         - ninja -C build
         - ls build
         - build/autohintexe -h
-      after_success: false
 
 cache: pip
 
