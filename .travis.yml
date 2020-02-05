@@ -39,9 +39,10 @@ jobs:
         - MB_PYTHON_VERSION=3.7
     - os: linux
       install:
-        - pip install tox
+        - pip install tox<3.8
       script:
         - tox -e coverage-codecov-c
+      after_success: false
     - os: osx
       language: generic
       env:
@@ -58,6 +59,8 @@ jobs:
         - ninja -C build
         - ls build
         - build/autohintexe -h
+      after_success: false
+
 
 cache: pip
 
@@ -73,7 +76,7 @@ script:
   - install_run $PLAT
 
 after_success:
-  - pip install tox
+  - pip install tox<3.8
   # upload code coverage to Codecov.io
   - tox -e codecov
   # deploy to PyPI on tags
