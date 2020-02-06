@@ -28,7 +28,7 @@ exclude_lines =
     if 0:
     if __name__ == .__main__.:
 
-# ignore source code that can’t be found
+# ignore source code that can't be found
 ignore_errors = True
 
 # when running a summary report, show missing lines

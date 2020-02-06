@@ -1,5 +1,5 @@
+os: linux
 dist: trusty
-sudo: required
 language: python
 # The travis Python version is unrelated to the version we build and test
 # with.  This is set with the MB_PYTHON_VERSION variable.
@@ -27,7 +27,7 @@ env:
     # the pypi password is stored in Travis settings
     - TWINE_USERNAME="adobe-type-tools-ci"
 
-matrix:
+jobs:
   fast_finish: true
   include:
     - os: linux
@@ -38,12 +38,11 @@ matrix:
       env:
         - MB_PYTHON_VERSION=3.7
     - os: linux
-      before_install: false
       install:
-        - pip install tox
+        - pip install "tox<3.8"
       script:
         - tox -e coverage-codecov-c
-      after_success: false
+      after_success: skip
     - os: osx
       language: generic
       env:
@@ -53,7 +52,6 @@ matrix:
       env:
         - MB_PYTHON_VERSION=3.7
     - os: linux
-      before_install: false
       install:
         - pip3 install meson ninja
       script:
@@ -61,7 +59,8 @@ matrix:
         - ninja -C build
         - ls build
         - build/autohintexe -h
-      after_success: false
+      after_success: skip
+
 
 cache: pip
 
@@ -77,7 +76,7 @@ script:
   - install_run $PLAT
 
 after_success:
-  - pip install tox
+  - pip install "tox<3.8"
   # upload code coverage to Codecov.io
   - tox -e codecov
   # deploy to PyPI on tags
@@ -94,9 +93,8 @@ after_success:
 deploy:
   # deploy to Github Releases on tags
   provider: releases
-  api_key:
+  token:
     secure: mAME533GEyugk6RXVe7Noqb1uf8I9aGxciYU4K9jD45vbUBVT88Nz3AMYCl65PBdw3prUOTNeH4R9sMlx/hMJ8ct/hpFcg2aWCt7nd+QIk7fiMZct43m1oMk/t6Jcan4NNunVNN/EgE1YBf1lCIlp8NZaDpH3atYJedO+F0ETeesn4IIAYnmOS3EENZS2Gy+eDT0hwW0IURqYMh88IqQg6vL1vTnH6fmzUMgih1e832TkjlUsDOr/x8iLgOMjQbccDeOMKLYXy/GivP51a6SSlbUMjbUJOzZD4vwJ2I5Aw1VeIiQbCrVPW4qHSr7o3LW77pljnroo1AKVSOXLVRozWnYtkO36vDNL9iddafzwmGtO0+40lCXSh38Q0Xg6j553TR8ZajoTigboTNHs8uL08krTGyrla0uKCibCLc2VjCRXHr7umemL/BYLw4LLPojCl6AzdbVE5A0Gih2p/wQ7RQn/xMwB06PezqRRYMD+BcuIXvRqfFixcQFswokpmVe94+Hx5oZMtsoU6H2sza1z4u71Sxmp91wSl9ufMkA/GHcPDVfYq/G1zeaIdfaqQ/k2pVVC+SjiL6jjDevmOCAv3b8XMB+crpFMdoWnSexW6UqLWSc1blviDDG+dOMRbrao6SCBInEkxgSZjpsu3iJsWdtW7E5QSO7VnmLi1aEoQg=
-  skip_cleanup: true
   file_glob: true
   file: "dist/psautohint*.zip"
   on:

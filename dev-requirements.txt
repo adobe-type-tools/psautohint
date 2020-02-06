@@ -1,6 +1,2 @@
- # pyparsing pinned to 2.4.0 to avoid UserWarnings introduced in 2.4.1
- # (which are actually from dependency, "packaging").
- # see https://github.com/tox-dev/tox/issues/1375
-pyparsing==2.4.0 # pyup: ignore
-tox==3.14.0
-coverage>=5.0.0
+tox<3.8
+coverage>=5.0.1
