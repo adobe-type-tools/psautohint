@@ -505,8 +505,8 @@ def get_fontinfo_list_withFontInfo(options, font, path, glyph_list):
                                   options.noFlex,
                                   options.vCounterGlyphs,
                                   options.hCounterGlyphs)
-        # NOTE If --print-dflt-fddict is supposed to exit the CLI run, exit it
-        sys.exit(fddict.getFontInfo())
+        # Exit by printing default FDDict with all lines indented by one tab
+        sys.exit("\t" + "\n\t".join(fddict.getFontInfo().split("\n")))
 
     fdglyphdict, fontDictList = font.getfdInfo(options.allow_no_blues,
                                                options.noFlex,
