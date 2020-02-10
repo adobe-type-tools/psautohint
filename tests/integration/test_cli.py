@@ -1,4 +1,5 @@
 import glob
+import os
 from os.path import basename
 import subprocess
 import pytest
@@ -210,7 +211,6 @@ def test_option(path, option, argument, tmpdir):
     "--no-flex",
     "--no-hint-sub",
     "--no-zones-stems",
-    "--print-dflt-fddict",
     "--print-list-fddict",
     "--report-only",
     "--verbose",
@@ -223,6 +223,22 @@ def test_argumentless_option(path, option, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
 
     autohint([path, '-o', out, option])
+
+
+def test_print_fddict(capsys):
+    dummypath = os.path.join(DATA_DIR, "dummy")
+    fontpath = os.path.join(dummypath, "font.otf")
+    fipath = os.path.join(dummypath, "fontinfo_fdd")
+    exp_path = os.path.join(dummypath, 'print_dflt_fddict_expected.txt')
+
+    with open(exp_path, 'r') as exp_f:
+        expected = exp_f.read()
+        with pytest.raises(SystemExit) as wrapped_exc:
+            autohint([fontpath,
+                      '--print-dflt-fddict',
+                      '--fontinfo-file',
+                      fipath])
+            str(wrapped_exc) == expected
 
 
 @pytest.mark.parametrize("option", [

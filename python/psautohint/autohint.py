@@ -31,7 +31,7 @@
 import ast
 import logging
 import os
-import re
+import sys
 import time
 from collections import defaultdict, namedtuple
 
@@ -402,28 +402,6 @@ fontInfoKeywordList = [
     'Baseline6',
 ]
 
-integerPattern = r""" -?\d+"""
-arrayPattern = r""" \[[ ,0-9]+\]"""
-stringPattern = r""" \S+"""
-counterPattern = r""" \([\S ]+\)"""
-
-
-def printFontInfo(fontInfoString):
-    for item in fontInfoKeywordList:
-        if item in ['FontName', 'FlexOK']:
-            matchingExp = item + stringPattern
-        elif item in ['VCounterChars', 'HCounterChars']:
-            matchingExp = item + counterPattern
-        elif item in ['DominantV', 'DominantH']:
-            matchingExp = item + arrayPattern
-        else:
-            matchingExp = item + integerPattern
-
-        try:
-            print('\t%s' % re.search(matchingExp, fontInfoString).group())
-        except Exception:
-            pass
-
 
 def openFile(path, options):
     font_format = get_font_format(path)
@@ -527,8 +505,8 @@ def get_fontinfo_list_withFontInfo(options, font, path, glyph_list):
                                   options.noFlex,
                                   options.vCounterGlyphs,
                                   options.hCounterGlyphs)
-        printFontInfo(str(fddict))
-        return
+        # Exit by printing default FDDict with all lines indented by one tab
+        sys.exit("\t" + "\n\t".join(fddict.getFontInfo().split("\n")))
 
     fdglyphdict, fontDictList = font.getfdInfo(options.allow_no_blues,
                                                options.noFlex,
@@ -542,7 +520,7 @@ def get_fontinfo_list_withFontInfo(options, font, path, glyph_list):
             print("Showing user-defined FontDict Values:\n")
             for fi, fontDict in enumerate(fontDictList):
                 print(fontDict.DictName)
-                printFontInfo(str(fontDict))
+                print(fontDict.getFontInfo())
                 gnameList = []
                 # item = [glyphName, [fdIndex, glyphListIndex]]
                 itemList = sorted(fdglyphdict.items(), key=lambda x: x[1][1])
