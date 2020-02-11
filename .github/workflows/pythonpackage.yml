@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   build:
+    if: "! contains(toJSON(github.event.commits.*.msg), '[skip ci]')"
 
     runs-on: ${{ matrix.os }}
     strategy:
