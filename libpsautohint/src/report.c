@@ -378,7 +378,7 @@ ReportHintConflict(Fixed x0, Fixed y0, Fixed x1, Fixed y1, char ch)
     char s[2];
     s[0] = ch;
     s[1] = 0;
-    LogMsg(LOGERROR, OK, "  Conflicts with current hints: %g %g %g %g %s.",
+    LogMsg(LOGDEBUG, OK, "  Conflicts with current hints: %g %g %g %g %s.",
            FixToDbl(x0), FixToDbl(y0), FixToDbl(x1), FixToDbl(y1), s);
 }
 
