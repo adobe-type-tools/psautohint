@@ -38,6 +38,9 @@ jobs:
       env:
         - MB_PYTHON_VERSION=3.7
     - os: linux
+      env:
+        - MB_PYTHON_VERSION=3.8
+    - os: linux
       install:
         - pip install "tox<3.8"
       script:
@@ -51,6 +54,10 @@ jobs:
       language: generic
       env:
         - MB_PYTHON_VERSION=3.7
+    - os: osx
+      language: generic
+      env:
+        - MB_PYTHON_VERSION=3.8
     - os: linux
       install:
         - pip3 install meson ninja
