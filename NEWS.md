@@ -1,5 +1,11 @@
 Changelog
 
+# v2.0.1 - March 25, 2020
+- Fixed [a recursion error with `-x` option](https://github.com/adobe-type-tools/psautohint/issues/223) (thanks @kontur!)
+- Fixed [an error and other problems with `--print-dflt-fddict`](https://github.com/adobe-type-tools/psautohint/issues/222) (thanks again @kontur!)
+- Changed [logging level of "Conflicts with current hints" message to DEBUG](https://github.com/adobe-type-tools/psautohint/pull/235/commits/69bab0df4eac8c4a88d9ac4dce94c2d6c61aba99) instead of ERROR (thanks _again_ @kontur!)
+- Added [Python 3.8 wheels](https://github.com/adobe-type-tools/psautohint/pull/242) to the distribution set (thanks @miguelsousa!)
+
 # v2.0.0 - December 6, 2019
 - Drop Python 2.7 support – **this version supports Python 3.6+ ONLY**
 - [modify CLI argument parsing](https://github.com/adobe-type-tools/psautohint/issues/176) to allow the same options as AFDKO autohint and [improve `-o` option](https://github.com/adobe-type-tools/psautohint/issues/129)
