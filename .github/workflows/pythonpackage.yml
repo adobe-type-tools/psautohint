@@ -1,6 +1,11 @@
 name: Test Python Package
 
-on: [push]
+on:
+  push:
+    branches:
+      - '*'
+  repository_dispatch:
+    types: manual-trigger
 
 jobs:
   build:
@@ -33,7 +38,8 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r dev-requirements.txt
-    - name: Lint with flake8
+    - name: Lint with flake8 (Ubuntu/Python 3.7 only)
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7'
       run: |
         pip install flake8
         # stop the build if there are Python syntax errors or undefined names
