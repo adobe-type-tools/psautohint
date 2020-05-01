@@ -54,7 +54,9 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7'
       env:
         CFLAGS: '--coverage'
+        PYTHONPATH: ${{env:PYTHONPATH}}:build/lib
       run: |
         pip install pytest pytest-cov pytest-xdist
-        pytest --cov=./ --cov-report=xml -n auto
+        python setup.py build --build-base build --build-platlib build/lib
+        python -m pytest --cov=./ --cov-report=xml -n auto
         bash <(curl -s https://codecov.io/bash)
