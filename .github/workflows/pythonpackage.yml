@@ -21,6 +21,8 @@ jobs:
             python-version: 3.6
           - os: macos-latest
             python-version: 3.7
+          - os: ubuntu-latest
+            python-version: 3.7
           - os: windows-latest
             python-version: 3.6
           - os: windows-latest
@@ -55,15 +57,3 @@ jobs:
       if: ${{ env.OS_PY_VERS }} != 'ubuntu-latest_3.7'
       run: |
         tox -e py-cov
-
-    - name: Generate and upload coverage (only Ubuntu/Python 3.7)
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7'
-      env:
-        CFLAGS: '--coverage'
-      run: |
-        pip install pytest pytest-cov pytest-xdist
-        echo "::set-env name=PYTHONPATH::home/runner/work/psautohint/build/lib"
-        python setup.py build --build-base build --build-platlib build/lib
-        python setup.py install
-        python -m pytest --cov=psautohint --cov-report=xml -n auto
-        bash <(curl -s https://codecov.io/bash)
