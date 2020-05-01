@@ -52,7 +52,7 @@ jobs:
         flake8 . --count --exit-zero --max-line-length=127 --statistics
 
     - name: Test with tox (except Ubuntu/Python 3.7)
-      if: $OS_PY_VERS != 'ubuntu-latest_3.7'
+      if: ${{ OS_PY_VERS }} != 'ubuntu-latest_3.7'
       run: |
         tox -e py-cov
 
