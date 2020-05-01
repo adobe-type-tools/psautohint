@@ -47,17 +47,17 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-line-length=127 --statistics
     - name: Test with tox (except Ubuntu/Python 3.7)
-      # if: matrix.os != 'ubuntu-latest' && matrix.python-version != '3.7'
+      if: matrix.os != 'ubuntu-latest' && matrix.python-version != '3.7'
       run: |
         tox -e py-cov
 
-#     - name: Generate C coverage (only Ubuntu/Python 3.7)
-#       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7'
-#       env:
-#         CFLAGS: '--coverage'
-#         PYTHONPATH: '/build/lib'
-#       run: |
-#         pip install pytest pytest-cov pytest-xdist
-#         python setup.py build --build-base build --build-platlib build/lib
-#         python -m pytest --cov=./ --cov-report=xml -n auto
-#         bash <(curl -s https://codecov.io/bash)
+    - name: Generate C coverage (only Ubuntu/Python 3.7)
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7'
+      env:
+        CFLAGS: '--coverage'
+      run: |
+        pip install pytest pytest-cov pytest-xdist
+        echo "::set-env name=PYTHONPATH::home/runner/work/psautohint/build/lib"
+        python setup.py build --build-base build --build-platlib build/lib
+        python -m pytest --cov=./ --cov-report=xml -n auto
+        bash <(curl -s https://codecov.io/bash)
