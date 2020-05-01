@@ -30,14 +30,18 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: true
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
+        echo "::set-env name=OS_PY_VERS::${{ matrix.os }}_${{ matrix.python-version }}"
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r dev-requirements.txt
+        
     - name: Lint with flake8 (only Ubuntu/Python 3.8)
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8'
       run: |
@@ -46,12 +50,13 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-line-length=127 --statistics
-    - name: Test with tox #(except Ubuntu/Python 3.7)
-      if: matrix.os != 'ubuntu-latest' && matrix.python-version != '3.7'
+
+    - name: Test with tox (except Ubuntu/Python 3.7)
+      if: OS_PY_VERS != 'ubuntu-latest_3.7'
       run: |
         tox -e py-cov
 
-    - name: Generate C coverage (only Ubuntu/Python 3.7)
+    - name: Generate and upload coverage (only Ubuntu/Python 3.7)
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7'
       env:
         CFLAGS: '--coverage'
