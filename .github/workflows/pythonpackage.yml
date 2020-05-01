@@ -60,5 +60,5 @@ jobs:
         echo "::set-env name=PYTHONPATH::home/runner/work/psautohint/build/lib"
         python setup.py build --build-base build --build-platlib build/lib
         python setup.py install
-        python -m pytest --cov=./ --cov-report=xml -n auto
+        python -m pytest --cov=psautohint --cov-report=xml -n auto
         bash <(curl -s https://codecov.io/bash)
