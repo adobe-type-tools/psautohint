@@ -37,4 +37,4 @@ jobs:
         python setup.py build --build-base build --build-platlib build/lib
         python setup.py install
         python -m pytest --cov=psautohint --cov-report=xml -n auto
-        bash <(curl -s https://codecov.io/bash)
+        bash <(curl -s https://codecov.io/bash -y .codecov.yml)
