@@ -427,7 +427,9 @@ class UFOFontData:
                 shutil.rmtree(path)
             shutil.copytree(self.path, path)
 
-        writer = UFOWriter(path, self._reader.formatVersion, validate=False)
+        writer = UFOWriter(path,
+                           self._reader.formatVersionTuple,
+                           validate=False)
 
         layer = PROCESSED_LAYER_NAME
         if self.writeToDefaultLayer:
