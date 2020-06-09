@@ -392,7 +392,7 @@ ReportDuplicates(Fixed x, Fixed y)
 void
 ReportBBoxBogus(Fixed llx, Fixed lly, Fixed urx, Fixed ury)
 {
-    LogMsg(WARNING, OK, "Glyph bounding box looks bogus: %g %g %g %g.",
+    LogMsg(INFO, OK, "Glyph bounding box looks bogus: %g %g %g %g.",
            FixToDbl(llx), FixToDbl(lly), FixToDbl(urx), FixToDbl(ury));
 }
 
