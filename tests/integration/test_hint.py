@@ -166,6 +166,18 @@ def test_seac_op(tmpdir, caplog):
     assert "Skipping Aacute: can't process SEAC composite glyphs." in msgs
 
 
+@pytest.mark.skipif(tx_found is False, reason="'tx' is missing")
+def test_mute_tx_msgs(tmpdir, capfd):
+    path = "%s/dummy/nohints.pfa" % DATA_DIR
+    out = str(tmpdir / basename(path)) + ".out"
+    options = Options(path, out)
+
+    hintFiles(options)
+
+    captured = capfd.readouterr()
+    assert "(cfw) unhinted <.notdef>" in captured.err
+
+
 @parametrize("path", glob.glob("%s/dummy/bad_privatedict_*" % DATA_DIR))
 def test_bad_privatedict(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
