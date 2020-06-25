@@ -175,7 +175,7 @@ def test_mute_tx_msgs(tmpdir, capfd):
     hintFiles(options)
 
     captured = capfd.readouterr()
-    assert "(cfw) unhinted <.notdef>" in captured.err
+    assert "(cfw) unhinted <.notdef>" not in captured.err
 
 
 @parametrize("path", glob.glob("%s/dummy/bad_privatedict_*" % DATA_DIR))
