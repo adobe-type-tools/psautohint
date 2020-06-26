@@ -807,7 +807,7 @@ def convertBezToT2(bezString, mm_hint_info=None):
 
 def _run_tx(args):
     try:
-        subprocess.check_call(["tx"] + args)
+        subprocess.check_call(["tx"] + args, stderr=subprocess.DEVNULL)
     except (subprocess.CalledProcessError, OSError) as e:
         raise FontParseError(e)
 
