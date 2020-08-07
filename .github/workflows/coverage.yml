@@ -32,7 +32,7 @@ jobs:
       env:
         CFLAGS: '--coverage'
       run: |
-        pip install pytest pytest-cov pytest-xdist
+        pip install pytest==5.4.3 pytest-cov pytest-xdist
         echo "::set-env name=PYTHONPATH::home/runner/work/psautohint/build/lib"
         python setup.py build --build-base build --build-platlib build/lib
         python setup.py install
