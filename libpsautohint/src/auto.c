@@ -422,6 +422,8 @@ TryResolveConflict(PathElt* e, bool Hflg)
     lc1 = seg1->sLoc;
     lnk1 = lst;
     lst = lst->next;
+    if (lst == NULL)
+        return false;
     seg2 = lst->lnk->seg;
     lc2 = seg2->sLoc;
     lnk2 = lst;
