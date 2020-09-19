@@ -55,7 +55,7 @@ def main():
         with open(os.path.join(outpath, "fontinfo"), "x") as fp:
             fp.write(info)
 
-    glyphs = [font.convertToBez(n, True, True)[0] for n in names]
+    glyphs = [font.convertToBez(n, True, True) for n in names]
     for name, glyph in zip(names, glyphs):
         if glyph is None:
             glyph = ""
