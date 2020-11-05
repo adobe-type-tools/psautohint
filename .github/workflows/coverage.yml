@@ -28,13 +28,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r dev-requirements.txt
         pip list
-        
+        echo "PYTHONPATH=home/runner/work/psautohint/build/lib" >> $GITHUB_ENV
+
     - name: Generate and upload Python and C coverage
       env:
         CFLAGS: '--coverage'
       run: |
         pip install pytest==5.4.3 pytest-cov pytest-xdist==1.34.0
-        echo "::set-env name=PYTHONPATH::home/runner/work/psautohint/build/lib"
         python setup.py build --build-base build --build-platlib build/lib
         python setup.py install
         python -m pytest --cov=psautohint --cov-report=xml -n auto
