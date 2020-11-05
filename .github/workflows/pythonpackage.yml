@@ -48,7 +48,6 @@ jobs:
 
     - name: Install dependencies
       run: |
-        echo "::set-env name=OS_PY_VERS::${{ matrix.os }}_${{ matrix.python-version }}"
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r dev-requirements.txt
         
@@ -56,13 +55,12 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
       run: |
         pip install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-line-length=127 --statistics
+        flake8 --count --show-source --statistics
 
     - name: Test with tox (except Ubuntu/Python 3.7)
-      if: ${{ env.OS_PY_VERS }} != 'ubuntu-latest_3.7'
+      # not in love with the following syntax, but it works,
+      # whereas "! (condition)" does NOT
+      if: (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7') == false 
       run: |
         tox -e py-cov
 
@@ -98,18 +96,34 @@ jobs:
         env: 
           CIBW_BUILD: "cp3?-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-          CIBW_SKIP: "pp* cp35* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x"
+          CIBW_SKIP: "pp* cp35* cp*win32 cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x"
       
       - name: Build sdist
         run: |
           python setup.py sdist
         if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       
-      - name: Publish package to TEST PyPI
+      - name: Publish package to PyPI
         run: |
           pip install twine
-          twine upload --repository testpypi dist/*
+          twine upload dist/*
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.test_pypi_password }}
-        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+          TWINE_PASSWORD: ${{ secrets.pypi_password }}
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+
+  create_release:
+    needs: build_wheels
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: true
