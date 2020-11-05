@@ -55,7 +55,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
       run: |
         pip install flake8
-        flake8 --count --show-source --statistics
+        flake8 --config=setup.cfg --count --show-source --statistics
 
     - name: Test with tox (except Ubuntu/Python 3.7)
       # not in love with the following syntax, but it works,
