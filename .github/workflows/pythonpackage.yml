@@ -112,13 +112,8 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.pypi_password }}
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
 
-  create_release:
-    needs: build_wheels
-    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
       - name: Create release
-        id: create_release
+        if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -127,3 +122,11 @@ jobs:
           release_name: ${{ github.ref }}
           draft: false
           prerelease: true
+
+      - name: Attach sdist to release
+        if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag_name="${GITHUB_REF##*/}"
+          hub release edit $(find dist -type f -name "*.zip" -printf "-a %p ") -m "" "$tag_name"
