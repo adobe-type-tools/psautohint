@@ -78,13 +78,13 @@ def test_autohint_good_glyph(glyph):
 
 
 @pytest.mark.parametrize("glyph", [
-  b"% foo\ncf",            # unknown operator
-  b"% foo\n" + 80 * b"f",  # too long unknown operator
-  b"% " + 65 * b"A",       # too long glyph name
-  b"% foo\n10 ",           # number left on stack at end of glyph
-  b"% foo\n0a 0 rm\ned",   # bad number terminator
-  b"% foo\nry",            # stack underflow
-  b"% foo\n$",             # unexpected character
+    b"% foo\ncf",            # unknown operator
+    b"% foo\n" + 80 * b"f",  # too long unknown operator
+    b"% " + 65 * b"A",       # too long glyph name
+    b"% foo\n10 ",           # number left on stack at end of glyph
+    b"% foo\n0a 0 rm\ned",   # bad number terminator
+    b"% foo\nry",            # stack underflow
+    b"% foo\n$",             # unexpected character
 ])
 def test_autohint_bad_glyph(glyph):
     with pytest.raises(_psautohint.error):
@@ -100,8 +100,8 @@ def test_autohintmm_bad_glyphs(glyphs):
 
 
 @pytest.mark.parametrize("info", [
-  b"HCounterChars [" + b" ".join(b"A" * i for i in range(16)) + b"]",
-  b"VCounterChars [" + b" ".join(b"A" * i for i in range(16)) + b"]",
+    b"HCounterChars [" + b" ".join(b"A" * i for i in range(16)) + b"]",
+    b"VCounterChars [" + b" ".join(b"A" * i for i in range(16)) + b"]",
 ])
 def test_autohint_too_many_counter_glyphs(info):
     _psautohint.autohint(info, GLYPH)

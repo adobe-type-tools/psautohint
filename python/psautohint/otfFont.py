@@ -871,7 +871,7 @@ class CFFFontData:
         if font_format == "OTF":
             # It is an OTF font, we can process it directly.
             font = TTFont(path)
-            if "CFF "in font:
+            if "CFF " in font:
                 cff_format = "CFF "
             elif "CFF2" in font:
                 cff_format = "CFF2"
@@ -1221,7 +1221,7 @@ class CFFFontData:
 
                 elif token[:5] == 'hstem':
                     h_hint_args = program[:idx]
-                    v_program = program[idx+1:]
+                    v_program = program[idx + 1:]
 
                     for j, vtoken in enumerate(v_program):
                         if type(vtoken) is str:
@@ -1488,7 +1488,7 @@ def get_scalars(self, vsindex, region_idx):
     for idx in range(region_idx):  # omit the scalar for the region.
         scalar = self._getScalar(region_index[idx])
         if scalar:
-            scalars[idx+1] = scalar
+            scalars[idx + 1] = scalar
     return scalars
 
 

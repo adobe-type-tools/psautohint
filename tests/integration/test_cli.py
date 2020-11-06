@@ -288,7 +288,7 @@ def test_invalid_save_path(tmpdir):
 
 @pytest.mark.parametrize("args", [
     pytest.param(['-z'], id="report_zones"),
-    pytest.param([],     id="report_stems"),
+    pytest.param([], id="report_stems"),
     pytest.param(['-a'], id="report_stems,all_stems"),
     pytest.param(['-g', 'a-z,A-Z,zero-nine'], id="report_stems,glyphs"),
 ])

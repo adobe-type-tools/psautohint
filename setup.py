@@ -236,8 +236,8 @@ class build_exe(Command):
         Raise DistutilsSetupError if the structure is invalid anywhere;
         just returns otherwise.
         """
-        if (not isinstance(executables, list)
-                or not all(isinstance(e, Executable) for e in executables)):
+        if (not isinstance(executables, list) or
+                not all(isinstance(e, Executable) for e in executables)):
             raise DistutilsSetupError(
                 "'executables' option must be a list of Extension instances")
 
@@ -438,9 +438,9 @@ class CustomBuildClib(_build_clib):
             sources = build_info.get('sources')
             if sources is None or not isinstance(sources, (list, tuple)):
                 raise DistutilsSetupError(
-                       "in 'libraries' option (library '%s'), "
-                       "'sources' must be present and must be "
-                       "a list of source filenames" % lib_name)
+                    "in 'libraries' option (library '%s'), "
+                    "'sources' must be present and must be "
+                    "a list of source filenames" % lib_name)
             sources = list(sources)
 
             log.info("building '%s' library", lib_name)
