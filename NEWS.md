@@ -1,5 +1,17 @@
 Changelog
 
+# v2.1.2 - November 6, 2020
+- Move remaining CI workflows (building wheels, deploying) to GitHub Actions including building of Python 3.9 wheels for supported platforms.
+- Updated dependencies
+- Fixed some [minor formatting issues](https://github.com/adobe-type-tools/psautohint/pull/272)
+
+# v2.1.1 - September 24, 2020
+- Mute ['unhinted <glyphname>' messages from tx](https://github.com/adobe-type-tools/psautohint/issues/231)
+- Updated dependencies
+- Generate coverage reports from GitHub Actions
+- Fix [NULL pointer access when processing taito glyph](https://github.com/adobe-type-tools/psautohint/pull/263)
+- Fix [dump-font.py utility](https://github.com/adobe-type-tools/psautohint/commit/e04a11844738584bb7a666fbb69ffb840b2d19ef) (thanks @khaledhosny!)
+
 # v2.0.1 - March 25, 2020
 - Fixed [a recursion error with `-x` option](https://github.com/adobe-type-tools/psautohint/issues/223) (thanks @kontur!)
 - Fixed [an error and other problems with `--print-dflt-fddict`](https://github.com/adobe-type-tools/psautohint/issues/222) (thanks again @kontur!)
