@@ -455,7 +455,7 @@ def get_bez_glyphs(options, font, glyph_list):
     return glyphs
 
 
-def get_fontinfo_list(options, font, glyph_list, is_var):
+def get_fontinfo_list(options, font, glyph_list, is_var=False):
 
     # Check counter glyphs, if any.
     counter_glyphs = options.hCounterGlyphs + options.vCounterGlyphs
@@ -476,7 +476,7 @@ def get_fontinfo_list(options, font, glyph_list, is_var):
         return get_fontinfo_list_withFontInfo(options, font, glyph_list)
 
 
-def get_fontinfo_list_withFDArray(options, font, glyph_list, is_var):
+def get_fontinfo_list_withFDArray(options, font, glyph_list, is_var=False):
     lastFDIndex = None
     fontinfo_list = {}
     for name in glyph_list:
@@ -791,7 +791,7 @@ def hint_with_reference_font(options, fonts, paths, outpaths):
     # fonts have the same glyph set, glyph dict and in general are
     # compatible. If not bad things will happen.
     glyph_names = get_glyph_list(options, fonts[0], paths[0])
-    fontinfo_list = get_fontinfo_list(options, fonts[0], glyph_names, False)
+    fontinfo_list = get_fontinfo_list(options, fonts[0], glyph_names)
 
     glyphs = []
     for i, font in enumerate(fonts):
@@ -818,7 +818,7 @@ def hint_regular_fonts(options, fonts, paths, outpaths):
         outpath = outpaths[i]
 
         glyph_names = get_glyph_list(options, font, path)
-        fontinfo_list = get_fontinfo_list(options, font, glyph_names, False)
+        fontinfo_list = get_fontinfo_list(options, font, glyph_names)
 
         log.info("Hinting font %s. Start time: %s.", path, time.asctime())
 
