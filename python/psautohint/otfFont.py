@@ -948,7 +948,7 @@ class CFFFontData:
         try:
             bezString, t2Wdth = convertT2GlyphToBez(t2CharString,
                                                     read_hints, round_coords)
-            # Note: the glyph name is important, as it is used by autohintexe
+            # Note: the glyph name is important, as it is used by the C-code
             # for various heuristics, including [hv]stem3 derivation.
             bezString = "% " + glyphName + "\n" + bezString
         except SEACError:
