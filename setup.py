@@ -10,7 +10,6 @@ from distutils.sysconfig import customize_compiler as _customize_compiler
 from distutils.dep_util import newer_group
 from distutils.ccompiler import show_compilers
 
-from distutils.command.build import build as _build
 from setuptools.command.build_clib import build_clib as _build_clib
 from setuptools.command.build_ext import build_ext as _build_ext
 
@@ -101,9 +100,10 @@ class build_exe(Command):
          "forcibly build everything (ignore file timestamps)"),
         ('compiler=', 'c',
          "specify the compiler type"),
+        ('asan', None, 'debug + Address Sanitizer'),
     ]
 
-    boolean_options = ['inplace', 'debug', 'force']
+    boolean_options = ['inplace', 'debug', 'force', 'asan']
 
     help_options = [
         ('help-compiler', None,
@@ -127,6 +127,7 @@ class build_exe(Command):
         self.debug = None
         self.force = None
         self.compiler = None
+        self.asan = None
 
     def finalize_options(self):
         self.set_undefined_options('build',
@@ -153,6 +154,18 @@ class build_exe(Command):
             self.rpath = []
         elif isinstance(self.rpath, str):
             self.rpath = self.rpath.split(os.pathsep)
+
+        if self.asan:
+            # implies debug
+            self.debug = 1
+
+            asancflags = " -O0 -g -fsanitize=address"
+            cflags = os.environ.get('CFLAGS', '') + asancflags
+            os.environ['CFLAGS'] = cflags
+
+            asanldflags = " -fsanitize=address -shared-libasan"
+            ldflags = os.environ.get('LDFLAGS', '') + asanldflags
+            os.environ['LDFLAGS'] = ldflags
 
         # for executables under windows use different directories
         # for Release and Debug builds.
@@ -357,45 +370,6 @@ class build_exe(Command):
         return os.path.join(*exe_path) + exe_suffix
 
 
-class CustomBuild(_build):
-    """Runs 'build_exe' sub-command if any executables are defined for
-    the current distribution.
-    """
-
-    command_name = "build"
-
-    user_options = _build.user_options + [
-        ('asan', None, 'debug + Address Sanitizer')
-    ]
-
-    boolean_options = _build.boolean_options + ['asan']
-
-    def initialize_options(self):
-        _build.initialize_options(self)
-        self.asan = None
-
-    def finalize_options(self):
-        _build.finalize_options(self)
-        if self.asan:
-            # implies debug
-            self.debug = 1
-
-            asancflags = " -O0 -g -fsanitize=address"
-            cflags = os.environ.get('CFLAGS', '') + asancflags
-            os.environ['CFLAGS'] = cflags
-
-            asanldflags = " -fsanitize=address -shared-libasan"
-            ldflags = os.environ.get('LDFLAGS', '') + asanldflags
-            os.environ['LDFLAGS'] = ldflags
-
-    def has_executables(self):
-        return self.distribution.has_executables()
-
-    sub_commands = _build.sub_commands + [
-        ('build_exe', has_executables),
-    ]
-
-
 class CustomBuildClib(_build_clib):
     """Includes in the sdist all the libraries' headers (filenames
     specified in the 'obj_deps' dict of a library's build_info dict).
@@ -464,7 +438,6 @@ class CustomBuildClib(_build_clib):
 
 
 cmdclass = {
-    'build': CustomBuild,
     'build_clib': CustomBuildClib,
     'build_ext': CustomBuildExt,
     'build_exe': build_exe,
