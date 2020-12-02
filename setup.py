@@ -12,8 +12,6 @@ from distutils.ccompiler import show_compilers
 
 from distutils.command.build import build as _build
 from setuptools.command.build_clib import build_clib as _build_clib
-from setuptools.command.install import install as _install
-from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.build_ext import build_ext as _build_ext
 
 
@@ -465,63 +463,12 @@ class CustomBuildClib(_build_clib):
                                             debug=self.debug)
 
 
-class CustomInstall(_install):
-    """Sets 'install_lib' option to 'install_platlib' if distribution
-    contains any executables.
-    """
-
-    def finalize_options(self):
-        _install.finalize_options(self)
-        if self.distribution.has_executables():
-            self.install_lib = self.install_platlib
-
-
-class CustomInstallLib(_install_lib):
-    """Runs 'build_exe' if distribution contains any executables
-    """
-
-    def build(self):
-        _install_lib.build(self)
-        if not self.skip_build:
-            if self.distribution.has_executables():
-                self.run_command('build_exe')
-
-    def get_outputs(self):
-        outputs = _install_lib.get_outputs(self)
-
-        exe_outputs = self._mutate_outputs(
-            self.distribution.has_executables(),
-            'build_exe', 'build_lib', self.install_dir)
-
-        return outputs + exe_outputs
-
-
 cmdclass = {
     'build': CustomBuild,
     'build_clib': CustomBuildClib,
     'build_ext': CustomBuildExt,
     'build_exe': build_exe,
-    'install': CustomInstall,
-    'install_lib': CustomInstallLib,
 }
-
-
-try:
-    from wheel.bdist_wheel import bdist_wheel
-except ImportError:
-    pass
-else:
-
-    class CustomBDistWheel(bdist_wheel):
-        """Marks the wheel as non-pure if distribution contains any executables
-        """
-
-        def finalize_options(self):
-            bdist_wheel.finalize_options(self)
-            if self.distribution.has_executables():
-                self.root_is_pure = False
-
-    cmdclass['bdist_wheel'] = CustomBDistWheel
 
 
 libraries = [
