@@ -14,14 +14,6 @@ from setuptools.command.build_clib import build_clib as _build_clib
 from setuptools.command.build_ext import build_ext as _build_ext
 
 
-class CustomBuildExt(_build_ext):
-
-    def run(self):
-        if self.distribution.has_c_libraries():
-            self.run_command("build_clib")
-        _build_ext.run(self)
-
-
 class Executable(Extension):
     pass
 
@@ -435,6 +427,14 @@ class CustomBuildClib(_build_clib):
             self.compiler.create_static_lib(objects, lib_name,
                                             output_dir=self.build_clib,
                                             debug=self.debug)
+
+
+class CustomBuildExt(_build_ext):
+
+    def run(self):
+        if self.distribution.has_c_libraries():
+            self.run_command("build_clib")
+        _build_ext.run(self)
 
 
 cmdclass = {
