@@ -97,6 +97,7 @@ jobs:
           CIBW_BUILD: "cp3?-*"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
           CIBW_SKIP: "pp* cp35* cp*win32 cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x"
+          CIBW_ENVIRONMENT: "CFLAGS='-g0'"
       
       - name: Build sdist
         run: |
