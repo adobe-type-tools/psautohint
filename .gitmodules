@@ -2,6 +2,3 @@
 	path = tests/integration/data
 	url = https://github.com/adobe-type-tools/psautohint-testdata.git
 	ignore = dirty
-[submodule "multibuild"]
-	path = multibuild
-	url = https://github.com/matthew-brett/multibuild/
