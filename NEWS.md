@@ -1,5 +1,12 @@
 Changelog
 
+# v2.2.0 - December 15, 2020
+- Removed unused third-party CI configs and related code
+- Updated dependencies
+- Removed deprecated CLI option flags that were temporarily in place for the autohint -> psautohint transition
+- Removed `autohintexe` from Python wheels. It can still be built using `python setup.py build_exe`.
+- Cleaned up Python code
+
 # v2.1.2 - November 6, 2020
 - Move remaining CI workflows (building wheels, deploying) to GitHub Actions including building of Python 3.9 wheels for supported platforms.
 - Updated dependencies
