@@ -906,11 +906,16 @@ class CFFFontData:
         self.topDict = self.cffTable.cff.topDictIndex[0]
         self.charStrings = self.topDict.CharStrings
         if 'fvar' in self.ttFont:
+            # have not yet collected VF global data.
             self.is_vf = True
             fvar = self.ttFont['fvar']
             CFF2 = self.cffTable
             CFF2.desubroutinize()
             topDict = CFF2.cff.topDictIndex[0]
+            # We need a new charstring object into which we can save the
+            # hinted CFF2 program data. Copying an existing charstring is a
+            # little easier than creating a new one and making sure that all
+            # properties are set correctly.
             self.temp_cs = copy.deepcopy(self.charStrings['.notdef'])
             self.vs_data_models = self.get_vs_data_models(topDict,
                                                           fvar)
@@ -1350,22 +1355,7 @@ class CFFFontData:
             t2CharString.program = program
 
     def get_vf_bez_glyphs(self, glyph_name):
-
         charstring = self.charStrings[glyph_name]
-        if 'fvar' in self.ttFont:
-            # have not yet collected VF global data.
-            self.is_vf = True
-            fvar = self.ttFont['fvar']
-            CFF2 = self.cffTable
-            CFF2.desubroutinize()
-            topDict = CFF2.cff.topDictIndex[0]
-            # We need a new charstring object into which we can save the
-            # hinted CFF2 program data. Copying an existing charstring is a
-            # little easier than creating a new one and making sure that all
-            # properties are set correctly.
-            self.temp_cs = copy.deepcopy(self.charStrings['.notdef'])
-            self.vs_data_models = self.get_vs_data_models(topDict,
-                                                          fvar)
 
         if 'vsindex' in charstring.program:
             op_index = charstring.program.index('vsindex')
