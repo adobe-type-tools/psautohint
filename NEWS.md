@@ -1,5 +1,11 @@
 Changelog
 
+# v2.3.0 - February 22, 2021
+- Fixed a major performance issue when hinting VFs (thanks, @madig!)
+  ([#289](https://github.com/adobe-type-tools/psautohint/pull/289),
+   [#221](https://github.com/adobe-type-tools/psautohint/issues/221))
+- Updated dependencies
+
 # v2.2.0 - December 15, 2020
 - Removed unused third-party CI configs and related code
 - Updated dependencies
