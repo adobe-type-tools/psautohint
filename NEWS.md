@@ -5,7 +5,9 @@ Changelog
   ([#289](https://github.com/adobe-type-tools/psautohint/pull/289),
    [#221](https://github.com/adobe-type-tools/psautohint/issues/221))
 - Updated dependencies
-
+  ([#290](https://github.com/adobe-type-tools/psautohint/pull/290),
+   [#291](https://github.com/adobe-type-tools/psautohint/pull/291),
+   [#292](https://github.com/adobe-type-tools/psautohint/pull/292))
 # v2.2.0 - December 15, 2020
 - Removed unused third-party CI configs and related code
 - Updated dependencies
