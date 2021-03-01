@@ -1,4 +1,4 @@
 # 'lxml' is not a primary requirement of psautohint but it's listed here because we
 # want to have control over the version and guarantee that the XML output remains stable
 lxml==4.6.2
-fonttools[ufo,lxml]==4.20.0
+fonttools[lxml,ufo]==4.21.1
