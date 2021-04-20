@@ -584,7 +584,7 @@ setup(name="psautohint",
       python_requires='>3.6',
       setup_requires=["setuptools_scm"],
       install_requires=[
-          'fonttools[ufo]>=3.32.0',
+          'fonttools[ufo]>=4.22.0',
       ],
       extras_require={
           "testing": [
