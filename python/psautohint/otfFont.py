@@ -15,7 +15,7 @@ import itertools
 from fontTools.misc.psCharStrings import (T2OutlineExtractor,
                                           SimpleT2Decompiler)
 from fontTools.ttLib import TTFont, newTable
-from fontTools.misc.fixedTools import otRound
+from fontTools.misc.roundTools import noRound, otRound
 from fontTools.varLib.varStore import VarStoreInstancer
 from fontTools.varLib.cff import CFF2CharStringMergePen, MergeOutlineExtractor
 # import subset.cff is needed to load the implementation for
@@ -1497,7 +1497,7 @@ class VarDataModel(object):
     def num_masters(self):
         return self._num_masters
 
-    def getDeltas(self, master_values):
+    def getDeltas(self, master_values, *, round=noRound):
         assert len(master_values) == len(self.delta_weights)
         out = []
         for i, scalars in enumerate(self.delta_weights):
@@ -1505,5 +1505,5 @@ class VarDataModel(object):
             for j, scalar in scalars.items():
                 if scalar:
                     delta -= out[j] * scalar
-            out.append(delta)
+            out.append(round(delta))
         return out
