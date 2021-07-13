@@ -175,7 +175,7 @@ TryYFlex(PathElt* e, PathElt* n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
     dx = abs(x0 - x2);
     if (dx < MAXFLEX)
         return; /* Let's not add flex to features less than MAXFLEX wide. */
-    if (dx < (3 * abs(y0 - y2)))
+    if (dx < (3 * abs((y0 + y2) / 2 - y1)))
         return; /* We want the width to be at least three times the height. */
     if (ProdLt0(y1 - y0, y1 - y2))
         return; /* y0 and y2 not on same side of y1 */
@@ -227,14 +227,14 @@ TryXFlex(PathElt* e, PathElt* n, Fixed x0, Fixed y0, Fixed x1, Fixed y1)
     double d0sq, d1sq, quot, dx, dy;
 
     GetEndPoint(n, &x2, &y2);
-    dx = abs(y0 - y2);
+    dx = abs(x0 - x2);
     if (dx > gFlexCand)
         return; /* too big diff in bases */
 
-    dy = abs(x0 - x2);
+    dy = abs(y0 - y2);
     if (dy < MAXFLEX)
         return; /* Let's not add flex to features less than MAXFLEX wide. */
-    if (dy < (3 * abs(x0 - x2)))
+    if (dy < (3 * abs((x0 + x2) / 2 - x1)))
         return; /* We want the width to be at least three times the height. */
 
     if (ProdLt0(x1 - x0, x1 - x2))
