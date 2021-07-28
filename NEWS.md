@@ -1,5 +1,9 @@
 Changelog
 
+# v2.3.1 - July 28, 2021
+- Updated for fontTools rounding changes (thanks, @madig!)
+  ([#301](https://github.com/adobe-type-tools/psautohint/pull/301))
+- Updated dependencies
 # v2.3.0 - February 22, 2021
 - Fixed a major performance issue when hinting VFs (thanks, @madig!)
   ([#289](https://github.com/adobe-type-tools/psautohint/pull/289),
