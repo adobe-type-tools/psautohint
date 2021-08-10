@@ -1,0 +1,76 @@
+name: Test
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+
+  pull_request:
+    branches: [master]
+    types: [opened]
+    paths-ignore:
+      - '**.md'
+
+  repository_dispatch:
+    types: manual-trigger
+
+jobs:
+  run_tests:
+    if: contains(toJson(github.event.commits), '[skip ci]') == false && contains(toJson(github.event.commits), '[skip github]') == false
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.7', '3.8', '3.9', '3.10']
+        exclude:
+          - os: macos-latest
+            python-version: '3.7'
+          - os: macos-latest
+            python-version: '3.8'
+          - os: macos-latest
+            python-version: '3.9'
+          - os: windows-latest
+            python-version: '3.7'
+          - os: windows-latest
+            python-version: '3.8'
+          - os: windows-latest
+            python-version: '3.9'
+          # The coverage workflow runs on the config below
+          - os: ubuntu-latest
+            python-version: '3.8'
+
+    steps:
+
+    - name: Check out
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt -r dev-requirements.txt
+        
+    - name: Lint with flake8 (only Ubuntu/Python 3.9)
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
+      run: |
+        python -m pip install flake8
+        flake8 --config=setup.cfg --count --show-source --statistics
+
+    - name: Install psautohint
+      run: |
+        python -m pip install .
+
+    - name: Test with pytest
+      run: |
+        python -m pytest
+
+    - name: Uninstall psautohint
+      run: |
+        python -m pip uninstall psautohint -y
