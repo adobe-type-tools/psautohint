@@ -1,7 +1,5 @@
 extraction:
   python:
-    python_setup:
-      requirements: "cython>=0.29"
   cpp:
     after_prepare:
     - "pip3 install --upgrade --user cython"

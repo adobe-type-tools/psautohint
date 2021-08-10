@@ -400,10 +400,10 @@ class DuplicateMessageFilter(logging.Filter):
         self.logs = set()
 
     def filter(self, record):
-        current = (record.module, record.levelno, record.getMessage())
-        if current in self.logs:
-            return False
-        self.logs.add(current)
+#        current = (record.module, record.levelno, record.getMessage())
+#        if current in self.logs:
+#            return False
+#        self.logs.add(current)
         return True
 
 
@@ -488,9 +488,9 @@ def _parse_fontinfo_file(options, fontinfo_path):
         glyphList = entry[1].split()
         if glyphList:
             if entry[0] == "V":
-                options.vCounterGlyphs.extend(glyphList)
+                options.vCounterGlyphs.update(glyphList)
             else:
-                options.hCounterGlyphs.extend(glyphList)
+                options.hCounterGlyphs.update(glyphList)
 
 
 def get_options(args):
@@ -694,7 +694,11 @@ def get_options(args):
     else:
         log_level = logging.DEBUG
 
-    logging.basicConfig(format="%(levelname)s: %(message)s", level=log_level,
+#    logging.basicConfig(format="%(levelname)s: %(message)s",
+#                         level=log_level, filename=parsed_args.log_path)
+    logging.basicConfig(format="[%(filename)s:%(lineno)d] " +
+                               "%(levelname)s: %(message)s",
+                        level=log_level,
                         filename=parsed_args.log_path)
 
     if parsed_args.test is False:
@@ -764,13 +768,14 @@ def get_options(args):
 def main(args=None):
     options, pargs = get_options(args)
 
-    try:
-        hintFiles(options)
-    except Exception as ex:
-        if pargs.traceback:
-            raise
-        logging.error(ex)
-        return 1
+    hintFiles(options)
+#    try:
+#        hintFiles(options)
+#    except Exception as ex:
+#        if pargs.traceback:
+#            raise
+#        logging.error(ex)
+#        return 1
 
 
 class ReportOptions(ACOptions):
@@ -940,13 +945,14 @@ def get_stemhist_options(args):
 def stemhist(args=None):
     options, pargs = get_stemhist_options(args)
 
-    try:
-        hintFiles(options)
-    except Exception as ex:
-        if pargs.traceback:
-            raise
-        logging.error(ex)
-        return 1
+    hintFiles(options)
+#    try:
+#        hintFiles(options)
+#    except Exception as ex:
+#        if pargs.traceback:
+#            raise
+#        logging.error(ex)
+#        return 1
 
 
 if __name__ == '__main__':

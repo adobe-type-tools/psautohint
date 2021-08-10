@@ -10,6 +10,7 @@ font file.
 
 import logging
 import re
+import numbers
 
 
 log = logging.getLogger(__name__)
@@ -75,20 +76,14 @@ kOtherFDDictKeys = [
     "HCounterChars",
     "BlueFuzz"
 ]
-# We keep this in the FDDict, as it is easier
-# to sort and validate as a list of pairs
+
 kFontDictBluePairsName = "BlueValuesPairs"
 kFontDictOtherBluePairsName = "OtherBlueValuesPairs"
-# Holds the actual string for the Type1 font dict
-kFontDictBluesName = "BlueValues"
-# Holds the actual string for the Type1 font dict
-kFontDictOtherBluesName = "OtherBlues"
+
 kRunTimeFDDictKeys = [
     "DictName",
     kFontDictBluePairsName,
     kFontDictOtherBluePairsName,
-    kFontDictBluesName,
-    kFontDictOtherBluesName
 ]
 kFDDictKeys = (kOtherFDDictKeys +
                kBlueValueKeys +
@@ -109,15 +104,54 @@ class FDDict:
         self.DictName = None
         for key in kFDDictKeys:
             setattr(self, key, None)
-        self.FlexOK = "true"
+        self.FlexOK = True
+        setattr(self, kFontDictBluePairsName, [])
+        setattr(self, kFontDictOtherBluePairsName, [])
 
-    def getFontInfo(self):
-        fontinfo = []
-        for key, value in vars(self).items():
-            if key not in kFontInfoKeys or value is None:
+    def asASCII(self):
+        a = getattr(self, '_ASCII', None)
+        if a is not None:
+            return a
+        a = ''
+        for k, v in vars(self).items():
+            if k not in kFontInfoKeys or v is None:
                 continue
-            fontinfo.append("%s %s" % (key, value))
-        return "\n".join(fontinfo)
+            if isinstance(v, list):
+                v = '[%s]' % ' '.join((str(i) for i in v))
+            elif v is False:
+                v = 'false'
+            elif v is True:
+                v = 'true'
+            elif not isinstance(v, str):
+                v = str(v)
+            a += "%s %s\n" % (k, v)
+        self._ASCII = a.encode('ascii')
+        return self._ASCII
+
+    def setInfo(self, key, value):
+        if key == 'LanguageGroup':
+            if ((isinstance(value, numbers.Number) and value == 1) or
+                    value == '1'):
+                value = 1
+            else:
+                value = 0
+        elif key in ('DominantV', 'DominantH'):
+            value = [int(v) for v in value]
+        elif key == 'FlexOK':
+            if key is None:
+                value = True        # default
+            elif key == 'false':
+                value = False
+            else:
+                value = bool(value)
+        elif key in ('VCounterChars', 'HCounterChars'):
+            pass  # already formatted in __main__::_parse_fontinfo_file
+        elif key in ('FontName', 'DictName'):
+            pass  # keep the string
+        elif value is not None:
+            value = int(value)
+
+        setattr(self, key, value)
 
     def buildBlueLists(self):
         if self.BaselineOvershoot is None:
@@ -134,28 +168,25 @@ class FDDict:
         blueKeyList = [kBlueValueKeys, kOtherBlueValueKeys]
         bluePairListNames = [kFontDictBluePairsName,
                              kFontDictOtherBluePairsName]
-        blueFieldNames = [kFontDictBluesName, kFontDictOtherBluesName]
         for i in [0, 1]:
             keyList = blueKeyList[i]
-            fieldName = blueFieldNames[i]
             pairFieldName = bluePairListNames[i]
             bluePairList = []
             for key in keyList:
                 if key.endswith("Overshoot"):
                     width = getattr(self, key)
                     if width is not None:
-                        width = int(width)
                         baseName = key[:-len("Overshoot")]
                         zonePos = None
                         if key == "BaselineOvershoot":
-                            zonePos = int(self.BaselineYCoord)
+                            zonePos = self.BaselineYCoord
                             tempKey = "BaselineYCoord"
                         else:
                             for posSuffix in ["", "Height", "Baseline"]:
                                 tempKey = "%s%s" % (baseName, posSuffix)
                                 value = getattr(self, tempKey, None)
                                 if value is not None:
-                                    zonePos = int(value)
+                                    zonePos = value
                                     break
                         if zonePos is None:
                             raise FontInfoParseError(
@@ -182,11 +213,12 @@ class FDDict:
                                     (self.DictName, tempKey, width))
                         bluePairList.append((topPos, bottomPos, tempKey,
                                             self.DictName, isBottomZone))
-
+                        log.info("key: %s, tempKey: %s, isBottomZone: %r" %
+                                 (key, tempKey, isBottomZone))
             if bluePairList:
                 bluePairList = sorted(bluePairList)
                 prevPair = bluePairList[0]
-                zoneBuffer = 2 * int(self.BlueFuzz) + 1
+                zoneBuffer = 2 * self.BlueFuzz + 1
                 for pair in bluePairList[1:]:
                     if prevPair[0] > pair[1]:
                         raise FontInfoParseError(
@@ -203,21 +235,10 @@ class FDDict:
                              zoneBuffer, pair[2], pair[1]))
                     prevPair = pair
                 setattr(self, pairFieldName, bluePairList)
-                bluesList = []
-                for pairEntry in bluePairList:
-                    bluesList.append(pairEntry[1])
-                    bluesList.append(pairEntry[0])
-                bluesList = [str(v) for v in bluesList]
-                bluesList = "[%s]" % (" ".join(bluesList))
-                setattr(self, fieldName, bluesList)
         return
 
     def __repr__(self):
-        fddict = {}
-        for key, val in vars(self).items():
-            if val is None:
-                continue
-            fddict[key] = val
+        fddict = {k: v for k, v in vars(self).items() if v is not None}
         return "<%s '%s' %s>" % (
             self.__class__.__name__, fddict.get('DictName', 'no name'), fddict)
 
@@ -302,8 +323,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
         elif state == inDictValue:
             dictValueList.append(token)
             if token[-1] in ["]", ")"]:
-                value = " ".join(dictValueList)
-                setattr(fdDict, dictKeyWord, value)
+                fdDict.setInfo(dictKeyWord, dictValueList)
                 state = dictState  # found the last token in the list value.
 
         elif state == glyphSetState:
@@ -359,7 +379,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
                         dictValueList = [value]
                         dictKeyWord = token
                     else:
-                        setattr(fdDict, token, value)
+                        fdDict.setInfo(token, value)
                 else:
                     raise FontInfoParseError(
                         "FDDict key \"%s\" in fdDict named \"%s\" is not "
@@ -377,7 +397,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
         # outside the font BBox, so that hinting won't be affected by them.
         defaultFDDict = fontDictList[0]
         for key in kBlueValueKeys + kOtherBlueValueKeys:
-            setattr(defaultFDDict, key, None)
+            defaultFDDict.setInfo(key, None)
         defaultFDDict.BaselineYCoord = minY - 100
         defaultFDDict.BaselineOvershoot = 0
         defaultFDDict.CapHeight = maxY + 100
@@ -422,9 +442,6 @@ def mergeFDDicts(prevDictList, privateDict):
             dList = getattr(prefDDict, stemFieldName)
             stemDict = stemDictList[wi]
             if dList is not None:
-                dList = dList[1:-1]  # remove the braces
-                dList = dList.split()
-                dList = [int(d) for d in dList]
                 for width in dList:
                     stemDict[width] = prefDDict.DictName
 

@@ -1,4 +1,2 @@
 include README.md COPYING LICENSE
 include requirements.txt
-
-recursive-include libpsautohint *.h

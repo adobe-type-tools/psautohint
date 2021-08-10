@@ -120,12 +120,13 @@ import shutil
 from collections import OrderedDict
 from types import SimpleNamespace
 
-from fontTools.pens.basePen import BasePen
+# from fontTools.pens.basePen import BasePen
 from fontTools.pens.pointPen import AbstractPointPen
 from fontTools.ufoLib import UFOReader, UFOWriter
 from fontTools.ufoLib.errors import UFOLibError
 
 from . import fdTools, FontParseError
+from .glyphData import glyphData
 
 
 log = logging.getLogger(__name__)
@@ -386,24 +387,22 @@ class UFOFontData:
     def hasFDArray():
         return False
 
-    def convertToBez(self, name, read_hints, round_coords, doAll=False):
-        # We do not yet support reading hints, so read_hints is ignored.
-        width, bez, skip = self._get_or_skip_glyph(name, round_coords, doAll)
+    def convertToGlyphData(self, name, read_stems, read_flex, round_coords,
+                           doAll=False):
+        glyph, skip = self._get_or_skip_glyph(name, read_stems, read_flex,
+                                              round_coords, doAll)
         if skip:
             return None
+        return glyph
 
-        bezString = "\n".join(bez)
-        bezString = "\n".join(["% " + name, "sc", bezString, "ed", ""])
-        return bezString
-
-    def updateFromBez(self, bezData, name, mm_hint_info=None):
+    def updateFromGlyph(self, glyph, name):
         layer = None
         if name in self.processedLayerGlyphMap:
             layer = PROCESSED_LAYER_NAME
         glyphset = self._get_glyphset(layer)
 
-        glyph = BezGlyph(bezData)
-        glyphset.readGlyph(name, glyph)
+#        glyph = BezGlyph(gl)
+#        glyphset.readGlyph(name, glyph)
         if hasattr(glyph, 'width'):
             glyph.width = norm_float(glyph.width)
         self.newGlyphMap[name] = glyph
@@ -458,7 +457,7 @@ class UFOFontData:
             if self.writeToDefaultLayer:
                 self.recalcHashEntry(name, glyph)
             glyphset.contents[name] = filename
-            glyphset.writeGlyph(name, glyph, glyph.drawPoints)
+            # XXX glyphset.writeGlyph(name, glyph, glyph.drawPoints)
         glyphset.writeContents()
 
         # Write hashmap
@@ -573,21 +572,24 @@ class UFOFontData:
         return self._glyphsets[layer_name]
 
     @staticmethod
-    def get_glyph_bez(glyph, round_coords):
-        pen = BezPen(glyph.glyphSet, round_coords)
-        glyph.draw(pen)
+    def get_glyph_data(glyph, name, read_stems, read_flex, round_coords):
+        gl = glyphData(round_coords=round_coords, name=name)  # XXX
+        glyph.draw(gl)
         if not hasattr(glyph, "width"):
             glyph.width = 0
-        return pen.bez
+        gl.setWidth(glyph.width)
+        return gl
 
-    def _get_or_skip_glyph(self, name, round_coords, doAll):
+    def _get_or_skip_glyph(self, name, read_stems, read_flex, round_coords,
+                           doAll):
         # Get default glyph layer data, so we can check if the glyph
         # has been edited since this program was last run.
         # If the program name is in the history list, and the srcHash
         # matches the default glyph layer data, we can skip.
         glyphset = self._get_glyphset()
         glyph = glyphset[name]
-        bez = self.get_glyph_bez(glyph, round_coords)
+        glyph_data = self.get_glyph_data(glyph, name, read_stems, read_flex,
+                                         round_coords)
 
         # Hash is always from the default glyph layer.
         hash_pen = HashPointPen(glyph)
@@ -598,9 +600,9 @@ class UFOFontData:
         if name in self.processedLayerGlyphMap:
             glyphset = self._get_glyphset(PROCESSED_LAYER_NAME)
             glyph = glyphset[name]
-            bez = self.get_glyph_bez(glyph, round_coords)
-
-        return glyph.width, bez, skip
+            glyph_data = self.get_glyph_data(glyph, read_stems, read_flex,
+                                             round_coords)
+        return glyph_data, skip
 
     def getGlyphList(self):
         glyphOrder = self._reader.readLib().get(PUBLIC_GLYPH_ORDER, [])
@@ -645,9 +647,10 @@ class UFOFontData:
 
         fdDict = fdTools.FDDict()
         # should be 1 if the glyphs are ideographic, else 0.
-        fdDict.LanguageGroup = self.fontInfo.get("languagegroup", "0")
-        fdDict.OrigEmSqUnits = self.getUnitsPerEm()
-        fdDict.FontName = self.getPSName()
+        fdDict.setInfo('LanguageGroup',
+                       self.fontInfo.get("languagegroup", "0"))
+        fdDict.setInfo('OrigEmSqUnits', self.getUnitsPerEm())
+        fdDict.setInfo('FontName', self.getPSName())
         upm = self.getUnitsPerEm()
         low = min(-upm * 0.25,
                   self.fontInfo.get("openTypeOS2WinDescent", 0) - 200)
@@ -676,12 +679,11 @@ class UFOFontData:
         for i in range(3, numBlueValues, 2):
             blueValues[i] = blueValues[i] - blueValues[i - 1]
 
-        blueValues = [str(v) for v in blueValues]
         numBlueValues = min(numBlueValues, len(fdTools.kBlueValueKeys))
         for i in range(numBlueValues):
             key = fdTools.kBlueValueKeys[i]
             value = blueValues[i]
-            setattr(fdDict, key, value)
+            fdDict.setInfo(key, value)
 
         otherBlues = self.fontInfo.get("postscriptOtherBlues", [])
 
@@ -691,13 +693,12 @@ class UFOFontData:
             otherBlues.sort()
             for i in range(0, numBlueValues, 2):
                 otherBlues[i] = otherBlues[i] - otherBlues[i + 1]
-            otherBlues = [str(v) for v in otherBlues]
             numBlueValues = min(numBlueValues,
                                 len(fdTools.kOtherBlueValueKeys))
             for i in range(numBlueValues):
                 key = fdTools.kOtherBlueValueKeys[i]
                 value = otherBlues[i]
-                setattr(fdDict, key, value)
+                fdDict.setInfo(key, value)
 
         vstems = self.fontInfo.get("postscriptStemSnapV", [])
         if not vstems:
@@ -714,7 +715,7 @@ class UFOFontData:
             # dummy value that will allow PyAC to run
             vstems = [fdDict.OrigEmSqUnits]
             log.warning("There is no value or 0 value for DominantV.")
-        fdDict.DominantV = "[" + " ".join([str(v) for v in vstems]) + "]"
+        fdDict.setInfo('DominantV', vstems)
 
         hstems = self.fontInfo.get("postscriptStemSnapH", [])
         if not hstems:
@@ -731,22 +732,20 @@ class UFOFontData:
             # dummy value that will allow PyAC to run
             hstems = [fdDict.OrigEmSqUnits]
             log.warning("There is no value or 0 value for DominantH.")
-        fdDict.DominantH = "[" + " ".join([str(v) for v in hstems]) + "]"
+        fdDict.setInfo('DominantH', hstems)
 
         if noFlex:
-            fdDict.FlexOK = "false"
+            fdDict.setInfo('FlexOK', False)
         else:
-            fdDict.FlexOK = "true"
+            fdDict.setInfo('FlexOK', True)
 
         # Add candidate lists for counter hints, if any.
         if vCounterGlyphs:
-            temp = " ".join(vCounterGlyphs)
-            fdDict.VCounterChars = "( %s )" % (temp)
+            fdDict.setInfo('VCounterChars', vCounterGlyphs)
         if hCounterGlyphs:
-            temp = " ".join(hCounterGlyphs)
-            fdDict.HCounterChars = "( %s )" % (temp)
+            fdDict.setInfo('HCounterChars', hCounterGlyphs)
 
-        fdDict.BlueFuzz = self.fontInfo.get("postscriptBlueFuzz", 1)
+        fdDict.setInfo('BlueFuzz', self.fontInfo.get("postscriptBlueFuzz", 1))
         # postscriptBlueShift
         # postscriptBlueScale
         self.fontDict = fdDict
@@ -787,35 +786,6 @@ class UFOFontData:
     @staticmethod
     def close():
         return
-
-
-class BezPen(BasePen):
-    def __init__(self, glyph_set, round_coords):
-        super(BezPen, self).__init__(glyph_set)
-        self.round_coords = round_coords
-        self.bez = []
-
-    def _point(self, point):
-        if self.round_coords:
-            return " ".join("%d" % round(pt) for pt in point)
-        return " ".join("%3f" % pt for pt in point)
-
-    def _moveTo(self, pt):
-        self.bez.append("%s mt" % self._point(pt))
-
-    def _lineTo(self, pt):
-        self.bez.append("%s dt" % self._point(pt))
-
-    def _curveToOne(self, pt1, pt2, pt3):
-        self.bez.append("%s ct" % self._point(pt1 + pt2 + pt3))
-
-    @staticmethod
-    def _qCurveToOne(pt1, pt2):
-        raise FontParseError("Quadratic curves are not supported")
-
-    def _closePath(self):
-        self.bez.append("cp")
-
 
 class HashPointPen(AbstractPointPen):
 
@@ -858,72 +828,42 @@ class HashPointPen(AbstractPointPen):
         glyph.drawPoints(self)
 
 
-class BezGlyph(object):
-    def __init__(self, bez):
-        self._bez = bez
-        self.lib = {}
-
-    @staticmethod
-    def _draw(contours, pen):
-        for contour in contours:
-            pen.beginPath()
-            for point in contour:
-                x = point.get("x")
-                y = point.get("y")
-                segmentType = point.get("type", None)
-                name = point.get("name", None)
-                pen.addPoint((x, y), segmentType=segmentType, name=name)
-            pen.endPath()
-
-    def drawPoints(self, pen):
-        contours, hints = convertBezToOutline(self._bez)
-        self._draw(contours, pen)
-
-        # Add the stem hints.
-        if hints is not None:
-            # Add this hash to the glyph data, as it is the hash which matches
-            # the output outline data. This is not necessarily the same as the
-            # hash of the source data; autohint can be used to change outlines.
-            hash_pen = HashPointPen(self)
-            self._draw(contours, hash_pen)
-            hints["id"] = hash_pen.getHash()
-
-            # Remove any existing hint data.
-            for key in (HINT_DOMAIN_NAME1, HINT_DOMAIN_NAME2):
-                if key in self.lib:
-                    del self.lib[key]
-
-            self.lib[HINT_DOMAIN_NAME2] = hints
-
-
-class HintMask:
-    # class used to collect hints for the current
-    # hint mask when converting bez to T2.
-    def __init__(self, listPos):
-        # The index into the pointList is kept
-        # so we can quickly find them later.
-        self.listPos = listPos
-        self.hList = []  # These contain the actual hint values.
-        self.vList = []
-        self.hstem3List = []
-        self.vstem3List = []
-        # The name attribute of the point which follows the new hint set.
-        self.pointName = "hintSet" + str(listPos).zfill(4)
-
-    def getHintSet(self):
-        hintset = OrderedDict()
-        hintset[POINT_TAG] = self.pointName
-        hintset[STEMS_NAME] = []
-
-        if len(self.hList) > 0 or len(self.hstem3List):
-            hintset[STEMS_NAME].extend(
-                makeHintSet(self.hList, self.hstem3List, isH=True))
-
-        if len(self.vList) > 0 or len(self.vstem3List):
-            hintset[STEMS_NAME].extend(
-                makeHintSet(self.vList, self.vstem3List, isH=False))
-
-        return hintset
+#class BezGlyph(object):
+#    def __init__(self, bez):
+#        self._bez = bez
+#        self.lib = {}
+#
+#    @staticmethod
+#    def _draw(contours, pen):
+#        for contour in contours:
+#            pen.beginPath()
+#            for point in contour:
+#                x = point.get("x")
+#                y = point.get("y")
+#                segmentType = point.get("type", None)
+#                name = point.get("name", None)
+#                pen.addPoint((x, y), segmentType=segmentType, name=name)
+#            pen.endPath()
+#
+#    def drawPoints(self, pen):
+#        contours, hints = convertBezToOutline(self._bez)
+#        self._draw(contours, pen)
+#
+#        # Add the stem hints.
+#        if hints is not None:
+#            # Add this hash to the glyph data, as it is the hash which matches
+#            # the output outline data. This is not necessarily the same as the
+#            # hash of the source data; autohint can be used to change outlines.
+#            hash_pen = HashPointPen(self)
+#            self._draw(contours, hash_pen)
+#            hints["id"] = hash_pen.getHash()
+#
+#            # Remove any existing hint data.
+#            for key in (HINT_DOMAIN_NAME1, HINT_DOMAIN_NAME2):
+#                if key in self.lib:
+#                    del self.lib[key]
+#
+#            self.lib[HINT_DOMAIN_NAME2] = hints
 
 
 def norm_float(value):
@@ -931,336 +871,3 @@ def norm_float(value):
     if isinstance(value, float) and value.is_integer():
         return int(value)
     return value
-
-
-def makeStemHintList(hintsStem3, isH):
-    # In bez terms, the first coordinate in each pair is
-    # absolute, second is relative, and hence is the width.
-    if isH:
-        op = HSTEM3_NAME
-    else:
-        op = VSTEM3_NAME
-    posList = [op]
-    for stem3 in hintsStem3:
-        for pos, width in stem3:
-            posList.append("%s %s" % (norm_float(pos), norm_float(width)))
-    return " ".join(posList)
-
-
-def makeHintList(hints, isH):
-    # Add the list of hint operators
-    # In bez terms, the first coordinate in each pair is
-    # absolute, second is relative, and hence is the width.
-    hintset = []
-    for hint in hints:
-        if not hint:
-            continue
-        pos = hint[0]
-        width = hint[1]
-        if isH:
-            op = HSTEM_NAME
-        else:
-            op = VSTEM_NAME
-        hintset.append("%s %s %s" % (op, norm_float(pos), norm_float(width)))
-    return hintset
-
-
-def fixStartPoint(contour, operators):
-    # For the GLIF format, the idea of first/last point is funky, because
-    # the format avoids identifying a start point. This means there is no
-    # implied close-path line-to. If the last implied or explicit path-close
-    # operator is a line-to, then replace the "mt" with linto, and remove
-    # the last explicit path-closing line-to, if any. If the last op is a
-    # curve, then leave the first two point args on the stack at the end of
-    # the point list, and move the last curveto to the first op, replacing
-    # the move-to.
-
-    _, firstX, firstY = operators[0]
-    lastOp, lastX, lastY = operators[-1]
-    point = contour[0]
-    if (firstX == lastX) and (firstY == lastY):
-        del contour[-1]
-        point["type"] = lastOp
-    else:
-        # we have an implied final line to. All we need to do
-        # is convert the inital moveto to a lineto.
-        point["type"] = "line"
-
-
-bezToUFOPoint = {
-    "mt": 'move',
-    "rmt": 'move',
-    "dt": 'line',
-    "ct": 'curve',
-}
-
-
-def convertCoords(current_x, current_y):
-    return norm_float(current_x), norm_float(current_y)
-
-
-def convertBezToOutline(bezString):
-    """
-    Since the UFO outline element as no attributes to preserve,
-    I can just make a new one.
-    """
-    # convert bez data to a UFO glif XML representation
-    #
-    # Convert all bez ops to simplest UFO equivalent
-    # Add all hints to vertical and horizontal hint lists as encountered;
-    # insert a HintMask class whenever a new set of hints is encountered
-    # after all operators have been processed, convert HintMask items into
-    # hintmask ops and hintmask bytes add all hints as prefix review operator
-    # list to optimize T2 operators.
-    # if useStem3 == 1, then any counter hints must be processed as stem3
-    # hints, else the opposite.
-    # Counter hints are used only in LanguageGroup 1 glyphs, aka ideographs
-
-    bezString = re.sub(r"%.+?\n", "", bezString)  # supress comments
-    bez = re.findall(r"(\S+)", bezString)
-    flexes = []
-    # Create an initial hint mask. We use this if
-    # there is no explicit initial hint sub.
-    hintmask = HintMask(0)
-    hintmasks = [hintmask]
-    vstem3_args = []
-    hstem3_args = []
-    args = []
-    operators = []
-    hintmask_name = None
-    in_preflex = False
-    hints = None
-    op_index = 0
-    current_x = 0
-    current_y = 0
-    contours = []
-    contour = None
-    has_hints = False
-
-    for token in bez:
-        try:
-            val = float(token)
-            args.append(val)
-            continue
-        except ValueError:
-            pass
-        if token == "newcolors":
-            pass
-        elif token in ["beginsubr", "endsubr"]:
-            pass
-        elif token == "snc":
-            hintmask = HintMask(op_index)
-            # If the new hints precedes any marking operator,
-            # then we want throw away the initial hint mask we
-            # made, and use the new one as the first hint mask.
-            if op_index == 0:
-                hintmasks = [hintmask]
-            else:
-                hintmasks.append(hintmask)
-            hintmask_name = hintmask.pointName
-        elif token == "enc":
-            pass
-        elif token == "rb":
-            if hintmask_name is None:
-                hintmask_name = hintmask.pointName
-            hintmask.hList.append(args)
-            args = []
-            has_hints = True
-        elif token == "ry":
-            if hintmask_name is None:
-                hintmask_name = hintmask.pointName
-            hintmask.vList.append(args)
-            args = []
-            has_hints = True
-        elif token == "rm":  # vstem3's are vhints
-            if hintmask_name is None:
-                hintmask_name = hintmask.pointName
-            has_hints = True
-            vstem3_args.append(args)
-            args = []
-            if len(vstem3_args) == 3:
-                hintmask.vstem3List.append(vstem3_args)
-                vstem3_args = []
-
-        elif token == "rv":  # hstem3's are hhints
-            has_hints = True
-            hstem3_args.append(args)
-            args = []
-            if len(hstem3_args) == 3:
-                hintmask.hstem3List.append(hstem3_args)
-                hstem3_args = []
-
-        elif token == "preflx1":
-            # the preflx1/preflx2a sequence provides the same i as the flex
-            # sequence; the difference is that the preflx1/preflx2a sequence
-            # provides the argument values needed for building a Type1 string
-            # while the flex sequence is simply the 6 rcurveto points. Both
-            # sequences are always provided.
-            args = []
-            # need to skip all move-tos until we see the "flex" operator.
-            in_preflex = True
-        elif token == "preflx2a":
-            args = []
-        elif token == "flxa":  # flex with absolute coords.
-            in_preflex = False
-            flex_point_name = BASE_FLEX_NAME + str(op_index).zfill(4)
-            flexes.append(flex_point_name)
-            # The first 12 args are the 6 args for each of
-            # the two curves that make up the flex feature.
-            i = 0
-            while i < 2:
-                current_x = args[0]
-                current_y = args[1]
-                x, y = convertCoords(current_x, current_y)
-                point = {"x": x, "y": y}
-                contour.append(point)
-                current_x = args[2]
-                current_y = args[3]
-                x, y = convertCoords(current_x, current_y)
-                point = {"x": x, "y": y}
-                contour.append(point)
-                current_x = args[4]
-                current_y = args[5]
-                x, y = convertCoords(current_x, current_y)
-                point_type = 'curve'
-                point = {"x": x, "y": y, "type": point_type}
-                contour.append(point)
-                operators.append([point_type, current_x, current_y])
-                op_index += 1
-                if i == 0:
-                    args = args[6:12]
-                i += 1
-            # attach the point name to the first point of the first curve.
-            contour[-6][POINT_NAME] = flex_point_name
-            if hintmask_name is not None:
-                # We have a hint mask that we want to attach to the first
-                # point of the flex op. However, there is already a flex
-                # name in that attribute. What we do is set the flex point
-                # name into the hint mask.
-                hintmask.pointName = flex_point_name
-                hintmask_name = None
-            args = []
-        elif token == "sc":
-            pass
-        elif token == "cp":
-            pass
-        elif token == "ed":
-            pass
-        else:
-            if in_preflex and token in ["rmt", "mt"]:
-                continue
-
-            if token in ["rmt", "mt", "dt", "ct"]:
-                op_index += 1
-            else:
-                raise BezParseError(
-                    "Unhandled operation: '%s' '%s'." % (args, token))
-            point_type = bezToUFOPoint[token]
-            if token in ["rmt", "mt", "dt"]:
-                if token in ["mt", "dt"]:
-                    current_x = args[0]
-                    current_y = args[1]
-                else:
-                    current_x += args[0]
-                    current_y += args[1]
-                x, y = convertCoords(current_x, current_y)
-                point = {"x": x, "y": y, "type": point_type}
-
-                if point_type == "move":
-                    if contour is not None:
-                        if len(contour) == 1:
-                            # Just in case we see two moves in a row,
-                            # delete the previous contour if it has
-                            # only the move-to
-                            log.info("Deleting moveto: %s adding %s",
-                                     contours[-1], contour)
-                            del contours[-1]
-                        else:
-                            # Fix the start/implied end path
-                            # of the previous path.
-                            fixStartPoint(contour, operators)
-                    operators = []
-                    contour = []
-                    contours.append(contour)
-
-                if hintmask_name is not None:
-                    point[POINT_NAME] = hintmask_name
-                    hintmask_name = None
-                contour.append(point)
-                operators.append([point_type, current_x, current_y])
-            else:  # "ct"
-                current_x = args[0]
-                current_y = args[1]
-                x, y = convertCoords(current_x, current_y)
-                point = {"x": x, "y": y}
-                contour.append(point)
-                current_x = args[2]
-                current_y = args[3]
-                x, y = convertCoords(current_x, current_y)
-                point = {"x": x, "y": y}
-                contour.append(point)
-                current_x = args[4]
-                current_y = args[5]
-                x, y = convertCoords(current_x, current_y)
-                point = {"x": x, "y": y, "type": point_type}
-                contour.append(point)
-                if hintmask_name is not None:
-                    # attach the pointName to the first point of the curve.
-                    contour[-3][POINT_NAME] = hintmask_name
-                    hintmask_name = None
-                operators.append([point_type, current_x, current_y])
-            args = []
-
-    if contour is not None:
-        if len(contour) == 1:
-            # Just in case we see two moves in a row, delete
-            # the previous contour if it has zero length.
-            del contours[-1]
-        else:
-            fixStartPoint(contour, operators)
-
-    # Add hints, if any.
-    # Must be done at the end of op processing to make sure we have seen all
-    # the hints in the bez string.
-    # Note that the hintmasks are identified in the operators by the point
-    # name. We will follow the T1 spec: a glyph may have stem3 counter hints
-    # or regular hints, but not both.
-
-    if has_hints or len(flexes) > 0:
-        hints = OrderedDict()
-        hints["id"] = ""
-
-        # Convert the rest of the hint masks to a hintmask op and hintmask
-        # bytes.
-        hints[HINT_SET_LIST_NAME] = []
-        for hintmask in hintmasks:
-            hints[HINT_SET_LIST_NAME].append(hintmask.getHintSet())
-
-        if len(flexes) > 0:
-            hints[FLEX_INDEX_LIST_NAME] = []
-            for pointTag in flexes:
-                hints[FLEX_INDEX_LIST_NAME].append(pointTag)
-
-    return contours, hints
-
-
-def makeHintSet(hints, hintsStem3, isH):
-    # A charstring may have regular v stem hints or vstem3 hints, but not both.
-    # Same for h stem hints and hstem3 hints.
-    hintset = []
-    if len(hintsStem3) > 0:
-        hintsStem3.sort()
-        numHints = len(hintsStem3)
-        hintLimit = int((STACK_LIMIT - 2) / 2)
-        if numHints >= hintLimit:
-            hintsStem3 = hintsStem3[:hintLimit]
-        hintset.append(makeStemHintList(hintsStem3, isH))
-    else:
-        hints.sort()
-        numHints = len(hints)
-        hintLimit = int((STACK_LIMIT - 2) / 2)
-        if numHints >= hintLimit:
-            hints = hints[:hintLimit]
-        hintset.extend(makeHintList(hints, isH))
-
-    return hintset

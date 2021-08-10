@@ -1,12 +1,6 @@
 import os
-import logging
 
-from . import _psautohint
-
-
-log = logging.getLogger(__name__)
-
-__version__ = _psautohint.version
+__version__ = '2.4XXXTodo'
 
 
 class FontParseError(Exception):
@@ -47,31 +41,3 @@ def get_font_format(font_file_path):
         return None
     else:
         return None
-
-
-def hint_bez_glyph(info, glyph, allow_edit=True, allow_hint_sub=True,
-                   round_coordinates=True, report_zones=False,
-                   report_stems=False, report_all_stems=False):
-    report = 0
-    if report_zones:
-        report = 1
-    elif report_stems:
-        report = 2
-    # In/out of C code is bytes. In/out of Python code is str.
-    hinted_b = _psautohint.autohint(info.encode('ascii'),
-                                    glyph.encode('ascii'),
-                                    allow_edit,
-                                    allow_hint_sub,
-                                    round_coordinates,
-                                    report,
-                                    report_all_stems)
-    hinted = hinted_b.decode('ascii')
-
-    return hinted
-
-
-def hint_compatible_bez_glyphs(info, glyphs, masters):
-    hinted = _psautohint.autohintmm(tuple(g.encode('ascii') for g in glyphs),
-                                    tuple(m.encode('ascii') for m in masters))
-
-    return [g.decode('ascii') for g in hinted]
