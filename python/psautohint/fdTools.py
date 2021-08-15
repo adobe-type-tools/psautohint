@@ -206,7 +206,7 @@ class FDDict:
                             bottomPos = zonePos
                             topPos = zonePos + width
                             isBottomZone = 0
-                            if i == 1:
+                            if i == 1 and width > 0:
                                 raise FontInfoParseError(
                                     "FontDict %s. Zone %s is a bottom zone, "
                                     "and so the width (%s) must be negative." %

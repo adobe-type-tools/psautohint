@@ -412,8 +412,8 @@ def get_fontinfo_list(options, font, glyph_list, is_var=False):
     if counter_glyphs:
         missing = [n for n in counter_glyphs if n not in font.getGlyphList()]
         if missing:
-            log.error("H/VCounterChars glyph named in fontinfo is "
-                      "not in font: %s", missing)
+            log.warning("H/VCounterChars glyph named in fontinfo is "
+                        "not in font: %s", missing)
 
     # For Type1 name keyed fonts, psautohint supports defining
     # different alignment zones for different glyphs by FontDict
