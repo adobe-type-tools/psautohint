@@ -175,8 +175,6 @@ class stem(tuple):
 #    def UFOstr(self, isV):
 #        return "%sstem %.1g %.1g" % ( 'v' if isV else 'h', self.lb, se
 
-    __repr__ = __str__
-
     def isGhost(self):
         width = self.rt - self.lb
         if width == -20:
@@ -194,6 +192,9 @@ class stem(tuple):
         else:
             l = 0
         return (self.lb - l, self.rt - self.lb)
+
+    def UFOVals(self):
+        return (self.lb, self.rt - self.lb)
 
     def overlaps(self, other):
         lloc, uloc = self.lb, self.rt
@@ -574,9 +575,11 @@ class glyphData:
             return False
         return self.subpaths[-1][-1].isClose()
 
-    def hasHints(self, doVert=False, both=False):
+    def hasHints(self, doVert=False, both=False, either=False):
         if both:
             return len(self.vstems) > 0 and len(self.hstems) > 0
+        elif either:
+            return len(self.vstems) > 0 or len(self.hstems) > 0
         elif doVert:
             return len(self.vstems) > 0
         else:
@@ -637,8 +640,6 @@ class glyphData:
             prog.append('endchar')
         return prog
 
-#    def drawPoints(self, pen):
-
     # XXX deal with or avoid reordering when preserving any hints
     def reorder(self, neworder, lg):
         lg.debug("Reordering subpaths: %r" % neworder)
@@ -673,6 +674,34 @@ class glyphData:
         offset = 0
         if subpath < len(self.subpaths):
             return self.subpaths[subpath][offset]
+        return None
+
+    # Iterate through path elements but start each subpath
+    # with implicit closing line (if any). Skip pro forma
+    # (zero-length) close elements
+    def nextForHints(self, c):
+        if c is None:
+            return None
+        if c is self:
+            if not self.subpaths or not self.subpaths[0]:
+                return None
+            c = self.subpaths[0][-1]
+            if c.s == c.e:
+                c = self.subpaths[0][0]
+            return c
+        self.syncPositions()
+        subpath, offset = c.position
+        if c.isClose():
+            return self.subpaths[subpath][0]
+        offset += 1
+        if offset < len(self.subpaths[subpath]) - 1:
+            return self.subpaths[subpath][offset]
+        subpath += 1
+        if subpath < len(self.subpaths):
+            c = self.subpaths[subpath][-1]
+            if c.s == c.e:
+                c = self.subpaths[subpath][0]
+            return c
         return None
 
     def prev(self, c):

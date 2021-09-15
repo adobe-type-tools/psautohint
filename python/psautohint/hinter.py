@@ -56,6 +56,8 @@ class hinter:
         self.MuchPF = 50
         self.VeryMuchPF = 100
         self.CPfrac = 0.4
+        self.ConflictValMin = 50.0
+        self.ConflictValMult = 20.0
         self.BandMargin = 30
         self.MaxFlare = 10
         self.MaxBendMerge = 6
@@ -74,6 +76,7 @@ class hinter:
         self.MaxMerge = 2
         self.SFactor = 20
         self.SpcBonus = 1000
+        self.SpecialCharBonus = 200
         self.GhostFactor = 1.0 / 8.0
         self.DeltaDiffMin = .05
         self.DeltaDiffReport = 3
@@ -402,9 +405,11 @@ class hinter:
                         assert vali.lloc <= valj.lloc or valj.isGhost
                         n = self.glyph.nextInSubpath(c)
                         p = self.glyph.prevInSubpath(c)
-                        if vali.val < 50 and self.OKToRem(segi.loc, vali.spc):
+                        if (vali.val < self.ConflictValMin and
+                                self.OKToRem(segi.loc, vali.spc)):
                             remidx = i
-                        elif (valj.val < 50 and vali.val > valj.val * 20 and
+                        elif (valj.val < self.ConflictValMin and
+                              vali.val > valj.val * self.ConflictValMult and
                               self.OKToRem(segj.loc, valj.spc)):
                             remidx = j
                         elif (c.isLine() or self.flatQuo(p0, p1) > 0 and
@@ -733,10 +738,10 @@ class hinter:
                 self.Bonus = 0
                 if (self.isSpecial(lower=False) and
                         self.relPosition(c, lower=False)):
-                    self.Bonus = 200
+                    self.Bonus = self.SpecialCharBonus
                 elif (self.isSpecial(lower=True) and
                       self.relPosition(c, lower=True)):
-                    self.Bonus = 200
+                    self.Bonus = self.SpecialCharBonus
             if c.isLine() and not c.isTiny():
                 q = self.flatQuo(c.s, c.e)
                 if q > 0:
@@ -1431,7 +1436,7 @@ class hinter:
                     self.report.stemZone(l, u)  # XXX ?
 
         if not isV and glyphTop > glyphBot:
-            self.report.charZone(l, u)
+            self.report.charZone(glyphBot, glyphTop)
 
     def mainVals(self):
         mainValues = []
@@ -1465,7 +1470,7 @@ class hinter:
                         best = newbest
             svl.remove(best)
             prevBV = best.val
-            mainValues.insert(0, best)
+            bisect.insort(mainValues, best)
             llocb, ulocb = best.lloc, best.uloc
             if best.isGhost:
                 if best.lseg.type == hintSegment.sType.GHOST:

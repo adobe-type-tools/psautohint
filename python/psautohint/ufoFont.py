@@ -11,17 +11,18 @@ be used with UFO fonts only to support the hash mechanism.
 
 Developed in order to support checkOutlines and autohint, the code
 supports two main functions:
-- convert between UFO GLIF and bez formats
+- convert between UFO GLIF and GlyphData representations
 - keep a history of processing in a hash map, so that the (lengthy)
 processing by autohint and checkOutlines can be avoided if the glyph has
 already been processed, and the source data has not changed.
 
 The basic model is:
  - read GLIF file
- - transform GLIF XML element to bez file
- - call FDK tool on bez file
- - transform new bez file to GLIF XML element with new data, and save in list
-
+ - transform GLIF XML element to a GlyphData structure
+ - operate on the GlyphData structure
+ - transform the altered GlyphData back to a GLIF XML element,
+   and save in list
+-
 After all glyphs are done save all the new GLIF XML elements to GLIF
 files, and update the hash map.
 
@@ -117,7 +118,6 @@ import os
 import re
 import shutil
 
-from collections import OrderedDict
 from types import SimpleNamespace
 
 # from fontTools.pens.basePen import BasePen
@@ -333,10 +333,10 @@ HASHMAP_VERSION = (1, 0)  # If major version differs, do not use.
 AUTOHINT_NAME = "autohint"
 CHECKOUTLINE_NAME = "checkOutlines"
 
-BASE_FLEX_NAME = "flexCurve"
-FLEX_INDEX_LIST_NAME = "flexList"
+POINT_NAME_PATTERN = "hintRef%04d"
 HINT_DOMAIN_NAME1 = "com.adobe.type.autohint"
 HINT_DOMAIN_NAME2 = "com.adobe.type.autohint.v2"
+FLEX_INDEX_LIST_NAME = "flexList"
 HINT_SET_LIST_NAME = "hintSetList"
 HSTEM3_NAME = "hstem3"
 HSTEM_NAME = "hstem"
@@ -346,10 +346,6 @@ STEMS_NAME = "stems"
 VSTEM3_NAME = "vstem3"
 VSTEM_NAME = "vstem"
 STACK_LIMIT = 46
-
-
-class BezParseError(ValueError):
-    pass
 
 
 class UFOFontData:
@@ -401,16 +397,14 @@ class UFOFontData:
             layer = PROCESSED_LAYER_NAME
         glyphset = self._get_glyphset(layer)
 
-#        glyph = BezGlyph(gl)
-#        glyphset.readGlyph(name, glyph)
-        if hasattr(glyph, 'width'):
-            glyph.width = norm_float(glyph.width)
-        self.newGlyphMap[name] = glyph
+        gdwrap = GlyphDataWrapper(glyph)
+        glyphset.readGlyph(name, gdwrap)
+        self.newGlyphMap[name] = gdwrap
 
-        # updateFromBez is called only if the glyph has been autohinted which
-        # might also change its outline data. We need to update the edit status
-        # in the hash map entry. I assume that convertToBez has been run
-        # before, which will add an entry for this glyph.
+        # updateFromGlyphData is called only if the glyph has been autohinted
+        # which might also change its outline data. We need to update the edit
+        # status in the hash map entry. We assume that convertToGlyphData has
+        # been run before, which will add an entry for this glyph.
         self.updateHashEntry(name)
 
     def save(self, path):
@@ -457,7 +451,7 @@ class UFOFontData:
             if self.writeToDefaultLayer:
                 self.recalcHashEntry(name, glyph)
             glyphset.contents[name] = filename
-            # XXX glyphset.writeGlyph(name, glyph, glyph.drawPoints)
+            glyphset.writeGlyph(name, glyph, glyph.drawPoints)
         glyphset.writeContents()
 
         # Write hashmap
@@ -519,7 +513,7 @@ class UFOFontData:
         hashBefore, historyList = self.hashMap[glyphName]
 
         hash_pen = HashPointPen(glyph)
-        glyph.drawPoints(hash_pen)
+        glyph.drawPoints(hash_pen, ufoHintLib=False)
         hashAfter = hash_pen.getHash()
 
         if hashAfter != hashBefore:
@@ -746,6 +740,7 @@ class UFOFontData:
             fdDict.setInfo('HCounterChars', hCounterGlyphs)
 
         fdDict.setInfo('BlueFuzz', self.fontInfo.get("postscriptBlueFuzz", 1))
+        fdDict.buildBlueLists()
         # postscriptBlueShift
         # postscriptBlueScale
         self.fontDict = fdDict
@@ -786,6 +781,7 @@ class UFOFontData:
     @staticmethod
     def close():
         return
+
 
 class HashPointPen(AbstractPointPen):
 
@@ -828,42 +824,120 @@ class HashPointPen(AbstractPointPen):
         glyph.drawPoints(self)
 
 
-#class BezGlyph(object):
-#    def __init__(self, bez):
-#        self._bez = bez
-#        self.lib = {}
-#
-#    @staticmethod
-#    def _draw(contours, pen):
-#        for contour in contours:
-#            pen.beginPath()
-#            for point in contour:
-#                x = point.get("x")
-#                y = point.get("y")
-#                segmentType = point.get("type", None)
-#                name = point.get("name", None)
-#                pen.addPoint((x, y), segmentType=segmentType, name=name)
-#            pen.endPath()
-#
-#    def drawPoints(self, pen):
-#        contours, hints = convertBezToOutline(self._bez)
-#        self._draw(contours, pen)
-#
-#        # Add the stem hints.
-#        if hints is not None:
-#            # Add this hash to the glyph data, as it is the hash which matches
-#            # the output outline data. This is not necessarily the same as the
-#            # hash of the source data; autohint can be used to change outlines.
-#            hash_pen = HashPointPen(self)
-#            self._draw(contours, hash_pen)
-#            hints["id"] = hash_pen.getHash()
-#
-#            # Remove any existing hint data.
-#            for key in (HINT_DOMAIN_NAME1, HINT_DOMAIN_NAME2):
-#                if key in self.lib:
-#                    del self.lib[key]
-#
-#            self.lib[HINT_DOMAIN_NAME2] = hints
+class GlyphDataWrapper(object):
+    def __init__(self, glyph):
+        self._glyph = glyph
+        self.lib = {}
+        if hasattr(glyph, 'width'):
+            self.width = norm_float(glyph.width)
+
+    def addUfoFlex(self, uhl, pointname):
+        if uhl.get(FLEX_INDEX_LIST_NAME, None) is None:
+            uhl[FLEX_INDEX_LIST_NAME] = []
+        uhl[FLEX_INDEX_LIST_NAME].append(pointname)
+
+    def addUfoMask(self, uhl, masks, pointname):
+        if masks is None:
+            return
+
+        if uhl.get(HINT_SET_LIST_NAME, None) is None:
+            uhl[HINT_SET_LIST_NAME] = []
+
+        glyph = self._glyph
+        iscntr = [False, False]
+        opname = [HSTEM_NAME, VSTEM_NAME]
+        cntropname = [HSTEM3_NAME, VSTEM3_NAME]
+        if glyph.cntr and glyph.cntr[0]:
+            for i in range(2):
+                iscntr[i] = True in glyph.cntr[0][i]
+
+        ustems = []
+        for i, stems in enumerate([glyph.hstems, glyph.vstems]):
+            sl = [s for (s, b) in zip(stems, masks[i]) if b]
+            if iscntr[i]:
+                pl = [cntropname[i]]
+                for s in sl:
+                    pl.extend((str(norm_float(v)) for v in s.UFOVals()))
+                ustems.append(" ".join(pl))
+            else:
+                for s in sl:
+                    p, w = s.UFOVals()
+                    ustems.append("%s %s %s" % (opname[i], norm_float(p),
+                                                norm_float(w)))
+        hintset = {}
+        hintset[POINT_TAG] = pointname
+        hintset[STEMS_NAME] = ustems
+        uhl[HINT_SET_LIST_NAME].append(hintset)
+
+    def addUfoHints(self, uhl, pe, labelnum, startSubpath=False):
+        pn = POINT_NAME_PATTERN % labelnum
+        if uhl is None:
+            # Not recording hints
+            return labelnum, None
+        if not startSubpath or labelnum != 0:
+            # No hint data to record
+            if pe.flex != 1 and not pe.masks:
+                return labelnum, None
+            if pe.flex == 1:
+                self.addUfoFlex(uhl, pn)
+            self.addUfoMask(uhl, pe.masks, pn)
+        else:
+            # First call, record top-level mask (if any)
+            self.addUfoMask(uhl, self._glyph.startmasks, pn)
+        labelnum += 1
+        return labelnum, pn
+
+    def drawPoints(self, pen, ufoHintLib=True):
+        uhl = {} if ufoHintLib else None
+        glyph = self._glyph
+        doHints = ufoHintLib and (glyph.hasFlex() or
+                                  glyph.hasHints(either=True))
+        pln, pn = 0, None
+        for s in glyph.subpaths:
+            wrapi = len(s) - 1
+            if wrapi < 0:
+                continue
+            w = s[wrapi]
+            assert w.isClose() and w.e == s[0].s
+            if w.e == w.s:
+                wrapi -= 1
+                w = s[wrapi]
+            pen.beginPath()
+            wt = 'line' if w.isLine() else "curve"
+            if doHints:
+                pln, pn = self.addUfoHints(uhl, w, pln, startSubpath=True)
+            pen.addPoint((w.e.x, w.e.y), segmentType=wt, name=pn)
+            for i in range(0, wrapi):
+                c = s[i]
+                if doHints:
+                    pln, pn = self.addUfoHints(uhl, c, pln)
+                if c.isLine():
+                    pen.addPoint((c.e.x, c.e.y), segmentType="line", name=pn)
+                else:
+                    pen.addPoint((c.cs.x, c.cs.y), name=pn)
+                    pen.addPoint((c.ce.x, c.ce.y))
+                    pen.addPoint((c.e.x, c.e.y), segmentType="curve")
+            if not w.isLine():
+                if doHints:
+                    pln, pn = self.addUfoHints(uhl, w, pln)
+                pen.addPoint((w.cs.x, w.cs.y), name=pn)
+                pen.addPoint((w.ce.x, w.ce.y))
+            pen.endPath()
+
+        if ufoHintLib:
+            # Add this hash to the glyph data, as it is the hash which matches
+            # the output outline data. This is not necessarily the same as the
+            # hash of the source data; autohint can be used to change outlines.
+            hash_pen = HashPointPen(self)
+            self.drawPoints(hash_pen, ufoHintLib=False)
+            uhl["id"] = hash_pen.getHash()
+
+            # Remove any existing hint data.
+            for key in (HINT_DOMAIN_NAME1, HINT_DOMAIN_NAME2):
+                if key in self.lib:
+                    del self.lib[key]
+
+            self.lib[HINT_DOMAIN_NAME2] = uhl
 
 
 def norm_float(value):

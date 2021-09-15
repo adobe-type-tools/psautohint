@@ -157,7 +157,7 @@ class Report:
         # value: zone count
         top_dict = defaultdict(int)
         bot_dict = defaultdict(int)
-        for top, bot in all_zones_dict:
+        for bot, top in all_zones_dict:
             top = self.round_value(top)
             top_dict[top] += 1
             bot = self.round_value(bot)
@@ -574,7 +574,7 @@ class hintAdapter:
 
         self.distributeMasks(glyph)
 
-        return glyph.changed
+        return True
 
     def distributeMasks(self, glyph):
         log = self.hHinter
@@ -623,7 +623,8 @@ class hintAdapter:
         NOTSHORT, SHORT, CONFLICT = 0, 1, 2
         mode = NOTSHORT
         ns = None
-        for c in glyph:
+        c = glyph.nextForHints(glyph)
+        while c:
             if c.isShort() or c.flex == 2:
                 if mode == NOTSHORT:
                     if ns:
@@ -665,6 +666,7 @@ class hintAdapter:
                 if mode == SHORT:
                     incompatmasks, _ = self.joinMasks(incompatmasks, cmasks,
                                                       False)
+            c = glyph.nextForHints(c)
         if mode == SHORT:
             oldmasks[:] = masks
             masks = oldmasks
