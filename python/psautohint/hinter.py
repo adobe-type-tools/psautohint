@@ -549,6 +549,8 @@ class hinter:
     def checkTfm(self):
         pass
 
+    # Generate segments
+
     def relPosition(self, c, lower=False):
         for subp in self.glyph.subpaths:
             if ((lower and subp[0].s.a < c.s.a) or
@@ -732,8 +734,10 @@ class hinter:
         self.Bonus = 0
         for c in self.glyph:
             prv = self.glyph.prevInSubpath(c)
-            self.info("Element %d %d   x %g y %g" %
-                      (c.position[0], c.position[1] + 1, c.e.x, c.e.y))
+            if c.isLine():
+                self.info("Element %d %d   %s %s" % (c.position[0], c.position[1] + 1, c.s, c.e))
+            else:
+                self.info("Element %d %d   %s %s %s %s" % (c.position[0], c.position[1] + 1, c.s, c.cs, c.ce, c.e))
             if c.isStart():
                 self.Bonus = 0
                 if (self.isSpecial(lower=False) and
@@ -804,12 +808,12 @@ class hinter:
                                 if abs(end) > abs(adist):
                                     adist = end
                                 self.addSegment(c.s.a, c.s.a + adist, c.s.o, prv, c,
-                                        hintSegment.sType.CURVE, "not flex2 if")
+                                        hintSegment.sType.CURVE, "curve start 1")
                             else:
                                 # XXX bugfix in V
                                 adist = self.adjustDist(self.CPTo(c.s.a, c.cs.a) - c.s.a, q)
                                 self.addSegment(c.s.a, c.s.a + adist, c.s.o, prv, c,
-                                        hintSegment.sType.CURVE, "not flex2 else")
+                                        hintSegment.sType.CURVE, "curve start 2")
                 if c.flex != 1:
                     q = self.flatQuo(c.ce, c.e)
 #                    self.info("q=%f" % q)
@@ -843,7 +847,7 @@ class hinter:
                                                self.glyph.nextSlopePoint(c))
                             self.addSegment(aavg - adist, aavg + adist, sp, c,
                                             None, hintSegment.sType.CURVE,
-                                            "not flex1 if")
+                                            "curve end 1")
                         else:
                             q2 = self.flatQuo(c.cs, c.e)
                             if (q2 > 0 and
@@ -855,11 +859,11 @@ class hinter:
 #                                self.info("aend = %f, adist = %f, q2 = %f" % (aend, adist, q2))
                                 self.addSegment(c.e.a - adist, c.e.a, c.e.o, c,
                                                 None, hintSegment.sType.CURVE,
-                                                "not flex1 else 1")
+                                                "curve end 2")
                             else:
                                 self.addSegment(c.e.a - adist, c.e.a, c.e.o, c,
                                                 None, hintSegment.sType.CURVE,
-                                                "not flex1 else 2")
+                                                "curve end 3")
                 if c.flex is None:
                     d, extp, extt, isMin = c.getBounds().farthestExtreme(not self.isV())
                     if d > 2:
@@ -874,7 +878,7 @@ class hinter:
                         self.addSegment(aavg - adist, aavg + adist,
                                         round(extp.o + 0.5), c, None,
                                         hintSegment.sType.CURVE,
-                                        "curve segment")
+                                        "curve extrema")
 
         self.hs.compactLists()
         self.hs.remExtraBends(self)
@@ -893,7 +897,8 @@ class hinter:
             else:
                 self.debug("None")
 
-        # Stems
+    # Generate candidate stems with values
+
     def genStemVals(self):
         ll, ul = self.segmentLists()
 #        for ls in ll:
@@ -1088,7 +1093,8 @@ class hinter:
                 svl[k].val = val
             i = j
 
-    # merge
+    # Prune unneeded candidate stems
+
     def pruneStemVals(self):
         for c in self.hs.stemValues if self.isV() else reversed(self.hs.stemValues):
             otherLow = otherHigh = False
@@ -1208,17 +1214,9 @@ class hinter:
         other_sv.show(self.isV(), "pruner", self)
         sv.pruned = True
 
-    def closePathElems(self, pe1, pe2, loc1, loc2):
-        if pe1 is pe2:
-            return True
-        if loc1 > loc2:
-            loc1, loc2 = loc2, loc1
-        if (loc2 - loc1) > 5 * self.CloseMerge:
-            return False
-        loc1 -= self.CloseMerge
-        loc2 += self.closeMerge
+    # Merge related candidate stems
 
-    def findBestValues(self):
+    def findBestValues(self):  # XXX need better name
         svl = self.hs.stemValues
         svll = len(svl)
         for i in range(svll):
@@ -1395,6 +1393,8 @@ class hinter:
             return True
         return not (not self.Pruning or sv.val < self.PruneB)
 
+    # Reporting
+
     def checkVals(self):
         lPrev = uPrev = -1e20
         for sv in self.hs.stemValues:
@@ -1437,6 +1437,8 @@ class hinter:
 
         if not isV and glyphTop > glyphBot:
             self.report.charZone(glyphBot, glyphTop)
+
+    # Pick non-conflicting "main" set of stems
 
     def mainVals(self):
         mainValues = []
