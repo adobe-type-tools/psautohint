@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 
 
 class hintSegment:
+    """Represents a hint "segment" (one side of a potential stem)"""
     class sType(Enum):
         LINE = 0,
         BEND = 1,
@@ -22,6 +23,32 @@ class hintSegment:
         GHOST = 3
 
     def __init__(self, aloc, oMin, oMax, pe, typ, bonus, isV, desc):
+        """
+        Initializes the object
+
+        self.loc is the segment location in the aligned dimension
+        (x for horizontal, y for vertical)
+
+        self.min and self.max are the extent of the segment in the
+        opposite dimension
+
+        self.bonus is 0 for normal segments and more for "special"
+        segments (e.g. those within a BlueValue)
+
+        self.type indicates the source of the segment (with GHOST
+        being specially important)
+
+        self.isV records the dimension (False for horizontal, etc.)
+
+        self.desc is a string with a more detailed indication of
+        how the segment was derived)
+
+        self.pe is a weak reference to the pathElement (spline) from
+        which the segment was derived
+
+        self.hintval, self.replacedBy, and self.deleted are state used
+        by the hinter
+        """
         self.loc = aloc
         self.min = oMin
         self.max = oMax
@@ -44,16 +71,21 @@ class hintSegment:
         return self.loc < other.loc
 
     def current(self, orig=None):
+        """
+        Returns the object corresponding to this object relative to
+        self.replacedBy
+        """
         if self.replacedBy is None:
             return self
         if self is orig:
-            # XXX throw exception about cycle
+            self.error("Cycle in hint segment replacement")
             return self
         if orig is None:
             orig = self
         return self.replacedBy.current(orig=self)
 
     def show(self, label, lg=log):
+        """Logs a debug message about the segment"""
         if self.isV:
             pp = (label, 'v', self.loc, self.min, self.loc, self.max,
                   self.desc)
@@ -64,6 +96,7 @@ class hintSegment:
 
 
 class stemValue:
+    """Represents a potential hint stem"""
     def __init__(self, lloc, uloc, val, spc, lseg, useg, isGhost=False):
         assert lloc <= uloc
         self.val = val
@@ -85,12 +118,14 @@ class stemValue:
         return slloc == olloc and suloc == ouloc
 
     def __lt__(self, other):
+        """Orders values by lower and then upper location"""
         slloc, suloc = self.ghosted()
         olloc, ouloc = other.ghosted()
         return (slloc < olloc or (slloc == olloc and suloc < ouloc))
 
     # c.f. page 22 of Adobe TN #5177 "The Type 2 Charstring Format"
     def ghosted(self):
+        """Return the stem range but with ghost stems normalized"""
         lloc, uloc = self.lloc, self.uloc
         if self.isGhost:
             if self.lseg.type == hintSegment.sType.GHOST:
@@ -102,6 +137,7 @@ class stemValue:
         return (lloc, uloc)
 
     def compVal(self, spcFactor=1, ghostFactor=1):
+        """Represent self.val and self.spc as a comparable 2-tuple"""
         v = self.val
         if self.isGhost:
             v *= ghostFactor
@@ -110,6 +146,7 @@ class stemValue:
         return (v, self.initialVal)
 
     def show(self, isV, typ, lg=log):
+        """Add a log message with the content of the object"""
         tags = ('v', 'l', 'r', 'b', 't') if isV else ('h', 'b', 't', 'l', 'r')
         start = "%s %sval %s %g %s %g v %g s %g %s" % (typ, tags[0], tags[1],
                                                        self.lloc, tags[2],
@@ -126,19 +163,46 @@ class stemValue:
 
 
 class pathElementHintState:
+    """Stores the intermediate hint state of a pathElement"""
     def __init__(self):
         self.segments = []
         self.mask = []
 
     def cleanup(self):
+        """Deletes segments marked as such"""
         self.segments[:] = [s.current() for s in self.segments
                             if not s.deleted]
 
     def pruneHintSegs(self):
+        """Deletes segments with no assigned hintval"""
         self.segments[:] = [s for s in self.segments if s.hintval is not None]
 
 
 class glyphHintState:
+    """
+    Stores the intermediate hint state (for one dimension) of a glyphData object
+
+    peStates: A hash of pathElementHintState objects with the pathElement as key
+    increasingSegs: Segments with endpoints (in the opposite dimension) greater
+                    than their start points
+    decreasingSegs: Segments with endpoints (in the opposite dimension) less
+                    than their start points
+    stemValues: List of stemValue objects in increasing order of position
+    mainValues: List of non-overlapping "main" stemValues in decreasing order
+                of value
+    rejectValues: The set of stemValues - mainValues
+    counterHinted: True if the glyph is counter hinted in this dimension
+    stems: stemValue stems represented in glyphData 'stem' object format
+    keepHints: If true, keep already defined hints and masks in this dimension
+               (XXX only partially implemented)
+    hasConflicts: True when some stemValues overlap
+    stemConflicts: 2d boolean array. Stem n conflicts with stem m <=>
+                   stemConflicts[n][m] == True
+    ghostCompat: if stem m is a ghost stem, ghostCompat[m] is a boolean
+                 array where ghostCompat[m][n] is True <=> n can substitute
+                 for m (n has the same location on the relevant side)
+    mainMask: glyphData hintmask-like representation of mainValues
+    """
     def __init__(self):
         self.peStates = {}
         self.increasingSegs = []
@@ -155,6 +219,10 @@ class glyphHintState:
         self.mainMask = None
 
     def getPEState(self, pe, make=False):
+        """
+        Returns the pathElementHintState object for pe, allocating the object
+        if necessary
+        """
         s = self.peStates.get(pe, None)
         if s:
             return s
@@ -165,6 +233,7 @@ class glyphHintState:
             return None
 
     def addSegment(self, fr, to, loc, pe1, pe2, typ, bonus, isV, desc):
+        """Adds a new segment associated with pathElements pe1 and pe2"""
         if fr > to:
             mn, mx = to, fr
             lst = self.decreasingSegs
@@ -182,6 +251,11 @@ class glyphHintState:
         bisect.insort(lst, s)
 
     def compactList(self, l):
+        """
+        Compacts overlapping segments with the same location by picking
+        one segment to represent the pair, adjusting its values, and 
+        removing the other segment
+        """
         i = 0
         while i < len(l):
             j = i + 1
@@ -206,10 +280,19 @@ class glyphHintState:
             i += 1
 
     def compactLists(self):
+        """Compacts both segment lists"""
         self.compactList(self.decreasingSegs)
         self.compactList(self.increasingSegs)
 
     def remExtraBends(self, lg=log):
+        """
+        Delete BEND segment x when there is another segment y:
+           1. At the same location
+           2. but in the other direction
+           2. that is not of type BEND or GHOST and
+           3. that overlaps with x and
+           4. is at least three times longer
+        """
         li = self.increasingSegs
         ld = self.decreasingSegs
         i = 0
@@ -240,20 +323,30 @@ class glyphHintState:
                         del ld[d]
                         d -= 1
                         lg.debug("rem seg loc %g from %g to %g" %
-                                 (hsd.loc, hsd.min, hsi.max))
+                                 (hsd.loc, hsd.min, hsd.max))
                 d += 1
             i += 1
 
     def cleanup(self):
+        """Runs cleanup on all pathElementHintState objects"""
         for pes in self.peStates.values():
             pes.cleanup()
 
     def pruneHintSegs(self):
+        """Runs pruneHintSegs on all pathElementHintState objects"""
         for pes in self.peStates.values():
             pes.pruneHintSegs()
 
 
 class links:
+    """
+    Tracks which subpaths need which stem hints and calculates a subpath
+    to reduce hint substitution
+
+    cnt: The number of subpaths
+    links: A cnt x cnt array of integers modified by mark
+           (Values only 0 or 1 but kept as ints for later arithmetic)
+    """
     def __init__(self, glyph):
         l = len(glyph.subpaths)
         if l < 4 or l > 100:
@@ -263,6 +356,7 @@ class links:
         self.links = [[0] * l for i in range(l)]
 
     def logLinks(self, lg=log):
+        """Prints a log message representing links"""
         if self.cnt == 0:
             return
         lg.debug("Links")
@@ -272,12 +366,17 @@ class links:
                                for i in range(self.cnt))))
 
     def logShort(self, shrt, lab, lg):
+        """Prints a log message representing (1-d) shrt"""
         lg.debug(lab)
         lg.debug(' '.join((str(i).rjust(2) for i in range(self.cnt))))
         lg.debug(' '.join(((str(shrt[i]) if shrt[i] else ' ').rjust(2)
                            for i in range(self.cnt))))
 
     def mark(self, hntr):
+        """
+        For each stemValue in hntr, set links[m][n] and links[n][m] to 1
+        if one side of a stem is in m and the other is in n
+        """
         if self.cnt == 0:
             return
         for sv in hntr.hs.stemValues:
@@ -292,6 +391,10 @@ class links:
             self.links[usubp][lsubp] = 1
 
     def moveIdx(self, suborder, subidxs, outlinks, idx, lg):
+        """
+        Move value idx from subidxs to the end of suborder and update
+        outlinks to record all links shared with idx
+        """
         subidxs.remove(idx)
         suborder.append(idx)
         for i in range(len(outlinks)):
@@ -299,6 +402,11 @@ class links:
         self.logShort(outlinks, "Outlinks", lg)
 
     def shuffle(self, lg=log):
+        """
+        Returns suborder list with all subpath indexes in decreasing
+        order of links shared with previous subpath. (The first subpath
+        being the one with most links overall.)
+        """
         if self.cnt == 0:
             return None
         sumlinks = [sum(l) for l in zip(*self.links)]

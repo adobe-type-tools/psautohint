@@ -1,7 +1,7 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-Utilities for converting between T2 charstrings and the glyphData format.
+Utilities for converting between T2 charstrings and glyphData objects.
 """
 
 import copy
@@ -56,7 +56,7 @@ def _add_method(*clazzes):
 
 
 def hintOn(i, hintMaskBytes):
-    # used to help convert T2 hintmask bytes to a boolean array
+    """Used to help convert T2 hintmask bytes to a boolean array"""
     byteIndex = int(i / 8)
     byteValue = hintMaskBytes[byteIndex]
     offset = 7 - (i % 8)
@@ -64,13 +64,17 @@ def hintOn(i, hintMaskBytes):
 
 
 class T2ToGlyphDataExtractor(T2OutlineExtractor):
+    """
+    Inherits from the fontTools Outline Extractor and adapts some of the
+    operator methods to match the "hint pen" interface of the glyphData class
+    """
     def __init__(self, gd, localSubrs, globalSubrs, nominalWidthX,
-                 defaultWidthX, read_stems=True, read_flex=True):
+                 defaultWidthX, readStems=True, readFlex=True):
         T2OutlineExtractor.__init__(self, gd, localSubrs, globalSubrs,
                                     nominalWidthX, defaultWidthX)
         self.glyph = gd
-        self.read_stems = read_stems
-        self.read_flex = read_flex
+        self.readStems = readStems
+        self.readFlex = readFlex
         self.hintMaskBytes = None
         self.subrLevel = 0
         self.vhintCount = 0
@@ -90,50 +94,50 @@ class T2ToGlyphDataExtractor(T2OutlineExtractor):
             raise SEACError
 
     def op_hflex(self, index):
-        if self.read_flex:
+        if self.readFlex:
             self.glyph.nextIsFlex()
         super().op_hflex(index)
 
     def op_flex(self, index):
-        if self.read_flex:
+        if self.readFlex:
             self.glyph.nextIsFlex()
         super().op_flex(index)
 
     def op_hflex1(self, index):
-        if self.read_flex:
+        if self.readFlex:
             self.glyph.nextIsFlex()
         super().op_hflex1(index)
 
     def op_flex1(self, index):
-        if self.read_flex:
+        if self.readFlex:
             self.glyph.nextIsFlex()
         super().op_flex1(index)
 
     def op_hstem(self, index):
         args = self.popallWidth()
         self.countHints(args, True)
-        if not self.read_stems:
+        if not self.readStems:
             return
         self.glyph.hStem(args, False)
 
     def op_vstem(self, index):
         args = self.popallWidth()
         self.countHints(args, False)
-        if not self.read_stems:
+        if not self.readStems:
             return
         self.glyph.vStem(args, False)
 
     def op_hstemhm(self, index):
         args = self.popallWidth()
         self.countHints(args, True)
-        if not self.read_stems:
+        if not self.readStems:
             return
         self.glyph.hStem(args, True)
 
     def op_vstemhm(self, index):
         args = self.popallWidth()
         self.countHints(args, False)
-        if not self.read_stems:
+        if not self.readStems:
             return
         self.glyph.vStem(args, True)
 
@@ -165,28 +169,27 @@ class T2ToGlyphDataExtractor(T2OutlineExtractor):
 
     def op_hintmask(self, index):
         hintString, hhints, vhints, index = self.doMask(index)
-        if self.read_stems:
+        if self.readStems:
             self.glyph.hintmask(hhints, vhints)
         return hintString, index
 
     def op_cntrmask(self, index):
         hintString, hhints, vhints, index = self.doMask(index)
-        if self.read_stems:
+        if self.readStems:
             self.glyph.cntrmask(hhints, vhints)
         return hintString, index
 
 
-def convertT2ToGlyphData(t2CharString, read_stems=True, read_flex=True,
-                         round_coords=True, name=None):
-    # wrapper for T2ToGlyphDataExtractor which
-    # applies it to the supplied T2 charstring
-    gl = glyphData(round_coords=round_coords, name=name)
+def convertT2ToGlyphData(t2CharString, readStems=True, readFlex=True,
+                         roundCoords=True, name=None):
+    """Wrapper method for T2ToGlyphDataExtractor execution"""
+    gl = glyphData(roundCoords=roundCoords, name=name)
     subrs = getattr(t2CharString.private, "Subrs", [])
     extractor = T2ToGlyphDataExtractor(gl, subrs,
                                        t2CharString.globalSubrs,
                                        t2CharString.private.nominalWidthX,
                                        t2CharString.private.defaultWidthX,
-                                       read_stems, read_flex)
+                                       readStems, readFlex)
     extractor.execute(t2CharString)
     t2_width_arg = None
     if extractor.gotWidth and (extractor.width is not None):
@@ -288,12 +291,12 @@ class CFFFontData:
         alignment_max = max(upm * 1.25, font_max)
         return alignment_min, alignment_max
 
-    def convertToGlyphData(self, glyphName, read_stems, read_flex,
-                           round_coords, doAll=False):
+    def convertToGlyphData(self, glyphName, readStems, readFlex,
+                           roundCoords, doAll=False):
         t2CharString = self.charStrings[glyphName]
         try:
-            gl = convertT2ToGlyphData(t2CharString, read_stems, read_flex,
-                                      round_coords, name=glyphName)
+            gl = convertT2ToGlyphData(t2CharString, readStems, readFlex,
+                                      roundCoords, name=glyphName)
         except SEACError:
             log.warning("Skipping %s: can't process SEAC composite glyphs.",
                         glyphName)

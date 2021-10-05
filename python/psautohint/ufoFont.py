@@ -1,20 +1,14 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-This module supports using the Adobe FDK tools which operate on 'bez'
-files with UFO fonts. It provides low level utilities to manipulate UFO
-data without fully parsing and instantiating UFO objects, and without
-requiring that the AFDKO contain the robofab libraries.
-
-Modified in Nov 2014, when AFDKO added the robofab libraries. It can now
-be used with UFO fonts only to support the hash mechanism.
+This module provides means of reading glyph data from and writing data 
+to UFO fonts, partly in virtue of the fontTools UFO library.
 
 Developed in order to support checkOutlines and autohint, the code
 supports two main functions:
 - convert between UFO GLIF and GlyphData representations
-- keep a history of processing in a hash map, so that the (lengthy)
-processing by autohint and checkOutlines can be avoided if the glyph has
-already been processed, and the source data has not changed.
+- Calculate a hash value for a glyph path used to maintain a map of what
+  glyphs have already been processed.
 
 The basic model is:
  - read GLIF file
@@ -383,10 +377,10 @@ class UFOFontData:
     def hasFDArray():
         return False
 
-    def convertToGlyphData(self, name, read_stems, read_flex, round_coords,
+    def convertToGlyphData(self, name, readStems, readFlex, roundCoords,
                            doAll=False):
-        glyph, skip = self._get_or_skip_glyph(name, read_stems, read_flex,
-                                              round_coords, doAll)
+        glyph, skip = self._get_or_skip_glyph(name, readStems, readFlex,
+                                              roundCoords, doAll)
         if skip:
             return None
         return glyph
@@ -566,15 +560,15 @@ class UFOFontData:
         return self._glyphsets[layer_name]
 
     @staticmethod
-    def get_glyph_data(glyph, name, read_stems, read_flex, round_coords):
-        gl = glyphData(round_coords=round_coords, name=name)  # XXX
+    def get_glyph_data(glyph, name, readStems, readFlex, roundCoords):
+        gl = glyphData(roundCoords=roundCoords, name=name)
         glyph.draw(gl)
         if not hasattr(glyph, "width"):
             glyph.width = 0
         gl.setWidth(glyph.width)
         return gl
 
-    def _get_or_skip_glyph(self, name, read_stems, read_flex, round_coords,
+    def _get_or_skip_glyph(self, name, readStems, readFlex, roundCoords,
                            doAll):
         # Get default glyph layer data, so we can check if the glyph
         # has been edited since this program was last run.
@@ -582,8 +576,8 @@ class UFOFontData:
         # matches the default glyph layer data, we can skip.
         glyphset = self._get_glyphset()
         glyph = glyphset[name]
-        glyph_data = self.get_glyph_data(glyph, name, read_stems, read_flex,
-                                         round_coords)
+        glyph_data = self.get_glyph_data(glyph, name, readStems, readFlex,
+                                         roundCoords)
 
         # Hash is always from the default glyph layer.
         hash_pen = HashPointPen(glyph)
@@ -594,8 +588,8 @@ class UFOFontData:
         if name in self.processedLayerGlyphMap:
             glyphset = self._get_glyphset(PROCESSED_LAYER_NAME)
             glyph = glyphset[name]
-            glyph_data = self.get_glyph_data(glyph, read_stems, read_flex,
-                                             round_coords)
+            glyph_data = self.get_glyph_data(glyph, readStems, readFlex,
+                                             roundCoords)
         return glyph_data, skip
 
     def getGlyphList(self):
@@ -825,6 +819,10 @@ class HashPointPen(AbstractPointPen):
 
 
 class GlyphDataWrapper(object):
+    """
+    Wraps a glyphData object while storing the properties set by readGlyph
+    to aid output of hint data in Adobe's "hint format 2" for UFO.
+    """
     def __init__(self, glyph):
         self._glyph = glyph
         self.lib = {}
@@ -832,11 +830,13 @@ class GlyphDataWrapper(object):
             self.width = norm_float(glyph.width)
 
     def addUfoFlex(self, uhl, pointname):
+        """Mark the named point as starting a flex hint"""
         if uhl.get(FLEX_INDEX_LIST_NAME, None) is None:
             uhl[FLEX_INDEX_LIST_NAME] = []
         uhl[FLEX_INDEX_LIST_NAME].append(pointname)
 
     def addUfoMask(self, uhl, masks, pointname):
+        """Associates the hint set represented by masks with the named point"""
         if masks is None:
             return
 
@@ -870,6 +870,7 @@ class GlyphDataWrapper(object):
         uhl[HINT_SET_LIST_NAME].append(hintset)
 
     def addUfoHints(self, uhl, pe, labelnum, startSubpath=False):
+        """Adds hints to the pathElement, naming points as necessary"""
         pn = POINT_NAME_PATTERN % labelnum
         if uhl is None:
             # Not recording hints
@@ -888,6 +889,10 @@ class GlyphDataWrapper(object):
         return labelnum, pn
 
     def drawPoints(self, pen, ufoHintLib=True):
+        """
+        Calls pointPen commands on pen to draw the glyph, optionally naming
+        some points and building a library of hint annotations
+        """
         uhl = {} if ufoHintLib else None
         glyph = self._glyph
         doHints = ufoHintLib and (glyph.hasFlex() or

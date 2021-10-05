@@ -332,7 +332,7 @@ class HintOptions(ACOptions):
         self.logOnly = pargs.report_only
         self.printDefaultFDDict = pargs.print_dflt_fddict
         self.printFDDictList = pargs.print_list_fddict
-        self.round_coords = not pargs.decimal
+        self.roundCoords = not pargs.decimal
         self.writeToDefaultLayer = pargs.write_to_default_layer
 
 
@@ -400,10 +400,10 @@ class DuplicateMessageFilter(logging.Filter):
         self.logs = set()
 
     def filter(self, record):
-#        current = (record.module, record.levelno, record.getMessage())
-#        if current in self.logs:
-#            return False
-#        self.logs.add(current)
+        current = (record.module, record.levelno, record.getMessage())
+        if current in self.logs:
+            return False
+        self.logs.add(current)
         return True
 
 
@@ -472,7 +472,7 @@ def _validate_path(path_str):
 
 
 RE_COUNTER_CHARS = re.compile(
-    r"([VH])CounterChars\s+[\(\[]\s*([^\)\r\n]+)[\)\]]")
+    r"([VH]CounterChars)\s+[\(\[]\s*([^\)\r\n]+)[\)\]]")
 RE_COMMENT_LINE = re.compile(r"#[^\r\n]+")
 
 
@@ -484,10 +484,11 @@ def _parse_fontinfo_file(options, fontinfo_path):
     data = _read_txt_file(fontinfo_path)
     data = re.sub(RE_COMMENT_LINE, "", data)
     counterGlyphLists = RE_COUNTER_CHARS.findall(data)
-    for entry in counterGlyphLists:
-        glyphList = entry[1].split()
+    for glname, glist in counterGlyphLists:
+        # True indicates there should be an error if the glyph is missing
+        glyphList = { k: True for k in glist.split() }
         if glyphList:
-            if entry[0] == "V":
+            if glname[0] == "V":
                 options.vCounterGlyphs.update(glyphList)
             else:
                 options.hCounterGlyphs.update(glyphList)
@@ -687,22 +688,22 @@ def get_options(args):
 
     parsed_args = parser.parse_args(args)
 
+    log_format = "%(levelname)s: %(message)s"
     if parsed_args.verbose == 0:
         log_level = logging.WARNING
-    elif parsed_args.verbose == 1:
-        log_level = logging.INFO
     else:
-        log_level = logging.DEBUG
+        log_format = "[%(filename)s:%(lineno)d] " + log_format
+        if parsed_args.verbose == 1:
+            log_level = logging.INFO
+        else:
+            log_level = logging.DEBUG
 
-#    logging.basicConfig(format="%(levelname)s: %(message)s",
-#                         level=log_level, filename=parsed_args.log_path)
-    logging.basicConfig(format="[%(filename)s:%(lineno)d] " +
-                               "%(levelname)s: %(message)s",
-                        level=log_level,
+    logging.basicConfig(format=log_format, level=log_level,
                         filename=parsed_args.log_path)
 
-    if parsed_args.test is False:
-        # Filter duplicate logging messages only when not running the tests
+    # Filter duplicate logging messages only when not running the tests
+    # and when not reporting more detailed log levels
+    if log_level == logging.WARNING and parsed_args.test is False:
         for handler in logging.root.handlers:
             handler.addFilter(DuplicateMessageFilter())
 

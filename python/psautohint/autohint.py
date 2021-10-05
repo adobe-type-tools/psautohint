@@ -5,29 +5,6 @@
 # Parse args. If glyphlist is from file, read in entire file as single string,
 # and remove all white space, then parse out glyph-names and GID's.
 
-# For each font name:
-#   Use fontTools library to open font and extract CFF table.
-#   If error, skip font and report error.
-#   Filter specified glyph list, if any, with list of glyphs in the font.
-#   Open font plist file, if any. If not, create empty font plist.
-#   Build alignment zone string
-#   For identifier in glyph-list:
-#     Get T2 charstring for glyph from parent font CFF table. If not present,
-#       report and skip.
-#     Get new alignment zone string if FDarray index (which font dict is used)
-#       has changed.
-#     Convert to bez
-#     Build autohint point list string; this is used to tell if glyph has been
-#       changed since the last time it was hinted.
-#     If requested, check against plist dict, and skip if glyph is already
-#       hinted or is manually hinted.
-#     Call autohint library on bez string.
-#     If change to the point list is permitted and happened, rebuild.
-#     Autohint point list string.
-#     Convert bez string to T2 charstring, and update parent font CFF.
-#     Add glyph hint entry to plist file
-#  Save font plist file.
-
 import logging
 import os
 import sys
@@ -54,7 +31,7 @@ class ACOptions(object):
         self.nameAliases = {}
         self.excludeGlyphList = False
         self.hintAll = False
-        self.read_hints = True
+        self.readHints = True
         self.allowChanges = False
         self.noFlex = False
         self.noHintSub = False
@@ -62,20 +39,26 @@ class ACOptions(object):
         self.logOnly = False
         self.printDefaultFDDict = False
         self.printFDDictList = False
-        self.round_coords = True
+        self.roundCoords = True
         self.writeToDefaultLayer = False
         self.font_format = None
         self.report_zones = False
         self.report_stems = False
         self.report_all_stems = False
 
-        self.hCounterGlyphs = {'element', 'equivalence', 'notelement',
-                               'divide'}
-        self.vCounterGlyphs = {'m', 'M', 'T', 'ellipsis'}
-        self.upperSpecials = {'questiondown', 'exclamdown', 'semicolon'}
-        self.lowerSpecials = {'question', 'exclam', 'colon'}
-        self.noBlues = {'at', 'bullet', 'copyright', 'currency', 'registered'}
-        self.newHintsOnMoveto = {'percent', 'perthousand'}
+        # False in these dictionaries indicates that there should be no
+        # warning if the glyph is missing
+        self.hCounterGlyphs = {'element': False, 'equivalence': False,
+                               'notelement': False, 'divide': False}
+        self.vCounterGlyphs = {'m': False, 'M': False, 'T': False,
+                               'ellipsis': False}
+        self.upperSpecials = {'questiondown': False, 'exclamdown': False,
+                              'semicolon': False}
+        self.lowerSpecials = {'question': False, 'exclam': False,
+                              'colon': False}
+        self.noBlues = {'at': False, 'bullet': False, 'copyright': False,
+                        'currency': False, 'registered': False}
+#        self.newHintsOnMoveto = {'percent': False, 'perthousand': False}
 
     def __str__(self):
         # used only when debugging.
@@ -102,6 +85,7 @@ class Report:
         self.glyphs = {}
 
     class Glyph:
+        """Subclass to store stem and zone data from a particular glyph"""
         def __init__(self, name=None, all_stems=False):
             self.name = name
             self.hstems = {}
@@ -179,12 +163,15 @@ class Report:
             rep_list.append((count_dict[item], item, gnames))
         return rep_list
 
-    def _get_lists(self):
+    def _get_lists(self, options):
         """
         self.glyphs is a dictionary:
             key: glyph name
             value: Reports.Glyph object
         """
+        if not (options.report_stems or options.report_zones):
+            return [], [], [], []
+
         h_stem_items_dict = defaultdict(set)
         h_stem_count_dict = defaultdict(int)
         v_stem_items_dict = defaultdict(set)
@@ -196,27 +183,29 @@ class Report:
         bot_zone_count_dict = defaultdict(int)
 
         for gName, gr in self.glyphs.items():
-            glyph_h_stem_dict = self.parse_stem_dict(gr.hstems)
-            glyph_v_stem_dict = self.parse_stem_dict(gr.vstems)
+            if options.report_stems:
+                glyph_h_stem_dict = self.parse_stem_dict(gr.hstems)
+                glyph_v_stem_dict = self.parse_stem_dict(gr.vstems)
 
-            for stem_width, stem_count in glyph_h_stem_dict.items():
-                h_stem_items_dict[stem_width].add(gName)
-                h_stem_count_dict[stem_width] += stem_count
+                for stem_width, stem_count in glyph_h_stem_dict.items():
+                    h_stem_items_dict[stem_width].add(gName)
+                    h_stem_count_dict[stem_width] += stem_count
 
-            for stem_width, stem_count in glyph_v_stem_dict.items():
-                v_stem_items_dict[stem_width].add(gName)
-                v_stem_count_dict[stem_width] += stem_count
+                for stem_width, stem_count in glyph_v_stem_dict.items():
+                    v_stem_items_dict[stem_width].add(gName)
+                    v_stem_count_dict[stem_width] += stem_count
 
-            glyph_top_zone_dict, glyph_bot_zone_dict = self.parse_zone_dicts(
-                gr.char_zones, gr.stem_zone_stems)
+            if options.report_zones:
+                tmp = self.parse_zone_dicts(gr.char_zones, gr.stem_zone_stems)
+                glyph_top_zone_dict, glyph_bot_zone_dict = tmp
 
-            for zone_height, zone_count in glyph_top_zone_dict.items():
-                top_zone_items_dict[zone_height].add(gName)
-                top_zone_count_dict[zone_height] += zone_count
+                for zone_height, zone_count in glyph_top_zone_dict.items():
+                    top_zone_items_dict[zone_height].add(gName)
+                    top_zone_count_dict[zone_height] += zone_count
 
-            for zone_height, zone_count in glyph_bot_zone_dict.items():
-                bot_zone_items_dict[zone_height].add(gName)
-                bot_zone_count_dict[zone_height] += zone_count
+                for zone_height, zone_count in glyph_bot_zone_dict.items():
+                    bot_zone_items_dict[zone_height].add(gName)
+                    bot_zone_count_dict[zone_height] += zone_count
 
         # item 0: stem count
         # item 1: stem width
@@ -332,9 +321,10 @@ def getGlyphNames(glyphTag, fontGlyphList, fontFileName):
 
 
 def filterGlyphList(options, fontGlyphList, fontFileName):
-    # Return the list of glyphs which are in the intersection of the argument
-    # list and the glyphs in the font.
-    # Complain about glyphs in the argument list which are not in the font.
+    """
+    Returns the list of glyphs which are in the intersection of the argument
+    list and the glyphs in the font.
+    """
     if not options.glyphList:
         glyphList = fontGlyphList
     else:
@@ -383,9 +373,9 @@ def get_glyphs(options, font, glyph_list):
     for name in glyph_list:
         # Convert to internal format
         try:
-            gl = font.convertToGlyphData(name, options.read_hints,  # stems
-                                         options.read_hints,  # flex
-                                         options.round_coords,
+            gl = font.convertToGlyphData(name, options.readHints,  # stems
+                                         options.readHints,  # flex
+                                         options.roundCoords,
                                          options.hintAll)
 
             if gl is None or gl.isEmpty():
@@ -407,13 +397,17 @@ def get_glyphs(options, font, glyph_list):
 
 def get_fontinfo_list(options, font, glyph_list, is_var=False):
 
-    # Check counter glyphs, if any.
-    counter_glyphs = options.hCounterGlyphs.union(options.vCounterGlyphs)
-    if counter_glyphs:
-        missing = [n for n in counter_glyphs if n not in font.getGlyphList()]
-        if missing:
-            log.warning("H/VCounterChars glyph named in fontinfo is "
-                        "not in font: %s", missing)
+    # Check for missing glyphs explicitly added via fontinfo or command line
+    for label, charDict in (("hCounterGlyphs", options.hCounterGlyphs),
+                            ("vCounterGlyphs", options.vCounterGlyphs),
+                            ("upperSpecials", options.upperSpecials),
+                            ("lowerSpecials", options.lowerSpecials),
+#                            ("newHintsOnMoveTo", options.newHintsOnMoveTo)
+                            ("noBlues", options.noBlues)):
+        for name in (n for n, w in charDict.items()
+                     if w and n not in font.getGlyphList()):
+            log.warning("%s glyph named in fontinfo is " % label +
+                        "not in font: %s" % name)
 
     # For Type1 name keyed fonts, psautohint supports defining
     # different alignment zones for different glyphs by FontDict
@@ -502,6 +496,11 @@ def get_fontinfo_list_withFontInfo(options, font, glyph_list):
 
 
 class hintAdapter:
+    """
+    Adapter between high-level autohint.py code and the 1D hinter.
+    Also contains code that uses hints from both dimensions, primarily
+    for hintmask distribution
+    """
     def __init__(self, options, fontinfo_list, report=None):
         self.options = options
         self.fontinfo_list = fontinfo_list
@@ -511,13 +510,22 @@ class hintAdapter:
             self.report = Report()
         self.hHinter = hhinter(options)
         self.vHinter = vhinter(options)
+        self.name = ""
+
+        self.FlareValueLimit = 1000
+        self.MaxHalfMargin = 20  # XXX 10 might better match original C code
+        self.PromotionDistance = 50
 
     def getSegments(self, glyph, pe, oppo=False):
+        """Returns the list of segments for pe in the requested dimension"""
         gstate = glyph.vhs if (self.doV == (not oppo)) else glyph.hhs
         pestate = gstate.getPEState(pe)
         return pestate.segments if pestate else []
 
     def getMasks(self, glyph, pe):
+        """
+        Returns the masks of hints needed by/desired for pe in each dimension
+        """
         masks = []
         for i, hs in enumerate((glyph.hhs, glyph.vhs)):
             mask = None
@@ -534,11 +542,13 @@ class hintAdapter:
         return masks
 
     def hint(self, name, glyph):
+        """Top-level flex and stem hinting method for a glyph"""
         self.doV = False
         gr = self.report.glyphs.get(name, None)
         if gr is None:
             gr = Report.Glyph(name, self.options.report_all_stems)
             self.report.glyphs[name] = gr
+        self.name = name
         self.hHinter.setGlyph(self.fontinfo_list[name], gr, glyph, name)
         self.vHinter.setGlyph(self.fontinfo_list[name], gr, glyph, name)
 
@@ -577,6 +587,10 @@ class hintAdapter:
         return True
 
     def distributeMasks(self, glyph):
+        """
+        When necessary, chose the locations and contents of hintmasks for
+        the glyph
+        """
         log = self.hHinter
         stems = [None, None]
         masks = [None, None]
@@ -644,10 +658,10 @@ class hintAdapter:
             cmasks = self.getMasks(glyph, c)
             candmasks, conflict = self.joinMasks(masks, cmasks,
                                                  mode == CONFLICT)
-#            maskstr = ''.join(('1' if i else '0'
-#                               for i in (candmasks[0] + candmasks[1])))
-#            log.info("mask %s at %g %g, mode %d, conflict: %r" %
-#                     (maskstr, c.e.x, c.e.y, mode, conflict))
+            maskstr = ''.join(('1' if i else '0'
+                               for i in (candmasks[0] + candmasks[1])))
+            log.info("mask %s at %g %g, mode %d, conflict: %r" %
+                     (maskstr, c.e.x, c.e.y, mode, conflict))
             if conflict:
                 if mode == NOTSHORT:
                     self.bridgeMasks(glyph, masks, cmasks, usedmasks, c)
@@ -672,22 +686,23 @@ class hintAdapter:
             masks = oldmasks
         self.bridgeMasks(glyph, masks, None, usedmasks, glyph.last())
         if False in usedmasks[0] or False in usedmasks[1]:
-            misslist = [None, None]
-            for hv in range(2):
-                misslist[hv] = [i for i in range(lnstm[hv])
-                                if not usedmasks[hv][i]]
-            self.delMissing(stems, misslist)
-            self.delMissing(glyph.startmasks, misslist)
+            self.delUnused(stems, usedmasks)
+            self.delUnused(glyph.startmasks, usedmasks)
             foundPEMask = False
             for c in glyph:
                 if c.masks:
                     foundPEMask = True
-                    self.delMissing(c.masks, misslist)
+                    self.delUnused(c.masks, usedmasks)
             if not foundPEMask:
                 glyph.startmasks = None
                 glyph.is_hm = False
 
     def buildCounterMasks(self, glyph):
+        """
+        For glyph dimensions that are counter-hinted, make a cntrmask
+        with all Trues in that dimension (because only h/vstem3 style counter
+        hints are supported)
+        """
         assert not glyph.hhs.keepHints or not glyph.vhs.keepHints
         if not glyph.hhs.keepHints:
             hcmsk = [glyph.hhs.counterHinted] * len(glyph.hhs.stems)
@@ -706,6 +721,10 @@ class hintAdapter:
         glyph.cntr = cntr
 
     def joinMasks(self, m, cm, log):
+        """
+        Try to add the stems in cm to m, or start a new mask if there are
+        conflicts.
+        """
         conflict = False
         nm = [None, None]
         for hv in range(2):
@@ -751,6 +770,13 @@ class hintAdapter:
         return nm, conflict
 
     def bridgeMasks(self, glyph, o, n, used, pe):
+        """
+        For switching hintmasks: Clean up o by adding compatible stems from
+        mainMask and add stems from o to n when they are close to pe
+
+        used contains a running map of which stems have ever been included
+        in a hintmask
+        """
         stems = [glyph.hstems, glyph.vstems]
         po = pe.e if pe.isLine() else pe.cs
         carryMask = [[False] * len(o[0]), [False] * len(o[1])]
@@ -761,7 +787,8 @@ class hintAdapter:
             for i in range(len(o[hv])):
                 if not o[hv][i]:
                     continue
-                if stems[hv][i].distance(nloc) < 15:  # XXX half BandMargin
+                dlimit = max(self.hHinter.BandMargin/2, self.MaxHalfMargin)
+                if stems[hv][i].distance(nloc) < dlimit:
                     carryMask[hv][i] = True
             # If there are no hints in o in this dimension add the closest to
             # the current path element
@@ -786,11 +813,15 @@ class hintAdapter:
     def mergeMain(self, glyph):
         return len(glyph.subpaths) <= 5
 
-    def delMissing(self, l, ml):
+    def delUnused(self, l, ml):
+        """If ml[d][i] is False delete that entry from ml[d]"""
         for hv in range(2):
-            l[hv][:] = [l[hv][i] for i in range(len(l[hv])) if i not in ml[hv]]
+            l[hv][:] = [l[hv][i] for i in range(len(l[hv])) if ml[hv][i]]
 
     def listHintInfo(self, glyph):
+        """
+        Output debug messages about what stems are associated with what segments
+        """
         for pe in glyph:
             hList = self.getSegments(glyph, pe, False)
             vList = self.getSegments(glyph, pe, True)
@@ -802,6 +833,11 @@ class hintAdapter:
                     seg.hintval.show(True, "listhint", self.vHinter)
 
     def remFlares(self, glyph):
+        """
+        When two paths are witin MaxFlare and connected by a path that
+        also stays within MaxFlare, and both desire different stems,
+        (sometimes) remove the lower-valued stem of the pair
+        """
         for c in glyph:
             csl = self.getSegments(glyph, c)
             if not csl:
@@ -838,12 +874,14 @@ class hintAdapter:
                                     self.isUSeg(nseg.loc, nhv.uloc, nhv.lloc)):
                                 if (chv.compVal(self.hHinter.SpcBonus) >
                                         nhv.compVal(self.hHinter.SpcBonus)):
-                                    if nhv.spc == 0 and nhv.val < 1000:
+                                    if (nhv.spc == 0 and
+                                            nhv.val < self.FlareValueLimit):
                                         self.reportRemFlare(n, c, "n")
                                         del nsl[nsi]
                                         nsi -= 1
                                 else:
-                                    if chv.spc == 0 and chv.val < 1000:
+                                    if (chv.spc == 0 and
+                                            chv.val < self.FlareValueLimit):
                                         self.reportRemFlare(c, n, "c")
                                         del csl[csi]
                                         csi -= 1
@@ -853,6 +891,7 @@ class hintAdapter:
                 n = glyph.nextInSubpath(n)
 
     def isFlare(self, loc, glyph, c, n):
+        """Utility function for remFlares"""
         while c is not n:
             v = c.e.x if self.doV else c.e.y
             if abs(v - loc) > self.hHinter.MaxFlare:
