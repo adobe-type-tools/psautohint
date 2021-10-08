@@ -271,7 +271,7 @@ class hinter:
         if (feq(n.s.a, n.cs.a) and feq(n.cs.a, n.ce.a) and
                 feq(n.ce.a, n.e.a) and not self.linearFlexOK()):
             self.info("Make curves from %g %g to %g %g" % (*c.s, *n.e) +
-                      "non-linear to add flex")  # XXXwhat if only one is line?
+                      "non-linear to add flex")  # XXXwhat if only one line?
             return
 
         c.flex = 1
@@ -355,26 +355,17 @@ class hinter:
 
     def CPFrom(self, cp2, cp3):
         """Return point cp3 adjusted relative to cp2 by CPFrac"""
-#        self.info("CPFrom: cp2: %f, cp3: %f, cpFrom: %f, val: %f" %
-#                  (cp2, cp3, 1-self.CPfrac,
-#                   (cp3 - cp2) * (1.0-self.CPfrac) + cp2))
         return (cp3 - cp2) * (1.0 - self.CPfrac) + cp2
 
     def CPTo(self, cp0, cp1):
         """Return point cp1 adjusted relative to cp0 by CPFrac"""
-#        self.info("CPTo: cp0: %f, cp1: %f, cpTo: %f, val: %f" %
-#                  (cp0, cp1, self.CPfrac,
-#                   (cp1 - cp0) * self.CPfrac + cp0))
         return (cp1 - cp0) * self.CPfrac + cp0
 
     def adjustDist(self, v, q):
-#        self.info("adjdist = %f ( %f %f )" % (v*q, v, q))
         return v * q
 
     def testTan(self, p):
         """Test angle of p (treated as vector) relative to BendTangent"""
-#        self.info("testTan: %f %f  %f" %
-#                  (abs(p.a), abs(p.o), abs(p.o) * self.BendTangent))
         return abs(p.a) > (abs(p.o) * self.BendTangent)
 
     @staticmethod
@@ -389,15 +380,12 @@ class hinter:
         0 means not interestingly flat in dimension a. (or o if doOppo)
         Intermediate values represent degrees of interesting flatness
         """
-#        self.info("fq pts %f,%f  %f,%f" % (*p1, *p2))
         d = (p1 - p2).abs()
         if doOppo:
             d = pt(d.y, d.x)
         if feq(d.o, 0):
-#            log.debug(f"flatquo diff = %f,%f result = 1" % d)
             return 1
         if feq(d.a, 0):
-#            log.debug(f"flatquo diff = %f,%f result = 0" % d)
             return 0
         q = (d.o * d.o) / (self.Theta * d.a)
         if q < 0.25:
@@ -412,17 +400,13 @@ class hinter:
             result = self.interpolate(q, 0.25, 2, 0, 4)
         else:
             result = 0
-#        log.debug(f"flatquo diff = %f,%f q=%f result = %f" % (*d, q, result))
         return result
 
     def testBend(self, p0, p1, p2):
         """Test of the angle between p0-p1 and p1-p2"""
-#        self.info("TB: %f,%f %f,%f %f,%f" % (*p0, *p1, *p2))
         d1 = p1 - p0
         d2 = p2 - p1
         dp = d1.dot(d2)
-#        self.info("dp: %f, d1normsq: %f, d2normsq = %f" %
-#                  (dp, d1.normsq(), d2.normsq()))
         return dp * dp / (d1.normsq() * d2.normsq()) <= 0.5
 
     def isCCW(self, p0, p1, p2):
@@ -457,11 +441,6 @@ class hinter:
             return
         osame = self.diffSign(p2.o - p1.o, p1.o - p0.o)
         tbend = self.testBend(p0, p1, p2)
-#        self.info("DS: %f %f %f" % (p0.a, p1.a, p2.a))
-#        self.info("YS: %r, TT: %r, DS: %r, FQ: %r, TB: %r" %
-#                  (osame, self.testTan(p1 - p2),
-#                   self.diffSign(p2.a - p1.a, p1.a - p0.a),
-#                   self.flatQuo(p0, p1, doOppo=True) > 0, tbend))
         if osame or (self.testTan(p1 - p2) and
                      (self.diffSign(p2.a - p1.a, p1.a - p0.a) or
                       (self.flatQuo(p0, p1, doOppo=True) > 0 and tbend))):
@@ -501,11 +480,6 @@ class hinter:
             return
         osame = self.diffSign(p2.o - p0.o, p0.o - p1.o)
         tbend = self.testBend(p2, p0, p1)
-#        self.info("DS: %f %f %f" % (p0.a, p1.a, p2.a))
-#        self.info("YS: %r, TT: %r, DS: %r, FQ: %r, TB: %r" %
-#                  (osame, self.testTan(p0 - p2),
-#                   self.diffSign(p2.a - p0.a, p0.a - p1.a),
-#                   self.flatQuo(p1, p0, doOppo=True) > 0, tbend))
         if osame or (self.testTan(p0 - p2) and
                      (self.diffSign(p2.a - p0.a, p0.a - p1.a) or
                       (self.flatQuo(p1, p0, doOppo=True) > 0 and tbend))):
@@ -540,7 +514,6 @@ class hinter:
             d = (self.glyph.prevSlopePoint(c) - c.cs).abs()
         else:
             d = (self.glyph.nextSlopePoint(c) - c.ce).abs()
-#        self.info("dmn %g   dmx %g" % (d.o, d.a))
         return d.o <= self.OppoFlatMax and d.a >= self.FlatMin
 
     def sameDir(self, c, doPrev=False):
@@ -556,7 +529,6 @@ class hinter:
         else:
             n = self.glyph.nextInSubpath(c, skipTiny=True)
             p0, p1, p2 = c.s, c.e, n.e
-#        self.info("p0: %f,%f  p1: %f,%f  p2: %f,%f" % (*p0, *p1, *p2))
         if (self.diffSign(p0.y - p1.y, p1.y - p2.y) or
                 self.diffSign(p0.x - p1.x, p1.x - p2.x)):
             return False
@@ -569,7 +541,8 @@ class hinter:
         of the segment are within ExtremaDist of pe
         """
         a, b, c, d = pe.cubicParameters()
-        loc = round(extp.o) + (-self.ExtremaDist if isMn else self.ExtremaDist)
+        loc = round(extp.o) + (-self.ExtremaDist
+                               if isMn else self.ExtremaDist)
 
         horiz = not self.isV()  # When finding vertical stems solve for x
         sl = solveCubic(a[horiz], b[horiz], c[horiz], d[horiz] - loc)
@@ -605,8 +578,6 @@ class hinter:
         the adjacent splines. Locations within BlueValue bands are
         priviledged.
         """
-#        self.info("%g,%g  %g,%g  %g  %g,%g  %g,%g  %g,%g  %g,%g" %
-#                  (*p0, *p1, dist, *pp0, *pp1, *prv, *nxt))
         inBand0 = self.inBand(p0.o, dist >= 0)
         inBand1 = self.inBand(p1.o, dist >= 0)
         if inBand0 and not inBand1:
@@ -679,7 +650,6 @@ class hinter:
                         sp = self.pickSpot(c.s, c.e, adist, c.s, c.e,
                                            self.glyph.prevSlopePoint(c),
                                            self.glyph.nextSlopePoint(c))
-#                        self.info("sp is %g  %g  %g" % (sp, aavg, adist))
                         self.addSegment(aavg - adist, aavg + adist, sp, prv, c,
                                         hintSegment.sType.LINE, "line")
                         d = (c.s - c.e).abs()
@@ -692,7 +662,6 @@ class hinter:
                     self.doBendsNext(c)
                     self.doBendsPrev(c)
             elif not c.isLine():
-#                self.info("flex is " + str(c.flex))
                 if c.flex == 1:
                     fl1 = c
                     fl1prv = prv
@@ -722,14 +691,6 @@ class hinter:
                     if q == 0:
                         self.doBendsPrev(c)
                     else:
-#                       self.info("eq: %r, ne: %r, nIF: %r, sD: %r, blah: %r" %
-#                                 (feq(c.cs.o, c.s.o), fne(c.ce.o, c.e.o),
-#                                  self.nodeIsFlat(i, doPrev=True),
-#                                  self.sameDir(i, doPrev=True),
-#                                  feq(c.cs.o, c.s.o) or
-#                                  (fne(c.ce.o, c.e.o) and
-#                                   (self.nodeIsFlat(i, doPrev=True) or
-#                                    notself.sameDir(i, doPrev=True)))))
                         if (feq(c.cs.o, c.s.o) or
                             (fne(c.ce.o, c.e.o) and
                              (self.nodeIsFlat(c, doPrev=True) or
@@ -737,11 +698,12 @@ class hinter:
                             q2 = self.flatQuo(c.ce, c.s)
                             if (q2 > 0 and self.sameSign(c.cs.a - c.s.a,
                                                          c.ce.a - c.s.a) and
-                                abs(c.ce.a - c.s.a) > abs(c.cs.a - c.s.a)):
+                                    abs(c.ce.a - c.s.a) > abs(c.cs.a - c.s.a)):
                                 adist = self.adjustDist(self.CPTo(c.cs.a,
                                                                   c.ce.a) -
                                                         c.s.a, q2)
-                                end = self.adjustDist(self.CPTo(c.s.a, c.cs.a) -
+                                end = self.adjustDist(self.CPTo(c.s.a,
+                                                                c.cs.a) -
                                                       c.s.a, q)
                                 if abs(end) > abs(adist):
                                     adist = end
@@ -750,12 +712,12 @@ class hinter:
                                                 hintSegment.sType.CURVE,
                                                 "curve start 1")
                             else:
-                                # XXX bugfix in V
                                 adist = self.adjustDist(self.CPTo(c.s.a,
                                                                   c.cs.a) -
                                                         c.s.a, q)
                                 self.addSegment(c.s.a, c.s.a + adist, c.s.o,
-                                                prv, c, hintSegment.sType.CURVE,
+                                                prv, c,
+                                                hintSegment.sType.CURVE,
                                                 "curve start 2")
                 if c.flex != 1:
                     # flex != 1 => the end point is not in the middle of a
@@ -773,11 +735,6 @@ class hinter:
                     # the special case of a close-to-flat curve, treating
                     # it somewhat like a close-to-flat line.
                     q = self.flatQuo(c.ce, c.e)
-#                    self.info("q=%f" % q)
-#                    self.info("t1 %r  (t2 %r  t3 %r  t4 %r)" %
-#                              (feq(c.ce.o, c.e.o), fne(c.cs.o, c.s.o),
-#                               self.nodeIsFlat(i, doPrev=False),
-#                               self.sameDir(i, doPrev=False)))
                     if q == 0:
                         self.doBendsNext(c)
                     elif (feq(c.ce.o, c.e.o) or
@@ -791,9 +748,6 @@ class hinter:
                             ad2 = self.adjustDist(c.e.a - c.s.a, q2)
                         else:
                             ad2 = 0
-#                        self.info("q=%f, q2=%f, adist=%f, ad2=%f, CPF=%f" %
-#                                  (q, q2, adist, ad2,
-#                                   self.CPFrom(c.ce.a, c.e.a)))
                         if q2 > 0 and abs(ad2) > abs(adist):
                             ccs, cce = c.cs, c.ce
                             if (feq(c.s.o, c.cs.o) and feq(c.cs.o, c.ce.o) and
@@ -802,11 +756,13 @@ class hinter:
                                         self.AutoLinearCurveFix):
                                     c.convertToLine()
                                     ccs, cce = c.s, c.e
-                                    self.info("Curve from %s to %s" % (c.s, c.e)
-                                              + "changed to a line.")
+                                    self.info("Curve from %s to %s" % (c.s,
+                                                                       c.e) +
+                                              "changed to a line.")
                                 else:
-                                    self.info("Curve from %s to %s" % (c.s, c.e)
-                                              + "should be changed to a line.")
+                                    self.info("Curve from %s to %s" % (c.s,
+                                                                       c.e) +
+                                              "should be changed to a line.")
                             adist = ad2 / 2
                             aavg = (c.s.a + c.e.a) / 2
                             sp = self.pickSpot(c.s, c.e, adist, ccs, cce,
@@ -819,14 +775,13 @@ class hinter:
                             q2 = self.flatQuo(c.cs, c.e)
                             if (q2 > 0 and self.sameSign(c.cs.a - c.e.a,
                                                          c.ce.a - c.e.a) and
-                                abs(c.ce.a - c.e.a) < abs(c.cs.a - c.e.a)):
+                                    abs(c.ce.a - c.e.a) < abs(c.cs.a - c.e.a)):
                                 aend = self.adjustDist(c.e.a -
                                                        self.CPFrom(c.cs.a,
                                                                    c.ce.a),
                                                        q2)
                                 if abs(aend) > abs(adist):
                                     adist = aend
-#                                self.info("aend = %f, adist = %f, q2 = %f" % (aend, adist, q2))
                                 self.addSegment(c.e.a - adist, c.e.a, c.e.o, c,
                                                 None, hintSegment.sType.CURVE,
                                                 "curve end 2")
@@ -888,22 +843,12 @@ class hinter:
         within BlueValue bands
         """
         ll, ul = self.segmentLists()
-#        for ls in ll:
-#            self.info("l loc: %g, min: %g, max: %g" %
-#                      (ls.loc, ls.min, ls.max))
-#        for ls in ul:
-#            self.info("u loc: %g, min: %g, max: %g" %
-#                      (ls.loc, ls.min, ls.max))
+
         for ls in ll:
             for us in ul:
-#                self.info("us.min %g  ls.max %g  us.max %g  ls.min %g" %
-#                          (us.min, ls.max, us.max, ls.min))
                 if ls.loc > us.loc:
-#                    self.info("continue")
                     continue
                 val, spc = self.evalPair(ls, us)
-#                self.info("bloc: %g, uloc: %g, spc: %g, val: %g" %
-#                          (ls.loc, us.loc, spc, val))
                 self.stemMiss(ls, us)
                 self.addStemValue(ls.loc, us.loc, val, spc, ls, us)
 
@@ -926,12 +871,7 @@ class hinter:
                     ghostSeg.min = round(cntr - self.GhostLength / 2)
                     self.addStemValue(ghostSeg.loc, s.loc, self.GhostVal,
                                       self.GhostSpecial, ghostSeg, s)
-
-#        for sv in self.hs.stemValues:
-#            sv.show(self.isV(), "before", self)
         self.combineStemValues()
-#        for sv in self.hs.stemValues:
-#            sv.show(self.isV(), "after", self)
 
     def evalPair(self, ls, us):
         """
@@ -954,19 +894,13 @@ class hinter:
             return 0, spc
         inBBand = self.inBand(ls.loc, isBottom=True)
         inTBand = self.inBand(us.loc, isBottom=False)
-#        self.info("bloc %g, tloc %g, inBBand %r, inTBand %r" %
-#                  (ls.loc, us.loc, inBBand, inTBand))
         if inBBand and inTBand:
             return 0, spc
         if inBBand or inTBand:
             spc += 2
-#        self.info("us.min %g  ls.max %g  us.max %g  ls.min %g" %
-#                  (us.min, ls.max, us.max, ls.min))
         if us.min <= ls.max and us.max >= ls.min:  # overlap
             overlen = min(us.max, ls.max) - max(us.min, ls.min)
             minlen = min(us.max - us.min, ls.max - ls.min)
-#            self.info("loc_d: %g  overlen: %g  minlen: %g" %
-#                      (loc_d, overlen, minlen))
             if feq(overlen, minlen):
                 dist = loc_d
             else:
@@ -975,12 +909,8 @@ class hinter:
             o_d = min(abs(us.min - ls.max), abs(us.max - ls.min))
             dist = round(loc_d * self.NoOverlapPenalty +
                          o_d * o_d / self.GapDistDenom)
-#            self.info("one: %g, two: %g, dist: %g, o_d: %g, loc_d: %g" %
-#                      (loc_d * self.NoOverlapPenalty, o_d * o_d / 40,
-#                       dist, o_d, loc_d))
             if o_d > loc_d:  # XXX this didn't work before
                 dist *= o_d / loc_d
-#                self.info("dist: %g" % dist)
         dist = max(dist, 2 * self.MinDist)
         if min(ls.bonus, us.bonus) > 0:
             spc += 2
@@ -988,8 +918,6 @@ class hinter:
             if dsw == abs(loc_d):
                 spc += 1
                 break
-#        self.info("l1 %g, l2 %g, dist %g, d %g" %
-#                  (ls.max - ls.min, us.max - us.min, dist, loc_d))
         dist = max(dist, 2)
         bl = max(ls.max - ls.min, 2)
         ul = max(us.max - us.min, 2)
@@ -997,17 +925,12 @@ class hinter:
         ru = ul * ul
         q = dist * dist
         v = 1000 * rl * ru / (q * q)
-#        self.info("rl %g, ru %g, q %g, v %g" %
-#                  (rl * 256**2, ru * 256**2, q * 256**2, v))
         if loc_d > self.BigDist:
             fac = self.BigDist / loc_d
-#            self.info("fac : %g" % fac)
             if fac > .5:
-#                self.info("fac**8 %g" % fac**8)
                 v *= fac**8
             else:
                 return 0, spc
-#        self.info("v %g" % v)
         v = max(v, self.MinValue)
         v = min(v, self.MaxValue)
         return v, spc
@@ -1045,8 +968,6 @@ class hinter:
 
     def addStemValue(self, lloc, uloc, val, spc, lseg, useg):
         """Adapts the stem parameters into a stemValue object and adds it"""
-#        self.info("lloc %g, uloc %g, val %g, spc %g" %
-#                  (lloc, uloc, val, spc))
         if val == 0:
             return
         if (self.Pruning and val < self.PruneValue) and spc <= 0:
@@ -1127,12 +1048,8 @@ class hinter:
             uInBand = self.inBand(c.uloc, isBottom=False)
             lInBand = self.inBand(c.lloc, isBottom=True)
             for d in svl:
-#                c.show(self.isV(), "prune c", self)
-#                d.show(self.isV(), "prune d", self)
-#                self.info("otherLow %r, otherHigh %r" % (otherLow, otherHigh))
                 if d.pruned and not ignorePruned:
                     continue
-#                self.info("vm %r" % (not d.val > c.val * self.VeryMuchPF))
                 if (not c.isGhost and d.isGhost and
                         not d.val > c.val * self.VeryMuchPF):
                     continue
@@ -1142,18 +1059,10 @@ class hinter:
                     continue
                 csl = self.closeSegs(c.lseg, d.lseg)
                 csu = self.closeSegs(c.useg, d.useg)
-#                self.info("csl: %r, csu: %r" % (csl, csu))
                 if c.val < 100 and d.val > c.val * self.MuchPF:
                     cs_tst = csl or csu
                 else:
                     cs_tst = csl and csu
-#                self.info("c.lloc: %g, d.lloc: %g" % (c.lloc, d.lloc))
-#                self.info("t1: %r, t2: %r, t3: %r, t4: %r" %
-#                          (c.lloc - self.PruneDistance <= d.lloc,
-#                           c.uloc + self.PruneDistance >= d.uloc,
-#                           cs_tst, self.isV() or c.val < 16 or
-#                           ((not uInBand or feq(c.uloc, d.uloc)) and
-#                           (not lInBand or feq(c.lloc, d.lloc)))))
                 if (d.val > c.val * self.PruneFactor and
                     c.lloc - self.PruneDistance <= d.lloc and
                     c.uloc + self.PruneDistance >= d.uloc and cs_tst and
@@ -1163,7 +1072,6 @@ class hinter:
                     self.prune(c, d, "close and higher value")
                     break
                 if c.lseg is not None and c.useg is not None:
-#                    self.info("d.val %g c.val %g ldiff %g udiff %g ddiff %g cdiff %g csl %r csu %r lib %r uib %r" % (d.val, c.val, abs(c.lloc - d.lloc), abs(c.uloc - d.uloc), abs(d.uloc - d.lloc), abs(c.uloc - c.lloc), csl, csu, lInBand, uInBand))
                     if abs(c.lloc - d.lloc) < 1:
                         if (not otherLow and
                                 c.val < d.val * self.PruneFactorLt and
@@ -1208,7 +1116,6 @@ class hinter:
             locb, loca = s1.loc, s2.loc
         if (locb - loca) > 5 * self.CloseMerge:
             return False
-#        self.info("loca: %g, locb: %g" % (loca, locb))
         loca -= self.CloseMerge
         locb += self.CloseMerge
         n = s1.pe()
@@ -1226,10 +1133,8 @@ class hinter:
             if (ngood and n is pe2) or (pgood and p is pe2):
                 return True
             if n.e.o > locb or n.e.o < loca:
-#                self.info("n not good %r %r %r" % (ncurrent.e.o, locb, loca))
                 ngood = False
             if p.e.o > locb or p.e.o < loca:
-#                self.info("p not good %r %r %r" % (pcurrent.e.o, locb, loca))
                 pgood = False
             n = self.glyph.nextInSubpath(n)
             p = self.glyph.prevInSubpath(p)
@@ -1256,7 +1161,8 @@ class hinter:
         ll, ul = self.segmentLists()
         self.findHighestValForSegs(ul, True)
         self.findHighestValForSegs(ll, False)
-        self.hs.stemValues = [sv for sv in self.hs.stemValues if not sv.pruned]
+        self.hs.stemValues = [sv for sv in self.hs.stemValues
+                              if not sv.pruned]
 
     def findHighestValForSegs(self, segl, isU):
         """Associates each segment in segl with the highest related stemVal"""
@@ -1285,9 +1191,6 @@ class hinter:
                 loctest = not sv.isGhost
             else:
                 loctest = vs is seg or self.closeSegs(vs, seg)
-#            self.info("d %g  loctest %r  cVFS %r" %
-#                      (abs(vl - seg.loc), loctest,
-#                       self.considerValForSeg(sv, seg, isU)))
             return (abs(vl - seg.loc) <= self.MaxMerge and loctest and
                     self.considerValForSeg(sv, seg, isU))
 
@@ -1384,24 +1287,6 @@ class hinter:
                 svlIB = self.inBand(sv.lloc, isBottom=True)
                 btuIB = self.inBand(bst.uloc, isBottom=False)
                 btlIB = self.inBand(bst.lloc, isBottom=True)
-#                self.info("t1 %r  t2 %r  t3 %r" %
-#                          (feq(bst.lloc, sv.lloc) and
-#                           self.closeSegs(bst.lseg, sv.lseg) and
-#                           not btlIB and not svuIB and not btuIB,
-#                           feq(bst.uloc, sv.uloc) and
-#                           self.closeSegs(bst.useg, sv.useg) and
-#                           not btuIB and not svlIB and not btlIB,
-#                           abs(bst.lloc - sv.lloc) <= self.MaxMerge
-#                           and abs(bst.uloc - sv.uloc) <= self.MaxMerge and
-#                           (self.isV() or feq(bst.lloc, sv.lloc) or
-#                            not svlIB) and
-#                           (self.isV() or feq(bst.uloc, sv.uloc) or
-#                            not svuIB)))
-#                self.info("%g %g %r %r %r %r" %
-#                          (abs(bst.lloc - sv.lloc), abs(bst.uloc - sv.uloc),
-#                           feq(bst.lloc, sv.lloc),
-#                           not svlIB, feq(bst.uloc, sv.uloc),
-#                           not svuIB))
                 if ((feq(bst.lloc, sv.lloc) and
                      self.closeSegs(bst.lseg, sv.lseg) and
                      not btlIB and not svuIB and not btuIB) or
@@ -1562,10 +1447,7 @@ class hinter:
                         llocsv = ulocsv
                     else:
                         ulocsv = llocsv
-#                self.info("blloc %g, buloc %g, svlloc %g, svuloc %g" %
-#                          (llocb, ulocb, llocsv, ulocsv))
                 if llocsv <= ulocb and ulocsv >= llocb:
-#                    svl[i].show(self.isV(), "rejecting", self)
                     rejectValues.append(svl[i])
                     del svl[i]
                 else:
@@ -1615,12 +1497,14 @@ class hinter:
                 maxloc = loc
                 maxdelta = delta
         if (abs(mindelta - maxdelta) < self.DeltaDiffMin and
-                abs((maxloc - midloc) - (midloc - minloc)) < self.DeltaDiffMin):
+                abs((maxloc - midloc) - (midloc - minloc)) <
+                self.DeltaDiffMin):
             self.hs.rejectValues.extend(hvl[3:])
             self.hs.mainValues = hvl[0:3]
             return True
         if (abs(mindelta - maxdelta) < self.DeltaDiffReport and
-                abs((maxloc - midloc) - (midloc - minloc)) < self.DeltaDiffReport):
+                abs((maxloc - midloc) - (midloc - minloc)) <
+                self.DeltaDiffReport):
             self.info("Near miss for %s counter hints." % self.aDesc())
         return False
 
@@ -1749,9 +1633,6 @@ class hinter:
             if not seg.hintval or seg.hintval.idx is None:
                 continue
             mask[seg.hintval.idx] = True
-#        maskstr = ''.join(( '1' if i else '0' for i in mask ))
-#        self.info("%s mask %s at %g %g" %
-#                  (self.aDesc(), maskstr, c.e.x, c.e.y))
         p0, p1 = (c.s, c.e) if c.isLine() else (c.cs, c.e)
         if self.hs.hasConflicts and True in mask:
             for i in range(l):
@@ -1882,11 +1763,11 @@ class hhinter(hinter):
     def checkNearBands(self, loc, pl):
         for p in pl:
             if loc >= p[1] - self.NearFuzz and loc < p[1]:
-                self.info("Near miss above horizontal zone at %f instead of %f."
-                          % (loc, p[1]))
+                self.info("Near miss above horizontal zone at " +
+                          "%f instead of %f." % (loc, p[1]))
             if loc <= p[0] + self.NearFuzz and loc > p[0]:
-                self.info("Near miss below horizontal zone at %f instead of %f."
-                          % (loc, p[0]))
+                self.info("Near miss below horizontal zone at " +
+                          "%f instead of %f." % (loc, p[0]))
 
     def segmentLists(self):
         return self.hs.increasingSegs, self.hs.decreasingSegs

@@ -1,7 +1,7 @@
 # Copyright 2014 Adobe. All rights reserved.
 
 """
-This module provides means of reading glyph data from and writing data 
+This module provides means of reading glyph data from and writing data
 to UFO fonts, partly in virtue of the fontTools UFO library.
 
 Developed in order to support checkOutlines and autohint, the code

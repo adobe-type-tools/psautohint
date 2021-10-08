@@ -180,9 +180,11 @@ class pathElementHintState:
 
 class glyphHintState:
     """
-    Stores the intermediate hint state (for one dimension) of a glyphData object
+    Stores the intermediate hint state (for one dimension) of a glyphData
+    object
 
-    peStates: A hash of pathElementHintState objects with the pathElement as key
+    peStates: A hash of pathElementHintState objects with the pathElement as
+              key
     increasingSegs: Segments with endpoints (in the opposite dimension) greater
                     than their start points
     decreasingSegs: Segments with endpoints (in the opposite dimension) less
@@ -253,7 +255,7 @@ class glyphHintState:
     def compactList(self, l):
         """
         Compacts overlapping segments with the same location by picking
-        one segment to represent the pair, adjusting its values, and 
+        one segment to represent the pair, adjusting its values, and
         removing the other segment
         """
         i = 0

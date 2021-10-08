@@ -9,7 +9,6 @@ import logging
 import os
 import sys
 import time
-import gc
 from copy import copy, deepcopy
 from collections import defaultdict, namedtuple
 
@@ -403,7 +402,6 @@ def get_fontinfo_list(options, font, glyph_list, is_var=False):
                             ("vCounterGlyphs", options.vCounterGlyphs),
                             ("upperSpecials", options.upperSpecials),
                             ("lowerSpecials", options.lowerSpecials),
-#                            ("newHintsOnMoveTo", options.newHintsOnMoveTo)
                             ("noBlues", options.noBlues)]:
         for name in (n for n, w in charDict.items()
                      if w and n not in font.getGlyphList()):
@@ -617,7 +615,7 @@ class hintAdapter:
             elif not glyph.hhs.hasConflicts:
                 masks[0] = [True] * lnstm[0]
             else:
-                pass  # XXX error existing hints have conflicts but no start mask
+                pass  # XXX existing hints have conflicts but no start mask
         else:
             masks[0] = [False] * lnstm[0]
 
@@ -630,7 +628,7 @@ class hintAdapter:
             elif not glyph.hhs.hasConflicts:
                 masks[1] = [True] * lnstm[1]
             else:
-                pass  # XXX error existing hints have conflicts but no start mask
+                pass  # XXX existing hints have conflicts but no start mask
         else:
             masks[1] = [False] * lnstm[1]
 
@@ -798,7 +796,7 @@ class hintAdapter:
             for i in range(len(o[hv])):
                 if not o[hv][i]:
                     continue
-                dlimit = max(self.hHinter.BandMargin/2, self.MaxHalfMargin)
+                dlimit = max(self.hHinter.BandMargin / 2, self.MaxHalfMargin)
                 if stems[hv][i].distance(nloc) < dlimit:
                     carryMask[hv][i] = True
             # If there are no hints in o in this dimension add the closest to
@@ -831,7 +829,8 @@ class hintAdapter:
 
     def listHintInfo(self, glyph):
         """
-        Output debug messages about what stems are associated with what segments
+        Output debug messages about which stems are associated with which
+        segments
         """
         for pe in glyph:
             hList = self.getSegments(glyph, pe, False)

@@ -15,6 +15,7 @@ from fontTools.pens.basePen import BasePen
 import logging
 log = logging.getLogger(__name__)
 
+
 def norm_float(value):
     """Converts a float (whose decimal part is zero) to integer"""
     if isinstance(value, float):
@@ -257,9 +258,6 @@ class stem(tuple):
             return "({0} (low ghost))".format(self.rt)
         else:
             return "(bad stem values {0}, {1})".format(self.lb, self.rt)
-
-#    def UFOstr(self, isV):
-#        return "%sstem %.1g %.1g" % ( 'v' if isV else 'h', self.lb, se
 
     def isGhost(self):
         """Returns True if the stem is a ghost hint"""
@@ -621,7 +619,8 @@ class pathElement:
 
         if is_start:
             if is_start[1].masks:
-                prog.extend(['hintmask', pathElement.stemBytes(is_start[1].masks)])
+                prog.extend(['hintmask',
+                             pathElement.stemBytes(is_start[1].masks)])
             rmt = self.s - is_start[0]
             prog.extend([*rmt, 'rmoveto'])
 
@@ -738,7 +737,9 @@ class glyphData(BasePen):
         self.nextflex = 1
 
     def hStem(self, data, is_hm):
-        """quasi-pen method passing horizontal stem data (in relative format)"""
+        """
+        quasi-pen method to pass horizontal stem data (in relative format)
+        """
         self.flex_count += 1
         if self.is_hm is not None and self.is_hm != is_hm:
             log.warning("Horizontal stem hints mask setting does not match" +
@@ -765,7 +766,8 @@ class glyphData(BasePen):
             self.startmasks = [hhints, vhints]
         else:
             if not self.startmasks and not self.cntr:
-                log.warning("Initial hintmask missing in current glyph %s" % self.name)
+                log.warning("Initial hintmask missing in current glyph %s" %
+                            self.name)
             # In the glyphdata format the end of a path is implicit in the
             # charstring but explicit in the subpath, while a moveto is
             # explicit in the charstring and implicit in the subpath. So
@@ -802,7 +804,9 @@ class glyphData(BasePen):
         return self.flex_count > 0
 
     def hasHints(self, doVert=False, both=False, either=False):
-        """Returns True if there are hints of the parameter-specified type(s)"""
+        """
+        Returns True if there are hints of the parameter-specified type(s)
+        """
         if both:
             return len(self.vstems) > 0 and len(self.hstems) > 0
         elif either:

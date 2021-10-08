@@ -487,7 +487,7 @@ def _parse_fontinfo_file(options, fontinfo_path):
     for glname, glist in counterGlyphLists:
         # True indicates there should be an error if the glyph is missing
         if glist:
-            glyphList = { k: True for k in glist.split() }
+            glyphList = {k: True for k in glist.split()}
             if glname[0] == "V":
                 options.vCounterGlyphs.update(glyphList)
             else:
