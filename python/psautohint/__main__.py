@@ -486,8 +486,8 @@ def _parse_fontinfo_file(options, fontinfo_path):
     counterGlyphLists = RE_COUNTER_CHARS.findall(data)
     for glname, glist in counterGlyphLists:
         # True indicates there should be an error if the glyph is missing
-        glyphList = { k: True for k in glist.split() }
-        if glyphList:
+        if glist:
+            glyphList = { k: True for k in glist.split() }
             if glname[0] == "V":
                 options.vCounterGlyphs.update(glyphList)
             else:
@@ -769,14 +769,13 @@ def get_options(args):
 def main(args=None):
     options, pargs = get_options(args)
 
-    hintFiles(options)
-#    try:
-#        hintFiles(options)
-#    except Exception as ex:
-#        if pargs.traceback:
-#            raise
-#        logging.error(ex)
-#        return 1
+    try:
+        hintFiles(options)
+    except Exception as ex:
+        if pargs.traceback:
+            raise
+        logging.error(ex)
+        return 1
 
 
 class ReportOptions(ACOptions):
@@ -946,14 +945,13 @@ def get_stemhist_options(args):
 def stemhist(args=None):
     options, pargs = get_stemhist_options(args)
 
-    hintFiles(options)
-#    try:
-#        hintFiles(options)
-#    except Exception as ex:
-#        if pargs.traceback:
-#            raise
-#        logging.error(ex)
-#        return 1
+    try:
+        hintFiles(options)
+    except Exception as ex:
+        if pargs.traceback:
+            raise
+        logging.error(ex)
+        return 1
 
 
 if __name__ == '__main__':

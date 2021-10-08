@@ -108,10 +108,7 @@ class FDDict:
         setattr(self, kFontDictBluePairsName, [])
         setattr(self, kFontDictOtherBluePairsName, [])
 
-    def asASCII(self):
-        a = getattr(self, '_ASCII', None)
-        if a is not None:
-            return a
+    def __str__(self):
         a = ''
         for k, v in vars(self).items():
             if k not in kFontInfoKeys or v is None:
@@ -125,8 +122,7 @@ class FDDict:
             elif not isinstance(v, str):
                 v = str(v)
             a += "%s %s\n" % (k, v)
-        self._ASCII = a.encode('ascii')
-        return self._ASCII
+        return a
 
     def setInfo(self, key, value):
         if key == 'LanguageGroup':
@@ -373,11 +369,13 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
                 if token in kFDDictKeys:
                     value = tokenList[i]
                     i += 1
-                    if (value[0] in ["[", "("]) and (
-                       not value[-1] in ["]", ")"]):
-                        state = inDictValue
-                        dictValueList = [value]
-                        dictKeyWord = token
+                    if value[0] in ["[", "("]:
+                        if not value[-1] in ["]", ")"]:
+                            state = inDictValue
+                            dictValueList = [value]
+                            dictKeyWord = token
+                        else:
+                            fdDict.setInfo(token, value[1:-1])
                     else:
                         fdDict.setInfo(token, value)
                 else:

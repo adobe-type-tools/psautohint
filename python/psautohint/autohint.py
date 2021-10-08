@@ -9,6 +9,7 @@ import logging
 import os
 import sys
 import time
+import gc
 from copy import copy, deepcopy
 from collections import defaultdict, namedtuple
 
@@ -251,8 +252,8 @@ class Report:
         """
         return (-t[1], -t[0], t[2])
 
-    def save(self, path):
-        h_stems, v_stems, top_zones, bot_zones = self._get_lists()
+    def save(self, path, options):
+        h_stems, v_stems, top_zones, bot_zones = self._get_lists(options)
         items = ([h_stems, self._sort_count],
                  [v_stems, self._sort_count],
                  [top_zones, self._sort_val_reversed],
@@ -398,12 +399,12 @@ def get_glyphs(options, font, glyph_list):
 def get_fontinfo_list(options, font, glyph_list, is_var=False):
 
     # Check for missing glyphs explicitly added via fontinfo or command line
-    for label, charDict in (("hCounterGlyphs", options.hCounterGlyphs),
+    for label, charDict in [("hCounterGlyphs", options.hCounterGlyphs),
                             ("vCounterGlyphs", options.vCounterGlyphs),
                             ("upperSpecials", options.upperSpecials),
                             ("lowerSpecials", options.lowerSpecials),
 #                            ("newHintsOnMoveTo", options.newHintsOnMoveTo)
-                            ("noBlues", options.noBlues)):
+                            ("noBlues", options.noBlues)]:
         for name in (n for n, w in charDict.items()
                      if w and n not in font.getGlyphList()):
             log.warning("%s glyph named in fontinfo is " % label +
@@ -447,7 +448,7 @@ def get_fontinfo_list_withFontInfo(options, font, glyph_list):
                                   options.vCounterGlyphs,
                                   options.hCounterGlyphs)
         # Exit by printing default FDDict with all lines indented by one tab
-        sys.exit("\t" + "\n\t".join(fddict.getFontInfo().split("\n")))
+        sys.exit("\t" + "\n\t".join(str(fddict).split("\n")))
 
     fdglyphdict, fontDictList = font.getfdInfo(options.allow_no_blues,
                                                options.noFlex,
@@ -461,7 +462,7 @@ def get_fontinfo_list_withFontInfo(options, font, glyph_list):
             print("Showing user-defined FontDict Values:\n")
             for fi, fontDict in enumerate(fontDictList):
                 print(fontDict.DictName)
-                print(fontDict.getFontInfo())
+                print(str(fontDict))
                 gnameList = []
                 # item = [glyphName, [fdIndex, glyphListIndex]]
                 itemList = sorted(fdglyphdict.items(), key=lambda x: x[1][1])
@@ -511,6 +512,7 @@ class hintAdapter:
         self.hHinter = hhinter(options)
         self.vHinter = vhinter(options)
         self.name = ""
+        self.cnt = 0
 
         self.FlareValueLimit = 1000
         self.MaxHalfMargin = 20  # XXX 10 might better match original C code
@@ -583,6 +585,15 @@ class hintAdapter:
         self.vHinter.convertToMasks()
 
         self.distributeMasks(glyph)
+
+        # Clear the intermediate state
+        glyph.vhs = glyph.hhs = None
+
+        self.cnt += 1
+
+#        if self.cnt % 100 == 0:
+#            print(name, self.cnt, gc.collect())
+#            print(name, self.cnt)
 
         return True
 
@@ -1121,7 +1132,7 @@ def hint_regular_fonts(options, fonts, paths, outpaths):
         hinted = hint_font(hintadapt, font, glyph_names)
 
         if options.report_zones or options.report_stems:
-            hintadapt.report.save(outpath)
+            hintadapt.report.save(outpath, options)
         else:
             if hinted:
                 log.info("Saving font file with new hints...")

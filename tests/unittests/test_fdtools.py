@@ -13,7 +13,7 @@ def parse(path, glyphs=None):
     if glyphs is None:
         glyphs = []
     fddict = FDDict()
-    fddict.BlueFuzz = 0
+    fddict.setInfo("BlueFuzz", 0)
     return parseFontInfoFile([fddict], data, glyphs, 2000, -1000, "Foo")
 
 
@@ -42,7 +42,7 @@ def test_bluefuzz_and_fontname():
     path = "%s/fontinfo/bluefuzz_fontname" % DATA_DIR
     _, font_dicts, _ = parse(path, ["A", "B", "C", "D"])
     assert len(font_dicts) > 1
-    assert font_dicts[1].BlueFuzz == "10"
+    assert font_dicts[1].BlueFuzz == 10
     assert font_dicts[1].FontName == "Bar"
 
 
@@ -64,9 +64,9 @@ def test_bad_fontinfo(path):
 ])
 def test_fddict_bad_zone(attributes):
     fddict = FDDict()
-    fddict.BlueFuzz = 0
-    fddict.BaselineYCoord = 0
-    fddict.BaselineOvershoot = -10
+    fddict.setInfo("BlueFuzz", 0)
+    fddict.setInfo("BaselineYCoord", 0)
+    fddict.setInfo("BaselineOvershoot", -10)
 
     for key in attributes:
         setattr(fddict, key, attributes[key])
@@ -86,11 +86,10 @@ def test_merge_fddicts_with_stemdicts(stemdict):
     fddict2 = FDDict()
 
     for i, fddict in enumerate([fddict1, fddict2]):
-        fddict.BlueFuzz = 0
-        fddict.BaselineYCoord = 0
-        fddict.BaselineOvershoot = -10
-        setattr(fddict, stemdict,
-                "[" + " ".join([str(i * 10), str(i * 20)]) + "]")
+        fddict.setInfo("BlueFuzz", 0)
+        fddict.setInfo("BaselineYCoord", 0)
+        fddict.setInfo("BaselineOvershoot", -10)
+        fddict.setInfo(stemdict, [str(i * 10), str(i * 20)])
         fddict.buildBlueLists()
 
     mergeFDDicts([fddict1, fddict2], fddict0)

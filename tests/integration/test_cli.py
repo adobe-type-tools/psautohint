@@ -11,6 +11,7 @@ from psautohint.__main__ import stemhist
 from .differ import main as differ
 from . import make_temp_copy, DATA_DIR
 
+do_multi = False
 
 # font.otf, font.cff, font.ufo
 FONTS = glob.glob("%s/dummy/font.[ocu][tf][fo]" % DATA_DIR)
@@ -33,6 +34,7 @@ def test_outpath(path, tmpdir):
     autohint([path, '-o', out])
 
 
+@pytest.mark.skipif(do_multi is False, reason="variable font tests disabled")
 def test_multi_outpath(tmpdir):
     """Test handling multiple output paths."""
     paths = sorted(glob.glob("%s/dummy/mm0/*.ufo" % DATA_DIR))
@@ -44,6 +46,7 @@ def test_multi_outpath(tmpdir):
     autohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
+@pytest.mark.skipif(do_multi is False, reason="variable font tests disabled")
 def test_multi_outpath_unequal(tmpdir):
     """Test that we exit if output paths don't match number of input paths."""
     paths = sorted(glob.glob("%s/dummy/mm0/*.ufo" % DATA_DIR))
@@ -56,6 +59,7 @@ def test_multi_outpath_unequal(tmpdir):
         autohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
+@pytest.mark.skipif(do_multi is False, reason="variable font tests disabled")
 def test_multi_different_formats(tmpdir):
     """Test that we exit if input paths are of different formats."""
     base = "%s/dummy/mm0" % DATA_DIR
@@ -70,6 +74,7 @@ def test_multi_different_formats(tmpdir):
         autohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
+@pytest.mark.skipif(do_multi is False, reason="variable font tests disabled")
 def test_multi_reference_is_input(tmpdir):
     """Test that we exit if reference font is also one of the input paths."""
     paths = sorted(glob.glob("%s/dummy/mm0/*.ufo" % DATA_DIR))
@@ -82,6 +87,7 @@ def test_multi_reference_is_input(tmpdir):
         autohint(inpaths + ['-o'] + outpaths + ['-r', reference])
 
 
+@pytest.mark.skipif(do_multi is False, reason="variable font tests disabled")
 def test_multi_reference_is_duplicated(tmpdir):
     """Test that we exit if one of the input paths is duplicated."""
     paths = sorted(glob.glob("%s/dummy/mm0/*.ufo" % DATA_DIR))
@@ -321,6 +327,7 @@ def test_outpath_order(path, tmpdir):
     autohint(['-o', out, path])
 
 
+@pytest.mark.skipif(do_multi is False, reason="variable font tests disabled")
 def test_multi_order(tmpdir):
     """ e.g. psautohint -o outfile1 outfile2 infile1 infile2"""
     in1 = "%s/dummy/font.ufo" % DATA_DIR
@@ -331,6 +338,7 @@ def test_multi_order(tmpdir):
     autohint(['-o', out1, out2, in1, in2])
 
 
+@pytest.mark.skipif(do_multi is False, reason="variable font tests disabled")
 def test_multi_order_unequal(tmpdir):
     """ e.g. psautohint -o outfile1 outfile2 infile"""
     in1 = "%s/dummy/font.ufo" % DATA_DIR

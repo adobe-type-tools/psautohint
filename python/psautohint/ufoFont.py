@@ -120,7 +120,7 @@ from fontTools.ufoLib import UFOReader, UFOWriter
 from fontTools.ufoLib.errors import UFOLibError
 
 from . import fdTools, FontParseError
-from .glyphData import glyphData
+from .glyphData import glyphData, norm_float
 
 
 log = logging.getLogger(__name__)
@@ -560,8 +560,9 @@ class UFOFontData:
         return self._glyphsets[layer_name]
 
     @staticmethod
-    def get_glyph_data(glyph, name, readStems, readFlex, roundCoords):
-        gl = glyphData(roundCoords=roundCoords, name=name)
+    def get_glyph_data(glyph, name, readStems, readFlex, roundCoords,
+                       glyphSet):
+        gl = glyphData(roundCoords=roundCoords, name=name, glyphSet=glyphSet)
         glyph.draw(gl)
         if not hasattr(glyph, "width"):
             glyph.width = 0
@@ -577,7 +578,7 @@ class UFOFontData:
         glyphset = self._get_glyphset()
         glyph = glyphset[name]
         glyph_data = self.get_glyph_data(glyph, name, readStems, readFlex,
-                                         roundCoords)
+                                         roundCoords, glyphset)
 
         # Hash is always from the default glyph layer.
         hash_pen = HashPointPen(glyph)
@@ -588,8 +589,8 @@ class UFOFontData:
         if name in self.processedLayerGlyphMap:
             glyphset = self._get_glyphset(PROCESSED_LAYER_NAME)
             glyph = glyphset[name]
-            glyph_data = self.get_glyph_data(glyph, readStems, readFlex,
-                                             roundCoords)
+            glyph_data = self.get_glyph_data(glyph, name, readStems, readFlex,
+                                             roundCoords, glyphset)
         return glyph_data, skip
 
     def getGlyphList(self):
@@ -837,9 +838,6 @@ class GlyphDataWrapper(object):
 
     def addUfoMask(self, uhl, masks, pointname):
         """Associates the hint set represented by masks with the named point"""
-        if masks is None:
-            return
-
         if uhl.get(HINT_SET_LIST_NAME, None) is None:
             uhl[HINT_SET_LIST_NAME] = []
 
@@ -853,7 +851,10 @@ class GlyphDataWrapper(object):
 
         ustems = []
         for i, stems in enumerate([glyph.hstems, glyph.vstems]):
-            sl = [s for (s, b) in zip(stems, masks[i]) if b]
+            if masks and masks[i]:
+                sl = [s for (s, b) in zip(stems, masks[i]) if b]
+            else:
+                sl = stems
             if iscntr[i]:
                 pl = [cntropname[i]]
                 for s in sl:
@@ -881,12 +882,12 @@ class GlyphDataWrapper(object):
                 return labelnum, None
             if pe.flex == 1:
                 self.addUfoFlex(uhl, pn)
-            self.addUfoMask(uhl, pe.masks, pn)
+            if pe.masks:
+                self.addUfoMask(uhl, pe.masks, pn)
         else:
             # First call, record top-level mask (if any)
             self.addUfoMask(uhl, self._glyph.startmasks, pn)
-        labelnum += 1
-        return labelnum, pn
+        return labelnum + 1, pn
 
     def drawPoints(self, pen, ufoHintLib=True):
         """
@@ -943,10 +944,3 @@ class GlyphDataWrapper(object):
                     del self.lib[key]
 
             self.lib[HINT_DOMAIN_NAME2] = uhl
-
-
-def norm_float(value):
-    """Converts a float (whose decimal part is zero) to integer"""
-    if isinstance(value, float) and value.is_integer():
-        return int(value)
-    return value

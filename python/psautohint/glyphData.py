@@ -10,9 +10,19 @@ import operator
 from copy import deepcopy
 from builtins import tuple as _tuple
 from fontTools.misc.bezierTools import solveQuadratic, calcCubicParameters
+from fontTools.pens.basePen import BasePen
 
 import logging
 log = logging.getLogger(__name__)
+
+def norm_float(value):
+    """Converts a float (whose decimal part is zero) to integer"""
+    if isinstance(value, float):
+        value = round(value, 4)
+        if value.is_integer():
+            return int(value)
+        return value
+    return value
 
 
 def feq(a, b):
@@ -108,6 +118,9 @@ class pt(tuple):
         else:
             raise RuntimeError("glyphData.pt method ao used without " +
                                "setting align")
+
+    def norm_float(self):
+        return pt(norm_float(self[0]), norm_float(self[1]))
 
     # for two pts
     def __add__(self, other):
@@ -271,7 +284,7 @@ class stem(tuple):
             l = last.rt
         else:
             l = 0
-        return (self.lb - l, self.rt - self.lb)
+        return (norm_float(self.lb - l), norm_float(self.rt - self.lb))
 
     def UFOVals(self):
         """Returns a tuple of stem values appropriate for UFO output"""
@@ -530,8 +543,8 @@ class pathElement:
             log.error("Cannot convert flex-hinted curve to line: skipping.")
             return
         self.is_line = True
-        del self.ps
-        del self.pe
+        del self.cs
+        del self.ce
         self.bounds = None
 
     def convertToCurve(self, sRatio=.333333, eRatio=None, roundCoords=False):
@@ -638,10 +651,11 @@ class pathElement:
         return prog, after
 
 
-class glyphData:
+class glyphData(BasePen):
     """Stores state corresponding to a T2 CharString"""
-    def __init__(self, roundCoords, name=''):
+    def __init__(self, roundCoords, name='', glyphSet=None):
         self.roundCoords = roundCoords
+        self.glyphSet = glyphSet
 
         self.subpaths = []
         self.hstems = []
@@ -714,6 +728,9 @@ class glyphData:
         """Returns position (subpath idx, offset) of next spline to be drawn"""
         return (len(self.subpaths) - 1, len(self.subpaths[-1]))
 
+    def getGlyphSet(self):
+        return self.glyphSet
+
     # "hintpen" methods:
     def nextIsFlex(self):
         """quasi-pen method noting that next spline starts a flex hint"""
@@ -748,7 +765,7 @@ class glyphData:
             self.startmasks = [hhints, vhints]
         else:
             if not self.startmasks and not self.cntr:
-                log.warning("Initial hintmask missing in glyph %s" % self.name)
+                log.warning("Initial hintmask missing in current glyph %s" % self.name)
             # In the glyphdata format the end of a path is implicit in the
             # charstring but explicit in the subpath, while a moveto is
             # explicit in the charstring and implicit in the subpath. So

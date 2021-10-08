@@ -34,6 +34,7 @@ class hinter:
         return fne(a, 0) and fne(b, 0) and ((a > 0) == (b > 0))
 
     def __init__(self, options):
+        self.StemLimit = 22  # ((kStackLimit) - 2) / 2), kStackLimit == 46
         """Initialize constant values and miscelaneous state"""
         self.MaxStemDist = 150  # initial maximum stem width allowed for hints
         self.InitBigDist = self.MaxStemDist
@@ -256,10 +257,10 @@ class hinter:
 
         real_n = self.glyph.nextInSubpath(c, skipTiny=False)
         if real_n is not n:
-            self.warning("Remove short spline at %g %g to add flex." % c.e)
+            self.info("Remove short spline at %g %g to add flex." % c.e)
             return
         elif real_n.is_close:
-            self.warning("Move closepath from %g %.gto add flex." % c.e)
+            self.info("Move closepath from %g %.gto add flex." % c.e)
             return
 
         if fne(c.s.a, n.e.a):
@@ -307,6 +308,7 @@ class hinter:
         self.pruneStemVals()
         self.highestStemVals()
         self.mergeVals()
+        self.limitVals()
         for sv in self.hs.stemValues:
             sv.show(self.isV(), "postmerge", self)
         self.debug("pick main %s" % self.aDesc())
@@ -793,11 +795,13 @@ class hinter:
 #                                  (q, q2, adist, ad2,
 #                                   self.CPFrom(c.ce.a, c.e.a)))
                         if q2 > 0 and abs(ad2) > abs(adist):
+                            ccs, cce = c.cs, c.ce
                             if (feq(c.s.o, c.cs.o) and feq(c.cs.o, c.ce.o) and
                                     feq(c.ce.o, c.e.o)):
                                 if (self.options.allowChanges and
                                         self.AutoLinearCurveFix):
                                     c.convertToLine()
+                                    ccs, cce = c.s, c.e
                                     self.info("Curve from %s to %s" % (c.s, c.e)
                                               + "changed to a line.")
                                 else:
@@ -805,7 +809,7 @@ class hinter:
                                               + "should be changed to a line.")
                             adist = ad2 / 2
                             aavg = (c.s.a + c.e.a) / 2
-                            sp = self.pickSpot(c.s, c.e, adist, c.cs, c.ce,
+                            sp = self.pickSpot(c.s, c.e, adist, ccs, cce,
                                                self.glyph.prevSlopePoint(c),
                                                self.glyph.nextSlopePoint(c))
                             self.addSegment(aavg - adist, aavg + adist, sp, c,
@@ -1045,7 +1049,6 @@ class hinter:
 #                  (lloc, uloc, val, spc))
         if val == 0:
             return
-#        if (not self.Pruning or val < self.PruneValue) and spc <= 0:
         if (self.Pruning and val < self.PruneValue) and spc <= 0:
             return
         if (lseg.type == hintSegment.sType.BEND and
@@ -1054,7 +1057,6 @@ class hinter:
         ghst = (lseg.type == hintSegment.sType.GHOST or
                 useg.type == hintSegment.sType.GHOST)
         if not ghst and (self.Pruning and val <= self.PruneD) and spc <= 0:
-#        if not ghst and (not self.Pruning or val <= self.PruneD) and spc <= 0:
             if (lseg.type == hintSegment.sType.BEND or
                     useg.type == hintSegment.sType.BEND):
                 return
@@ -1242,6 +1244,72 @@ class hinter:
         other_sv.show(self.isV(), "pruner", self)
         sv.pruned = True
 
+    # Associate segments with the highest valued close stem
+
+    def highestStemVals(self):
+        """
+        Associates each segment in both lists with the highest related stemVal,
+        pruning stemValues with no association
+        """
+        for sv in self.hs.stemValues:
+            sv.pruned = True
+        ll, ul = self.segmentLists()
+        self.findHighestValForSegs(ul, True)
+        self.findHighestValForSegs(ll, False)
+        self.hs.stemValues = [sv for sv in self.hs.stemValues if not sv.pruned]
+
+    def findHighestValForSegs(self, segl, isU):
+        """Associates each segment in segl with the highest related stemVal"""
+        for seg in segl:
+            ghst = None
+            highest = self.findHighestVal(seg, isU, False)
+            if highest is not None and highest.isGhost:
+                nonGhst = self.findHighestVal(seg, isU, True)
+                if nonGhst is not None and nonGhst.val >= 2:
+                    ghst = highest
+                    highest = nonGhst
+            if highest is not None:
+                if not (highest.val < self.MinHighSegVal and
+                        (ghst is None or ghst.val < self.MinHighSegVal)):
+                    highest.pruned = False
+                    seg.hintval = highest
+
+    def findHighestVal(self, seg, isU, locFlag):
+        """Finds the highest stemVal related to seg"""
+        highest = None
+        svl = self.hs.stemValues
+
+        def OKcond(sv):
+            vs, vl = (sv.useg, sv.uloc) if isU else (sv.lseg, sv.lloc)
+            if locFlag:
+                loctest = not sv.isGhost
+            else:
+                loctest = vs is seg or self.closeSegs(vs, seg)
+#            self.info("d %g  loctest %r  cVFS %r" %
+#                      (abs(vl - seg.loc), loctest,
+#                       self.considerValForSeg(sv, seg, isU)))
+            return (abs(vl - seg.loc) <= self.MaxMerge and loctest and
+                    self.considerValForSeg(sv, seg, isU))
+
+        try:
+            _, highest = max(((sv.compVal(self.SpcBonus, self.GhostFactor), sv)
+                              for sv in svl if OKcond(sv)))
+        except ValueError:
+            pass
+        self.debug("findHighestVal: loc %g min %g max %g" %
+                   (seg.loc, seg.min, seg.max))
+        if highest:
+            highest.show(self.isV(), "highest", self)
+        else:
+            self.debug("NULL")
+        return highest
+
+    def considerValForSeg(self, sv, seg, isU):
+        """Utility test for findHighestVal"""
+        if sv.spc > 0 or self.inBand(seg.loc, not isU):
+            return True
+        return not (self.Pruning and sv.val < self.PruneB)
+
     # Merge related candidate stems
 
     def findBestValues(self):
@@ -1364,7 +1432,7 @@ class hinter:
                                     not svuIB):
                                 replace = True
                         elif (abs(bst.uloc - sv.uloc) <= 1 and
-                              abs(bst.tloc - sv.lloc) <= self.MaxBendMerge):
+                              abs(bst.lloc - sv.lloc) <= self.MaxBendMerge):
                             if (sv.lseg.type == hintSegment.sType.BEND and
                                     not svlIB):
                                 replace = True
@@ -1372,70 +1440,27 @@ class hinter:
                     self.replaceVals(sv.lloc, sv.uloc, bst.lloc, bst.uloc,
                                      bst.best)
 
-    def highestStemVals(self):
-        """
-        Associates each segment in both lists with the highest related stemVal,
-        pruning stemValues with no association
-        """
-        for sv in self.hs.stemValues:
-            sv.pruned = True
-        ll, ul = self.segmentLists()
-        self.findHighestValForSegs(ul, True)
-        self.findHighestValForSegs(ll, False)
-        self.hs.stemValues = [sv for sv in self.hs.stemValues if not sv.pruned]
+    # Limit number of stems
 
-    def findHighestValForSegs(self, segl, isU):
-        """Associates each segment in segl with the highest related stemVal"""
-        for seg in segl:
-            ghst = None
-            highest = self.findHighestVal(seg, isU, False)
-            if highest is not None and highest.isGhost:
-                nonGhst = self.findHighestVal(seg, isU, True)
-                if nonGhst is not None and nonGhst.val >= 2:
-                    ghst = highest
-                    highest = nonGhst
-            if highest is not None:
-                if not (highest.val < self.MinHighSegVal and
-                        (ghst is None or ghst.val < self.MinHighSegVal)):
-                    highest.pruned = False
-                    seg.hintval = highest
-
-    def findHighestVal(self, seg, isU, locFlag):
-        """Finds the highest stemVal related to seg"""
-        highest = None
+    def limitVals(self):
+        """
+        Limit the number of stem values in a dimension
+        """
         svl = self.hs.stemValues
+        if len(svl) <= self.StemLimit:
+            return
 
-        def OKcond(sv):
-            vs, vl = (sv.useg, sv.uloc) if isU else (sv.lseg, sv.lloc)
-            if locFlag:
-                loctest = not sv.isGhost
-            else:
-                loctest = vs is seg or self.closeSegs(vs, seg)
-#            self.info("d %g  loctest %r  cVFS %r" %
-#                      (abs(vl - seg.loc), loctest,
-#                       self.considerValForSeg(sv, seg, isU)))
-            return (abs(vl - seg.loc) <= self.MaxMerge and loctest and
-                    self.considerValForSeg(sv, seg, isU))
+        self.info("Trimming stem list to %g from %g" %
+                  (self.StemLimit, len(svl)))
+        # This will leave some segments with .highest entries that aren't
+        # part of the stemValues list, but those won't get .idx values so
+        # things will mostly work out. We could do better trying to find
+        # alternative hints for segments. (Thee previous code just chopped
+        # the list at one end.)
+        ol = [(sv.compVal(self.SpcBonus), sv) for sv in svl]
+        ol.sort(reverse=True)
 
-        try:
-            _, highest = max(((sv.compVal(self.SpcBonus, self.GhostFactor), sv)
-                              for sv in svl if OKcond(sv)))
-        except ValueError:
-            pass
-        self.debug("findHighestVal: loc %g min %g max %g" %
-                   (seg.loc, seg.min, seg.max))
-        if highest:
-            highest.show(self.isV(), "highest", self)
-        else:
-            self.debug("NULL")
-        return highest
-
-    def considerValForSeg(self, sv, seg, isU):
-        """Utility test for findHighestVal"""
-        if sv.spc > 0 or self.inBand(seg.loc, not isU):
-            return True
-        return not (self.Pruning and sv.val < self.PruneB)
-#        return not (not self.Pruning or sv.val < self.PruneB)
+        svl[:] = sorted((sv for weight, sv in ol[:self.StemLimit]))
 
     # Reporting
 
@@ -1558,7 +1583,6 @@ class hinter:
         if not self.Pruning or val > self.PruneA:
             return True
         if self.Pruning and val < self.PruneB:
-#        if not self.Pruning or val < self.PruneB:
             return False
         return not self.Pruning or prevBV <= val * self.PruneC
 
@@ -1722,7 +1746,7 @@ class hinter:
         l = len(self.hs.stems)
         mask = [False] * l
         for seg in pestate.segments:
-            if not seg.hintval or not seg.hintval.idx:
+            if not seg.hintval or seg.hintval.idx is None:
                 continue
             mask[seg.hintval.idx] = True
 #        maskstr = ''.join(( '1' if i else '0' for i in mask ))
