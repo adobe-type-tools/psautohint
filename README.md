@@ -10,11 +10,15 @@ PSAutoHint
 A standalone version of the [AFDKO](https://github.com/adobe-type-tools/afdko)
 autohinter.
 
+**NOTE**: As of 2022 the package is "pure" Python instead of a Python
+wrapper around C code. See these [notes](doc/NOTES.md) for more information
+about the Python port.
+
 Building and running
 --------------------
 
-This repository consists of an autohinter written in pure python and
-related documentation.
+This repository consists of an autohinter written in Python and related
+documentation.
 
 To install the module system-wide:
 
@@ -31,6 +35,6 @@ The autohinter can then be used by running:
 Testing
 -------
 
-We have a test suite that can be run with:
+The package test suite can be run with:
 
     pytest
