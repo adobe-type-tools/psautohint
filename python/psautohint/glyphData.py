@@ -766,8 +766,10 @@ class glyphData(BasePen):
             self.startmasks = [hhints, vhints]
         else:
             if not self.startmasks and not self.cntr:
-                log.warning("Initial hintmask missing in current glyph %s" %
-                            self.name)
+                # XXX Should refactor so this prints as warning when
+                # using existing hint data
+                log.info("Initial hintmask missing in current glyph %s" %
+                         self.name)
             # In the glyphdata format the end of a path is implicit in the
             # charstring but explicit in the subpath, while a moveto is
             # explicit in the charstring and implicit in the subpath. So

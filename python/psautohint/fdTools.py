@@ -225,7 +225,7 @@ class FDDict:
                     elif abs(pair[1] - prevPair[0]) <= zoneBuffer:
                         raise FontInfoParseError(
                             "In FDDict %s. The top of zone %s at %s is within "
-                            "the min spearation limit (%s units) of zone %s "
+                            "the min separation limit (%s units) of zone %s "
                             "with the bottom at %s." %
                             (self.DictName, prevPair[2], prevPair[0],
                              zoneBuffer, pair[2], pair[1]))

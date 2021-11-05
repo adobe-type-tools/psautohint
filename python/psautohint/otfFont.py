@@ -151,11 +151,15 @@ class T2ToGlyphDataExtractor(T2OutlineExtractor):
         args = []
         if not self.hintMaskBytes:
             args = self.popallWidth()
-            if args:
+            if args and self.vhintCount == 0:
                 # hstem(hm) followed by values followed by a hint mask is
                 # an implicit vstem(hm)
                 self.countHints(args, False)
                 self.glyph.vStem(args, None)
+            elif args:
+                log.warning("Glyph %s may be corrupt: found extra stem data",
+                            self.glyph.name)
+
             self.hintMaskBytes = (self.vhintCount + self.hhintCount + 7) // 8
 
         hintMaskString, index = self.callingStack[-1].getBytes(

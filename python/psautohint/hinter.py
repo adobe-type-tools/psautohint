@@ -407,7 +407,11 @@ class hinter:
         d1 = p1 - p0
         d2 = p2 - p1
         dp = d1.dot(d2)
-        return dp * dp / (d1.normsq() * d2.normsq()) <= 0.5
+        q = d1.normsq() * d2.normsq()
+        # Shouldn't hit this in practice
+        if feq(q, 0):
+            return False
+        return dp * dp / q <= 0.5
 
     def isCCW(self, p0, p1, p2):
         d0 = p1 - p0
@@ -440,10 +444,10 @@ class hinter:
         if feq(p0.o, p1.o):
             return
         osame = self.diffSign(p2.o - p1.o, p1.o - p0.o)
-        tbend = self.testBend(p0, p1, p2)
         if osame or (self.testTan(p1 - p2) and
                      (self.diffSign(p2.a - p1.a, p1.a - p0.a) or
-                      (self.flatQuo(p0, p1, doOppo=True) > 0 and tbend))):
+                      (self.flatQuo(p0, p1, doOppo=True) > 0 and
+                       self.testBend(p0, p1, p2)))):
             delta = self.BendLength / 2
             doboth = False
             if p0.a <= p1.a < p2.a or p0.a < p1.a <= p2.a:
@@ -479,10 +483,10 @@ class hinter:
         if feq(p0.o, p1.o):
             return
         osame = self.diffSign(p2.o - p0.o, p0.o - p1.o)
-        tbend = self.testBend(p2, p0, p1)
         if osame or (self.testTan(p0 - p2) and
                      (self.diffSign(p2.a - p0.a, p0.a - p1.a) or
-                      (self.flatQuo(p1, p0, doOppo=True) > 0 and tbend))):
+                      (self.flatQuo(p1, p0, doOppo=True) > 0 and
+                       self.testBend(p2, p0, p1)))):
             delta = self.BendLength / 2
             if p2.a <= p0.a < p1.a or p2.a < p0.a <= p1.a:
                 pass
