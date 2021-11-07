@@ -143,22 +143,19 @@ class T2ToGlyphDataExtractor(T2OutlineExtractor):
 
     def countHints(self, args, horiz):
         if horiz:
-            self.hhintCount = len(args) // 2
+            self.hhintCount += len(args) // 2
         else:
-            self.vhintCount = len(args) // 2
+            self.vhintCount += len(args) // 2
 
-    def doMask(self, index):
+    def doMask(self, index, cntr=False):
         args = []
         if not self.hintMaskBytes:
             args = self.popallWidth()
-            if args and self.vhintCount == 0:
-                # hstem(hm) followed by values followed by a hint mask is
-                # an implicit vstem(hm)
+            if args:
+                # values after stems operators followed by a
+                # hint/cntrmask is an implicit vstem(hm))
                 self.countHints(args, False)
-                self.glyph.vStem(args, None)
-            elif args:
-                log.warning("Glyph %s may be corrupt: found extra stem data",
-                            self.glyph.name)
+                self.glyph.vStem(args, None if cntr else True)
 
             self.hintMaskBytes = (self.vhintCount + self.hhintCount + 7) // 8
 
@@ -178,7 +175,7 @@ class T2ToGlyphDataExtractor(T2OutlineExtractor):
         return hintString, index
 
     def op_cntrmask(self, index):
-        hintString, hhints, vhints, index = self.doMask(index)
+        hintString, hhints, vhints, index = self.doMask(index, True)
         if self.readStems:
             self.glyph.cntrmask(hhints, vhints)
         return hintString, index
@@ -320,6 +317,8 @@ class CFFFontData:
         else:
             # This is an MM source font. Update the font's charstring directly.
             t2CharString = self.charStrings[glyphName]
+            # Not used but useful for debugging save failures
+            t2CharString._name = glyphName
             t2CharString.program = t2Program
 
     def save(self, path):

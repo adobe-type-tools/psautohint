@@ -640,6 +640,12 @@ class hintAdapter:
             return
 
         usedmasks = deepcopy(masks)
+        if glyph.hhs.counterHinted:
+            usedmasks[0] = [mv or uv for mv, uv in
+                            zip(glyph.hhs.mainMask, usedmasks[0])]
+        if glyph.vhs.counterHinted:
+            usedmasks[1] = [mv or uv for mv, uv in
+                            zip(glyph.vhs.mainMask, usedmasks[1])]
 
         glyph.is_hm = True
         glyph.startmasks = masks
@@ -697,6 +703,8 @@ class hintAdapter:
         if False in usedmasks[0] or False in usedmasks[1]:
             self.delUnused(stems, usedmasks)
             self.delUnused(glyph.startmasks, usedmasks)
+            for c in glyph.cntr:
+                self.delUnused(c, usedmasks)
             foundPEMask = False
             for c in glyph:
                 if c.masks:
@@ -739,9 +747,9 @@ class hintAdapter:
         for hv in range(2):
             hs = self.vHinter.hs if hv == 1 else self.hHinter.hs
             l = len(m[hv])
-            if hs.counterHinted:
-                nm[hv] = [True] * l
-                continue
+#            if hs.counterHinted:
+#                nm[hv] = [True] * l
+#                continue
             c = cm[hv]
             n = nm[hv] = copy(m[hv])
             if hs.keepHints:

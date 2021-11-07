@@ -740,27 +740,32 @@ class glyphData(BasePen):
         """
         quasi-pen method to pass horizontal stem data (in relative format)
         """
-        self.flex_count += 1
         if self.is_hm is not None and self.is_hm != is_hm:
-            log.warning("Horizontal stem hints mask setting does not match" +
-                        " previous setting")
+            # XXX Should refactor so this prints as warning when
+            # using existing hint data
+            log.info("Horizontal stem hints mask setting does not match" +
+                     " previous setting")
         self.is_hm = is_hm
-        self.hstems = self.toStems(data)
+        self.hstems.extend(self.toStems(data))
 
     def vStem(self, data, is_hm):
         """quasi-pen method passing vertical stem data (in relative format)"""
         if is_hm is not None:
             if self.is_hm is not None and self.is_hm != is_hm:
-                log.warning("Vertical stem hints mask setting does not match" +
-                            " previous setting")
+                # XXX Should refactor so this prints as warning when
+                # using existing hint data
+                log.info("Vertical stem hints mask setting does not match" +
+                         " previous setting")
             self.is_hm = is_hm
-        self.vstems = self.toStems(data)
+        self.vstems.extend(self.toStems(data))
 
     def hintmask(self, hhints, vhints):
         """quasi-pen method passing hintmask data"""
         if not self.is_hm:
-            log.warning("Hintmask found when stems weren't marked as having" +
-                        " hintmasks")
+            # XXX Should refactor so this prints as warning when
+            # using existing hint data
+            log.info("Hintmask found when stems weren't marked as having" +
+                     " hintmasks")
             self.is_hm = True
         if len(self.subpaths) == 0:
             self.startmasks = [hhints, vhints]

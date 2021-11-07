@@ -441,7 +441,7 @@ class hinter:
         added in both "directions"
         """
         p0, p1, p2 = c.slopePoint(1), c.e, self.glyph.nextSlopePoint(c)
-        if feq(p0.o, p1.o):
+        if feq(p0.o, p1.o) or p2 is None:
             return
         osame = self.diffSign(p2.o - p1.o, p1.o - p0.o)
         if osame or (self.testTan(p1 - p2) and
@@ -479,9 +479,9 @@ class hinter:
         added in both "directions"
         """
         p0, p1, p2 = c.s, c.slopePoint(0), self.glyph.prevSlopePoint(c)
-        cs = self.glyph.prevInSubpath(c)
-        if feq(p0.o, p1.o):
+        if feq(p0.o, p1.o) or p2 is None:
             return
+        cs = self.glyph.prevInSubpath(c)
         osame = self.diffSign(p2.o - p0.o, p0.o - p1.o)
         if osame or (self.testTan(p0 - p2) and
                      (self.diffSign(p2.a - p0.a, p0.a - p1.a) or
@@ -515,9 +515,15 @@ class hinter:
         if not c:
             return
         if doPrev:
-            d = (self.glyph.prevSlopePoint(c) - c.cs).abs()
+            sp = self.glyph.prevSlopePoint(c)
+            if sp is None:
+                return False
+            d = (sp - c.cs).abs()
         else:
-            d = (self.glyph.nextSlopePoint(c) - c.ce).abs()
+            sp = self.glyph.nextSlopePoint(c)
+            if sp is None:
+                return False
+            d = (sp - c.ce).abs()
         return d.o <= self.OppoFlatMax and d.a >= self.FlatMin
 
     def sameDir(self, c, doPrev=False):
@@ -529,9 +535,13 @@ class hinter:
             return False
         if doPrev:
             p = self.glyph.prevInSubpath(c, skipTiny=True)
+            if p is None:
+                return
             p0, p1, p2 = c.e, c.s, p.s
         else:
             n = self.glyph.nextInSubpath(c, skipTiny=True)
+            if n is None:
+                return
             p0, p1, p2 = c.s, c.e, n.e
         if (self.diffSign(p0.y - p1.y, p1.y - p2.y) or
                 self.diffSign(p0.x - p1.x, p1.x - p2.x)):
@@ -592,9 +602,9 @@ class hinter:
             return p0.o
         if fne(p0.o, pp0.o) and feq(p1.o, pp1.o):
             return p1.o
-        if feq(p0.o, prv.o) and fne(p1.o, nxt.o):
+        if (prv and feq(p0.o, prv.o)) and (not nxt or fne(p1.o, nxt.o)):
             return p0.o
-        if fne(p0.o, prv.o) and feq(p1.o, nxt.o):
+        if (not prv or fne(p0.o, prv.o)) and (prv and feq(p1.o, nxt.o)):
             return p1.o
         if inBand0 and inBand1:
             upper, lower = (p1.o, p0.o) if p0.o < p1.o else (p0.o, p1.o)
@@ -603,7 +613,7 @@ class hinter:
             return p0.o
         if abs(pp1.a - p1.a) > abs(pp0.a - p0.a):
             return p1.o
-        if feq(p0.o, prv.o) and feq(p1.o, nxt.o):
+        if prv and feq(p0.o, prv.o) and nxt and feq(p1.o, nxt.o):
             if abs(p0.a - prv.a) > abs(p1.a - nxt.a):
                 return p0.o
             return p1.o
@@ -1596,7 +1606,8 @@ class hinter:
                     continue
                 if sl[i].overlaps(sl[j]):
                     hasConflicts = sc[i][j] = sc[j][i] = True
-        assert not (self.hs.counterHinted and hasConflicts)
+        if self.hs.counterHinted and hasConflicts:
+            self.warning("XXX TEMPORARY WARNING: conflicting counter hints")
         self.hs.stems = sl
         self.hs.stemConflicts = sc
         self.hs.hasConflicts = hasConflicts
