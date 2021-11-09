@@ -356,6 +356,8 @@ class CFFFontData:
         return self.is_cff2 or hasattr(self.topDict, "FDSelect")
 
     def flattenBlends(self, blendList):
+        if not blendList:
+            return []
         if type(blendList[0]) is list:
             flatList = [blendList[i][0] for i in range(len(blendList))]
         else:

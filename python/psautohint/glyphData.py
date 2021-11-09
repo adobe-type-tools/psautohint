@@ -955,7 +955,10 @@ class glyphData(BasePen):
         self.syncPositions()
         subpath, offset = c.position
         if c.isClose():
-            return self.subpaths[subpath][0]
+            n = self.subpaths[subpath][0]
+            if n == c:
+                return None
+            return n
         offset += 1
         if offset < len(self.subpaths[subpath]) - 1:
             return self.subpaths[subpath][offset]
