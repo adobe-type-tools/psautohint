@@ -330,6 +330,8 @@ class hinter:
                     self.resetForHinting()
                     self.calcHintValues(lnks, force=True, tryCounter=False)
                     return
+                else:
+                    self.highestStemVals()  # for bbox segments
         if len(self.hs.mainValues) == 0:
             self.addBBox(False)
         self.debug("%s results" % self.aDesc())
@@ -1544,15 +1546,17 @@ class hinter:
                     return
             lseg = hintSegment(mn_pt.o, mn_pt.a, mx_pt.a, pbs.extpes[0][peidx],
                                hintSegment.sType.LINE, 0, self.isV(), "l bbox")
+            self.hs.getPEState(pbs.extpes[0][peidx],
+                               True).segments.append(lseg)
             useg = hintSegment(mx_pt.o, mn_pt.a, mx_pt.a, pbs.extpes[1][peidx],
                                hintSegment.sType.LINE, 0, self.isV(), "u bbox")
+            self.hs.getPEState(pbs.extpes[1][peidx],
+                               True).segments.append(useg)
             hv = stemValue(mn_pt.o, mx_pt.o, 100, 0, lseg, useg, False)
-            if not doSubpaths:
-                self.insertStemValue(hv, "bboxadd")
+            self.insertStemValue(hv, "bboxadd")
             self.hs.mainValues.append(hv)
             self.hs.mainValues.sort(key=lambda sv: sv.compVal(self.SpcBonus),
                                     reverse=True)
-            self.info("bbb: %r" % self.hs.stemValues)
 
     # masks
 
