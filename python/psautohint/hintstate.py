@@ -329,6 +329,15 @@ class glyphHintState:
                 d += 1
             i += 1
 
+    def deleteSegments(self):
+        for s in self.increasingSegs:
+            s.deleted = True
+        for s in self.decreasingSegs:
+            s.deleted = True
+        self.increasingSegs = []
+        self.decreasingSegs = []
+        self.cleanup()
+
     def cleanup(self):
         """Runs cleanup on all pathElementHintState objects"""
         for pes in self.peStates.values():
