@@ -9,7 +9,8 @@ import threading
 import operator
 from copy import deepcopy
 from builtins import tuple as _tuple
-from fontTools.misc.bezierTools import solveQuadratic, calcCubicParameters
+from fontTools.misc.bezierTools import (solveQuadratic, calcCubicParameters,
+                                        splitCubicAtT)
 from fontTools.pens.basePen import BasePen
 
 import logging
@@ -459,7 +460,15 @@ class pathElement:
         self.s is the first point, self.e is the last.
         If the spline is a curve self.cs is the first control point and
         self.ce is the second.
+
+        When segment_sub is not None it must either be a list or an
+        integer. If it is a list then that list must contain pathElements,
+        representing the same path (in order). These will be used in place
+        of the pathElement during segment generation. Each of these
+        substitution pathElements must have segment_sub equal to the
+        offset in the parent's segment_sub list.
     """
+
     def __init__(self, *args, is_close=False, masks=None, flex=False,
                  position=None):
         self.is_line = False
@@ -486,6 +495,7 @@ class pathElement:
         self.flex = flex
         self.bounds = None
         self.position = position
+        self.segment_sub = None
 
     def getBounds(self):
         """Returns the bounds object for the object, generating it if needed"""
@@ -648,6 +658,23 @@ class pathElement:
             prog.append('rlineto')
 
         return prog, after
+
+    def splitAtInflectionsForSegs(self):
+        a, b, c, d, = self.cubicParameters()
+        t2c = 3*(b[0]*a[1] - a[0]*b[1])
+        t1c = 3*(c[0]*a[1] - a[0]*c[1])
+        t0c = (c[0]*b[1] - b[0]*c[1])
+        sols = [ t for t in solveQuadratic(t2c, t1c, t0c) if 0 < t < 1 ]
+        if len(sols) > 0:
+            self.segment_sub = []
+            for s in splitCubicAtT(self.s, self.cs, self.ce, self.e, *sols):
+                pts = [ pt(tup) for tup in s ]
+                spe = pathElement(*pts)
+                spe.position = self.position
+                spe.segment_sub = len(self.segment_sub)
+                self.segment_sub.append(spe)
+            return True
+        return False
 
 
 class glyphData(BasePen):
@@ -830,7 +857,12 @@ class glyphData(BasePen):
         if self.pathEdited:
             for sp in range(len(self.subpaths)):
                 for ofst in range(len(self.subpaths[sp])):
-                    self.subpaths[sp][ofst].position = (sp, ofst)
+                    pe = self.subpaths[sp][ofst]
+                    pe.position = (sp, ofst)
+                    if isinstance(pe.sequence_sub, list):
+                        for i, spe in enumerate(pe.sequence_sub):
+                            spe.position = (sp, ofst)
+                            spe.sequence_sub = i
 
     def setPathEdited(self):
         self.pathEdited = True
@@ -910,7 +942,7 @@ class glyphData(BasePen):
             return self.subpaths[-1][-1]
         return None
 
-    def next(self, c):
+    def next(self, c, segSub=False):
         """
         If c == self, returns the first elemeht of the path
 
@@ -921,17 +953,36 @@ class glyphData(BasePen):
             return None
         if c is self:
             if self.subpaths and self.subpaths[0]:
-                return self.subpaths[0][0]
+                t = self.subpaths[0][0]
+                if not segSub or not isinstance(t.segment_sub, list):
+                    return t
+                else:
+                    return t.segment_sub[0]
             return None
+        assert ((segSub or not isinstance(c.segment_sub, int))
+                and (not segSub or not isinstance(c.segment_sub, list)))
         self.syncPositions()
         subpath, offset = c.position
+        if isinstance(c.segment_sub, int):
+            suboff = c.segment_sub + 1
+            t = self.subpaths[subpath][offset]
+            if len(t.segment_sub) > suboff:
+                return t.segment_sub[suboff]
         offset += 1
         if offset < len(self.subpaths[subpath]):
-            return self.subpaths[subpath][offset]
+            t = self.subpaths[subpath][offset]
+            if not segSub or not isinstance(t.segment_sub, list):
+                return t
+            else:
+                return t.segment_sub[0]
         subpath += 1
         offset = 0
         if subpath < len(self.subpaths):
-            return self.subpaths[subpath][offset]
+            t = self.subpaths[subpath][offset]
+            if not segSub or not isinstance(t.segment_sub, list):
+                return t
+            else:
+                return t.segment_sub[0]
         return None
 
     # Iterate through path elements but start each subpath
@@ -970,42 +1021,47 @@ class glyphData(BasePen):
             return c
         return None
 
-    def prev(self, c):
-        """Like next() but returns the previous element in the path, or None"""
-        if c is self or c is None:
-            return None
-        self.syncPositions()
-        subpath, offset = c.position
-        if offset > 0:
-            return self.subpaths[subpath][offset - 1]
-        subpath -= 1
-        if subpath >= 0:
-            return self.subpaths[subpath][-1]
-        return None
-
-    def inSubpath(self, c, i, skipTiny, closeWrapOK):
+    def inSubpath(self, c, i, skipTiny, closeWrapOK, segSub):
         """Utility function for nextInSubpath and prevInSubpath"""
         if c is None or (c is self and i == -1):
             return None
         if c is self:
-            return self.next(c)
+            return self.next(c, segSub)
+        assert ((segSub or not isinstance(c.segment_sub, int))
+                and (not segSub or not isinstance(c.segment_sub, list)))
         self.syncPositions()
         subpath, offset = c.position
         sp = self.subpaths[subpath]
         l = len(sp)
-        o = (offset + i) % l
-        if o == offset:
-            return None
-        while skipTiny and sp[o].isTiny():
-            o = (o + i) % l
-            if o == offset:
+        o = offset
+        while True:
+            done = False
+            if isinstance(c.segment_sub, int):
+                suboff = c.segment_sub + i
+                t = self.subpaths[subpath][o]
+                if 0 <= suboff < len(t.segment_sub):
+                    c = t.segment_sub[suboff]
+                    done = True
+            if not done:
+                o = (o + i) % l
+                if o == offset:
+                    return None
+                if segSub and isinstance(sp[o].segment_sub, list):
+                    if i < 0:
+                        suboff = len(sp[o].segment_sub) + i
+                    else:
+                        suboff = 0
+                    c = sp[o].segment_sub[suboff]
+                else:
+                    c = sp[o]
+            if not skipTiny or not c.isTiny():
+                break
+            if (not closeWrapOK and
+                    ((i > 0 and o < offset) or (i < 0 and o > offset))):
                 return None
-        if (not closeWrapOK and
-                ((i > 0 and o < offset) or (i < 0 and o > offset))):
-            return None
-        return sp[o]
+        return c
 
-    def nextInSubpath(self, c, skipTiny=False, closeWrapOK=True):
+    def nextInSubpath(self, c, skipTiny=False, closeWrapOK=True, segSub=False):
         """
         Returns the next element in the subpath after c.
 
@@ -1014,9 +1070,9 @@ class glyphData(BasePen):
 
         If c is the last element and closeWrapOK is False returns None
         """
-        return self.inSubpath(c, 1, skipTiny, closeWrapOK)
+        return self.inSubpath(c, 1, skipTiny, closeWrapOK, segSub)
 
-    def prevInSubpath(self, c, skipTiny=False, closeWrapOK=True):
+    def prevInSubpath(self, c, skipTiny=False, closeWrapOK=True, segSub=False):
         """
         Returns the previous element in the subpath before c.
 
@@ -1025,16 +1081,16 @@ class glyphData(BasePen):
 
         If c is the first element and closeWrapOK is False returns None
         """
-        return self.inSubpath(c, -1, skipTiny, closeWrapOK)
+        return self.inSubpath(c, -1, skipTiny, closeWrapOK, segSub)
 
     def nextSlopePoint(self, c):
         """Returns the slope point of the element of the subpath after c"""
-        n = self.nextInSubpath(c, skipTiny=True)
+        n = self.nextInSubpath(c, skipTiny=True, segSub=True)
         return None if n is None else n.slopePoint(0)
 
     def prevSlopePoint(self, c):
         """Returns the slope point of the element of the subpath before c"""
-        p = self.prevInSubpath(c, skipTiny=True)
+        p = self.prevInSubpath(c, skipTiny=True, segSub=True)
         return None if p is None else p.slopePoint(1)
 
     class glyphiter:

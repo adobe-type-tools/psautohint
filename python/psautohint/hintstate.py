@@ -234,8 +234,13 @@ class glyphHintState:
         else:
             return None
 
-    def addSegment(self, fr, to, loc, pe1, pe2, typ, bonus, isV, desc):
+    def addSegment(self, fr, to, loc, pe1, pe2, typ, bonus, isV, desc, log):
         """Adds a new segment associated with pathElements pe1 and pe2"""
+        if isV:
+            pp = ('v', loc, fr, loc, to, desc)
+        else:
+            pp = ('h', fr, loc, to, loc, desc)
+        log.debug("add %sseg %g %g to %g %g %s" % pp)
         if fr > to:
             mn, mx = to, fr
             lst = self.decreasingSegs

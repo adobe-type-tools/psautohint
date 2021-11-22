@@ -568,6 +568,9 @@ class hintAdapter:
         self.hHinter.calcHintValues(lnks)
         self.vHinter.calcHintValues(lnks)
 
+        if self.options.justReporting():
+            return False
+
         if self.hHinter.keepHints and self.vHinter.keepHints:
             return False
 

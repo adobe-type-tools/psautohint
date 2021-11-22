@@ -301,6 +301,7 @@ class hinter:
         self.BigDist = max(self.dominantStems() + [self.InitBigDist])
         self.BigDist *= self.BigDistFactor
         self.debug("generate %s segments" % self.aDesc())
+        self.prepForSegs()
         self.genSegs()
         self.limitSegs()
         self.debug("generate %s stem values" % self.aDesc())
@@ -346,15 +347,16 @@ class hinter:
 
     # Segments
     def addSegment(self, fr, to, loc, pe1, pe2, typ, desc):
-        """Log and call hs.addSegment"""
-        if self.isV():
-            pp = ('v', loc, fr, loc, to, desc)
-        else:
-            pp = ('h', fr, loc, to, loc, desc)
-        self.debug("add %sseg %g %g to %g %g %s" % pp)
-
+        if pe1 is not None and isinstance(pe1.segment_sub, int):
+            subpath, offset = pe1.position
+            pe1 = self.glyph.subpaths[subpath][offset]
+        if pe2 is not None and isinstance(pe2.segment_sub, int):
+            subpath, offset = pe2.position
+            pe2 = self.glyph.subpaths[subpath][offset]
+        if pe1 == pe2:
+            pe2 = None
         self.hs.addSegment(fr, to, loc, pe1, pe2, typ, self.Bonus,
-                           self.isV(), desc)
+                           self.isV(), desc, self)
 
     def CPFrom(self, cp2, cp3):
         """Return point cp3 adjusted relative to cp2 by CPFrac"""
@@ -484,7 +486,7 @@ class hinter:
         p0, p1, p2 = c.s, c.slopePoint(0), self.glyph.prevSlopePoint(c)
         if feq(p0.o, p1.o) or p2 is None:
             return
-        cs = self.glyph.prevInSubpath(c)
+        cs = self.glyph.prevInSubpath(c, segSub=True)
         osame = self.diffSign(p2.o - p0.o, p0.o - p1.o)
         if osame or (self.testTan(p0 - p2) and
                      (self.diffSign(p2.a - p0.a, p0.a - p1.a) or
@@ -537,12 +539,12 @@ class hinter:
         if not c:
             return False
         if doPrev:
-            p = self.glyph.prevInSubpath(c, skipTiny=True)
+            p = self.glyph.prevInSubpath(c, skipTiny=True, segSub=True)
             if p is None:
                 return
             p0, p1, p2 = c.e, c.s, p.s
         else:
-            n = self.glyph.nextInSubpath(c, skipTiny=True)
+            n = self.glyph.nextInSubpath(c, skipTiny=True, segSub=True)
             if n is None:
                 return
             p0, p1, p2 = c.s, c.e, n.e
@@ -622,216 +624,246 @@ class hinter:
             return p1.o
         return (p0.o + p1.o) / 2
 
+    def cpDirection(self, p0, p1, p2):
+        """
+        Utility function for detecting singly-inflected curves.
+        See original C code or "Fast Detection o the Geometric Form of
+        Two-Dimensional Cubic Bezier Curves" by Stephen Vincent
+        """
+        det = (p0.x * (p1.y - p2.y) +
+               p1.x * (p2.y - p0.y) +
+               p2.x * (p0.y - p1.y))
+        if det > 0:
+            return 1
+        elif det < 0:
+            return -1
+        return 0
+
+    def prepForSegs(self):
+        for c in self.glyph:
+            if (not c.isLine() and
+                    (self.cpDirection(c.s, c.cs, c.ce) !=
+                     self.cpDirection(c.cs, c.ce, c.e))):
+                if c.splitAtInflectionsForSegs():
+                    self.info("splitting at inflection point in %d %d" %
+                              (c.position[0], c.position[1] + 1))
+
     def genSegs(self):
         """
-        Iterates through the glyph's pathElements and calculates and
-        adds associated segments. These segments indicate "flat" areas
-        of the glyph in the relevant dimension weighted by segment
-        length.
+        Calls genSegsForPathElement for each pe and cleans up the
+        generated segment lists
         """
         self.Bonus = 0
-        for c in self.glyph:
-            prv = self.glyph.prevInSubpath(c)
-            self.info("Element %d %d" % (c.position[0], c.position[1] + 1))
-            if c.isStart():
-                # Certain glyphs with one contour above (or # below) all others
-                # are marked as "Special", so that segments on that contour
-                # are given a bonus weight increasing the likelihood of their
-                # segment locations ending up in the final set of stem hints.
-                self.Bonus = 0
-                if (self.isSpecial(lower=False) and
-                        self.relPosition(c, lower=False)):
-                    self.Bonus = self.SpecialCharBonus
-                elif (self.isSpecial(lower=True) and
-                      self.relPosition(c, lower=True)):
-                    self.Bonus = self.SpecialCharBonus
-            if c.isLine() and not c.isTiny():
-                # If the line is completely flat, add the line itself as a
-                # segment. Otherwise if it is somewhat flat add a segment
-                # reduced in length by adjustDist between the start and end
-                # points at the location picked by pickSpot. Warn if the
-                # line is close to but not quite horizontal.
-                q = self.flatQuo(c.s, c.e)
-                if q > 0:
-                    if feq(c.s.o, c.e.o):
-                        self.addSegment(c.s.a, c.e.a, c.s.o, prv, c,
-                                        hintSegment.sType.LINE, "flat line")
-                    else:
-                        if q < .25:
-                            q = .25
-                        adist = self.adjustDist(c.e.a - c.s.a, q) / 2
-                        aavg = (c.s.a + c.e.a) / 2
-                        # XXX If we're picking the spot why aren't we
-                        # picking the pair of path elements to pass
-                        # to addSegment?
-                        sp = self.pickSpot(c.s, c.e, adist, c.s, c.e,
-                                           self.glyph.prevSlopePoint(c),
-                                           self.glyph.nextSlopePoint(c))
-                        self.addSegment(aavg - adist, aavg + adist, sp, prv, c,
-                                        hintSegment.sType.LINE, "line")
-                        d = (c.s - c.e).abs()
-                        if d.o <= 2 and (d.a > 10 or d.normsq() > 100):
-                            self.info("The line from %g %g to %g %g" %
-                                      (*c.s, *c.e) +
-                                      " is not exactly " + self.aDesc())
-                else:
-                    # If the line is not somewhat flat just add BEND segments
-                    self.doBendsNext(c)
-                    self.doBendsPrev(c)
-            elif not c.isLine():
-                if c.flex == 1:
-                    fl1 = c
-                    fl1prv = prv
-                elif c.flex == 2:
-                    # Flex-hinted curves have a segment corresponding to the
-                    # line between the curve-pair endpoints. For a pair flat
-                    # in the relevant dimension this is the line used for the
-                    # pair at lower resolutions.
-                    if self.flatQuo(fl1.s, c.e) > 0:
-                        self.addSegment(fl1.s.a, c.e.a, c.e.o, fl1prv, c,
-                                        hintSegment.sType.LINE, "flex")
-                if c.flex != 2:
-                    # flex != 2 => the start point is not in the middle of a
-                    # flex hint, so this code is for hinting the start points
-                    # of curves.
-                    #
-                    # If the start of the segment is not interestingly flat
-                    # just add BEND segments. Otherwise add a CURVE segment
-                    # for the start of the curve if the start slope is flat
-                    # or the node is (relative to the previous spline) either
-                    # flat or it bends away sharply.
-                    #
-                    # q2 measures the slope of the start point to the second
-                    # control point and just functions to modify the
-                    # segment length calculation.
-                    q = self.flatQuo(c.cs, c.s)
-                    if q == 0:
-                        self.doBendsPrev(c)
-                    else:
-                        if (feq(c.cs.o, c.s.o) or
-                            (fne(c.ce.o, c.e.o) and
-                             (self.nodeIsFlat(c, doPrev=True) or
-                              not self.sameDir(c, doPrev=True)))):
-                            q2 = self.flatQuo(c.ce, c.s)
-                            if (q2 > 0 and self.sameSign(c.cs.a - c.s.a,
-                                                         c.ce.a - c.s.a) and
-                                    abs(c.ce.a - c.s.a) > abs(c.cs.a - c.s.a)):
-                                adist = self.adjustDist(self.CPTo(c.cs.a,
-                                                                  c.ce.a) -
-                                                        c.s.a, q2)
-                                end = self.adjustDist(self.CPTo(c.s.a,
-                                                                c.cs.a) -
-                                                      c.s.a, q)
-                                if abs(end) > abs(adist):
-                                    adist = end
-                                self.addSegment(c.s.a, c.s.a + adist, c.s.o,
-                                                prv, c,
-                                                hintSegment.sType.CURVE,
-                                                "curve start 1")
-                            else:
-                                adist = self.adjustDist(self.CPTo(c.s.a,
-                                                                  c.cs.a) -
-                                                        c.s.a, q)
-                                self.addSegment(c.s.a, c.s.a + adist, c.s.o,
-                                                prv, c,
-                                                hintSegment.sType.CURVE,
-                                                "curve start 2")
-                if c.flex != 1:
-                    # flex != 1 => the end point is not in the middle of a
-                    # flex hint, so this code is for hinting the end points
-                    # of curves.
-                    #
-                    # If the end of the segment is not interestingly flat
-                    # just add BEND segments. Otherwise add a CURVE segment
-                    # for the start of the curve if the start slope is flat
-                    # or the node is (relative to the previous spline) either
-                    # flat or it bends away sharply.
-                    #
-                    # The second and third segment types correspond to the
-                    # first and second start point types. The first handles
-                    # the special case of a close-to-flat curve, treating
-                    # it somewhat like a close-to-flat line.
-                    q = self.flatQuo(c.ce, c.e)
-                    if q == 0:
-                        self.doBendsNext(c)
-                    elif (feq(c.ce.o, c.e.o) or
-                          (fne(c.cs.o, c.s.o) and
-                           (self.nodeIsFlat(c, doPrev=False) or
-                            not self.sameDir(c, doPrev=False)))):
-                        adist = self.adjustDist(c.e.a -
-                                                self.CPFrom(c.ce.a, c.e.a), q)
-                        q2 = self.flatQuo(c.s, c.e)
-                        if q2 > 0:
-                            ad2 = self.adjustDist(c.e.a - c.s.a, q2)
-                        else:
-                            ad2 = 0
-                        if q2 > 0 and abs(ad2) > abs(adist):
-                            ccs, cce = c.cs, c.ce
-                            if (feq(c.s.o, c.cs.o) and feq(c.cs.o, c.ce.o) and
-                                    feq(c.ce.o, c.e.o)):
-                                if (self.options.allowChanges and
-                                        self.AutoLinearCurveFix):
-                                    c.convertToLine()
-                                    ccs, cce = c.s, c.e
-                                    self.info("Curve from %s to %s" % (c.s,
-                                                                       c.e) +
-                                              "changed to a line.")
-                                else:
-                                    self.info("Curve from %s to %s" % (c.s,
-                                                                       c.e) +
-                                              "should be changed to a line.")
-                            adist = ad2 / 2
-                            aavg = (c.s.a + c.e.a) / 2
-                            sp = self.pickSpot(c.s, c.e, adist, ccs, cce,
-                                               self.glyph.prevSlopePoint(c),
-                                               self.glyph.nextSlopePoint(c))
-                            self.addSegment(aavg - adist, aavg + adist, sp, c,
-                                            None, hintSegment.sType.CURVE,
-                                            "curve end 1")
-                        else:
-                            q2 = self.flatQuo(c.cs, c.e)
-                            if (q2 > 0 and self.sameSign(c.cs.a - c.e.a,
-                                                         c.ce.a - c.e.a) and
-                                    abs(c.ce.a - c.e.a) < abs(c.cs.a - c.e.a)):
-                                aend = self.adjustDist(c.e.a -
-                                                       self.CPFrom(c.cs.a,
-                                                                   c.ce.a),
-                                                       q2)
-                                if abs(aend) > abs(adist):
-                                    adist = aend
-                                self.addSegment(c.e.a - adist, c.e.a, c.e.o, c,
-                                                None, hintSegment.sType.CURVE,
-                                                "curve end 2")
-                            else:
-                                self.addSegment(c.e.a - adist, c.e.a, c.e.o, c,
-                                                None, hintSegment.sType.CURVE,
-                                                "curve end 3")
-                if c.flex is None:
-                    # Curves that are not part of a flex hint can have an
-                    # extrema that is flat in the relative dimension. This
-                    # calls farthestExtreme() and if there is such an extrema
-                    # more than 2 points away from the start and end points
-                    # it calls extremaSegment() and adds the segment.
-                    tmp = c.getBounds().farthestExtreme(not self.isV())
-                    d, extp, extt, isMin = tmp
-                    if d > 2:
-                        frst, lst = self.extremaSegment(c, extp, extt, isMin)
-                        aavg = (frst + lst) / 2
-                        if feq(frst, lst):
-                            adist = (c.e.a - c.s.a) / 10
-                        else:
-                            adist = (lst - frst) / 2
-                        if abs(adist) < self.BendLength:
-                            adist = math.copysign(adist, self.BendLength)
-                        self.addSegment(aavg - adist, aavg + adist,
-                                        round(extp.o + 0.5), c, None,
-                                        hintSegment.sType.CURVE,
-                                        "curve extrema")
+        c = self.glyph.next(self.glyph, segSub=True)
+        while c:
+            self.genSegsForPathElement(c)
+            c = self.glyph.next(c, segSub=True)
 
         self.hs.compactLists()
         self.hs.remExtraBends(self)
         self.hs.cleanup()
         self.checkTfm()
+
+    def genSegsForPathElement(self, c):
+        """
+        Calculates and adds segments for pathElement c. These segments
+        indicate "flat" areas of the glyph in the relevant dimension
+        weighted by segment length.
+        """
+        prv = self.glyph.prevInSubpath(c, segSub=True)
+        self.info("Element %d %d" % (c.position[0], c.position[1] + 1))
+        if c.isStart():
+            # Certain glyphs with one contour above (or # below) all others
+            # are marked as "Special", so that segments on that contour
+            # are given a bonus weight increasing the likelihood of their
+            # segment locations ending up in the final set of stem hints.
+            self.Bonus = 0
+            if (self.isSpecial(lower=False) and
+                    self.relPosition(c, lower=False)):
+                self.Bonus = self.SpecialCharBonus
+            elif (self.isSpecial(lower=True) and
+                  self.relPosition(c, lower=True)):
+                self.Bonus = self.SpecialCharBonus
+        if c.isLine() and not c.isTiny():
+            # If the line is completely flat, add the line itself as a
+            # segment. Otherwise if it is somewhat flat add a segment
+            # reduced in length by adjustDist between the start and end
+            # points at the location picked by pickSpot. Warn if the
+            # line is close to but not quite horizontal.
+            q = self.flatQuo(c.s, c.e)
+            if q > 0:
+                if feq(c.s.o, c.e.o):
+                    self.addSegment(c.s.a, c.e.a, c.s.o, prv, c,
+                                    hintSegment.sType.LINE, "flat line")
+                else:
+                    if q < .25:
+                        q = .25
+                    adist = self.adjustDist(c.e.a - c.s.a, q) / 2
+                    aavg = (c.s.a + c.e.a) / 2
+                    # XXX If we're picking the spot why aren't we
+                    # picking the pair of path elements to pass
+                    # to addSegment?
+                    sp = self.pickSpot(c.s, c.e, adist, c.s, c.e,
+                                       self.glyph.prevSlopePoint(c),
+                                       self.glyph.nextSlopePoint(c))
+                    self.addSegment(aavg - adist, aavg + adist, sp, prv, c,
+                                    hintSegment.sType.LINE, "line")
+                    d = (c.s - c.e).abs()
+                    if d.o <= 2 and (d.a > 10 or d.normsq() > 100):
+                        self.info("The line from %g %g to %g %g" %
+                                  (*c.s, *c.e) +
+                                  " is not exactly " + self.aDesc())
+            else:
+                # If the line is not somewhat flat just add BEND segments
+                self.doBendsNext(c)
+                self.doBendsPrev(c)
+        elif not c.isLine():
+            if c.flex == 2:
+                # Flex-hinted curves have a segment corresponding to the
+                # line between the curve-pair endpoints. For a pair flat
+                # in the relevant dimension this is the line used for the
+                # pair at lower resolutions.
+                fl1prv = self.glyph.prevInSubpath(prv, segSub=True)
+                if self.flatQuo(prv.s, c.e) > 0:
+                    self.addSegment(prv.s.a, c.e.a, c.e.o, fl1prv, c,
+                                    hintSegment.sType.LINE, "flex")
+            if c.flex != 2:
+                # flex != 2 => the start point is not in the middle of a
+                # flex hint, so this code is for hinting the start points
+                # of curves.
+                #
+                # If the start of the segment is not interestingly flat
+                # just add BEND segments. Otherwise add a CURVE segment
+                # for the start of the curve if the start slope is flat
+                # or the node is (relative to the previous spline) either
+                # flat or it bends away sharply.
+                #
+                # q2 measures the slope of the start point to the second
+                # control point and just functions to modify the
+                # segment length calculation.
+                q = self.flatQuo(c.cs, c.s)
+                if q == 0:
+                    self.doBendsPrev(c)
+                else:
+                    if (feq(c.cs.o, c.s.o) or
+                        (fne(c.ce.o, c.e.o) and
+                         (self.nodeIsFlat(c, doPrev=True) or
+                          not self.sameDir(c, doPrev=True)))):
+                        q2 = self.flatQuo(c.ce, c.s)
+                        if (q2 > 0 and self.sameSign(c.cs.a - c.s.a,
+                                                     c.ce.a - c.s.a) and
+                                abs(c.ce.a - c.s.a) > abs(c.cs.a - c.s.a)):
+                            adist = self.adjustDist(self.CPTo(c.cs.a,
+                                                              c.ce.a) -
+                                                    c.s.a, q2)
+                            end = self.adjustDist(self.CPTo(c.s.a,
+                                                            c.cs.a) -
+                                                  c.s.a, q)
+                            if abs(end) > abs(adist):
+                                adist = end
+                            self.addSegment(c.s.a, c.s.a + adist, c.s.o,
+                                            prv, c,
+                                            hintSegment.sType.CURVE,
+                                            "curve start 1")
+                        else:
+                            adist = self.adjustDist(self.CPTo(c.s.a,
+                                                              c.cs.a) -
+                                                    c.s.a, q)
+                            self.addSegment(c.s.a, c.s.a + adist, c.s.o,
+                                            prv, c,
+                                            hintSegment.sType.CURVE,
+                                            "curve start 2")
+            if c.flex != 1:
+                # flex != 1 => the end point is not in the middle of a
+                # flex hint, so this code is for hinting the end points
+                # of curves.
+                #
+                # If the end of the segment is not interestingly flat
+                # just add BEND segments. Otherwise add a CURVE segment
+                # for the start of the curve if the start slope is flat
+                # or the node is (relative to the previous spline) either
+                # flat or it bends away sharply.
+                #
+                # The second and third segment types correspond to the
+                # first and second start point types. The first handles
+                # the special case of a close-to-flat curve, treating
+                # it somewhat like a close-to-flat line.
+                q = self.flatQuo(c.ce, c.e)
+                if q == 0:
+                    self.doBendsNext(c)
+                elif (feq(c.ce.o, c.e.o) or
+                      (fne(c.cs.o, c.s.o) and
+                       (self.nodeIsFlat(c, doPrev=False) or
+                        not self.sameDir(c, doPrev=False)))):
+                    adist = self.adjustDist(c.e.a -
+                                            self.CPFrom(c.ce.a, c.e.a), q)
+                    q2 = self.flatQuo(c.s, c.e)
+                    if q2 > 0:
+                        ad2 = self.adjustDist(c.e.a - c.s.a, q2)
+                    else:
+                        ad2 = 0
+                    if q2 > 0 and abs(ad2) > abs(adist):
+                        ccs, cce = c.cs, c.ce
+                        if (feq(c.s.o, c.cs.o) and feq(c.cs.o, c.ce.o) and
+                                feq(c.ce.o, c.e.o)):
+                            if (self.options.allowChanges and
+                                    self.AutoLinearCurveFix):
+                                c.convertToLine()
+                                ccs, cce = c.s, c.e
+                                self.info("Curve from %s to %s" % (c.s,
+                                                                   c.e) +
+                                          "changed to a line.")
+                            else:
+                                self.info("Curve from %s to %s" % (c.s,
+                                                                   c.e) +
+                                          "should be changed to a line.")
+                        adist = ad2 / 2
+                        aavg = (c.s.a + c.e.a) / 2
+                        sp = self.pickSpot(c.s, c.e, adist, ccs, cce,
+                                           self.glyph.prevSlopePoint(c),
+                                           self.glyph.nextSlopePoint(c))
+                        self.addSegment(aavg - adist, aavg + adist, sp, c,
+                                        None, hintSegment.sType.CURVE,
+                                        "curve end 1")
+                    else:
+                        q2 = self.flatQuo(c.cs, c.e)
+                        if (q2 > 0 and self.sameSign(c.cs.a - c.e.a,
+                                                     c.ce.a - c.e.a) and
+                                abs(c.ce.a - c.e.a) < abs(c.cs.a - c.e.a)):
+                            aend = self.adjustDist(c.e.a -
+                                                   self.CPFrom(c.cs.a,
+                                                               c.ce.a),
+                                                   q2)
+                            if abs(aend) > abs(adist):
+                                adist = aend
+                            self.addSegment(c.e.a - adist, c.e.a, c.e.o, c,
+                                            None, hintSegment.sType.CURVE,
+                                            "curve end 2")
+                        else:
+                            self.addSegment(c.e.a - adist, c.e.a, c.e.o, c,
+                                            None, hintSegment.sType.CURVE,
+                                            "curve end 3")
+            if c.flex is None:
+                # Curves that are not part of a flex hint can have an
+                # extrema that is flat in the relative dimension. This
+                # calls farthestExtreme() and if there is such an extrema
+                # more than 2 points away from the start and end points
+                # it calls extremaSegment() and adds the segment.
+                tmp = c.getBounds().farthestExtreme(not self.isV())
+                d, extp, extt, isMin = tmp
+                if d > 2:
+                    frst, lst = self.extremaSegment(c, extp, extt, isMin)
+                    aavg = (frst + lst) / 2
+                    if feq(frst, lst):
+                        adist = (c.e.a - c.s.a) / 10
+                    else:
+                        adist = (lst - frst) / 2
+                    if abs(adist) < self.BendLength:
+                        adist = math.copysign(adist, self.BendLength)
+                    self.addSegment(aavg - adist, aavg + adist,
+                                    round(extp.o + 0.5), c, None,
+                                    hintSegment.sType.CURVE,
+                                    "curve extrema")
 
     def limitSegs(self):
         maxsegs = max(len(self.hs.increasingSegs), len(self.hs.decreasingSegs))
