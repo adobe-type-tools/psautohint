@@ -334,6 +334,7 @@ class HintOptions(ACOptions):
         self.printFDDictList = pargs.print_list_fddict
         self.roundCoords = not pargs.decimal
         self.writeToDefaultLayer = pargs.write_to_default_layer
+        self.maxSegments = pargs.max_segments
 
 
 class _CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -681,6 +682,13 @@ def get_options(args):
         help="show traceback for exceptions.",
     )
     parser.add_argument(
+        '--max-segments',
+        type=int,
+        default=100,
+        help="Don't hint glyph in dimension when more than this number "
+             "of segments are generated"
+    )
+    parser.add_argument(
         '--test',
         action='store_true',
         help="toggle settings needed for testing",
@@ -739,6 +747,7 @@ def get_options(args):
     options.font_format = _validate_font_paths(all_font_paths, parser)
 
     if parsed_args.glyphs_to_hint:
+        options.explicitGlyphs = True
         options.glyphList = _process_glyph_list_arg(
             parsed_args.glyphs_to_hint, options.nameAliases)
     elif parsed_args.glyphs_to_not_hint:
@@ -746,6 +755,7 @@ def get_options(args):
         options.glyphList = _process_glyph_list_arg(
             parsed_args.glyphs_to_not_hint, options.nameAliases)
     elif parsed_args.glyphs_to_hint_file:
+        options.explicitGlyphs = True
         options.glyphList = _process_glyph_list_arg(
             _read_txt_file(parsed_args.glyphs_to_hint_file),
             options.nameAliases)

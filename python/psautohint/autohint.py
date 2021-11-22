@@ -28,6 +28,8 @@ class ACOptions(object):
         self.outputPaths = []
         self.reference_font = None
         self.glyphList = []
+        # True when contents of glyphList were specified directly by the user
+        self.explicitGlyphs = False
         self.nameAliases = {}
         self.excludeGlyphList = False
         self.hintAll = False
@@ -41,6 +43,9 @@ class ACOptions(object):
         self.printFDDictList = False
         self.roundCoords = True
         self.writeToDefaultLayer = False
+        # If this number of segments is exceeded in a dimension, don't hint
+        # (Only applies when explicitGlyphs is False)
+        self.maxSegments = 100
         self.font_format = None
         self.report_zones = False
         self.report_stems = False

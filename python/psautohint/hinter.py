@@ -34,8 +34,6 @@ class hinter:
         return fne(a, 0) and fne(b, 0) and ((a > 0) == (b > 0))
 
     def __init__(self, options):
-        # When there are more segments in a direction, hint the bounding box
-        self.MaxSegments = 90
         self.StemLimit = 22  # ((kStackLimit) - 2) / 2), kStackLimit == 46
         """Initialize constant values and miscelaneous state"""
         self.MaxStemDist = 150  # initial maximum stem width allowed for hints
@@ -837,7 +835,8 @@ class hinter:
 
     def limitSegs(self):
         maxsegs = max(len(self.hs.increasingSegs), len(self.hs.decreasingSegs))
-        if maxsegs > self.MaxSegments:
+        if (not self.options.explicitGlyphs and
+                maxsegs > self.options.maxSegments):
             self.warning("Calculated %d segments, skipping %s stem testing" %
                          (maxsegs, self.aDesc()))
             self.hs.deleteSegments()
