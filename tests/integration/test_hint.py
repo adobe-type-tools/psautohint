@@ -413,6 +413,7 @@ def test_big_glyph(tmpdir):
     path = "%s/dummy/big_glyph.ufo" % DATA_DIR
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
+    options.explicitGlyphs = True
 
     hintFiles(options)
 
