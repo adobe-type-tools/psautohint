@@ -95,4 +95,4 @@ jobs:
       with:
         body: '[Release Notes](https://github.com/adobe-type-tools/psautohint/blob/master/NEWS.md#${{ steps.date_tag.outputs.VERSION }}---${{ steps.date_tag.outputs.TODAY }})'
         prerelease: true
-        files: ./dist/*
+        files: ./dist/*.tar.gz
