@@ -36,7 +36,7 @@ jobs:
         output-dir: dist
       env:
         CIBW_BUILD: "cp3*"
-        CIBW_ARCHS_MACOS: x86_64
+        CIBW_ARCHS_MACOS: x86_64 arm64
         CIBW_ARCHS_WINDOWS: AMD64
         CIBW_ARCHS_LINUX: x86_64
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
@@ -65,6 +65,17 @@ jobs:
 
     steps:
 
+    - name: Get date & flat tag
+      id: date_tag
+      run: |
+        export DATE=$(TZ=US/Pacific date +'%B-%d-%Y')
+        echo $DATE
+        export FLAT_TAG=$(echo ${GITHUB_REF##*/} | sed 's/\.//g')
+        echo $FLAT_TAG
+        echo ::set-output name=TODAY::$DATE
+        echo ::set-output name=VERSION::$FLAT_TAG
+      shell: bash
+
     - name: Download release assets
       uses: actions/download-artifact@v2
       with:
@@ -82,5 +93,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        body: '[Release Notes](https://github.com/adobe-type-tools/psautohint/blob/master/NEWS.md#${{ steps.date_tag.outputs.VERSION }}---${{ steps.date_tag.outputs.TODAY }})'
         prerelease: true
         files: ./dist/*
