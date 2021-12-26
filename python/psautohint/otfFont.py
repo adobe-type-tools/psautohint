@@ -888,7 +888,7 @@ class CFFFontData:
                 fd, temp_path = tempfile.mkstemp()
                 os.close(fd)
                 try:
-                    _run_tx(["-cff", "+b", "-std", path, temp_path])
+                    _run_tx(["-cff", "+b", path, temp_path])
                     with open(temp_path, "rb") as fp:
                         data = fp.read()
                 finally:
@@ -995,7 +995,7 @@ class CFFFontData:
                 os.close(fd)
 
                 try:
-                    args = ["-t1", "-std"]
+                    args = ["-t1", ]
                     if self.font_format == "PFB":
                         args.append("-pfb")
                     _run_tx(args + [temp_path, path])
