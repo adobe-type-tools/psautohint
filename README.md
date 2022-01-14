@@ -11,8 +11,6 @@ PSAutoHint
 A standalone version of [AFDKO](https://github.com/adobe-type-tools/afdko)’s
 autohinter.
 
-**NOTE**: as of August 2019, only Python 3.6 or later is supported.
-
 Building and running
 --------------------
 
