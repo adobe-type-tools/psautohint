@@ -17,7 +17,7 @@ FONTS = glob.glob("%s/dummy/font.[ocu][tf][fo]" % DATA_DIR)
 
 
 def autohint(args):
-    return psautohint(["--all"] + args)
+    return psautohint(["--all", "--test"] + args)
 
 
 @pytest.mark.parametrize("path", FONTS)

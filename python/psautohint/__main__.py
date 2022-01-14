@@ -679,6 +679,11 @@ def get_options(args):
         action='store_true',
         help="show traceback for exceptions.",
     )
+    parser.add_argument(
+        '--test',
+        action='store_true',
+        help="toggle settings needed for testing",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -691,8 +696,11 @@ def get_options(args):
 
     logging.basicConfig(format="%(levelname)s: %(message)s", level=log_level,
                         filename=parsed_args.log_path)
-    for handler in logging.root.handlers:
-        handler.addFilter(DuplicateMessageFilter())
+
+    if parsed_args.test is False:
+        # Filter duplicate logging messages only when not running the tests
+        for handler in logging.root.handlers:
+            handler.addFilter(DuplicateMessageFilter())
 
     if (not len(parsed_args.font_paths or []) and
             len(parsed_args.output_paths or [])):
