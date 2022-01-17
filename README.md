@@ -42,7 +42,7 @@ Testing
 
 We have a test suite that can be run with:
 
-    tox
+    pytest
 
 Debugging
 ---------

@@ -58,6 +58,14 @@ jobs:
         python -m pip install flake8
         flake8 --config=setup.cfg --count --show-source --statistics
 
-    - name: Test with tox
+    - name: Install psautohint
       run: |
-        tox -e py-cov
+        python -m pip install .
+
+    - name: Test with pytest
+      run: |
+        python -m pytest
+
+    - name: Uninstall psautohint
+      run: |
+        python -m pip uninstall psautohint -y
