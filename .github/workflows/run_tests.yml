@@ -58,9 +58,6 @@ jobs:
         python -m pip install flake8
         flake8 --config=setup.cfg --count --show-source --statistics
 
-    - name: Test with tox (except Ubuntu/Python 3.8)
-      # not in love with the following syntax, but it works,
-      # whereas "! (condition)" does NOT
-      if: (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8') == false
+    - name: Test with tox
       run: |
         tox -e py-cov
