@@ -37,7 +37,7 @@ jobs:
         CIBW_ARCHS_WINDOWS: AMD64
         CIBW_ARCHS_LINUX: x86_64
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-        CIBW_SKIP: "cp36* cp310* *musllinux*"
+        CIBW_SKIP: "cp36* *musllinux*"
         CIBW_ENVIRONMENT: "CFLAGS='-g0'"
 
     - name: Build sdist (Ubuntu only)
