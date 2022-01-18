@@ -22,16 +22,21 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.7', '3.8', '3.9']
+        python-version: ['3.7', '3.8', '3.9', '3.10']
         exclude:
           - os: macos-latest
             python-version: '3.7'
           - os: macos-latest
             python-version: '3.8'
+          - os: macos-latest
+            python-version: '3.9'
           - os: windows-latest
             python-version: '3.7'
           - os: windows-latest
             python-version: '3.8'
+          - os: windows-latest
+            python-version: '3.9'
+          # The coverage workflow runs on the config below
           - os: ubuntu-latest
             python-version: '3.8'
 
@@ -58,9 +63,14 @@ jobs:
         python -m pip install flake8
         flake8 --config=setup.cfg --count --show-source --statistics
 
-    - name: Test with tox (except Ubuntu/Python 3.8)
-      # not in love with the following syntax, but it works,
-      # whereas "! (condition)" does NOT
-      if: (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.8') == false
+    - name: Install psautohint
       run: |
-        tox -e py-cov
+        python -m pip install .
+
+    - name: Test with pytest
+      run: |
+        python -m pytest
+
+    - name: Uninstall psautohint
+      run: |
+        python -m pip uninstall psautohint -y

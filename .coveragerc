@@ -10,9 +10,6 @@ source = psautohint
 [paths]
 source =
     python/psautohint
-    .tox/*/lib/python*/site-packages/psautohint
-    .tox/*/Lib/site-packages/psautohint
-    .tox/pypy*/site-packages/psautohint
 
 [report]
 # Regexes for lines to exclude from consideration

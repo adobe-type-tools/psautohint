@@ -27,17 +27,30 @@ jobs:
       with:
         python-version: '3.8'
 
-    - name: Build wheels
-      uses: pypa/cibuildwheel@v2.3.0
+    - name: Build wheels (Python 3.7 through 3.9)
+      uses: pypa/cibuildwheel@v2.3.1
       with:
         output-dir: dist
       env:
-        CIBW_BUILD: "cp3*"
+        CIBW_BUILD: "cp37* cp38* cp39*"
         CIBW_ARCHS_MACOS: x86_64 arm64
         CIBW_ARCHS_WINDOWS: AMD64
         CIBW_ARCHS_LINUX: x86_64
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-        CIBW_SKIP: "cp36* cp310* *musllinux*"
+        CIBW_SKIP: "*musllinux*"
+        CIBW_ENVIRONMENT: "CFLAGS='-g0'"
+
+    - name: Build wheels (Python 3.10 only)
+      uses: pypa/cibuildwheel@v2.3.1
+      with:
+        output-dir: dist
+      env:
+        CIBW_BUILD: "cp310*"
+        CIBW_ARCHS_MACOS: x86_64 arm64
+        CIBW_ARCHS_WINDOWS: AMD64
+        CIBW_ARCHS_LINUX: x86_64
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
+        CIBW_SKIP: "*musllinux*"
         CIBW_ENVIRONMENT: "CFLAGS='-g0'"
 
     - name: Build sdist (Ubuntu only)
