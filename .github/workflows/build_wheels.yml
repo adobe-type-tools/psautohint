@@ -33,7 +33,7 @@ jobs:
         output-dir: dist
       env:
         CIBW_BUILD: "cp37* cp38* cp39*"
-        CIBW_ARCHS_MACOS: x86_64 arm64
+        CIBW_ARCHS_MACOS: x86_64 universal2
         CIBW_ARCHS_WINDOWS: AMD64
         CIBW_ARCHS_LINUX: x86_64
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
@@ -46,7 +46,7 @@ jobs:
         output-dir: dist
       env:
         CIBW_BUILD: "cp310*"
-        CIBW_ARCHS_MACOS: x86_64 arm64
+        CIBW_ARCHS_MACOS: x86_64 universal2
         CIBW_ARCHS_WINDOWS: AMD64
         CIBW_ARCHS_LINUX: x86_64
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
