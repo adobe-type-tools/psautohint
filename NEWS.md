@@ -1,5 +1,11 @@
 Changelog
 
+# v2.4.0 - February 2, 2022
+- Dropped Python 3.6 support - Python 3.7 is now the minimum requirement
+- Added Python 3.10 support
+- Added `universal2` wheel for Mac (M1 support)
+- Improved CI (including dropping use of `tox` for tests)
+- Updated dependencies
 # v2.3.1 - July 28, 2021
 - Updated for fontTools rounding changes (thanks, @madig!)
   ([#301](https://github.com/adobe-type-tools/psautohint/pull/301))
