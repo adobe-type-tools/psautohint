@@ -443,6 +443,7 @@ class UFOFontData:
                 filename = self.processedLayerGlyphMap[name]
             # Recalculate glyph hashes
             if self.writeToDefaultLayer:
+                ggs = self.getGlyphSet(glyph.getCallerToken())
                 self.recalcHashEntry(name, glyph)
             glyphset.contents[name] = filename
             glyphset.writeGlyph(name, glyph, glyph.drawPoints)
@@ -560,9 +561,8 @@ class UFOFontData:
         return self._glyphsets[layer_name]
 
     @staticmethod
-    def get_glyph_data(glyph, name, readStems, readFlex, roundCoords,
-                       glyphSet):
-        gl = glyphData(roundCoords=roundCoords, name=name, glyphSet=glyphSet)
+    def get_glyph_data(glyph, name, readStems, readFlex, roundCoords):
+        gl = glyphData(roundCoords=roundCoords, name=name)
         glyph.draw(gl)
         if not hasattr(glyph, "width"):
             glyph.width = 0
@@ -578,10 +578,10 @@ class UFOFontData:
         glyphset = self._get_glyphset()
         glyph = glyphset[name]
         glyph_data = self.get_glyph_data(glyph, name, readStems, readFlex,
-                                         roundCoords, glyphset)
+                                         roundCoords)
 
         # Hash is always from the default glyph layer.
-        hash_pen = HashPointPen(glyph)
+        hash_pen = HashPointPen(glyph, glyphset)
         glyph.drawPoints(hash_pen)
         skip = self.checkSkipGlyph(name, hash_pen.getHash(), doAll)
 
@@ -590,7 +590,7 @@ class UFOFontData:
             glyphset = self._get_glyphset(PROCESSED_LAYER_NAME)
             glyph = glyphset[name]
             glyph_data = self.get_glyph_data(glyph, name, readStems, readFlex,
-                                             roundCoords, glyphset)
+                                             roundCoords)
         return glyph_data, skip
 
     def getGlyphList(self):
@@ -634,7 +634,7 @@ class UFOFontData:
         if self.fontDict is not None:
             return self.fontDict
 
-        fdDict = fdTools.FDDict()
+        fdDict = fdTools.FDDict(fdIndex)
         # should be 1 if the glyphs are ideographic, else 0.
         fdDict.setInfo('LanguageGroup',
                        self.fontInfo.get("languagegroup", "0"))
@@ -742,10 +742,10 @@ class UFOFontData:
         return fdDict
 
     def getfdInfo(self, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs,
-                  glyphList, fdIndex=0):
-        fdGlyphDict = None
+                  glyphList):
+        fdGlyphDict = {}
         fdDict = self.getFontInfo(allow_no_blues, noFlex,
-                                  vCounterGlyphs, hCounterGlyphs, fdIndex)
+                                  vCounterGlyphs, hCounterGlyphs)
         fontDictList = [fdDict]
 
         # Check the fontinfo file, and add any other font dicts
@@ -760,7 +760,7 @@ class UFOFontData:
             fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
 
             if "FDDict" in fontInfoData:
-                fdGlyphDict, fontDictList, finalFDict = \
+                fdGlyphDict, finalFDict = \
                     fdTools.parseFontInfoFile(
                         fontDictList, fontInfoData, glyphList, maxY, minY,
                         self.getPSName())
@@ -780,8 +780,8 @@ class UFOFontData:
 
 class HashPointPen(AbstractPointPen):
 
-    def __init__(self, glyph):
-        self.glyphset = getattr(glyph, "glyphSet", None)
+    def __init__(self, glyph, glyphset=None):
+        self.glyphset = glyphset
         self.width = norm_float(round(getattr(glyph, "width", 0), 9))
         self.data = ["w%s" % self.width]
 
@@ -809,6 +809,16 @@ class HashPointPen(AbstractPointPen):
 
     def addComponent(self, baseGlyphName, transformation, identifier=None,
                      **kwargs):
+        # UFO glif files can reference other glifs as "components", so the
+        # hash algorithm needs to deal with this. However, hinted glyphs
+        # do not have components, so there is no need to track and
+        # use the associated glyphset when calculating hinted hashes. As
+        # that is the only circumstance where glyphset should be None, we
+        # should never reach this condition.
+        if self.glyphset is None:
+            raise FontParseError("Internal error: addComponent called " +
+                                 "when UFO glyphset is not set")
+
         self.data.append("base:%s" % baseGlyphName)
 
         for v in transformation:

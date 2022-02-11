@@ -98,10 +98,15 @@ kFontInfoKeys = (kOtherFDDictKeys +
 class FontInfoParseError(ValueError):
     pass
 
-
 class FDDict:
-    def __init__(self):
-        self.DictName = None
+    def __init__(self, fdIndex, dictName = None):
+        self.fdIndex = fdIndex
+        if dictName is not None:
+            self.DictName = dictName
+        elif fdIndex > 0:
+            self.DictName = "FDArray index %s" % fdIndex
+        else:
+            self.DictName = "Default FDArray"
         for key in kFDDictKeys:
             setattr(self, key, None)
         self.FlexOK = True
@@ -280,7 +285,8 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
                     state = dictState
                     dictName = tokenList[i]
                     i += 1
-                    fdDict = FDDict()
+                    fdIndex = len(fontDictList)
+                    fdDict = FDDict(fdIndex)
                     fdDict.DictName = dictName
                     if dictName == kFinalDictName:
                         # This is dict is NOT used to hint any glyphs; it is
@@ -289,7 +295,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
                         finalFDict = fdDict
                     else:
                         # save dict and FDIndex.
-                        fdIndexDict[dictName] = len(fontDictList)
+                        fdIndexDict[dictName] = fdIndex
                         fontDictList.append(fdDict)
 
                 elif token == kGlyphSetToken:
@@ -339,7 +345,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
                 for gname in glyphList:
                     if re.search(token, gname):
                         # fdIndex value
-                        fdGlyphDict[gname] = [fdIndexDict[setName], gi]
+                        fdGlyphDict[gname] = fdIndexDict[setName]
                     gi += 1
 
         elif state == dictState:
@@ -404,13 +410,8 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
         defaultFDDict.DictName = kDefaultDictName  # "No Alignment Zones"
         defaultFDDict.FontName = fontName
         defaultFDDict.buildBlueLists()
-        gi = 0
-        for gname in glyphList:
-            if gname not in fdGlyphDict:
-                fdGlyphDict[gname] = [0, gi]
-            gi += 1
 
-    return fdGlyphDict, fontDictList, finalFDict
+    return fdGlyphDict, finalFDict
 
 
 def mergeFDDicts(prevDictList, privateDict):
@@ -423,6 +424,8 @@ def mergeFDDicts(prevDictList, privateDict):
     bluePairListNames = [kFontDictBluePairsName, kFontDictOtherBluePairsName]
     zoneDictList = [blueZoneDict, otherBlueZoneDict]
     for prefDDict in prevDictList:
+        if prefDDict is None:
+            continue
         for ki in [0, 1]:
             zoneDict = zoneDictList[ki]
             bluePairName = bluePairListNames[ki]

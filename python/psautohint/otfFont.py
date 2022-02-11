@@ -378,9 +378,7 @@ class CFFFontData:
             pDict = pTopDict
         privateDict = pDict.Private
 
-        fdDict = fdTools.FDDict()
-        if fdIndex > 0:
-            fdDict.setInfo('DictName', "OTF FDArray index %s" % fdIndex)
+        fdDict = fdTools.FDDict(fdIndex)
         fdDict.setInfo('LanguageGroup',
                        getattr(privateDict, "LanguageGroup", 0))
 
@@ -507,13 +505,13 @@ class CFFFontData:
         return fdIndex
 
     def getfdInfo(self, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs,
-                  glyphList, fdIndex=0):
+                  glyphList):
         topDict = self.topDict
-        fdGlyphDict = None
+        fdGlyphDict = {}
 
         # Get the default fontinfo from the font's top dict.
         fdDict = self.getFontInfo(
-            allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs, fdIndex)
+            allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs)
         fontDictList = [fdDict]
 
         # Check the fontinfo file, and add any other font dicts
@@ -529,7 +527,7 @@ class CFFFontData:
         if "FDDict" in fontInfoData:
             maxY = topDict.FontBBox[3]
             minY = topDict.FontBBox[1]
-            fdGlyphDict, fontDictList, finalFDict = fdTools.parseFontInfoFile(
+            fdGlyphDict, finalFDict = fdTools.parseFontInfoFile(
                 fontDictList, fontInfoData, glyphList, maxY, minY,
                 self.getPSName())
             if hasattr(topDict, "FDArray"):

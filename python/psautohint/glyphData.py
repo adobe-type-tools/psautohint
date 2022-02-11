@@ -504,6 +504,10 @@ class pathElement:
         self.bounds = boundsState(self)
         return self.bounds
 
+    def clearTempState(self):
+        self.bounds = None
+        self.segment_sub = None
+
     def isLine(self):
         """Returns True if the spline is a line"""
         return self.is_line
@@ -679,9 +683,8 @@ class pathElement:
 
 class glyphData(BasePen):
     """Stores state corresponding to a T2 CharString"""
-    def __init__(self, roundCoords, name='', glyphSet=None):
+    def __init__(self, roundCoords, name=''):
         self.roundCoords = roundCoords
-        self.glyphSet = glyphSet
 
         self.subpaths = []
         self.hstems = []
@@ -753,9 +756,6 @@ class glyphData(BasePen):
     def getPosition(self):
         """Returns position (subpath idx, offset) of next spline to be drawn"""
         return (len(self.subpaths) - 1, len(self.subpaths[-1]))
-
-    def getGlyphSet(self):
-        return self.glyphSet
 
     # "hintpen" methods:
     def nextIsFlex(self):
@@ -1186,3 +1186,8 @@ class glyphData(BasePen):
         self.cntr = cntr
         for c in self:
             c.clearHints(doVert=doVert)
+
+    def clearTempState(self):
+        self.hhs = self.vhs = None
+        for c in self:
+            c.clearTempState()

@@ -84,41 +84,49 @@ class ACOptions(object):
 class ACHintError(Exception):
     pass
 
+class GlyphReport:
+    """Class to store stem and zone data from a particular glyph"""
+    def __init__(self, name=None, all_stems=False):
+        self.name = name
+        self.hstems = {}
+        self.vstems = {}
+        self.hstems_pos = set()
+        self.vstems_pos = set()
+        self.char_zones = set()
+        self.stem_zone_stems = set()
+        self.all_stems = all_stems
+
+    def clear(self):
+        self.hstems.clear()
+        self.vstems.clear()
+        self.hstems_pos.clear()
+        self.vstems_pos.clear()
+        self.char_zones.clear()
+        self.stem_zones_stems.clear()
+
+    def charZone(self, l, u):
+        self.char_zones.add((l, u))
+
+    def stemZone(self, l, u):
+        self.stem_zone_stems.add((l, u))
+
+    def stem(self, l, u, isLine, isV=False):
+        if not isLine and not self.all_stems:
+            return
+        if isV:
+            stems, stems_pos = self.vstems, self.vstems_pos
+        else:
+            stems, stems_pos = self.hstems, self.hstems_pos
+        pair = (l, u)
+        if pair not in stems_pos:
+            width = pair[1] - pair[0]
+            stems[width] = stems.get(width, 0) + 1
+            stems_pos.add(pair)
+
 
 class Report:
     def __init__(self):
         self.glyphs = {}
-
-    class Glyph:
-        """Subclass to store stem and zone data from a particular glyph"""
-        def __init__(self, name=None, all_stems=False):
-            self.name = name
-            self.hstems = {}
-            self.vstems = {}
-            self.hstems_pos = set()
-            self.vstems_pos = set()
-            self.char_zones = set()
-            self.stem_zone_stems = set()
-            self.all_stems = all_stems
-
-        def charZone(self, l, u):
-            self.char_zones.add((l, u))
-
-        def stemZone(self, l, u):
-            self.stem_zone_stems.add((l, u))
-
-        def stem(self, l, u, isLine, isV=False):
-            if not isLine and not self.all_stems:
-                return
-            if isV:
-                stems, stems_pos = self.vstems, self.vstems_pos
-            else:
-                stems, stems_pos = self.hstems, self.hstems_pos
-            pair = (l, u)
-            if pair not in stems_pos:
-                width = pair[1] - pair[0]
-                stems[width] = stems.get(width, 0) + 1
-                stems_pos.add(pair)
 
     @staticmethod
     def round_value(val):
@@ -369,35 +377,23 @@ def get_glyph_list(options, font, path):
     return glyph_list
 
 
-GlyphEntry = namedtuple("GlyphEntry", "glyph,font")
+def get_glyph(options, font, name):
 
+    # Convert to internal format
+    try:
+        gl = font.convertToGlyphData(name, options.readHints,  # stems
+                                     options.readHints,  # flex
+                                     options.roundCoords,
+                                     options.hintAll)
 
-def get_glyphs(options, font, glyph_list):
-    glyphs = {}
-
-    for name in glyph_list:
-        # Convert to internal format
-        try:
-            gl = font.convertToGlyphData(name, options.readHints,  # stems
-                                         options.readHints,  # flex
-                                         options.roundCoords,
-                                         options.hintAll)
-
-            if gl is None or gl.isEmpty():
-                # skip empty glyphs.
-                continue
-        except KeyError:
-            # Source fonts may be sparse, e.g. be a subset of the
-            # reference font.
-            gl = None
-        glyphs[name] = GlyphEntry(gl, font)
-
-    total = len(glyph_list)
-    processed = len(glyphs)
-    if processed != total:
-        log.info("Skipped %s of %s glyphs.", total - processed, total)
-
-    return glyphs
+        if gl is None or gl.isEmpty():
+            # skip empty glyphs.
+            return None
+        return gl
+    except KeyError:
+        # Source fonts may be sparse, e.g. be a subset of the
+        # reference font.
+        return None
 
 
 def get_fontinfo_list(options, font, glyph_list, is_var=False):
@@ -425,21 +421,24 @@ def get_fontinfo_list(options, font, glyph_list, is_var=False):
 
 
 def get_fontinfo_list_withFDArray(options, font, glyph_list, is_var=False):
-    fontinfo_list = {}
-    fddict_cache = {}
+    fdGlyphDict = {}
+    fontDictList = []
+    filen = 0
     for name in glyph_list:
         fdIndex = font.getfdIndex(name)
-        fddict = fddict_cache.get(fdIndex)
-        if not fddict:
+        if fdIndex >= l:
+            fontDictList.extend([None] * (fdindex-l+1))
+        if fontDictList[fdIndex] is None:
             fddict = font.getFontInfo(options.allow_no_blues,
                                       options.noFlex,
                                       options.vCounterGlyphs,
                                       options.hCounterGlyphs,
                                       fdIndex)
-            fddict_cache[fdIndex] = fddict
-        fontinfo_list[name] = fddict
+            fontDictList[fdIndex] = fddict
+        if fdIndex != 0:
+            fdGlyphDict[name] = fdIndex
 
-    return fontinfo_list
+    return fdGlyphDict, fontDictList
 
 
 def get_fontinfo_list_withFontInfo(options, font, glyph_list):
@@ -453,7 +452,7 @@ def get_fontinfo_list_withFontInfo(options, font, glyph_list):
         # Exit by printing default FDDict with all lines indented by one tab
         sys.exit("\t" + "\n\t".join(str(fddict).split("\n")))
 
-    fdglyphdict, fontDictList = font.getfdInfo(options.allow_no_blues,
+    fdGlyphDict, fontDictList = font.getfdInfo(options.allow_no_blues,
                                                options.noFlex,
                                                options.vCounterGlyphs,
                                                options.hCounterGlyphs,
@@ -461,17 +460,17 @@ def get_fontinfo_list_withFontInfo(options, font, glyph_list):
 
     if options.printFDDictList:
         # Print the user defined FontDicts, and exit.
-        if fdglyphdict:
+        if fdGlyphDict:
             print("Showing user-defined FontDict Values:\n")
             for fi, fontDict in enumerate(fontDictList):
+                if fontDict is None:
+                    continue
                 print(fontDict.DictName)
                 print(str(fontDict))
-                gnameList = []
-                # item = [glyphName, [fdIndex, glyphListIndex]]
-                itemList = sorted(fdglyphdict.items(), key=lambda x: x[1][1])
-                for gName, entry in itemList:
-                    if entry[0] == fi:
-                        gnameList.append(gName)
+                if fi == 0:
+                    continue
+                gnameList = [gn for gn, fdIndex in fdGlyphDict.items()
+                             if fdIndex == fi]
                 print("%d glyphs:" % len(gnameList))
                 if len(gnameList) > 0:
                     gTxt = " ".join(gnameList)
@@ -482,21 +481,11 @@ def get_fontinfo_list_withFontInfo(options, font, glyph_list):
             print("There are no user-defined FontDict Values.")
         return
 
-    if fdglyphdict is None:
-        fdIndex = 0
-        fddict = fontDictList[0]
-    else:
+    if fdGlyphDict:
         log.info("Using alternate FDDict global values from fontinfo "
                  "file for some glyphs.")
 
-    fontinfo_list = {}
-    for name in glyph_list:
-        if fdglyphdict is not None:
-            fdIndex = fdglyphdict[name][0]
-            fddict = fontDictList[fdIndex]
-        fontinfo_list[name] = fddict
-
-    return fontinfo_list
+    return fdGlyphDict, fontDictList
 
 
 class hintAdapter:
@@ -505,13 +494,9 @@ class hintAdapter:
     Also contains code that uses hints from both dimensions, primarily
     for hintmask distribution
     """
-    def __init__(self, options, fontinfo_list, report=None):
+    def __init__(self, options, fontDictList):
         self.options = options
-        self.fontinfo_list = fontinfo_list
-        if report:
-            self.report = report
-        else:
-            self.report = Report()
+        self.fontDictList = fontDictList
         self.hHinter = hhinter(options)
         self.vHinter = vhinter(options)
         self.name = ""
@@ -546,16 +531,13 @@ class hintAdapter:
             masks.append(mask)
         return masks
 
-    def hint(self, name, glyph):
+    def hint(self, name, glyph, fdIndex=0):
         """Top-level flex and stem hinting method for a glyph"""
         self.doV = False
-        gr = self.report.glyphs.get(name, None)
-        if gr is None:
-            gr = Report.Glyph(name, self.options.report_all_stems)
-            self.report.glyphs[name] = gr
+        gr = GlyphReport(name, self.options.report_all_stems)
         self.name = name
-        self.hHinter.setGlyph(self.fontinfo_list[name], gr, glyph, name)
-        self.vHinter.setGlyph(self.fontinfo_list[name], gr, glyph, name)
+        self.hHinter.setGlyph(self.fontDictList[fdIndex], gr, glyph, name)
+        self.vHinter.setGlyph(self.fontDictList[fdIndex], gr, glyph, name)
 
         glyph.changed = False
 
@@ -569,10 +551,10 @@ class hintAdapter:
         self.vHinter.calcHintValues(lnks)
 
         if self.options.justReporting():
-            return False
+            return gr, False
 
         if self.hHinter.keepHints and self.vHinter.keepHints:
-            return False
+            return glyph, False
 
         if self.options.allowChanges:
             neworder = lnks.shuffle(self.hHinter)  # hHinter serves as log
@@ -592,8 +574,7 @@ class hintAdapter:
 
         self.distributeMasks(glyph)
 
-        # Clear the intermediate state
-        glyph.vhs = glyph.hhs = None
+        glyph.clearTempState()
 
         self.cnt += 1
 
@@ -601,7 +582,7 @@ class hintAdapter:
 #            print(name, self.cnt, gc.collect())
 #            print(name, self.cnt)
 
-        return True
+        return glyph, True
 
     def distributeMasks(self, glyph):
         """
@@ -980,47 +961,70 @@ def hint_compatible_glyphs(hintadapt, name, glyphs, masters):
     return hinted
 
 
-def log_dict(fddict, name, task="hinting"):
-    if getattr(fddict, 'DictName', None):
-        log.info("%s: Begin %s (using fdDict %s).",
-                 name, task, fddict.DictName)
+def log_dict(fddict, an, name, task="hinting"):
+    if an != name:
+        log.info("%s (%s): Begin %s (using fdDict %s).",
+                 an, name, task, fddict.DictName)
     else:
-        log.info("%s: Begin %s.", name, task)
+        log.info("%s: Begin glyph %s (using fdDict %s).",
+                 name, task, fddict.DictName)
 
+def hint_font(options, font, glyph_list, returnReport=False):
+    aliases = options.nameAliases
 
-def hint_font(hintadapt, font, glyph_list):
-    aliases = hintadapt.options.nameAliases
+    fdGlyphDict, fontDictList = get_fontinfo_list(options, font,
+                                                  glyph_list)
 
+    hintadapt = hintAdapter(options, fontDictList)
     hinted = {}
-    glyphs = get_glyphs(hintadapt.options, font, glyph_list)
-    for name in glyphs:
-        if hintadapt.options.justReporting():
+    notFound = 0
+    if returnReport:
+        report = Report()
+        task = 'analysis'
+    else:
+        report = None
+        task = "hinting"
+
+    #glyphs = get_glyphs(options, font, glyph_list)
+    for name in glyph_list:
+        if returnReport and name == '.notdef':
+            continue
+        if returnReport:
             if name == '.notdef':
                 continue
             task = "analysis"
         else:
             task = "hinting"
 
-        g = glyphs[name]
+        g = get_glyph(options, font, name)
 
+        if g is None:
+            notFound += 1
+            continue
+        
+        fdIndex = fdGlyphDict.get(name, 0)
         an = aliases.get(name, name)
-        log_dict(hintadapt.fontinfo_list[name], name, task)
+
+        log_dict(fontDictList[fdIndex], an, name, task)
 
         # Call auto-hint library on glyph
-        changed = hintadapt.hint(name, g.glyph)
+        r, changed = hintadapt.hint(name, g, fdIndex)
 
-        if not g.glyph.hasHints(both=True):
-            log.info("%s: No hints added!", an)
-            if not changed:
-                continue
+        if returnReport:
+            report.glyphs[name] = r
+        elif changed:
+            if not g.hasHints(both=True):
+                log.info("%s: No hints added!", an)
+            if not options.logOnly:
+                hinted[name] = r
 
-        if hintadapt.options.logOnly or hintadapt.options.justReporting():
-            continue
+    if notFound:
+        log.info("Skipped %s of %s glyphs.", notFound, len(glyph_list))
 
-        if changed:
-            hinted[name] = g
-
-    return hinted
+    if returnReport:
+        return report
+    else:
+        return hinted
 
 
 def hint_compatible_fonts(options, paths, glyphs, fontinfo_list):
@@ -1137,22 +1141,23 @@ def hint_regular_fonts(options, fonts, paths, outpaths):
         path = paths[i]
         outpath = outpaths[i]
 
-        glyph_names = get_glyph_list(options, font, path)
-        fontinfo_list = get_fontinfo_list(options, font, glyph_names)
-
-        hintadapt = hintAdapter(options, fontinfo_list)
+        glyph_list = get_glyph_list(options, font, path)
 
         log.info("Hinting font %s. Start time: %s.", path, time.asctime())
 
-        hinted = hint_font(hintadapt, font, glyph_names)
+        returnReport = options.report_zones or options.report_stems
 
-        if options.report_zones or options.report_stems:
-            hintadapt.report.save(outpath, options)
+        r = hint_font(options, font, glyph_list, returnReport)
+
+        if returnReport:
+            report = r
+            report.save(outpath, options)
         else:
+            hinted = r
             if hinted:
                 log.info("Saving font file with new hints...")
-                for name, ge in hinted.items():
-                    font.updateFromGlyph(ge.glyph, name)
+                for name, glyph in hinted.items():
+                    font.updateFromGlyph(glyph, name)
                 font.save(outpath)
             else:
                 log.info("No glyphs were hinted.")
