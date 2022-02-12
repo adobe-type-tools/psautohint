@@ -9,20 +9,21 @@ to an optimal set.
 import logging
 import bisect
 import math
-from copy import copy
+from copy import copy, deepcopy
 from abc import abstractmethod
 
 from fontTools.misc.bezierTools import solveCubic
 
 from .glyphData import pt, feq, fne, stem
-from .hintstate import hintSegment, stemValue, glyphHintState
+from .hintstate import hintSegment, stemValue, glyphHintState, links
+from .report import glyphReport
 
 log = logging.getLogger(__name__)
 
 
-class hinter:
+class dimensionHinter:
     """
-    Common hinting implementation, inherited by vertical and horizontal
+    Common hinting implementation inherited by vertical and horizontal
     variants
     """
     @staticmethod
@@ -1758,7 +1759,7 @@ class hinter:
                 (not self.inBand(loc, False) and not self.inBand(loc, True)))
 
 
-class hhinter(hinter):
+class hhinter(dimensionHinter):
     def startFlex(self):
         """Make pt.a map to x and pt.b map to y"""
         pt.setAlign(False)
@@ -1836,7 +1837,7 @@ class hhinter(hinter):
         return self.name in self.options.hCounterGlyphs
 
 
-class vhinter(hinter):
+class vhinter(dimensionHinter):
     def startFlex(self):
         pt.setAlign(True)
 
@@ -1872,3 +1873,430 @@ class vhinter(hinter):
 
     def isCounterGlyph(self):
         return self.name in self.options.vCounterGlyphs
+
+
+class glyphHinter:
+    """
+    Adapter between high-level autohint.py code and the 1D hinter.
+    Also contains code that uses hints from both dimensions, primarily
+    for hintmask distribution
+    """
+    def __init__(self, options, fontDictList):
+        self.options = options
+        self.fontDictList = fontDictList
+        self.hHinter = hhinter(options)
+        self.vHinter = vhinter(options)
+        self.name = ""
+        self.cnt = 0
+
+        self.FlareValueLimit = 1000
+        self.MaxHalfMargin = 20  # XXX 10 might better match original C code
+        self.PromotionDistance = 50
+
+    def getSegments(self, glyph, pe, oppo=False):
+        """Returns the list of segments for pe in the requested dimension"""
+        gstate = glyph.vhs if (self.doV == (not oppo)) else glyph.hhs
+        pestate = gstate.getPEState(pe)
+        return pestate.segments if pestate else []
+
+    def getMasks(self, glyph, pe):
+        """
+        Returns the masks of hints needed by/desired for pe in each dimension
+        """
+        masks = []
+        for i, hs in enumerate((glyph.hhs, glyph.vhs)):
+            mask = None
+            if hs.keepHints:
+                if pe.mask:
+                    mask = copy(pe.mask[i])
+            else:
+                pes = hs.getPEState(pe)
+                if pes and pes.mask:
+                    mask = copy(pes.mask)
+            if mask is None:
+                mask = [False] * len(hs.stems)
+            masks.append(mask)
+        return masks
+
+    def hint(self, name, glyph, fdIndex=0):
+        """Top-level flex and stem hinting method for a glyph"""
+        self.doV = False
+        gr = glyphReport(name, self.options.report_all_stems)
+        self.name = name
+        self.hHinter.setGlyph(self.fontDictList[fdIndex], gr, glyph, name)
+        self.vHinter.setGlyph(self.fontDictList[fdIndex], gr, glyph, name)
+
+        glyph.changed = False
+
+        if not self.options.noFlex:
+            self.hHinter.addFlex()
+            self.vHinter.addFlex(inited=True)
+
+        lnks = links(glyph)
+
+        self.hHinter.calcHintValues(lnks)
+        self.vHinter.calcHintValues(lnks)
+
+        if self.options.justReporting():
+            return gr, False
+
+        if self.hHinter.keepHints and self.vHinter.keepHints:
+            return glyph, False
+
+        if self.options.allowChanges:
+            neworder = lnks.shuffle(self.hHinter)  # hHinter serves as log
+            if neworder:
+                glyph.reorder(neworder, self.hHinter)  # hHinter serves as log
+
+        self.listHintInfo(glyph)
+
+        if not self.hHinter.keepHints:
+            self.remFlares(glyph)
+        self.doV = True
+        if not self.vHinter.keepHints:
+            self.remFlares(glyph)
+
+        self.hHinter.convertToMasks()
+        self.vHinter.convertToMasks()
+
+        self.distributeMasks(glyph)
+
+        glyph.clearTempState()
+
+        self.cnt += 1
+
+#        if self.cnt % 100 == 0:
+#            print(name, self.cnt, gc.collect())
+#            print(name, self.cnt)
+
+        return glyph, True
+
+    def distributeMasks(self, glyph):
+        """
+        When necessary, chose the locations and contents of hintmasks for
+        the glyph
+        """
+        log = self.hHinter
+        stems = [None, None]
+        masks = [None, None]
+        lnstm = [0, 0]
+        # Initial horizontal data
+        # If keepHints was true hhs.stems was already set to glyph.hstems in
+        # converttoMasks()
+        stems[0] = glyph.hstems = glyph.hhs.stems
+        lnstm[0] = len(stems[0])
+        if self.hHinter.keepHints:
+            if glyph.startmasks and glyph.startmasks[0]:
+                masks[0] = glyph.startmasks[0]
+            elif not glyph.hhs.hasConflicts:
+                masks[0] = [True] * lnstm[0]
+            else:
+                pass  # XXX existing hints have conflicts but no start mask
+        else:
+            masks[0] = [False] * lnstm[0]
+
+        # Initial vertical data
+        stems[1] = glyph.vstems = glyph.vhs.stems
+        lnstm[1] = len(stems[1])
+        if self.vHinter.keepHints:
+            if glyph.startmasks and glyph.startmasks[1]:
+                masks[1] = glyph.startmasks[1]
+            elif not glyph.hhs.hasConflicts:
+                masks[1] = [True] * lnstm[1]
+            else:
+                pass  # XXX existing hints have conflicts but no start mask
+        else:
+            masks[1] = [False] * lnstm[1]
+
+        self.buildCounterMasks(glyph)
+
+        if not glyph.hhs.hasConflicts and not glyph.vhs.hasConflicts:
+            glyph.startmasks = None
+            glyph.is_hm = False
+            return
+
+        usedmasks = deepcopy(masks)
+        if glyph.hhs.counterHinted:
+            usedmasks[0] = [mv or uv for mv, uv in
+                            zip(glyph.hhs.mainMask, usedmasks[0])]
+        if glyph.vhs.counterHinted:
+            usedmasks[1] = [mv or uv for mv, uv in
+                            zip(glyph.vhs.mainMask, usedmasks[1])]
+
+        glyph.is_hm = True
+        glyph.startmasks = masks
+        NOTSHORT, SHORT, CONFLICT = 0, 1, 2
+        mode = NOTSHORT
+        ns = None
+        c = glyph.nextForHints(glyph)
+        while c:
+            if c.isShort() or c.flex == 2:
+                if mode == NOTSHORT:
+                    if ns:
+                        mode = SHORT
+                        oldmasks = masks
+                        masks = deepcopy(masks)
+                        incompatmasks = self.getMasks(glyph, ns)
+                    else:
+                        mode = CONFLICT
+            else:
+                ns = c
+                if mode == SHORT:
+                    oldmasks[:] = masks
+                    masks = oldmasks
+                    incompatmasks = None
+                mode = NOTSHORT
+            cmasks = self.getMasks(glyph, c)
+            candmasks, conflict = self.joinMasks(masks, cmasks,
+                                                 mode == CONFLICT)
+            maskstr = ''.join(('1' if i else '0'
+                               for i in (candmasks[0] + candmasks[1])))
+            log.info("mask %s at %g %g, mode %d, conflict: %r" %
+                     (maskstr, c.e.x, c.e.y, mode, conflict))
+            if conflict:
+                if mode == NOTSHORT:
+                    self.bridgeMasks(glyph, masks, cmasks, usedmasks, c)
+                    masks = c.masks = cmasks
+                elif mode == SHORT:
+                    assert ns
+                    newinc, _ = self.joinMasks(incompatmasks, cmasks, True)
+                    self.bridgeMasks(glyph, oldmasks, newinc, usedmasks, ns)
+                    masks = ns.masks = newinc
+                    mode = CONFLICT
+                else:
+                    assert mode == CONFLICT
+                    masks[:] = candmasks
+            else:
+                masks[:] = candmasks
+                if mode == SHORT:
+                    incompatmasks, _ = self.joinMasks(incompatmasks, cmasks,
+                                                      False)
+            c = glyph.nextForHints(c)
+        if mode == SHORT:
+            oldmasks[:] = masks
+            masks = oldmasks
+        self.bridgeMasks(glyph, masks, None, usedmasks, glyph.last())
+        if False in usedmasks[0] or False in usedmasks[1]:
+            self.delUnused(stems, usedmasks)
+            self.delUnused(glyph.startmasks, usedmasks)
+            for c in glyph.cntr:
+                self.delUnused(c, usedmasks)
+            foundPEMask = False
+            for c in glyph:
+                if c.masks:
+                    foundPEMask = True
+                    self.delUnused(c.masks, usedmasks)
+            if not foundPEMask:
+                glyph.startmasks = None
+                glyph.is_hm = False
+
+    def buildCounterMasks(self, glyph):
+        """
+        For glyph dimensions that are counter-hinted, make a cntrmask
+        with all Trues in that dimension (because only h/vstem3 style counter
+        hints are supported)
+        """
+        assert not glyph.hhs.keepHints or not glyph.vhs.keepHints
+        if not glyph.hhs.keepHints:
+            hcmsk = [glyph.hhs.counterHinted] * len(glyph.hhs.stems)
+        if not glyph.vhs.keepHints:
+            vcmsk = [glyph.vhs.counterHinted] * len(glyph.vhs.stems)
+        if glyph.hhs.keepHints or glyph.vhs.keepHints and glyph.cntr:
+            cntr = []
+            for cm in glyph.cntr:
+                hm = cm[0] if glyph.hhs.keepHints else hcmsk
+                vm = cm[1] if glyph.vhs.keepHints else vcmsk
+                cntr.append([hm, vm])
+        elif glyph.hhs.counterHinted or glyph.vhs.counterHinted:
+            cntr = [[hcmsk, vcmsk]]
+        else:
+            cntr = []
+        glyph.cntr = cntr
+
+    def joinMasks(self, m, cm, log):
+        """
+        Try to add the stems in cm to m, or start a new mask if there are
+        conflicts.
+        """
+        conflict = False
+        nm = [None, None]
+        for hv in range(2):
+            hs = self.vHinter.hs if hv == 1 else self.hHinter.hs
+            l = len(m[hv])
+#            if hs.counterHinted:
+#                nm[hv] = [True] * l
+#                continue
+            c = cm[hv]
+            n = nm[hv] = copy(m[hv])
+            if hs.keepHints:
+                conflict = True in c
+                continue
+            assert len(c) == l
+            for i in range(l):
+                iconflict = ireplaced = False
+                if not c[i] or n[i]:
+                    continue
+                # look for conflicts
+                for j in range(l):
+                    if not hs.hasConflicts:
+                        break
+                    if j == i:
+                        continue
+                    if n[j] and hs.stemConflicts[i][j]:
+                        # See if we can do a ghost stem swap
+                        if hs.ghostCompat[i]:
+                            for k in range(l):
+                                if not n[k] or not hs.ghostCompat[i][k]:
+                                    continue
+                                else:
+                                    ireplaced = True
+                                    break
+                        if not ireplaced:
+                            iconflict = True
+                    if ireplaced:
+                        break
+                if not iconflict and not ireplaced:
+                    n[i] = True
+                elif iconflict:
+                    conflict = True
+                    # XXX log conflict here if log is true
+        return nm, conflict
+
+    def bridgeMasks(self, glyph, o, n, used, pe):
+        """
+        For switching hintmasks: Clean up o by adding compatible stems from
+        mainMask and add stems from o to n when they are close to pe
+
+        used contains a running map of which stems have ever been included
+        in a hintmask
+        """
+        stems = [glyph.hstems, glyph.vstems]
+        po = pe.e if pe.isLine() else pe.cs
+        carryMask = [[False] * len(o[0]), [False] * len(o[1])]
+        for hv in range(2):
+            # Carry a previous hint forward if it is compatible and close
+            # to the current pathElement
+            nloc = pe.e.x if hv == 1 else pe.e.y
+            for i in range(len(o[hv])):
+                if not o[hv][i]:
+                    continue
+                dlimit = max(self.hHinter.BandMargin / 2, self.MaxHalfMargin)
+                if stems[hv][i].distance(nloc) < dlimit:
+                    carryMask[hv][i] = True
+            # If there are no hints in o in this dimension add the closest to
+            # the current path element
+            if True not in o[hv]:
+                oloc = po.x if hv == 1 else po.y
+                try:
+                    _, ms = min(((stems[hv][i].distance(oloc), i)
+                                 for i in range(len(o[hv]))))
+                    o[hv][ms] = True
+                except ValueError:
+                    pass
+        if self.mergeMain(glyph):
+            no, _ = self.joinMasks(o, [glyph.hhs.mainMask, glyph.vhs.mainMask],
+                                   False)
+            o[:] = no
+        for hv in range(2):
+            used[hv] = [ov or uv for ov, uv in zip(o[hv], used[hv])]
+        if n is not None:
+            nm, _ = self.joinMasks(n, carryMask, False)
+            n[:] = nm
+
+    def mergeMain(self, glyph):
+        return len(glyph.subpaths) <= 5
+
+    def delUnused(self, l, ml):
+        """If ml[d][i] is False delete that entry from ml[d]"""
+        for hv in range(2):
+            l[hv][:] = [l[hv][i] for i in range(len(l[hv])) if ml[hv][i]]
+
+    def listHintInfo(self, glyph):
+        """
+        Output debug messages about which stems are associated with which
+        segments
+        """
+        for pe in glyph:
+            hList = self.getSegments(glyph, pe, False)
+            vList = self.getSegments(glyph, pe, True)
+            if hList or vList:
+                self.hHinter.debug("hintlist x %g y %g" % (pe.e.x, pe.e.y))
+                for seg in hList:
+                    seg.hintval.show(False, "listhint", self.hHinter)
+                for seg in vList:
+                    seg.hintval.show(True, "listhint", self.vHinter)
+
+    def remFlares(self, glyph):
+        """
+        When two paths are witin MaxFlare and connected by a path that
+        also stays within MaxFlare, and both desire different stems,
+        (sometimes) remove the lower-valued stem of the pair
+        """
+        for c in glyph:
+            csl = self.getSegments(glyph, c)
+            if not csl:
+                continue
+            n = glyph.nextInSubpath(c)
+            cDone = False
+            while c != n and not cDone:
+                nsl = self.getSegments(glyph, n)
+                if not nsl:
+                    if not self.getSegments(glyph, n, True):
+                        break
+                    else:
+                        n = glyph.nextInSubpath(n)
+                        continue
+                csi = 0
+                while csi < len(csl):
+                    cseg = csl[csi]
+                    nsi = 0
+                    while nsi < len(nsl):
+                        nseg = nsl[nsi]
+                        if cseg is not None and nseg is not None:
+                            diff = abs(cseg.loc - nseg.loc)
+                            if diff > self.hHinter.MaxFlare:
+                                cDone = True
+                                nsi += 1
+                                continue
+                            if not self.isFlare(cseg.loc, glyph, c, n):
+                                cDone = True
+                                nsi += 1
+                                continue
+                            chv, nhv = cseg.hintval, nseg.hintval
+                            if (diff != 0 and
+                                self.isUSeg(cseg.loc, chv.uloc, chv.lloc) ==
+                                    self.isUSeg(nseg.loc, nhv.uloc, nhv.lloc)):
+                                if (chv.compVal(self.hHinter.SpcBonus) >
+                                        nhv.compVal(self.hHinter.SpcBonus)):
+                                    if (nhv.spc == 0 and
+                                            nhv.val < self.FlareValueLimit):
+                                        self.reportRemFlare(n, c, "n")
+                                        del nsl[nsi]
+                                        nsi -= 1
+                                else:
+                                    if (chv.spc == 0 and
+                                            chv.val < self.FlareValueLimit):
+                                        self.reportRemFlare(c, n, "c")
+                                        del csl[csi]
+                                        csi -= 1
+                                        break
+                        nsi += 1
+                    csi += 1
+                n = glyph.nextInSubpath(n)
+
+    def isFlare(self, loc, glyph, c, n):
+        """Utility function for remFlares"""
+        while c is not n:
+            v = c.e.x if self.doV else c.e.y
+            if abs(v - loc) > self.hHinter.MaxFlare:
+                return False
+            c = glyph.nextInSubpath(c)
+        return True
+
+    def isUSeg(self, loc, uloc, lloc):
+        return abs(uloc - loc) <= abs(lloc - loc)
+
+    def reportRemFlare(self, pe, pe2, desc):
+        self.hHinter.info("Removed %s flare at %g %g by %g %g : %s" %
+                          ("vertical" if self.doV else "horizontal",
+                           pe.e.x, pe.e.y, pe2.e.x, pe2.e.y, desc))
