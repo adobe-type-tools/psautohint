@@ -6,16 +6,13 @@
 # and remove all white space, then parse out glyph-names and GID's.
 
 import logging
-# import os
-# import sys
-# import time
-# from copy import copy, deepcopy
+import time
 from collections import defaultdict
 
 log = logging.getLogger(__name__)
 
 
-class glyphReport:
+class GlyphReport:
     """Class to store stem and zone data from a particular glyph"""
     def __init__(self, name=None, all_stems=False):
         self.name = name

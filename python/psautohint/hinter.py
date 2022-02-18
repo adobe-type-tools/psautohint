@@ -16,7 +16,8 @@ from fontTools.misc.bezierTools import solveCubic
 
 from .glyphData import pt, feq, fne, stem
 from .hintstate import hintSegment, stemValue, glyphHintState, links
-from .report import glyphReport
+from .report import GlyphReport
+from .logging import logging_reconfig
 
 log = logging.getLogger(__name__)
 
@@ -1881,6 +1882,20 @@ class glyphHinter:
     Also contains code that uses hints from both dimensions, primarily
     for hintmask distribution
     """
+    impl = None
+
+    @classmethod
+    def initialize(_cls, options, fontDictList, logQueue=None):
+        _cls.impl = _cls(options, fontDictList)
+        if logQueue is not None:
+            logging_reconfig(logQueue, options.verbose)
+
+    @classmethod
+    def hint(_cls, name, glyphTuple, fdIndex=0):
+        if _cls.impl is None:
+            raise RuntimeError("glyphHinter implementation not initialized")
+        return _cls.impl._hint(name, glyphTuple, fdIndex)
+
     def __init__(self, options, fontDictList):
         self.options = options
         self.fontDictList = fontDictList
@@ -1918,10 +1933,11 @@ class glyphHinter:
             masks.append(mask)
         return masks
 
-    def hint(self, name, glyph, fdIndex=0):
+    def _hint(self, name, glyphTuple, fdIndex=0):
         """Top-level flex and stem hinting method for a glyph"""
+        glyph = glyphTuple[0]
         self.doV = False
-        gr = glyphReport(name, self.options.report_all_stems)
+        gr = GlyphReport(name, self.options.report_all_stems)
         self.name = name
         self.hHinter.setGlyph(self.fontDictList[fdIndex], gr, glyph, name)
         self.vHinter.setGlyph(self.fontDictList[fdIndex], gr, glyph, name)
@@ -1938,10 +1954,10 @@ class glyphHinter:
         self.vHinter.calcHintValues(lnks)
 
         if self.options.justReporting():
-            return gr, False
+            return name, gr
 
         if self.hHinter.keepHints and self.vHinter.keepHints:
-            return glyph, False
+            return name, None
 
         if self.options.allowChanges:
             neworder = lnks.shuffle(self.hHinter)  # hHinter serves as log
@@ -1969,7 +1985,7 @@ class glyphHinter:
 #            print(name, self.cnt, gc.collect())
 #            print(name, self.cnt)
 
-        return glyph, True
+        return name, (glyph,)
 
     def distributeMasks(self, glyph):
         """

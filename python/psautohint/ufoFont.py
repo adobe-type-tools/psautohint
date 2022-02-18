@@ -395,7 +395,7 @@ class UFOFontData:
         glyphset.readGlyph(name, gdwrap)
         self.newGlyphMap[name] = gdwrap
 
-        # updateFromGlyphData is called only if the glyph has been autohinted
+        # updateFromGlyph is called only if the glyph has been autohinted
         # which might also change its outline data. We need to update the edit
         # status in the hash map entry. We assume that convertToGlyphData has
         # been run before, which will add an entry for this glyph.

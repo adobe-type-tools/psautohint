@@ -13,6 +13,7 @@ import sys
 import textwrap
 
 from . import __version__, get_font_format
+from .logging import logging_conf
 from .autohint import ACOptions, hintFiles
 
 
@@ -388,26 +389,6 @@ class _AdditionalHelpAction(argparse.Action):
         parser.exit(message=formatter.format_help())
 
 
-class DuplicateMessageFilter(logging.Filter):
-    """
-    Suppresses any log message that was reported before in the same module and
-    for the same logging level. We check for module and level number in
-    addition to the message just in case, though checking the message only is
-    probably enough.
-    """
-
-    def __init__(self):
-        super(DuplicateMessageFilter, self).__init__()
-        self.logs = set()
-
-    def filter(self, record):
-        current = (record.module, record.levelno, record.getMessage())
-        if current in self.logs:
-            return False
-        self.logs.add(current)
-        return True
-
-
 def _split_comma_sequence(comma_str):
     return [item.strip() for item in comma_str.split(',')]
 
@@ -666,6 +647,15 @@ def get_options(args):
         addl_help=FDDICT_DOC
     )
     parser.add_argument(
+        '-p',
+        '--processes',
+        type=int,
+        help="The number of glyph-hinting processes (default is "
+             "os.cpu_count(), which is typically the number of CPU cores "
+             "in the computer. If negative the number will be subtracted "
+             "from the core count (with a minimum result of 1)"
+    )
+    parser.add_argument(
         '--info',
         action=_AdditionalHelpAction,
         help="show program's general info and exit",
@@ -696,24 +686,7 @@ def get_options(args):
 
     parsed_args = parser.parse_args(args)
 
-    log_format = "%(levelname)s: %(message)s"
-    if parsed_args.verbose == 0:
-        log_level = logging.WARNING
-    else:
-        log_format = "[%(filename)s:%(lineno)d] " + log_format
-        if parsed_args.verbose == 1:
-            log_level = logging.INFO
-        else:
-            log_level = logging.DEBUG
-
-    logging.basicConfig(format=log_format, level=log_level,
-                        filename=parsed_args.log_path)
-
-    # Filter duplicate logging messages only when not running the tests
-    # and when not reporting more detailed log levels
-    if log_level == logging.WARNING and parsed_args.test is False:
-        for handler in logging.root.handlers:
-            handler.addFilter(DuplicateMessageFilter())
+    logging_conf(parsed_args.verbose, parsed_args.log_path)
 
     if (not len(parsed_args.font_paths or []) and
             len(parsed_args.output_paths or [])):
@@ -764,6 +737,11 @@ def get_options(args):
         options.glyphList = _process_glyph_list_arg(
             _read_txt_file(parsed_args.glyphs_to_not_hint_file),
             options.nameAliases)
+
+    if parsed_args.processes:
+        options.process_count = parsed_args.processes
+
+    options.verbose = parsed_args.verbose
 
     if not parsed_args.fontinfo_file:
         fontinfo_path = os.path.join(os.path.dirname(all_font_paths[0]),
@@ -899,6 +877,15 @@ def get_stemhist_options(args):
              'Use -vv for extra-verbose mode.'
     )
     parser.add_argument(
+        '-p',
+        '--processes',
+        type=int,
+        help="The number of glyph-hinting processes (default is "
+             "os.cpu_count(), which is typically the number of CPU cores "
+             "in the computer. If negative the number will be subtracted "
+             "from the core count (with a minimum result of 1)"
+    )
+    parser.add_argument(
         '--version',
         action='version',
         version=__version__
@@ -910,16 +897,7 @@ def get_stemhist_options(args):
     )
     parsed_args = parser.parse_args(args)
 
-    if parsed_args.verbose == 0:
-        log_level = logging.WARNING
-    elif parsed_args.verbose == 1:
-        log_level = logging.INFO
-    else:
-        log_level = logging.DEBUG
-
-    logging.basicConfig(format="%(levelname)s: %(message)s", level=log_level)
-    for handler in logging.root.handlers:
-        handler.addFilter(DuplicateMessageFilter())
+    logging_conf(parsed_args.verbose)
 
     if (parsed_args.output_paths and
             len(parsed_args.font_paths) != len(parsed_args.output_paths)):
@@ -931,6 +909,11 @@ def get_stemhist_options(args):
     options = ReportOptions(parsed_args)
 
     options.font_format = _validate_font_paths(parsed_args.font_paths, parser)
+
+    if parsed_args.processes:
+        options.process_count = parsed_args.processes
+
+    options.verbose = parsed_args.verbose
 
     if parsed_args.glyphs_to_hint:
         options.glyphList = _process_glyph_list_arg(

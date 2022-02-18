@@ -237,6 +237,8 @@ class stem(tuple):
     __slots__ = ()
 
     def __new__(_cls, lb=0, rt=0):
+        if isinstance(lb, tuple):
+            return _tuple.__new__(_cls, lb)
         return _tuple.__new__(_cls, (lb, rt))
 
     @property
@@ -1110,6 +1112,12 @@ class glyphData(BasePen):
         return self.glyphiter(self)
 
     # utility
+
+    def setMasterDesc(self, desc):
+        self.masterDesc = desc
+
+    def getMasterDesc(self):
+        return getattr(self, masterDesc, "[Unknown]")
 
     def getStemMasks(self):
         """Utility function for pen methods"""
