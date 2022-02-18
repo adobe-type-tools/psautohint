@@ -7,7 +7,7 @@ import subprocess
 from fontTools.misc.xmlWriter import XMLWriter
 from fontTools.cffLib import CFFFontSet
 from fontTools.ttLib import TTFont
-from psautohint.autohint import ACOptions, ACHintError, hintFiles
+from psautohint.autohint import ACOptions, hintFiles
 from psautohint import FontParseError
 
 from .differ import main as differ
@@ -251,8 +251,7 @@ def test_too_long_glyph_name(tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
 
-    with pytest.raises(ACHintError):
-        hintFiles(options)
+    hintFiles(options)
 
 
 def test_hashmap_glyph_changed(tmpdir, caplog):

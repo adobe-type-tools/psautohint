@@ -12,9 +12,11 @@ def parse(path, glyphs=None):
         data = fp.read()
     if glyphs is None:
         glyphs = []
-    fddict = FDDict()
+    fddict = FDDict(0)
     fddict.setInfo("BlueFuzz", 0)
-    return parseFontInfoFile([fddict], data, glyphs, 2000, -1000, "Foo")
+    dl = [fddict]
+    gd, fd = parseFontInfoFile(dl, data, glyphs, 2000, -1000, "Foo")
+    return gd, dl, fd
 
 
 def test_finalfont():
@@ -63,7 +65,7 @@ def test_bad_fontinfo(path):
     {"Baseline5Overshoot": 10, "Baseline5": 0},
 ])
 def test_fddict_bad_zone(attributes):
-    fddict = FDDict()
+    fddict = FDDict(0)
     fddict.setInfo("BlueFuzz", 0)
     fddict.setInfo("BaselineYCoord", 0)
     fddict.setInfo("BaselineOvershoot", -10)
@@ -76,14 +78,14 @@ def test_fddict_bad_zone(attributes):
 
 
 def test_merge_empty_fddicts():
-    mergeFDDicts([FDDict(), FDDict()], FDDict())
+    mergeFDDicts([FDDict(0), FDDict(1)], FDDict(2))
 
 
 @pytest.mark.parametrize("stemdict", ["DominantH", "DominantV"])
 def test_merge_fddicts_with_stemdicts(stemdict):
-    fddict0 = FDDict()
-    fddict1 = FDDict()
-    fddict2 = FDDict()
+    fddict0 = FDDict(0)
+    fddict1 = FDDict(1)
+    fddict2 = FDDict(2)
 
     for i, fddict in enumerate([fddict1, fddict2]):
         fddict.setInfo("BlueFuzz", 0)

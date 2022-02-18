@@ -258,6 +258,7 @@ class fontWrapper:
 
     def getFontinfoList(self):
         options = self.options
+        font = self.fontInstances[0].font
         # Check for missing glyphs explicitly added via fontinfo or cmd line
         for label, charDict in [("hCounterGlyphs", options.hCounterGlyphs),
                                 ("vCounterGlyphs", options.vCounterGlyphs),
@@ -274,15 +275,13 @@ class fontWrapper:
         # entries in the fontinfo file. This is NOT supported for CID
         # or CFF2 fonts, as these have FDArrays, can can truly support
         # different Font.Dict.Private Dicts for different groups of glyphs.
-        if self.fontInstances[0].font.hasFDArray():
+        if font.hasFDArray():
             (self.fdGlyphDict,
-             self.fontDictList) = get_fontinfo_list_withFDArray(options,
-                                              self.fontInstances[0].font,
+             self.fontDictList) = get_fontinfo_list_withFDArray(options, font,
                                               self.glyphNameList, self.isVF)
         else:
             (self.fdGlyphDict,
-             self.fontDictList) = get_fontinfo_list_withFontInfo(options,
-                                               self.fontInstances[0].font,
+             self.fontDictList) = get_fontinfo_list_withFontInfo(options, font,
                                                self.glyphNameList)
 
     def hintStatus(self, name, hgt):
@@ -358,7 +357,7 @@ class fontWrapper:
             gmap = map(lambda x: glyphHinter.hint(*x), self)
             pool = None
         else:
-            set_start_method('spawn')
+            # set_start_method('spawn')
             manager = Manager()
             logQueue = manager.Queue(-1)
             lt = Thread(target=log_receiver, args=(logQueue,))
@@ -390,7 +389,7 @@ class fontWrapper:
 
         if report is not None:
             report.save(self.fontInstances[0].outpath, self.options)
-        elif not hasHints:
+        elif not hintedAny:
             log.info("No glyphs were hinted.")
 
         if pool is not None:

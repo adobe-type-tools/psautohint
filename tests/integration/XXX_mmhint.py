@@ -4,7 +4,7 @@ import pytest
 
 from fontTools.misc.xmlWriter import XMLWriter
 from fontTools.ttLib import TTFont
-from psautohint.autohint import ACOptions, ACHintError, hintFiles
+from psautohint.autohint import ACOptions, hintFiles
 
 from .differ import main as differ
 from . import make_temp_copy, DATA_DIR
@@ -87,8 +87,7 @@ def test_incompatible_masters(tmpdir):
     outpaths = [str(tmpdir / p) for p in inpaths]
 
     options = Options(reference, inpaths, outpaths)
-    with pytest.raises(ACHintError):
-        hintFiles(options)
+    hintFiles(options)
 
 
 def test_sparse_mmotf(tmpdir):

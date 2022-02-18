@@ -443,7 +443,6 @@ class UFOFontData:
                 filename = self.processedLayerGlyphMap[name]
             # Recalculate glyph hashes
             if self.writeToDefaultLayer:
-                ggs = self.getGlyphSet(glyph.getCallerToken())
                 self.recalcHashEntry(name, glyph)
             glyphset.contents[name] = filename
             glyphset.writeGlyph(name, glyph, glyph.drawPoints)
@@ -561,9 +560,12 @@ class UFOFontData:
         return self._glyphsets[layer_name]
 
     @staticmethod
-    def get_glyph_data(glyph, name, readStems, readFlex, roundCoords):
+    def get_glyph_data(glyph, name, readStems, readFlex, roundCoords,
+                       glyphset):
         gl = glyphData(roundCoords=roundCoords, name=name)
+        gl.glyphSet = glyphset  # To support addComponent in read phase
         glyph.draw(gl)
+        del gl.glyphSet
         if not hasattr(glyph, "width"):
             glyph.width = 0
         gl.setWidth(glyph.width)
@@ -578,7 +580,7 @@ class UFOFontData:
         glyphset = self._get_glyphset()
         glyph = glyphset[name]
         glyph_data = self.get_glyph_data(glyph, name, readStems, readFlex,
-                                         roundCoords)
+                                         roundCoords, glyphset)
 
         # Hash is always from the default glyph layer.
         hash_pen = HashPointPen(glyph, glyphset)
@@ -590,7 +592,7 @@ class UFOFontData:
             glyphset = self._get_glyphset(PROCESSED_LAYER_NAME)
             glyph = glyphset[name]
             glyph_data = self.get_glyph_data(glyph, name, readStems, readFlex,
-                                             roundCoords)
+                                             roundCoords, glyphset)
         return glyph_data, skip
 
     def getGlyphList(self):
