@@ -98,6 +98,7 @@ kFontInfoKeys = (kOtherFDDictKeys +
 class FontInfoParseError(ValueError):
     pass
 
+
 class FDDict:
     def __init__(self, fdIndex, dictName=None):
         self.fdIndex = fdIndex

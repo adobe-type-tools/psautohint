@@ -667,14 +667,14 @@ class pathElement:
 
     def splitAtInflectionsForSegs(self):
         a, b, c, d, = self.cubicParameters()
-        t2c = 3*(b[0]*a[1] - a[0]*b[1])
-        t1c = 3*(c[0]*a[1] - a[0]*c[1])
-        t0c = (c[0]*b[1] - b[0]*c[1])
-        sols = [ t for t in solveQuadratic(t2c, t1c, t0c) if 0 < t < 1 ]
+        t2c = 3 * (b[0] * a[1] - a[0] * b[1])
+        t1c = 3 * (c[0] * a[1] - a[0] * c[1])
+        t0c = (c[0] * b[1] - b[0] * c[1])
+        sols = [t for t in solveQuadratic(t2c, t1c, t0c) if 0 < t < 1]
         if len(sols) > 0:
             self.segment_sub = []
             for s in splitCubicAtT(self.s, self.cs, self.ce, self.e, *sols):
-                pts = [ pt(tup) for tup in s ]
+                pts = [pt(tup) for tup in s]
                 spe = pathElement(*pts)
                 spe.position = self.position
                 spe.segment_sub = len(self.segment_sub)
@@ -961,8 +961,8 @@ class glyphData(BasePen):
                 else:
                     return t.segment_sub[0]
             return None
-        assert ((segSub or not isinstance(c.segment_sub, int))
-                and (not segSub or not isinstance(c.segment_sub, list)))
+        assert ((segSub or not isinstance(c.segment_sub, int)) and
+                (not segSub or not isinstance(c.segment_sub, list)))
         self.syncPositions()
         subpath, offset = c.position
         if isinstance(c.segment_sub, int):
@@ -1029,8 +1029,8 @@ class glyphData(BasePen):
             return None
         if c is self:
             return self.next(c, segSub)
-        assert ((segSub or not isinstance(c.segment_sub, int))
-                and (not segSub or not isinstance(c.segment_sub, list)))
+        assert ((segSub or not isinstance(c.segment_sub, int)) and
+                (not segSub or not isinstance(c.segment_sub, list)))
         self.syncPositions()
         subpath, offset = c.position
         sp = self.subpaths[subpath]
@@ -1117,7 +1117,7 @@ class glyphData(BasePen):
         self.masterDesc = desc
 
     def getMasterDesc(self):
-        return getattr(self, masterDesc, "[Unknown]")
+        return getattr(self, 'masterDesc', "[Unknown]")
 
     def getStemMasks(self):
         """Utility function for pen methods"""

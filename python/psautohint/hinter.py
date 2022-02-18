@@ -1741,7 +1741,7 @@ class dimensionHinter:
                         if remidx is not None:
                             mask[remidx] = False
                             self.debug("Resolved conflicting hints at %g %g" %
-                                      (c.e.x, c.e.y))
+                                       (c.e.x, c.e.y))
                         else:
                             mask[i] = mask[j] = False
                             self.debug("Could not resolve conflicting hints" +

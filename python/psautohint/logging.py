@@ -7,6 +7,7 @@ Auto-hinting program for PostScript, OpenType/CFF and UFO fonts.
 import logging
 import logging.handlers
 
+
 class DuplicateMessageFilter(logging.Filter):
     """
     Suppresses any log message that was reported before in the same module and
@@ -25,6 +26,7 @@ class DuplicateMessageFilter(logging.Filter):
             return False
         self.logs.add(current)
         return True
+
 
 def logging_conf(verbose, logfile=None, handlers=None):
     log_format = "%(levelname)s: %(message)s"
@@ -50,6 +52,7 @@ def logging_conf(verbose, logfile=None, handlers=None):
         for handler in logging.root.handlers:
             handler.addFilter(DuplicateMessageFilter())
 
+
 def log_receiver(logQueue):
     while True:
         record = logQueue.get()
@@ -57,6 +60,7 @@ def log_receiver(logQueue):
             break
         logger = logging.getLogger(record.name)
         logger.handle(record)
+
 
 def logging_reconfig(logQueue, verbose=0):
     qh = logging.handlers.QueueHandler(logQueue)

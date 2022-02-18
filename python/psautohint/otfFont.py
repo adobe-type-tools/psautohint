@@ -531,7 +531,7 @@ class CFFFontData:
                 fontDictList, fontInfoData, glyphList, maxY, minY,
                 self.getPSName())
             if hasattr(topDict, "FDArray"):
-                private = topDict.FDArray[fdIndex].Private
+                private = topDict.FDArray[0].Private
             else:
                 private = topDict.Private
             if finalFDict is None:

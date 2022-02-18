@@ -11,7 +11,7 @@ import sys
 import time
 from collections import namedtuple
 from threading import Thread
-from multiprocessing import Pool, Manager, set_start_method
+from multiprocessing import Pool, Manager  # , set_start_method
 
 from .otfFont import CFFFontData
 from .ufoFont import UFOFontData
@@ -154,13 +154,12 @@ def get_glyph(options, font, name):
 def get_fontinfo_list_withFDArray(options, font, glyph_list, is_var=False):
     fdGlyphDict = {}
     fontDictList = []
-    filen = 0
     l = 0
     for name in glyph_list:
         fdIndex = font.getfdIndex(name)
         if fdIndex >= l:
-            fontDictList.extend([None] * (fdIndex-l+1))
-            l = fdIndex+1
+            fontDictList.extend([None] * (fdIndex - l + 1))
+            l = fdIndex + 1
         if fontDictList[fdIndex] is None:
             fddict = font.getFontInfo(options.allow_no_blues,
                                       options.noFlex,
@@ -220,7 +219,9 @@ def get_fontinfo_list_withFontInfo(options, font, glyph_list):
 
     return fdGlyphDict, fontDictList
 
+
 FontInstance = namedtuple("FontInstance", "font desc outpath")
+
 
 class fontWrapper:
     """
@@ -272,18 +273,18 @@ class fontWrapper:
         # different Font.Dict.Private Dicts for different groups of glyphs.
         if font.hasFDArray():
             (self.fdGlyphDict,
-             self.fontDictList) = get_fontinfo_list_withFDArray(options, font,
-                                              self.glyphNameList, self.isVF)
+             self.fontDictList) = get_fontinfo_list_withFDArray(
+                 options, font, self.glyphNameList, self.isVF)
         else:
             (self.fdGlyphDict,
-             self.fontDictList) = get_fontinfo_list_withFontInfo(options, font,
-                                               self.glyphNameList)
+             self.fontDictList) = get_fontinfo_list_withFontInfo(
+                 options, font, self.glyphNameList)
 
     def hintStatus(self, name, hgt):
         an = self.options.nameAliases.get(name, name)
         hs = [g.hasHints(both=True) for g in hgt if g is not None]
         if False in hs:
-            if len(gt) == 1:
+            if len(hgt) == 1:
                 log.info("%s: No hints added!", an)
                 return False
             elif True in hs:
@@ -352,7 +353,6 @@ class fontWrapper:
             pool = Pool(pcount, initializer=glyphHinter.initialize,
                         initargs=(self.options, self.fontDictList, logQueue))
             gmap = pool.starmap(glyphHinter.hint, self)
-
 
         for name, r in gmap:
             if isinstance(r, GlyphReport):
