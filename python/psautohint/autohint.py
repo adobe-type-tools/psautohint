@@ -238,12 +238,7 @@ class fontWrapper:
             self.isVF = (hasattr(fil[0].font, 'ttFont') and
                          'fvar' in fil[0].font.ttFont)
         self.reportOnly = options.justReporting()
-        if self.reportOnly:
-            assert not self.isVF and len(fil) == 1
-            self.taskDesc = 'analysis'
-        else:
-            self.taskDesc = 'hinting'
-        self.aliases = options.nameAliases
+        assert not self.reportOnly or (not self.isVF and len(fil) == 1)
         self.notFound = 0
         self.glyphNameList = filterGlyphList(options,
                                              fil[0].font.getGlyphList(),
@@ -285,7 +280,7 @@ class fontWrapper:
                                                self.glyphNameList)
 
     def hintStatus(self, name, hgt):
-        an = self.aliases.get(name, name)
+        an = self.options.nameAliases.get(name, name)
         hs = [g.hasHints(both=True) for g in hgt if g is not None]
         if False in hs:
             if len(gt) == 1:
@@ -326,14 +321,6 @@ class fontWrapper:
                 return self.__next__()
             self.fw.notFound = self.notFound
             fdIndex = self.fw.fdGlyphDict.get(name, 0)
-            fdn = self.fw.fontDictList[fdIndex].DictName
-            an = self.fw.aliases.get(name, name)
-            if an != name:
-                log.info("%s (%s): Begin %s (using fdDict %s).",
-                         an, name, self.fw.taskDesc, fdn)
-            else:
-                log.info("%s: Begin %s (using fdDict %s).",
-                         name, self.fw.taskDesc, fdn)
             return name, gt, fdIndex
 
     def __iter__(self):

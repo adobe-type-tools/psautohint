@@ -647,8 +647,8 @@ class dimensionHinter:
                     (self.cpDirection(c.s, c.cs, c.ce) !=
                      self.cpDirection(c.cs, c.ce, c.e))):
                 if c.splitAtInflectionsForSegs():
-                    self.info("splitting at inflection point in %d %d" %
-                              (c.position[0], c.position[1] + 1))
+                    self.debug("splitting at inflection point in %d %d" %
+                               (c.position[0], c.position[1] + 1))
 
     def genSegs(self):
         """
@@ -673,7 +673,7 @@ class dimensionHinter:
         weighted by segment length.
         """
         prv = self.glyph.prevInSubpath(c, segSub=True)
-        self.info("Element %d %d" % (c.position[0], c.position[1] + 1))
+        self.debug("Element %d %d" % (c.position[0], c.position[1] + 1))
         if c.isStart():
             # Certain glyphs with one contour above (or # below) all others
             # are marked as "Special", so that segments on that contour
@@ -1740,17 +1740,17 @@ class dimensionHinter:
                         # XXX handle ResolveConflictBySplit here
                         if remidx is not None:
                             mask[remidx] = False
-                            self.info("Resolved conflicting hints at %g %g" %
+                            self.debug("Resolved conflicting hints at %g %g" %
                                       (c.e.x, c.e.y))
                         else:
                             mask[i] = mask[j] = False
-                            self.info("Could not resolve conflicting hints" +
-                                      " at %g %g" % (c.e.x, c.e.y) +
-                                      ", removing both")
+                            self.debug("Could not resolve conflicting hints" +
+                                       " at %g %g" % (c.e.x, c.e.y) +
+                                       ", removing both")
         if True in mask:
             maskstr = ''.join(('1' if i else '0' for i in mask))
-            self.info("%s mask %s at %g %g" %
-                      (self.aDesc(), maskstr, c.e.x, c.e.y))
+            self.debug("%s mask %s at %g %g" %
+                       (self.aDesc(), maskstr, c.e.x, c.e.y))
             pestate.mask = mask
         else:
             pestate.mask = None
@@ -1903,6 +1903,10 @@ class glyphHinter:
         self.vHinter = vhinter(options)
         self.name = ""
         self.cnt = 0
+        if options.justReporting():
+            self.taskDesc = 'analysis'
+        else:
+            self.taskDesc = 'hinting'
 
         self.FlareValueLimit = 1000
         self.MaxHalfMargin = 20  # XXX 10 might better match original C code
@@ -1936,11 +1940,20 @@ class glyphHinter:
     def _hint(self, name, glyphTuple, fdIndex=0):
         """Top-level flex and stem hinting method for a glyph"""
         glyph = glyphTuple[0]
+        fddict = self.fontDictList[fdIndex]
+        an = self.options.nameAliases.get(name, name)
+        if an != name:
+            log.info("%s (%s): Begin %s (using fdDict '%s').",
+                     an, name, self.taskDesc, fddict.DictName)
+        else:
+            log.info("%s: Begin %s (using fdDict '%s').",
+                     name, self.taskDesc, fddict.DictName)
+
         self.doV = False
         gr = GlyphReport(name, self.options.report_all_stems)
         self.name = name
-        self.hHinter.setGlyph(self.fontDictList[fdIndex], gr, glyph, name)
-        self.vHinter.setGlyph(self.fontDictList[fdIndex], gr, glyph, name)
+        self.hHinter.setGlyph(fddict, gr, glyph, name)
+        self.vHinter.setGlyph(fddict, gr, glyph, name)
 
         glyph.changed = False
 
@@ -2067,8 +2080,8 @@ class glyphHinter:
                                                  mode == CONFLICT)
             maskstr = ''.join(('1' if i else '0'
                                for i in (candmasks[0] + candmasks[1])))
-            log.info("mask %s at %g %g, mode %d, conflict: %r" %
-                     (maskstr, c.e.x, c.e.y, mode, conflict))
+            log.debug("mask %s at %g %g, mode %d, conflict: %r" %
+                      (maskstr, c.e.x, c.e.y, mode, conflict))
             if conflict:
                 if mode == NOTSHORT:
                     self.bridgeMasks(glyph, masks, cmasks, usedmasks, c)
@@ -2313,6 +2326,6 @@ class glyphHinter:
         return abs(uloc - loc) <= abs(lloc - loc)
 
     def reportRemFlare(self, pe, pe2, desc):
-        self.hHinter.info("Removed %s flare at %g %g by %g %g : %s" %
-                          ("vertical" if self.doV else "horizontal",
-                           pe.e.x, pe.e.y, pe2.e.x, pe2.e.y, desc))
+        self.hHinter.debug("Removed %s flare at %g %g by %g %g : %s" %
+                           ("vertical" if self.doV else "horizontal",
+                            pe.e.x, pe.e.y, pe2.e.x, pe2.e.y, desc))

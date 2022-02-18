@@ -99,16 +99,16 @@ class FontInfoParseError(ValueError):
     pass
 
 class FDDict:
-    def __init__(self, fdIndex, dictName = None):
+    def __init__(self, fdIndex, dictName=None):
         self.fdIndex = fdIndex
+        for key in kFDDictKeys:
+            setattr(self, key, None)
         if dictName is not None:
             self.DictName = dictName
         elif fdIndex > 0:
             self.DictName = "FDArray index %s" % fdIndex
         else:
             self.DictName = "Default FDArray"
-        for key in kFDDictKeys:
-            setattr(self, key, None)
         self.FlexOK = True
         setattr(self, kFontDictBluePairsName, [])
         setattr(self, kFontDictOtherBluePairsName, [])
