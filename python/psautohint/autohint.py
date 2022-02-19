@@ -342,7 +342,7 @@ class fontWrapper:
 
         if pcount == 1:
             glyphHinter.initialize(self.options, self.fontDictList)
-            gmap = map(lambda x: glyphHinter.hint(*x), self)
+            gmap = map(glyphHinter.hint, self)
             pool = None
         else:
             # set_start_method('spawn')
@@ -352,12 +352,12 @@ class fontWrapper:
             lt.start()
             pool = Pool(pcount, initializer=glyphHinter.initialize,
                         initargs=(self.options, self.fontDictList, logQueue))
-            gmap = pool.starmap(glyphHinter.hint, self)
+            gmap = pool.imap_unordered(glyphHinter.hint, self)
 
         for name, r in gmap:
             if isinstance(r, GlyphReport):
-                assert report is not None
-                report.glyphs[name] = r
+                if report is not None:
+                    report.glyphs[name] = r
             else:
                 hasHints = self.hintStatus(name, r)
                 if hasHints and not self.options.logOnly:

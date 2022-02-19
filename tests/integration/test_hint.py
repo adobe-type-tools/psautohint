@@ -24,6 +24,7 @@ class Options(ACOptions):
         self.hintAll = True
         self.verbose = False
         self.read_hints = True
+        self.process_count = 1
 
 
 @parametrize("ufo", glob.glob("%s/*/*/font.ufo" % DATA_DIR))

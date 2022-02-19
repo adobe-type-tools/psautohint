@@ -18,6 +18,7 @@ class Options(ACOptions):
         self.report_zones = zones
         self.report_stems = stems
         self.report_all_stems = all_stems
+        self.process_count = 1
 
 
 @pytest.mark.parametrize("zones,stems,all_stems", [

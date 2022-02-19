@@ -6,7 +6,7 @@ import pytest
 
 from psautohint import FontParseError
 from psautohint.__main__ import main as psautohint
-from psautohint.__main__ import stemhist
+from psautohint.__main__ import stemhist as psstemhist
 
 from .differ import main as differ
 from . import make_temp_copy, DATA_DIR
@@ -20,6 +20,8 @@ FONTS = glob.glob("%s/dummy/font.[ocu][tf][fo]" % DATA_DIR)
 def autohint(args):
     return psautohint(["--all", "--test"] + args)
 
+def stemhist(args):
+    return psstemhist(["-p", "1"] + args)
 
 @pytest.mark.parametrize("path", FONTS)
 def test_basic(path, tmpdir):

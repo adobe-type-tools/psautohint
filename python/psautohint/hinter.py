@@ -1891,10 +1891,13 @@ class glyphHinter:
             logging_reconfig(logQueue, options.verbose)
 
     @classmethod
-    def hint(_cls, name, glyphTuple, fdIndex=0):
+    def hint(_cls, name, glyphTuple=None, fdIndex=0):
         if _cls.impl is None:
             raise RuntimeError("glyphHinter implementation not initialized")
-        return _cls.impl._hint(name, glyphTuple, fdIndex)
+        if isinstance(name, tuple):
+            return _cls.impl._hint(*name)
+        else:
+            return _cls.impl._hint(name, glyphTuple, fdIndex)
 
     def __init__(self, options, fontDictList):
         self.options = options
