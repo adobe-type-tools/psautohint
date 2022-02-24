@@ -353,7 +353,8 @@ class fontWrapper:
                 lt = Thread(target=log_receiver, args=(logQueue,))
                 lt.start()
                 pool = Pool(pcount, initializer=glyphHinter.initialize,
-                            initargs=(self.options, self.fontDictList, logQueue))
+                            initargs=(self.options, self.fontDictList,
+                                      logQueue))
                 if report is not None:
                     # Retain glyph ordering for reporting purposes
                     gmap = pool.imap(glyphHinter.hint, self)
@@ -378,7 +379,7 @@ class fontWrapper:
 
             if self.notFound:
                 log.info("Skipped %s of %s glyphs.", self.notFound,
-                        self.numGlyphs())
+                         self.numGlyphs())
 
             if report is not None:
                 report.save(self.fontInstances[0].outpath, self.options)
