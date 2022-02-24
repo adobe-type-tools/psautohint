@@ -1,5 +1,7 @@
 Changelog
 
+# v3.0.0 - TBD
+- New pure Python implemenation
 # v2.4.0 - February 2, 2022
 - Dropped Python 3.6 support - Python 3.7 is now the minimum requirement
 - Added Python 3.10 support

@@ -1,7 +1,6 @@
 import io
 import os
 
-from distutils import log
 from setuptools import setup, Extension, Command
 
 from setuptools.dist import Distribution
