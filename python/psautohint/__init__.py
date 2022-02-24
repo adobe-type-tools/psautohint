@@ -1,11 +1,5 @@
 import os
-from importlib.metadata import version
-
-
-try:
-    __version__ = version("psautohint")
-except:
-    __version__ = '__UNKNOWN__'
+from ._version import version as __version__
 
 
 class FontParseError(Exception):

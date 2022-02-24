@@ -1,5 +1,6 @@
 import io
 import os
+import setuptools_scm
 
 from setuptools import setup, Extension, Command
 
@@ -9,7 +10,6 @@ with io.open("README.md", encoding="utf-8") as readme:
     long_description = readme.read()
 
 setup(name="psautohint",
-      use_scm_version=True,
       description="Python wrapper for Adobe's PostScript autohinter",
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -26,7 +26,6 @@ setup(name="psautohint",
           ],
       },
       python_requires='>3.7',
-      setup_requires=["setuptools_scm"],
       install_requires=[
           'fonttools[ufo]>=4.22.0',
       ],

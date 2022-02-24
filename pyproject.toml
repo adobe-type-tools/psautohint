@@ -4,3 +4,5 @@ requires = [
     "wheel >= 0.31",
     "setuptools_scm >= 2.1"
 ]
+[tool.setuptools_scm]
+write_to = "python/psautohint/_version.py"
