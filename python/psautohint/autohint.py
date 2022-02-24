@@ -340,50 +340,63 @@ class fontWrapper:
             if pcount < 0:
                 pcount = 1
 
-        if pcount == 1:
-            glyphHinter.initialize(self.options, self.fontDictList)
-            gmap = map(glyphHinter.hint, self)
-            pool = None
-        else:
-            # set_start_method('spawn')
-            manager = Manager()
-            logQueue = manager.Queue(-1)
-            lt = Thread(target=log_receiver, args=(logQueue,))
-            lt.start()
-            pool = Pool(pcount, initializer=glyphHinter.initialize,
-                        initargs=(self.options, self.fontDictList, logQueue))
-            gmap = pool.imap_unordered(glyphHinter.hint, self)
-
-        for name, r in gmap:
-            if isinstance(r, GlyphReport):
-                if report is not None:
-                    report.glyphs[name] = r
+        pool = None
+        lt = None
+        try:
+            if pcount == 1:
+                glyphHinter.initialize(self.options, self.fontDictList)
+                gmap = map(glyphHinter.hint, self)
             else:
-                hasHints = self.hintStatus(name, r)
-                if hasHints and not self.options.logOnly:
-                    hintedAny = True
-                    font = self.fontInstances[0].font
-                    for i, new_glyph in enumerate(r):
-                        if i > 0 and not self.isVF:
-                            font = self.fontInstances[i].font
-                        font.updateFromGlyph(new_glyph, name)
-                    if self.isVF:
-                        font.merge_hinted_glyphs(name)
+                # set_start_method('spawn')
+                manager = Manager()
+                logQueue = manager.Queue(-1)
+                lt = Thread(target=log_receiver, args=(logQueue,))
+                lt.start()
+                pool = Pool(pcount, initializer=glyphHinter.initialize,
+                            initargs=(self.options, self.fontDictList, logQueue))
+                if report is not None:
+                    # Retain glyph ordering for reporting purposes
+                    gmap = pool.imap(glyphHinter.hint, self)
+                else:
+                    gmap = pool.imap_unordered(glyphHinter.hint, self)
 
-        if self.notFound:
-            log.info("Skipped %s of %s glyphs.", self.notFound,
-                     self.numGlyphs())
+            for name, r in gmap:
+                if isinstance(r, GlyphReport):
+                    if report is not None:
+                        report.glyphs[name] = r
+                else:
+                    hasHints = self.hintStatus(name, r)
+                    if hasHints and not self.options.logOnly:
+                        hintedAny = True
+                        font = self.fontInstances[0].font
+                        for i, new_glyph in enumerate(r):
+                            if i > 0 and not self.isVF:
+                                font = self.fontInstances[i].font
+                            font.updateFromGlyph(new_glyph, name)
+                        if self.isVF:
+                            font.merge_hinted_glyphs(name)
 
-        if report is not None:
-            report.save(self.fontInstances[0].outpath, self.options)
-        elif not hintedAny:
-            log.info("No glyphs were hinted.")
+            if self.notFound:
+                log.info("Skipped %s of %s glyphs.", self.notFound,
+                        self.numGlyphs())
 
-        if pool is not None:
-            pool.close()
-            pool.join()
-            logQueue.put(None)
-            lt.join()
+            if report is not None:
+                report.save(self.fontInstances[0].outpath, self.options)
+            elif not hintedAny:
+                log.info("No glyphs were hinted.")
+
+            if pool is not None:
+                pool.close()
+                pool.join()
+                logQueue.put(None)
+                lt.join()
+        finally:
+            if pool is not None:
+                pool.terminate()
+                pool.join()
+            if lt is not None:
+                logQueue.put(None)
+                lt.join()
 
         return hintedAny
 
