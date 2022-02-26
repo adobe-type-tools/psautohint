@@ -78,7 +78,7 @@ jobs:
     - name: Get date & flat tag
       id: date_tag
       run: |
-        export DATE=$(TZ=US/Pacific date +'%B-%d-%Y')
+        export DATE=$(TZ=US/Pacific date +'%B-%-d-%Y')
         echo $DATE
         export FLAT_TAG=$(echo ${GITHUB_REF##*/} | sed 's/\.//g')
         echo $FLAT_TAG
