@@ -331,11 +331,16 @@ class HintOptions(ACOptions):
         self.noHintSub = pargs.no_hint_sub
         self.allow_no_blues = pargs.no_zones_stems
         self.logOnly = pargs.report_only
+        self.removeConflicts = not pargs.keep_conflicts
         self.printDefaultFDDict = pargs.print_dflt_fddict
         self.printFDDictList = pargs.print_list_fddict
         self.roundCoords = not pargs.decimal
         self.writeToDefaultLayer = pargs.write_to_default_layer
         self.maxSegments = pargs.max_segments
+        self.verbose = pargs.verbose
+        if pargs.processes:
+            self.process_count = pargs.processes
+
 
 
 class _CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -532,6 +537,13 @@ def get_options(args):
         '--write-to-default-layer',
         action='store_true',
         help='write hints to default layer. This is a UFO-only option.'
+    )
+    parser.add_argument(
+        '-k',
+        '--keep-conflicts',
+        action='store_true',
+        help='When hinting a variable font keep a stem hint even when its '
+             'order inverts compared with another stem.'
     )
     glyphs_parser = parser.add_mutually_exclusive_group()
     glyphs_parser.add_argument(
@@ -738,11 +750,6 @@ def get_options(args):
             _read_txt_file(parsed_args.glyphs_to_not_hint_file),
             options.nameAliases)
 
-    if parsed_args.processes:
-        options.process_count = parsed_args.processes
-
-    options.verbose = parsed_args.verbose
-
     if not parsed_args.fontinfo_file:
         fontinfo_path = os.path.join(os.path.dirname(all_font_paths[0]),
                                      FONTINFO_FILE_NAME)
@@ -778,6 +785,9 @@ class ReportOptions(ACOptions):
         self.report_stems = not pargs.alignment_zones
         self.report_zones = pargs.alignment_zones
         self.report_all_stems = pargs.all_stems
+        self.verbose = pargs.verbose
+        if pargs.processes:
+            self.process_count = pargs.processes
 
 
 def get_stemhist_options(args):
@@ -909,11 +919,6 @@ def get_stemhist_options(args):
     options = ReportOptions(parsed_args)
 
     options.font_format = _validate_font_paths(parsed_args.font_paths, parser)
-
-    if parsed_args.processes:
-        options.process_count = parsed_args.processes
-
-    options.verbose = parsed_args.verbose
 
     if parsed_args.glyphs_to_hint:
         options.glyphList = _process_glyph_list_arg(

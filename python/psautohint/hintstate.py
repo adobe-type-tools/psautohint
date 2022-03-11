@@ -17,10 +17,12 @@ log = logging.getLogger(__name__)
 class hintSegment:
     """Represents a hint "segment" (one side of a potential stem)"""
     class sType(Enum):
-        LINE = 0,
-        BEND = 1,
-        CURVE = 2
-        GHOST = 3
+        LINE = 1
+        BEND = 2
+        CURVE = 3
+        LBBOX = 4
+        UBBOX = 5
+        GHOST = 6
 
     def __init__(self, aloc, oMin, oMax, pe, typ, bonus, isV, desc):
         """
@@ -69,6 +71,19 @@ class hintSegment:
 
     def __lt__(self, other):
         return self.loc < other.loc
+
+    def isBend(self):
+        return self.type == self.sType.BEND
+
+    def isCurve(self):
+        return self.type == self.sType.CURVE
+
+    def isLine(self):
+        return self.type in (self.sType.LINE, self.sType.LBBOX,
+                             self.sType.UBBOX)
+
+    def isGhost(self):
+        return self.type == self.sType.GHOST
 
     def current(self, orig=None):
         """
@@ -165,18 +180,25 @@ class stemValue:
 class pathElementHintState:
     """Stores the intermediate hint state of a pathElement"""
     def __init__(self):
-        self.segments = []
+        self.s_segs = []
+        self.m_segs = []
+        self.e_segs = []
         self.mask = []
 
     def cleanup(self):
         """Deletes segments marked as such"""
-        self.segments[:] = [s.current() for s in self.segments
-                            if not s.deleted]
+        for l in (self.s_segs, self.m_segs, self.e_segs):
+            l[:] = [s for s in l if not s.deleted and not s.current().deleted]
 
     def pruneHintSegs(self):
         """Deletes segments with no assigned hintval"""
-        self.segments[:] = [s for s in self.segments if s.hintval is not None]
+        for l in (self.s_segs, self.m_segs, self.e_segs):
+            l[:] = [s for s in l if s.current().hintval is not None]
 
+    def currentSegments(self):
+        return [ s.current()
+                 for s in self.s_segs + self.m_segs + self.e_segs
+                 if not s.deleted and not s.current().deleted ]
 
 class glyphHintState:
     """
@@ -195,11 +217,12 @@ class glyphHintState:
     rejectValues: The set of stemValues - mainValues
     counterHinted: True if the glyph is counter hinted in this dimension
     stems: stemValue stems represented in glyphData 'stem' object format
+    weights: weights corresponding to 'stems', for resolving conflicts
     keepHints: If true, keep already defined hints and masks in this dimension
                (XXX only partially implemented)
-    hasConflicts: True when some stemValues overlap
-    stemConflicts: 2d boolean array. Stem n conflicts with stem m <=>
-                   stemConflicts[n][m] == True
+    hasOverlaps: True when some stemValues overlap
+    stemOverlaps: 2d boolean array. Stem n "overlaps" with stem m <=>
+                  stemOverlaps[n][m] == True
     ghostCompat: if stem m is a ghost stem, ghostCompat[m] is a boolean
                  array where ghostCompat[m][n] is True <=> n can substitute
                  for m (n has the same location on the relevant side)
@@ -214,10 +237,12 @@ class glyphHintState:
         self.rejectValues = None
         self.counterHinted = False
         self.stems = None  # in sorted glyphData format
+        self.weights = None
         self.keepHints = None
-        self.hasConflicts = None
-        self.stemConflicts = None
+        self.hasOverlaps = None
+        self.stemOverlaps = None
         self.ghostCompat = None
+        self.goodMask = None
         self.mainMask = None
 
     def getPEState(self, pe, make=False):
@@ -234,7 +259,8 @@ class glyphHintState:
         else:
             return None
 
-    def addSegment(self, fr, to, loc, pe1, pe2, typ, bonus, isV, desc, log):
+    def addSegment(self, fr, to, loc, pe1, pe2, typ, bonus, isV, mid,
+                   desc, log):
         """Adds a new segment associated with pathElements pe1 and pe2"""
         if isV:
             pp = ('v', loc, fr, loc, to, desc)
@@ -247,13 +273,27 @@ class glyphHintState:
         else:
             mn, mx = fr, to
             lst = self.increasingSegs
+
         s = hintSegment(loc, mn, mx, pe2 if pe2 else pe1, typ, bonus, isV,
                         desc)
-        assert not pe1 or not pe2 or pe1 is not pe2
+        assert pe1 and (not pe2 or pe1 is not pe2)
+        # Segments derived from the first point in a path c are typically
+        # also added to the previous spline p, with p passed as pe1 and c
+        # passed as pe2. Segments derived from the last point in a path
+        # are only added to that path, passed as pe1. pe1 is therefore the
+        # "end point position" and pe2 the "start point position" except in
+        # the special case of MCURVE, which indicates the point was derived
+        # from the middle of the spline.
         if pe1:
-            self.getPEState(pe1, True).segments.append(s)
+            if mid:
+                self.getPEState(pe1, True).m_segs.append(s)
+            else:
+                self.getPEState(pe1, True).e_segs.append(s)
         if pe2:
-            self.getPEState(pe2, True).segments.append(s)
+            if mid:
+                self.getPEState(pe2, True).m_segs.append(s)
+            else:
+                self.getPEState(pe2, True).s_segs.append(s)
 
         bisect.insort(lst, s)
 
@@ -300,14 +340,8 @@ class glyphHintState:
            3. that overlaps with x and
            4. is at least three times longer
         """
-        li = self.increasingSegs
-        ld = self.decreasingSegs
-        i = 0
-        while i < len(li):
-            d = 0
-            while d < len(ld):
-                hsi = li[i]
-                hsd = ld[d]
+        for hsi in self.increasingSegs:
+            for hsd in self.decreasingSegs:
                 if hsd.loc > hsi.loc:
                     break
                 if (hsd.loc == hsi.loc and hsd.min < hsi.max and
@@ -316,9 +350,7 @@ class glyphHintState:
                             hsd.type != hintSegment.sType.BEND and
                             hsd.type != hintSegment.sType.GHOST and
                             (hsd.max - hsd.min) > (hsi.max - hsi.min) * 3):
-                        li[i].deleted = True
-                        del li[i]
-                        i -= 1
+                        hsi.deleted = True
                         lg.debug("rem seg loc %g from %g to %g" %
                                  (hsi.loc, hsi.min, hsi.max))
                         break
@@ -326,13 +358,9 @@ class glyphHintState:
                           hsi.type != hintSegment.sType.BEND and
                           hsi.type != hintSegment.sType.GHOST and
                           (hsi.max - hsi.min) > (hsd.max - hsd.min) * 3):
-                        ld[d].deleted = True
-                        del ld[d]
-                        d -= 1
+                        hsd.deleted = True
                         lg.debug("rem seg loc %g from %g to %g" %
                                  (hsd.loc, hsd.min, hsd.max))
-                d += 1
-            i += 1
 
     def deleteSegments(self):
         for s in self.increasingSegs:
@@ -345,6 +373,10 @@ class glyphHintState:
 
     def cleanup(self):
         """Runs cleanup on all pathElementHintState objects"""
+        self.increasingSegs = [ s for s in self.increasingSegs
+                                if not s.deleted ]
+        self.decreasingSegs = [ s for s in self.decreasingSegs
+                                if not s.deleted ]
         for pes in self.peStates.values():
             pes.cleanup()
 

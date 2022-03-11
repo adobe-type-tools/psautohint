@@ -262,14 +262,22 @@ class stem(tuple):
         else:
             return "(bad stem values {0}, {1})".format(self.lb, self.rt)
 
-    def isGhost(self):
+    def isGhost(self, doBool=False):
         """Returns True if the stem is a ghost hint"""
         width = self.rt - self.lb
         if width == -20:   # from topGhst in ac.h
-            return "high"
+            return "high" if not doBool else True
         if width == -21:   # from botGhst in ac.h
-            return "low"
+            return "low" if not doBool else True
         return False
+
+    def ghostCompat(a, b):
+        if a.isGhost(True) == b.isGhost(True):
+            return False
+        if a.isGhost() == 'high' or b.isGhost() == 'high':
+            return a.rt == b.rt
+        else:
+            return a.lb == b.lb
 
     def isBad(self):
         """Returns True if the stem is malformed"""

@@ -41,6 +41,7 @@ class ACOptions(object):
         self.noHintSub = False
         self.allow_no_blues = False
         self.logOnly = False
+        self.removeConflicts = True
         # Copy of parse_args verbose for child processes
         self.verbose = 0
         self.printDefaultFDDict = False
