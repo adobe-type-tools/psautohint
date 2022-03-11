@@ -275,7 +275,7 @@ class stem(tuple):
         if a.isGhost(True) == b.isGhost(True):
             return False
         if a.isGhost() == 'high' or b.isGhost() == 'high':
-            return a.rt == b.rt
+            return a.lb == b.rt
         else:
             return a.lb == b.lb
 

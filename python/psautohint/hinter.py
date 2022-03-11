@@ -1754,17 +1754,17 @@ class dimensionHinter:
                         if sl[i] > sl[j]:
                             hasConflicts = sc[i][j] = sc[j][i] = True
 
-            _, self.goodMask = self.unconflict(sc)
+            _, self.hs.goodMask = self.unconflict(sc)
         else:
-            self.goodMask = [True] * l
+            self.hs.goodMask = [True] * l
 
         self.hs.hasOverlaps = False
         self.hs.stemOverlaps = so = [[False] * l for i in range(l)]
         for i in range(l):
-            if not self.goodMask[i]:
+            if not self.hs.goodMask[i]:
                 continue
             for j in range(i+1, l):
-                if not self.goodMask[j]:
+                if not self.hs.goodMask[j]:
                     continue
                 for sl in self.hs.stems:
                     if sl[i].overlaps(sl[j]) or sl[i] > sl[j]:
@@ -1777,12 +1777,13 @@ class dimensionHinter:
 
         # A ghost stem in the default master should be a ghost everywhere
         for i, s in enumerate(dsl):
-            if not self.goodMask[i] or not s.isGhost(True):
+            if not self.hs.goodMask[i] or not s.isGhost(True):
                 continue
             gc[i] = [False] * l
             for j in range(l):
-                if i == j or not self.goodMask[j]:
+                if i == j or not self.hs.goodMask[j]:
                     continue
+#                print('here0', self.hs.stems[0][i].ghostCompat(self.hs.stems[0][j]))
                 if all(sl[i].ghostCompat(sl[j]) for sl in self.hs.stems):
                     assert so[i][j]
                     gc[i][j] = True
@@ -1802,7 +1803,7 @@ class dimensionHinter:
                 if so[c.idx][s.idx]:
                     ok = False
                     break
-            if ok and self.goodMask[c.idx]:
+            if ok and self.hs.goodMask[c.idx]:
                 mm[c.idx] = True
                 okl.append(c)
 
@@ -1819,7 +1820,7 @@ class dimensionHinter:
         segments = pestate.currentSegments()
         for seg in segments:
             if (not seg.hintval or seg.hintval.idx is None or
-                    not self.goodMask[seg.hintval.idx]):
+                    not self.hs.goodMask[seg.hintval.idx]):
                 continue
             mask[seg.hintval.idx] = True
         p0, p1 = (c.s, c.e) if c.isLine() else (c.cs, c.e)
