@@ -1009,7 +1009,7 @@ class glyphData(BasePen):
             if not self.subpaths or not self.subpaths[0]:
                 return None
             c = self.subpaths[0][-1]
-            if c.s == c.e:
+            if not c.isClose():
                 c = self.subpaths[0][0]
             return c
         self.syncPositions()
@@ -1021,11 +1021,13 @@ class glyphData(BasePen):
             return n
         offset += 1
         if offset < len(self.subpaths[subpath]) - 1:
-            return self.subpaths[subpath][offset]
+            c = self.subpaths[subpath][offset]
+            if not c.isClose():
+                return c
         subpath += 1
         if subpath < len(self.subpaths):
             c = self.subpaths[subpath][-1]
-            if c.s == c.e:
+            if not c.isClose():
                 c = self.subpaths[subpath][0]
             return c
         return None
