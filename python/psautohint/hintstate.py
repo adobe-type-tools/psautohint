@@ -20,11 +20,13 @@ class hintSegment:
         LINE = 1
         BEND = 2
         CURVE = 3
-        LBBOX = 4
-        UBBOX = 5
-        GHOST = 6
+        LGBBOX = 4
+        UGBBOX = 5
+        LPBBOX = 6
+        UPBBOX = 7
+        GHOST = 8
 
-    def __init__(self, aloc, oMin, oMax, pe, typ, bonus, isV, desc):
+    def __init__(self, aloc, oMin, oMax, pe, typ, bonus, isV, isInc, desc):
         """
         Initializes the object
 
@@ -57,6 +59,7 @@ class hintSegment:
         self.bonus = bonus
         self.type = typ
         self.isV = isV
+        self.isInc = isInc
         self.desc = desc
         if pe:
             self.pe = weakref.ref(pe)
@@ -79,8 +82,17 @@ class hintSegment:
         return self.type == self.sType.CURVE
 
     def isLine(self):
-        return self.type in (self.sType.LINE, self.sType.LBBOX,
-                             self.sType.UBBOX)
+        return self.type == self.sType.LINE or self.isBBox()
+
+    def isBBox(self):
+        return self.type in (self.sType.LGBBOX, self.sType.UGBBOX,
+                             self.sType.LPBBOX, self.sType.UPBBOX)
+
+    def isGBBox(self):
+        return self.type in (self.sType.LGBBOX, self.sType.UGBBOX)
+
+    def isUBBox(self):
+        return self.type in (self.sType.UPBBOX, self.sType.UGBBOX)
 
     def isGhost(self):
         return self.type == self.sType.GHOST
@@ -186,19 +198,25 @@ class pathElementHintState:
         self.mask = []
 
     def cleanup(self):
-        """Deletes segments marked as such"""
+        """Updates and deletes segments according to deleted and replacedBy"""
         for l in (self.s_segs, self.m_segs, self.e_segs):
-            l[:] = [s for s in l if not s.deleted and not s.current().deleted]
+            l[:] = [x for x in (s.current() for s in l) if not x.deleted]
 
     def pruneHintSegs(self):
         """Deletes segments with no assigned hintval"""
         for l in (self.s_segs, self.m_segs, self.e_segs):
-            l[:] = [s for s in l if s.current().hintval is not None]
+            l[:] = [s for s in l if s.hintval is not None]
 
-    def currentSegments(self):
-        return [ s.current()
-                 for s in self.s_segs + self.m_segs + self.e_segs
-                 if not s.deleted and not s.current().deleted ]
+    def segments(self):
+        return [s for s in self.s_segs + self.m_segs + self.e_segs]
+
+    def segLists(self, first=None):
+        if first == None or first == 's':
+            return (('s', self.s_segs), ('m', self.m_segs), ('e', self.e_segs))
+        elif first == 'm':
+            return (('m', self.m_segs), ('s', self.s_segs), ('e', self.e_segs))
+        elif first == 'e':
+            return (('e', self.e_segs), ('m', self.m_segs), ('s', self.s_segs))
 
 class glyphHintState:
     """
@@ -269,13 +287,15 @@ class glyphHintState:
         log.debug("add %sseg %g %g to %g %g %s" % pp)
         if fr > to:
             mn, mx = to, fr
+            isInc = False
             lst = self.decreasingSegs
         else:
             mn, mx = fr, to
+            isInc = True
             lst = self.increasingSegs
 
         s = hintSegment(loc, mn, mx, pe2 if pe2 else pe1, typ, bonus, isV,
-                        desc)
+                        isInc, desc)
         assert pe1 and (not pe2 or pe1 is not pe2)
         # Segments derived from the first point in a path c are typically
         # also added to the previous spline p, with p passed as pe1 and c
@@ -341,11 +361,11 @@ class glyphHintState:
            4. is at least three times longer
         """
         for hsi in self.increasingSegs:
-            for hsd in self.decreasingSegs:
-                if hsd.loc > hsi.loc:
-                    break
-                if (hsd.loc == hsi.loc and hsd.min < hsi.max and
-                        hsd.max > hsi.min):
+            lo = bisect.bisect_left(self.decreasingSegs, hsi)
+            hi = bisect.bisect_right(self.decreasingSegs, hsi, lo=lo)
+            for hsd in self.decreasingSegs[lo:hi]:
+                assert hsd.loc == hsi.loc
+                if hsd.min < hsi.max and hsd.max > hsi.min:
                     if (hsi.type == hintSegment.sType.BEND and
                             hsd.type != hintSegment.sType.BEND and
                             hsd.type != hintSegment.sType.GHOST and
@@ -373,10 +393,8 @@ class glyphHintState:
 
     def cleanup(self):
         """Runs cleanup on all pathElementHintState objects"""
-        self.increasingSegs = [ s for s in self.increasingSegs
-                                if not s.deleted ]
-        self.decreasingSegs = [ s for s in self.decreasingSegs
-                                if not s.deleted ]
+        self.increasingSegs = [s for s in self.increasingSegs if not s.deleted]
+        self.decreasingSegs = [s for s in self.decreasingSegs if not s.deleted]
         for pes in self.peStates.values():
             pes.cleanup()
 
@@ -384,6 +402,43 @@ class glyphHintState:
         """Runs pruneHintSegs on all pathElementHintState objects"""
         for pes in self.peStates.values():
             pes.pruneHintSegs()
+
+class stemLocationCandidate:
+    """
+    Information about a candidate location for a stem in a non-default
+    master glyph, derived from segments generated for the glyph or,
+    occasionally, directly from point locations.
+    """
+    def __init__(self, loc):
+        self.loc = loc
+        self.strong = 0
+        self.weak = 0
+        self.special = False
+
+    def addSegment(self, seg, strong=False):
+        if seg is None:
+            score = 0
+        else:
+            score = self.oMax - seg.oMin
+            if seg.bonus > 0:
+                self.special = True
+        if strong:
+            self.strong += score
+        else:
+            self.weak += score
+
+    def isStrong(self):
+        return self.strong > 0
+
+    def isMixed(self):
+        return self.strong > 0 and self.weak > 0
+
+    def __eq__(self, other):
+        return feq(self.strong, other.strong) and feq(self.weak, other.weak)
+
+    def __lt__(self, other):
+        return (self.strong < other.strong or
+                (feq(self.strong, other.strong) and self.weak < other.weak))
 
 
 class links:

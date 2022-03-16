@@ -305,6 +305,8 @@ class CFFFontData:
         return gl
 
     def updateFromGlyph(self, gl, glyphName):
+        if gl is None:
+            return
         t2Program = gl.T2()
 
         if not self.is_cff2:

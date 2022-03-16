@@ -324,10 +324,12 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
                 state = baseState  # found the last token in the list value.
 
         elif state == inDictValue:
-            dictValueList.append(token)
             if token[-1] in ["]", ")"]:
+                dictValueList.append(token[:-1])
                 fdDict.setInfo(dictKeyWord, dictValueList)
                 state = dictState  # found the last token in the list value.
+            else:
+                dictValueList.append(token)
 
         elif state == glyphSetState:
             # "end GlyphSet" marks end of set,
@@ -379,7 +381,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
                     if value[0] in ["[", "("]:
                         if not value[-1] in ["]", ")"]:
                             state = inDictValue
-                            dictValueList = [value]
+                            dictValueList = [value[1:]]
                             dictKeyWord = token
                         else:
                             fdDict.setInfo(token, value[1:-1])

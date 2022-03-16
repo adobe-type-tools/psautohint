@@ -151,8 +151,7 @@ def get_glyph(options, font, name):
         # reference font.
         return None
 
-
-def get_fontinfo_list_withFDArray(options, font, glyph_list, is_var=False):
+def get_fontinfo_list_withFDArray(options, font, glyph_list, isVF=False):
     fdGlyphDict = {}
     fontDictList = []
     l = 0
@@ -166,10 +165,19 @@ def get_fontinfo_list_withFDArray(options, font, glyph_list, is_var=False):
                                       options.noFlex,
                                       options.vCounterGlyphs,
                                       options.hCounterGlyphs,
-                                      fdIndex)
+                                      fdIndex, isVF)
             fontDictList[fdIndex] = fddict
         if fdIndex != 0:
             fdGlyphDict[name] = fdIndex
+
+    if isVF and fontDictList:
+        # If the font was variable then each "fddict" in the list is a
+        # list of fddicts by master. Now we just need to swap the axes
+        # (could use a numpy one-liner but don't want the dependency)
+        fdls = []
+        for i in range(len(fontDictList[fdIndex])):
+            fdls.append([x[i] if x is not None else None
+                        for x in fontDictList])
 
     return fdGlyphDict, fontDictList
 
@@ -248,12 +256,12 @@ class fontWrapper:
         if not self.glyphNameList:
             raise FontParseError("Selected glyph list is empty for " +
                                  "font <%s>." % fil[0].desc)
-        self.getFontinfoList()
+        self.getFontinfoLists()
 
     def numGlyphs(self):
         return len(self.glyphNameList)
 
-    def getFontinfoList(self):
+    def getFontinfoLists(self):
         options = self.options
         font = self.fontInstances[0].font
         # Check for missing glyphs explicitly added via fontinfo or cmd line
@@ -272,17 +280,36 @@ class fontWrapper:
         # entries in the fontinfo file. This is NOT supported for CID
         # or CFF2 fonts, as these have FDArrays, can can truly support
         # different Font.Dict.Private Dicts for different groups of glyphs.
-        if font.hasFDArray():
+        if self.isVF:
             (self.fdGlyphDict,
-             self.fontDictList) = get_fontinfo_list_withFDArray(
-                 options, font, self.glyphNameList, self.isVF)
+             self.fontDictLists) = get_fontinfo_list_withFDArray(options, font,
+                self.glyphNameList, True)
         else:
-            (self.fdGlyphDict,
-             self.fontDictList) = get_fontinfo_list_withFontInfo(
-                 options, font, self.glyphNameList)
+            if font.hasFDArray():
+                getfil = get_fontinfo_list_withFDArray
+            else:
+                getfil = get_fontinfo_list_withFontInfo
+            fdls = self.fontDictLists = []
+            self.fdGlyphDict = None
+            for f in self.fontInstances:
+                gd, fdl = getfil(options, f.font, self.glyphNameList)
+                if self.fdGlyphDict is None:
+                    self.fdGlyphDict = gd
+                elif not self.equalDicts(self.fdGlyphDict, gd):
+                    self.error("fdIndexes in font %s different " % font.desc +
+                               "from those in font %s" % f.desc)
+                fdls.append(fdl)
+
+    def equalDicts(self, d1, d2):
+        # This allows for sparse masters, just verifying that if a glyph name
+        # is in both dictionaries it maps to the same index.
+        return all((d1[k] == d2[k] for k in d1 if k in d2))
 
     def hintStatus(self, name, hgt):
         an = self.options.nameAliases.get(name, name)
+        if hgt is None:
+            log.warning("%s: Could not hint!", an)
+            return False
         hs = [g.hasHints(both=True) for g in hgt if g is not None]
         if False in hs:
             if len(hgt) == 1:
@@ -304,23 +331,27 @@ class fontWrapper:
 
         def __next__(self):
             # gnit's StopIteration exception stops this iteration
-            name = self.gnit.__next__()
-            if self.fw.reportOnly and name == '.notdef':
-                return self.__next__()
-            if self.fw.isVF:
-                gt = self.fw.fontInstances[0].font.get_vf_glyphs(name)
-                for i, g in enumerate(gt):
-                    if g is not None:
-                        g.setMasterDesc("Master %d" % i)
-            else:
-                gt = tuple((get_glyph(self.fw.options, f.font, name)
-                            for f in self.fw.fontInstances))
-                for i, g in enumerate(gt):
-                    if g is not None:
-                        g.setMasterDesc(self.fw.fontInstances[i].desc)
-            if True not in (g is not None for g in gt):
-                self.notFound += 1
-                return self.__next__()
+            stillLooking = True
+            while stillLooking:
+                stillLooking = False
+                name = self.gnit.__next__()
+                if self.fw.reportOnly and name == '.notdef':
+                    stillLooking = True
+                    continue
+                if self.fw.isVF:
+                    gt = self.fw.fontInstances[0].font.get_vf_glyphs(name)
+                    for i, g in enumerate(gt):
+                        if g is not None:
+                            g.setMasterDesc("Master %d" % i)
+                else:
+                    gt = tuple((get_glyph(self.fw.options, f.font, name)
+                                for f in self.fw.fontInstances))
+                    for i, g in enumerate(gt):
+                        if g is not None:
+                            g.setMasterDesc(self.fw.fontInstances[i].desc)
+                if True not in (g is not None for g in gt):
+                    self.notFound += 1
+                    stillLooking = True
             self.fw.notFound = self.notFound
             fdIndex = self.fw.fdGlyphDict.get(name, 0)
             return name, gt, fdIndex
@@ -340,12 +371,14 @@ class fontWrapper:
             pcount = os.cpu_count() - pcount
             if pcount < 0:
                 pcount = 1
+        if pcount > self.numGlyphs():
+            pcount = self.numGlyphs()
 
         pool = None
         lt = None
         try:
             if pcount == 1:
-                glyphHinter.initialize(self.options, self.fontDictList)
+                glyphHinter.initialize(self.options, self.fontDictLists)
                 gmap = map(glyphHinter.hint, self)
             else:
                 # set_start_method('spawn')
@@ -354,7 +387,7 @@ class fontWrapper:
                 lt = Thread(target=log_receiver, args=(logQueue,))
                 lt.start()
                 pool = Pool(pcount, initializer=glyphHinter.initialize,
-                            initargs=(self.options, self.fontDictList,
+                            initargs=(self.options, self.fontDictLists,
                                       logQueue))
                 if report is not None:
                     # Retain glyph ordering for reporting purposes
@@ -368,8 +401,11 @@ class fontWrapper:
                         report.glyphs[name] = r
                 else:
                     hasHints = self.hintStatus(name, r)
-                    if hasHints and not self.options.logOnly:
-                        hintedAny = True
+                    if r is None:
+                        r = [None]*len(self.fontInstances)
+                    if not self.options.logOnly:
+                        if hasHints:
+                            hintedAny = True
                         font = self.fontInstances[0].font
                         for i, new_glyph in enumerate(r):
                             if i > 0 and not self.isVF:

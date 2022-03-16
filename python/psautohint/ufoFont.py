@@ -386,6 +386,12 @@ class UFOFontData:
         return glyph
 
     def updateFromGlyph(self, glyph, name):
+        if glyph is None:
+            try:
+                self.removeHashEntry(name)
+            except:
+                pass
+            return
         layer = None
         if name in self.processedLayerGlyphMap:
             layer = PROCESSED_LAYER_NAME
@@ -502,6 +508,10 @@ class UFOFontData:
         # If the program is not in the history list, add it.
         if AUTOHINT_NAME not in historyList:
             historyList.append(AUTOHINT_NAME)
+
+    def removeHashEntry(self, glyphName):
+        del self.hashMap[glyphName]
+        self.hashMapChanged = True
 
     def recalcHashEntry(self, glyphName, glyph):
         hashBefore, historyList = self.hashMap[glyphName]
@@ -916,7 +926,7 @@ class GlyphDataWrapper(object):
             if wrapi < 0:
                 continue
             w = s[wrapi]
-            assert w.isClose() and w.e == s[0].s
+            assert w.e == s[0].s
             if w.e == w.s:
                 wrapi -= 1
                 w = s[wrapi]

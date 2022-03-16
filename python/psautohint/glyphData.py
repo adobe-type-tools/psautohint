@@ -222,6 +222,10 @@ class pt(tuple):
         """Returns True if each coordinate is feq to that of the argument"""
         return feq(self[0], other[0]) and feq(self[1], other[1])
 
+    def eq_exact(self, other):
+        """Returns True if each coordinate is equal to that of the argument"""
+        return self[0] == other[0] and self[1] == other[1]
+
 
 class stem(tuple):
     """
@@ -526,13 +530,6 @@ class pathElement:
         """Returns True if this pathElement implicitly closes a subpath"""
         return self.is_close
 
-    def isNull(self):
-        """
-        Returns True if this pathElement implicitly closes a subpath and
-        has zero length
-        """
-        return self.is_close and self.s == self.e
-
     def isStart(self):
         """Returns True if this pathElement starts a subpath"""
         return self.position[1] == 0
@@ -755,6 +752,8 @@ class glyphData(BasePen):
             t = self.current_end
         else:
             t = self.subpaths[-1][0].s
+        if self.current_end.eq_exact(t):
+            return
         self.subpaths[-1].append(pathElement(self.current_end, t,
                                              masks=self.getStemMasks(),
                                              flex=self.checkFlex(False),
@@ -869,10 +868,10 @@ class glyphData(BasePen):
                 for ofst in range(len(self.subpaths[sp])):
                     pe = self.subpaths[sp][ofst]
                     pe.position = (sp, ofst)
-                    if isinstance(pe.sequence_sub, list):
-                        for i, spe in enumerate(pe.sequence_sub):
+                    if isinstance(pe.segment_sub, list):
+                        for i, spe in enumerate(pe.segment_sub):
                             spe.position = (sp, ofst)
-                            spe.sequence_sub = i
+                            spe.segment_sub = i
 
     def setPathEdited(self):
         self.pathEdited = True
@@ -1115,6 +1114,9 @@ class glyphData(BasePen):
             if self.pos is None:
                 raise StopIteration
             return self.pos
+
+        def __iter__(self):
+            return self
 
     def __iter__(self):
         return self.glyphiter(self)
