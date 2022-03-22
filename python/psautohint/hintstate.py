@@ -403,7 +403,9 @@ class glyphHintState:
         for pes in self.peStates.values():
             pes.pruneHintSegs()
 
-class stemLocationCandidate:
+class stemLocCandidate:
+    strongMultiplier = 1.2
+    bandMultiplier = 2.0
     """
     Information about a candidate location for a stem in a non-default
     master glyph, derived from segments generated for the glyph or,
@@ -413,19 +415,16 @@ class stemLocationCandidate:
         self.loc = loc
         self.strong = 0
         self.weak = 0
-        self.special = False
 
-    def addSegment(self, seg, strong=False):
-        if seg is None:
-            score = 0
-        else:
-            score = self.oMax - seg.oMin
-            if seg.bonus > 0:
-                self.special = True
+    def addScore(self, score, strong):
         if strong:
             self.strong += score
         else:
             self.weak += score
+
+    def weight(self, inBand):
+        return ((self.strong * self.strongMultiplier + self.weak) *
+                (self.bandMultiplier if inBand else 1))
 
     def isStrong(self):
         return self.strong > 0
@@ -439,6 +438,46 @@ class stemLocationCandidate:
     def __lt__(self, other):
         return (self.strong < other.strong or
                 (feq(self.strong, other.strong) and self.weak < other.weak))
+
+
+class masterStemState:
+    """
+    State for the process of deciding on the lower and upper locations
+    for a particular stem in a non-default master.
+    """
+    def __init__(self, loc, dhinter):
+        self.defaultLoc = loc
+        self.dhinter = dhinter
+        self.candDict = {}
+        self.usedSegs = set()
+        self.bb = None
+
+    def addToLoc(self, loc, score, strong=False, bb=False, seg=None):
+        if self.bb is not None:
+            if self.bb != bb:
+                self.dhinter.warning("Mixed bounding-box and "
+                                     "non-bounding box location data")
+        else:
+            self.bb = bb
+        if seg is not None:
+            sid = id(seg)
+            if sid in self.usedSegs:
+                return
+            self.usedSegs.add(sid)
+        if loc in self.candDict:
+            sLC = self.candDict[loc]
+        else:
+            sLC = self.candDict[loc] = stemLocCandidate(loc)
+        sLC.addScore(score, strong)
+
+    def bestLocation(self, isBottom):
+        weights = ((x.weight(self.dhinter.inBand(x.loc, isBottom)), x.loc)
+                   for x in self.candDict.values())
+        try:
+            m = max(weights)
+            return m[1]
+        except:
+            return None
 
 
 class links:

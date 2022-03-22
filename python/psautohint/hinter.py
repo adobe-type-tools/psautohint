@@ -17,14 +17,15 @@ from fontTools.misc.bezierTools import solveCubic
 
 from .glyphData import pt, feq, fne, stem
 from .glyphData import pathElement, glyphData
-from .hintstate import hintSegment, stemValue, glyphHintState, links
+from .hintstate import (hintSegment, stemValue, glyphHintState, links,
+                        masterStemState)
 from .report import GlyphReport
 from .logging import logging_reconfig
 
 log = logging.getLogger(__name__)
 
 GlyphPE = namedtuple("GlyphPE", "glyph pe")
-LocDict = namedtuple("LocDict", "l u")
+LocDict = namedtuple("LocDict", "l u used")
 
 class dimensionHinter:
     """
@@ -98,6 +99,7 @@ class dimensionHinter:
         self.GhostFactor = 1.0 / 8.0
         self.DeltaDiffMin = .05
         self.DeltaDiffReport = 3
+        self.NoSegScore = 0.1
 
         self.FlexStrict = True
 
@@ -162,7 +164,7 @@ class dimensionHinter:
                 self.gl = [gllist[0], gllist[glidx]]
             else:
                 self.gl = gllist
-            self.il = [g.__iter__() for g in gllist]
+            self.il = [gl.__iter__() for gl in gllist]
 
         def __next__(self):
             return [GlyphPE(self.gl[i], ii.__next__())
@@ -234,12 +236,12 @@ class dimensionHinter:
 
     def addFlex(self, force=True, inited=False):
         """Path-level interface to add flex hints to current glyph"""
-        hasflex = (g.flex_count != 0 for g in self.gllist)
+        hasflex = (gl.flex_count != 0 for gl in self.gllist)
         if not inited and any(hasflex):
             if force or not all(hasflex):
                 self.info("Clearing existing flex hints")
-                for g in self.gllist:
-                    g.clearFlex()
+                for gl in self.gllist:
+                    gl.clearFlex()
             else:
                 self.info("Already has flex hints, skipping addFlex")
                 return
@@ -250,12 +252,12 @@ class dimensionHinter:
 
         pt.clearAlign()
 
-    def tryFlex(self, g, c):
+    def tryFlex(self, gl, c):
         """pathElement-level interface to add flex hints to current glyph"""
         # Not a curve, already flexed, or flex depth would be too large
         if not c or c.isLine() or c.flex or c.s.a_dist(c.e) > self.MaxFlex:
             return False
-        n = g.nextInSubpath(c, skipTiny=True)
+        n = gl.nextInSubpath(c, skipTiny=True)
         if not n or n.isLine() or n.flex:
             return False
 
@@ -280,11 +282,11 @@ class dimensionHinter:
             return False
 
         if self.FlexStrict:
-            nn = g.nextInSubpath(n, skipTiny=True)
+            nn = gl.nextInSubpath(n, skipTiny=True)
             # Endpoint of spline after n bends back towards flex midpoint
             if not nn or self.diffSign(nn.e.a - n.e.a, c.e.a - n.e.a):
                 return False
-            p = g.prevInSubpath(c, skipTiny=True)
+            p = gl.prevInSubpath(c, skipTiny=True)
             # Endpoint of spline before e bends back towards flex midpoint
             if not p or self.diffSign(p.s.a - c.s.a, c.e.a - c.s.a):
                 return False
@@ -295,7 +297,7 @@ class dimensionHinter:
             elif not self.isV() and (c.s.y > n.e.y) != (c.s.x < c.e.x):
                 return False
 
-        real_n = g.nextInSubpath(c, skipTiny=False)
+        real_n = gl.nextInSubpath(c, skipTiny=False)
         if real_n is not n:
             self.info("Remove short spline at %g %g to add flex." % c.e)
             return False
@@ -317,12 +319,12 @@ class dimensionHinter:
         return True
 
     def markFlex(self, cl):
-        for g, c in cl:
-            n = g.nextInSubpath(c, skipTiny=False)
+        for gl, c in cl:
+            n = gl.nextInSubpath(c, skipTiny=False)
             c.flex = 1
             n.flex = 2
-            g.flex_count += 1
-            g.changed = True
+            gl.flex_count += 1
+            gl.changed = True
         if not self.HasFlex:
             self.info("Added flex operators to this glyph.")
             self.HasFlex = True
@@ -1677,11 +1679,11 @@ class dimensionHinter:
             self.hs.stemValues = sorted(self.hs.mainValues)
         for sv in self.hs.stemValues:
             p = sv.ghosted()
-            idx = valuepairmap.get(p, None)
-            if idx is not None:
-                sv.idx = idx
+            sidx = valuepairmap.get(p, None)
+            if sidx is not None:
+                sv.idx = sidx
                 if self.options.removeConflicts:
-                    wl[idx] += sv.compVal(self.SpcBonus)[0]**.25
+                    wl[sidx] += sv.compVal(self.SpcBonus)[0]**.25
             else:
                 valuepairmap[p] = sv.idx = len(dsl)
                 dsl.append(stem(*p))
@@ -1695,14 +1697,20 @@ class dimensionHinter:
 
         # Determine the stem locations for other masters
 
-        for i in range(1, len(self.gllist)):
-            self.calcMasterStems(i)
+        for glidx in range(1, len(self.gllist)):
+            self.calcMasterStems(glidx)
+
+        self.info("Initial %s stem list (including masters, if any):" %
+                  self.aDesc())
+        for sidx in range(len(self.hs.stems[0])):
+            self.info("Stem %d: %s" % (sidx, [sl[sidx]
+                                              for sl in self.hs.stems]))
 
         return True
 
-    def calcMasterStems(self, i):
-        self.fddict = self.fontDictLists[i][self.fdIndex]
-        self.glyph = self.gllist[i]
+    def calcMasterStems(self, glidx):
+        self.fddict = self.fontDictLists[glidx][self.fdIndex]
+        self.glyph = self.gllist[glidx]
         hs0 = self.hs
         if self.isV():
             self.hs = self.glyph.vhs = glyphHintState()
@@ -1720,52 +1728,104 @@ class dimensionHinter:
         self.genSegs()
 
         numStems = len(hs0.stems[0])
-        LocDicts = [LocDict({}, {}) for x in range(numStems)]
-        usedSegs = set()
+        mSSl = [(masterStemState(s.lb, self), masterStemState(s.rt, self))
+                for s in hs0.stems[0]]
 
-        for c in self.__iter__(i):
+        for c in self.__iter__(glidx):
             c0 = c[0]
             ci = c[1]
-            peS0 = hs0.getPEState(c0)
+            peS0 = hs0.getPEState(c0.pe)
             if peS0 is None:
                 continue
-            peSi = self.hs.getPEState(ci)
+            peSi = self.hs.getPEState(ci.pe)
             done = [[False, False] for x in range(numStems)]
             for pos0, seg0l in peS0.segLists():
                 for seg0 in seg0l:
                     assert seg0.hintval is not None
-                    idx = seg0.hintval.idx
-                    assert idx is not None
-                    ul = 1 if seg0.isInc else 0
-                    if done[idx][ul]:
+                    sidx = seg0.hintval.idx
+                    # assert sidx is not None
+                    if sidx is None:
+                        continue
+                    ul = 1 if (seg0.isInc == self.isV()) else 0
+                    if done[sidx][ul]:
                         continue
 
-                    ld = LocDicts[idx][ul]
+                    mSS = mSSl[sidx][ul]
                     found = False
                     if seg0.isBBox():
                         if seg0.isGBBox():
                             pbs = gl.getBounds(None)
                         else:
                             pbs = gl.getBounds(peSi.position[0])
-                        mn_pt, mx_pt = pt(tuple(pbs.b[0])), pt(tuple(pbs.b[1]))
+                        mn_pt = pt(tuple(pbs.b[0]))
+                        mx_pt = pt(tuple(pbs.b[1]))
                         score = mx_pt.a - mn_pt.a
                         loc = mx_pt.o if seg0.isUBBox() else mn_pt.o
-                        strong = True
+                        mSS.addLoc(loc, score, strong=True, bb=True)
                     elif peSi is not None:
                         for posi, segil in peSi.segLists(pos0):
-                            if found:
-                                break
                             for segi in segil:
                                 if segi.isInc != seg0.isInc:
                                     continue
+                                score = segi.max-segi.min
+                                mSS.addToLoc(segi.loc, score,
+                                             strong=(posi==pos0),
+                                             seg=segi)
+                                found = True
+                                # print(self.aDesc(), seg0.loc, segi.loc, segi.max-segi.min, posi == pos0, seg0.type == segi.type)
+                            if found and posi == pos0:
+                                break
+                    # Fall back to point location
+                    if not found:
+                        if pos0 == 's':
+                            loc = ci.pe.s.o
+                        elif pos0 == 'e':
+                            loc = ci.pe.e.o
+                        else:
+                            loc = (ci.pe.s.o + ci.pe.e.o)/2
+                        self.warning("Falling back to point location for "
+                                     "segment %s" % (ci.pe.position,))
+                        mSS.addToLoc(loc, self.NoSegScore)
+                    done[sidx][ul] = True
 
-                    done[idx][ul] = True
-
-        hs0.stems[i][:] = hs0.stems[0].copy()
+        sl = hs0.stems[glidx]
+        for sidx, s0 in enumerate(hs0.stems[0]):
+            isG = s0.isGhost()
+            if isG != 'high':
+                lo = self.bestLocation(sidx, 0, mSSl, hs0)
+            if isG != 'low': 
+                hi = self.bestLocation(sidx, 1, mSSl, hs0)
+            if isG == 'low':
+                hi = lo - 21
+            elif isG == 'high':
+                lo = hi
+                hi = lo - 20
+            else:
+                if hi < lo:
+                    self.warning("Stem end is less than start for non-"
+                                 "ghost stem")
+            sl.append(stem((lo, hi)))
 
         self.fddict = self.fontDictLists[0][self.fdIndex]
         self.glyph = self.gllist[0]
         self.hs = hs0
+
+    def bestLocation(self, sidx, ul, mSSl, hs0):
+        loc = mSSl[sidx][ul].bestLocation(ul==0)
+        if loc is not None:
+            return loc
+        for sv in hs0.stemValues:
+            if sv.idx != sidx:
+                continue
+            seg = sv.useg if ul==1 else sv.lseg
+            if seg.hintval.idx != sidx:
+                loc = mSSl[seg.hintval.idx][ul].bestLocation(ul==0)
+                if loc is not None:
+                    return loc
+        assert False
+        self.warning("No data for %s location of stem %d" %
+                     ('lower' if ul==0 else 'upper', i))
+        return hs0.stems[0][sidx][ul]
 
     def unconflict(self, sc, curSet=None, pinSet=None):
         l = len(sc)
@@ -1781,33 +1841,33 @@ class dimensionHinter:
 
         doIdx = None
         doConflictSet = None
-        for i in range(l):
-            if pinSet[i] or not curSet[i]:
+        for sidx in range(l):
+            if pinSet[sidx] or not curSet[sidx]:
                 continue
             conflictSet = []
-            for j in range(i, l):
-                if pinSet[j] or not curSet[i]:
+            for sjdx in range(sidx, l):
+                if pinSet[sjdx] or not curSet[sidx]:
                     continue
-                if sc[i][j]:
-                    conflictSet.append(j)
+                if sc[sidx][sjdx]:
+                    conflictSet.append(sjdx)
             if conflictSet:
-                if doidx is None:
-                    doidx = i
+                if doIdx is None:
+                    doIdx = sidx
                     doConflictSet = conflictSet
             else:
-                pinSet[i] = True
+                pinSet[sidx] = True
 
         if doIdx is None:
-            return (sum((self.hs.weights[i] for i in range(l) if curSet[i])),
-                    curSet)
+            return (sum((self.hs.weights[x]
+                         for x in range(l) if curSet[sidx])), curSet)
         else:
             pinSet[doIdx] = True
-            for i in doConflictSet:
-                curSet[j] = False
+            for sidx in doConflictSet:
+                curSet[sidx] = False
             r1 = self.unconflict(sc, curSet, pinSet)
             pinSet[doIdx] = curSet[doIdx] = False
-            for i in doConflictSet:
-                curSet[j] = True
+            for sidx in doConflictSet:
+                curSet[sidx] = True
             r2 = self.unconflict(sc, curSet, pinSet)
             return r1 if r1[0] > r2[0] else r2
 
@@ -1830,28 +1890,30 @@ class dimensionHinter:
         l = len(dsl)
         hasConflicts = False
         if self.options.removeConflicts:
-            sc = [[False] * l for i in range(l)]
-            for i in range(l):
-                for j in range(i+1, l):
+            sc = [[False] * l for _ in range(l)]
+            for sidx in range(l):
+                for sjdx in range(sidx+1, l):
                     for sl in self.hs.stems:
-                        if sl[i] > sl[j]:
-                            hasConflicts = sc[i][j] = sc[j][i] = True
+                        if sl[sidx] > sl[sjdx]:
+                            hasConflicts = True
+                            sc[sidx][sjdx] = sc[sjdx][sidx] = True
 
             _, self.hs.goodMask = self.unconflict(sc)
         else:
             self.hs.goodMask = [True] * l
 
         self.hs.hasOverlaps = False
-        self.hs.stemOverlaps = so = [[False] * l for i in range(l)]
-        for i in range(l):
-            if not self.hs.goodMask[i]:
+        self.hs.stemOverlaps = so = [[False] * l for _ in range(l)]
+        for sidx in range(l):
+            if not self.hs.goodMask[sidx]:
                 continue
-            for j in range(i+1, l):
-                if not self.hs.goodMask[j]:
+            for sjdx in range(sidx+1, l):
+                if not self.hs.goodMask[sjdx]:
                     continue
                 for sl in self.hs.stems:
-                    if sl[i].overlaps(sl[j]) or sl[i] > sl[j]:
-                        self.hs.hasOverlaps = so[i][j] = so[j][i] = True
+                    if sl[sidx].overlaps(sl[sjdx]) or sl[sidx] > sl[sjdx]:
+                        self.hs.hasOverlaps = True
+                        so[sidx][sjdx] = so[sjdx][sidx] = True
 
         if self.hs.counterHinted and self.hs.hasOverlaps and self.gllist <= 1:
             self.warning("XXX TEMPORARY WARNING: overlapping counter hints")
@@ -1859,17 +1921,17 @@ class dimensionHinter:
         self.hs.ghostCompat = gc = [None] * l
 
         # A ghost stem in the default master should be a ghost everywhere
-        for i, s in enumerate(dsl):
-            if not self.hs.goodMask[i] or not s.isGhost(True):
+        for sidx, s in enumerate(dsl):
+            if not self.hs.goodMask[sidx] or not s.isGhost(True):
                 continue
-            gc[i] = [False] * l
-            for j in range(l):
-                if i == j or not self.hs.goodMask[j]:
+            gc[sidx] = [False] * l
+            for sjdx in range(l):
+                if sidx == sjdx or not self.hs.goodMask[sjdx]:
                     continue
-#                print('here0', self.hs.stems[0][i].ghostCompat(self.hs.stems[0][j]))
-                if all(sl[i].ghostCompat(sl[j]) for sl in self.hs.stems):
-                    assert so[i][j]
-                    gc[i][j] = True
+#                print('here0', self.hs.stems[0][sidx].ghostCompat(self.hs.stems[0][sjdx]))
+                if all(sl[sidx].ghostCompat(sl[sjdx]) for sl in self.hs.stems):
+                    assert so[sidx][sjdx]
+                    gc[sidx][sjdx] = True
 
         # The stems corresponding to mainValues may conflict now. This isn't
         # a fatal problem because mainMask stems are only added if they don't
@@ -1908,46 +1970,46 @@ class dimensionHinter:
             mask[seg.hintval.idx] = True
         p0, p1 = (c.s, c.e) if c.isLine() else (c.cs, c.e)
         if self.hs.hasOverlaps and True in mask:
-            for i in range(l):
-                for j in range(i, l):
-                    if not mask[i]:
+            for sidx in range(l):
+                for sjdx in range(sidx, l):
+                    if not mask[sidx]:
                         break
-                    if not mask[j] or i == j:
+                    if not mask[sjdx] or sidx == sjdx:
                         continue
-                    if self.hs.stemOverlaps[i][j]:
+                    if self.hs.stemOverlaps[sidx][sjdx]:
                         remidx = None
                         _, segi = max(((seg.hintval.compVal(self.SpcBonus), sg)
                                       for sg in segments
-                                      if sg.hintval.idx == i))
+                                      if sg.hintval.idx == sidx))
                         _, segj = max(((sg.hintval.compVal(self.SpcBonus), sg)
                                       for sg in segments
-                                      if sg.hintval.idx == j))
+                                      if sg.hintval.idx == sjdx))
                         vali, valj = segi.hintval, segj.hintval
                         assert vali.lloc <= valj.lloc or valj.isGhost
                         n = self.glyph.nextInSubpath(c)
                         p = self.glyph.prevInSubpath(c)
                         if (vali.val < self.ConflictValMin and
                                 self.OKToRem(segi.loc, vali.spc)):
-                            remidx = i
+                            remidx = sidx
                         elif (valj.val < self.ConflictValMin and
                               vali.val > valj.val * self.ConflictValMult and
                               self.OKToRem(segj.loc, valj.spc)):
-                            remidx = j
+                            remidx = sjdx 
                         elif (c.isLine() or self.flatQuo(p0, p1) > 0 and
                               self.OKToRem(segi.loc, vali.spc)):
-                            remidx = i
+                            remidx = sidx 
                         elif self.diffSign(p1.o - p0.o, p.s.o - p0.o):
-                            remidx = i
+                            remidx = sidx
                         elif self.diffSign(n.e.o - p1.o, p0.o - p1.o):
-                            remidx = j
+                            remidx = sjdx
                         elif ((feq(p1.o, valj.lloc) or
                                feq(p1.o, valj.uloc)) and
                               fne(p0.o, vali.lloc) and fne(p0.o, vali.uloc)):
-                            remidx = i
+                            remidx = sidx
                         elif ((feq(p0.o, vali.lloc) or
                                feq(p0.o, vali.uloc)) and
                               fne(p1.o, valj.lloc) and fne(p1.o, valj.uloc)):
-                            remidx = j
+                            remidx = sjdx
                         # XXX ResolveConflictBySplit was called here.
                         if remidx is not None:
                             mask[remidx] = False
@@ -1959,7 +2021,7 @@ class dimensionHinter:
                             # winds up getting hinted will depend on the 
                             # previous spline hint states. That could be
                             # neither but it is likely one will be in the set.
-                            mask[i] = mask[j] = False
+                            mask[sidx] = mask[sjdx] = False
                             self.debug("Could not resolve conflicting hints" +
                                        " at %g %g" % (c.e.x, c.e.y) +
                                        ", removing both")
@@ -2247,9 +2309,6 @@ class glyphHinter:
                                 (si, g.getMasterDesc(), len(gp)) +
                                 "while %s has %d elements: Cannot hint" %
                                 (glyph.getMasterDesc(), len(dp)))
-                    assert False
-                    print(glyph.T2())
-                    print(g.T2())
                     return False
 
         # Use hHinter for path element list iterator

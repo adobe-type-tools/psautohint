@@ -156,6 +156,7 @@ class FDDict:
         setattr(self, key, value)
 
     def buildBlueLists(self):
+        log.info("Building BlueValue lists for FDDict %s" % self.DictName)
         if self.BaselineOvershoot is None:
             raise FontInfoParseError(
                 "FDDict definition %s is missing the BaselineYCoord/"
@@ -215,8 +216,9 @@ class FDDict:
                                     (self.DictName, tempKey, width))
                         bluePairList.append((topPos, bottomPos, tempKey,
                                             self.DictName, isBottomZone))
-                        log.info("key: %s, tempKey: %s, isBottomZone: %r" %
-                                 (key, tempKey, isBottomZone))
+                        log.debug("%s BlueValue %s: (%g, %g)" %
+                                  ('Bottom' if isBottomZone else 'Top',
+                                   tempKey, bottomPos, topPos))
             if bluePairList:
                 bluePairList = sorted(bluePairList)
                 prevPair = bluePairList[0]

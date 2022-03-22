@@ -223,8 +223,7 @@ def get_fontinfo_list_withFontInfo(options, font, glyph_list):
         return
 
     if fdGlyphDict:
-        log.info("Using alternate FDDict global values from fontinfo "
-                 "file for some glyphs.")
+        log.info("Using alternate FDDicts for some glyphs.")
 
     return fdGlyphDict, fontDictList
 
@@ -292,12 +291,13 @@ class fontWrapper:
             fdls = self.fontDictLists = []
             self.fdGlyphDict = None
             for f in self.fontInstances:
+                log.info("Getting FDDicts for font %s" % f.desc)
                 gd, fdl = getfil(options, f.font, self.glyphNameList)
                 if self.fdGlyphDict is None:
                     self.fdGlyphDict = gd
                 elif not self.equalDicts(self.fdGlyphDict, gd):
-                    self.error("fdIndexes in font %s different " % font.desc +
-                               "from those in font %s" % f.desc)
+                    log.error("fdIndexes in font %s different " % font.desc +
+                              "from those in font %s" % f.desc)
                 fdls.append(fdl)
 
     def equalDicts(self, d1, d2):
