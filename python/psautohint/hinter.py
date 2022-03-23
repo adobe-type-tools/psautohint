@@ -112,6 +112,7 @@ class dimensionHinter:
         self.fddict = None
         self.report = None
         self.name = None
+        self.isMulti = False
 
     def setGlyph(self, fdIndex, report, gllist, name, clearPrev=True):
         """Initialize the state for processing a specific glyph"""
@@ -120,6 +121,7 @@ class dimensionHinter:
         self.report = report
         self.glyph = gllist[0]
         self.gllist = gllist
+        self.isMulti = (len(gllist) > 1)
         self.name = name
         self.HasFlex = False
         self.Bonus = None
@@ -156,18 +158,18 @@ class dimensionHinter:
 
     class gliter:
         """A pathElement set iterator for the glyphData object list"""
-        __slots__ = ('gl', 'il')
+        __slots__ = ('gll', 'il')
 
         def __init__(self, gllist, glidx=None):
             if glidx is not None:
                 assert isinstance(glidx, int) and glidx > 0
-                self.gl = [gllist[0], gllist[glidx]]
+                self.gll = [gllist[0], gllist[glidx]]
             else:
-                self.gl = gllist
-            self.il = [gl.__iter__() for gl in gllist]
+                self.gll = gllist
+            self.il = [gl.__iter__() for gl in self.gll]
 
         def __next__(self):
-            return [GlyphPE(self.gl[i], ii.__next__())
+            return [GlyphPE(self.gll[i], ii.__next__())
                     for i, ii in enumerate(self.il)]
 
         def __iter__(self):
@@ -388,6 +390,7 @@ class dimensionHinter:
             self.debug("Using %s counter hints." % self.aDesc())
         for hv in self.hs.mainValues:
             hv.show(self.isV(), "result", self)
+        self.markStraySegs()
         self.hs.pruneHintSegs()
 
         pt.clearAlign()
@@ -857,16 +860,17 @@ class dimensionHinter:
                         if (feq(c.s.o, c.cs.o) and feq(c.cs.o, c.ce.o) and
                                 feq(c.ce.o, c.e.o)):
                             if (self.options.allowChanges and
-                                    self.AutoLinearCurveFix):
+                                    self.AutoLinearCurveFix and
+                                    not self.isMulti):
                                 c.convertToLine()
                                 ccs, cce = c.s, c.e
-                                self.info("Curve from %s to %s" % (c.s,
-                                                                   c.e) +
+                                self.info("Curve from %s to %s " % (c.s,
+                                                                    c.e) +
                                           "changed to a line.")
-                            else:
-                                self.info("Curve from %s to %s" % (c.s,
-                                                                   c.e) +
-                                          "should be changed to a line.")
+                            elif not self.isMulti:
+                                self.info("Curve from %s to %s " % (c.s,
+                                                                    c.e) +
+                                          "can be changed to a line.")
                         adist = ad2 / 2
                         aavg = (c.s.a + c.e.a) / 2
                         sp = self.pickSpot(c.s, c.e, adist, ccs, cce,
@@ -1634,11 +1638,11 @@ class dimensionHinter:
                     for hv in self.hs.mainValues)):
                 continue
             lseg = hintSegment(mn_pt.o, mn_pt.a, mx_pt.a, pbs.extpes[0][peidx],
-                               ltype, 0, self.isV(), self.isV(), "l bbox")
+                               ltype, 0, self.isV(), not self.isV(), "l bbox")
             self.hs.getPEState(pbs.extpes[0][peidx],
                                True).m_segs.append(lseg)
             useg = hintSegment(mx_pt.o, mn_pt.a, mx_pt.a, pbs.extpes[1][peidx],
-                               utype, 0, self.isV(), not self.isV(), "u bbox")
+                               utype, 0, self.isV(), self.isV(), "u bbox")
             self.hs.getPEState(pbs.extpes[1][peidx],
                                True).m_segs.append(useg)
             hv = stemValue(mn_pt.o, mx_pt.o, 100, 0, lseg, useg, False)
@@ -1646,6 +1650,20 @@ class dimensionHinter:
             self.hs.mainValues.append(hv)
             self.hs.mainValues.sort(key=lambda sv: sv.compVal(self.SpcBonus),
                                     reverse=True)
+
+    def markStraySegs(self):
+        """
+        highestStemVals() may not assign a hintval to a given segment.
+        Once the list of stems has been arrived at we go through each
+        looking for stems where the segment on one side is unassigned
+        and assign it to that stem.
+        """
+        for sv in self.hs.stemValues:
+            for seg in (sv.lseg, sv.useg):
+                assert seg is not None
+                if not seg.isGhost() and seg.hintval is None:
+                    seg.hintval = sv
+                    # assert False
 
     # masks
 
@@ -1700,11 +1718,11 @@ class dimensionHinter:
         for glidx in range(1, len(self.gllist)):
             self.calcMasterStems(glidx)
 
-        self.info("Initial %s stem list (including masters, if any):" %
-                  self.aDesc())
+        self.debug("Initial %s stem list (including masters, if any):" %
+                   self.aDesc())
         for sidx in range(len(self.hs.stems[0])):
-            self.info("Stem %d: %s" % (sidx, [sl[sidx]
-                                              for sl in self.hs.stems]))
+            self.debug("Stem %d: %s" % (sidx, [sl[sidx]
+                                               for sl in self.hs.stems]))
 
         return True
 
@@ -1712,6 +1730,10 @@ class dimensionHinter:
         self.fddict = self.fontDictLists[glidx][self.fdIndex]
         self.glyph = self.gllist[glidx]
         hs0 = self.hs
+        numStems = len(hs0.stems[0])
+        if numStems == 0:
+            return
+
         if self.isV():
             self.hs = self.glyph.vhs = glyphHintState()
         else:
@@ -1727,7 +1749,6 @@ class dimensionHinter:
         self.prepForSegs()
         self.genSegs()
 
-        numStems = len(hs0.stems[0])
         mSSl = [(masterStemState(s.lb, self), masterStemState(s.rt, self))
                 for s in hs0.stems[0]]
 
@@ -1747,6 +1768,7 @@ class dimensionHinter:
                     if sidx is None:
                         continue
                     ul = 1 if (seg0.isInc == self.isV()) else 0
+#                    self.info("Looking for %s index %d on pe %s" % ('upper' if ul else 'lower', sidx, c0.pe.position))
                     if done[sidx][ul]:
                         continue
 
@@ -1754,14 +1776,15 @@ class dimensionHinter:
                     found = False
                     if seg0.isBBox():
                         if seg0.isGBBox():
-                            pbs = gl.getBounds(None)
+                            pbs = self.glyph.getBounds(None)
                         else:
-                            pbs = gl.getBounds(peSi.position[0])
+                            pbs = self.glyph.getBounds(peSi.position[0])
                         mn_pt = pt(tuple(pbs.b[0]))
                         mx_pt = pt(tuple(pbs.b[1]))
                         score = mx_pt.a - mn_pt.a
                         loc = mx_pt.o if seg0.isUBBox() else mn_pt.o
-                        mSS.addLoc(loc, score, strong=True, bb=True)
+                        mSS.addToLoc(loc, score, strong=True, bb=True)
+                        found = True
                     elif peSi is not None:
                         for posi, segil in peSi.segLists(pos0):
                             for segi in segil:
@@ -1897,8 +1920,11 @@ class dimensionHinter:
                         if sl[sidx] > sl[sjdx]:
                             hasConflicts = True
                             sc[sidx][sjdx] = sc[sjdx][sidx] = True
-
+        if hasConflicts:
             _, self.hs.goodMask = self.unconflict(sc)
+            self.info("Removed %s stems %s to resolve conflicts" %
+                      (self.aDesc(), [i for i, g in enumerate(self.hs.goodMask)
+                                      if not g]))
         else:
             self.hs.goodMask = [True] * l
 
@@ -1965,66 +1991,67 @@ class dimensionHinter:
         segments = pestate.segments()
         for seg in segments:
             if (not seg.hintval or seg.hintval.idx is None or
-                    not self.hs.goodMask[seg.hintval.idx]):
+                    not self.hs.goodMask[seg.hintval.idx] or
+                    seg.suppressed):
                 continue
             mask[seg.hintval.idx] = True
         p0, p1 = (c.s, c.e) if c.isLine() else (c.cs, c.e)
         if self.hs.hasOverlaps and True in mask:
             for sidx in range(l):
-                for sjdx in range(sidx, l):
-                    if not mask[sidx]:
-                        break
-                    if not mask[sjdx] or sidx == sjdx:
+                for sjdx in range(sidx+1, l):
+                    if not (mask[sidx] and mask[sjdx] and
+                            self.hs.stemOverlaps[sidx][sjdx]):
                         continue
-                    if self.hs.stemOverlaps[sidx][sjdx]:
-                        remidx = None
-                        _, segi = max(((seg.hintval.compVal(self.SpcBonus), sg)
-                                      for sg in segments
-                                      if sg.hintval.idx == sidx))
-                        _, segj = max(((sg.hintval.compVal(self.SpcBonus), sg)
-                                      for sg in segments
-                                      if sg.hintval.idx == sjdx))
-                        vali, valj = segi.hintval, segj.hintval
-                        assert vali.lloc <= valj.lloc or valj.isGhost
-                        n = self.glyph.nextInSubpath(c)
-                        p = self.glyph.prevInSubpath(c)
-                        if (vali.val < self.ConflictValMin and
-                                self.OKToRem(segi.loc, vali.spc)):
-                            remidx = sidx
-                        elif (valj.val < self.ConflictValMin and
-                              vali.val > valj.val * self.ConflictValMult and
-                              self.OKToRem(segj.loc, valj.spc)):
-                            remidx = sjdx 
-                        elif (c.isLine() or self.flatQuo(p0, p1) > 0 and
-                              self.OKToRem(segi.loc, vali.spc)):
-                            remidx = sidx 
-                        elif self.diffSign(p1.o - p0.o, p.s.o - p0.o):
-                            remidx = sidx
-                        elif self.diffSign(n.e.o - p1.o, p0.o - p1.o):
-                            remidx = sjdx
-                        elif ((feq(p1.o, valj.lloc) or
-                               feq(p1.o, valj.uloc)) and
-                              fne(p0.o, vali.lloc) and fne(p0.o, vali.uloc)):
-                            remidx = sidx
-                        elif ((feq(p0.o, vali.lloc) or
-                               feq(p0.o, vali.uloc)) and
-                              fne(p1.o, valj.lloc) and fne(p1.o, valj.uloc)):
-                            remidx = sjdx
-                        # XXX ResolveConflictBySplit was called here.
-                        if remidx is not None:
-                            mask[remidx] = False
-                            self.debug("Resolved conflicting hints at %g %g" %
-                                       (c.e.x, c.e.y))
-                        else:
-                            # Removing the hints from the spline doesn't mean
-                            # neither will be hinted, it means that whatever
-                            # winds up getting hinted will depend on the 
-                            # previous spline hint states. That could be
-                            # neither but it is likely one will be in the set.
-                            mask[sidx] = mask[sjdx] = False
-                            self.debug("Could not resolve conflicting hints" +
-                                       " at %g %g" % (c.e.x, c.e.y) +
-                                       ", removing both")
+                    remidx = None
+                    _, segi = max(((sg.hintval.compVal(self.SpcBonus), sg)
+                                  for sg in segments
+                                  if (not sg.suppressed and
+                                      sg.hintval.idx == sidx)))
+                    _, segj = max(((sg.hintval.compVal(self.SpcBonus), sg)
+                                  for sg in segments
+                                  if (not sg.suppressed and
+                                      sg.hintval.idx == sjdx)))
+                    vali, valj = segi.hintval, segj.hintval
+                    assert vali.lloc <= valj.lloc or valj.isGhost
+                    n = self.glyph.nextInSubpath(c)
+                    p = self.glyph.prevInSubpath(c)
+                    if (vali.val < self.ConflictValMin and
+                            self.OKToRem(segi.loc, vali.spc)):
+                        remidx = sidx
+                    elif (valj.val < self.ConflictValMin and
+                          vali.val > valj.val * self.ConflictValMult and
+                          self.OKToRem(segj.loc, valj.spc)):
+                        remidx = sjdx 
+                    elif (c.isLine() or self.flatQuo(p0, p1) > 0 and
+                          self.OKToRem(segi.loc, vali.spc)):
+                        remidx = sidx 
+                    elif self.diffSign(p1.o - p0.o, p.s.o - p0.o):
+                        remidx = sidx
+                    elif self.diffSign(n.e.o - p1.o, p0.o - p1.o):
+                        remidx = sjdx
+                    elif ((feq(p1.o, valj.lloc) or
+                           feq(p1.o, valj.uloc)) and
+                          fne(p0.o, vali.lloc) and fne(p0.o, vali.uloc)):
+                        remidx = sidx
+                    elif ((feq(p0.o, vali.lloc) or
+                           feq(p0.o, vali.uloc)) and
+                          fne(p1.o, valj.lloc) and fne(p1.o, valj.uloc)):
+                        remidx = sjdx
+                    # XXX ResolveConflictBySplit was called here.
+                    if remidx is not None:
+                        mask[remidx] = False
+                        self.debug("Resolved conflicting hints at %g %g" %
+                                   (c.e.x, c.e.y))
+                    else:
+                        # Removing the hints from the spline doesn't mean
+                        # neither will be hinted, it means that whatever
+                        # winds up getting hinted will depend on the 
+                        # previous spline hint states. That could be
+                        # neither but it is likely one will be in the set.
+                        mask[sidx] = mask[sjdx] = False
+                        self.debug("Could not resolve conflicting hints" +
+                                   " at %g %g" % (c.e.x, c.e.y) +
+                                   ", removing both")
         if True in mask:
             maskstr = ''.join(('1' if i else '0' for i in mask))
             self.debug("%s mask %s at %g %g" %
@@ -2632,18 +2659,14 @@ class glyphHinter:
                                 if (nhv.spc == 0 and
                                         nhv.val < self.FlareValueLimit):
                                     self.reportRemFlare(n, c, "n")
-                                    nseg.deleted = True
+                                    nseg.suppressed = True
                             else:
                                 if (chv.spc == 0 and
                                         chv.val < self.FlareValueLimit):
                                     self.reportRemFlare(c, n, "c")
-                                    cseg.deleted = True
+                                    cseg.suppressed = True
                                     break
                 n = glyph.nextInSubpath(n)
-        if self.doV:
-            self.vHinter.hs.cleanup()
-        else:
-            self.hHinter.hs.cleanup()
 
     def isFlare(self, loc, glyph, c, n):
         """Utility function for remFlares"""

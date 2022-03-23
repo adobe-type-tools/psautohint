@@ -610,6 +610,10 @@ class pathElement:
                 return self.ce
             return self.cs
 
+    def __deepcopy__(self, memo):
+        """Don't deepcopy pathElement objects"""
+        return self
+
     @staticmethod
     def stemBytes(masks):
         """Calculate bytes corresponding to a (boolean array) hintmask"""

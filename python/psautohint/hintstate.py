@@ -68,6 +68,7 @@ class hintSegment:
         self.hintval = None
         self.replacedBy = None
         self.deleted = False
+        self.suppressed = False
 
     def __eq__(self, other):
         return feq(self.loc, other.loc)
