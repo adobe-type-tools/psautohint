@@ -7,6 +7,8 @@ Auto-hinting program for PostScript, OpenType/CFF and UFO fonts.
 import logging
 import logging.handlers
 
+log_glyph = ''
+log_instance = ''
 
 class DuplicateMessageFilter(logging.Filter):
     """
@@ -52,6 +54,13 @@ def logging_conf(verbose, logfile=None, handlers=None):
         for handler in logging.root.handlers:
             handler.addFilter(DuplicateMessageFilter())
 
+#    old_factory = logging.getLogRecordFactory()
+
+#    def psautohint_record_factory(*args, **kwargs):
+#        record = old_factory(*args, **kwargs)
+#        record.glyph = log_glyph
+#        record.instance = log_instance
+#        return record
 
 def log_receiver(logQueue):
     while True:

@@ -112,7 +112,7 @@ class hintSegment:
             orig = self
         return self.replacedBy.current(orig=self)
 
-    def show(self, label, lg=log):
+    def show(self, label):
         """Logs a debug message about the segment"""
         if self.isV:
             pp = (label, 'v', self.loc, self.min, self.loc, self.max,
@@ -120,7 +120,7 @@ class hintSegment:
         else:
             pp = (label, 'h', self.min, self.loc, self.max, self.loc,
                   self.desc)
-        lg.debug("%s %sseg %g %g to %g %g %s" % pp)
+        log.debug("%s %sseg %g %g to %g %g %s" % pp)
 
 
 class stemValue:
@@ -173,7 +173,7 @@ class stemValue:
             v *= spcFactor
         return (v, self.initialVal)
 
-    def show(self, isV, typ, lg=log):
+    def show(self, isV, typ):
         """Add a log message with the content of the object"""
         tags = ('v', 'l', 'r', 'b', 't') if isV else ('h', 'b', 't', 'l', 'r')
         start = "%s %sval %s %g %s %g v %g s %g %s" % (typ, tags[0], tags[1],
@@ -183,11 +183,11 @@ class stemValue:
                                                        'G' if self.isGhost
                                                        else '')
         if self.lseg is None:
-            lg.debug(start)
+            log.debug(start)
             return
-        lg.debug("%s %s1 %g %s1 %g  %s2 %g %s2 %g" %
-                 (start, tags[3], self.lseg.min, tags[4], self.lseg.max,
-                  tags[3], self.useg.min, tags[4], self.useg.max))
+        log.debug("%s %s1 %g %s1 %g  %s2 %g %s2 %g" %
+                  (start, tags[3], self.lseg.min, tags[4], self.lseg.max,
+                   tags[3], self.useg.min, tags[4], self.useg.max))
 
 
 class pathElementHintState:
@@ -279,7 +279,7 @@ class glyphHintState:
             return None
 
     def addSegment(self, fr, to, loc, pe1, pe2, typ, bonus, isV, mid,
-                   desc, log):
+                   desc):
         """Adds a new segment associated with pathElements pe1 and pe2"""
         if isV:
             pp = ('v', loc, fr, loc, to, desc)
@@ -352,7 +352,7 @@ class glyphHintState:
         self.compactList(self.decreasingSegs)
         self.compactList(self.increasingSegs)
 
-    def remExtraBends(self, lg=log):
+    def remExtraBends(self):
         """
         Delete BEND segment x when there is another segment y:
            1. At the same location
@@ -372,16 +372,16 @@ class glyphHintState:
                             hsd.type != hintSegment.sType.GHOST and
                             (hsd.max - hsd.min) > (hsi.max - hsi.min) * 3):
                         hsi.deleted = True
-                        lg.debug("rem seg loc %g from %g to %g" %
-                                 (hsi.loc, hsi.min, hsi.max))
+                        log.debug("rem seg loc %g from %g to %g" %
+                                  (hsi.loc, hsi.min, hsi.max))
                         break
                     elif (hsd.type == hintSegment.sType.BEND and
                           hsi.type != hintSegment.sType.BEND and
                           hsi.type != hintSegment.sType.GHOST and
                           (hsi.max - hsi.min) > (hsd.max - hsd.min) * 3):
                         hsd.deleted = True
-                        lg.debug("rem seg loc %g from %g to %g" %
-                                 (hsd.loc, hsd.min, hsd.max))
+                        log.debug("rem seg loc %g from %g to %g" %
+                                  (hsd.loc, hsd.min, hsd.max))
 
     def deleteSegments(self):
         for s in self.increasingSegs:
@@ -498,42 +498,42 @@ class links:
         self.cnt = l
         self.links = [[0] * l for i in range(l)]
 
-    def logLinks(self, lg=log):
+    def logLinks(self):
         """Prints a log message representing links"""
         if self.cnt == 0:
             return
-        lg.debug("Links")
-        lg.debug(' '.join((str(i).rjust(2) for i in range(self.cnt))))
+        log.debug("Links")
+        log.debug(' '.join((str(i).rjust(2) for i in range(self.cnt))))
         for j in range(self.cnt):
-            lg.debug(' '.join((('Y' if self.links[j][i] else ' ').rjust(2)
-                               for i in range(self.cnt))))
+            log.debug(' '.join((('Y' if self.links[j][i] else ' ').rjust(2)
+                                for i in range(self.cnt))))
 
-    def logShort(self, shrt, lab, lg):
+    def logShort(self, shrt, lab):
         """Prints a log message representing (1-d) shrt"""
-        lg.debug(lab)
-        lg.debug(' '.join((str(i).rjust(2) for i in range(self.cnt))))
-        lg.debug(' '.join(((str(shrt[i]) if shrt[i] else ' ').rjust(2)
-                           for i in range(self.cnt))))
+        log.debug(lab)
+        log.debug(' '.join((str(i).rjust(2) for i in range(self.cnt))))
+        log.debug(' '.join(((str(shrt[i]) if shrt[i] else ' ').rjust(2)
+                            for i in range(self.cnt))))
 
-    def mark(self, hntr):
+    def mark(self, stemValues, isV):
         """
         For each stemValue in hntr, set links[m][n] and links[n][m] to 1
         if one side of a stem is in m and the other is in n
         """
         if self.cnt == 0:
             return
-        for sv in hntr.hs.stemValues:
+        for sv in stemValues:
             if not sv.lseg or not sv.useg or not sv.lseg.pe or not sv.useg.pe:
                 continue
             lsubp, usubp = sv.lseg.pe().position[0], sv.useg.pe().position[0]
             if lsubp == usubp:
                 continue
-            sv.show(hntr.isV(), "mark", hntr)
-            hntr.debug(" : %d <=> %d" % (lsubp, usubp))
+            sv.show(isV, "mark")
+            log.debug(" : %d <=> %d" % (lsubp, usubp))
             self.links[lsubp][usubp] = 1
             self.links[usubp][lsubp] = 1
 
-    def moveIdx(self, suborder, subidxs, outlinks, idx, lg):
+    def moveIdx(self, suborder, subidxs, outlinks, idx):
         """
         Move value idx from subidxs to the end of suborder and update
         outlinks to record all links shared with idx
@@ -542,9 +542,9 @@ class links:
         suborder.append(idx)
         for i in range(len(outlinks)):
             outlinks[i] += self.links[idx][i]
-        self.logShort(outlinks, "Outlinks", lg)
+        self.logShort(outlinks, "Outlinks")
 
-    def shuffle(self, lg=log):
+    def shuffle(self):
         """
         Returns suborder list with all subpath indexes in decreasing
         order of links shared with previous subpath. (The first subpath
@@ -554,19 +554,19 @@ class links:
             return None
         sumlinks = [sum(l) for l in zip(*self.links)]
         outlinks = [0] * self.cnt
-        self.logLinks(lg)
-        self.logShort(sumlinks, "Sumlinks", lg)
+        self.logLinks()
+        self.logShort(sumlinks, "Sumlinks")
         subidxs = list(range(self.cnt))
         suborder = []
         while subidxs:
             # negate s to preserve all-links-equal subpath ordering
             _, bst = max(((sumlinks[s], -s) for s in subidxs))
-            self.moveIdx(suborder, subidxs, outlinks, -bst, lg)
+            self.moveIdx(suborder, subidxs, outlinks, -bst)
             while True:
                 try:
                     _, _, bst = max(((outlinks[s], sumlinks[s], -s)
                                      for s in subidxs if outlinks[s] > 0))
                 except ValueError:
                     break
-                self.moveIdx(suborder, subidxs, outlinks, -bst, lg)
+                self.moveIdx(suborder, subidxs, outlinks, -bst)
         return suborder

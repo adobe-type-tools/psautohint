@@ -935,9 +935,9 @@ class glyphData(BasePen):
         return prog
 
     # XXX deal with or avoid reordering when preserving any hints
-    def reorder(self, neworder, lg):
+    def reorder(self, neworder):
         """Change the order of subpaths according to neworder"""
-        lg.debug("Reordering subpaths: %r" % neworder)
+        log.debug("Reordering subpaths: %r" % neworder)
         spl = self.subpaths
         assert len(neworder) == len(spl)
         self.subpaths = [spl[i] for i in neworder]
