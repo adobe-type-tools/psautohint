@@ -100,16 +100,21 @@ class FontInfoParseError(ValueError):
 
 
 class FDDict:
-    def __init__(self, fdIndex, dictName=None):
+    def __init__(self, fdIndex, dictName=None, vsindex=0, region=None):
         self.fdIndex = fdIndex
+        self.vsindex = vsindex
+        self.region = region
         for key in kFDDictKeys:
             setattr(self, key, None)
         if dictName is not None:
             self.DictName = dictName
-        elif fdIndex > 0:
-            self.DictName = "FDArray index %s" % fdIndex
         else:
-            self.DictName = "Default FDArray"
+            if fdIndex > 0:
+                self.DictName = "FDArray index %s" % fdIndex
+            else:
+                self.DictName = "Default FDArray"
+            if self.region is not None:
+                self.DictName += " for region %d" % self.region
         self.FlexOK = True
         setattr(self, kFontDictBluePairsName, [])
         setattr(self, kFontDictOtherBluePairsName, [])
@@ -289,8 +294,7 @@ def parseFontInfoFile(fontDictList, data, glyphList, maxY, minY, fontName):
                     dictName = tokenList[i]
                     i += 1
                     fdIndex = len(fontDictList)
-                    fdDict = FDDict(fdIndex)
-                    fdDict.DictName = dictName
+                    fdDict = FDDict(fdIndex, dictName=dictName)
                     if dictName == kFinalDictName:
                         # This is dict is NOT used to hint any glyphs; it is
                         # used to supply the merged alignment zones and stem

@@ -12,11 +12,12 @@ from . import make_temp_copy, DATA_DIR
 
 class Options(ACOptions):
 
-    def __init__(self, reference, inpaths, outpaths):
+    def __init__(self, reference, inpaths, outpaths, ref_out=None):
         super(Options, self).__init__()
         self.inputPaths = inpaths
         self.outputPaths = outpaths
-        self.reference_font = reference
+        self.referenceFont = reference
+        self.referenceOutputPath = ref_out
         self.hintAll = True
         self.verbose = False
         self.verbose = False
@@ -26,11 +27,12 @@ class Options(ACOptions):
 def test_mmufo(base, tmpdir):
     paths = sorted(glob.glob(base + "/*.ufo"))
     # the reference font is modified in-place, make a temp copy first
-    reference = make_temp_copy(tmpdir, paths[0])
+    reference = paths[0]
     inpaths = paths[1:]
+    ref_out = str(tmpdir / basename(reference)) + ".out"
     outpaths = [str(tmpdir / basename(p)) + ".out" for p in inpaths]
 
-    options = Options(reference, inpaths, outpaths)
+    options = Options(reference, inpaths, outpaths, ref_out)
     hintFiles(options)
 
     for inpath, outpath in zip(inpaths, outpaths):
@@ -41,15 +43,16 @@ def test_mmufo(base, tmpdir):
 def test_mmotf(base, tmpdir):
     paths = sorted(glob.glob(base + "/*.otf"))
     # the reference font is modified in-place, make a temp copy first
-    reference = make_temp_copy(tmpdir, paths[0])
+    reference = paths[0]
     inpaths = paths[1:]
+    ref_out = str(tmpdir / basename(reference)) + ".out"
     outpaths = [str(tmpdir / basename(p)) + ".out" for p in inpaths]
 
-    options = Options(reference, inpaths, outpaths)
+    options = Options(reference, inpaths, outpaths, ref_out)
     hintFiles(options)
 
     refs = [p + ".ref" for p in paths]
-    for ref, out in zip(refs, [reference] + outpaths):
+    for ref, out in zip(refs, [ref_out] + outpaths):
         for path in (ref, out):
             font = TTFont(path)
             assert "CFF " in font
@@ -82,11 +85,12 @@ def test_incompatible_masters(tmpdir):
     base = "%s/source-serif-pro/" % DATA_DIR
     paths = [base + "Light/font.ufo", base + "Black/font.ufo"]
     # the reference font is modified in-place, make a temp copy first
-    reference = make_temp_copy(tmpdir, paths[0])
+    reference = paths[0]
     inpaths = paths[1:]
+    ref_out = str(tmpdir / reference)
     outpaths = [str(tmpdir / p) for p in inpaths]
 
-    options = Options(reference, inpaths, outpaths)
+    options = Options(reference, inpaths, outpaths, ref_out)
     hintFiles(options)
 
 
@@ -95,16 +99,17 @@ def test_sparse_mmotf(tmpdir):
     paths = sorted(glob.glob(base + "/*.otf"))
     # the reference font is modified in-place, make a temp copy first
     # MasterSet_Kanji-w0.00.otf has to be the reference font.
-    reference = make_temp_copy(tmpdir, paths[0])
+    reference = paths[0]
     inpaths = paths[1:]
+    ref_out = str(tmpdir / basename(reference)) + ".out"
     outpaths = [str(tmpdir / basename(p)) + ".out" for p in inpaths]
 
-    options = Options(reference, inpaths, outpaths)
+    options = Options(reference, inpaths, outpaths, ref_out)
     options.allow_no_blues = True
     hintFiles(options)
 
     refs = [p + ".ref" for p in paths]
-    for ref, out in zip(refs, [reference] + outpaths):
+    for ref, out in zip(refs, [ref_out] + outpaths):
         for path in (ref, out):
             font = TTFont(path)
             assert "CFF " in font

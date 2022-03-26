@@ -357,22 +357,22 @@ class CFFFontData:
     def hasFDArray(self):
         return self.is_cff2 or hasattr(self.topDict, "FDSelect")
 
-    def flattenBlends(self, blendList):
-        if not blendList:
-            return []
-        if type(blendList[0]) is list:
-            flatList = [blendList[i][0] for i in range(len(blendList))]
+    def getPrivateDictVal(self, pDict, attr, default, region=0):
+        val = getattr(pDict, attr, default)
+        if attr in ('BlueValues', 'OtherBlues', 'FamilyBlues',
+                    'FamilyOtherBlues', 'StemSnapH', 'StemSnapV'):
+            if len(val) > 0:
+                if isinstance(val[0], list):
+                    val = [v[0] + 0 if region == 0 else v[region] for v in val]
+
         else:
-            flatList = blendList
-        return flatList
+            if isinstance(val, list):
+                val = val[0] + 0 if region == 0 else val[region]
+        return val
 
     def getFontInfo(self, allow_no_blues, noFlex,
-                    vCounterGlyphs, hCounterGlyphs, fdIndex=0):
-        # The psautohint library needs the global font hint zones
-        # and standard stem widths.
-        # Format them into a single text string.
-        # The text format is arbitrary, inherited from very old software,
-        # but there is no real need to change it.
+                    vCounterGlyphs, hCounterGlyphs, fdIndex=0,
+                    isVF=False):
         pTopDict = self.topDict
         if hasattr(pTopDict, "FDArray"):
             pDict = pTopDict.FDArray[fdIndex]
@@ -380,126 +380,125 @@ class CFFFontData:
             pDict = pTopDict
         privateDict = pDict.Private
 
-        fdDict = fdTools.FDDict(fdIndex)
-        fdDict.setInfo('LanguageGroup',
-                       getattr(privateDict, "LanguageGroup", 0))
-
-        if hasattr(pDict, "FontMatrix"):
-            fontMatrix = pDict.FontMatrix
+        if self.is_cff2:
+            numReg = privateDict.getNumRegions()
         else:
-            fontMatrix = pTopDict.FontMatrix
-        upm = int(1 / fontMatrix[0])
-        fdDict.setInfo('OrigEmSqUnits', upm)
+            numReg = 0
 
-        fdDict.setInfo('FontName',
-                       getattr(pTopDict, "FontName", self.getPSName()))
+        fdDictArray = []
 
-        blueValues = getattr(privateDict, "BlueValues", [])[:]
-        numBlueValues = len(blueValues)
-        if numBlueValues < 4:
-            low, high = self.get_min_max(pTopDict, upm)
-            # Make a set of inactive alignment zones: zones outside of the
-            # font BBox so as not to affect hinting. Used when source font has
-            # no BlueValues or has invalid BlueValues. Some fonts have bad BBox
-            # values, so I don't let this be smaller than -upm*0.25, upm*1.25.
-            inactiveAlignmentValues = [low, low, high, high]
-            if allow_no_blues:
-                blueValues = inactiveAlignmentValues
-                numBlueValues = len(blueValues)
+        for r in range(numReg+1):
+            fdDict = fdTools.FDDict(fdIndex, region=r-1 if r>0 else None)
+            fdDict.setInfo('LanguageGroup',
+                           self.getPrivateDictVal(privateDict,
+                                                  'LanguageGroup', 0, r))
+
+            if not self.is_cff2 and hasattr(pDict, "FontMatrix"):
+                fontMatrix = pDict.FontMatrix
+                upm = int(1 / fontMatrix[0])
+            elif hasattr(pTopDict, 'FontMatrix'):
+                fontMatrix = pTopDict.FontMatrix
+                upm = int(1 / fontMatrix[0])
             else:
-                raise FontParseError("Font must have at least four values in "
-                                     "its BlueValues array for PSAutoHint to "
-                                     "work!")
-        blueValues.sort()
+                upm = 1000
+            fdDict.setInfo('OrigEmSqUnits', upm)
 
-        # The first pair only is a bottom zone, where the first value is the
-        # overshoot position. The rest are top zones, and second value of the
-        # pair is the overshoot position.
-        blueValues = self.flattenBlends(blueValues)
-        blueValues[0] = blueValues[0] - blueValues[1]
-        for i in range(3, numBlueValues, 2):
-            blueValues[i] = blueValues[i] - blueValues[i - 1]
+            if not self.is_cff2:
+                fdDict.setInfo('FontName',
+                               getattr(pTopDict, "FontName", self.getPSName()))
 
-        numBlueValues = min(numBlueValues, len(fdTools.kBlueValueKeys))
-        for i in range(numBlueValues):
-            key = fdTools.kBlueValueKeys[i]
-            value = blueValues[i]
-            fdDict.setInfo(key, value)
+            for bvattr, bvkeys in (('BlueValues',
+                                    fdTools.kBlueValueKeys),
+                                   ('OtherBlues',
+                                    fdTools.kOtherBlueValueKeys)):
+                bvs = self.getPrivateDictVal(privateDict, bvattr, [], r)
+                numbvs = len(bvs)
+                if bvattr == 'BlueValues' and numbvs < 4:
+                    low, high = self.get_min_max(pTopDict, upm)
+                    # Make a set of inactive alignment zones: zones outside
+                    # of the font BBox so as not to affect hinting. Used
+                    # when source font has no BlueValues or has invalid
+                    # BlueValues. Some fonts have bad BBox values, so I
+                    # don't let this be smaller than -upm*0.25, upm*1.25.
+                    inactiveAlignmentValues = [low, low, high, high]
+                    if allow_no_blues:
+                        bvs = inactiveAlignmentValues
+                        numbvs = len(bvs)
+                    else:
+                        raise FontParseError("Font must have at least four " +
+                                             "values in its %s " % bvattr +
+                                             "array for PSAutoHint to work!")
+                    bvs.sort()
 
-        if hasattr(privateDict, "OtherBlues"):
-            # For all OtherBlues, the pairs are bottom zones, and
-            # the first value of each pair is the overshoot position.
-            i = 0
-            numBlueValues = len(privateDict.OtherBlues)
-            blueValues = privateDict.OtherBlues[:]
-            blueValues.sort()
-            blueValues = self.flattenBlends(blueValues)
-            for i in range(0, numBlueValues, 2):
-                blueValues[i] = blueValues[i] - blueValues[i + 1]
-            numBlueValues = min(numBlueValues,
-                                len(fdTools.kOtherBlueValueKeys))
-            for i in range(numBlueValues):
-                key = fdTools.kOtherBlueValueKeys[i]
-                value = blueValues[i]
-                fdDict.setInfo(key, value)
+                # The first pair only is a bottom zone, where the first value
+                # is the overshoot position. The rest are top zones, and second
+                # value of the pair is the overshoot position.
+                if bvattr == 'BlueValues':
+                    bvs[0] = bvs[0] - bvs[1]
+                    for i in range(3, numbvs, 2):
+                        bvs[i] = bvs[i] - bvs[i - 1]
+                else:
+                    for i in range(0, numbvs, 2):
+                        bvs[i] = bvs[i] - bvs[i + 1]
 
-        if hasattr(privateDict, "StemSnapV"):
-            vstems = privateDict.StemSnapV
-        elif hasattr(privateDict, "StdVW"):
-            vstems = [privateDict.StdVW]
-        else:
-            if allow_no_blues:
-                # dummy value. Needs to be larger than any hint will likely be,
-                # as the autohint program strips out any hint wider than twice
-                # the largest global stem width.
-                vstems = [upm]
+                numbvs = min(numbvs, len(bvkeys))
+                for i in range(numbvs):
+                    key = bvkeys[i]
+                    value = bvs[i]
+                    fdDict.setInfo(key, value)
+
+            for ssnap, stdw, fdkey in (('StemSnapV', 'StdVW', 'DominantV'),
+                                       ('StemSnapH', 'StdHW', 'DominantH')):
+                if hasattr(privateDict, ssnap):
+                    sstems = self.getPrivateDictVal(privateDict, ssnap,
+                                                    [], r)
+                elif hasattr(privateDict, stdw):
+                    sstems = [self.getPrivateDictVal(privateDict, stdw,
+                                                     -1, r)]
+                else:
+                    if allow_no_blues:
+                        # dummy value. Needs to be larger than any hint will
+                        # likely be, as the autohint program strips out any
+                        # hint wider than twice the largest global stem width.
+                        sstems = [upm]
+                    else:
+                        raise FontParseError("Font has neither %s nor %s!" %
+                                         (ssnap, stdw))
+                sstems.sort()
+                if (len(sstems) == 0) or ((len(sstems) == 1) and (sstems[0] < 1)):
+                    sstems = [upm]  # dummy value that will allow PyAC to run
+                    log.warning("There is no value or 0 value for %s." % fdkey)
+                fdDict.setInfo(fdkey, sstems)
+
+            if noFlex:
+                fdDict.setInfo('FlexOK', False)
             else:
-                raise FontParseError("Font has neither StemSnapV nor StdVW!")
-        vstems.sort()
-        vstems = self.flattenBlends(vstems)
-        if (len(vstems) == 0) or ((len(vstems) == 1) and (vstems[0] < 1)):
-            vstems = [upm]  # dummy value that will allow PyAC to run
-            log.warning("There is no value or 0 value for DominantV.")
-        fdDict.setInfo('DominantV', vstems)
+                fdDict.setInfo('FlexOK', True)
 
-        if hasattr(privateDict, "StemSnapH"):
-            hstems = privateDict.StemSnapH
-        elif hasattr(privateDict, "StdHW"):
-            hstems = [privateDict.StdHW]
-        else:
-            if allow_no_blues:
-                # dummy value. Needs to be larger than any hint will likely be,
-                # as the autohint program strips out any hint wider than twice
-                # the largest global stem width.
-                hstems = [upm]
-            else:
-                raise FontParseError("Font has neither StemSnapH nor StdHW!")
-        hstems.sort()
-        hstems = self.flattenBlends(hstems)
-        if (len(hstems) == 0) or ((len(hstems) == 1) and (hstems[0] < 1)):
-            hstems = [upm]  # dummy value that will allow PyAC to run
-            log.warning("There is no value or 0 value for DominantH.")
-        fdDict.setInfo('DominantH', hstems)
+            # Add candidate lists for counter hints, if any.
+            if vCounterGlyphs:
+                fdDict.setInfo('VCounterChars', vCounterGlyphs)
+            if hCounterGlyphs:
+                fdDict.setInfo('HCounterChars', hCounterGlyphs)
 
-        if noFlex:
-            fdDict.setInfo('FlexOK', False)
-        else:
-            fdDict.setInfo('FlexOK', True)
+            fdDict.setInfo('BlueFuzz',
+                            self.getPrivateDictVal(privateDict,
+                                                   'BlueFuzz', 1, r))
 
-        # Add candidate lists for counter hints, if any.
-        if vCounterGlyphs:
-            fdDict.setInfo('VCounterChars', vCounterGlyphs)
-        if hCounterGlyphs:
-            fdDict.setInfo('HCounterChars', hCounterGlyphs)
+            fdDict.buildBlueLists()
 
-        fdDict.setInfo('BlueFuzz', getattr(privateDict, "BlueFuzz", 1))
+            if not isVF:
+                return fdDict
 
-        fdDict.buildBlueLists()
+            fdDictArray.append(fdDict)
 
-        return fdDict
+        assert isVF
+        return fdDictArray
 
     def getfdIndex(self, name):
         gid = self.ttFont.getGlyphID(name)
+        if gid is None:
+            return None
         if hasattr(self.topDict, "FDSelect"):
             fdIndex = self.topDict.FDSelect[gid]
         else:

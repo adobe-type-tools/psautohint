@@ -324,7 +324,8 @@ class HintOptions(ACOptions):
         super(HintOptions, self).__init__()
         self.inputPaths = pargs.font_paths
         self.outputPaths = pargs.output_paths
-        self.reference_font = pargs.reference_font
+        self.referenceFont = pargs.reference_font
+        self.referenceOutputPath = pargs.reference_out
         self.hintAll = pargs.hint_all_ufo
         self.allowChanges = pargs.allow_changes
         self.noFlex = pargs.no_flex
@@ -520,6 +521,15 @@ def get_options(args):
         help='reference font\n'
              'Font to be used as reference, when hinting multiple fonts '
              'compatibily.'
+    )
+    parser.add_argument(
+        '-u',
+        '--reference-out',
+        metavar='PATH',
+        type=_check_save_path,
+        help='reference out\n'
+             'Output path for the reference font, when hinting multiple '
+             'fonts compatibily.'
     )
     parser.add_argument(
         '-a',

@@ -2263,7 +2263,7 @@ class glyphHinter:
         if not self.compatiblePaths(gllist):
             return name, None
 
-        defglyph = glyphTuple[0]
+        defglyph = gllist[0]
         defglyph.changed = False
 
         if not self.options.noFlex:
@@ -2332,6 +2332,7 @@ class glyphHinter:
             for si, dp in enumerate(glyph.subpaths):
                 gp = g.subpaths[si]
                 if len(dp) != len(gp):
+                    assert False
                     log.warning("subpath %d in %s has %d elements " % 
                                 (si, g.getMasterDesc(), len(gp)) +
                                 "while %s has %d elements: Cannot hint" %

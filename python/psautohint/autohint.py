@@ -28,7 +28,8 @@ class ACOptions(object):
     def __init__(self):
         self.inputPaths = []
         self.outputPaths = []
-        self.reference_font = None
+        self.referenceFont = None
+        self.referenceOutputPath = None
         self.glyphList = []
         # True when contents of glyphList were specified directly by the user
         self.explicitGlyphs = False
@@ -143,7 +144,8 @@ def get_glyph(options, font, name):
                                      options.roundCoords,
                                      options.hintAll)
         if gl is None or gl.isEmpty():
-            # skip empty glyphs.
+            log.info("Skipping glyph %s: no data from convertToGlyphData" %
+                     name)
             return None
         return gl
     except KeyError:
@@ -157,6 +159,8 @@ def get_fontinfo_list_withFDArray(options, font, glyph_list, isVF=False):
     l = 0
     for name in glyph_list:
         fdIndex = font.getfdIndex(name)
+        if fdIndex is None:
+            continue
         if fdIndex >= l:
             fontDictList.extend([None] * (fdIndex - l + 1))
             l = fdIndex + 1
@@ -172,8 +176,9 @@ def get_fontinfo_list_withFDArray(options, font, glyph_list, isVF=False):
 
     if isVF and fontDictList:
         # If the font was variable then each "fddict" in the list is a
-        # list of fddicts by master. Now we just need to swap the axes
-        # (could use a numpy one-liner but don't want the dependency)
+        # list of fddicts for the default and all the regions. Now we 
+        # need to swap the axes (could use a numpy one-liner but don't
+        # want the dependency)
         fdls = []
         for i in range(len(fontDictList[fdIndex])):
             fdls.append([x[i] if x is not None else None
@@ -463,10 +468,16 @@ def openFile(path, options):
 
 
 def get_outpath(options, font_path, i):
-    if options.outputPaths is not None and i < len(options.outputPaths):
-        outpath = options.outputPaths[i]
+    if i == 'r':
+        if options.referenceOutputPath is not None:
+            outpath = options.referenceOutputPath
+        else:
+            outpath = font_path
     else:
-        outpath = font_path
+        if options.outputPaths is not None and i < len(options.outputPaths):
+            outpath = options.outputPaths[i]
+        else:
+            outpath = font_path
     return outpath
 
 
@@ -474,24 +485,24 @@ def hintFiles(options):
     fontInstances = []
     # If there is a reference font, prepend it to font paths.
     # It must be the first font in the list, code below assumes that.
-    if options.reference_font:
-        font = openFile(options.reference_font, options)
+    if options.referenceFont:
+        font = openFile(options.referenceFont, options)
         if hasattr(font, 'ttFont'):
             assert 'fvar' not in font.ttFont, ("Can't use a CFF2 VF font as a "
                                                "default font in a set of MM "
                                                "fonts.")
         fontInstances.append(FontInstance(font,
-                             os.path.basename(options.reference_font),
-                             options.reference_font))
+                             os.path.basename(options.referenceFont),
+                             get_outpath(options, options.referenceFont, 'r')))
 
     # Open the rest of the fonts and handle output paths.
     for i, path in enumerate(options.inputPaths):
         fontInstances.append(FontInstance(openFile(path, options),
-                             os.path.basename(path),
-                             get_outpath(options, path, i)))
+                                          os.path.basename(path),
+                                          get_outpath(options, path, i)))
 
     noFlex = options.noFlex
-    if fontInstances and options.reference_font:
+    if fontInstances and options.referenceFont:
         log.info("Hinting fonts with reference %s. Start time: %s.",
                  fontInstances[0].desc, time.asctime())
         if fontInstances[0].font.isCID():
