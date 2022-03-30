@@ -12,7 +12,8 @@ import subprocess
 import sys
 import textwrap
 
-from . import __version__, get_font_format
+from . import get_font_format
+from ._version import version as __version__
 from .logging import logging_conf
 from .autohint import ACOptions, hintFiles
 
@@ -331,9 +332,9 @@ class HintOptions(ACOptions):
         self.noFlex = pargs.no_flex
         self.noHintSub = pargs.no_hint_sub
         self.allow_no_blues = pargs.no_zones_stems
+        self.ignoreFontinfo = pargs.ignore_fontinfo
         self.logOnly = pargs.report_only
         self.removeConflicts = not pargs.keep_conflicts
-        self.printDefaultFDDict = pargs.print_dflt_fddict
         self.printFDDictList = pargs.print_list_fddict
         self.roundCoords = not pargs.decimal
         self.writeToDefaultLayer = pargs.write_to_default_layer
@@ -341,7 +342,6 @@ class HintOptions(ACOptions):
         self.verbose = pargs.verbose
         if pargs.processes:
             self.process_count = pargs.processes
-
 
 
 class _CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -647,22 +647,19 @@ def get_options(args):
              f"Default: '{FONTINFO_FILE_NAME}'"
     )
     parser.add_argument(
-        '--print-dflt-fddict',
+        '--ignore-fontinfo',
         action='store_true',
-        help="print the font's default FDDict set\n"
-             'This can be used as a starting point for building FDDict '
-             "sets. Use '--doc-fddict' option for more info."
+        help='Ignore fontinfo files in the same directory as the font'
     )
     parser.add_argument(
         '--print-list-fddict',
         action='store_true',
-        help='print the list of user-defined FDDict sets, and the glyphs '
-             'associated with each of them\n'
-             'This is useful for checking the FDDict sets and their glyph-'
-             "matching definitions. Use '--doc-fddict' option for more info."
+        help='print the list of private dictionaries, whether defined in the '
+             'font or using fontinfo files, and the glyphs associated with '
+             "each\nUse the '--doc-fontinfo' for more information."
     )
     parser.add_argument(
-        '--doc-fddict',
+        '--doc-fontinfo',
         action=_AdditionalHelpAction,
         help="show a description of the format for defining sets of "
              "alternate alignment zones in a 'fontinfo' file and exit",

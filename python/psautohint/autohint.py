@@ -7,7 +7,6 @@
 
 import logging
 import os
-import sys
 import time
 from collections import namedtuple
 from threading import Thread
@@ -18,6 +17,7 @@ from .ufoFont import UFOFontData
 from .report import Report, GlyphReport
 from .hinter import glyphHinter
 from .logging import log_receiver
+from .fdTools import FDDictManager
 
 from . import (get_font_format, FontParseError)
 
@@ -41,6 +41,7 @@ class ACOptions(object):
         self.noFlex = False
         self.noHintSub = False
         self.allow_no_blues = False
+        self.ignoreFontinfo = False
         self.logOnly = False
         self.removeConflicts = True
         # Copy of parse_args verbose for child processes
@@ -153,92 +154,36 @@ def get_glyph(options, font, name):
         # reference font.
         return None
 
-def get_fontinfo_list_withFDArray(options, font, glyph_list, isVF=False):
-    fdGlyphDict = {}
-    fontDictList = []
-    l = 0
-    for name in glyph_list:
-        fdIndex = font.getfdIndex(name)
-        if fdIndex is None:
-            continue
-        if fdIndex >= l:
-            fontDictList.extend([None] * (fdIndex - l + 1))
-            l = fdIndex + 1
-        if fontDictList[fdIndex] is None:
-            fddict = font.getFontInfo(options.allow_no_blues,
-                                      options.noFlex,
-                                      options.vCounterGlyphs,
-                                      options.hCounterGlyphs,
-                                      fdIndex, isVF)
-            fontDictList[fdIndex] = fddict
-        if fdIndex != 0:
-            fdGlyphDict[name] = fdIndex
 
-    if isVF and fontDictList:
-        # If the font was variable then each "fddict" in the list is a
-        # list of fddicts for the default and all the regions. Now we 
-        # need to swap the axes (could use a numpy one-liner but don't
-        # want the dependency)
-        fdls = []
-        for i in range(len(fontDictList[fdIndex])):
-            fdls.append([x[i] if x is not None else None
-                        for x in fontDictList])
-
-    return fdGlyphDict, fontDictList
+FontInstance = namedtuple("FontInstance", "font inpath outpath")
 
 
-def get_fontinfo_list_withFontInfo(options, font, glyph_list):
-    # Build alignment zone string
-    if options.printDefaultFDDict:
-        print("Showing default FDDict Values:")
-        fddict = font.getFontInfo(options.allow_no_blues,
-                                  options.noFlex,
-                                  options.vCounterGlyphs,
-                                  options.hCounterGlyphs)
-        # Exit by printing default FDDict with all lines indented by one tab
-        sys.exit("\t" + "\n\t".join(str(fddict).split("\n")))
-
-    fdGlyphDict, fontDictList = font.getfdInfo(options.allow_no_blues,
-                                               options.noFlex,
-                                               options.vCounterGlyphs,
-                                               options.hCounterGlyphs,
-                                               glyph_list)
-
-    if options.printFDDictList:
-        # Print the user defined FontDicts, and exit.
-        if fdGlyphDict:
-            print("Showing user-defined FontDict Values:\n")
-            for fi, fontDict in enumerate(fontDictList):
-                if fontDict is None:
-                    continue
-                print(fontDict.DictName)
-                print(str(fontDict))
-                if fi == 0:
-                    continue
-                gnameList = [gn for gn, fdIndex in fdGlyphDict.items()
-                             if fdIndex == fi]
-                print("%d glyphs:" % len(gnameList))
-                if len(gnameList) > 0:
-                    gTxt = " ".join(gnameList)
+def setUniqueDescs(fontInstances):
+    descs = [f.font.getPSName() for f in fontInstances]
+    if None in descs or '' in descs or len(descs) != len(set(descs)):
+        if len(fontInstances) == 1:
+            # Don't add a substantive instance path when hinting one font
+            fontInstances[0].font.desc = ''
+            return
+        descs = [f.inpath for f in fontInstances]
+        try:
+            prefix = os.path.commonpath(descs)
+            descs = [os.path.relpath(p, prefix) for p in descs]
+            while True:
+                dn = [os.path.dirname(p) for p in descs]
+                if len(set(os.path.basename(p) for p in descs)) == 1:
+                    descs = dn
                 else:
-                    gTxt = "None"
-                print(gTxt + "\n")
-        else:
-            print("There are no user-defined FontDict Values.")
-        return
-
-    if fdGlyphDict:
-        log.info("Using alternate FDDicts for some glyphs.")
-
-    return fdGlyphDict, fontDictList
-
-
-FontInstance = namedtuple("FontInstance", "font desc outpath")
+                    break
+        except ValueError:
+            pass
+    for f, d in zip(fontInstances, descs):
+        f.font.desc = d
 
 
 class fontWrapper:
     """
-    Stores references to one or more related master font objects.
+    Stores references to one or more related instance font objects.
     Extracts glyphs from those objects by name, hints them, and
     stores the result back those objects. Optionally saves the
     modified glyphs in corresponding output font files.
@@ -246,6 +191,7 @@ class fontWrapper:
     def __init__(self, options, fil):
         self.options = options
         self.fontInstances = fil
+        setUniqueDescs(fil)
         if len(fil) > 1:
             self.isVF = False
         else:
@@ -256,59 +202,15 @@ class fontWrapper:
         self.notFound = 0
         self.glyphNameList = filterGlyphList(options,
                                              fil[0].font.getGlyphList(),
-                                             fil[0].desc)
+                                             fil[0].font.desc)
         if not self.glyphNameList:
             raise FontParseError("Selected glyph list is empty for " +
-                                 "font <%s>." % fil[0].desc)
-        self.getFontinfoLists()
+                                 "font <%s>." % fil[0].font.desc)
+        self.dictManager = FDDictManager(options, fil, self.glyphNameList,
+                                         self.isVF)
 
     def numGlyphs(self):
         return len(self.glyphNameList)
-
-    def getFontinfoLists(self):
-        options = self.options
-        font = self.fontInstances[0].font
-        # Check for missing glyphs explicitly added via fontinfo or cmd line
-        for label, charDict in [("hCounterGlyphs", options.hCounterGlyphs),
-                                ("vCounterGlyphs", options.vCounterGlyphs),
-                                ("upperSpecials", options.upperSpecials),
-                                ("lowerSpecials", options.lowerSpecials),
-                                ("noBlues", options.noBlues)]:
-            for name in (n for n, w in charDict.items()
-                         if w and n not in font.getGlyphList()):
-                log.warning("%s glyph named in fontinfo is " % label +
-                            "not in font: %s" % name)
-
-        # For Type1 name keyed fonts, psautohint supports defining
-        # different alignment zones for different glyphs by FontDict
-        # entries in the fontinfo file. This is NOT supported for CID
-        # or CFF2 fonts, as these have FDArrays, can can truly support
-        # different Font.Dict.Private Dicts for different groups of glyphs.
-        if self.isVF:
-            (self.fdGlyphDict,
-             self.fontDictLists) = get_fontinfo_list_withFDArray(options, font,
-                self.glyphNameList, True)
-        else:
-            if font.hasFDArray():
-                getfil = get_fontinfo_list_withFDArray
-            else:
-                getfil = get_fontinfo_list_withFontInfo
-            fdls = self.fontDictLists = []
-            self.fdGlyphDict = None
-            for f in self.fontInstances:
-                log.info("Getting FDDicts for font %s" % f.desc)
-                gd, fdl = getfil(options, f.font, self.glyphNameList)
-                if self.fdGlyphDict is None:
-                    self.fdGlyphDict = gd
-                elif not self.equalDicts(self.fdGlyphDict, gd):
-                    log.error("fdIndexes in font %s different " % font.desc +
-                              "from those in font %s" % f.desc)
-                fdls.append(fdl)
-
-    def equalDicts(self, d1, d2):
-        # This allows for sparse masters, just verifying that if a glyph name
-        # is in both dictionaries it maps to the same index.
-        return all((d1[k] == d2[k] for k in d1 if k in d2))
 
     def hintStatus(self, name, hgt):
         an = self.options.nameAliases.get(name, name)
@@ -321,10 +223,10 @@ class fontWrapper:
                 log.info("%s: No hints added!", an)
                 return False
             elif True in hs:
-                log.info("%s: Hints only added to some masters!", an)
+                log.info("%s: Hints only added to some instances!", an)
                 return True
             else:
-                log.info("%s: No hints added to any master!", an)
+                log.info("%s: No hints added to any instances!", an)
                 return False
         return True
 
@@ -336,6 +238,7 @@ class fontWrapper:
 
         def __next__(self):
             # gnit's StopIteration exception stops this iteration
+            vi = 0
             stillLooking = True
             while stillLooking:
                 stillLooking = False
@@ -344,22 +247,15 @@ class fontWrapper:
                     stillLooking = True
                     continue
                 if self.fw.isVF:
-                    gt = self.fw.fontInstances[0].font.get_vf_glyphs(name)
-                    for i, g in enumerate(gt):
-                        if g is not None:
-                            g.setMasterDesc("Master %d" % i)
+                    gt, vi = self.fw.fontInstances[0].font.get_vf_glyphs(name)
                 else:
                     gt = tuple((get_glyph(self.fw.options, f.font, name)
                                 for f in self.fw.fontInstances))
-                    for i, g in enumerate(gt):
-                        if g is not None:
-                            g.setMasterDesc(self.fw.fontInstances[i].desc)
                 if True not in (g is not None for g in gt):
                     self.notFound += 1
                     stillLooking = True
             self.fw.notFound = self.notFound
-            fdIndex = self.fw.fdGlyphDict.get(name, 0)
-            return name, gt, fdIndex
+            return name, gt, self.fw.dictManager.getRecKey(name, vi)
 
     def __iter__(self):
         return self.glyphiter(self)
@@ -382,8 +278,9 @@ class fontWrapper:
         pool = None
         lt = None
         try:
+            dictRecord = self.dictManager.getDictRecord()
             if pcount == 1:
-                glyphHinter.initialize(self.options, self.fontDictLists)
+                glyphHinter.initialize(self.options, dictRecord)
                 gmap = map(glyphHinter.hint, self)
             else:
                 # set_start_method('spawn')
@@ -392,7 +289,7 @@ class fontWrapper:
                 lt = Thread(target=log_receiver, args=(logQueue,))
                 lt.start()
                 pool = Pool(pcount, initializer=glyphHinter.initialize,
-                            initargs=(self.options, self.fontDictLists,
+                            initargs=(self.options, dictRecord,
                                       logQueue))
                 if report is not None:
                     # Retain glyph ordering for reporting purposes
@@ -407,7 +304,7 @@ class fontWrapper:
                 else:
                     hasHints = self.hintStatus(name, r)
                     if r is None:
-                        r = [None]*len(self.fontInstances)
+                        r = [None] * len(self.fontInstances)
                     if not self.options.logOnly:
                         if hasHints:
                             hintedAny = True
@@ -454,7 +351,7 @@ class fontWrapper:
             f.font.close()
 
 
-def openFile(path, options):
+def openFont(path, options):
     font_format = get_font_format(path)
     if font_format is None:
         raise FontParseError(f"{path} is not a supported font format")
@@ -486,25 +383,25 @@ def hintFiles(options):
     # If there is a reference font, prepend it to font paths.
     # It must be the first font in the list, code below assumes that.
     if options.referenceFont:
-        font = openFile(options.referenceFont, options)
+        font = openFont(options.referenceFont, options)
         if hasattr(font, 'ttFont'):
             assert 'fvar' not in font.ttFont, ("Can't use a CFF2 VF font as a "
                                                "default font in a set of MM "
                                                "fonts.")
         fontInstances.append(FontInstance(font,
-                             os.path.basename(options.referenceFont),
+                             os.path.abspath(options.referenceFont),
                              get_outpath(options, options.referenceFont, 'r')))
 
     # Open the rest of the fonts and handle output paths.
     for i, path in enumerate(options.inputPaths):
-        fontInstances.append(FontInstance(openFile(path, options),
-                                          os.path.basename(path),
+        fontInstances.append(FontInstance(openFont(path, options),
+                                          os.path.abspath(path),
                                           get_outpath(options, path, i)))
 
     noFlex = options.noFlex
     if fontInstances and options.referenceFont:
         log.info("Hinting fonts with reference %s. Start time: %s.",
-                 fontInstances[0].desc, time.asctime())
+                 fontInstances[0].font.desc, time.asctime())
         if fontInstances[0].font.isCID():
             options.noFlex = True
         fw = fontWrapper(options, fontInstances)
@@ -513,10 +410,10 @@ def hintFiles(options):
         else:
             fw.close()
         log.info("Done hinting fonts with reference %s. End time: %s.",
-                 fontInstances[0].desc, time.asctime())
+                 fontInstances[0].font.desc, time.asctime())
     else:
         for fi in fontInstances:
-            log.info("Hinting font %s. Start time: %s.", fi.desc,
+            log.info("Hinting font %s. Start time: %s.", fi.font.desc,
                      time.asctime())
             if fi[0].isCID():
                 options.noFlex = True  # Flex hinting in CJK fonts does
@@ -529,5 +426,5 @@ def hintFiles(options):
                 fw.save()
             else:
                 fw.close()
-            log.info("Done hinting font %s. End time: %s.", fi.desc,
+            log.info("Done hinting font %s. End time: %s.", fi.font.desc,
                      time.asctime())

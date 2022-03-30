@@ -95,6 +95,8 @@ def test_type1_raises(path, tmpdir):
 def test_type1_supported(path, tmpdir):
     out = str(tmpdir / basename(path)) + ".out"
     options = Options(path, out)
+    if basename(path) == 'font.ps':
+        options.ignoreFontinfo = True
     hintFiles(options)
 
     path_dump = str(tmpdir / basename(path)) + ".txt"

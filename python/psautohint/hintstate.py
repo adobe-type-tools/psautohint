@@ -212,12 +212,13 @@ class pathElementHintState:
         return [s for s in self.s_segs + self.m_segs + self.e_segs]
 
     def segLists(self, first=None):
-        if first == None or first == 's':
+        if first is None or first == 's':
             return (('s', self.s_segs), ('m', self.m_segs), ('e', self.e_segs))
         elif first == 'm':
             return (('m', self.m_segs), ('s', self.s_segs), ('e', self.e_segs))
         elif first == 'e':
             return (('e', self.e_segs), ('m', self.m_segs), ('s', self.s_segs))
+
 
 class glyphHintState:
     """
@@ -404,12 +405,13 @@ class glyphHintState:
         for pes in self.peStates.values():
             pes.pruneHintSegs()
 
+
 class stemLocCandidate:
     strongMultiplier = 1.2
     bandMultiplier = 2.0
     """
-    Information about a candidate location for a stem in a non-default
-    master glyph, derived from segments generated for the glyph or,
+    Information about a candidate location for a stem in a region
+    glyph, derived from segments generated for the glyph or,
     occasionally, directly from point locations.
     """
     def __init__(self, loc):
@@ -441,10 +443,10 @@ class stemLocCandidate:
                 (feq(self.strong, other.strong) and self.weak < other.weak))
 
 
-class masterStemState:
+class instanceStemState:
     """
     State for the process of deciding on the lower and upper locations
-    for a particular stem in a non-default master.
+    for a particular region stem.
     """
     def __init__(self, loc, dhinter):
         self.defaultLoc = loc
@@ -456,8 +458,8 @@ class masterStemState:
     def addToLoc(self, loc, score, strong=False, bb=False, seg=None):
         if self.bb is not None:
             if self.bb != bb:
-                self.dhinter.warning("Mixed bounding-box and "
-                                     "non-bounding box location data")
+                log.warning("Mixed bounding-box and "
+                            "non-bounding box location data")
         else:
             self.bb = bb
         if seg is not None:
@@ -477,7 +479,7 @@ class masterStemState:
         try:
             m = max(weights)
             return m[1]
-        except:
+        except ValueError:
             return None
 
 

@@ -7,7 +7,6 @@ Utilities for converting between T2 charstrings and glyphData objects.
 import copy
 import logging
 import os
-import re
 import subprocess
 import tempfile
 from fontTools.misc.psCharStrings import T2OutlineExtractor
@@ -213,6 +212,7 @@ class CFFFontData:
         self.is_cff2 = False
         self.is_vf = False
         self.vs_data_models = None
+        self.desc = None
         if font_format == "OTF":
             # It is an OTF font, we can process it directly.
             font = TTFont(path)
@@ -253,6 +253,8 @@ class CFFFontData:
         if 'fvar' in self.ttFont:
             # have not yet collected VF global data.
             self.is_vf = True
+            self.glyph_programs = []
+            self.vsIndexMap = {}
             fvar = self.ttFont['fvar']
             CFF2 = self.cffTable
             CFF2.desubroutinize()
@@ -261,9 +263,9 @@ class CFFFontData:
             # hinted CFF2 program data. Copying an existing charstring is a
             # little easier than creating a new one and making sure that all
             # properties are set correctly.
-            self.temp_cs = copy.deepcopy(self.charStrings['.notdef'])
-            self.vs_data_models = self.get_vs_data_models(topDict,
-                                                          fvar)
+            self.temp_cs_extract = copy.deepcopy(self.charStrings['.notdef'])
+            self.temp_cs_merge = copy.deepcopy(self.charStrings['.notdef'])
+            self.vs_data_models = self.get_vs_data_models(topDict, fvar)
 
     def getGlyphList(self):
         return self.ttFont.getGlyphOrder()
@@ -352,46 +354,69 @@ class CFFFontData:
         self.ttFont.close()
 
     def isCID(self):
+        # XXX wrong for variable font
         return hasattr(self.topDict, "FDSelect")
 
-    def hasFDArray(self):
-        return self.is_cff2 or hasattr(self.topDict, "FDSelect")
-
-    def getPrivateDictVal(self, pDict, attr, default, region=0):
+    def getPrivateDictVal(self, pDict, attr, default, vsindex, vsi):
         val = getattr(pDict, attr, default)
         if attr in ('BlueValues', 'OtherBlues', 'FamilyBlues',
                     'FamilyOtherBlues', 'StemSnapH', 'StemSnapV'):
-            if len(val) > 0:
-                if isinstance(val[0], list):
-                    val = [v[0] + 0 if region == 0 else v[region] for v in val]
-
+            last_def = 0
+            last_calc = 0
+            vlist = []
+            for dl in val:
+                if isinstance(dl, list):
+                    assert vsi is not None
+                    calc = (dl[0] - last_def +
+                            vsi.interpolateFromDeltas(vsindex, dl[1:]))
+                    vlist.append(last_calc + calc)
+                    last_def = dl[0]
+                    last_calc += calc
+                else:
+                    vlist.append(dl)
+                    last_def = last_calc = dl
+            val = vlist
         else:
             if isinstance(val, list):
-                val = val[0] + 0 if region == 0 else val[region]
+                assert vsi is not None
+                val = val[0] + vsi.interpolateFromDeltas(vsindex, val[1:])
+
         return val
 
-    def getFontInfo(self, allow_no_blues, noFlex,
-                    vCounterGlyphs, hCounterGlyphs, fdIndex=0,
-                    isVF=False):
+    def getPrivateFDDict(self, allow_no_blues, noFlex, vCounterGlyphs,
+                         hCounterGlyphs, desc, fdIndex=0, gl_vsindex=None):
         pTopDict = self.topDict
         if hasattr(pTopDict, "FDArray"):
             pDict = pTopDict.FDArray[fdIndex]
         else:
+            assert fdIndex == 0
             pDict = pTopDict
         privateDict = pDict.Private
 
-        if self.is_cff2:
-            numReg = privateDict.getNumRegions()
+        if self.is_vf:
+            dict_vsindex = getattr(privateDict, 'vsindex', 0)
+            if gl_vsindex is None:
+                gl_vsindex = dict_vsindex
+            vs_data_model = self.vs_data_models[gl_vsindex]
+            vsi_list = vs_data_model.master_vsi_list
         else:
-            numReg = 0
+            assert gl_vsindex is None
+            dict_vsindex = None
+            vsi_list = [None]
+            fontName = desc
 
         fdDictArray = []
 
-        for r in range(numReg+1):
-            fdDict = fdTools.FDDict(fdIndex, region=r-1 if r>0 else None)
+        for vn, vsi in enumerate(vsi_list):
+            if self.is_vf:
+                fontName = self.getInstanceName(vsi)
+                if fontName is None:
+                    fontName = "Model %d Instance %d" % (gl_vsindex, vn)
+            fdDict = fdTools.FDDict(fdIndex, fontName=fontName)
             fdDict.setInfo('LanguageGroup',
                            self.getPrivateDictVal(privateDict,
-                                                  'LanguageGroup', 0, r))
+                                                  'LanguageGroup', 0,
+                                                  dict_vsindex, vsi))
 
             if not self.is_cff2 and hasattr(pDict, "FontMatrix"):
                 fontMatrix = pDict.FontMatrix
@@ -403,15 +428,12 @@ class CFFFontData:
                 upm = 1000
             fdDict.setInfo('OrigEmSqUnits', upm)
 
-            if not self.is_cff2:
-                fdDict.setInfo('FontName',
-                               getattr(pTopDict, "FontName", self.getPSName()))
-
             for bvattr, bvkeys in (('BlueValues',
                                     fdTools.kBlueValueKeys),
                                    ('OtherBlues',
                                     fdTools.kOtherBlueValueKeys)):
-                bvs = self.getPrivateDictVal(privateDict, bvattr, [], r)
+                bvs = self.getPrivateDictVal(privateDict, bvattr, [],
+                                             dict_vsindex, vsi)
                 numbvs = len(bvs)
                 if bvattr == 'BlueValues' and numbvs < 4:
                     low, high = self.get_min_max(pTopDict, upm)
@@ -421,7 +443,8 @@ class CFFFontData:
                     # BlueValues. Some fonts have bad BBox values, so I
                     # don't let this be smaller than -upm*0.25, upm*1.25.
                     inactiveAlignmentValues = [low, low, high, high]
-                    if allow_no_blues:
+                    if allow_no_blues or self.is_vf:
+                        # XXX adjusted for vf
                         bvs = inactiveAlignmentValues
                         numbvs = len(bvs)
                     else:
@@ -451,21 +474,23 @@ class CFFFontData:
                                        ('StemSnapH', 'StdHW', 'DominantH')):
                 if hasattr(privateDict, ssnap):
                     sstems = self.getPrivateDictVal(privateDict, ssnap,
-                                                    [], r)
+                                                    [], dict_vsindex, vsi)
                 elif hasattr(privateDict, stdw):
                     sstems = [self.getPrivateDictVal(privateDict, stdw,
-                                                     -1, r)]
+                                                     -1, dict_vsindex, vsi)]
                 else:
-                    if allow_no_blues:
+                    if allow_no_blues or self.is_vf:
+                        # XXX adjusted for vf
                         # dummy value. Needs to be larger than any hint will
                         # likely be, as the autohint program strips out any
                         # hint wider than twice the largest global stem width.
                         sstems = [upm]
                     else:
                         raise FontParseError("Font has neither %s nor %s!" %
-                                         (ssnap, stdw))
+                                             (ssnap, stdw))
                 sstems.sort()
-                if (len(sstems) == 0) or ((len(sstems) == 1) and (sstems[0] < 1)):
+                if (len(sstems) == 0) or ((len(sstems) == 1) and
+                                          (sstems[0] < 1)):
                     sstems = [upm]  # dummy value that will allow PyAC to run
                     log.warning("There is no value or 0 value for %s." % fdkey)
                 fdDict.setInfo(fdkey, sstems)
@@ -482,18 +507,17 @@ class CFFFontData:
                 fdDict.setInfo('HCounterChars', hCounterGlyphs)
 
             fdDict.setInfo('BlueFuzz',
-                            self.getPrivateDictVal(privateDict,
-                                                   'BlueFuzz', 1, r))
-
+                           self.getPrivateDictVal(privateDict, 'BlueFuzz',
+                                                  1, dict_vsindex, vsi))
             fdDict.buildBlueLists()
 
-            if not isVF:
+            if not self.is_vf:
                 return fdDict
 
             fdDictArray.append(fdDict)
 
-        assert isVF
-        return fdDictArray
+        assert self.is_vf
+        return fdDictArray, gl_vsindex
 
     def getfdIndex(self, name):
         gid = self.ttFont.getGlyphID(name)
@@ -505,43 +529,34 @@ class CFFFontData:
             fdIndex = 0
         return fdIndex
 
-    def getfdInfo(self, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs,
-                  glyphList):
+    def isVF(self):
+        return self.is_vf
+
+    def getInputPath(self):
+        return self.inputPath
+
+    def getMinMaxY(self):
+        return self.topDict.FontBBox[1], self.topDict.FontBBox[3]
+
+    def getPrivateDict(self, fdIndex):
         topDict = self.topDict
-        fdGlyphDict = {}
-
-        # Get the default fontinfo from the font's top dict.
-        fdDict = self.getFontInfo(
-            allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs)
-        fontDictList = [fdDict]
-
-        # Check the fontinfo file, and add any other font dicts
-        srcFontInfo = os.path.dirname(self.inputPath)
-        srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
-        if os.path.exists(srcFontInfo):
-            with open(srcFontInfo, "r", encoding="utf-8") as fi:
-                fontInfoData = fi.read()
-            fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
+        if hasattr(topDict, "FDArray"):
+            assert fdIndex < len(topDict.FDArray)
+            private = topDict.FDArray[fdIndex].Private
         else:
-            return fdGlyphDict, fontDictList
+            assert fdIndex == 0
+            private = topDict.Private
+        return private
 
-        if "FDDict" in fontInfoData:
-            maxY = topDict.FontBBox[3]
-            minY = topDict.FontBBox[1]
-            fdGlyphDict, finalFDict = fdTools.parseFontInfoFile(
-                fontDictList, fontInfoData, glyphList, maxY, minY,
-                self.getPSName())
-            if hasattr(topDict, "FDArray"):
-                private = topDict.FDArray[0].Private
-            else:
-                private = topDict.Private
-            if finalFDict is None:
-                # If a font dict was not explicitly specified for the
-                # output font, use the first user-specified font dict.
-                fdTools.mergeFDDicts(fontDictList[1:], private)
-            else:
-                fdTools.mergeFDDicts([finalFDict], private)
-        return fdGlyphDict, fontDictList
+    def mergePrivateMap(self, privateMap):
+        privateDict = self.getPrivateDict(0)
+        for k, v in privateMap.items():
+            setattr(privateDict, k, v)
+
+    def getInstanceName(self, vsi):
+        assert self.is_vf
+        # fvar = self.ttFont['fvar']
+        return None
 
     def get_vf_glyphs(self, glyph_name):
         charstring = self.charStrings[glyph_name]
@@ -549,23 +564,24 @@ class CFFFontData:
         if 'vsindex' in charstring.program:
             op_index = charstring.program.index('vsindex')
             vsindex = charstring.program[op_index - 1]
+            self.vsIndexMap[glyph_name] = (vsindex, True)
         else:
-            vsindex = 0
-        self.vsindex = vsindex
-        self.glyph_programs = []
-        vs_data_model = self.vs_data_model = self.vs_data_models[vsindex]
+            privateDict = self.getPrivateDict(self.getfdIndex(glyph_name))
+            vsindex = getattr(privateDict, 'vsindex', 0)
+            self.vsIndexMap[glyph_name] = (vsindex, False)
+        vs_data_model = self.vs_data_models[vsindex]
 
         glyph_list = []
         for vsi in vs_data_model.master_vsi_list:
             t2_program = interpolate_cff2_charstring(charstring, glyph_name,
                                                      vsi.interpolateFromDeltas,
                                                      vsindex)
-            self.temp_cs.program = t2_program
-            glyph = convertT2ToGlyphData(self.temp_cs, True, False, True,
-                                         name=glyph_name)
+            self.temp_cs_extract.program = t2_program
+            glyph = convertT2ToGlyphData(self.temp_cs_extract, True, False,
+                                         True, name=glyph_name)
             glyph_list.append(glyph)
 
-        return glyph_list
+        return glyph_list, vsindex
 
     @staticmethod
     def get_vs_data_models(topDict, fvar):
@@ -589,11 +605,14 @@ class CFFFontData:
         return vs_data_models
 
     def merge_hinted_glyphs(self, name):
-        new_t2cs = merge_hinted_programs(self.temp_cs, self.glyph_programs,
-                                         name, self.vs_data_model)
-        if self.vsindex:
-            new_t2cs.program = [self.vsindex, 'vsindex'] + new_t2cs.program
+        vsindex, addIndex = self.vsIndexMap[name]
+        new_t2cs = merge_hinted_programs(self.temp_cs_merge,
+                                         self.glyph_programs, name,
+                                         self.vs_data_models[vsindex])
+        if addIndex:
+            new_t2cs.program = [vsindex, 'vsindex'] + new_t2cs.program
         self.charStrings[name] = new_t2cs
+        self.glyph_programs = []
 
 
 def interpolate_cff2_charstring(charstring, gname, interpolateFromDeltas,
@@ -611,15 +630,15 @@ def interpolate_cff2_charstring(charstring, gname, interpolateFromDeltas,
             last_i = i + 1
         elif token == 'blend':
             num_regions = charstring.getNumRegions(vsindex)
-            numMasters = 1 + num_regions
+            numInstances = 1 + num_regions
             num_args = program[i - 1]
             # The program list starting at program[i] is now:
             # ..args for following operations
             # num_args values  from the default font
-            # num_args tuples, each with numMasters-1 delta values
+            # num_args tuples, each with numInstances-1 delta values
             # num_blend_args
             # 'blend'
-            argi = i - (num_args * numMasters + 1)
+            argi = i - (num_args * numInstances + 1)
             if last_i != argi:
                 new_program.extend(program[last_i:argi])
             end_args = tuplei = argi + num_args
@@ -674,8 +693,8 @@ def get_scalars(self, vsindex, region_idx):
 class VarDataModel(object):
 
     def __init__(self, var_data, vsindex, master_vsi_list):
-        self.master_vsi_list = master_vsi_list
         self.var_data = var_data
+        self.master_vsi_list = master_vsi_list
         self._num_masters = len(master_vsi_list)
         self.delta_weights = [{}]  # for default font value
         for region_idx, vsi in enumerate(master_vsi_list[1:]):

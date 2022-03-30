@@ -16,16 +16,16 @@ from collections import namedtuple
 from fontTools.misc.bezierTools import solveCubic
 
 from .glyphData import pt, feq, fne, stem
-from .glyphData import pathElement, glyphData
 from .hintstate import (hintSegment, stemValue, glyphHintState, links,
-                        masterStemState)
+                        instanceStemState)
 from .report import GlyphReport
-from .logging import logging_reconfig
+from .logging import logging_reconfig, set_log_parameters
 
 log = logging.getLogger(__name__)
 
 GlyphPE = namedtuple("GlyphPE", "glyph pe")
 LocDict = namedtuple("LocDict", "l u used")
+
 
 class dimensionHinter:
     """
@@ -40,7 +40,7 @@ class dimensionHinter:
     def sameSign(a, b):
         return fne(a, 0) and fne(b, 0) and ((a > 0) == (b > 0))
 
-    def __init__(self, options, fontDictLists):
+    def __init__(self, options):
         self.StemLimit = 22  # ((kStackLimit) - 2) / 2), kStackLimit == 46
         """Initialize constant values and miscelaneous state"""
         self.MaxStemDist = 150  # initial maximum stem width allowed for hints
@@ -105,21 +105,20 @@ class dimensionHinter:
 
         self.HasFlex = False
         self.options = options
-        self.fontDictLists = fontDictLists
 
-        self.fdIndex = None
+        self.fddicts = None
+        self.gllist = None
         self.glyph = None
-        self.fddict = None
         self.report = None
         self.name = None
         self.isMulti = False
 
-    def setGlyph(self, fdIndex, report, gllist, name, clearPrev=True):
+    def setGlyph(self, fddicts, report, gllist, name, clearPrev=True):
         """Initialize the state for processing a specific glyph"""
-        self.fdIndex = fdIndex
-        self.fddict = self.fontDictLists[0][fdIndex]
+        self.fddicts = fddicts
         self.report = report
         self.glyph = gllist[0]
+        self.fddict = fddicts[0]
         self.gllist = gllist
         self.isMulti = (len(gllist) > 1)
         self.name = name
@@ -139,10 +138,6 @@ class dimensionHinter:
             self.hs = self.glyph.vhs = glyphHintState()
         else:
             self.hs = self.glyph.hhs = glyphHintState()
-
-#    def info(self, msg):
-#        """Log info level message"""
-#        log.info(f"{self.name}: " + msg)
 
     class gliter:
         """A pathElement set iterator for the glyphData object list"""
@@ -172,7 +167,15 @@ class dimensionHinter:
         pass
 
     @abstractmethod
+    def stopFlex(self):
+        pass
+
+    @abstractmethod
     def startHint(self):
+        pass
+
+    @abstractmethod
+    def stopHint(self):
         pass
 
     @abstractmethod
@@ -180,7 +183,15 @@ class dimensionHinter:
         pass
 
     @abstractmethod
+    def stopStemConvert(self):
+        pass
+
+    @abstractmethod
     def startMaskConvert(self):
+        pass
+
+    @abstractmethod
+    def stopMaskConvert(self):
         pass
 
     @abstractmethod
@@ -223,9 +234,9 @@ class dimensionHinter:
     def linearFlexOK(self):
         return False
 
-
     def addFlex(self, force=True, inited=False):
         """Path-level interface to add flex hints to current glyph"""
+        self.startFlex()
         hasflex = (gl.flex_count != 0 for gl in self.gllist)
         if not inited and any(hasflex):
             if force or not all(hasflex):
@@ -235,12 +246,10 @@ class dimensionHinter:
             else:
                 log.info("Already has flex hints, skipping addFlex")
                 return
-        self.startFlex()
         for c in self:
             if all((self.tryFlex(x.glyph, x.pe) for x in c)):
                 self.markFlex(c)
-
-        pt.clearAlign()
+        self.stopFlex()
 
     def tryFlex(self, gl, c):
         """pathElement-level interface to add flex hints to current glyph"""
@@ -324,6 +333,7 @@ class dimensionHinter:
         Top-level method for calculating stem hints for a glyph in one
         dimension
         """
+        self.startHint()
         if self.glyph.hasHints(doVert=self.isV()):
             if force:
                 log.info("Clearing existing %s hints" % self.aDesc())
@@ -332,9 +342,9 @@ class dimensionHinter:
             else:
                 self.keepHints = True
                 log.info("Already has %s hints" % self.aDesc())
+                self.stopHint()
                 return
         self.keepHints = False
-        self.startHint()
         self.BigDist = max(self.dominantStems() + [self.InitBigDist])
         self.BigDist *= self.BigDistFactor
         log.debug("generate %s segments" % self.aDesc())
@@ -365,9 +375,10 @@ class dimensionHinter:
                 if not self.hs.counterHinted:
                     log.info(("Glyph is in list for using %s counter hints " +
                               "but didn't find any candidates.") %
-                              self.aDesc())
+                             self.aDesc())
                     self.resetForHinting()
                     self.calcHintValues(lnks, force=True, tryCounter=False)
+                    self.stopHint()
                     return
                 else:
                     self.highestStemVals()  # for bbox segments
@@ -380,8 +391,7 @@ class dimensionHinter:
             hv.show(self.isV(), "result")
         self.markStraySegs()
         self.hs.pruneHintSegs()
-
-        pt.clearAlign()
+        self.stopHint()
 
     # Segments
     def addSegment(self, fr, to, loc, pe1, pe2, typ, desc, mid=False):
@@ -1620,6 +1630,8 @@ class dimensionHinter:
             utype = hintSegment.sType.UGBBOX
         for param in paraml:
             pbs = gl.getBounds(param)
+            if pbs is None:
+                continue
             mn_pt, mx_pt = pt(tuple(pbs.b[0])), pt(tuple(pbs.b[1]))
             peidx = 0 if self.isV() else 1
             if any((hv.lloc <= mx_pt.o and mn_pt.o <= hv.uloc
@@ -1673,9 +1685,10 @@ class dimensionHinter:
                 self.hs.stems = tuple((g.hstems if g.hstems else []
                                        for g in self.gllist))
                 l = self.hs.stems[0]
-                return all((len(sl) == l for sl in self.hs.stems))
+            self.stopStemConvert()
+            return all((len(sl) == l for sl in self.hs.stems))
 
-        # Build up the default master stem list
+        # Build up the default stem list
         valuepairmap = {}
         self.hs.stems = tuple(([] for g in self.gllist))
         if self.options.removeConflicts:
@@ -1701,27 +1714,27 @@ class dimensionHinter:
                     # segments. This isn't great but may be good enough.
                     wl.append(sv.compVal(self.SpcBonus)[0]**.25)
 
-        # Determine the stem locations for other masters
+        # Determine the stem locations for other regions
 
         for glidx in range(1, len(self.gllist)):
-            self.calcMasterStems(glidx)
+            self.calcInstanceStems(glidx)
 
-        log.debug("Initial %s stem list (including masters, if any):" %
+        log.debug("Initial %s stem list (including regions, if any):" %
                   self.aDesc())
         for sidx in range(len(self.hs.stems[0])):
             log.debug("Stem %d: %s" % (sidx, [sl[sidx]
                                               for sl in self.hs.stems]))
-
+        self.stopStemConvert()
         return True
 
-    def calcMasterStems(self, glidx):
-        self.fddict = self.fontDictLists[glidx][self.fdIndex]
+    def calcInstanceStems(self, glidx):
         self.glyph = self.gllist[glidx]
+        self.fddict = self.fddicts[glidx]
         hs0 = self.hs
         numStems = len(hs0.stems[0])
         if numStems == 0:
             return
-
+        set_log_parameters(instance=self.fddict.FontName)
         if self.isV():
             self.hs = self.glyph.vhs = glyphHintState()
         else:
@@ -1737,7 +1750,7 @@ class dimensionHinter:
         self.prepForSegs()
         self.genSegs()
 
-        mSSl = [(masterStemState(s.lb, self), masterStemState(s.rt, self))
+        iSSl = [(instanceStemState(s.lb, self), instanceStemState(s.rt, self))
                 for s in hs0.stems[0]]
 
         for c in self.__iter__(glidx):
@@ -1756,34 +1769,33 @@ class dimensionHinter:
                     if sidx is None:
                         continue
                     ul = 1 if (seg0.isInc == self.isV()) else 0
-#                    log.info("Looking for %s index %d on pe %s" % ('upper' if ul else 'lower', sidx, c0.pe.position))
                     if done[sidx][ul]:
                         continue
 
-                    mSS = mSSl[sidx][ul]
+                    iSS = iSSl[sidx][ul]
                     found = False
                     if seg0.isBBox():
                         if seg0.isGBBox():
                             pbs = self.glyph.getBounds(None)
                         else:
                             pbs = self.glyph.getBounds(peSi.position[0])
-                        mn_pt = pt(tuple(pbs.b[0]))
-                        mx_pt = pt(tuple(pbs.b[1]))
-                        score = mx_pt.a - mn_pt.a
-                        loc = mx_pt.o if seg0.isUBBox() else mn_pt.o
-                        mSS.addToLoc(loc, score, strong=True, bb=True)
-                        found = True
+                        if pbs is not None:
+                            mn_pt = pt(tuple(pbs.b[0]))
+                            mx_pt = pt(tuple(pbs.b[1]))
+                            score = mx_pt.a - mn_pt.a
+                            loc = mx_pt.o if seg0.isUBBox() else mn_pt.o
+                            iSS.addToLoc(loc, score, strong=True, bb=True)
+                            found = True
                     elif peSi is not None:
                         for posi, segil in peSi.segLists(pos0):
                             for segi in segil:
                                 if segi.isInc != seg0.isInc:
                                     continue
-                                score = segi.max-segi.min
-                                mSS.addToLoc(segi.loc, score,
-                                             strong=(posi==pos0),
+                                score = segi.max - segi.min
+                                iSS.addToLoc(segi.loc, score,
+                                             strong=(posi == pos0),
                                              seg=segi)
                                 found = True
-                                # print(self.aDesc(), seg0.loc, segi.loc, segi.max-segi.min, posi == pos0, seg0.type == segi.type)
                             if found and posi == pos0:
                                 break
                     # Fall back to point location
@@ -1793,19 +1805,19 @@ class dimensionHinter:
                         elif pos0 == 'e':
                             loc = ci.pe.e.o
                         else:
-                            loc = (ci.pe.s.o + ci.pe.e.o)/2
+                            loc = (ci.pe.s.o + ci.pe.e.o) / 2
                         log.warning("Falling back to point location for "
                                     "segment %s" % (ci.pe.position,))
-                        mSS.addToLoc(loc, self.NoSegScore)
+                        iSS.addToLoc(loc, self.NoSegScore)
                     done[sidx][ul] = True
 
         sl = hs0.stems[glidx]
         for sidx, s0 in enumerate(hs0.stems[0]):
             isG = s0.isGhost()
             if isG != 'high':
-                lo = self.bestLocation(sidx, 0, mSSl, hs0)
-            if isG != 'low': 
-                hi = self.bestLocation(sidx, 1, mSSl, hs0)
+                lo = self.bestLocation(sidx, 0, iSSl, hs0)
+            if isG != 'low':
+                hi = self.bestLocation(sidx, 1, iSSl, hs0)
             if isG == 'low':
                 hi = lo - 21
             elif isG == 'high':
@@ -1817,25 +1829,26 @@ class dimensionHinter:
                                 "ghost stem")
             sl.append(stem((lo, hi)))
 
-        self.fddict = self.fontDictLists[0][self.fdIndex]
+        self.fddict = self.fddicts[0]
         self.glyph = self.gllist[0]
+        set_log_parameters(instance=self.fddict.FontName)
         self.hs = hs0
 
-    def bestLocation(self, sidx, ul, mSSl, hs0):
-        loc = mSSl[sidx][ul].bestLocation(ul==0)
+    def bestLocation(self, sidx, ul, iSSl, hs0):
+        loc = iSSl[sidx][ul].bestLocation(ul == 0)
         if loc is not None:
             return loc
         for sv in hs0.stemValues:
             if sv.idx != sidx:
                 continue
-            seg = sv.useg if ul==1 else sv.lseg
+            seg = sv.useg if ul == 1 else sv.lseg
             if seg.hintval.idx != sidx:
-                loc = mSSl[seg.hintval.idx][ul].bestLocation(ul==0)
+                loc = iSSl[seg.hintval.idx][ul].bestLocation(ul == 0)
                 if loc is not None:
                     return loc
         assert False
         log.warning("No data for %s location of stem %d" %
-                    ('lower' if ul==0 else 'upper', i))
+                    ('lower' if ul == 0 else 'upper', sidx))
         return hs0.stems[0][sidx][ul]
 
     def unconflict(self, sc, curSet=None, pinSet=None):
@@ -1882,7 +1895,6 @@ class dimensionHinter:
             r2 = self.unconflict(sc, curSet, pinSet)
             return r1 if r1[0] > r2[0] else r2
 
-
     def convertToMasks(self):
         """
         This method builds up the information needed to mostly get away from
@@ -1894,7 +1906,8 @@ class dimensionHinter:
         """
         self.startMaskConvert()
         if self.keepHints:
-            pass # XXX to figure out
+            # XXX to figure out
+            self.stopMaskConvert()
             return
 
         dsl = self.hs.stems[0]
@@ -1903,7 +1916,7 @@ class dimensionHinter:
         if self.options.removeConflicts:
             sc = [[False] * l for _ in range(l)]
             for sidx in range(l):
-                for sjdx in range(sidx+1, l):
+                for sjdx in range(sidx + 1, l):
                     for sl in self.hs.stems:
                         if sl[sidx] > sl[sjdx]:
                             hasConflicts = True
@@ -1921,7 +1934,7 @@ class dimensionHinter:
         for sidx in range(l):
             if not self.hs.goodMask[sidx]:
                 continue
-            for sjdx in range(sidx+1, l):
+            for sjdx in range(sidx + 1, l):
                 if not self.hs.goodMask[sjdx]:
                     continue
                 for sl in self.hs.stems:
@@ -1934,7 +1947,7 @@ class dimensionHinter:
 
         self.hs.ghostCompat = gc = [None] * l
 
-        # A ghost stem in the default master should be a ghost everywhere
+        # A ghost stem in the default should be a ghost everywhere
         for sidx, s in enumerate(dsl):
             if not self.hs.goodMask[sidx] or not s.isGhost(True):
                 continue
@@ -1942,7 +1955,6 @@ class dimensionHinter:
             for sjdx in range(l):
                 if sidx == sjdx or not self.hs.goodMask[sjdx]:
                     continue
-#                print('here0', self.hs.stems[0][sidx].ghostCompat(self.hs.stems[0][sjdx]))
                 if all(sl[sidx].ghostCompat(sl[sjdx]) for sl in self.hs.stems):
                     assert so[sidx][sjdx]
                     gc[sidx][sjdx] = True
@@ -1971,6 +1983,7 @@ class dimensionHinter:
             if not pestate:
                 continue
             self.makePEMask(pestate, pe)
+        self.stopMaskConvert()
 
     def makePEMask(self, pestate, c):
         """Convert the hints desired by pathElement to a conflict-free mask"""
@@ -1986,7 +1999,7 @@ class dimensionHinter:
         p0, p1 = (c.s, c.e) if c.isLine() else (c.cs, c.e)
         if self.hs.hasOverlaps and True in mask:
             for sidx in range(l):
-                for sjdx in range(sidx+1, l):
+                for sjdx in range(sidx + 1, l):
                     if not (mask[sidx] and mask[sjdx] and
                             self.hs.stemOverlaps[sidx][sjdx]):
                         continue
@@ -2009,10 +2022,10 @@ class dimensionHinter:
                     elif (valj.val < self.ConflictValMin and
                           vali.val > valj.val * self.ConflictValMult and
                           self.OKToRem(segj.loc, valj.spc)):
-                        remidx = sjdx 
+                        remidx = sjdx
                     elif (c.isLine() or self.flatQuo(p0, p1) > 0 and
                           self.OKToRem(segi.loc, vali.spc)):
-                        remidx = sidx 
+                        remidx = sidx
                     elif self.diffSign(p1.o - p0.o, p.s.o - p0.o):
                         remidx = sidx
                     elif self.diffSign(n.e.o - p1.o, p0.o - p1.o):
@@ -2033,9 +2046,9 @@ class dimensionHinter:
                     else:
                         # Removing the hints from the spline doesn't mean
                         # neither will be hinted, it means that whatever
-                        # winds up getting hinted will depend on the 
+                        # winds up getting hinted will depend on the
                         # previous spline hint states. That could be
-                        # neither but it is likely one will be in the set.
+                        # neither but it is likely one will be in the set
                         mask[sidx] = mask[sjdx] = False
                         log.debug("Could not resolve conflicting hints" +
                                   " at %g %g" % (c.e.x, c.e.y) +
@@ -2056,19 +2069,26 @@ class dimensionHinter:
 class hhinter(dimensionHinter):
     def startFlex(self):
         """Make pt.a map to x and pt.b map to y"""
+        set_log_parameters(dimension='-')
         pt.setAlign(False)
+
+    def stopFlex(self):
+        set_log_parameters(dimension='')
+        pt.clearAlign()
 
     def startHint(self):
         """
         Make pt.a map to x and pt.b map to y and store BlueValue bands
         for easier processing
         """
-        pt.setAlign(False)
+        self.startFlex()
         blues = self.fddict.BlueValuesPairs + self.fddict.OtherBlueValuesPairs
         self.topPairs = [pair for pair in blues if not pair[4]]
         self.bottomPairs = [pair for pair in blues if pair[4]]
 
-    startMaskConvert = startStemConvert = startFlex
+    startStemConvert = startMaskConvert = startFlex
+
+    stopHint = stopStemConvert = stopMaskConvert = stopFlex
 
     def dominantStems(self):
         return self.fddict.DominantH
@@ -2133,9 +2153,15 @@ class hhinter(dimensionHinter):
 
 class vhinter(dimensionHinter):
     def startFlex(self):
+        set_log_parameters(dimension='|')
         pt.setAlign(True)
 
-    startMaskConvert = startStemCovert = startHint = startFlex
+    def stopFlex(self):
+        set_log_parameters(dimension='')
+        pt.clearAlign()
+
+    startHint = startStemConvert = startMaskConvert = startFlex
+    stopHint = stopStemConvert = stopMaskConvert = stopFlex
 
     def isV(self):
         return True
@@ -2178,25 +2204,25 @@ class glyphHinter:
     impl = None
 
     @classmethod
-    def initialize(_cls, options, fontDictLists, logQueue=None):
-        _cls.impl = _cls(options, fontDictLists)
+    def initialize(_cls, options, dictRecord, logQueue=None):
+        _cls.impl = _cls(options, dictRecord)
         if logQueue is not None:
             logging_reconfig(logQueue, options.verbose)
 
     @classmethod
-    def hint(_cls, name, glyphTuple=None, fdIndex=0):
+    def hint(_cls, name, glyphTuple=None, fdKey=None):
         if _cls.impl is None:
             raise RuntimeError("glyphHinter implementation not initialized")
         if isinstance(name, tuple):
             return _cls.impl._hint(*name)
         else:
-            return _cls.impl._hint(name, glyphTuple, fdIndex)
+            return _cls.impl._hint(name, glyphTuple, fdKey)
 
-    def __init__(self, options, fontDictLists):
+    def __init__(self, options, dictRecord):
         self.options = options
-        self.fontDictLists = fontDictLists
-        self.hHinter = hhinter(options, fontDictLists)
-        self.vHinter = vhinter(options, fontDictLists)
+        self.dictRecord = dictRecord
+        self.hHinter = hhinter(options)
+        self.vHinter = vhinter(options)
         self.cnt = 0
         if options.justReporting():
             self.taskDesc = 'analysis'
@@ -2232,26 +2258,41 @@ class glyphHinter:
             masks.append(mask)
         return masks
 
-    def _hint(self, name, glyphTuple, fdIndex=0):
+    def _hint(self, name, glyphTuple, fdKey):
         """Top-level flex and stem hinting method for a glyph"""
-        fddict = self.fontDictLists[0][fdIndex]
-        an = self.options.nameAliases.get(name, name)
-        if an != name:
-            log.info("%s (%s): Begin %s (using fdDict '%s').",
-                     an, name, self.taskDesc, fddict.DictName)
+        if isinstance(fdKey, tuple):
+            assert len(fdKey) == 2
+            fdDictList = self.dictRecord[fdKey[0]][fdKey[1]]
         else:
-            log.info("%s: Begin %s (using fdDict '%s').",
-                     name, self.taskDesc, fddict.DictName)
-
-        gr = GlyphReport(name, self.options.report_all_stems)
+            fdDictList = fdKey
         gllist = [g for g in glyphTuple if g is not None]
-        self.hHinter.setGlyph(fdIndex, gr, gllist, name)
-        self.vHinter.setGlyph(fdIndex, gr, gllist, name)
-
-        if not self.compatiblePaths(gllist):
-            return name, None
+        fddicts = [d for g, d in zip(glyphTuple, fdDictList) if g is not None]
 
         defglyph = gllist[0]
+        fddict = fddicts[0]
+
+        an = self.options.nameAliases.get(name, name)
+        if an != name:
+            log_name = '%s (%s)' % (name, an)
+        else:
+            log_name = name
+
+        if len(glyphTuple) > 1:
+            set_log_parameters(glyph=log_name, instance=fddict.FontName)
+        else:
+            set_log_parameters(glyph=log_name, instance='')
+
+        log.info("Begin %s (using fdDict '%s').", self.taskDesc,
+                 fddict.DictName)
+
+        gr = GlyphReport(name, self.options.report_all_stems)
+        self.hHinter.setGlyph(fddicts, gr, gllist, name)
+        self.vHinter.setGlyph(fddicts, gr, gllist, name)
+
+        if not self.compatiblePaths(gllist, fddicts):
+            set_log_parameters(glyph='', instance='')
+            return name, None
+
         defglyph.changed = False
 
         if not self.options.noFlex:
@@ -2264,9 +2305,11 @@ class glyphHinter:
         self.vHinter.calcHintValues(lnks)
 
         if self.options.justReporting():
+            set_log_parameters(glyph='', instance='')
             return name, gr
 
         if self.hHinter.keepHints and self.vHinter.keepHints:
+            set_log_parameters(glyph='', instance='')
             return name, None
 
         if self.options.allowChanges:
@@ -2288,7 +2331,7 @@ class glyphHinter:
         self.hHinter.convertToStemLists()
         self.vHinter.convertToStemLists()
 
-        self.otherMasterStems(gllist)
+        self.otherInstanceStems(gllist)
 
         self.hHinter.convertToMasks()
         self.vHinter.convertToMasks()
@@ -2296,37 +2339,47 @@ class glyphHinter:
         usedmasks = self.distributeMasks(defglyph)
         self.cleanupUnused(gllist, usedmasks)
 
-        self.otherMasterMasks(gllist)
+        self.otherInstanceMasks(gllist)
 
         for g in gllist:
             g.clearTempState()
 
+        set_log_parameters(glyph='', instance='')
         return name, glyphTuple
 
-    def compatiblePaths(self, gllist):
+    def compatiblePaths(self, gllist, fddicts):
         if len(gllist) < 2:
             return True
 
-        log = self.hHinter
-
         glyph = gllist[0]
+        fddict = fddicts[0]
 
-        for g in gllist[1:]:
+        for i, (g, fd) in enumerate(zip(gllist[1:], fddicts[1:])):
+            set_log_parameters(instance=fd.FontName)
             if len(glyph.subpaths) != len(g.subpaths):
-                log.warning("%s has a different number " % g.getMasterDesc() +
-                            "of subpaths compared with %s: Cannot hint" %
-                            glyph.getMasterDesc())
+                log.warning("Path has a different number of subpaths compared "
+                            "with '%s': Cannot hint." % fd.FontName)
                 return False
             for si, dp in enumerate(glyph.subpaths):
                 gp = g.subpaths[si]
-                if len(dp) != len(gp):
-                    assert False
-                    log.warning("subpath %d in %s has %d elements " % 
-                                (si, g.getMasterDesc(), len(gp)) +
-                                "while %s has %d elements: Cannot hint" %
-                                (glyph.getMasterDesc(), len(dp)))
+                dpl, gpl = len(dp), len(gp)
+                if gpl != dpl:
+                    # XXX decide on warning message for these
+                    if (gpl == dpl + 1 and gp[-1].isClose() and
+                            not dp[-1].isClose()):
+                        for gi in range(i + 1):
+                            gllist[i].addNullClose(si)
+                        continue
+                    if (dpl == gpl + 1 and dp[-1].isClose() and
+                            not gp[-1].isClose()):
+                        g.addNullClose(si)
+                        continue
+                    log.warning("subpath %d has %d elements " % (si, len(gp)) +
+                                "while '%s' had %d elements: Cannot hint" %
+                                (fd.FontName, len(dp)))
                     return False
 
+        set_log_parameters(instance=fddict.FontName)
         # Use hHinter for path element list iterator
         for c in self.hHinter:
             isline = [x.pe.isLine() for x in c]
@@ -2673,17 +2726,19 @@ class glyphHinter:
                   ("vertical" if self.doV else "horizontal",
                    pe.e.x, pe.e.y, pe2.e.x, pe2.e.y, desc))
 
-    def otherMasterStems(self, gllist):
+    def otherInstanceStems(self, gllist):
         if len(gllist) < 2:
             return True
 
         glyph = gllist[0]
 
+        # We stored the other instance stems in the default glyph's
+        # hintState object, so copy them into the glyphs here.
         for i, g in enumerate(gllist[1:], 1):
             g.hstems = glyph.hhs.stems[i]
             g.vstems = glyph.vhs.stems[i]
 
-    def otherMasterMasks(self, gllist):
+    def otherInstanceMasks(self, gllist):
         if len(gllist) < 2:
             return True
 

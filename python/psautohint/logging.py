@@ -9,6 +9,8 @@ import logging.handlers
 
 log_glyph = ''
 log_instance = ''
+log_dimension = ''
+
 
 class DuplicateMessageFilter(logging.Filter):
     """
@@ -30,37 +32,73 @@ class DuplicateMessageFilter(logging.Filter):
         return True
 
 
+class psautoLogFormatter(logging.Formatter):
+    def __init__(self, fmt, datefmt=None, verbose=False):
+        super().__init__(fmt, datefmt)
+        self.verbose = verbose
+
+    def format(self, record):
+        if self.verbose:
+            verbose_field = "[%s:%d] " % (record.filename, record.lineno)
+        else:
+            verbose_field = ''
+        if record.dimension != '':
+            dim_field = record.dimension + ' '
+        else:
+            dim_field = ''
+        if record.instance != '' and record.glyph != '':
+            glyph_field = '(%s, "%s") ' % (record.glyph, record.instance)
+        elif record.glyph != '':
+            glyph_field = '(%s) ' % (record.glyph)
+        else:
+            glyph_field = ''
+        return (verbose_field + glyph_field + dim_field +
+                super().format(record))
+
+
+def set_log_parameters(dimension=None, glyph=None, instance=None):
+    global log_glyph, log_dimension, log_instance
+    if glyph is not None:
+        log_glyph = glyph
+    if dimension is not None:
+        log_dimension = dimension
+    if instance is not None:
+        log_instance = instance
+
+
 def logging_conf(verbose, logfile=None, handlers=None):
-    log_format = "%(levelname)s: %(message)s"
     if verbose == 0:
         log_level = logging.WARNING
     else:
-        log_format = "[%(filename)s:%(lineno)d] " + log_format
         if verbose == 1:
             log_level = logging.INFO
         else:
             log_level = logging.DEBUG
 
     if handlers is not None:
-        logging.basicConfig(format=log_format, level=log_level,
-                            handlers=handlers)
+        logging.basicConfig(level=log_level, handlers=handlers)
     else:
-        logging.basicConfig(format=log_format, level=log_level,
-                            filename=logfile)
+        logging.basicConfig(level=log_level, filename=logfile)
 
-    # Filter duplicate logging messages only when not running the tests
-    # and when not reporting more detailed log levels
-    if log_level == logging.WARNING:
-        for handler in logging.root.handlers:
+    old_factory = logging.getLogRecordFactory()
+
+    def psautohint_record_factory(*args, **kwargs):
+        record = old_factory(*args, **kwargs)
+        record.glyph = log_glyph
+        record.instance = log_instance
+        record.dimension = log_dimension
+        return record
+
+    logging.setLogRecordFactory(psautohint_record_factory)
+
+    fmt = psautoLogFormatter("%(levelname)s: %(message)s",
+                             verbose=verbose > 1)
+
+    for handler in logging.root.handlers:
+        handler.setFormatter(fmt)
+        if log_level == logging.WARNING:
             handler.addFilter(DuplicateMessageFilter())
 
-#    old_factory = logging.getLogRecordFactory()
-
-#    def psautohint_record_factory(*args, **kwargs):
-#        record = old_factory(*args, **kwargs)
-#        record.glyph = log_glyph
-#        record.instance = log_instance
-#        return record
 
 def log_receiver(logQueue):
     while True:
@@ -78,7 +116,6 @@ def logging_reconfig(logQueue, verbose=0):
         # Already configured logging to just swap out handlers
         for h in root.handlers:
             root.removeHandler(h)
-        qh.addFilter(DuplicateMessageFilter())
         root.addHandler(qh)
     else:
         logging_conf(verbose, None, [qh])

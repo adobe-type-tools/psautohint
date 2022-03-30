@@ -1,5 +1,4 @@
 import os
-from ._version import version as __version__
 
 
 class FontParseError(Exception):

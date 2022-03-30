@@ -109,7 +109,6 @@ import ast
 import hashlib
 import logging
 import os
-import re
 import shutil
 
 from types import SimpleNamespace
@@ -362,6 +361,7 @@ class UFOFontData:
         self.hashMapChanged = False
         # If True, then write data to the default layer
         self.writeToDefaultLayer = write_to_default_layer
+        self.desc = None
 
     def getUnitsPerEm(self):
         return self.fontInfo.get("unitsPerEm", 1000)
@@ -369,12 +369,11 @@ class UFOFontData:
     def getPSName(self):
         return self.fontInfo.get("postscriptFontName", "PSName-Undefined")
 
-    @staticmethod
-    def isCID():
-        return False
+    def getInputPath(self):
+        return self.path
 
     @staticmethod
-    def hasFDArray():
+    def isCID():
         return False
 
     def convertToGlyphData(self, name, readStems, readFlex, roundCoords,
@@ -389,7 +388,7 @@ class UFOFontData:
         if glyph is None:
             try:
                 self.removeHashEntry(name)
-            except:
+            except ValueError:
                 pass
             return
         layer = None
@@ -641,18 +640,19 @@ class UFOFontData:
             self._fontInfo = vars(info)
         return self._fontInfo
 
-    def getFontInfo(self, allow_no_blues, noFlex,
-                    vCounterGlyphs, hCounterGlyphs, fdIndex=0):
+    def getPrivateFDDict(self, allow_no_blues, noFlex, vCounterGlyphs,
+                         hCounterGlyphs, desc, fdIndex=None):
         if self.fontDict is not None:
             return self.fontDict
 
-        fdDict = fdTools.FDDict(fdIndex)
+        assert fdIndex is None or fdIndex == 0
+
+        fdDict = fdTools.FDDict(fdIndex, fontName=desc)
         # should be 1 if the glyphs are ideographic, else 0.
         fdDict.setInfo('LanguageGroup',
                        self.fontInfo.get("languagegroup", "0"))
-        fdDict.setInfo('OrigEmSqUnits', self.getUnitsPerEm())
-        fdDict.setInfo('FontName', self.getPSName())
         upm = self.getUnitsPerEm()
+        fdDict.setInfo('OrigEmSqUnits', upm)
         low = min(-upm * 0.25,
                   self.fontInfo.get("openTypeOS2WinDescent", 0) - 200)
         high = max(upm * 1.25,
@@ -753,37 +753,20 @@ class UFOFontData:
         self.fontDict = fdDict
         return fdDict
 
-    def getfdInfo(self, allow_no_blues, noFlex, vCounterGlyphs, hCounterGlyphs,
-                  glyphList):
-        fdGlyphDict = {}
-        fdDict = self.getFontInfo(allow_no_blues, noFlex,
-                                  vCounterGlyphs, hCounterGlyphs)
-        fontDictList = [fdDict]
+    def getfdIndex(self, name):
+        # XXX update for postscriptFDArray in lib.plist
+        return 0
 
-        # Check the fontinfo file, and add any other font dicts
-        srcFontInfo = os.path.dirname(self.path)
-        srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
-        maxX = self.getUnitsPerEm() * 2
-        maxY = maxX
-        minY = -self.getUnitsPerEm()
-        if os.path.exists(srcFontInfo):
-            with open(srcFontInfo, "r", encoding="utf-8") as fi:
-                fontInfoData = fi.read()
-            fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
+    def isVF(self):
+        return False
 
-            if "FDDict" in fontInfoData:
-                fdGlyphDict, finalFDict = \
-                    fdTools.parseFontInfoFile(
-                        fontDictList, fontInfoData, glyphList, maxY, minY,
-                        self.getPSName())
-                if finalFDict is None:
-                    # If a font dict was not explicitly specified for the
-                    # output font, use the first user-specified font dict.
-                    fdTools.mergeFDDicts(fontDictList[1:], self.fontDict)
-                else:
-                    fdTools.mergeFDDicts([finalFDict], self.fontDict)
+    def getMinMaxY(self):
+        upm = self.getUnitsPerEm()
+        return -upm, 2 * upm
 
-        return fdGlyphDict, fontDictList
+    def mergePrivateMap(self, privateMap):
+        for k, v in privateMap.items():
+            setattr(self.fontDict, k, v)
 
     @staticmethod
     def close():

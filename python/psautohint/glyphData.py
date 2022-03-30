@@ -889,6 +889,8 @@ class glyphData(BasePen):
         b = self.boundsMap.get(subpath, None)
         if b is not None:
             return b
+        if len(self.subpaths) == 0:
+            return None
         if subpath is None:
             b = deepcopy(self.getBounds(0))
             for i in range(1, len(self.subpaths)):
@@ -1129,11 +1131,12 @@ class glyphData(BasePen):
 
     # utility
 
-    def setMasterDesc(self, desc):
-        self.masterDesc = desc
-
-    def getMasterDesc(self):
-        return getattr(self, 'masterDesc', "[Unknown]")
+    def addNullClose(self, si):
+        sp = self.subpaths[si]
+        assert not sp[-1].isClose()
+        pe = pathElement(sp[0].s, sp[0].s, is_close=True,
+                         position=(si, len(sp)))
+        sp.append(pe)
 
     def getStemMasks(self):
         """Utility function for pen methods"""

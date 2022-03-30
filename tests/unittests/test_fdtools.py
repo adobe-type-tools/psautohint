@@ -14,9 +14,9 @@ def parse(path, glyphs=None):
         glyphs = []
     fddict = FDDict(0)
     fddict.setInfo("BlueFuzz", 0)
-    dl = [fddict]
-    gd, fd = parseFontInfoFile(dl, data, glyphs, 2000, -1000, "Foo")
-    return gd, dl, fd
+    dl = {0: fddict}
+    sm, fd = parseFontInfoFile(dl, data, glyphs, 2000, -1000, "Foo")
+    return sm, dl, fd
 
 
 def test_finalfont():
@@ -78,12 +78,11 @@ def test_fddict_bad_zone(attributes):
 
 
 def test_merge_empty_fddicts():
-    mergeFDDicts([FDDict(0), FDDict(1)], FDDict(2))
+    mergeFDDicts([FDDict(0), FDDict(1)])
 
 
 @pytest.mark.parametrize("stemdict", ["DominantH", "DominantV"])
 def test_merge_fddicts_with_stemdicts(stemdict):
-    fddict0 = FDDict(0)
     fddict1 = FDDict(1)
     fddict2 = FDDict(2)
 
@@ -94,4 +93,4 @@ def test_merge_fddicts_with_stemdicts(stemdict):
         fddict.setInfo(stemdict, [str(i * 10), str(i * 20)])
         fddict.buildBlueLists()
 
-    mergeFDDicts([fddict1, fddict2], fddict0)
+    mergeFDDicts([fddict1, fddict2])
