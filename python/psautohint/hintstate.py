@@ -458,8 +458,8 @@ class instanceStemState:
     def addToLoc(self, loc, score, strong=False, bb=False, seg=None):
         if self.bb is not None:
             if self.bb != bb:
-                log.warning("Mixed bounding-box and "
-                            "non-bounding box location data")
+                log.info("Mixed bounding-box and "
+                         "non-bounding box location data")
         else:
             self.bb = bb
         if seg is not None:
@@ -474,10 +474,20 @@ class instanceStemState:
         sLC.addScore(score, strong)
 
     def bestLocation(self, isBottom):
-        weights = ((x.weight(self.dhinter.inBand(x.loc, isBottom)), x.loc)
-                   for x in self.candDict.values())
+        weights = [(x.weight(self.dhinter.inBand(x.loc, isBottom)), x.loc)
+                   for x in self.candDict.values()]
         try:
             m = max(weights)
+#            try:
+#                next_m = m
+#                while abs(next_m[1] - m[1]) < 3.01:
+#                    weights.remove(next_m)
+#                    next_m = max(weights)
+#                if m[0] < next_m[0] * 2:
+#                    log.warning("Stem location competition: "
+#                                "weight %s vs %s" % (m, next_m))
+#            except:
+#                pass
             return m[1]
         except ValueError:
             return None

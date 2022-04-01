@@ -62,6 +62,23 @@ def hintOn(i, hintMaskBytes):
     return ((2**offset) & byteValue) > 0
 
 
+def denormalizeValue(nv, a):
+    l, d, u = a.minValue, a.defaultValue, a.maxValue
+    assert l <= d <= u
+    if nv == 0:
+        v = d
+    elif nv < 0:
+        v = l + (d - l) * -nv
+    else:
+        v = d + (u - d) * nv
+    return v
+
+
+def denormalizeLocation(loc, axes):
+    return {a.axisTag: denormalizeValue(loc.get(a.axisTag, a.defaultValue), a)
+            for a in axes}
+
+
 class T2ToGlyphDataExtractor(T2OutlineExtractor):
     """
     Inherits from the fontTools Outline Extractor and adapts some of the
@@ -255,7 +272,7 @@ class CFFFontData:
             self.is_vf = True
             self.glyph_programs = []
             self.vsIndexMap = {}
-            fvar = self.ttFont['fvar']
+            self.axes = self.ttFont['fvar'].axes
             CFF2 = self.cffTable
             CFF2.desubroutinize()
             topDict = CFF2.cff.topDictIndex[0]
@@ -265,7 +282,7 @@ class CFFFontData:
             # properties are set correctly.
             self.temp_cs_extract = copy.deepcopy(self.charStrings['.notdef'])
             self.temp_cs_merge = copy.deepcopy(self.charStrings['.notdef'])
-            self.vs_data_models = self.get_vs_data_models(topDict, fvar)
+            self.vs_data_models = self.get_vs_data_models(topDict, self.axes)
 
     def getGlyphList(self):
         return self.ttFont.getGlyphOrder()
@@ -409,7 +426,7 @@ class CFFFontData:
 
         for vn, vsi in enumerate(vsi_list):
             if self.is_vf:
-                fontName = self.getInstanceName(vsi)
+                fontName = self.getInstanceName(vn, vsi, self.axes)
                 if fontName is None:
                     fontName = "Model %d Instance %d" % (gl_vsindex, vn)
             fdDict = fdTools.FDDict(fdIndex, fontName=fontName)
@@ -553,10 +570,15 @@ class CFFFontData:
         for k, v in privateMap.items():
             setattr(privateDict, k, v)
 
-    def getInstanceName(self, vsi):
-        assert self.is_vf
-        # fvar = self.ttFont['fvar']
-        return None
+    @staticmethod
+    def getInstanceName(vn, vsi, axes):
+        if vn == 0:
+            vals = (f'{v:g}' for v in (a.defaultValue for a in axes))
+            return 'DEF{' + ','.join(vals) + '}'
+        else:
+            vals = (f'{v:g}'
+                    for v in denormalizeLocation(vsi.location, axes).values())
+        return '{' + ','.join(vals) + '}'
 
     def get_vf_glyphs(self, glyph_name):
         charstring = self.charStrings[glyph_name]
@@ -573,9 +595,9 @@ class CFFFontData:
 
         glyph_list = []
         for vsi in vs_data_model.master_vsi_list:
+            iFD = vsi.interpolateFromDeltas
             t2_program = interpolate_cff2_charstring(charstring, glyph_name,
-                                                     vsi.interpolateFromDeltas,
-                                                     vsindex)
+                                                     iFD, vsindex)
             self.temp_cs_extract.program = t2_program
             glyph = convertT2ToGlyphData(self.temp_cs_extract, True, False,
                                          True, name=glyph_name)
@@ -584,20 +606,20 @@ class CFFFontData:
         return glyph_list, vsindex
 
     @staticmethod
-    def get_vs_data_models(topDict, fvar):
+    def get_vs_data_models(topDict, axes):
         otvs = topDict.VarStore.otVarStore
         region_list = otvs.VarRegionList.Region
-        axis_tags = [axis_entry.axisTag for axis_entry in fvar.axes]
+        axis_tags = [axis_entry.axisTag for axis_entry in axes]
         vs_data_models = []
         for vsindex, var_data in enumerate(otvs.VarData):
-            vsi = VarStoreInstancer(topDict.VarStore.otVarStore, fvar.axes, {})
+            vsi = VarStoreInstancer(topDict.VarStore.otVarStore, axes, {})
             master_vsi_list = [vsi]
             for region_idx in var_data.VarRegionIndex:
                 region = region_list[region_idx]
                 loc = {}
                 for i, axis in enumerate(region.VarRegionAxis):
                     loc[axis_tags[i]] = axis.PeakCoord
-                vsi = VarStoreInstancer(topDict.VarStore.otVarStore, fvar.axes,
+                vsi = VarStoreInstancer(topDict.VarStore.otVarStore, axes,
                                         loc)
                 master_vsi_list.append(vsi)
             vdm = VarDataModel(var_data, vsindex, master_vsi_list)
@@ -622,12 +644,14 @@ def interpolate_cff2_charstring(charstring, gname, interpolateFromDeltas,
     # and discard vsindex op.
     new_program = []
     last_i = 0
+    seenVOP = False
     program = charstring.program
     for i, token in enumerate(program):
         if token == 'vsindex':
             if last_i != 0:
                 new_program.extend(program[last_i:i - 1])
             last_i = i + 1
+            seenVOP = True
         elif token == 'blend':
             num_regions = charstring.getNumRegions(vsindex)
             numInstances = 1 + num_regions
@@ -654,7 +678,8 @@ def interpolate_cff2_charstring(charstring, gname, interpolateFromDeltas,
                 argi += 1
             new_program.extend(master_args)
             last_i = i + 1
-    if last_i != 0:
+            seenVOP = True
+    if last_i != 0 or not seenVOP:
         new_program.extend(program[last_i:])
     return new_program
 

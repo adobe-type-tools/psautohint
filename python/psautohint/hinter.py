@@ -923,7 +923,7 @@ class dimensionHinter:
                 maxsegs > self.options.maxSegments):
             log.warning("Calculated %d segments, skipping %s stem testing" %
                         (maxsegs, self.aDesc()))
-            log.hs.deleteSegments()
+            self.hs.deleteSegments()
 
     def showSegs(self):
         """
@@ -1806,8 +1806,8 @@ class dimensionHinter:
                             loc = ci.pe.e.o
                         else:
                             loc = (ci.pe.s.o + ci.pe.e.o) / 2
-                        log.warning("Falling back to point location for "
-                                    "segment %s" % (ci.pe.position,))
+                        log.info("Falling back to point location for "
+                                 "segment %s" % (ci.pe.position,))
                         iSS.addToLoc(loc, self.NoSegScore)
                     done[sidx][ul] = True
 
@@ -1819,14 +1819,17 @@ class dimensionHinter:
             if isG != 'low':
                 hi = self.bestLocation(sidx, 1, iSSl, hs0)
             if isG == 'low':
+                lo = lo + 21
                 hi = lo - 21
             elif isG == 'high':
                 lo = hi
                 hi = lo - 20
             else:
                 if hi < lo:
+                    # Differentiate bad stem from ghost stem
+                    lo = hi + 50
                     log.warning("Stem end is less than start for non-"
-                                "ghost stem")
+                                "ghost stem, will be removed from set")
             sl.append(stem((lo, hi)))
 
         self.fddict = self.fddicts[0]
@@ -1913,21 +1916,23 @@ class dimensionHinter:
         dsl = self.hs.stems[0]
         l = len(dsl)
         hasConflicts = False
+        self.hs.goodMask = [True] * l
         if self.options.removeConflicts:
             sc = [[False] * l for _ in range(l)]
-            for sidx in range(l):
-                for sjdx in range(sidx + 1, l):
-                    for sl in self.hs.stems:
+            for sl in self.hs.stems:
+                for sidx in range(l):
+                    if sl[sidx].isBad():
+                        self.hs.goodMask[sidx] = False
+                        continue
+                    for sjdx in range(sidx + 1, l):
                         if sl[sidx] > sl[sjdx]:
                             hasConflicts = True
                             sc[sidx][sjdx] = sc[sjdx][sidx] = True
         if hasConflicts:
-            _, self.hs.goodMask = self.unconflict(sc)
+            _, self.hs.goodMask = self.unconflict(sc, self.hs.goodMask)
             log.info("Removed %s stems %s to resolve conflicts" %
                      (self.aDesc(), [i for i, g in enumerate(self.hs.goodMask)
                                      if not g]))
-        else:
-            self.hs.goodMask = [True] * l
 
         self.hs.hasOverlaps = False
         self.hs.stemOverlaps = so = [[False] * l for _ in range(l)]
