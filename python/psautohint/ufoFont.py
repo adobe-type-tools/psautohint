@@ -899,48 +899,20 @@ class GlyphDataWrapper(object):
         Calls pointPen commands on pen to draw the glyph, optionally naming
         some points and building a library of hint annotations
         """
-        uhl = {} if ufoHintLib else None
-        glyph = self._glyph
-        doHints = ufoHintLib and (glyph.hasFlex() or
-                                  glyph.hasHints(either=True))
-        pln, pn = 0, None
-        for s in glyph.subpaths:
-            wrapi = len(s) - 1
-            if wrapi < 0:
-                continue
-            w = s[wrapi]
-            assert w.e == s[0].s
-            if w.e == w.s:
-                wrapi -= 1
-                w = s[wrapi]
-            pen.beginPath()
-            wt = 'line' if w.isLine() else "curve"
-            if doHints:
-                pln, pn = self.addUfoHints(uhl, w, pln, startSubpath=True)
-            pen.addPoint((w.e.x, w.e.y), segmentType=wt, name=pn)
-            for i in range(0, wrapi):
-                c = s[i]
-                if doHints:
-                    pln, pn = self.addUfoHints(uhl, c, pln)
-                if c.isLine():
-                    pen.addPoint((c.e.x, c.e.y), segmentType="line", name=pn)
-                else:
-                    pen.addPoint((c.cs.x, c.cs.y), name=pn)
-                    pen.addPoint((c.ce.x, c.ce.y))
-                    pen.addPoint((c.e.x, c.e.y), segmentType="curve")
-            if not w.isLine():
-                if doHints:
-                    pln, pn = self.addUfoHints(uhl, w, pln)
-                pen.addPoint((w.cs.x, w.cs.y), name=pn)
-                pen.addPoint((w.ce.x, w.ce.y))
-            pen.endPath()
+        if ufoHintLib is not None:
+            uhl = {}
+            ufoH = lambda pe, lm, ss=False: self.addUfoHints(uhl, pe, lm, ss)
+        else:
+            ufoH = None
 
-        if ufoHintLib:
+        self._glyph.drawPoints(pen, ufoH)
+
+        if ufoHintLib is not None:
             # Add this hash to the glyph data, as it is the hash which matches
             # the output outline data. This is not necessarily the same as the
             # hash of the source data; autohint can be used to change outlines.
             hash_pen = HashPointPen(self)
-            self.drawPoints(hash_pen, ufoHintLib=False)
+            self._glyph.drawPoints(hash_pen, None)
             uhl["id"] = hash_pen.getHash()
 
             # Remove any existing hint data.

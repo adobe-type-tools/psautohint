@@ -120,6 +120,8 @@ class FDDict:
         for k, v in vars(self).items():
             if k not in kFontInfoKeys or v is None:
                 continue
+            if k == 'FontName':
+                continue
             if isinstance(v, list):
                 v = '[%s]' % ' '.join((str(i) for i in v))
             elif v is False:
@@ -658,24 +660,27 @@ class FDDictManager:
                 log.error("Cannot continue")
                 sys.exit()
 
-        if options.printFDDictList:
+        if options.printFDDictList or options.printAllFDDict:
             # Print the user defined FontDicts, and exit.
             print("Private Dictionaries:\n")
             for model, fda in self.dictRecord.items():
                 for fdIndex, fdl in fda.items():
-                    fontDict = fdl[0]
-                    if fontDict is None:
-                        continue
-                    print(fontDict.DictName)
-                    print(str(fontDict))
-                    gnameList = [gn for gn, fi in self.fdSelectMap.items()
-                                 if fdIndex == fi]
-                    print("%d glyphs:" % len(gnameList))
-                    if len(gnameList) > 0:
-                        gTxt = " ".join(gnameList)
-                    else:
-                        gTxt = "None"
-                    print(gTxt + "\n")
+                    for fontDict in fdl:
+                        if fontDict is None:
+                            continue
+                        print(fontDict.FontName)
+                        print(fontDict.DictName)
+                        print(str(fontDict))
+                        gnameList = [gn for gn, fi in self.fdSelectMap.items()
+                                     if fdIndex == fi]
+                        print("%d glyphs:" % len(gnameList))
+                        if len(gnameList) > 0:
+                            gTxt = " ".join(gnameList)
+                        else:
+                            gTxt = "None"
+                        print(gTxt + "\n")
+                        if not options.printAllFDDict:
+                            break
         elif len(set(self.fdSelectMap.keys())) > 1:
             log.info("Using different FDDicts for some glyphs.")
 

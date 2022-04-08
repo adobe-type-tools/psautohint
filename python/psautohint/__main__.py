@@ -336,10 +336,15 @@ class HintOptions(ACOptions):
         self.logOnly = pargs.report_only
         self.removeConflicts = not pargs.keep_conflicts
         self.printFDDictList = pargs.print_list_fddict
+        self.printAllFDDict = pargs.print_all_fddict
         self.roundCoords = not pargs.decimal
         self.writeToDefaultLayer = pargs.write_to_default_layer
         self.maxSegments = pargs.max_segments
         self.verbose = pargs.verbose
+        if pargs.force_overlap:
+            self.overlapForcing = True
+        elif pargs.force_no_overlap:
+            self.overlapForcing = False
         if pargs.processes:
             self.process_count = pargs.processes
 
@@ -482,11 +487,7 @@ def _parse_fontinfo_file(options, fontinfo_path):
                 options.hCounterGlyphs.update(glyphList)
 
 
-def get_options(args):
-    parser = argparse.ArgumentParser(
-        formatter_class=_CustomHelpFormatter,
-        description=__doc__
-    )
+def add_common_options(parser, term):
     parser_fonts = parser.add_argument(
         'font_paths',
         metavar='FONT',
@@ -502,6 +503,146 @@ def get_options(args):
         help='verbose mode\n'
              'Use -vv for extra-verbose mode.'
     )
+    glyphs_parser = parser.add_mutually_exclusive_group()
+    glyphs_parser.add_argument(
+        '-g',
+        '--glyphs',
+        metavar='GLYPH_LIST',
+        dest='glyphs_to_hint',
+        type=_split_comma_sequence,
+        default=[],
+        help='comma-separated sequence of glyphs to %s\n' % term +
+             'The glyph identifiers may be glyph indexes, glyph names, or '
+             'glyph CIDs. CID values must be prefixed with a forward slash.\n'
+             'Examples:\n'
+             '    psautohint -g A,B,C,69 MyFont.ufo\n'
+             '    psautohint -g /103,/434,68 MyCIDFont'
+    )
+    glyphs_parser.add_argument(
+        '--glyphs-file',
+        metavar='PATH',
+        dest='glyphs_to_hint_file',
+        type=_validate_path,
+        help='file containing a list of glyphs to %s\n' % term +
+             'The file must contain a comma-separated sequence of glyph '
+             'identifiers.'
+    )
+    glyphs_parser.add_argument(
+        '-x',
+        '--exclude-glyphs',
+        metavar='GLYPH_LIST',
+        dest='glyphs_to_not_hint',
+        type=_split_comma_sequence,
+        default=[],
+        help='comma-separated sequence of glyphs to NOT %s\n' % term +
+             "Counterpart to '--glyphs' option."
+    )
+    glyphs_parser.add_argument(
+        '--exclude-glyphs-file',
+        metavar='PATH',
+        dest='glyphs_to_not_hint_file',
+        type=_validate_path,
+        help='file containing a list of glyphs to NOT %s\n' % term +
+             "Counterpart to '--glyphs-file' option."
+    )
+    overlap_parser = parser.add_mutually_exclusive_group()
+    overlap_parser.add_argument(
+        '-m',
+        '--overlap-glyphs',
+        metavar='GLYPH_LIST',
+        dest='overlaps_to_hint',
+        type=_split_comma_sequence,
+        default=[],
+        help='comma-separated sequence of glyphs to be corrected for '
+             'overlap\nSame convention as --glyphs flag'
+    )
+    overlap_parser.add_argument(
+        '--overlaps-file',
+        metavar='PATH',
+        dest='overlaps_to_hint_file',
+        type=_validate_path,
+        help='file containing a list of glyphs to be corrected for overlap\n'
+             'The file must contain a comma-separated sequence of glyph '
+             'identifiers.'
+    )
+    overlap_parser.add_argument(
+        '--force-overlap',
+        action='store_true',
+        help='Correct for potential overlap on all glyphs (the default when '
+             'using -r or hinting a variable font and not supplying an '
+             'overlap list)'
+    )
+    overlap_parser.add_argument(
+        '--force-no-overlap',
+        action='store_true',
+        help='Do not correct for potential overlap on any glyphs (the '
+             'default when hinting individual, non-variable fonts and not '
+             'supplying an overlap list)'
+    )
+    parser.add_argument(
+        '--log',
+        metavar='PATH',
+        dest='log_path',
+        type=_check_save_path,
+        help='write output messages to a file'
+    )
+    parser.add_argument(
+        '-p',
+        '--processes',
+        type=int,
+        help="The number of glyph-%sing processes (default is " % term +
+             "os.cpu_count(), which is typically the number of CPU cores "
+             "in the computer. If negative the number will be subtracted "
+             "from the core count (with a minimum result of 1)"
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=__version__
+    )
+    parser.add_argument(
+        '--traceback',
+        action='store_true',
+        help="show traceback for exceptions.",
+    )
+    return parser_fonts
+
+
+def handle_glyph_lists(options, parsed_args):
+    if parsed_args.glyphs_to_hint:
+        options.explicitGlyphs = True
+        options.glyphList = _process_glyph_list_arg(
+            parsed_args.glyphs_to_hint, options.nameAliases)
+    elif parsed_args.glyphs_to_not_hint:
+        options.excludeGlyphList = True
+        options.glyphList = _process_glyph_list_arg(
+            parsed_args.glyphs_to_not_hint, options.nameAliases)
+    elif parsed_args.glyphs_to_hint_file:
+        options.explicitGlyphs = True
+        options.glyphList = _process_glyph_list_arg(
+            _read_txt_file(parsed_args.glyphs_to_hint_file),
+            options.nameAliases)
+    elif parsed_args.glyphs_to_not_hint_file:
+        options.excludeGlyphList = True
+        options.glyphList = _process_glyph_list_arg(
+            _read_txt_file(parsed_args.glyphs_to_not_hint_file),
+            options.nameAliases)
+
+    if parsed_args.overlaps_to_hint:
+        options.overlapList = _process_glyph_list_arg(
+            parsed_args.overlaps_to_hint, options.nameAliases)
+    elif parsed_args.overlaps_to_hint_file:
+        options.overlapList = _process_glyph_list_arg(
+            _read_txt_file(parsed_args.overlaps_to_hint_file),
+            options.nameAliases)
+
+
+def get_options(args):
+    parser = argparse.ArgumentParser(
+        formatter_class=_CustomHelpFormatter,
+        description=__doc__
+    )
+    parser_fonts = add_common_options(parser, 'hint')
     parser.add_argument(
         '-o',
         '--output',
@@ -523,7 +664,7 @@ def get_options(args):
              'compatibily.'
     )
     parser.add_argument(
-        '-u',
+        '-b',
         '--reference-out',
         metavar='PATH',
         type=_check_save_path,
@@ -555,48 +696,6 @@ def get_options(args):
         help='When hinting a variable font keep a stem hint even when its '
              'order inverts compared with another stem.'
     )
-    glyphs_parser = parser.add_mutually_exclusive_group()
-    glyphs_parser.add_argument(
-        '-g',
-        '--glyphs',
-        metavar='GLYPH_LIST',
-        dest='glyphs_to_hint',
-        type=_split_comma_sequence,
-        default=[],
-        help='comma-separated sequence of glyphs to hint\n'
-             'The glyph identifiers may be glyph indexes, glyph names, or '
-             'glyph CIDs. CID values must be prefixed with a forward slash.\n'
-             'Examples:\n'
-             '    psautohint -g A,B,C,69 MyFont.ufo\n'
-             '    psautohint -g /103,/434,68 MyCIDFont'
-    )
-    glyphs_parser.add_argument(
-        '--glyphs-file',
-        metavar='PATH',
-        dest='glyphs_to_hint_file',
-        type=_validate_path,
-        help='file containing a list of glyphs to hint\n'
-             'The file must contain a comma-separated sequence of glyph '
-             'identifiers.'
-    )
-    glyphs_parser.add_argument(
-        '-x',
-        '--exclude-glyphs',
-        metavar='GLYPH_LIST',
-        dest='glyphs_to_not_hint',
-        type=_split_comma_sequence,
-        default=[],
-        help='comma-separated sequence of glyphs to NOT hint\n'
-             "Counterpart to '--glyphs' option."
-    )
-    glyphs_parser.add_argument(
-        '--exclude-glyphs-file',
-        metavar='PATH',
-        dest='glyphs_to_not_hint_file',
-        type=_validate_path,
-        help='file containing a list of glyphs to NOT hint\n'
-             "Counterpart to '--glyphs-file' option."
-    )
     report_parser = parser.add_mutually_exclusive_group()
     report_parser.add_argument(
         '-c',
@@ -610,13 +709,6 @@ def get_options(args):
         '--report-only',
         action='store_true',
         help='process the font without modifying it'
-    )
-    parser.add_argument(
-        '--log',
-        metavar='PATH',
-        dest='log_path',
-        type=_check_save_path,
-        help='write output messages to a file'
     )
     parser.add_argument(
         '-d',
@@ -651,12 +743,21 @@ def get_options(args):
         action='store_true',
         help='Ignore fontinfo files in the same directory as the font'
     )
-    parser.add_argument(
+    fddict_parser = parser.add_mutually_exclusive_group()
+    fddict_parser.add_argument(
         '--print-list-fddict',
         action='store_true',
-        help='print the list of private dictionaries, whether defined in the '
+        help='print the list of private dictionaries in the single font, '
+             'reference font, or default instance, whether defined in the '
              'font or using fontinfo files, and the glyphs associated with '
-             "each\nUse the '--doc-fontinfo' for more information."
+             'each'
+    )
+    fddict_parser.add_argument(
+        '--print-all-fddict',
+        action='store_true',
+        help='print the list of private dictionaries for all fonts or '
+             'instances, whether defined in the font or using fontinfo '
+             'files, and the glyphs associated with each'
     )
     parser.add_argument(
         '--doc-fontinfo',
@@ -666,29 +767,10 @@ def get_options(args):
         addl_help=FDDICT_DOC
     )
     parser.add_argument(
-        '-p',
-        '--processes',
-        type=int,
-        help="The number of glyph-hinting processes (default is "
-             "os.cpu_count(), which is typically the number of CPU cores "
-             "in the computer. If negative the number will be subtracted "
-             "from the core count (with a minimum result of 1)"
-    )
-    parser.add_argument(
         '--info',
         action=_AdditionalHelpAction,
         help="show program's general info and exit",
         addl_help=GENERAL_INFO
-    )
-    parser.add_argument(
-        '--version',
-        action='version',
-        version=__version__
-    )
-    parser.add_argument(
-        '--traceback',
-        action='store_true',
-        help="show traceback for exceptions.",
     )
     parser.add_argument(
         '--max-segments',
@@ -738,24 +820,7 @@ def get_options(args):
 
     options.font_format = _validate_font_paths(all_font_paths, parser)
 
-    if parsed_args.glyphs_to_hint:
-        options.explicitGlyphs = True
-        options.glyphList = _process_glyph_list_arg(
-            parsed_args.glyphs_to_hint, options.nameAliases)
-    elif parsed_args.glyphs_to_not_hint:
-        options.excludeGlyphList = True
-        options.glyphList = _process_glyph_list_arg(
-            parsed_args.glyphs_to_not_hint, options.nameAliases)
-    elif parsed_args.glyphs_to_hint_file:
-        options.explicitGlyphs = True
-        options.glyphList = _process_glyph_list_arg(
-            _read_txt_file(parsed_args.glyphs_to_hint_file),
-            options.nameAliases)
-    elif parsed_args.glyphs_to_not_hint_file:
-        options.excludeGlyphList = True
-        options.glyphList = _process_glyph_list_arg(
-            _read_txt_file(parsed_args.glyphs_to_not_hint_file),
-            options.nameAliases)
+    handle_glyph_lists(options, parsed_args)
 
     if not parsed_args.fontinfo_file:
         fontinfo_path = os.path.join(os.path.dirname(all_font_paths[0]),
@@ -793,6 +858,10 @@ class ReportOptions(ACOptions):
         self.report_zones = pargs.alignment_zones
         self.report_all_stems = pargs.all_stems
         self.verbose = pargs.verbose
+        if pargs.force_overlap:
+            self.overlapForcing = True
+        elif pargs.force_no_overlap:
+            self.overlapForcing = False
         if pargs.processes:
             self.process_count = pargs.processes
 
@@ -803,13 +872,7 @@ def get_stemhist_options(args):
         description='Stem and Alignment zones report for PostScript, '
                     'OpenType/CFF and UFO fonts.'
     )
-    parser.add_argument(
-        'font_paths',
-        metavar='FONT',
-        nargs='+',
-        type=_validate_path,
-        help='Type1/CFF/OTF/UFO font files'
-    )
+    add_common_options(parser, 'report')
     parser.add_argument(
         '-o',
         '--output',
@@ -843,78 +906,9 @@ def get_stemhist_options(args):
         help='Include stems formed by curved line segments; by default, '
              'includes only stems formed by straight line segments.'
     )
-    glyphs_parser = parser.add_mutually_exclusive_group()
-    glyphs_parser.add_argument(
-        '-g',
-        '--glyphs',
-        metavar='GLYPH_LIST',
-        dest='glyphs_to_hint',
-        type=_split_comma_sequence,
-        default=[],
-        help='comma-separated sequence of glyphs to process\n'
-             'The glyph identifiers may be glyph indexes, glyph names, or '
-             'glyph CIDs. CID values must be prefixed with a forward slash.\n'
-             'Examples:\n'
-             '    psautohint -g A,B,C,69 MyFont.ufo\n'
-             '    psautohint -g /103,/434,68 MyCIDFont'
-    )
-    glyphs_parser.add_argument(
-        '--glyphs-file',
-        metavar='PATH',
-        dest='glyphs_to_hint_file',
-        type=_validate_path,
-        help='file containing a list of glyphs to process\n'
-             'The file must contain a comma-separated sequence of glyph '
-             'identifiers.'
-    )
-    glyphs_parser.add_argument(
-        '-x',
-        '--exclude-glyphs',
-        metavar='GLYPH_LIST',
-        dest='glyphs_to_not_hint',
-        type=_split_comma_sequence,
-        default=[],
-        help='comma-separated sequence of glyphs to NOT process\n'
-             "Counterpart to '--glyphs' option."
-    )
-    glyphs_parser.add_argument(
-        '--exclude-glyphs-file',
-        metavar='PATH',
-        dest='glyphs_to_not_hint_file',
-        type=_validate_path,
-        help='file containing a list of glyphs to NOT process\n'
-             "Counterpart to '--glyphs-file' option."
-    )
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        default=0,
-        help='verbose mode\n'
-             'Use -vv for extra-verbose mode.'
-    )
-    parser.add_argument(
-        '-p',
-        '--processes',
-        type=int,
-        help="The number of glyph-hinting processes (default is "
-             "os.cpu_count(), which is typically the number of CPU cores "
-             "in the computer. If negative the number will be subtracted "
-             "from the core count (with a minimum result of 1)"
-    )
-    parser.add_argument(
-        '--version',
-        action='version',
-        version=__version__
-    )
-    parser.add_argument(
-        '--traceback',
-        action='store_true',
-        help="show traceback for exceptions.",
-    )
     parsed_args = parser.parse_args(args)
 
-    logging_conf(parsed_args.verbose)
+    logging_conf(parsed_args.verbose, parsed_args.log_path)
 
     if (parsed_args.output_paths and
             len(parsed_args.font_paths) != len(parsed_args.output_paths)):
@@ -927,22 +921,7 @@ def get_stemhist_options(args):
 
     options.font_format = _validate_font_paths(parsed_args.font_paths, parser)
 
-    if parsed_args.glyphs_to_hint:
-        options.glyphList = _process_glyph_list_arg(
-            parsed_args.glyphs_to_hint, options.nameAliases)
-    elif parsed_args.glyphs_to_not_hint:
-        options.excludeGlyphList = True
-        options.glyphList = _process_glyph_list_arg(
-            parsed_args.glyphs_to_not_hint, options.nameAliases)
-    elif parsed_args.glyphs_to_hint_file:
-        options.glyphList = _process_glyph_list_arg(
-            _read_txt_file(parsed_args.glyphs_to_hint_file),
-            options.nameAliases)
-    elif parsed_args.glyphs_to_not_hint_file:
-        options.excludeGlyphList = True
-        options.glyphList = _process_glyph_list_arg(
-            _read_txt_file(parsed_args.glyphs_to_not_hint_file),
-            options.nameAliases)
+    handle_glyph_lists(options, parsed_args)
 
     return options, parsed_args
 

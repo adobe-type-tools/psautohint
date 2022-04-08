@@ -8,9 +8,13 @@ import numbers
 import threading
 import operator
 from copy import deepcopy
+from math import sqrt
+from collections import defaultdict
 from builtins import tuple as _tuple
-from fontTools.misc.bezierTools import (solveQuadratic, calcCubicParameters,
-                                        splitCubicAtT)
+from fontTools.misc.bezierTools import (solveQuadratic, solveCubic,
+                                        calcCubicParameters,
+                                        splitCubicAtT, segmentPointAtT,
+                                        approximateCubicArcLength)
 from fontTools.pens.basePen import BasePen
 
 import logging
@@ -27,14 +31,14 @@ def norm_float(value):
     return value
 
 
-def feq(a, b):
+def feq(a, b, factor=1.52e-5):
     """Returns True if a and b are close enough to be considered equal"""
-    return abs(a - b) < 1.52e-5
+    return abs(a - b) < factor
 
 
-def fne(a, b):
+def fne(a, b, factor=1.52e-5):
     """Returns True if a and b are not close enough to be considered equal"""
-    return abs(a - b) >= 1.52e-5
+    return abs(a - b) >= factor
 
 
 class pt(tuple):
@@ -161,6 +165,15 @@ class pt(tuple):
             raise TypeError('Both arguments to pt.dot must be pts')
         return self[0] * other[0] + self[1] * other[1]
 
+    def scross(self, other):
+        """
+        Returns a numeric value representing the cross product of this
+        pt object with the argument
+        """
+        if not isinstance(other, pt):
+            raise TypeError('Both arguments to pt.dot must be pts')
+        return other[1] * self[0] - other[0] * self[1]
+
     def distsq(self, other):
         """
         Returns a numerical value representing the squared distance
@@ -196,9 +209,9 @@ class pt(tuple):
         """
         return pt(abs(self[0]), abs(self[1]))
 
-    def round(self):
+    def round(self, dec=0):
         """Returns a new pt object with rounded coordinate values"""
-        return pt(round(self[0]), round(self[1]))
+        return pt(round(self[0], dec), round(self[1], dec))
 
     # for pt and number
     def __mul__(self, other):
@@ -218,9 +231,10 @@ class pt(tuple):
                             'number')
         return pt(self[0] * other, self[1] * other)
 
-    def __eq__(self, other):
+    def __eq__(self, other, factor=1.52e-5):
         """Returns True if each coordinate is feq to that of the argument"""
-        return feq(self[0], other[0]) and feq(self[1], other[1])
+        return (feq(self[0], other[0], factor) and
+                feq(self[1], other[1], factor))
 
     def eq_exact(self, other):
         """Returns True if each coordinate is equal to that of the argument"""
@@ -433,6 +447,16 @@ class boundsState:
         else:
             return 0, None, None, None
 
+    def intersects(self, other, margin=0):
+        """
+        Returns True if the bounds of this object are within those of
+        the argument
+        """
+        return (self.b[0][0] <= other.b[1][0] + margin and
+                self.b[1][0] + margin >= other.b[0][0] and
+                self.b[0][1] <= other.b[1][1] + margin and
+                self.b[1][1] + margin >= other.b[0][1])
+
 
 class pathBoundsState:
     """
@@ -482,6 +506,8 @@ class pathElement:
         substitution pathElements must have segment_sub equal to the
         offset in the parent's segment_sub list.
     """
+    assocMatchFactor = 93
+    tSlop = .005
 
     def __init__(self, *args, is_close=False, masks=None, flex=False,
                  position=None):
@@ -592,6 +618,40 @@ class pathElement:
         """Returns the fontTools cubic parameters for this pathElement"""
         return calcCubicParameters(self.s, self.cs, self.ce, self.e)
 
+    def getAssocFactor(self):
+        if self.is_line:
+            l = sqrt(self.s.distsq(self.e))
+        else:
+            l = approximateCubicArcLength(self.s, self.cs, self.ce, self.e)
+        return l / self.assocMatchFactor
+
+    def containsPoint(s, p, factor, returnT=False):
+        if s.is_line:
+            # We sometimes want t anyway, so why not?
+            ds = sqrt(s.s.distsq(s.e))
+            d1 = sqrt(s.s.distsq(p))
+            d2 = sqrt(s.e.distsq(p))
+            iseq = feq(ds, d1 + d2, factor)
+            if not returnT:
+                return iseq
+            else:
+                return iseq, d1 / ds
+        a, b, c, d = s.cubicParameters()
+        if abs(s.s.x - s.e.x) > abs(s.s.y - s.e.y):
+            i, j = 0, 1
+        else:
+            i, j = 1, 0
+        tl = solveCubic(a[i], b[i], c[i], d[i] - p[i])
+        sols = [(a[j] * t * t * t + b[j] * t * t + c[j] * t + d[j], t)
+                for t in tl if -.1 <= t <= 1.1]
+        tsols = [t for v, t in sols if feq(v, p[j], factor)]
+        if not returnT:
+            return len(tsols) > 0
+        if len(tsols) > 0:
+            return True, tsols[0]
+        else:
+            return False, 0
+
     def slopePoint(self, t):
         """
         Returns the point definiing the slope of the pathElement
@@ -691,10 +751,43 @@ class pathElement:
             return True
         return False
 
+    def splitAt(self, t):
+        if self.is_line:
+            pb = self.s + (self.e - self.s) * t
+            ret = pathElement(pb, self.e, position=self.position,
+                              is_close=self.is_close)
+            self.e = pb
+            self.is_close = False
+            self.bounds = None
+            return ret
+        else:
+            s, n = splitCubicAtT(self.s, self.cs, self.ce, self.e, t)
+            ptsn = [pt(p) for p in n]
+            ret = pathElement(*ptsn, position=self.position,
+                              is_close=self.is_close)
+            assert s[0] == self.s and n[3] == ret.e
+            self.cs = pt(s[1])
+            self.ce = pt(s[2])
+            self.e = pt(s[3])
+            self.is_close = False
+            self.bounds = None
+            return ret
+
+    def atT(self, t):
+        return pt(segmentPointAtT(self.fonttoolsSegment(), t))
+
+    def fonttoolsSegment(self):
+        if self.is_line:
+            return [tuple(self.s), tuple(self.e)]
+        else:
+            return [tuple(self.s), tuple(self.cs), tuple(self.ce),
+                    tuple(self.e)]
+
 
 class glyphData(BasePen):
     """Stores state corresponding to a T2 CharString"""
     def __init__(self, roundCoords, name=''):
+        super().__init__()
         self.roundCoords = roundCoords
 
         self.subpaths = []
@@ -710,7 +803,6 @@ class glyphData(BasePen):
         self.lastcp = None
 
         self.nextmasks = None
-        self.current_end = pt()
         self.nextflex = None
         self.changed = False
         self.pathEdited = False
@@ -720,51 +812,50 @@ class glyphData(BasePen):
 
     # pen methods:
 
-    def moveTo(self, ptup):
+    def _moveTo(self, ptup):
         """moveTo pen method"""
         self.lastcp = None
         self.subpaths.append([])
-        self.current_end = pt(ptup, roundCoords=self.roundCoords)
 
-    def lineTo(self, ptup):
+    def _lineTo(self, ptup):
         """lineTo pen method"""
         self.lastcp = None
+        curpt = pt(self._getCurrentPoint(), roundCoords=self.roundCoords)
         newpt = pt(ptup, roundCoords=self.roundCoords)
-        self.subpaths[-1].append(pathElement(self.current_end, newpt,
+        self.subpaths[-1].append(pathElement(curpt, newpt,
                                              masks=self.getStemMasks(),
                                              flex=self.checkFlex(False),
                                              position=self.getPosition()))
-        self.current_end = newpt
 
-    def curveTo(self, ptup1, ptup2, ptup3):
+    def _curveToOne(self, ptup1, ptup2, ptup3):
         """lineTo pen method"""
         self.lastcp = None
+        curpt = pt(self._getCurrentPoint(), roundCoords=self.roundCoords)
         newpt1 = pt(ptup1, roundCoords=self.roundCoords)
         newpt2 = pt(ptup2, roundCoords=self.roundCoords)
         newpt3 = pt(ptup3, roundCoords=self.roundCoords)
-        self.subpaths[-1].append(pathElement(self.current_end, newpt1, newpt2,
-                                             newpt3, masks=self.getStemMasks(),
+        self.subpaths[-1].append(pathElement(curpt, newpt1, newpt2, newpt3,
+                                             masks=self.getStemMasks(),
                                              flex=self.checkFlex(True),
                                              position=self.getPosition()))
-        self.current_end = newpt3
 
     # closePath is a courtesy of the caller, not an instruction, so
     # we rely on its semantics here
-    def closePath(self):
+    def _closePath(self):
         """closePath (courtesy) pen method"""
+        curpt = pt(self._getCurrentPoint(), roundCoords=self.roundCoords)
         if len(self.subpaths[-1]) == 0:  # No content after moveTo
-            t = self.current_end
+            t = curpt
         else:
             t = self.subpaths[-1][0].s
-        if self.current_end.eq_exact(t):
+        if curpt.eq_exact(t):
             return
-        self.subpaths[-1].append(pathElement(self.current_end, t,
+        self.subpaths[-1].append(pathElement(curpt, t,
                                              masks=self.getStemMasks(),
                                              flex=self.checkFlex(False),
                                              is_close=True,
                                              position=self.getPosition()))
         self.lastcp = self.subpaths[-1][-1]
-        self.current_end = t
 
     def getPosition(self):
         """Returns position (subpath idx, offset) of next spline to be drawn"""
@@ -935,6 +1026,45 @@ class glyphData(BasePen):
         if version == 1:
             prog.append('endchar')
         return prog
+
+    def drawPoints(self, pen, ufoH=None):
+        """
+        Calls pointPen commands on pen to draw the glyph, optionally naming
+        some points and building a library of hint annotations
+        """
+        doHints = ufoH is not None and (self.hasFlex() or
+                                        self.hasHints(either=True))
+        pln, pn = 0, None
+        for s in self.subpaths:
+            wrapi = len(s) - 1
+            if wrapi < 0:
+                continue
+            w = s[wrapi]
+            assert w.e == s[0].s
+            if w.e == w.s:
+                wrapi -= 1
+                w = s[wrapi]
+            pen.beginPath()
+            wt = 'line' if w.isLine() else "curve"
+            if doHints:
+                pln, pn = ufoH(w, pln, True)
+            pen.addPoint((w.e.x, w.e.y), segmentType=wt, name=pn)
+            for i in range(0, wrapi):
+                c = s[i]
+                if doHints:
+                    pln, pn = ufoH(c, pln)
+                if c.isLine():
+                    pen.addPoint((c.e.x, c.e.y), segmentType="line", name=pn)
+                else:
+                    pen.addPoint((c.cs.x, c.cs.y), name=pn)
+                    pen.addPoint((c.ce.x, c.ce.y))
+                    pen.addPoint((c.e.x, c.e.y), segmentType="curve")
+            if not w.isLine():
+                if doHints:
+                    pln, pn = ufoH(w, pln)
+                pen.addPoint((w.cs.x, w.cs.y), name=pn)
+                pen.addPoint((w.ce.x, w.ce.y))
+            pen.endPath()
 
     # XXX deal with or avoid reordering when preserving any hints
     def reorder(self, neworder):
@@ -1130,6 +1260,82 @@ class glyphData(BasePen):
         return self.glyphiter(self)
 
     # utility
+
+    def checkAssocPoint(self, segs, spe, ope, sp, op, mapEnd, factor=None):
+        if factor is None:
+            factor = ope.getAssocFactor()
+        if sp == op or ope.containsPoint(sp, factor):
+            if not ope.containsPoint(spe.atT(.5), factor):
+                return False
+            spe.association = ope
+            return True
+        else:
+            does, t = spe.containsPoint(op, factor, True)
+            if does and spe.tSlop < t < 1 - spe.tSlop:
+                midMapped = (1 - (1 - t) / 2) if mapEnd else t / 2
+                if not ope.containsPoint(spe.atT(midMapped), factor):
+                    return False
+                following = spe.splitAt(t)
+                if mapEnd:
+                    following.association = ope
+                    sl = self.subpaths[spe.position[0]]
+                    sl.insert(sl.index(spe) + 1, following)
+                    segs.add(spe)
+                else:
+                    spe.association = ope
+                    sl = self.subpaths[spe.position[0]]
+                    sl.insert(sl.index(spe), following)
+                    segs.add(following)
+                self.setPathEdited()
+                return True
+        return False
+
+    def associatePath(self, orig):
+        peMap = defaultdict(list)
+        for oc in orig:
+            peMap[tuple(oc.e.round(1))].append(oc)
+        segs = set()
+        for s in self.subpaths:
+            segs.update(s)
+        # The position[0] subpath pointers for self pathElements should stay
+        # accurate during the loop but the position[1] indexes won't.
+        while segs:
+            # Check a segment with the same start point
+            c = segs.pop()
+            done = False
+            oepel = peMap.get(tuple(c.e.round(1)), [])
+            if oepel:
+                for oepe in oepel:
+                    if self.checkAssocPoint(segs, c, oepe, c.s, oepe.s, True):
+                        done = True
+                        break
+                if done:
+                    continue
+            ospel = peMap.get(tuple(c.s.round(1)), [])
+            if ospel:
+                for ospe in ospel:
+                    ospe = orig.nextInSubpath(ospe)
+                    if self.checkAssocPoint(segs, c, ospe, c.e, ospe.e, False):
+                        done = True
+                        break
+                if done:
+                    continue
+            cBounds = c.getBounds()
+            for oc in orig:
+                factor = oc.getAssocFactor()
+                if cBounds.intersects(oc.getBounds(), factor):
+                    if (oc.containsPoint(c.s, factor) and
+                            self.checkAssocPoint(segs, c, oc, c.e, oc.e,
+                                                 False, factor)):
+                        done = True
+                        break
+            if done:
+                continue
+            assert not hasattr(c, 'association')
+            log.warning("Unable to map derived path element from " +
+                        "%s to %s" % (c.s, c.e))
+            c.association = None
+        self.syncPositions()
 
     def addNullClose(self, si):
         sp = self.subpaths[si]

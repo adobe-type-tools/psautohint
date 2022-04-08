@@ -250,6 +250,7 @@ class glyphHintState:
     """
     def __init__(self):
         self.peStates = {}
+        self.overlapRemoved = None
         self.increasingSegs = []
         self.decreasingSegs = []
         self.stemValues = []
@@ -279,7 +280,7 @@ class glyphHintState:
         else:
             return None
 
-    def addSegment(self, fr, to, loc, pe1, pe2, typ, bonus, isV, mid,
+    def addSegment(self, fr, to, loc, pe1, pe2, typ, bonus, isV, mid1, mid2,
                    desc):
         """Adds a new segment associated with pathElements pe1 and pe2"""
         if isV:
@@ -296,9 +297,9 @@ class glyphHintState:
             isInc = True
             lst = self.increasingSegs
 
+        assert pe1 or pe2
         s = hintSegment(loc, mn, mx, pe2 if pe2 else pe1, typ, bonus, isV,
                         isInc, desc)
-        assert pe1 and (not pe2 or pe1 is not pe2)
         # Segments derived from the first point in a path c are typically
         # also added to the previous spline p, with p passed as pe1 and c
         # passed as pe2. Segments derived from the last point in a path
@@ -307,12 +308,12 @@ class glyphHintState:
         # the special case of MCURVE, which indicates the point was derived
         # from the middle of the spline.
         if pe1:
-            if mid:
+            if mid1:
                 self.getPEState(pe1, True).m_segs.append(s)
             else:
                 self.getPEState(pe1, True).e_segs.append(s)
         if pe2:
-            if mid:
+            if mid2:
                 self.getPEState(pe2, True).m_segs.append(s)
             else:
                 self.getPEState(pe2, True).s_segs.append(s)

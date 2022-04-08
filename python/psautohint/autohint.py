@@ -35,6 +35,8 @@ class ACOptions(object):
         self.explicitGlyphs = False
         self.nameAliases = {}
         self.excludeGlyphList = False
+        self.overlapList = []
+        self.overlapForcing = None
         self.hintAll = False
         self.readHints = True
         self.allowChanges = False
@@ -46,8 +48,8 @@ class ACOptions(object):
         self.removeConflicts = True
         # Copy of parse_args verbose for child processes
         self.verbose = 0
-        self.printDefaultFDDict = False
         self.printFDDictList = False
+        self.printAllFDDict = False
         self.roundCoords = True
         self.writeToDefaultLayer = False
         # If this number of segments is exceeded in a dimension, don't hint

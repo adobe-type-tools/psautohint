@@ -18,6 +18,7 @@ from fontTools.misc.bezierTools import solveCubic
 from .glyphData import pt, feq, fne, stem
 from .hintstate import (hintSegment, stemValue, glyphHintState, links,
                         instanceStemState)
+from .overlap import removeOverlap
 from .report import GlyphReport
 from .logging import logging_reconfig, set_log_parameters
 
@@ -161,7 +162,7 @@ class dimensionHinter:
     def __iter__(self, glidx=None):
         return self.gliter(self.gllist, glidx)
 
-    # Methods filled in by subclasses
+    # Methods implemented by subclasses
     @abstractmethod
     def startFlex(self):
         pass
@@ -348,7 +349,6 @@ class dimensionHinter:
         self.BigDist = max(self.dominantStems() + [self.InitBigDist])
         self.BigDist *= self.BigDistFactor
         log.debug("generate %s segments" % self.aDesc())
-        self.prepForSegs()
         self.genSegs()
         self.limitSegs()
         log.debug("generate %s stem values" % self.aDesc())
@@ -394,6 +394,16 @@ class dimensionHinter:
         self.stopHint()
 
     # Segments
+    def handleOverlap(self):
+        if self.options.overlapForcing is True:
+            return True
+        elif self.options.overlapForcing is False:
+            return False
+        elif self.name in self.options.overlapList:
+            return True
+        else:
+            return self.isMulti
+
     def addSegment(self, fr, to, loc, pe1, pe2, typ, desc, mid=False):
         if pe1 is not None and isinstance(pe1.segment_sub, int):
             subpath, offset = pe1.position
@@ -409,8 +419,24 @@ class dimensionHinter:
             pe2 = t
         if pe1 == pe2:
             pe2 = None
+        mid1 = mid2 = mid
+        if pe1 is not None and hasattr(pe1, 'association'):
+            ope1 = pe1.association
+            if (not mid1 and ope1 is not None and
+                    not pe1.e.__eq__(ope1.e, ope1.getAssocFactor())):
+                mid1 = True
+            pe1 = ope1
+        if pe2 is not None and hasattr(pe2, 'association'):
+            ope2 = pe2.association
+            if (not mid2 and ope2 is not None and
+                    not pe2.e.__eq__(ope2.e, ope2.getAssocFactor())):
+                mid2 = True
+            pe2 = ope2
+
+        if not pe1 and not pe2:
+            return
         self.hs.addSegment(fr, to, loc, pe1, pe2, typ, self.Bonus,
-                           self.isV(), mid, desc)
+                           self.isV(), mid1, mid2, desc)
 
     def CPFrom(self, cp2, cp3):
         """Return point cp3 adjusted relative to cp2 by CPFrac"""
@@ -707,11 +733,33 @@ class dimensionHinter:
         Calls genSegsForPathElement for each pe and cleans up the
         generated segment lists
         """
+        origGlyph = None
+        if self.handleOverlap():
+            # To handle overlap, make a copy of the glyph without
+            # overlap and associate its pathElements with those of
+            # the unmodified glyph. Then set self.glyph to the modified
+            # version. The segment generation code only looks at
+            # self.hs in addSegment(), which has the appropriate code
+            # to follow the associations and add the segments to the
+            # unmodified glyph
+            origGlyph = self.glyph
+            self.glyph = removeOverlap(origGlyph)
+            if self.glyph is None:
+                self.glyph = origGlyph
+                origGlyph = None
+                self.hs.overlapRemoved = False
+            else:
+                self.glyph.associatePath(origGlyph)
+
+        self.prepForSegs()
         self.Bonus = 0
         c = self.glyph.next(self.glyph, segSub=True)
         while c:
             self.genSegsForPathElement(c)
             c = self.glyph.next(c, segSub=True)
+
+        if origGlyph is not None:
+            self.glyph = origGlyph
 
         self.hs.compactLists()
         self.hs.remExtraBends()
@@ -1747,7 +1795,6 @@ class dimensionHinter:
         self.startHint()
         self.BigDist = max(self.dominantStems() + [self.InitBigDist])
         self.BigDist *= self.BigDistFactor
-        self.prepForSegs()
         self.genSegs()
 
         iSSl = [(instanceStemState(s.lb, self), instanceStemState(s.rt, self))
@@ -1947,7 +1994,7 @@ class dimensionHinter:
                         self.hs.hasOverlaps = True
                         so[sidx][sjdx] = so[sjdx][sidx] = True
 
-        if self.hs.counterHinted and self.hs.hasOverlaps and self.gllist <= 1:
+        if self.hs.counterHinted and self.hs.hasOverlaps and not self.isMulti:
             log.warning("XXX TEMPORARY WARNING: overlapping counter hints")
 
         self.hs.ghostCompat = gc = [None] * l
