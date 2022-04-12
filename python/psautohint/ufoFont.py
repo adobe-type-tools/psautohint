@@ -760,8 +760,7 @@ class UFOFontData:
     def isVF(self):
         return False
 
-    def getMinMaxY(self):
-        upm = self.getUnitsPerEm()
+    def get_min_max(self, upm):
         return -upm, 2 * upm
 
     def mergePrivateMap(self, privateMap):

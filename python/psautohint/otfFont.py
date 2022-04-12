@@ -96,8 +96,10 @@ class T2ToGlyphDataExtractor(T2OutlineExtractor):
         self.vhintCount = 0
         self.hhintCount = 0
 
+#    def execute(self, charString, isSubr=False):
     def execute(self, charString):
         self.subrLevel += 1
+#        super().execute(charString, isSubr)
         super().execute(charString)
         self.subrLevel -= 1
         if self.subrLevel == 0:
@@ -208,6 +210,7 @@ def convertT2ToGlyphData(t2CharString, readStems=True, readFlex=True,
                                        t2CharString.private.defaultWidthX,
                                        readStems, readFlex)
     extractor.execute(t2CharString)
+    extractor.endPath()  # XXX Remove when fonttools #1899 is resolved
     t2_width_arg = None
     if extractor.gotWidth and (extractor.width is not None):
         t2_width_arg = extractor.width - t2CharString.private.nominalWidthX
@@ -297,19 +300,17 @@ class CFFFontData:
             psName = self.cffTable.cff.fontNames[0]
         return psName
 
-    def get_min_max(self, pTopDict, upm):
+    def get_min_max(self, upm):
         if self.is_cff2 and 'hhea' in self.ttFont:
             font_max = self.ttFont['hhea'].ascent
             font_min = self.ttFont['hhea'].descent
-        elif hasattr(pTopDict, 'FontBBox'):
-            font_max = pTopDict.FontBBox[3]
-            font_min = pTopDict.FontBBox[1]
+        elif hasattr(self.topDict, 'FontBBox'):
+            font_max = self.topDict.FontBBox[3]
+            font_min = self.topDict.FontBBox[1]
         else:
             font_max = upm * 1.25
             font_min = -upm * 0.25
-        alignment_min = min(-upm * 0.25, font_min)
-        alignment_max = max(upm * 1.25, font_max)
-        return alignment_min, alignment_max
+        return font_min, font_max
 
     def convertToGlyphData(self, glyphName, readStems, readFlex,
                            roundCoords, doAll=False):
@@ -453,7 +454,9 @@ class CFFFontData:
                                              dict_vsindex, vsi)
                 numbvs = len(bvs)
                 if bvattr == 'BlueValues' and numbvs < 4:
-                    low, high = self.get_min_max(pTopDict, upm)
+                    low, high = self.get_min_max(upm)
+                    low = min(-upm * 0.25, low)
+                    high = max(upm * 1.25, high)
                     # Make a set of inactive alignment zones: zones outside
                     # of the font BBox so as not to affect hinting. Used
                     # when source font has no BlueValues or has invalid
@@ -551,9 +554,6 @@ class CFFFontData:
 
     def getInputPath(self):
         return self.inputPath
-
-    def getMinMaxY(self):
-        return self.topDict.FontBBox[1], self.topDict.FontBBox[3]
 
     def getPrivateDict(self, fdIndex):
         topDict = self.topDict

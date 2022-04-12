@@ -567,7 +567,7 @@ def getFDInfo(font, desc, options, glyphList, isVF):
                                        options.vCounterGlyphs,
                                        options.hCounterGlyphs, desc)
         fdArrayMap = {0: fdDict}
-        minY, maxY = font.getMinMaxY()
+        minY, maxY = font.get_min_max(fdDict.OrigEmSqUnits)
         fdSelectMap, finalFDict = parseFontInfoFile(
             fdArrayMap, srcFontinfoData, glyphList, maxY, minY, desc)
         if finalFDict is None:
