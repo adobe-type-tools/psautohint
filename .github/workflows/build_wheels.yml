@@ -28,7 +28,7 @@ jobs:
         python-version: '3.8'
 
     - name: Build wheels (Python 3.7 through 3.9)
-      uses: pypa/cibuildwheel@v2.9.0
+      uses: pypa/cibuildwheel@v2.10.1
       with:
         output-dir: dist
       env:
@@ -41,7 +41,7 @@ jobs:
         CIBW_ENVIRONMENT: "CFLAGS='-g0'"
 
     - name: Build wheels (Python 3.10 only)
-      uses: pypa/cibuildwheel@v2.9.0
+      uses: pypa/cibuildwheel@v2.10.1
       with:
         output-dir: dist
       env:
