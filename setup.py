@@ -588,7 +588,7 @@ setup(name="psautohint",
       ],
       extras_require={
           "testing": [
-              "pytest-cov >=3, <4",
+              "pytest-cov >=4, <5",
               "pytest-xdist >=2.5.0, <2.6.0",
           ],
       },
