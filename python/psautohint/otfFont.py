@@ -92,18 +92,8 @@ class T2ToGlyphDataExtractor(T2OutlineExtractor):
         self.readStems = readStems
         self.readFlex = readFlex
         self.hintMaskBytes = None
-        self.subrLevel = 0
         self.vhintCount = 0
         self.hhintCount = 0
-
-#    def execute(self, charString, isSubr=False):
-    def execute(self, charString):
-        self.subrLevel += 1
-#        super().execute(charString, isSubr)
-        super().execute(charString)
-        self.subrLevel -= 1
-        if self.subrLevel == 0:
-            self.glyph.finish()
 
     def op_endchar(self, index):
         self.endPath()
@@ -210,7 +200,6 @@ def convertT2ToGlyphData(t2CharString, readStems=True, readFlex=True,
                                        t2CharString.private.defaultWidthX,
                                        readStems, readFlex)
     extractor.execute(t2CharString)
-    extractor.endPath()  # XXX Remove when fonttools #1899 is resolved
     t2_width_arg = None
     if extractor.gotWidth and (extractor.width is not None):
         t2_width_arg = extractor.width - t2CharString.private.nominalWidthX

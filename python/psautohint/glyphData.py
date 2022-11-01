@@ -921,10 +921,6 @@ class glyphData(BasePen):
         """quasi-pen method passing cntrmask data"""
         self.cntr.append([hhints, vhints])
 
-    def finish(self):
-        """finish pen method"""
-        pass
-
     # width
     def setWidth(self, width):
         self.wdth = width
