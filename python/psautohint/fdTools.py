@@ -54,6 +54,8 @@ kBlueValueKeys = [
     "Height6Overshoot",  # 13
 ]
 
+kFamilyValueKeys = ['Family' + i for i in kBlueValueKeys]
+
 kOtherBlueValueKeys = [
     "Baseline5Overshoot",  # 0
     "Baseline5",  # 1
@@ -66,6 +68,8 @@ kOtherBlueValueKeys = [
     "DescenderOvershoot",  # 8
     "DescenderHeight",  # 9
 ]
+
+kOtherFamilyValueKeys = ['Family' + i for i in kOtherBlueValueKeys]
 
 kOtherFDDictKeys = [
     "FontName",
@@ -81,19 +85,28 @@ kOtherFDDictKeys = [
 
 kFontDictBluePairsName = "BlueValuesPairs"
 kFontDictOtherBluePairsName = "OtherBlueValuesPairs"
+kFontDictFamilyPairsName = "FamilyValuesPairs"
+kFontDictOtherFamilyPairsName = "OtherFamilyValuesPairs"
 
 kRunTimeFDDictKeys = [
     "DictName",
     kFontDictBluePairsName,
     kFontDictOtherBluePairsName,
+    kFontDictFamilyPairsName,
+    kFontDictOtherFamilyPairsName,
 ]
+
 kFDDictKeys = (kOtherFDDictKeys +
                kBlueValueKeys +
                kOtherBlueValueKeys +
+               kFamilyValueKeys +
+               kOtherFamilyValueKeys +
                kRunTimeFDDictKeys)
 kFontInfoKeys = (kOtherFDDictKeys +
                  kBlueValueKeys +
                  kOtherBlueValueKeys +
+                 kFamilyValueKeys +
+                 kOtherFamilyValueKeys +
                  ["StemSnapH", "StemSnapV"])
 
 
@@ -114,6 +127,8 @@ class FDDict:
         self.FlexOK = True
         setattr(self, kFontDictBluePairsName, [])
         setattr(self, kFontDictOtherBluePairsName, [])
+        setattr(self, kFontDictFamilyPairsName, [])
+        setattr(self, kFontDictOtherFamilyPairsName, [])
 
     def __str__(self):
         a = ''
@@ -141,11 +156,14 @@ class FDDict:
             else:
                 value = 0
         elif key in ('DominantV', 'DominantH'):
-            value = [int(v) for v in value]
+            if type(value) == list:
+                value = [int(v) for v in value]
+            else:
+                value = [int(value)]
         elif key == 'FlexOK':
-            if key is None:
+            if value is None:
                 value = True        # default
-            elif key == 'false':
+            elif value == 'false':
                 value = False
             else:
                 value = bool(value)
@@ -171,10 +189,15 @@ class FDDict:
                 "must be a bottom zone - the BaselineOvershoot must be "
                 "negative, not positive." % self.DictName)
 
-        blueKeyList = [kBlueValueKeys, kOtherBlueValueKeys]
+        blueKeyList = [kBlueValueKeys,
+                       kOtherBlueValueKeys,
+                       kFamilyValueKeys,
+                       kOtherFamilyValueKeys]
         bluePairListNames = [kFontDictBluePairsName,
-                             kFontDictOtherBluePairsName]
-        for i in [0, 1]:
+                             kFontDictOtherBluePairsName,
+                             kFontDictFamilyPairsName,
+                             kFontDictOtherFamilyPairsName]
+        for i in range(4):
             keyList = blueKeyList[i]
             pairFieldName = bluePairListNames[i]
             bluePairList = []
@@ -187,6 +210,9 @@ class FDDict:
                         if key == "BaselineOvershoot":
                             zonePos = self.BaselineYCoord
                             tempKey = "BaselineYCoord"
+                        elif key == "FamilyBaselineOvershoot":
+                            zonePos = self.FamilyBaselineYCoord
+                            tempKey = "FamilyBaselineYCoord"
                         else:
                             for posSuffix in ["", "Height", "Baseline"]:
                                 tempKey = "%s%s" % (baseName, posSuffix)
@@ -204,6 +230,12 @@ class FDDict:
                             bottomPos = zonePos + width
                             isBottomZone = 1
                             if (i == 0) and (key != "BaselineOvershoot"):
+                                raise FontInfoParseError(
+                                    "FontDict %s. Zone %s is a top zone, and "
+                                    "the width (%s) must be positive." %
+                                    (self.DictName, tempKey, width))
+                            elif ((i == 2) and
+                                  (key != "FamilyBaselineOvershoot")):
                                 raise FontInfoParseError(
                                     "FontDict %s. Zone %s is a top zone, and "
                                     "the width (%s) must be positive." %
@@ -258,6 +290,9 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
     # The user-specified set of blue values to write into the output font,
     # some sort of merge of the individual font dicts. May not be supplied.
     finalFDict = None
+    setName = None
+
+    glyphSetSet = set()
 
     blueFuzz = fdArrayMap[0].BlueFuzz
 
@@ -292,21 +327,32 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
                     state = dictState
                     dictName = tokenList[i]
                     i += 1
-                    fdDict = FDDict(maxfdIndex + 1, dictName=dictName)
                     if dictName == kFinalDictName:
                         # This is dict is NOT used to hint any glyphs; it is
                         # used to supply the merged alignment zones and stem
                         # widths for the final font.
-                        finalFDict = fdDict
+                        if finalFDict is None:
+                            finalFDict = FDDict(maxfdIndex + 1,
+                                                dictName=dictName)
+                        fdDict = finalFDict
                     else:
-                        # save dict and FDIndex.
-                        maxfdIndex += 1
-                        fdIndexDict[dictName] = maxfdIndex
-                        fdArrayMap[maxfdIndex] = fdDict
+                        if dictName not in fdIndexDict:
+                            fdDict = FDDict(maxfdIndex + 1, dictName=dictName)
+                            # save dict and FDIndex.
+                            maxfdIndex += 1
+                            fdIndexDict[dictName] = maxfdIndex
+                            fdArrayMap[maxfdIndex] = fdDict
+                        else:
+                            fdDict = fdArrayMap[fdIndexDict[dictName]]
 
                 elif token == kGlyphSetToken:
                     state = glyphSetState
                     setName = tokenList[i]
+                    if setName in glyphSetSet:
+                        raise FontInfoParseError(
+                            "Duplicate GlyphSet \"%s\"" % setName)
+                    else:
+                        glyphSetSet.add(setName)
                     i += 1
                 else:
                     raise FontInfoParseError(
@@ -364,17 +410,6 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
                     raise FontInfoParseError(
                         "End FDDict  name \"%s\" does not match begin FDDict "
                         "name \"%s\"." % (tokenList[i + 1], dictName))
-                if fdDict.DominantH is None:
-                    log.warning("The FDDict '%s' in fontinfo has no "
-                                "DominantH value", dictName)
-                if fdDict.DominantV is None:
-                    log.warning("The FDDict '%s' in fontinfo has no "
-                                "DominantV value", dictName)
-                if fdDict.BlueFuzz is None:
-                    fdDict.BlueFuzz = blueFuzz
-                fdDict.buildBlueLists()
-                if fdDict.FontName is None:
-                    fdDict.FontName = fontName
                 state = baseState
                 i += 2
                 dictName = None
@@ -396,6 +431,20 @@ def parseFontInfoFile(fdArrayMap, data, glyphList, maxY, minY, fontName):
                     raise FontInfoParseError(
                         "FDDict key \"%s\" in fdDict named \"%s\" is not "
                         "recognized." % (token, dictName))
+
+    for dictName, fdIndex in fdIndexDict.items():
+        fdDict = fdArrayMap[fdIndex]
+        if fdDict.DominantH is None:
+            log.warning("The FDDict '%s' in fontinfo has no "
+                        "DominantH value", dictName)
+        if fdDict.DominantV is None:
+            log.warning("The FDDict '%s' in fontinfo has no "
+                        "DominantV value", dictName)
+        if fdDict.BlueFuzz is None:
+            fdDict.BlueFuzz = blueFuzz
+        fdDict.buildBlueLists()
+        if fdDict.FontName is None:
+            fdDict.FontName = fontName
 
     if fdIndexDict:
         # There are some FDDict definitions. This means that we need
@@ -486,8 +535,8 @@ def mergeFDDicts(prevDictList):
         goodZoneList.append(prevZone[0])
         zoneBuffer = 2 * prefDDict.BlueFuzz + 1
         for zone in zoneList[1:]:
-            curEntry = blueZoneDict[zone]
-            prevEntry = blueZoneDict[prevZone]
+            curEntry = zoneDict[zone]
+            prevEntry = zoneDict[prevZone]
             zoneName = curEntry[1]
             fdDictName = curEntry[2]
             prevZoneName = prevEntry[1]
@@ -543,14 +592,41 @@ def mergeFDDicts(prevDictList):
     return privateMap
 
 
-def fontinfoFileData(font):
+def fontinfoIncludeData(fdir, idir, match):
+    incrpath = match.group(1)
+    incpath = os.path.join(fdir, incrpath)
+    if os.path.isfile(incpath):
+        with open(incpath, "r", encoding="utf-8") as ii:
+            return ii.read()
+    if idir is not None:
+        incpath = os.path.join(idir, incrpath)
+        if os.path.isfile(incpath):
+            with open(incpath, "r", encoding="utf-8") as ii:
+                return ii.read()
+    raise FontInfoParseError("fontinfo include file \"%s\" not found" %
+                             incrpath)
+
+
+def fontinfoFileData(options, font):
     # Don't use fontinfo file for a variable font
     if not font.isVF():
-        srcFontInfo = os.path.dirname(font.getInputPath())
-        srcFontInfo = os.path.join(srcFontInfo, "fontinfo")
+        fdir = os.path.dirname(font.getInputPath())
+        if options.fontinfoPath is not None:
+            idir = os.path.dirname(options.fontinfoPath)
+            srcFontInfo = options.fontinfoPath
+        else:
+            idir = None
+            srcFontInfo = os.path.join(fdir, "fontinfo")
         if os.path.isfile(srcFontInfo):
             with open(srcFontInfo, "r", encoding="utf-8") as fi:
                 fontInfoData = fi.read()
+            # Process includes
+            subsMade = 1
+            while subsMade > 0:
+                fontInfoData, subsMade = re.subn(
+                    r"^include (.*)$",
+                    lambda m: fontinfoIncludeData(fdir, idir, m),
+                    fontInfoData, 0, re.M)
             fontInfoData = re.sub(r"#[^\r\n]+", "", fontInfoData)
             return fontInfoData, 'FDDict' in fontInfoData
     return None, None
@@ -559,7 +635,7 @@ def fontinfoFileData(font):
 def getFDInfo(font, desc, options, glyphList, isVF):
     privateMap = None
     # Check the fontinfo file, and add any other font dicts
-    srcFontinfoData, hasDict = fontinfoFileData(font)
+    srcFontinfoData, hasDict = fontinfoFileData(options, font)
     if hasDict and not options.ignoreFontinfo:
         # Get the default fontinfo from the font's top dict.
         fdDict = font.getPrivateFDDict(options.allow_no_blues,

@@ -1305,13 +1305,24 @@ class glyphData(BasePen):
                     if self.checkAssocPoint(segs, c, oepe, c.s, oepe.s, True):
                         done = True
                         break
+                    else:
+                        oepen = orig.nextInSubpath(oepe)
+                        if self.checkAssocPoint(segs, c, oepen, c.s, oepen.e,
+                                                True):
+                            done = True
+                            break
                 if done:
                     continue
             ospel = peMap.get(tuple(c.s.round(1)), [])
             if ospel:
                 for ospe in ospel:
-                    ospe = orig.nextInSubpath(ospe)
-                    if self.checkAssocPoint(segs, c, ospe, c.e, ospe.e, False):
+                    ospen = orig.nextInSubpath(ospe)
+                    if self.checkAssocPoint(segs, c, ospen, c.e, ospen.e,
+                                            False):
+                        done = True
+                        break
+                    elif self.checkAssocPoint(segs, c, ospe, c.e, ospe.s,
+                                              False):
                         done = True
                         break
                 if done:
@@ -1321,8 +1332,25 @@ class glyphData(BasePen):
                 factor = oc.getAssocFactor()
                 if cBounds.intersects(oc.getBounds(), factor):
                     if (oc.containsPoint(c.s, factor) and
-                            self.checkAssocPoint(segs, c, oc, c.e, oc.e,
-                                                 False, factor)):
+                            (self.checkAssocPoint(segs, c, oc, c.e, oc.e,
+                                                  False, factor) or
+                             self.checkAssocPoint(segs, c, oc, c.e, oc.s,
+                                                  False, factor))):
+                        done = True
+                        break
+            if done:
+                continue
+            # Didn't find the start point anywhere, probably because it
+            # was very close to but not quite identical to another start point.
+            # Try again from the other end.
+            for oc in orig:
+                factor = oc.getAssocFactor()
+                if cBounds.intersects(oc.getBounds(), factor):
+                    if (oc.containsPoint(c.e, factor) and
+                            (self.checkAssocPoint(segs, c, oc, c.s, oc.s,
+                                                  True, factor) or
+                             self.checkAssocPoint(segs, c, oc, c.s, oc.e,
+                                                  True, factor))):
                         done = True
                         break
             if done:

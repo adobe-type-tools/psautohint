@@ -45,11 +45,7 @@ same directory as the input font file, psautohint will search it for
 definitions of sets of alignment zones (a.k.a 'FDDict'), and for matching
 lists of glyphs to which each FDDict should be applied to. This approach
 allows a group of glyphs to be hinted using a different set of zones and stem
-widths than other glyphs. This solution isn't as robust as having multiple
-hint dictionaries --supported in CID fonts-- in the font, as the final
-name-keyed font can only have one set of alignment zones, but it does allow
-for improved hinting when different sets of glyphs need different alignment
-zones.
+widths than other glyphs.
 
 If FDDict definitions are used, then the global alignment zones and stem widths
 in the source font will be ignored. For any glyphs not covered by an explicit
@@ -57,18 +53,16 @@ FDDict definition, psautohint will synthesize a dummy FDDict, where the zones
 are set outside of the font's bounding box, so not to influence the hinting.
 This is desirable for glyphs that have no features that need to be aligned.
 
-If psautohint finds an FDDict named 'FinalFont', it will write that set of
-values to the output font. Otherwise, it will merge all the alignment zones
-and stem widths as the union of all FDDict definitions. If this merging fails
-because some of the alignment zones and stem widths overlap, then the font
-developer will have to provide a 'FinalFont' FDDict that explicitly defines
-which stems and zones to use in the hinted output font.
-
 To use a FDDict, one must define both the values of alignment zones and stem
 widths, and the set of glyphs to apply it to. The FDDict must be defined in
 the file before the set of glyphs which belong to it. Both the FDDict and the
 glyph set define a name; an FDDict is applied to the glyph set with the same
 name.
+
+A fontinfo file can contain multiple FDDict definitions with the same name.
+The values from each definition will be merged, with later values overriding
+earlier ones in the case of duplicates. Defining multiple GlyphSets with
+the same name is not allowed.
 
 Running psautohint with the option --print-dflt-fddict will provide the list
 of default FDDict values for the source font. These can be used as a starting
@@ -225,6 +219,12 @@ OtherBlues pairs:
 
     DescenderOvershoot
     DescenderHeight
+
+FamilyBlueValue pairs:
+    # Any BlueValue keyword preceded by "Family"
+
+FamilyOtherBlueValue pairs:
+    # Any OtherBlueValue keyword preceded by "Family"
 
 For zones which capture the bottom of a feature in a glyph --BaselineYCoord
 and all OtherBlues values-- the value specifies the top of the zone, and the
@@ -822,12 +822,15 @@ def get_options(args):
 
     handle_glyph_lists(options, parsed_args)
 
-    if not parsed_args.fontinfo_file:
+    if options.ignoreFontinfo:
+        pass
+    elif not parsed_args.fontinfo_file:
         fontinfo_path = os.path.join(os.path.dirname(all_font_paths[0]),
                                      FONTINFO_FILE_NAME)
         if os.path.isfile(fontinfo_path):
             _parse_fontinfo_file(options, fontinfo_path)
     else:
+        options.fontinfoPath = parsed_args.fontinfo_file
         _parse_fontinfo_file(options, parsed_args.fontinfo_file)
 
     return options, parsed_args

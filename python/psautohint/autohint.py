@@ -10,7 +10,7 @@ import os
 import time
 from collections import namedtuple
 from threading import Thread
-from multiprocessing import Pool, Manager  # , set_start_method
+from multiprocessing import Pool, Manager, current_process
 
 from .otfFont import CFFFontData
 from .ufoFont import UFOFontData
@@ -43,6 +43,7 @@ class ACOptions(object):
         self.noFlex = False
         self.noHintSub = False
         self.allow_no_blues = False
+        self.fontinfoPath = None
         self.ignoreFontinfo = False
         self.logOnly = False
         self.removeConflicts = True
@@ -276,6 +277,12 @@ class fontWrapper:
                 pcount = 1
         if pcount > self.numGlyphs():
             pcount = self.numGlyphs()
+
+        if pcount > 1 and current_process().daemon:
+            pcount = 1
+            if self.options.process_count is not None:
+                log.warning("Program was already spawned by a different " +
+                            "python process: running as single process")
 
         pool = None
         lt = None

@@ -2301,6 +2301,8 @@ class glyphHinter:
             if hs.keepHints:
                 if pe.mask:
                     mask = copy(pe.mask[i])
+            elif hs.counterHinted:
+                mask = copy(hs.mainMask)
             else:
                 pes = hs.getPEState(pe)
                 if pes and pes.mask:
@@ -2564,7 +2566,7 @@ class glyphHinter:
             hcmsk = [glyph.hhs.counterHinted] * len(glyph.hhs.stems[0])
         if not glyph.vhs.keepHints:
             vcmsk = [glyph.vhs.counterHinted] * len(glyph.vhs.stems[0])
-        if glyph.hhs.keepHints or glyph.vhs.keepHints and glyph.cntr:
+        if (glyph.hhs.keepHints or glyph.vhs.keepHints) and glyph.cntr:
             cntr = []
             for cm in glyph.cntr:
                 hm = cm[0] if glyph.hhs.keepHints else hcmsk

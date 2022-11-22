@@ -1,10 +1,5 @@
 import io
-import os
-import setuptools_scm
-
-from setuptools import setup, Extension, Command
-
-from setuptools.dist import Distribution
+from setuptools import setup
 
 with io.open("README.md", encoding="utf-8") as readme:
     long_description = readme.read()
@@ -23,6 +18,7 @@ setup(name="psautohint",
           'console_scripts': [
               "psautohint = psautohint.__main__:main",
               "psstemhist = psautohint.__main__:stemhist",
+              "splitpsdicts = psautohint.splitpsdicts:main",
           ],
       },
       python_requires='>3.7',
