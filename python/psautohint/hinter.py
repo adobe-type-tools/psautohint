@@ -2487,9 +2487,12 @@ class glyphHinter:
         self.buildCounterMasks(glyph)
 
         if not glyph.hhs.hasOverlaps and not glyph.vhs.hasOverlaps:
-            glyph.startmasks = None
-            glyph.is_hm = False
-            return None
+            if False in glyph.hhs.goodMask or False in glyph.vhs.goodMask:
+                return [glyph.hhs.goodMask, glyph.vhs.goodMask]
+            else:
+                glyph.startmasks = None
+                glyph.is_hm = False
+                return None
 
         usedmasks = deepcopy(masks)
         if glyph.hhs.counterHinted:
@@ -2638,6 +2641,7 @@ class glyphHinter:
         stems = [glyph.hstems, glyph.vstems]
         po = pe.e if pe.isLine() else pe.cs
         carryMask = [[False] * len(o[0]), [False] * len(o[1])]
+        goodmask = [glyph.hhs.goodMask, glyph.vhs.goodMask]
         for hv in range(2):
             # Carry a previous hint forward if it is compatible and close
             # to the current pathElement
@@ -2654,7 +2658,8 @@ class glyphHinter:
                 oloc = po.x if hv == 1 else po.y
                 try:
                     _, ms = min(((stems[hv][i].distance(oloc), i)
-                                 for i in range(len(o[hv]))))
+                                 for i in range(len(o[hv]))
+                                 if goodmask[hv][i]))
                     o[hv][ms] = True
                 except ValueError:
                     pass
@@ -2680,7 +2685,8 @@ class glyphHinter:
             self.delUnused([g.hstems, g.vstems], usedmasks)
         # The rest of the state at this point is in masks in gllist[0]
         glyph = gllist[0]
-        self.delUnused(glyph.startmasks, usedmasks)
+        if glyph.startmasks is not None:
+            self.delUnused(glyph.startmasks, usedmasks)
         for c in glyph.cntr:
             self.delUnused(c, usedmasks)
         foundPEMask = False

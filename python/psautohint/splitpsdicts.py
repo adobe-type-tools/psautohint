@@ -125,9 +125,11 @@ def remapDicts(fpath, dictmap):
         snapvs = getattr(npr, "StemSnapV", None)
         if snapvs is not None:
             npr.StemSnapV[:] = [snapvs[i] for i in dictspec.SIV]
+        npr.StdVW = npr.StemSnapV[0]
         snaphs = getattr(npr, "StemSnapH", None)
         if snaphs is not None:
             npr.StemSnapH[:] = [snaphs[i] for i in dictspec.SIH]
+        npr.StdHW = npr.StemSnapH[0]
 
         fontDict = FontDict()
         fontDict.setCFF2(True)
@@ -138,7 +140,7 @@ def remapDicts(fpath, dictmap):
     bbox = top.FontBBox
     font_max = bbox[3]
     font_min = bbox[1]
-    npr = deepcopy(origPriv)
+    npr = deepcopy(fdarray[0].Private)  # To get reasonable stem values
     npr.BlueValues[:] = [font_min - 100, font_min - 85,
                          font_max + 85, font_max + 100]
     if hasattr(npr, "FamilyBlues"):
