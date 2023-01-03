@@ -68,7 +68,7 @@ def denormalizeValue(nv, a):
     if nv == 0:
         v = d
     elif nv < 0:
-        v = l + (d - l) * (1+nv)
+        v = l + (d - l) * (1 + nv)
     else:
         v = d + (u - d) * nv
     return v
