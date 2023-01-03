@@ -1976,7 +1976,9 @@ class dimensionHinter:
                             hasConflicts = True
                             sc[sidx][sjdx] = sc[sjdx][sidx] = True
         if hasConflicts:
-            _, self.hs.goodMask = self.unconflict(sc, self.hs.goodMask)
+            _, self.hs.goodMask = self.unconflict(sc, self.hs.goodMask,
+                                                  [not a
+                                                   for a in self.hs.goodMask])
             log.info("Removed %s stems %s to resolve conflicts" %
                      (self.aDesc(), [i for i, g in enumerate(self.hs.goodMask)
                                      if not g]))

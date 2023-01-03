@@ -299,7 +299,7 @@ class stem(tuple):
 
     def isBad(self):
         """Returns True if the stem is malformed"""
-        return not self.isGhost() and self.rt - self.lb < 0
+        return not self.isGhost() and (self.rt - self.lb) < 0
 
     def relVals(self, last=None):
         """
@@ -845,9 +845,9 @@ class glyphData(BasePen):
         """closePath (courtesy) pen method"""
         curpt = pt(self._getCurrentPoint(), roundCoords=self.roundCoords)
         if len(self.subpaths[-1]) == 0:  # No content after moveTo
-            t = curpt
-        else:
-            t = self.subpaths[-1][0].s
+            self.subpaths.pop()
+            return
+        t = self.subpaths[-1][0].s
         if curpt.eq_exact(t):
             return
         self.subpaths[-1].append(pathElement(curpt, t,
