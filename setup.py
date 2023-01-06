@@ -21,7 +21,7 @@ setup(name="psautohint",
               "splitpsdicts = psautohint.splitpsdicts:main",
           ],
       },
-      python_requires='>3.7',
+      python_requires='>=3.8',
       install_requires=[
           'fonttools[ufo]>=4.22.0',
       ],

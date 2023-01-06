@@ -125,11 +125,16 @@ def remapDicts(fpath, dictmap):
         snapvs = getattr(npr, "StemSnapV", None)
         if snapvs is not None:
             npr.StemSnapV[:] = [snapvs[i] for i in dictspec.SIV]
-        npr.StdVW = npr.StemSnapV[0]
+            npr.StdVW = npr.StemSnapV[0]
+        elif getattr(npr, "StdVW", None) is None:
+            logger.error("No StemSnapV or StdVW in combined dict")
+
         snaphs = getattr(npr, "StemSnapH", None)
         if snaphs is not None:
             npr.StemSnapH[:] = [snaphs[i] for i in dictspec.SIH]
-        npr.StdHW = npr.StemSnapH[0]
+            npr.StdHW = npr.StemSnapH[0]
+        elif getattr(npr, "StdHW", None) is None:
+            logger.error("No StemSnapH or StdHW in combined dict")
 
         fontDict = FontDict()
         fontDict.setCFF2(True)
