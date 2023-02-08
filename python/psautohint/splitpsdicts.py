@@ -80,6 +80,7 @@ def getDictmap(options):
         dct.re = []
         for r in d.get("regex", []):
             dct.re.append(re.compile(r))
+        dct.foundGlyph = False
         dictmap.append(dct)
 
     return dictmap
@@ -98,12 +99,49 @@ def remapDicts(fpath, dictmap):
                      "%d private dicts: will not modify" % len(top.FDArray))
         return
 
+    hasExtra = False
+
+    fdselect = top.FDSelect = FDSelect()
+    for gn in cff.getGlyphOrder():
+        done = False
+        for i, dictspec in enumerate(dictmap):
+            for r in dictspec.re:
+                if r.search(gn):
+                    fdselect.append(i)
+                    dictspec.foundGlyph = True
+                    done = True
+                    break
+            if done:
+                break
+        if not done:
+            fdselect.append(i + 1)
+            hasExtra = True
+
+    j = 0
+    indexMap = []
+    newdictmap = []
+    for i, dictspec in enumerate(dictmap):
+        if dictspec.foundGlyph:
+            newdictmap.append(dictspec)
+            indexMap.append(j)
+            j += 1
+        else:
+            logger.warning("No glyphs found for entry %s, skipping" %
+                           dictspec.name)
+            indexMap.append(-1)
+    if hasExtra:
+        indexMap.append(j)
+
+    for i, v in enumerate(fdselect):
+        assert indexMap[v] != -1
+        fdselect[i] = indexMap[v]
+
     fdarray = top.FDArray = FDArrayIndex()
     origPriv = top.Private
     # Make sure info doesn't leak though in non-FDArray private dict
     top.Private = PrivateDict()
 
-    for dictspec in dictmap:
+    for dictspec in newdictmap:
         npr = deepcopy(origPriv)
         for bvals, fvals, indexes in [(getattr(npr, "BlueValues", None),
                                        getattr(npr, "FamilyBlues", None),
@@ -142,39 +180,28 @@ def remapDicts(fpath, dictmap):
         fdarray.append(fontDict)
 
     # add no-zone dictionary for other glyphs (leave stem sizes)
-    bbox = top.FontBBox
-    font_max = bbox[3]
-    font_min = bbox[1]
-    npr = deepcopy(fdarray[0].Private)  # To get reasonable stem values
-    npr.BlueValues[:] = [font_min - 100, font_min - 85,
-                         font_max + 85, font_max + 100]
-    if hasattr(npr, "FamilyBlues"):
-        npr.FamilyBlues[:] = [font_min - 100, font_min - 85,
-                              font_max + 85, font_max + 100]
-    if hasattr(npr, "OtherBlues"):
-        npr.OtherBlues[:] = []
-    if hasattr(npr, "FamilyOtherBlues"):
-        npr.FamilyOtherBlues[:] = []
-    fontDict = FontDict()
-    fontDict.setCFF2(True)
-    fontDict.Private = npr
-    fdarray.append(fontDict)
+    if hasExtra:
+        bbox = top.FontBBox
+        font_max = bbox[3]
+        font_min = bbox[1]
+        npr = deepcopy(fdarray[0].Private)  # To get reasonable stem values
+        npr.BlueValues[:] = [font_min - 100, font_min - 85,
+                             font_max + 85, font_max + 100]
+        if hasattr(npr, "FamilyBlues"):
+            npr.FamilyBlues[:] = [font_min - 100, font_min - 85,
+                                  font_max + 85, font_max + 100]
+        if hasattr(npr, "OtherBlues"):
+            npr.OtherBlues[:] = []
+        if hasattr(npr, "FamilyOtherBlues"):
+            npr.FamilyOtherBlues[:] = []
+        fontDict = FontDict()
+        fontDict.setCFF2(True)
+        fontDict.Private = npr
+        fdarray.append(fontDict)
 
-    fdselect = top.FDSelect = FDSelect()
-    for gn in cff.getGlyphOrder():
-        done = False
-        for i, dictspec in enumerate(dictmap):
-            for r in dictspec.re:
-                if r.search(gn):
-                    fdselect.append(i)
-                    done = True
-                    break
-            if done:
-                break
-        if not done:
-            fdselect.append(i + 1)
+    numdicts = len(newdictmap) + 1 if hasExtra else 0
 
-    logger.warning("Updating %s with %d dictionaries" % (fpath, i + 2))
+    logger.warning("Updating %s with %d dictionaries" % (fpath, numdicts))
     cfftpath = get_temp_file_path()
     cfftfile = open(cfftpath, "w+b")
     cff.cff.compile(cfftfile, f, False)
