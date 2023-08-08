@@ -589,7 +589,7 @@ setup(name="psautohint",
       extras_require={
           "testing": [
               "pytest-cov >=4, <5",
-              "pytest-xdist >=2.5.0, <2.6.0",
+              "pytest-xdist >=3.3.1, <3.4.0",
           ],
       },
       cmdclass=cmdclass,
