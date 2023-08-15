@@ -10,7 +10,7 @@ Important Note: `otfautohint`
 
 This repository is now **retired**. We have added a python port of its code to
 version 4.0.0 of [AFDKO](https://github.com/adobe-type-tools/afdko) (to be
-released shortly). There is more information
+released shortly, prerelease [here](https://github.com/adobe-type-tools/afdko/releases/tag/4.0.0a0)). There is more information
 [here](https://github.com/adobe-type-tools/afdko/blob/develop/docs/otfautohint_Notes.md).
 The new tool can be called from the command line as `otfautohint`, allowing it
 and `psautohint` to be used at the same time during a transition period.  Please switch to
