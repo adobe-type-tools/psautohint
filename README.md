@@ -5,8 +5,23 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/adobe-type-tools/psautohint.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/psautohint/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/adobe-type-tools/psautohint.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe-type-tools/psautohint/alerts/)
 
+Important Note: `otfautohint`
+=============================
+
+This repository is now **retired**. We have added a python port of its code to
+version 4.0.0 of [AFDKO](https://github.com/adobe-type-tools/afdko) (to be
+released shortly, prerelease [here](https://github.com/adobe-type-tools/afdko/releases/tag/4.0.0a0)). There is more information
+[here](https://github.com/adobe-type-tools/afdko/blob/develop/docs/otfautohint_Notes.md).
+The new tool can be called from the command line as `otfautohint`, allowing it
+and `psautohint` to be used at the same time during a transition period.  Please switch to
+`otfautohint` and file any new issues or PRs against that tool.
+
+(`psautohint` was split off from `AFDKO` a number of years ago for technical reasons having
+to do with code organization. The Python port resolves those issues so we are adding it
+back into AFDKO to simplify distribution of our tools.)
+
 PSAutoHint
-==========
+----------
 
 A standalone version of [AFDKO](https://github.com/adobe-type-tools/afdko)’s
 autohinter.
