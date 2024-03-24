@@ -588,8 +588,8 @@ setup(name="psautohint",
       ],
       extras_require={
           "testing": [
-              "pytest-cov >=4, <5",
-              "pytest-xdist >=2.5.0, <2.6.0",
+              "pytest-cov >=5, <6",
+              "pytest-xdist >=3.5.0, <3.6.0",
           ],
       },
       cmdclass=cmdclass,

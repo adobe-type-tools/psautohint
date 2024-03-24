@@ -18,17 +18,17 @@ jobs:
     steps:
 
     - name: Check out
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0  # unshallow fetch for setuptools-scm
 
     - name: Install Python 3.8
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.8'
 
     - name: Build wheels (Python 3.7 through 3.9)
-      uses: pypa/cibuildwheel@v2.11.1
+      uses: pypa/cibuildwheel@v2.17.0
       with:
         output-dir: dist
       env:
@@ -41,7 +41,7 @@ jobs:
         CIBW_ENVIRONMENT: "CFLAGS='-g0'"
 
     - name: Build wheels (Python 3.10 only)
-      uses: pypa/cibuildwheel@v2.11.1
+      uses: pypa/cibuildwheel@v2.17.0
       with:
         output-dir: dist
       env:
@@ -61,7 +61,7 @@ jobs:
         python -m build --sdist
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: wheelstorage
         path: ./dist/*
@@ -87,7 +87,7 @@ jobs:
       shell: bash
 
     - name: Download release assets
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: wheelstorage
         path: dist
@@ -99,7 +99,7 @@ jobs:
         password: ${{ secrets.pypi_password }}
 
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
